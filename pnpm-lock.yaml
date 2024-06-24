@@ -27,7 +27,7 @@ dependencies:
     specifier: ^2.0.0
     version: 2.1.1
   next:
-    specifier: 15.0.0-canary.28
+    specifier: ^15.0.0-canary.28
     version: 15.0.0-canary.28(@babel/core@7.24.6)(react-dom@19.0.0-rc-6230622a1a-20240610)(react@19.0.0-rc-6230622a1a-20240610)
   postcss:
     specifier: 8.4.31
