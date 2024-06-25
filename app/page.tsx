@@ -39,18 +39,18 @@ export default function Page() {
         <div className="flex items-center justify-center p-6 md:w-3/5 md:px-28 md:py-12">
           {/* Add Hero Images Here */}
           <Image
-            src="/hero-desktop.png"
+            src="/115281106_p2_master1200.jpg"
             width={1000}
-            height={760}
+            height={712}
             className="hidden md:block"
-            alt="Screenshots of the dashboard project showing desktop version"
+            alt="My drawing of Ruan Mei."
           />
           <Image
-            src="/hero-mobile.png"
+            src="/118312188_p0_master1200.jpg"
             width={560}
             height={620}
             className="block md:hidden"
-            alt="Screenshots of the dashboard project showing desktop version"
+            alt="My drawing of Furina."
           />
         </div>
       </div>
