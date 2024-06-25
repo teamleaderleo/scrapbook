@@ -1,6 +1,6 @@
 const { db } = require('@vercel/postgres');
 const {
-  invoices,
+  projects,
   customers,
   revenue,
   users,
@@ -46,13 +46,13 @@ async function seedUsers(client) {
   }
 }
 
-async function seedInvoices(client) {
+async function seedProjects(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
-    // Create the "invoices" table if it doesn't exist
+    // Create the "projects" table if it doesn't exist
     const createTable = await client.sql`
-    CREATE TABLE IF NOT EXISTS invoices (
+    CREATE TABLE IF NOT EXISTS projects (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     customer_id UUID NOT NULL,
     amount INT NOT NULL,
@@ -61,27 +61,27 @@ async function seedInvoices(client) {
   );
 `;
 
-    console.log(`Created "invoices" table`);
+    console.log(`Created "projects" table`);
 
-    // Insert data into the "invoices" table
-    const insertedInvoices = await Promise.all(
-      invoices.map(
-        (invoice) => client.sql`
-        INSERT INTO invoices (customer_id, amount, status, date)
-        VALUES (${invoice.customer_id}, ${invoice.amount}, ${invoice.status}, ${invoice.date})
+    // Insert data into the "projects" table
+    const insertedProjects = await Promise.all(
+      projects.map(
+        (project) => client.sql`
+        INSERT INTO projects (customer_id, amount, status, date)
+        VALUES (${project.customer_id}, ${project.amount}, ${project.status}, ${project.date})
         ON CONFLICT (id) DO NOTHING;
       `,
       ),
     );
 
-    console.log(`Seeded ${insertedInvoices.length} invoices`);
+    console.log(`Seeded ${insertedProjects.length} projects`);
 
     return {
       createTable,
-      invoices: insertedInvoices,
+      projects: insertedProjects,
     };
   } catch (error) {
-    console.error('Error seeding invoices:', error);
+    console.error('Error seeding projects:', error);
     throw error;
   }
 }
@@ -165,7 +165,7 @@ async function main() {
 
   await seedUsers(client);
   await seedCustomers(client);
-  await seedInvoices(client);
+  await seedProjects(client);
   await seedRevenue(client);
 
   await client.end();

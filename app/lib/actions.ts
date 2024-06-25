@@ -35,7 +35,7 @@ const FormSchema = z.object({
     .number()
     .gt(0, { message: 'Please enter an amount greater than $0.' }),
   status: z.enum(['pending', 'paid'], {
-    invalid_type_error: 'Please select an invoice status.',
+    invalid_type_error: 'Please select an project status.',
   }),
   date: z.string(),
 });
@@ -49,12 +49,12 @@ export type State = {
   message?: string | null;
 };
 
-const UpdateInvoice = FormSchema.omit({ id: true, date: true });
-const CreateInvoice = FormSchema.omit({ id: true, date: true });
+const UpdateProject = FormSchema.omit({ id: true, date: true });
+const CreateProject = FormSchema.omit({ id: true, date: true });
 
-export async function createInvoice(prevState: State, formData: FormData) {
+export async function createProject(prevState: State, formData: FormData) {
   // Validate form fields using Zod
-  const validatedFields = CreateInvoice.safeParse({
+  const validatedFields = CreateProject.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
@@ -64,7 +64,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to Create Invoice.',
+      message: 'Missing Fields. Failed to Create Project.',
     };
   }
   // Prepare data for insertion into the database
@@ -74,24 +74,24 @@ export async function createInvoice(prevState: State, formData: FormData) {
 
   try {
     await sql`
-      INSERT INTO invoices (customer_id, amount, status, date)
+      INSERT INTO projects (customer_id, amount, status, date)
       VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
     `;
   } catch (error) {
     return {
-      message: 'Database Error: Failed to Create Invoice.',
+      message: 'Database Error: Failed to Create Project.',
     };
   }
 
-  revalidatePath('/dashboard/invoices');
-  redirect('/dashboard/invoices');
+  revalidatePath('/dashboard/projects');
+  redirect('/dashboard/projects');
 }
 
-export async function updateInvoice(id: string,
+export async function updateProject(id: string,
   prevState: State,
   formData: FormData,
 ) {
-  const validatedFields = UpdateInvoice.safeParse({
+  const validatedFields = UpdateProject.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
@@ -100,7 +100,7 @@ export async function updateInvoice(id: string,
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to Update Invoice.',
+      message: 'Missing Fields. Failed to Update Project.',
     };
   }
 
@@ -109,25 +109,25 @@ export async function updateInvoice(id: string,
  
   try {
     await sql`
-        UPDATE invoices
+        UPDATE projects
         SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
         WHERE id = ${id}
       `;
   } catch (error) {
-    return { message: 'Database Error: Failed to Update Invoice.' };
+    return { message: 'Database Error: Failed to Update Project.' };
   }
  
-  // Revalidate the cache for the invoices page and redirect the user.
-  revalidatePath('/dashboard/invoices');
-  redirect('/dashboard/invoices');
+  // Revalidate the cache for the projects page and redirect the user.
+  revalidatePath('/dashboard/projects');
+  redirect('/dashboard/projects');
 }
 
-export async function deleteInvoice(id: string) {
+export async function deleteProject(id: string) {
   try {
-    await sql`DELETE FROM invoices WHERE id = ${id}`;
-    revalidatePath('/dashboard/invoices');
-    return { message: 'Deleted Invoice.' };
+    await sql`DELETE FROM projects WHERE id = ${id}`;
+    revalidatePath('/dashboard/projects');
+    return { message: 'Deleted Project.' };
   } catch (error) {
-    return { message: 'Database Error: Failed to Delete Invoice.' };
+    return { message: 'Database Error: Failed to Delete Project.' };
   }
 }

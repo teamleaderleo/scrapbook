@@ -44,7 +44,7 @@ export function RevenueChartSkeleton() {
   );
 }
 
-export function InvoiceSkeleton() {
+export function ProjectSkeleton() {
   return (
     <div className="flex flex-row items-center justify-between border-b border-gray-100 py-4">
       <div className="flex items-center">
@@ -59,7 +59,7 @@ export function InvoiceSkeleton() {
   );
 }
 
-export function LatestInvoicesSkeleton() {
+export function LatestProjectsSkeleton() {
   return (
     <div
       className={`${shimmer} relative flex w-full flex-col overflow-hidden md:col-span-4`}
@@ -67,11 +67,11 @@ export function LatestInvoicesSkeleton() {
       <div className="mb-4 h-8 w-36 rounded-md bg-gray-100" />
       <div className="flex grow flex-col justify-between rounded-xl bg-gray-100 p-4">
         <div className="bg-white px-6">
-          <InvoiceSkeleton />
-          <InvoiceSkeleton />
-          <InvoiceSkeleton />
-          <InvoiceSkeleton />
-          <InvoiceSkeleton />
+          <ProjectSkeleton />
+          <ProjectSkeleton />
+          <ProjectSkeleton />
+          <ProjectSkeleton />
+          <ProjectSkeleton />
           <div className="flex items-center pb-2 pt-6">
             <div className="h-5 w-5 rounded-full bg-gray-200" />
             <div className="ml-2 h-4 w-20 rounded-md bg-gray-200" />
@@ -96,7 +96,7 @@ export default function DashboardSkeleton() {
       </div>
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-8">
         <RevenueChartSkeleton />
-        <LatestInvoicesSkeleton />
+        <LatestProjectsSkeleton />
       </div>
     </>
   );
@@ -139,7 +139,7 @@ export function TableRowSkeleton() {
   );
 }
 
-export function InvoicesMobileSkeleton() {
+export function ProjectsMobileSkeleton() {
   return (
     <div className="mb-2 w-full rounded-md bg-white p-4">
       <div className="flex items-center justify-between border-b border-gray-100 pb-8">
@@ -163,18 +163,18 @@ export function InvoicesMobileSkeleton() {
   );
 }
 
-export function InvoicesTableSkeleton() {
+export function ProjectsTableSkeleton() {
   return (
     <div className="mt-6 flow-root">
       <div className="inline-block min-w-full align-middle">
         <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
           <div className="md:hidden">
-            <InvoicesMobileSkeleton />
-            <InvoicesMobileSkeleton />
-            <InvoicesMobileSkeleton />
-            <InvoicesMobileSkeleton />
-            <InvoicesMobileSkeleton />
-            <InvoicesMobileSkeleton />
+            <ProjectsMobileSkeleton />
+            <ProjectsMobileSkeleton />
+            <ProjectsMobileSkeleton />
+            <ProjectsMobileSkeleton />
+            <ProjectsMobileSkeleton />
+            <ProjectsMobileSkeleton />
           </div>
           <table className="hidden min-w-full text-gray-900 md:table">
             <thead className="rounded-lg text-left text-sm font-normal">
