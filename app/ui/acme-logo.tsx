@@ -1,13 +1,14 @@
 // import { GlobeAltIcon } from '@heroicons/react/24/outline';
-import { lusitana } from '@/app/ui/fonts';
+// import { josefin_slab } from '@/app/ui/fonts';
+import { josefin_slab } from '@/app/ui/fonts';
 
 export default function AcmeLogo() {
   return (
     <div
-      className={`${lusitana.className} flex flex-row items-center leading-none text-white`}
+      className={`${josefin_slab.className} flex flex-row items-center leading-none text-white`}
     >
       {/* <GlobeAltIcon className="h-12 w-12 rotate-[15deg]" /> */}
-      <p className="text-[44px]">Scrapbook</p>
+      <p className="text-[44px]">setzen</p>
     </div>
   );
 }

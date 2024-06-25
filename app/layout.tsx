@@ -4,10 +4,10 @@ import { Metadata } from 'next';
  
 export const metadata: Metadata = {
   title: {
-    template: '%s | Scrapbook',
-    default: 'Scrapbook',
+    template: '%s | Setzen',
+    default: 'Setzen',
   },
-  description: 'A scrapbook.',
+  description: 'Setzen.',
   metadataBase: new URL('https://next-learn-dashboard.vercel.sh'),
 };
 

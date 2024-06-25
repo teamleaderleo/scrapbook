@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { lusitana } from '@/app/ui/fonts';
+import { josefin_slab } from '@/app/ui/fonts';
 import Search from '@/app/ui/search';
 import {
   ArtifactsTableType,
@@ -13,7 +13,7 @@ export default async function ArtifactsTable({
 }) {
   return (
     <div className="w-full">
-      <h1 className={`${lusitana.className} mb-8 text-xl md:text-2xl`}>
+      <h1 className={`${josefin_slab.className} mb-8 text-xl md:text-2xl`}>
         Artifacts
       </h1>
       <Search placeholder="Search artifacts..." />
