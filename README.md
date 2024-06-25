@@ -61,6 +61,7 @@ The goal of this project is to create a comprehensive tool that helps artists ma
 
 I store everything in a personal Discord server because I appreciate being able to access stuff from both PC and mobile, and the infinite storage (despite image compression). I like using channels and channel categories, the chat UI, and the automatic embeds for Twitter and other websites, which makes it easy to save references and pictures for inspiration. I want an app with similar functionality to Pinterest but with the ability to go offline, or at the very least browse without being bogged down by recommendation algorithms and layouts that seem to cater more to advertisers than to the end user.
 
+This project will be deemed to have surpassed an MVP when I finalize a draft version of the scrapbook UI as well as complete the CRUD operations of images (artifacts), and sort out the data relationships between images and projects. AKA, when I can loosely start considering actually using it for personal use.
 
 ## Contributing
 
