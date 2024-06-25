@@ -1,4 +1,4 @@
-# Scrapbook-Style Project Management App
+# Scrapbook-Style Project Management App (MVP Stage)
 
 ## Overview
 
