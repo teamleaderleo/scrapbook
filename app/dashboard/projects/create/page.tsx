@@ -1,6 +1,6 @@
 import Form from '@/app/ui/projects/create-form';
 import Breadcrumbs from '@/app/ui/projects/breadcrumbs';
-import { fetchCustomers } from '@/app/lib/data';
+import { fetchArtifacts } from '@/app/lib/data';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const customers = await fetchCustomers();
+  const artifacts = await fetchArtifacts();
  
   return (
     <main>
@@ -22,7 +22,7 @@ export default async function Page() {
           },
         ]}
       />
-      <Form customers={customers} />
+      <Form artifacts={artifacts} />
     </main>
   );
 }

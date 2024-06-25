@@ -1,7 +1,7 @@
 import { sql } from '@vercel/postgres';
 import {
-  CustomerField,
-  CustomersTableType,
+  ArtifactField,
+  ArtifactsTableType,
   ProjectForm,
   ProjectsTable,
   LatestProjectRaw,
@@ -35,9 +35,9 @@ export async function fetchRevenue() {
 export async function fetchLatestProjects() {
   try {
     const data = await sql<LatestProjectRaw>`
-      SELECT projects.amount, customers.name, customers.image_url, customers.email, projects.id
+      SELECT projects.amount, artifacts.name, artifacts.image_url, artifacts.email, projects.id
       FROM projects
-      JOIN customers ON projects.customer_id = customers.id
+      JOIN artifacts ON projects.artifact_id = artifacts.id
       ORDER BY projects.date DESC
       LIMIT 5`;
 
@@ -58,7 +58,7 @@ export async function fetchCardData() {
     // However, we are intentionally splitting them to demonstrate
     // how to initialize multiple queries in parallel with JS.
     const projectCountPromise = sql`SELECT COUNT(*) FROM projects`;
-    const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
+    const artifactCountPromise = sql`SELECT COUNT(*) FROM artifacts`;
     const projectStatusPromise = sql`SELECT
          SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
          SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
@@ -66,17 +66,17 @@ export async function fetchCardData() {
 
     const data = await Promise.all([
       projectCountPromise,
-      customerCountPromise,
+      artifactCountPromise,
       projectStatusPromise,
     ]);
 
     const numberOfProjects = Number(data[0].rows[0].count ?? '0');
-    const numberOfCustomers = Number(data[1].rows[0].count ?? '0');
+    const numberOfArtifacts = Number(data[1].rows[0].count ?? '0');
     const totalPaidProjects = formatCurrency(data[2].rows[0].paid ?? '0');
     const totalPendingProjects = formatCurrency(data[2].rows[0].pending ?? '0');
 
     return {
-      numberOfCustomers,
+      numberOfArtifacts,
       numberOfProjects,
       totalPaidProjects,
       totalPendingProjects,
@@ -101,14 +101,14 @@ export async function fetchFilteredProjects(
         projects.amount,
         projects.date,
         projects.status,
-        customers.name,
-        customers.email,
-        customers.image_url
+        artifacts.name,
+        artifacts.email,
+        artifacts.image_url
       FROM projects
-      JOIN customers ON projects.customer_id = customers.id
+      JOIN artifacts ON projects.artifact_id = artifacts.id
       WHERE
-        customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`} OR
+        artifacts.name ILIKE ${`%${query}%`} OR
+        artifacts.email ILIKE ${`%${query}%`} OR
         projects.amount::text ILIKE ${`%${query}%`} OR
         projects.date::text ILIKE ${`%${query}%`} OR
         projects.status ILIKE ${`%${query}%`}
@@ -127,10 +127,10 @@ export async function fetchProjectsPages(query: string) {
   try {
     const count = await sql`SELECT COUNT(*)
     FROM projects
-    JOIN customers ON projects.customer_id = customers.id
+    JOIN artifacts ON projects.artifact_id = artifacts.id
     WHERE
-      customers.name ILIKE ${`%${query}%`} OR
-      customers.email ILIKE ${`%${query}%`} OR
+      artifacts.name ILIKE ${`%${query}%`} OR
+      artifacts.email ILIKE ${`%${query}%`} OR
       projects.amount::text ILIKE ${`%${query}%`} OR
       projects.date::text ILIKE ${`%${query}%`} OR
       projects.status ILIKE ${`%${query}%`}
@@ -149,7 +149,7 @@ export async function fetchProjectById(id: string) {
     const data = await sql<ProjectForm>`
       SELECT
         projects.id,
-        projects.customer_id,
+        projects.artifact_id,
         projects.amount,
         projects.status
       FROM projects
@@ -170,54 +170,54 @@ export async function fetchProjectById(id: string) {
   }
 }
 
-export async function fetchCustomers() {
+export async function fetchArtifacts() {
   try {
-    const data = await sql<CustomerField>`
+    const data = await sql<ArtifactField>`
       SELECT
         id,
         name
-      FROM customers
+      FROM artifacts
       ORDER BY name ASC
     `;
 
-    const customers = data.rows;
-    return customers;
+    const artifacts = data.rows;
+    return artifacts;
   } catch (err) {
     console.error('Database Error:', err);
-    throw new Error('Failed to fetch all customers.');
+    throw new Error('Failed to fetch all artifacts.');
   }
 }
 
-export async function fetchFilteredCustomers(query: string) {
+export async function fetchFilteredArtifacts(query: string) {
   try {
-    const data = await sql<CustomersTableType>`
+    const data = await sql<ArtifactsTableType>`
 		SELECT
-		  customers.id,
-		  customers.name,
-		  customers.email,
-		  customers.image_url,
+		  artifacts.id,
+		  artifacts.name,
+		  artifacts.email,
+		  artifacts.image_url,
 		  COUNT(projects.id) AS total_projects,
 		  SUM(CASE WHEN projects.status = 'pending' THEN projects.amount ELSE 0 END) AS total_pending,
 		  SUM(CASE WHEN projects.status = 'paid' THEN projects.amount ELSE 0 END) AS total_paid
-		FROM customers
-		LEFT JOIN projects ON customers.id = projects.customer_id
+		FROM artifacts
+		LEFT JOIN projects ON artifacts.id = projects.artifact_id
 		WHERE
-		  customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`}
-		GROUP BY customers.id, customers.name, customers.email, customers.image_url
-		ORDER BY customers.name ASC
+		  artifacts.name ILIKE ${`%${query}%`} OR
+        artifacts.email ILIKE ${`%${query}%`}
+		GROUP BY artifacts.id, artifacts.name, artifacts.email, artifacts.image_url
+		ORDER BY artifacts.name ASC
 	  `;
 
-    const customers = data.rows.map((customer) => ({
-      ...customer,
-      total_pending: formatCurrency(customer.total_pending),
-      total_paid: formatCurrency(customer.total_paid),
+    const artifacts = data.rows.map((artifact) => ({
+      ...artifact,
+      total_pending: formatCurrency(artifact.total_pending),
+      total_paid: formatCurrency(artifact.total_paid),
     }));
 
-    return customers;
+    return artifacts;
   } catch (err) {
     console.error('Database Error:', err);
-    throw new Error('Failed to fetch customer table.');
+    throw new Error('Failed to fetch artifact table.');
   }
 }
 

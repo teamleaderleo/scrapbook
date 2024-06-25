@@ -1,7 +1,7 @@
 const { db } = require('@vercel/postgres');
 const {
   projects,
-  customers,
+  artifacts,
   revenue,
   users,
 } = require('../app/lib/placeholder-data.js');
@@ -54,7 +54,7 @@ async function seedProjects(client) {
     const createTable = await client.sql`
     CREATE TABLE IF NOT EXISTS projects (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    customer_id UUID NOT NULL,
+    artifact_id UUID NOT NULL,
     amount INT NOT NULL,
     status VARCHAR(255) NOT NULL,
     date DATE NOT NULL
@@ -67,8 +67,8 @@ async function seedProjects(client) {
     const insertedProjects = await Promise.all(
       projects.map(
         (project) => client.sql`
-        INSERT INTO projects (customer_id, amount, status, date)
-        VALUES (${project.customer_id}, ${project.amount}, ${project.status}, ${project.date})
+        INSERT INTO projects (artifact_id, amount, status, date)
+        VALUES (${project.artifact_id}, ${project.amount}, ${project.status}, ${project.date})
         ON CONFLICT (id) DO NOTHING;
       `,
       ),
@@ -86,13 +86,13 @@ async function seedProjects(client) {
   }
 }
 
-async function seedCustomers(client) {
+async function seedArtifacts(client) {
   try {
     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
-    // Create the "customers" table if it doesn't exist
+    // Create the "artifacts" table if it doesn't exist
     const createTable = await client.sql`
-      CREATE TABLE IF NOT EXISTS customers (
+      CREATE TABLE IF NOT EXISTS artifacts (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL,
@@ -100,27 +100,27 @@ async function seedCustomers(client) {
       );
     `;
 
-    console.log(`Created "customers" table`);
+    console.log(`Created "artifacts" table`);
 
-    // Insert data into the "customers" table
-    const insertedCustomers = await Promise.all(
-      customers.map(
-        (customer) => client.sql`
-        INSERT INTO customers (id, name, email, image_url)
-        VALUES (${customer.id}, ${customer.name}, ${customer.email}, ${customer.image_url})
+    // Insert data into the "artifacts" table
+    const insertedArtifacts = await Promise.all(
+      artifacts.map(
+        (artifact) => client.sql`
+        INSERT INTO artifacts (id, name, email, image_url)
+        VALUES (${artifact.id}, ${artifact.name}, ${artifact.email}, ${artifact.image_url})
         ON CONFLICT (id) DO NOTHING;
       `,
       ),
     );
 
-    console.log(`Seeded ${insertedCustomers.length} customers`);
+    console.log(`Seeded ${insertedArtifacts.length} artifacts`);
 
     return {
       createTable,
-      customers: insertedCustomers,
+      artifacts: insertedArtifacts,
     };
   } catch (error) {
-    console.error('Error seeding customers:', error);
+    console.error('Error seeding artifacts:', error);
     throw error;
   }
 }
@@ -164,7 +164,7 @@ async function main() {
   const client = await db.connect();
 
   await seedUsers(client);
-  await seedCustomers(client);
+  await seedArtifacts(client);
   await seedProjects(client);
   await seedRevenue(client);
 

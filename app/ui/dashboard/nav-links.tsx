@@ -17,7 +17,7 @@ const links = [
     href: '/dashboard/projects',
     icon: DocumentDuplicateIcon,
   },
-  { name: 'Resources', href: '/dashboard/customers', icon: UserGroupIcon },
+  { name: 'Artifacts', href: '/dashboard/artifacts', icon: UserGroupIcon },
 ];
 
 export default function NavLinks() {

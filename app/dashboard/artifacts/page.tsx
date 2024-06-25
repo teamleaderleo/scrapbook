@@ -1,9 +1,9 @@
-import { fetchFilteredCustomers } from '@/app/lib/data';
-import CustomersTable from '@/app/ui/customers/table';
+import { fetchFilteredArtifacts } from '@/app/lib/data';
+import ArtifactsTable from '@/app/ui/artifacts/table';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Customers',
+  title: 'Artifacts',
 };
 
 export default async function Page({
@@ -16,11 +16,11 @@ export default async function Page({
 }) {
   const query = searchParams?.query || '';
 
-  const customers = await fetchFilteredCustomers(query);
+  const artifacts = await fetchFilteredArtifacts(query);
 
   return (
     <main>
-      <CustomersTable customers={customers} />
+      <ArtifactsTable artifacts={artifacts} />
     </main>
   );
 }

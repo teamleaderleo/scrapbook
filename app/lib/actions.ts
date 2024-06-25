@@ -28,8 +28,8 @@ export async function authenticate(
  
 const FormSchema = z.object({
   id: z.string(),
-  customerId: z.string({
-    invalid_type_error: 'Please select a customer.',
+  artifactId: z.string({
+    invalid_type_error: 'Please select an artifact.',
   }),
   amount: z.coerce
     .number()
@@ -42,7 +42,7 @@ const FormSchema = z.object({
  
 export type State = {
   errors?: {
-    customerId?: string[];
+    artifactId?: string[];
     amount?: string[];
     status?: string[];
   };
@@ -55,7 +55,7 @@ const CreateProject = FormSchema.omit({ id: true, date: true });
 export async function createProject(prevState: State, formData: FormData) {
   // Validate form fields using Zod
   const validatedFields = CreateProject.safeParse({
-    customerId: formData.get('customerId'),
+    artifactId: formData.get('artifactId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
@@ -68,14 +68,14 @@ export async function createProject(prevState: State, formData: FormData) {
     };
   }
   // Prepare data for insertion into the database
-  const { customerId, amount, status } = validatedFields.data;
+  const { artifactId, amount, status } = validatedFields.data;
   const amountInCents = amount * 100;
   const date = new Date().toISOString().split('T')[0];
 
   try {
     await sql`
-      INSERT INTO projects (customer_id, amount, status, date)
-      VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+      INSERT INTO projects (artifact_id, amount, status, date)
+      VALUES (${artifactId}, ${amountInCents}, ${status}, ${date})
     `;
   } catch (error) {
     return {
@@ -92,7 +92,7 @@ export async function updateProject(id: string,
   formData: FormData,
 ) {
   const validatedFields = UpdateProject.safeParse({
-    customerId: formData.get('customerId'),
+    artifactId: formData.get('artifactId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
@@ -104,13 +104,13 @@ export async function updateProject(id: string,
     };
   }
 
-  const { customerId, amount, status } = validatedFields.data;
+  const { artifactId, amount, status } = validatedFields.data;
   const amountInCents = amount * 100;
  
   try {
     await sql`
         UPDATE projects
-        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+        SET artifact_id = ${artifactId}, amount = ${amountInCents}, status = ${status}
         WHERE id = ${id}
       `;
   } catch (error) {

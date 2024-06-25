@@ -1,6 +1,6 @@
 import Form from '@/app/ui/projects/edit-form';
 import Breadcrumbs from '@/app/ui/projects/breadcrumbs';
-import { fetchProjectById, fetchCustomers } from '@/app/lib/data';
+import { fetchProjectById, fetchArtifacts } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 
@@ -10,9 +10,9 @@ export const metadata: Metadata = {
 
 export default async function Page({ params }: { params: { id: string } }) {
   const id = params.id;
-  const [project, customers] = await Promise.all([
+  const [project, artifacts] = await Promise.all([
     fetchProjectById(id),
-    fetchCustomers(),
+    fetchArtifacts(),
   ]);
 
   if (!project) {
@@ -30,7 +30,7 @@ export default async function Page({ params }: { params: { id: string } }) {
           },
         ]}
       />
-      <Form project={project} customers={customers} />
+      <Form project={project} artifacts={artifacts} />
     </main>
   );
 }
