@@ -7,7 +7,7 @@ settings:
 dependencies:
   '@heroicons/react':
     specifier: ^2.0.18
-    version: 2.1.3(react@19.0.0-rc-6230622a1a-20240610)
+    version: 2.1.3(react@19.0.0-rc-c21bcd627b-20240624)
   '@tailwindcss/forms':
     specifier: ^0.5.7
     version: 0.5.7(tailwindcss@3.3.3)
@@ -28,19 +28,19 @@ dependencies:
     version: 2.1.1
   next:
     specifier: ^15.0.0-canary.43
-    version: 15.0.0-rc.0(@babel/core@7.24.6)(react-dom@19.0.0-rc-6230622a1a-20240610)(react@19.0.0-rc-6230622a1a-20240610)
+    version: 15.0.0-rc.0(@babel/core@7.24.6)(react-dom@19.0.0-rc-c21bcd627b-20240624)(react@19.0.0-rc-c21bcd627b-20240624)
   next-auth:
     specifier: 5.0.0-beta.19
-    version: 5.0.0-beta.19(next@15.0.0-rc.0)(react@19.0.0-rc-6230622a1a-20240610)
+    version: 5.0.0-beta.19(next@15.0.0-rc.0)(react@19.0.0-rc-c21bcd627b-20240624)
   postcss:
     specifier: 8.4.31
     version: 8.4.31
   react:
-    specifier: 19.0.0-rc-6230622a1a-20240610
-    version: 19.0.0-rc-6230622a1a-20240610
+    specifier: 19.0.0-rc-c21bcd627b-20240624
+    version: 19.0.0-rc-c21bcd627b-20240624
   react-dom:
-    specifier: 19.0.0-rc-6230622a1a-20240610
-    version: 19.0.0-rc-6230622a1a-20240610(react@19.0.0-rc-6230622a1a-20240610)
+    specifier: 19.0.0-rc-c21bcd627b-20240624
+    version: 19.0.0-rc-c21bcd627b-20240624(react@19.0.0-rc-c21bcd627b-20240624)
   tailwindcss:
     specifier: 3.3.3
     version: 3.3.3
@@ -49,7 +49,7 @@ dependencies:
     version: 5.2.2
   use-debounce:
     specifier: ^10.0.1
-    version: 10.0.1(react@19.0.0-rc-6230622a1a-20240610)
+    version: 10.0.1(react@19.0.0-rc-c21bcd627b-20240624)
   zod:
     specifier: ^3.22.2
     version: 3.23.8
@@ -357,12 +357,12 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
-  /@heroicons/react@2.1.3(react@19.0.0-rc-6230622a1a-20240610):
+  /@heroicons/react@2.1.3(react@19.0.0-rc-c21bcd627b-20240624):
     resolution: {integrity: sha512-fEcPfo4oN345SoqdlCDdSa4ivjaKbk0jTd+oubcgNxnNgAfzysfwWfQUr+51wigiWHQQRiZNd1Ao0M5Y3M2EGg==}
     peerDependencies:
       react: '>= 16'
     dependencies:
-      react: 19.0.0-rc-6230622a1a-20240610
+      react: 19.0.0-rc-c21bcd627b-20240624
     dev: false
 
   /@humanwhocodes/config-array@0.11.14:
@@ -3348,7 +3348,7 @@ packages:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
     dev: true
 
-  /next-auth@5.0.0-beta.19(next@15.0.0-rc.0)(react@19.0.0-rc-6230622a1a-20240610):
+  /next-auth@5.0.0-beta.19(next@15.0.0-rc.0)(react@19.0.0-rc-c21bcd627b-20240624):
     resolution: {integrity: sha512-YHu1igcAxZPh8ZB7GIM93dqgY6gcAzq66FOhQFheAdOx1raxNcApt05nNyNCSB6NegSiyJ4XOPsaNow4pfDmsg==}
     peerDependencies:
       '@simplewebauthn/browser': ^9.0.1
@@ -3365,11 +3365,11 @@ packages:
         optional: true
     dependencies:
       '@auth/core': 0.32.0
-      next: 15.0.0-rc.0(@babel/core@7.24.6)(react-dom@19.0.0-rc-6230622a1a-20240610)(react@19.0.0-rc-6230622a1a-20240610)
-      react: 19.0.0-rc-6230622a1a-20240610
+      next: 15.0.0-rc.0(@babel/core@7.24.6)(react-dom@19.0.0-rc-c21bcd627b-20240624)(react@19.0.0-rc-c21bcd627b-20240624)
+      react: 19.0.0-rc-c21bcd627b-20240624
     dev: false
 
-  /next@15.0.0-rc.0(@babel/core@7.24.6)(react-dom@19.0.0-rc-6230622a1a-20240610)(react@19.0.0-rc-6230622a1a-20240610):
+  /next@15.0.0-rc.0(@babel/core@7.24.6)(react-dom@19.0.0-rc-c21bcd627b-20240624)(react@19.0.0-rc-c21bcd627b-20240624):
     resolution: {integrity: sha512-IWcCvxUSCAuOK5gig4+9yiyt/dLKpIa+WT01Qcx4CBE4TtwJljyTDnCVVn64jDZ4qmSzsaEYXpb4DTI8qbk03A==}
     engines: {node: '>=18.17.0'}
     hasBin: true
@@ -3396,9 +3396,9 @@ packages:
       caniuse-lite: 1.0.30001632
       graceful-fs: 4.2.11
       postcss: 8.4.31
-      react: 19.0.0-rc-6230622a1a-20240610
-      react-dom: 19.0.0-rc-6230622a1a-20240610(react@19.0.0-rc-6230622a1a-20240610)
-      styled-jsx: 5.1.3(@babel/core@7.24.6)(react@19.0.0-rc-6230622a1a-20240610)
+      react: 19.0.0-rc-c21bcd627b-20240624
+      react-dom: 19.0.0-rc-c21bcd627b-20240624(react@19.0.0-rc-c21bcd627b-20240624)
+      styled-jsx: 5.1.3(@babel/core@7.24.6)(react@19.0.0-rc-c21bcd627b-20240624)
     optionalDependencies:
       '@next/swc-darwin-arm64': 15.0.0-rc.0
       '@next/swc-darwin-x64': 15.0.0-rc.0
@@ -3900,21 +3900,21 @@ packages:
   /queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  /react-dom@19.0.0-rc-6230622a1a-20240610(react@19.0.0-rc-6230622a1a-20240610):
-    resolution: {integrity: sha512-56G4Pum5E7FeGL1rwHX5IxidSJxQnXP4yORRo0pVeOJuu5DQJvNKpUwmJoftMP/ez0AiglYTY77L2Gs8iyt1Hg==}
+  /react-dom@19.0.0-rc-c21bcd627b-20240624(react@19.0.0-rc-c21bcd627b-20240624):
+    resolution: {integrity: sha512-Tv0clQtq5hgkwiqlaEK2DHmXe7qrVR0igLlGxCSi0nvnMU1rMTTAM8QQu4rQ6ye3OwQEFT4U6osylRz17M8+HQ==}
     peerDependencies:
-      react: 19.0.0-rc-6230622a1a-20240610
+      react: 19.0.0-rc-c21bcd627b-20240624
     dependencies:
-      react: 19.0.0-rc-6230622a1a-20240610
-      scheduler: 0.25.0-rc-6230622a1a-20240610
+      react: 19.0.0-rc-c21bcd627b-20240624
+      scheduler: 0.25.0-rc-c21bcd627b-20240624
     dev: false
 
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
     dev: true
 
-  /react@19.0.0-rc-6230622a1a-20240610:
-    resolution: {integrity: sha512-SMgWGY//7nO7F3HMuBfmC15Cr4vTe2tlpSCATfnz/wymSftDOKUqc+0smjRhcUeCFCc1zhOAWJ+N//U5CrmOzQ==}
+  /react@19.0.0-rc-c21bcd627b-20240624:
+    resolution: {integrity: sha512-CmHLXFoC0mFi8LAGsjOZo+NmP68qCQpvSGpR2aPPlx6HjjWhEi0AYCHh34q7jWIiqzxNvJpjSJKKnuCUzIbxLw==}
     engines: {node: '>=0.10.0'}
     dev: false
 
@@ -4070,8 +4070,8 @@ packages:
       is-regex: 1.1.4
     dev: true
 
-  /scheduler@0.25.0-rc-6230622a1a-20240610:
-    resolution: {integrity: sha512-GTIQdJXthps5mgkIFo7yAq03M0QQYTfN8z+GrnMC/SCKFSuyFP5tk2BMaaWUsVy4u4r+dTLdiXH8JEivVls0Bw==}
+  /scheduler@0.25.0-rc-c21bcd627b-20240624:
+    resolution: {integrity: sha512-gfafeP3Ao8VQZRlX0m6XpuAPBODLYm5BhKmBfPekCXz+EmkLrFQGuQ65XkE5MER/G4dN+jEYdQ8MkMhGDMIVag==}
     dev: false
 
   /semver@5.7.2:
@@ -4337,7 +4337,7 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /styled-jsx@5.1.3(@babel/core@7.24.6)(react@19.0.0-rc-6230622a1a-20240610):
+  /styled-jsx@5.1.3(@babel/core@7.24.6)(react@19.0.0-rc-c21bcd627b-20240624):
     resolution: {integrity: sha512-qLRShOWTE/Mf6Bvl72kFeKBl8N2Eq9WIFfoAuvbtP/6tqlnj1SCjv117n2MIjOPpa1jTorYqLJgsHKy5Y3ziww==}
     engines: {node: '>= 12.0.0'}
     peerDependencies:
@@ -4352,7 +4352,7 @@ packages:
     dependencies:
       '@babel/core': 7.24.6
       client-only: 0.0.1
-      react: 19.0.0-rc-6230622a1a-20240610
+      react: 19.0.0-rc-c21bcd627b-20240624
     dev: false
 
   /sucrase@3.35.0:
@@ -4608,13 +4608,13 @@ packages:
       punycode: 2.3.1
     dev: true
 
-  /use-debounce@10.0.1(react@19.0.0-rc-6230622a1a-20240610):
+  /use-debounce@10.0.1(react@19.0.0-rc-c21bcd627b-20240624):
     resolution: {integrity: sha512-0uUXjOfm44e6z4LZ/woZvkM8FwV1wiuoB6xnrrOmeAEjRDDzTLQNRFtYHvqUsJdrz1X37j0rVGIVp144GLHGKg==}
     engines: {node: '>= 16.0.0'}
     peerDependencies:
       react: '>=16.8.0'
     dependencies:
-      react: 19.0.0-rc-6230622a1a-20240610
+      react: 19.0.0-rc-c21bcd627b-20240624
     dev: false
 
   /utf-8-validate@6.0.3:
