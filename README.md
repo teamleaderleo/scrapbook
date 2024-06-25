@@ -68,4 +68,4 @@ If you have ideas, suggestions, or improvements, feel free to create an issue or
 
 ## The artwork source?
 
-I drew the picture(s). 
+I drew the picture(s).
