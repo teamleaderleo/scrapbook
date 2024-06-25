@@ -69,7 +69,7 @@ export default async function ArtifactsTable({
                       Name
                     </th>
                     <th scope="col" className="px-3 py-5 font-medium">
-                      Email
+                      Tags
                     </th>
                     <th scope="col" className="px-3 py-5 font-medium">
                       Total Projects
