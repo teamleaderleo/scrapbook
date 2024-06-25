@@ -13,6 +13,9 @@ Check out the deployed application: [https://setzen.vercel.app/](https://setzen.
 ### Login Page:
 ![image](https://github.com/MikelBai/scrapbook/assets/13091533/ca45a1e3-66db-4989-9ed7-850ffe2bd770)
 
+### Login Page (Mobile):
+<img src="https://github.com/MikelBai/scrapbook/assets/13091533/7920ec02-4a31-4609-a7ab-3d9fa005620f" width="30%" alt="IMG_6309">
+
 ### Dashboard:
 ![image](https://github.com/MikelBai/scrapbook/assets/13091533/26c5dd2d-9219-4ca0-9bf6-180f9c22366e)
 
