@@ -10,7 +10,7 @@ Check out the deployed application: [https://setzen.vercel.app/](https://setzen.
 
 ## Schema
 
-<img src="https://github.com/MikelBai/scrapbook/assets/13091533/ade908b3-dc81-4768-b981-7c3d99c16c86" width="70%">
+<img src="https://github.com/MikelBai/scrapbook/assets/13091533/115a74a4-2a38-4f30-a8c6-df5a2017ef73" width="70%">
 
 This took a bit more thinking than I expected. And I'm still thinking about it!
 
