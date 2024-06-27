@@ -8,6 +8,12 @@ This project is a scrapbook-style project management application tailored for ar
 
 Check out the deployed application: [https://setzen.vercel.app/](https://setzen.vercel.app/)
 
+## Schema
+
+<img src="https://github.com/MikelBai/scrapbook/assets/13091533/ade908b3-dc81-4768-b981-7c3d99c16c86" width="70%">
+
+This took a bit more thinking than I expected. And I'm still thinking about it!
+
 ## What It Currently Looks Like
 
 ### Login Page:
