@@ -1,7 +1,7 @@
 import Pagination from '@/app/ui/projects/pagination';
 import Search from '@/app/ui/search';
 import Table from '@/app/ui/projects/table';
-import { CreateProject } from '@/app/ui/projects/buttons';
+import { CreateProject } from '@/app/ui/projects/button';
 import { lusitana } from '@/app/ui/fonts';
 import { ProjectsTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
