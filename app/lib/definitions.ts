@@ -50,14 +50,18 @@ export type LatestProject = {
   user_id: string; // Foreign key to User.id
 };
 
-export type ProjectsTable = {
-  id: string; // Primary key
-  user_id: string; // Foreign key to User.id
+
+// Type for the query result including artifacts
+export type ProjectsWithArtifacts = {
+  id: string;
+  user_id: string;
   name: string;
-  description?: string; // Nullable
+  description?: string;
   date: string;
   status: 'pending' | 'completed';
-  artifacts: Artifact[];
+  artifact_names: string[];
+  artifact_images: string[];
+  artifact_descriptions: string[];
 };
 
 export type ArtifactsTableType = {

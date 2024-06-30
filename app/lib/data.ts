@@ -3,7 +3,7 @@ import {
   ArtifactField,
   ArtifactsTableType,
   ProjectForm,
-  ProjectsTable,
+  ProjectsWithArtifacts,
   LatestProjectRaw,
   User,
 } from './definitions';
@@ -68,23 +68,28 @@ export async function fetchFilteredProjects(
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const projects = await sql<ProjectsTable>`
+    const projects = await sql<ProjectsWithArtifacts>`
       SELECT
         projects.id,
-        projects.amount,
+        projects.user_id,
+        projects.name,
+        projects.description,
         projects.date,
         projects.status,
-        artifacts.name,
-        artifacts.email,
-        artifacts.image_url
+        ARRAY_AGG(artifacts.name) AS artifact_names,
+        ARRAY_AGG(artifacts.image_url) AS artifact_images,
+        ARRAY_AGG(artifacts.description) AS artifact_descriptions
       FROM projects
-      JOIN artifacts ON projects.artifact_id = artifacts.id
+      JOIN project_artifacts ON projects.id = project_artifacts.project_id
+      JOIN artifacts ON project_artifacts.artifact_id = artifacts.id
       WHERE
-        artifacts.name ILIKE ${`%${query}%`} OR
-        artifacts.email ILIKE ${`%${query}%`} OR
-        projects.amount::text ILIKE ${`%${query}%`} OR
+        projects.name ILIKE ${`%${query}%`} OR
+        projects.description ILIKE ${`%${query}%`} OR
         projects.date::text ILIKE ${`%${query}%`} OR
-        projects.status ILIKE ${`%${query}%`}
+        projects.status ILIKE ${`%${query}%`} OR
+        artifacts.name ILIKE ${`%${query}%`} OR
+        artifacts.description ILIKE ${`%${query}%`}
+      GROUP BY projects.id
       ORDER BY projects.date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
@@ -95,6 +100,7 @@ export async function fetchFilteredProjects(
     throw new Error('Failed to fetch projects.');
   }
 }
+
 
 export async function fetchProjectsPages(query: string) {
   try {
