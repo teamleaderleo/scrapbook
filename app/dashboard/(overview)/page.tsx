@@ -1,11 +1,11 @@
-import { Card } from '@/app/ui/dashboard/cards';
-import RevenueChart from '@/app/ui/dashboard/revenue-chart';
-import LatestProjects from '@/app/ui/dashboard/latest-projects';
-import { lusitana } from '@/app/ui/fonts';
+import { Card } from '@/components/ui/dashboard/cards';
+import RevenueChart from '@/components/ui/dashboard/revenue-chart';
+import LatestProjects from '@/components/ui/dashboard/latest-projects';
+import { lusitana } from '@/components/ui/fonts';
 import {fetchCardData } from '@/app/lib/data';
 import { Suspense } from 'react';
-import { RevenueChartSkeleton, LatestProjectsSkeleton, CardsSkeleton } from '@/app/ui/skeletons';
-import CardWrapper from '@/app/ui/dashboard/cards';
+import { RevenueChartSkeleton, LatestProjectsSkeleton, CardsSkeleton } from '@/components/ui/skeletons';
+import CardWrapper from '@/components/ui/dashboard/cards';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {

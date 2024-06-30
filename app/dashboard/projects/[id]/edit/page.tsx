@@ -1,5 +1,5 @@
-import Form from '@/app/ui/projects/edit-form';
-import Breadcrumbs from '@/app/ui/projects/breadcrumbs';
+import Form from '@/components/ui/projects/edit-form';
+import Breadcrumbs from '@/components/ui/projects/breadcrumbs';
 import { fetchProjectById, fetchArtifacts } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';

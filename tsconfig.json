@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     "app/lib/placeholder-data.js",
     "scripts/seed.js"
-, "app/ui/dashboard/scrapbook.jsx", "app/dashboard/scrapbook/page.tsx"  ],
+, "components/ui/dashboard/scrapbook.jsx", "app/dashboard/scrapbook/page.tsx"  ],
   "exclude": ["node_modules"]
 }

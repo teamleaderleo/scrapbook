@@ -6,31 +6,8 @@ import {
   ProjectsTable,
   LatestProjectRaw,
   User,
-  Revenue,
 } from './definitions';
-import { formatCurrency } from './utils';
 
-export async function fetchRevenue() {
-  // Add noStore() here to prevent the response from being cached.
-  // This is equivalent to in fetch(..., {cache: 'no-store'}).
-
-  try {
-    // Artificially delay a response for demo purposes.
-    // Don't do this in production :)
-
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    const data = await sql<Revenue>`SELECT * FROM revenue`;
-
-    // console.log('Data fetch completed after 3 seconds.');
-
-    return data.rows;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch revenue data.');
-  }
-}
 
 export async function fetchLatestProjects() {
   try {
@@ -72,14 +49,10 @@ export async function fetchCardData() {
 
     const numberOfProjects = Number(data[0].rows[0].count ?? '0');
     const numberOfArtifacts = Number(data[1].rows[0].count ?? '0');
-    const totalPaidProjects = formatCurrency(data[2].rows[0].paid ?? '0');
-    const totalPendingProjects = formatCurrency(data[2].rows[0].pending ?? '0');
 
     return {
       numberOfArtifacts,
       numberOfProjects,
-      totalPaidProjects,
-      totalPendingProjects,
     };
   } catch (error) {
     console.error('Database Error:', error);

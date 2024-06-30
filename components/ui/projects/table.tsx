@@ -1,6 +1,6 @@
 import Image from 'next/image';
-import { UpdateProject, DeleteProject } from '@/app/ui/projects/button';
-import ProjectStatus from '@/app/ui/projects/status';
+import { UpdateProject, DeleteProject } from '@/components/ui/projects/button';
+import ProjectStatus from '@/components/ui/projects/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredProjects } from '@/app/lib/data';
 

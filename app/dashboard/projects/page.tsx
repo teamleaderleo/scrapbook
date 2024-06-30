@@ -1,9 +1,9 @@
-import Pagination from '@/app/ui/projects/pagination';
-import Search from '@/app/ui/search';
-import Table from '@/app/ui/projects/table';
-import { CreateProject } from '@/app/ui/projects/button';
-import { lusitana } from '@/app/ui/fonts';
-import { ProjectsTableSkeleton } from '@/app/ui/skeletons';
+import Pagination from '@/components/ui/projects/pagination';
+import Search from '@/components/ui/search';
+import Table from '@/components/ui/projects/table';
+import { CreateProject } from '@/components/ui/projects/button';
+import { lusitana } from '@/components/ui/fonts';
+import { ProjectsTableSkeleton } from '@/components/ui/skeletons';
 import { Suspense } from 'react';
 import { fetchProjectsPages } from '@/app/lib/data';
 import { Metadata } from 'next';

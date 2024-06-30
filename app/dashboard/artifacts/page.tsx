@@ -1,5 +1,5 @@
 import { fetchFilteredArtifacts } from '@/app/lib/data';
-import ArtifactsTable from '@/app/ui/artifacts/table';
+import ArtifactsTable from '@/components/ui/artifacts/table';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
