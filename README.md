@@ -10,7 +10,7 @@ Check out the deployed application: [https://setzen.vercel.app/](https://setzen.
 
 ## Schema
 
-<img src="https://github.com/MikelBai/scrapbook/assets/13091533/ade908b3-dc81-4768-b981-7c3d99c16c86" width="70%">
+<img src="https://github.com/MikelBai/scrapbook/assets/13091533/115a74a4-2a38-4f30-a8c6-df5a2017ef73" width="70%">
 
 This took a bit more thinking than I expected. And I'm still thinking about it!
 
@@ -30,11 +30,11 @@ This took a bit more thinking than I expected. And I'm still thinking about it!
 
 ## Vision
 
-The goal of this project is to create a comprehensive tool that helps artists manage their projects with ease and creativity. Key features include:
+The goal of this project is to create a comprehensive tool that helps artists manage their projects with ease and creativity. Current key features include:
 
-- **Visual and Textual Integration:** Incorporate images, sketches, and rich text to create detailed project descriptions and progress updates.
-- **Dynamic Views:** Toggle between different views, such as a calendar view and a scrapbook view, to visualize project timelines and progress.
-- **Enhanced Functionality:** Implement features like tagging, search, pagination, and authentication to improve usability and user experience.
+- **Visual and Textual Integration:** Incorporates images, sketches, and rich text to create detailed project descriptions and progress updates.
+- **Dynamic Views:** Can toggle between different views, such as a calendar view and a scrapbook view, to visualize project timelines and progress.
+- **Basic Functionality:** Has features like tagging, search, pagination, and authentication to provide a starting level of usability and user experience.
 
 ## Features Implemented
 
@@ -43,7 +43,7 @@ The goal of this project is to create a comprehensive tool that helps artists ma
 - **Dynamic Calendar View:** Introduced a calendar view that toggles between general tasks and day-by-day project progress.
 - **Pagination and Accessibility:** Added pagination and accessibility features to enhance user experience.
 - **Dynamic Rendering:** Implemented dynamic rendering to improve performance and interactivity.
-- **Authentication:** Integrated OAuth for user authentication (temporarily not active).
+- **Authentication:** Integrated OAuth for user authentication (temporarily not active; only the basic one is).
 
 ## Features in Progress
 
@@ -51,8 +51,8 @@ The goal of this project is to create a comprehensive tool that helps artists ma
 - **Layout for Scrapbook Concept:** Finalizing the layout for the scrapbook view and toggling between views.
 - **OAuth Integration:** Re-integrating OAuth for secure user authentication.
 - **Animations:** Planning and implementing animations to enhance user interaction.
-- **Rich Text Editor:** Utilized Quill.js for a feature-rich Markdown editor, supporting various text formatting options.
-- **Image and Sketch Integration:** Incorporated an HTML5 Canvas for seamless inclusion of artistic content.
+- **Rich Text Editor:** Integrating Quill.js for a feature-rich Markdown editor, supporting various text formatting options.
+- **Image and Sketch Integration:** Incorporating an HTML5 Canvas for seamless inclusion of artistic content.
 - **Updating various placeholders:** The pictures for the artifacts need to be updated to at least be my own pictures.
 
 ## Future Plans
