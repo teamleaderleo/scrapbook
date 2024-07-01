@@ -42,12 +42,13 @@ export type ArtifactTag = {
 };
 
 export type LatestProject = {
-  id: string; // Primary key
+  id: string;
   name: string;
-  image_url: string;
-  description: string;
+  description?: string; // Nullable
   date: string;
   user_id: string; // Foreign key to User.id
+  artifact_names: string[]; // Array of artifact names
+  artifact_image_urls: string[]; // Array of artifact image URLs
 };
 
 
@@ -60,11 +61,11 @@ export type ProjectsWithArtifacts = {
   date: string;
   status: 'pending' | 'completed';
   artifact_names: string[];
-  artifact_images: string[];
+  artifact_image_urls: string[];
   artifact_descriptions: string[];
 };
 
-export type ArtifactsTableType = {
+export type ArtifactsTable = {
   id: string; // Primary key
   user_id: string; // Foreign key to User.id
   name: string;

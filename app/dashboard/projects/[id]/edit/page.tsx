@@ -1,6 +1,6 @@
 import Form from '@/components/ui/projects/edit-form';
 import Breadcrumbs from '@/components/ui/projects/breadcrumbs';
-import { fetchProjectById, fetchArtifacts } from '@/app/lib/data';
+import { fetchProject, fetchArtifacts } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default async function Page({ params }: { params: { id: string } }) {
   const id = params.id;
   const [project, artifacts] = await Promise.all([
-    fetchProjectById(id),
+    fetchProject(id),
     fetchArtifacts(),
   ]);
 
