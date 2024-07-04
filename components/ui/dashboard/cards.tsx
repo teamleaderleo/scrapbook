@@ -16,16 +16,16 @@ const iconMap = {
 
 export default async function CardWrapper() {
   const {
-    numberOfProjects,
     numberOfArtifacts,
-    totalPaidProjects,
-    totalPendingProjects,
+    numberOfProjects,
+    numberOfPendingProjects,
+    numberOfCompletedProjects,
   } = await fetchCardData();
 
   return (
     <>
-      <Card title="Collected" value={totalPaidProjects} type="collected" />
-      <Card title="Pending" value={totalPendingProjects} type="pending" />
+      <Card title="Completed" value={numberOfCompletedProjects} type="collected" />
+      <Card title="Pending" value={numberOfPendingProjects} type="pending" />
       <Card title="Total Projects" value={numberOfProjects} type="projects" />
       <Card
         title="Total Artifacts"
