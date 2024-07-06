@@ -12,10 +12,9 @@ export default async function LatestProjects() {
         Latest Project Activity
       </h2>
       <div className="flex grow flex-col justify-between rounded-xl bg-gray-50 p-4">
-        {/* NOTE: comment in this code when you get to this point in the course */}
-
         <div className="bg-white px-6">
           {latestProjects.map((project, i) => {
+            const latestArtifact = project.artifacts[0]; // Assuming the first artifact is the most recent
             return (
               <div
                 key={project.id}
@@ -27,26 +26,30 @@ export default async function LatestProjects() {
                 )}
               >
                 <div className="flex items-center">
-                  <Image
-                    src={project.content}
-                    alt={`${project.name}'s profile picture`}
-                    className="mr-4 rounded-full"
-                    width={32}
-                    height={32}
-                  />
+                  {latestArtifact && latestArtifact.type === 'image' ? (
+                    <Image
+                      src={latestArtifact.content}
+                      alt={`${project.name}'s latest artifact`}
+                      className="mr-4 rounded-full"
+                      width={32}
+                      height={32}
+                    />
+                  ) : (
+                    <div className="mr-4 h-8 w-8 rounded-full bg-gray-200"></div>
+                  )}
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold md:text-base">
                       {project.name}
                     </p>
                     <p className="hidden text-sm text-gray-500 sm:block">
-                      {project.email}
+                      {project.description || 'No description'}
                     </p>
                   </div>
                 </div>
                 <p
                   className={`${lusitana.className} truncate text-sm font-medium md:text-base`}
                 >
-                  {project.amount}
+                  {project.status}
                 </p>
               </div>
             );
