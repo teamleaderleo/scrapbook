@@ -76,26 +76,16 @@ export async function fetchLatestProjects(limit: number = 5) {
         p.createdAt,
         p.updatedAt,
         p.status,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', t.id,
-              'name', t.name
-            )
-          ) FILTER (WHERE t.id IS NOT NULL),
-          '[]'
-        ) AS tags,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', a.id,
-              'name', a.name,
-              'type', a.type,
-              'content', (SELECT content FROM ArtifactContents WHERE artifactId = a.id ORDER BY createdAt DESC LIMIT 1)
-            )
-          ) FILTER (WHERE a.id IS NOT NULL),
-          '[]'
-        ) AS artifacts
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', t.id,
+          'name', t.name
+        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags,
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', a.id,
+          'name', a.name,
+          'type', a.type,
+          'content', (SELECT content FROM ArtifactContents WHERE artifactId = a.id ORDER BY createdAt DESC LIMIT 1)
+        )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifacts
       FROM Projects p
       LEFT JOIN Tags t ON p.id = t.projectId
       LEFT JOIN ProjectArtifactLinks pal ON p.id = pal.projectId
@@ -123,40 +113,30 @@ export async function fetchProjects(query: string = '', currentPage: number = 1)
         p.createdAt,
         p.updatedAt,
         p.status,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', a.id,
-              'name', a.name,
-              'type', a.type,
-              'content', (SELECT content FROM ArtifactContents WHERE artifactId = a.id ORDER BY createdAt DESC LIMIT 1)
-            )
-          ) FILTER (WHERE a.id IS NOT NULL),
-          '[]'
-        ) AS artifacts,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', t.id,
-              'name', t.name
-            )
-          ) FILTER (WHERE t.id IS NOT NULL),
-          '[]'
-        ) AS tags,
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', t.id,
+          'name', t.name
+        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags,
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', a.id,
+          'name', a.name,
+          'type', a.type,
+          'content', (SELECT content FROM ArtifactContents WHERE artifactId = a.id ORDER BY createdAt DESC LIMIT 1)
+        )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifacts,
         COUNT(DISTINCT p.id) OVER() AS totalProjects,
         SUM(CASE WHEN p.status = 'pending' THEN 1 ELSE 0 END) OVER() AS totalPending,
         SUM(CASE WHEN p.status = 'completed' THEN 1 ELSE 0 END) OVER() AS totalCompleted,
         COUNT(DISTINCT t.id) OVER() AS totalTags,
         COUNT(DISTINCT a.id) OVER() AS totalAssociatedArtifacts
       FROM Projects p
+      LEFT JOIN Tags t ON p.id = t.projectId
       LEFT JOIN ProjectArtifactLinks pal ON p.id = pal.projectId
       LEFT JOIN Artifacts a ON pal.artifactId = a.id
-      LEFT JOIN Tags t ON p.id = t.projectId
       WHERE
         p.name ILIKE ${`%${query}%`} OR
         p.description ILIKE ${`%${query}%`} OR
-        a.name ILIKE ${`%${query}%`} OR
-        t.name ILIKE ${`%${query}%`}
+        t.name ILIKE ${`%${query}%`} OR
+        a.name ILIKE ${`%${query}%`}
       GROUP BY p.id
       ORDER BY p.updatedAt DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}`;
@@ -205,36 +185,21 @@ export async function fetchLatestArtifacts(limit: number = 5) {
         a.description,
         a.createdAt,
         a.updatedAt,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', ac.id,
-              'type', ac.type,
-              'content', ac.content,
-              'createdAt', ac.createdAt
-            )
-          ) FILTER (WHERE ac.id IS NOT NULL),
-          '[]'
-        ) AS contents,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', t.id,
-              'name', t.name
-            )
-          ) FILTER (WHERE t.id IS NOT NULL),
-          '[]'
-        ) AS tags,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', p.id,
-              'name', p.name,
-              'status', p.status
-            )
-          ) FILTER (WHERE p.id IS NOT NULL),
-          '[]'
-        ) AS projects
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', ac.id,
+          'type', ac.type,
+          'content', ac.content,
+          'createdAt', ac.createdAt
+        )) FILTER (WHERE ac.id IS NOT NULL), '[]') AS contents,
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', t.id,
+          'name', t.name
+        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags,
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', p.id,
+          'name', p.name,
+          'status', p.status
+        )) FILTER (WHERE p.id IS NOT NULL), '[]') AS projects
       FROM Artifacts a
       LEFT JOIN ArtifactContents ac ON a.id = ac.artifactId
       LEFT JOIN Tags t ON a.id = t.artifactId
@@ -265,44 +230,29 @@ export async function fetchArtifacts(query: string = '') {
         a.description,
         a.createdAt,
         a.updatedAt,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', ac.id,
-              'type', ac.type,
-              'content', ac.content,
-              'createdAt', ac.createdAt
-            )
-          ) FILTER (WHERE ac.id IS NOT NULL),
-          '[]'
-        ) AS contents,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', t.id,
-              'name', t.name
-            )
-          ) FILTER (WHERE t.id IS NOT NULL),
-          '[]'
-        ) AS tags,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', p.id,
-              'name', p.name,
-              'status', p.status
-            )
-          ) FILTER (WHERE p.id IS NOT NULL),
-          '[]'
-        ) AS projects,
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', ac.id,
+          'type', ac.type,
+          'content', ac.content,
+          'createdAt', ac.createdAt
+        )) FILTER (WHERE ac.id IS NOT NULL), '[]') AS contents,
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', t.id,
+          'name', t.name
+        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags,
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', p.id,
+          'name', p.name,
+          'status', p.status
+        )) FILTER (WHERE p.id IS NOT NULL), '[]') AS projects,
         COUNT(DISTINCT a.id) OVER() AS totalArtifacts,
         COUNT(DISTINCT t.id) OVER() AS totalTags,
         COUNT(DISTINCT p.id) OVER() AS totalAssociatedProjects
       FROM Artifacts a
       LEFT JOIN ArtifactContents ac ON a.id = ac.artifactId
+      LEFT JOIN Tags t ON a.id = t.artifactId
       LEFT JOIN ProjectArtifactLinks pal ON a.id = pal.artifactId
       LEFT JOIN Projects p ON pal.projectId = p.id
-      LEFT JOIN Tags t ON a.id = t.artifactId
       WHERE
         a.name ILIKE ${`%${query}%`} OR
         a.description ILIKE ${`%${query}%`} OR
