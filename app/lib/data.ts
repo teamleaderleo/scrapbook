@@ -1,131 +1,100 @@
 import { sql } from '@vercel/postgres';
 import {
-  ArtifactField,
+  Artifact,
   ArtifactsTable,
-  ProjectForm,
+  Project,
   ProjectsWithArtifacts,
   LatestProject,
+  LatestArtifact,
   User,
 } from './definitions';
 
-
-export async function fetchLatestProjects() {
+export async function getUser(email: string) {
   try {
-    const data = await sql<LatestProject>`
-      SELECT 
-        projects.id, 
-        projects.name, 
-        projects.description, 
-        projects.date, 
-        projects.user_id, 
-        ARRAY_AGG(artifacts.name) AS artifact_names, 
-        ARRAY_AGG(artifacts.image_url) AS artifact_image_urls
-      FROM projects
-      LEFT JOIN project_artifacts ON projects.id = project_artifacts.project_id
-      LEFT JOIN artifacts ON project_artifacts.artifact_id = artifacts.id
-      GROUP BY projects.id
-      ORDER BY projects.date DESC
-      LIMIT 5`;
+    const user = await sql`SELECT * FROM users WHERE email=${email}`;
+    return user.rows[0] as User;
+  } catch (error) {
+    console.error('Failed to fetch user:', error);
+    throw new Error('Failed to fetch user.');
+  }
+}
+
+export async function fetchProject(id: string) {
+  try {
+    const data = await sql<Project>`
+      SELECT
+        p.id,
+        p.user_id,
+        p.name,
+        p.description,
+        p.date,
+        p.status,
+        ARRAY_AGG(pa.artifact_id) AS artifact_ids
+      FROM projects p
+      LEFT JOIN project_artifacts pa ON p.id = pa.project_id
+      WHERE p.id = ${id}
+      GROUP BY p.id`;
+
+    return data.rows[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch project.');
+  }
+}
+
+const ITEMS_PER_PAGE = 6;
+
+export async function fetchProjects(query: string, currentPage: number) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+  try {
+    const data = await sql<ProjectsWithArtifacts>`
+      SELECT
+        p.id,
+        p.user_id,
+        p.name,
+        p.description,
+        p.date,
+        p.status,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', a.id,
+              'name', a.name,
+              'type', a.type,
+              'content', a.content
+            )
+          ) FILTER (WHERE a.id IS NOT NULL),
+          '[]'
+        ) AS artifacts
+      FROM projects p
+      LEFT JOIN project_artifacts pa ON p.id = pa.project_id
+      LEFT JOIN artifacts a ON pa.artifact_id = a.id
+      WHERE
+        p.name ILIKE ${`%${query}%`} OR
+        p.description ILIKE ${`%${query}%`} OR
+        a.name ILIKE ${`%${query}%`}
+      GROUP BY p.id
+      ORDER BY p.date DESC
+      LIMITT.rowsFFSET ${offset}`;
 
     return data.rows;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch the latest projects.');
+    throw new Error('Failed to fetch filtered projects.');
   }
 }
 
-
-
-
-export async function fetchCardData() {
-  try {
-    const projectCountPromise = sql`SELECT COUNT(*) FROM projects`;
-    const artifactCountPromise = sql`SELECT COUNT(*) FROM artifacts`;
-    const projectStatusPromise = sql`SELECT
-         SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS "completed",
-         SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS "pending"
-         FROM projects`;
-
-    const data = await Promise.all([
-      projectCountPromise,
-      artifactCountPromise,
-      projectStatusPromise,
-    ]);
-
-    const numberOfProjects = Number(data[0].rows[0].count ?? '0');
-    const numberOfArtifacts = Number(data[1].rows[0].count ?? '0');
-    const projectStatus = data[2].rows[0];
-
-    return {
-      numberOfArtifacts,
-      numberOfProjects,
-      numberOfPendingProjects: projectStatus.pending,
-      numberOfCompletedProjects: projectStatus.completed,
-    };
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch card data.');
-  }
-}
-
-
-const ITEMS_PER_PAGE = 6;
-
-export async function fetchFilteredProjects(query: string, currentPage: number) {
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-
-  try {
-    const projects = await sql<ProjectsWithArtifacts>`
-      SELECT
-        projects.id,
-        projects.user_id,
-        projects.name,
-        projects.description,
-        projects.date,
-        projects.status,
-        ARRAY_AGG(artifacts.name) AS artifact_names,
-        ARRAY_AGG(artifacts.image_url) AS artifact_image_urls,
-        ARRAY_AGG(artifacts.description) AS artifact_descriptions
-      FROM projects
-      LEFT JOIN project_artifacts ON projects.id = project_artifacts.project_id
-      LEFT JOIN artifacts ON project_artifacts.artifact_id = artifacts.id
-      WHERE
-        projects.name ILIKE ${`%${query}%`} OR
-        projects.description ILIKE ${`%${query}%`} OR
-        projects.date::text ILIKE ${`%${query}%`} OR
-        projects.status ILIKE ${`%${query}%`} OR
-        artifacts.name ILIKE ${`%${query}%`} OR
-        artifacts.description ILIKE ${`%${query}%`}
-      GROUP BY projects.id
-      ORDER BY projects.date DESC
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
-    `;
-
-    return projects.rows;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch projects.');
-  }
-}
-
-
-
-
-export async function fetchProjectsPages(query: string) {
+export async function fetchProjectsPages(query: string = '') {
   try {
     const count = await sql`
-      SELECT COUNT(*)
-      FROM projects
-      LEFT JOIN project_artifacts ON projects.id = project_artifacts.project_id
-      LEFT JOIN artifacts ON project_artifacts.artifact_id = artifacts.id
+      SELECT COUNT(DISTINCT p.id)
+      FROM projects p
+      LEFT JOIN project_artifacts pa ON p.id = pa.project_id
+      LEFT JOIN artifacts a ON pa.artifact_id = a.id
       WHERE
-        projects.name ILIKE ${`%${query}%`} OR
-        projects.description ILIKE ${`%${query}%`} OR
-        projects.date::text ILIKE ${`%${query}%`} OR
-        projects.status ILIKE ${`%${query}%`} OR
-        artifacts.name ILIKE ${`%${query}%`} OR
-        artifacts.description ILIKE ${`%${query}%`}
-    `;
+        p.name ILIKE ${`%${query}%`} OR
+        p.description ILIKE ${`%${query}%`} OR
+        a.name ILIKE ${`%${query}%`}`;
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
@@ -135,92 +104,140 @@ export async function fetchProjectsPages(query: string) {
   }
 }
 
-
-export async function fetchProject(id: string) {
+export async function fetchLatestProjects(limit: number = 5) {
   try {
-    const data = await sql<ProjectForm>`
+    const data = await sql<LatestProject>`
+      SELECT 
+        p.id, 
+        p.name, 
+        p.description, 
+        p.date, 
+        p.user_id,
+        p.status,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', a.id,
+              'name', a.name,
+              'type', a.type,
+              'content', a.content
+            )
+          ) FILTER (WHERE a.id IS NOT NULL),
+          '[]'
+        ) AS artifacts
+      FROM projects p
+      LEFT JOIN project_artifacts pa ON p.id = pa.project_id
+      LEFT JOIN artifacts a ON pa.artifact_id = a.id
+      GROUP BY p.id
+      ORDER BY p.date DESC
+      LIMIT ${limit}`;
+
+    return data.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch the latest projects.');
+  }
+}
+
+export async function fetchArtifact(id: string) {
+  try {
+    const data = await sql<Artifact>`
       SELECT
-        projects.id,
-        projects.name,
-        projects.description,
-        projects.date,
-        projects.status,
-        ARRAY_AGG(artifacts.id) AS artifact_ids
-      FROM projects
-      LEFT JOIN project_artifacts ON projects.id = project_artifacts.project_id
-      LEFT JOIN artifacts ON project_artifacts.artifact_id = artifacts.id
-      WHERE projects.id = ${id}
-      GROUP BY projects.id;
-    `;
+        a.id,
+        a.user_id,
+        a.name,
+        a.type,
+        a.content,
+        a.description,
+        ARRAY_AGG(t.name) AS tags,
+        a.created_at,
+        a.updated_at
+      FROM artifacts a
+      LEFT JOIN artifact_tags at ON a.id = at.artifact_id
+      LEFT JOIN tags t ON at.tag_id = t.id
+      WHERE a.id = ${id}
+      GROUP BY a.id`;
 
     return data.rows[0];
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch project.');
+    throw new Error('Failed to fetch artifact.');
   }
 }
-
-export async function fetchArtifacts() {
-  try {
-    const data = await sql<ArtifactField>`
-      SELECT
-        id,
-        name,
-        description,
-        image_url
-      FROM artifacts
-      ORDER BY name ASC
-    `;
-
-    return data.rows;
-  } catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch all artifacts.');
-  }
-}
-
-
 
 // Handling No Projects: Using LEFT JOIN ensures that artifacts without projects are still returned.
 // Distinct Aggregation: We use DISTINCT within COUNT and ARRAY_AGG to ensure unique counts and lists.
 // Graceful Handling: Ensures artifacts returned even if not currently assigned to any projects.
-export async function fetchFilteredArtifacts(query: string) {
+export async function fetchArtifacts(query: string = '') {
   try {
     const data = await sql<ArtifactsTable>`
       SELECT
-        artifacts.id,
-        artifacts.user_id,
-        artifacts.name,
-        artifacts.description,
-        artifacts.image_url,
-        COUNT(DISTINCT projects.id) AS total_projects,
-        SUM(CASE WHEN projects.status = 'pending' THEN 1 ELSE 0 END) AS total_pending,
-        SUM(CASE WHEN projects.status = 'completed' THEN 1 ELSE 0 END) AS total_completed,
-        ARRAY_AGG(DISTINCT projects.name) AS project_names
-      FROM artifacts
-      LEFT JOIN project_artifacts ON artifacts.id = project_artifacts.artifact_id
-      LEFT JOIN projects ON project_artifacts.project_id = projects.id
+        a.id,
+        a.user_id,
+        a.name,
+        a.type,
+        a.description,
+        a.content,
+        COUNT(DISTINCT pa.project_id) AS total_projects,
+        SUM(CASE WHEN p.status = 'pending' THEN 1 ELSE 0 END) AS total_pending,
+        SUM(CASE WHEN p.status = 'completed' THEN 1 ELSE 0 END) AS total_completed,
+        ARRAY_AGG(DISTINCT t.name) AS tags,
+        a.created_at,
+        a.updated_at
+      FROM artifacts a
+      LEFT JOIN project_artifacts pa ON a.id = pa.artifact_id
+      LEFT JOIN projects p ON pa.project_id = p.id
+      LEFT JOIN artifact_tags at ON a.id = at.artifact_id
+      LEFT JOIN tags t ON at.tag_id = t.id
       WHERE
-        artifacts.name ILIKE ${`%${query}%`} OR
-        artifacts.description ILIKE ${`%${query}%`}
-      GROUP BY artifacts.id, artifacts.user_id, artifacts.name, artifacts.description, artifacts.image_url
-      ORDER BY artifacts.name ASC
-    `;
+        a.name ILIKE ${`%${query}%`} OR
+        a.description ILIKE ${`%${query}%`} OR
+        a.content ILIKE ${`%${query}%`} OR
+        t.name ILIKE ${`%${query}%`}
+      GROUP BY a.id
+      ORDER BY a.updated_at DESC`;
 
     return data.rows;
-  } catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch artifact table.');
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch filtered artifacts.');
   }
 }
 
-
-export async function getUser(email: string) {
+export async function fetchLatestArtifacts(limit: number = 5) {
   try {
-    const user = await sql`SELECT * FROM users WHERE email=${email}`;
-    return user.rows[0] as User;
+    const data = await sql<LatestArtifact>`
+      SELECT id, name, type, content, created_at
+      FROM artifacts
+      ORDER BY created_at DESC
+      LIMIT ${limit}`;
+
+    return data.rows;
   } catch (error) {
-    console.error('Failed to fetch user:', error);
-    throw new Error('Failed to fetch user.');
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch latest artifacts.');
+  }
+}
+
+export async function fetchCardData() {
+  try {
+    const data = await sql`
+      SELECT
+        (SELECT COUNT(*) FROM projects) AS total_projects,
+        (SELECT COUNT(*) FROM artifacts) AS total_artifacts,
+        (SELECT COUNT(*) FROM projects WHERE status = 'pending') AS pending_projects,
+        (SELECT COUNT(*) FROM projects WHERE status = 'completed') AS completed_projects`;
+
+    const { total_projects, total_artifacts, pending_projects, completed_projects } = data.rows[0];
+
+    return {
+      numberOfProjects: Number(total_projects),
+      numberOfArtifacts: Number(total_artifacts),
+      numberOfPendingProjects: Number(pending_projects),
+      numberOfCompletedProjects: Number(completed_projects),
+    };
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch card data.');
   }
 }

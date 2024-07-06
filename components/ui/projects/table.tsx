@@ -1,8 +1,7 @@
 import Image from 'next/image';
 import { UpdateProject, DeleteProject } from '@/components/ui/projects/button';
 import ProjectStatus from '@/components/ui/projects/status';
-import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
-import { fetchFilteredProjects } from '@/app/lib/data';
+import { fetchProjects } from '@/app/lib/data';
 
 export default async function ProjectsTable({
   query,
@@ -11,7 +10,7 @@ export default async function ProjectsTable({
   query: string;
   currentPage: number;
 }) {
-  const projects = await fetchFilteredProjects(query, currentPage);
+  const projects = await fetchProjects(query, currentPage);
 
   return (
     <div className="mt-6 flow-root">

@@ -9,12 +9,18 @@ export type User = {
   password: string; // Consider hashing the password
 };
 
+export type ArtifactType = 'text' | 'image' | 'link' | 'file';
+
 export type Artifact = {
-  id: string; // Primary key
-  user_id: string; // Foreign key to User.id
+  id: string;
+  user_id: string;
   name: string;
-  description?: string; // Nullable
-  image_url?: string; // Nullable
+  type: ArtifactType;
+  content: string; // This could be text content, a URL, or a file path
+  description?: string;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
 };
 
 export type Project = {
@@ -29,6 +35,7 @@ export type Project = {
 export type ProjectArtifact = {
   project_id: string; // Composite primary key part 1
   artifact_id: string; // Composite primary key part 2
+  added_at: string;
 };
 
 export type Tag = {
@@ -47,10 +54,21 @@ export type LatestProject = {
   description?: string; // Nullable
   date: string;
   user_id: string; // Foreign key to User.id
-  artifact_names: string[]; // Array of artifact names
-  artifact_image_urls: string[]; // Array of artifact image URLs
+  artifacts: {
+    id: string;
+    name: string;
+    type: ArtifactType;
+    content: string;
+  }[];
 };
 
+export type LatestArtifact = {
+  id: string;
+  name: string;
+  type: ArtifactType;
+  content: string;
+  created_at: string;
+};
 
 // Type for the query result including artifacts
 export type ProjectsWithArtifacts = {
@@ -60,48 +78,28 @@ export type ProjectsWithArtifacts = {
   description?: string;
   date: string;
   status: 'pending' | 'completed';
-  artifact_names: string[];
-  artifact_image_urls: string[];
-  artifact_descriptions: string[];
+  artifacts: {
+    id: string;
+    name: string;
+    type: ArtifactType;
+    content: string;
+  }[];
 };
 
 export type ArtifactsTable = {
-  id: string; // Primary key
-  user_id: string; // Foreign key to User.id
+  id: string;
+  user_id: string;
   name: string;
-  description?: string; // Nullable
-  image_url?: string; // Nullable
+  type: ArtifactType;
+  description?: string;
+  content: string;
   total_projects: number;
   total_pending: number;
   total_completed: number;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
 };
-
-export type FormattedArtifactsTable = {
-  id: string; // Primary key
-  user_id: string; // Foreign key to User.id
-  name: string;
-  description?: string; // Nullable
-  image_url?: string; // Nullable
-  total_projects: number;
-  total_pending: string;
-  total_completed: string;
-};
-
-export type ArtifactField = {
-  id: string; // Primary key
-  name: string;
-};
-
-export type ProjectForm = {
-  id: string; // Primary key
-  name: string;
-  description?: string; // Nullable
-  date: string;
-  status: 'pending' | 'completed';
-  artifact_ids: string[]; // Array of Foreign keys to Artifact.id
-};
-
-// TypeScript definitions for views
 
 // Dashboard view
 export type DashboardView = {

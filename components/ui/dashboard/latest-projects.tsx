@@ -28,7 +28,7 @@ export default async function LatestProjects() {
               >
                 <div className="flex items-center">
                   <Image
-                    src={project.image_url}
+                    src={project.content}
                     alt={`${project.name}'s profile picture`}
                     className="mr-4 rounded-full"
                     width={32}

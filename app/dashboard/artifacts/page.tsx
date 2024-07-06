@@ -1,4 +1,4 @@
-import { fetchFilteredArtifacts } from '@/app/lib/data';
+import { fetchArtifacts } from '@/app/lib/data';
 import ArtifactsTable from '@/components/ui/artifacts/table';
 import { Metadata } from 'next';
 
@@ -16,7 +16,7 @@ export default async function Page({
 }) {
   const query = searchParams?.query || '';
 
-  const artifacts = await fetchFilteredArtifacts(query);
+  const artifacts = await fetchArtifacts(query);
 
   return (
     <main>
