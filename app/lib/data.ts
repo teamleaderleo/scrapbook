@@ -299,18 +299,18 @@ export async function fetchCardData() {
   try {
     const data = await sql`
       SELECT
-        (SELECT COUNT(*) FROM projects) AS total_projects,
-        (SELECT COUNT(*) FROM artifacts) AS total_artifacts,
-        (SELECT COUNT(*) FROM projects WHERE status = 'pending') AS pending_projects,
-        (SELECT COUNT(*) FROM projects WHERE status = 'completed') AS completed_projects`;
+        (SELECT COUNT(*) FROM Projects) AS totalProjects,
+        (SELECT COUNT(*) FROM Artifacts) AS totalArtifacts,
+        (SELECT COUNT(*) FROM Projects WHERE status = 'pending') AS pendingProjects,
+        (SELECT COUNT(*) FROM Projects WHERE status = 'completed') AS completedProjects`;
 
-    const { total_projects, total_artifacts, pending_projects, completed_projects } = data.rows[0];
+    const { totalProjects, totalArtifacts, pendingProjects, completedProjects } = data.rows[0];
 
     return {
-      numberOfProjects: Number(total_projects),
-      numberOfArtifacts: Number(total_artifacts),
-      numberOfPendingProjects: Number(pending_projects),
-      numberOfCompletedProjects: Number(completed_projects),
+      numberOfProjects: Number(totalProjects),
+      numberOfArtifacts: Number(totalArtifacts),
+      numberOfPendingProjects: Number(pendingProjects),
+      numberOfCompletedProjects: Number(completedProjects),
     };
   } catch (error) {
     console.error('Database Error:', error);
