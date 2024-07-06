@@ -33,7 +33,7 @@ export type Artifact = {
   updated_at: string;
 };
 
-export type LatestArtifact = Artifact & {
+export type ArtifactDetail = Artifact & {
   tags: {
     id: string;
     name: string;
@@ -62,7 +62,7 @@ export type Project = {
   status: 'pending' | 'completed';
 };
 
-export type LatestProject = Project & {
+export type ProjectDetail = Project & {
   tags: {
     id: string;
     name: string;
@@ -76,7 +76,7 @@ export type LatestProject = Project & {
 };
 
 // Type for the query result
-export type ProjectView = LatestProject & {
+export type ProjectView = ProjectDetail & {
   total_projects: number;
   total_pending: number;
   total_completed: number;
@@ -84,7 +84,7 @@ export type ProjectView = LatestProject & {
   total_associated_artifacts: number;
 };
 
-export type ArtifactView = LatestArtifact &{
+export type ArtifactView = ArtifactDetail &{
   total_artifacts: number;
   total_tags: number;
   total_associated_projects: number;

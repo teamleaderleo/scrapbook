@@ -3,10 +3,10 @@ import {
   User,
   Artifact,
   ArtifactView,
-  LatestArtifact,
+  ArtifactDetail,
   Project,
   ProjectView,
-  LatestProject,
+  ProjectDetail,
   DashboardView,
   
 } from './definitions';
@@ -23,17 +23,29 @@ export async function getUser(email: string) {
 
 export async function fetchProject(id: string) {
   try {
-    const data = await sql<Project>`
+    const data = await sql<ProjectDetail>`
       SELECT
         p.id,
-        p.user_id,
+        p.userId,
         p.name,
         p.description,
-        p.date,
+        p.createdAt,
+        p.updatedAt,
         p.status,
-        ARRAY_AGG(pa.artifact_id) AS artifact_ids
-      FROM projects p
-      LEFT JOIN project_artifacts pa ON p.id = pa.project_id
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', t.id,
+          'name', t.name
+        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags,
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', a.id,
+          'name', a.name,
+          'type', a.type,
+          'content', (SELECT content FROM ArtifactContents WHERE artifactId = a.id ORDER BY createdAt DESC LIMIT 1)
+        )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifacts
+      FROM Projects p
+      LEFT JOIN Tags t ON p.id = t.projectId
+      LEFT JOIN ProjectArtifactLinks pal ON p.id = pal.projectId
+      LEFT JOIN Artifacts a ON pal.artifactId = a.id
       WHERE p.id = ${id}
       GROUP BY p.id`;
 
@@ -67,7 +79,7 @@ export async function fetchProjectsPages(query: string = '') {
 
 export async function fetchLatestProjects(limit: number = 5) {
   try {
-    const data = await sql<LatestProject>`
+    const data = await sql<ProjectDetail>`
       SELECT
         p.id,
         p.userId,
@@ -150,20 +162,35 @@ export async function fetchProjects(query: string = '', currentPage: number = 1)
 
 export async function fetchArtifact(id: string) {
   try {
-    const data = await sql<Artifact>`
+    const data = await sql<ArtifactDetail>`
       SELECT
         a.id,
-        a.user_id,
+        a.userId,
         a.name,
         a.type,
-        a.content,
         a.description,
-        ARRAY_AGG(t.name) AS tags,
-        a.created_at,
-        a.updated_at
-      FROM artifacts a
-      LEFT JOIN artifact_tags at ON a.id = at.artifact_id
-      LEFT JOIN tags t ON at.tag_id = t.id
+        a.createdAt,
+        a.updatedAt,
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', ac.id,
+          'type', ac.type,
+          'content', ac.content,
+          'createdAt', ac.createdAt
+        )) FILTER (WHERE ac.id IS NOT NULL), '[]') AS contents,
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', t.id,
+          'name', t.name
+        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags,
+        COALESCE(json_agg(DISTINCT jsonb_build_object(
+          'id', p.id,
+          'name', p.name,
+          'status', p.status
+        )) FILTER (WHERE p.id IS NOT NULL), '[]') AS projects
+      FROM Artifacts a
+      LEFT JOIN ArtifactContents ac ON a.id = ac.artifactId
+      LEFT JOIN Tags t ON a.id = t.artifactId
+      LEFT JOIN ProjectArtifactLinks pal ON a.id = pal.artifactId
+      LEFT JOIN Projects p ON pal.projectId = p.id
       WHERE a.id = ${id}
       GROUP BY a.id`;
 
@@ -176,7 +203,7 @@ export async function fetchArtifact(id: string) {
 
 export async function fetchLatestArtifacts(limit: number = 5) {
   try {
-    const data = await sql<LatestArtifact>`
+    const data = await sql<ArtifactDetail>`
       SELECT
         a.id,
         a.userId,
