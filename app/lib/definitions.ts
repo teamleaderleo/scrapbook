@@ -1,4 +1,4 @@
-export type User = {
+export type Account = {
   id: string;
   name: string;
   email: string;
@@ -6,7 +6,7 @@ export type User = {
 };
 
 export type Tag = {
-  user_id: string;
+  account_id: string;
   id: string;
   name: string;
   artifact_id?: string;
@@ -23,7 +23,7 @@ export type ArtifactContent = {
 };
 
 export type Artifact = {
-  user_id: string;
+  account_id: string;
   id: string;
   name: string;
   type: ArtifactType;
@@ -46,14 +46,14 @@ export type ArtifactDetail = Artifact & {
 };
 
 export type ProjectArtifactLink = {
-  user_id: string;
+  account_id: string;
   project_id: string; 
   artifact_id: string; 
   added_at: string;
 };
 
 export type Project = {
-  user_id: string;
+  account_id: string;
   id: string;
   name: string;
   description?: string;
@@ -92,8 +92,8 @@ export type ArtifactView = ArtifactDetail &{
 
 // Dashboard view
 export type DashboardView = {
-  user_id: string;
-  total_users: number;
+  account_id: string;
+  total_accounts: number;
   total_projects: number;
   total_artifacts: number;
   total_tags: number;

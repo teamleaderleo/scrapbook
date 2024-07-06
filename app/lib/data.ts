@@ -1,6 +1,6 @@
 import { sql } from '@vercel/postgres';
 import {
-  User,
+  Account,
   Artifact,
   ArtifactView,
   ArtifactDetail,
@@ -11,13 +11,13 @@ import {
   
 } from './definitions';
 
-export async function getUser(email: string) {
+export async function getAccount(email: string) {
   try {
-    const user = await sql`SELECT * FROM users WHERE email=${email}`;
-    return user.rows[0] as User;
+    const account = await sql`SELECT * FROM account WHERE email=${email}`;
+    return account.rows[0] as Account;
   } catch (error) {
-    console.error('Failed to fetch user:', error);
-    throw new Error('Failed to fetch user.');
+    console.error('Failed to fetch account:', error);
+    throw new Error('Failed to fetch account.');
   }
 }
 
@@ -26,7 +26,7 @@ export async function fetchProject(id: string) {
     const data = await sql<ProjectDetail>`
       SELECT
         p.id,
-        p.user_id,
+        p.account_id,
         p.name,
         p.description,
         p.created_at,
@@ -82,7 +82,7 @@ export async function fetchLatestProjects(limit: number = 5) {
     const data = await sql<ProjectDetail>`
       SELECT
         p.id,
-        p.user_id,
+        p.account_id,
         p.name,
         p.description,
         p.created_at,
@@ -119,7 +119,7 @@ export async function fetchProjects(query: string = '', currentPage: number = 1)
     const data = await sql<ProjectView>`
       SELECT
         p.id,
-        p.user_id,
+        p.account_id,
         p.name,
         p.description,
         p.created_at,
@@ -165,7 +165,7 @@ export async function fetchArtifact(id: string) {
     const data = await sql<ArtifactDetail>`
       SELECT
         a.id,
-        a.user_id,
+        a.account_id,
         a.name,
         a.type,
         a.description,
@@ -206,7 +206,7 @@ export async function fetchLatestArtifacts(limit: number = 5) {
     const data = await sql<ArtifactDetail>`
       SELECT
         a.id,
-        a.user_id,
+        a.account_id,
         a.name,
         a.type,
         a.description,
@@ -251,7 +251,7 @@ export async function fetchArtifacts(query: string = '') {
     const data = await sql<ArtifactView>`
       SELECT
         a.id,
-        a.user_id,
+        a.account_id,
         a.name,
         a.type,
         a.description,
@@ -318,12 +318,12 @@ export async function fetchCardData() {
   }
 }
 
-export async function fetchDashboardData(user_id: string) {
+export async function fetchDashboardData(account_id: string) {
   try {
     const data = await sql<DashboardView>`
       SELECT
-        ${user_id} AS user_id,
-        (SELECT COUNT(*) FROM Users) AS totalUsers,
+        ${account_id} AS account_id,
+        (SELECT COUNT(*) FROM Accounts) AS totalAccounts,
         (SELECT COUNT(*) FROM projects) AS total_projects,
         (SELECT COUNT(*) FROM artifacts) AS total_artifacts,
         (SELECT COUNT(*) FROM tags) AS total_tags,
