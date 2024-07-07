@@ -1,13 +1,13 @@
 export type Account = {
-  id: string;
+  id: string; // Primary key
   name: string;
-  email: string;
+  email: string; // Unique
   password: string; 
 };
 
 export type Tag = {
-  account_id: string;
-  id: string;
+  id: string; // Primary key
+  account_id: string; // Foreign key
   name: string;
   artifact_id?: string;
   project_id?: string;
@@ -17,6 +17,7 @@ export type ArtifactType = 'text' | 'image' | 'file';
 
 export type ArtifactContent = {
   id: string;
+  account_id: string;
   type: ArtifactType;
   content: string;
   created_at: string;
@@ -53,8 +54,8 @@ export type ProjectArtifactLink = {
 };
 
 export type Project = {
-  account_id: string;
   id: string;
+  account_id: string;
   name: string;
   description?: string;
   created_at: string;
