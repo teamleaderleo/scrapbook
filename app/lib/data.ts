@@ -243,9 +243,6 @@ export async function fetchLatestArtifacts(limit: number = 5) {
   }
 }
 
-// Handling No Projects: Using LEFT JOIN ensures that artifacts without projects are still returned.
-// Distinct Aggregation: We use DISTINCT within COUNT and ARRAY_AGG to ensure unique counts and lists.
-// Graceful Handling: Ensures artifacts returned even if not currently assigned to any projects.
 export async function fetchArtifacts(query: string = '') {
   try {
     const data = await sql<ArtifactView>`
