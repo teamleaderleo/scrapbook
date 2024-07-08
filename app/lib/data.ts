@@ -191,12 +191,12 @@ export async function fetchArtifact(accountId: string, id: string) {
         COALESCE(json_agg(DISTINCT jsonb_build_object(
           'id', t.id,
           'name', t.name
-        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tag,
+        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags,
         COALESCE(json_agg(DISTINCT jsonb_build_object(
           'id', p.id,
           'name', p.name,
           'status', p.status
-        )) FILTER (WHERE p.id IS NOT NULL), '[]') AS project
+        )) FILTER (WHERE p.id IS NOT NULL), '[]') AS projects
       FROM artifact a
       LEFT JOIN artifact_content ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
       LEFT JOIN tag t ON a.id = t.artifact_id
@@ -232,12 +232,12 @@ export async function fetchLatestArtifacts(accountId: string, limit: number = 5)
         COALESCE(json_agg(DISTINCT jsonb_build_object(
           'id', t.id,
           'name', t.name
-        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tag,
+        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags,
         COALESCE(json_agg(DISTINCT jsonb_build_object(
           'id', p.id,
           'name', p.name,
           'status', p.status
-        )) FILTER (WHERE p.id IS NOT NULL), '[]') AS project
+        )) FILTER (WHERE p.id IS NOT NULL), '[]') AS projects
       FROM artifact a
       LEFT JOIN artifact_content ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
       LEFT JOIN tag t ON a.id = t.artifact_id
