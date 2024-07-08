@@ -130,13 +130,13 @@ export async function fetchProjects(accountId: string, query: string = '', curre
         COALESCE(json_agg(DISTINCT jsonb_build_object(
           'id', t.id,
           'name', t.name
-        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tag,
+        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags,
         COALESCE(json_agg(DISTINCT jsonb_build_object(
           'id', a.id,
           'name', a.name,
           'type', a.type,
           'content', (SELECT content FROM artifact_content WHERE artifact_id = a.id AND account_id = ${accountId} ORDER BY created_at DESC LIMIT 1)
-        )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifact,
+        )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifacts,
         COUNT(DISTINCT p.id) OVER() AS total_projects,
         SUM(CASE WHEN p.status = 'pending' THEN 1 ELSE 0 END) OVER() AS total_pending,
         SUM(CASE WHEN p.status = 'completed' THEN 1 ELSE 0 END) OVER() AS total_completed,

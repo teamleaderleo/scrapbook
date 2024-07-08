@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 export default async function Page({ params }: { params: { id: string } }) {
   const id = params.id;
   const [project, artifacts] = await Promise.all([
-    fetchProject(id),
-    fetchArtifacts(),
+    fetchProject(ADMIN_UUID,id),
+    fetchArtifacts(ADMIN_UUID),
   ]);
 
   if (!project) {
