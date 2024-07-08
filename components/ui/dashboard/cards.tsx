@@ -6,6 +6,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { lusitana } from '@/components/ui/fonts';
 import { fetchCardData } from '@/app/lib/data';
+import { ADMIN_UUID } from '@/app/lib/constants';
 
 const iconMap = {
   collected: BanknotesIcon,
@@ -20,7 +21,7 @@ export default async function CardWrapper() {
     numberOfProjects,
     numberOfPendingProjects,
     numberOfCompletedProjects,
-  } = await fetchCardData();
+  } = await fetchCardData(ADMIN_UUID);
 
   return (
     <>

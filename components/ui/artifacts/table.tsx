@@ -2,14 +2,14 @@ import Image from 'next/image';
 import { lusitana } from '@/components/ui/fonts';
 import Search from '@/components/ui/search';
 import {
-  ArtifactsTableType,
-  FormattedArtifactsTable,
+  // ArtifactsTableType,
+  ArtifactDetail,
 } from '@/app/lib/definitions';
 
 export default async function ArtifactsTable({
   artifacts,
 }: {
-  artifacts: FormattedArtifactsTable[];
+  artifacts: ArtifactDetail[];
 }) {
   return (
     <div className="w-full">
