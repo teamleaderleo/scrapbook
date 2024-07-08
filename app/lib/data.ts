@@ -21,7 +21,7 @@ export async function getAccount(email: string) {
   }
 }
 
-export async function fetchProject(id: string, accountId: string) {
+export async function fetchProject(accountId: string, id: string) {
   try {
     const data = await sql<ProjectDetail>`
       SELECT
@@ -57,7 +57,7 @@ export async function fetchProject(id: string, accountId: string) {
 }
 
 const ITEMS_PER_PAGE = 6;
-export async function fetchProjectsPages(query: string = '', accountId: string) {
+export async function fetchProjectsPages(accountId: string, query: string = '') {
   try {
     const count = await sql`
       SELECT COUNT(DISTINCT p.id)
@@ -78,7 +78,7 @@ export async function fetchProjectsPages(query: string = '', accountId: string) 
   }
 }
 
-export async function fetchLatestProjects(limit: number = 5, accountId: string) {
+export async function fetchLatestProjects(accountId: string, limit: number = 5) {
   try {
     const data = await sql<ProjectDetail>`
       SELECT
@@ -115,7 +115,7 @@ export async function fetchLatestProjects(limit: number = 5, accountId: string) 
   }
 }
 
-export async function fetchProjects(query: string = '', currentPage: number = 1, accountId: string) {
+export async function fetchProjects(accountId: string, query: string = '', currentPage: number = 1) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
     const data = await sql<ProjectView>`
@@ -163,7 +163,7 @@ export async function fetchProjects(query: string = '', currentPage: number = 1,
   }
 }
 
-export async function fetchArtifact(id: string, accountId: string) {
+export async function fetchArtifact(accountId: string, id: string) {
   try {
     const data = await sql<ArtifactDetail>`
       SELECT
@@ -204,7 +204,7 @@ export async function fetchArtifact(id: string, accountId: string) {
   }
 }
 
-export async function fetchLatestArtifacts(limit: number = 5, accountId: string) {
+export async function fetchLatestArtifacts(accountId: string, limit: number = 5) {
   try {
     const data = await sql<ArtifactDetail>`
       SELECT
@@ -247,7 +247,7 @@ export async function fetchLatestArtifacts(limit: number = 5, accountId: string)
   }
 }
 
-export async function fetchArtifacts(query: string = '', accountId: string) {
+export async function fetchArtifacts(accountId: string, query: string = '') {
   try {
     const data = await sql<ArtifactView>`
       SELECT

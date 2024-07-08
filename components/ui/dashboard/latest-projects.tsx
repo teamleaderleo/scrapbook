@@ -4,8 +4,9 @@ import Image from 'next/image';
 import { lusitana } from '@/components/ui/fonts';
 import { fetchLatestProjects } from '@/app/lib/data';
 
+const ADMIN_UUID = '410544b2-4001-4271-9855-fec4b6a6442a'
 export default async function LatestProjects() {
-  const latestProjects = await fetchLatestProjects();
+  const latestProjects = await fetchLatestProjects(ADMIN_UUID);
   return (
     <div className="flex w-full flex-col md:col-span-4">
       <h2 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>
