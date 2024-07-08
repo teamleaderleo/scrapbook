@@ -15,7 +15,7 @@ export default async function LatestProjects() {
       <div className="flex grow flex-col justify-between rounded-xl bg-gray-50 p-4">
         <div className="bg-white px-6">
           {latestProjects.map((project, i) => {
-            const latestArtifact = project.artifacts[0]; // Assuming the first artifact is the most recent
+            const latestArtifact = project.artifacts && project.artifacts.length > 0 ? project.artifacts[0] : null;
             return (
               <div
                 key={project.id}
