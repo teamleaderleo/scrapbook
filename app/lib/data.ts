@@ -92,13 +92,13 @@ export async function fetchLatestProjects(accountId: string, limit: number = 5) 
         COALESCE(json_agg(DISTINCT jsonb_build_object(
           'id', t.id,
           'name', t.name
-        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tag,
+        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags,
         COALESCE(json_agg(DISTINCT jsonb_build_object(
           'id', a.id,
           'name', a.name,
           'type', a.type,
           'content', (SELECT content FROM artifact_content WHERE artifact_id = a.id AND account_id = ${accountId} ORDER BY created_at DESC LIMIT 1)
-        )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifact
+        )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifacts
       FROM project p
       LEFT JOIN tag t ON p.id = t.project_id
       LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
