@@ -21,7 +21,7 @@ export async function getAccount(email: string) {
   }
 }
 
-export async function fetchProject(id: string) {
+export async function fetchProject(id: string, accountId: string) {
   try {
     const data = await sql<ProjectDetail>`
       SELECT
@@ -40,13 +40,13 @@ export async function fetchProject(id: string) {
           'id', a.id,
           'name', a.name,
           'type', a.type,
-          'content', (SELECT content FROM artifact_contents WHERE artifact_id = a.id ORDER BY created_at DESC LIMIT 1)
+          'content', (SELECT content FROM artifact_contents WHERE artifact_id = a.id AND account_id = ${accountId} ORDER BY created_at DESC LIMIT 1)
         )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifact
       FROM project p
       LEFT JOIN tag t ON p.id = t.project_id
-      LEFT JOIN project_artifact_link pal ON p.id = pal.project_id
+      LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
       LEFT JOIN artifact a ON pal.artifact_id = a.id
-      WHERE p.id = ${id}
+      WHERE p.id = ${id} AND p.account_id = ${accountId}
       GROUP BY p.id`;
 
     return data.rows[0];
@@ -57,17 +57,18 @@ export async function fetchProject(id: string) {
 }
 
 const ITEMS_PER_PAGE = 6;
-export async function fetchProjectsPages(query: string = '') {
+export async function fetchProjectsPages(query: string = '', accountId: string) {
   try {
     const count = await sql`
       SELECT COUNT(DISTINCT p.id)
       FROM project p
-      LEFT JOIN project_artifact_link pal ON p.id = pal.project_id
+      LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
       LEFT JOIN artifact a ON pal.artifact_id = a.id
       WHERE
-        p.name ILIKE ${`%${query}%`} OR
+        p.account_id = ${accountId} AND
+        (p.name ILIKE ${`%${query}%`} OR
         p.description ILIKE ${`%${query}%`} OR
-        a.name ILIKE ${`%${query}%`}`;
+        a.name ILIKE ${`%${query}%`})`;
 
     const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
     return totalPages;
@@ -77,7 +78,7 @@ export async function fetchProjectsPages(query: string = '') {
   }
 }
 
-export async function fetchLatestProjects(limit: number = 5) {
+export async function fetchLatestProjects(limit: number = 5, accountId: string) {
   try {
     const data = await sql<ProjectDetail>`
       SELECT
@@ -96,12 +97,13 @@ export async function fetchLatestProjects(limit: number = 5) {
           'id', a.id,
           'name', a.name,
           'type', a.type,
-          'content', (SELECT content FROM artifact_contents WHERE artifact_id = a.id ORDER BY created_at DESC LIMIT 1)
+          'content', (SELECT content FROM artifact_contents WHERE artifact_id = a.id AND account_id = ${accountId} ORDER BY created_at DESC LIMIT 1)
         )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifact
       FROM project p
       LEFT JOIN tag t ON p.id = t.project_id
-      LEFT JOIN project_artifact_link pal ON p.id = pal.project_id
+      LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
       LEFT JOIN artifact a ON pal.artifact_id = a.id
+      WHERE p.account_id = ${accountId}
       GROUP BY p.id
       ORDER BY p.updated_at DESC
       LIMIT ${limit}`;
@@ -113,7 +115,7 @@ export async function fetchLatestProjects(limit: number = 5) {
   }
 }
 
-export async function fetchProjects(query: string = '', currentPage: number = 1) {
+export async function fetchProjects(query: string = '', currentPage: number = 1, accountId: string) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
     const data = await sql<ProjectView>`
@@ -133,7 +135,7 @@ export async function fetchProjects(query: string = '', currentPage: number = 1)
           'id', a.id,
           'name', a.name,
           'type', a.type,
-          'content', (SELECT content FROM artifact_contents WHERE artifact_id = a.id ORDER BY created_at DESC LIMIT 1)
+          'content', (SELECT content FROM artifact_contents WHERE artifact_id = a.id AND account_id = ${accountId} ORDER BY created_at DESC LIMIT 1)
         )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifact,
         COUNT(DISTINCT p.id) OVER() AS total_projects,
         SUM(CASE WHEN p.status = 'pending' THEN 1 ELSE 0 END) OVER() AS total_pending,
@@ -142,13 +144,14 @@ export async function fetchProjects(query: string = '', currentPage: number = 1)
         COUNT(DISTINCT a.id) OVER() AS total_associated_artifacts
       FROM project p
       LEFT JOIN tag t ON p.id = t.project_id
-      LEFT JOIN project_artifact_link pal ON p.id = pal.project_id
+      LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
       LEFT JOIN artifact a ON pal.artifact_id = a.id
       WHERE
-        p.name ILIKE ${`%${query}%`} OR
+        p.account_id = ${accountId} AND
+        (p.name ILIKE ${`%${query}%`} OR
         p.description ILIKE ${`%${query}%`} OR
         t.name ILIKE ${`%${query}%`} OR
-        a.name ILIKE ${`%${query}%`}
+        a.name ILIKE ${`%${query}%`})
       GROUP BY p.id
       ORDER BY p.updated_at DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}`;
@@ -160,7 +163,7 @@ export async function fetchProjects(query: string = '', currentPage: number = 1)
   }
 }
 
-export async function fetchArtifact(id: string) {
+export async function fetchArtifact(id: string, accountId: string) {
   try {
     const data = await sql<ArtifactDetail>`
       SELECT
@@ -187,11 +190,11 @@ export async function fetchArtifact(id: string) {
           'status', p.status
         )) FILTER (WHERE p.id IS NOT NULL), '[]') AS project
       FROM artifact a
-      LEFT JOIN artifact_contents ac ON a.id = ac.artifact_id
+      LEFT JOIN artifact_contents ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
       LEFT JOIN tag t ON a.id = t.artifact_id
-      LEFT JOIN project_artifact_link pal ON a.id = pal.artifact_id
+      LEFT JOIN project_artifact_link pal ON a.id = pal.artifact_id AND pal.account_id = ${accountId}
       LEFT JOIN project p ON pal.project_id = p.id
-      WHERE a.id = ${id}
+      WHERE a.id = ${id} AND a.account_id = ${accountId}
       GROUP BY a.id`;
 
     return data.rows[0];
@@ -201,7 +204,7 @@ export async function fetchArtifact(id: string) {
   }
 }
 
-export async function fetchLatestArtifacts(limit: number = 5) {
+export async function fetchLatestArtifacts(limit: number = 5, accountId: string) {
   try {
     const data = await sql<ArtifactDetail>`
       SELECT
@@ -228,10 +231,11 @@ export async function fetchLatestArtifacts(limit: number = 5) {
           'status', p.status
         )) FILTER (WHERE p.id IS NOT NULL), '[]') AS project
       FROM artifact a
-      LEFT JOIN artifact_contents ac ON a.id = ac.artifact_id
+      LEFT JOIN artifact_contents ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
       LEFT JOIN tag t ON a.id = t.artifact_id
-      LEFT JOIN project_artifact_link pal ON a.id = pal.artifact_id
+      LEFT JOIN project_artifact_link pal ON a.id = pal.artifact_id AND pal.account_id = ${accountId}
       LEFT JOIN project p ON pal.project_id = p.id
+      WHERE a.account_id = ${accountId}
       GROUP BY a.id
       ORDER BY a.updated_at DESC
       LIMIT ${limit}`;
@@ -243,7 +247,7 @@ export async function fetchLatestArtifacts(limit: number = 5) {
   }
 }
 
-export async function fetchArtifacts(query: string = '') {
+export async function fetchArtifacts(query: string = '', accountId: string) {
   try {
     const data = await sql<ArtifactView>`
       SELECT
@@ -273,15 +277,16 @@ export async function fetchArtifacts(query: string = '') {
         COUNT(DISTINCT t.id) OVER() AS total_tags,
         COUNT(DISTINCT p.id) OVER() AS total_associated_projects
       FROM artifact a
-      LEFT JOIN artifact_contents ac ON a.id = ac.artifact_id
+      LEFT JOIN artifact_contents ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
       LEFT JOIN tag t ON a.id = t.artifact_id
-      LEFT JOIN project_artifact_link pal ON a.id = pal.artifact_id
+      LEFT JOIN project_artifact_link pal ON a.id = pal.artifact_id AND pal.account_id = ${accountId}
       LEFT JOIN project p ON pal.project_id = p.id
       WHERE
-        a.name ILIKE ${`%${query}%`} OR
+        a.account_id = ${accountId} AND
+        (a.name ILIKE ${`%${query}%`} OR
         a.description ILIKE ${`%${query}%`} OR
         ac.content ILIKE ${`%${query}%`} OR
-        t.name ILIKE ${`%${query}%`}
+        t.name ILIKE ${`%${query}%`})
       GROUP BY a.id
       ORDER BY a.updated_at DESC`;
 
@@ -292,14 +297,14 @@ export async function fetchArtifacts(query: string = '') {
   }
 }
 
-export async function fetchCardData() {
+export async function fetchCardData(accountId: string) {
   try {
     const data = await sql`
       SELECT
-        (SELECT COUNT(*) FROM project) AS total_projects,
-        (SELECT COUNT(*) FROM artifact) AS total_artifacts,
-        (SELECT COUNT(*) FROM project WHERE status = 'pending') AS pending_projects,
-        (SELECT COUNT(*) FROM project WHERE status = 'completed') AS completed_projects`;
+        (SELECT COUNT(*) FROM project WHERE account_id = ${accountId}) AS total_projects,
+        (SELECT COUNT(*) FROM artifact WHERE account_id = ${accountId}) AS total_artifacts,
+        (SELECT COUNT(*) FROM project WHERE account_id = ${accountId} AND status = 'pending') AS pending_projects,
+        (SELECT COUNT(*) FROM project WHERE account_id = ${accountId} AND status = 'completed') AS completed_projects`;
 
     const { total_projects, total_artifacts, pending_projects, completed_projects } = data.rows[0];
 
@@ -315,17 +320,17 @@ export async function fetchCardData() {
   }
 }
 
-export async function fetchDashboardData(account_id: string) {
+export async function fetchDashboardData(accountId: string) {
   try {
     const data = await sql<DashboardView>`
       SELECT
-        ${account_id} AS account_id,
+        ${accountId} AS account_id,
         (SELECT COUNT(*) FROM account) AS total_accounts,
-        (SELECT COUNT(*) FROM project) AS total_projects,
-        (SELECT COUNT(*) FROM artifact) AS total_artifacts,
-        (SELECT COUNT(*) FROM tag) AS total_tags,
-        (SELECT COUNT(*) FROM project WHERE status = 'completed') AS completed_projects,
-        (SELECT COUNT(*) FROM project WHERE status = 'pending') AS pending_projects
+        (SELECT COUNT(*) FROM project WHERE account_id = ${accountId}) AS total_projects,
+        (SELECT COUNT(*) FROM artifact WHERE account_id = ${accountId}) AS total_artifacts,
+        (SELECT COUNT(*) FROM tag WHERE account_id = ${accountId}) AS total_tags,
+        (SELECT COUNT(*) FROM project WHERE account_id = ${accountId} AND status = 'completed') AS completed_projects,
+        (SELECT COUNT(*) FROM project WHERE account_id = ${accountId} AND status = 'pending') AS pending_projects
     `;
 
     return data.rows[0];
