@@ -4,79 +4,68 @@ import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { signIn } from '@/auth';
-import { AuthError } from 'next-auth';
 
-export async function authenticate(
-  prevState: string | undefined,
-  formData: FormData,
-) {
-  try {
-    await signIn('credentials', formData);
-  } catch (error) {
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case 'CredentialsSignin':
-          return 'Invalid credentials.';
-        default:
-          return 'Something went wrong.';
-      }
-    }
-    throw error;
-  }
-}
- 
-const FormSchema = z.object({
-  id: z.string(),
-  artifactId: z.string({
-    invalid_type_error: 'Please select an artifact.',
+const ProjectSchema = z.object({
+  name: z.string().min(1, 'Project name is required.'),
+  description: z.string().optional(),
+  status: z.enum(['pending', 'completed'], {
+    invalid_type_error: 'Please select a project status.',
   }),
-  amount: z.coerce
-    .number()
-    .gt(0, { message: 'Please enter an amount greater than $0.' }),
-  status: z.enum(['pending', 'paid'], {
-    invalid_type_error: 'Please select an project status.',
-  }),
-  date: z.string(),
+  tags: z.array(z.string()).optional(),
+  artifacts: z.array(z.string()).optional(),
 });
- 
+
 export type State = {
   errors?: {
-    artifactId?: string[];
-    amount?: string[];
+    name?: string[];
+    description?: string[];
     status?: string[];
+    tags?: string[];
+    artifacts?: string[];
   };
   message?: string | null;
 };
 
-const UpdateProject = FormSchema.omit({ id: true, date: true });
-const CreateProject = FormSchema.omit({ id: true, date: true });
-
-export async function createProject(prevState: State, formData: FormData) {
-  // Validate form fields using Zod
-  const validatedFields = CreateProject.safeParse({
-    artifactId: formData.get('artifactId'),
-    amount: formData.get('amount'),
+export async function createProject(accountId: string, prevState: State, formData: FormData) {
+  const validatedFields = ProjectSchema.safeParse({
+    name: formData.get('name'),
+    description: formData.get('description'),
     status: formData.get('status'),
+    tags: formData.getAll('tags'),
+    artifacts: formData.getAll('artifacts'),
   });
 
-    // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Missing Fields. Failed to Create Project.',
     };
   }
-  // Prepare data for insertion into the database
-  const { artifactId, amount, status } = validatedFields.data;
-  const amountInCents = amount * 100;
-  const date = new Date().toISOString().split('T')[0];
+
+  const { name, description, status, tags, artifacts } = validatedFields.data;
 
   try {
-    await sql`
-      INSERT INTO projects (artifact_id, amount, status, date)
-      VALUES (${artifactId}, ${amountInCents}, ${status}, ${date})
+    const result = await sql`
+      INSERT INTO project (account_id, name, description, status)
+      VALUES (${accountId}, ${name}, ${description}, ${status})
+      RETURNING id
     `;
+    const projectId = result.rows[0].id;
+
+    if (tags && tags.length > 0) {
+      await sql`
+        INSERT INTO tag (account_id, name, project_id)
+        VALUES ${sql(tags.map(tag => [accountId, tag, projectId]))}
+      `;
+    }
+
+    if (artifacts && artifacts.length > 0) {
+      await sql`
+        INSERT INTO project_artifact_link (account_id, project_id, artifact_id)
+        VALUES ${sql(artifacts.map(artifactId => [accountId, projectId, artifactId]))}
+      `;
+    }
+
   } catch (error) {
     return {
       message: 'Database Error: Failed to Create Project.',
@@ -87,14 +76,13 @@ export async function createProject(prevState: State, formData: FormData) {
   redirect('/dashboard/projects');
 }
 
-export async function updateProject(id: string,
-  prevState: State,
-  formData: FormData,
-) {
-  const validatedFields = UpdateProject.safeParse({
-    artifactId: formData.get('artifactId'),
-    amount: formData.get('amount'),
+export async function updateProject(id: string, accountId: string, prevState: State, formData: FormData) {
+  const validatedFields = ProjectSchema.safeParse({
+    name: formData.get('name'),
+    description: formData.get('description'),
     status: formData.get('status'),
+    tags: formData.getAll('tags'),
+    artifacts: formData.getAll('artifacts'),
   });
 
   if (!validatedFields.success) {
@@ -104,27 +92,44 @@ export async function updateProject(id: string,
     };
   }
 
-  const { artifactId, amount, status } = validatedFields.data;
-  const amountInCents = amount * 100;
- 
+  const { name, description, status, tags, artifacts } = validatedFields.data;
+
   try {
     await sql`
-        UPDATE projects
-        SET artifact_id = ${artifactId}, amount = ${amountInCents}, status = ${status}
-        WHERE id = ${id}
+      UPDATE project
+      SET name = ${name}, description = ${description}, status = ${status}
+      WHERE id = ${id} AND account_id = ${accountId}
+    `;
+
+    // Update tags
+    await sql`DELETE FROM tag WHERE project_id = ${id}`;
+    if (tags && tags.length > 0) {
+      await sql`
+        INSERT INTO tag (account_id, name, project_id)
+        VALUES ${sql(tags.map(tag => [accountId, tag, id]))}
       `;
+    }
+
+    // Update artifacts
+    await sql`DELETE FROM project_artifact_link WHERE project_id = ${id}`;
+    if (artifacts && artifacts.length > 0) {
+      await sql`
+        INSERT INTO project_artifact_link (account_id, project_id, artifact_id)
+        VALUES ${sql(artifacts.map(artifactId => [accountId, id, artifactId]))}
+      `;
+    }
+
   } catch (error) {
     return { message: 'Database Error: Failed to Update Project.' };
   }
  
-  // Revalidate the cache for the projects page and redirect the user.
   revalidatePath('/dashboard/projects');
   redirect('/dashboard/projects');
 }
 
-export async function deleteProject(id: string) {
+export async function deleteProject(id: string, accountId: string) {
   try {
-    await sql`DELETE FROM projects WHERE id = ${id}`;
+    await sql`DELETE FROM project WHERE id = ${id} AND account_id = ${accountId}`;
     revalidatePath('/dashboard/projects');
     return { message: 'Deleted Project.' };
   } catch (error) {
