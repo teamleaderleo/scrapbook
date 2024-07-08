@@ -7,6 +7,9 @@ import { ProjectsTableSkeleton } from '@/components/ui/skeletons';
 import { Suspense } from 'react';
 import { fetchProjectsPages } from '@/app/lib/data';
 import { Metadata } from 'next';
+import { ADMIN_UUID } from '@/app/lib/constants';
+// import ADMIN_UUID from '@/app/lib/constants';
+
 
 export const metadata: Metadata = {
   title: 'Projects',
@@ -23,7 +26,7 @@ export default async function Page({
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
 
-  const totalPages = await fetchProjectsPages(query);
+  const totalPages = await fetchProjectsPages(ADMIN_UUID, query);
 
   return (
     <div className="w-full">

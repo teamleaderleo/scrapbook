@@ -4,6 +4,7 @@ import ProjectStatus from '@/components/ui/projects/status';
 import { fetchProjects } from '@/app/lib/data';
 
 import Link from 'next/link';
+import { ADMIN_UUID } from '@/app/lib/constants';
 
 export default async function ProjectsTable({
   query,

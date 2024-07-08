@@ -3,6 +3,7 @@ import Breadcrumbs from '@/components/ui/projects/breadcrumbs';
 import { fetchProject, fetchArtifacts } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import { ADMIN_UUID } from '@/app/lib/constants';
 
 export const metadata: Metadata = {
   title: 'Edit',
