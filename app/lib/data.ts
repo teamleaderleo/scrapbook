@@ -255,9 +255,22 @@ export async function fetchLatestArtifacts(accountId: string, limit: number = 5)
   }
 }
 
-export async function fetchArtifacts(accountId: string, query: string = '') {
+export async function fetchArtifacts(accountId: string, query: string = '', currentPage: number = 1) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
     const data = await sql<ArtifactView>`
+      WITH filtered_artifacts AS (
+        SELECT a.id
+        FROM artifact a
+        LEFT JOIN artifact_content ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
+        LEFT JOIN tag t ON a.id = t.artifact_id
+        WHERE
+          a.account_id = ${accountId} AND
+          (a.name ILIKE ${`%${query}%`} OR
+          a.description ILIKE ${`%${query}%`} OR
+          ac.content ILIKE ${`%${query}%`} OR
+          t.name ILIKE ${`%${query}%`})
+      )
       SELECT
         a.id,
         a.account_id,
@@ -275,28 +288,24 @@ export async function fetchArtifacts(accountId: string, query: string = '') {
         COALESCE(json_agg(DISTINCT jsonb_build_object(
           'id', t.id,
           'name', t.name
-        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tag,
+        )) FILTER (WHERE t.id IS NOT NULL), '[]') AS tags,
         COALESCE(json_agg(DISTINCT jsonb_build_object(
           'id', p.id,
           'name', p.name,
           'status', p.status
-        )) FILTER (WHERE p.id IS NOT NULL), '[]') AS project,
-        COUNT(DISTINCT a.id) OVER() AS total_artifacts,
-        COUNT(DISTINCT t.id) OVER() AS total_tags,
-        COUNT(DISTINCT p.id) OVER() AS total_associated_projects
+        )) FILTER (WHERE p.id IS NOT NULL), '[]') AS projects,
+        (SELECT COUNT(*) FROM filtered_artifacts) AS total_artifacts,
+        (SELECT COUNT(DISTINCT t.id) FROM filtered_artifacts fa JOIN tag t ON fa.id = t.artifact_id) AS total_tags,
+        (SELECT COUNT(DISTINCT p.id) FROM filtered_artifacts fa JOIN project_artifact_link pal ON fa.id = pal.artifact_id JOIN project p ON pal.project_id = p.id) AS total_associated_projects
       FROM artifact a
       LEFT JOIN artifact_content ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
       LEFT JOIN tag t ON a.id = t.artifact_id
       LEFT JOIN project_artifact_link pal ON a.id = pal.artifact_id AND pal.account_id = ${accountId}
       LEFT JOIN project p ON pal.project_id = p.id
-      WHERE
-        a.account_id = ${accountId} AND
-        (a.name ILIKE ${`%${query}%`} OR
-        a.description ILIKE ${`%${query}%`} OR
-        ac.content ILIKE ${`%${query}%`} OR
-        t.name ILIKE ${`%${query}%`})
+      WHERE a.id IN (SELECT id FROM filtered_artifacts)
       GROUP BY a.id
-      ORDER BY a.updated_at DESC`;
+      ORDER BY a.updated_at DESC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}`;
 
     return data.rows;
   } catch (error) {

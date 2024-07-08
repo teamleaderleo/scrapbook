@@ -1,6 +1,6 @@
 'use client';
 
-import { ArtifactField, ProjectForm } from '@/app/lib/definitions';
+import { ArtifactDetail, ProjectDetail } from '@/app/lib/definitions';
 import {
   CheckIcon,
   ClockIcon,
@@ -8,7 +8,7 @@ import {
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { Button } from '@/app/ui/button';
+import { Button } from '@/components/ui/button';
 import { updateProject } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
 
@@ -16,8 +16,8 @@ export default function EditProjectForm({
   project,
   artifacts,
 }: {
-  project: ProjectForm;
-  artifacts: ArtifactField[];
+  project: ProjectDetail;
+  artifacts: ArtifactDetail[];
 }) {
 
   const initialState = { message: null, errors: {} };

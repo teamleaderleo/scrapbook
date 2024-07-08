@@ -1,6 +1,6 @@
 'use client';
 
-import { ArtifactField } from '@/app/lib/definitions';
+import { ArtifactDetail } from '@/app/lib/definitions';
 import Link from 'next/link';
 import {
   CheckIcon,
@@ -8,11 +8,11 @@ import {
   CurrencyDollarIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
-import { Button } from '@/app/ui/button';
+import { Button } from '@/components/ui/button';
 import { createProject, State } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
 
-export default function Form({ artifacts }: { artifacts: ArtifactField[] }) {
+export default function Form({ artifacts }: { artifacts: ArtifactDetail[] }) {
   const initialState: State = { message: null, errors: {} };
   const [state, formAction] = useFormState(createProject, initialState);
 
