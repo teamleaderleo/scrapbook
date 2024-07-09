@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Tag } from '@/app/lib/definitions';
-import { addTagToProject, removeTagFromProject, addTagToArtifact, removeTagFromArtifact, getAllTags } from '@/app/lib/utils-server';
+import { addTagToProject, removeTagFromProject, addTagToArtifact, removeTagFromArtifact } from '@/app/lib/utils-server';
 import { ADMIN_UUID } from '@/app/lib/constants';
+import { useTagContext } from './tagcontext';
 
 interface TagListProps {
   initialTags?: Tag[];
@@ -13,16 +14,7 @@ interface TagListProps {
 export function TagList({ initialTags = [], onTagsChange, projectId, artifactId }: TagListProps) {
   const [tags, setTags] = useState<Tag[]>(initialTags);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [allTags, setAllTags] = useState<Tag[]>([]);
-  const [lastUpdate, setLastUpdate] = useState(Date.now());
-
-  useEffect(() => {
-    async function fetchAllTags() {
-      const fetchedTags = await getAllTags(ADMIN_UUID);
-      setAllTags(fetchedTags);
-    }
-    fetchAllTags();
-  }, [lastUpdate]);
+  const { allTags, refreshTags } = useTagContext();
 
   const handleAddTag = async (tagName: string) => {
     if (!tags.some(tag => tag.name.toLowerCase() === tagName.toLowerCase())) {
@@ -38,7 +30,7 @@ export function TagList({ initialTags = [], onTagsChange, projectId, artifactId 
         const updatedTags = [...tags, newTag];
         setTags(updatedTags);
         onTagsChange(updatedTags);
-        setLastUpdate(Date.now()); // Trigger a refresh of allTags
+        refreshTags(); // Refresh all tags after adding a new one
       }
     }
   };
