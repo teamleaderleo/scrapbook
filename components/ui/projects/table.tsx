@@ -2,12 +2,24 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { fetchProjects } from '@/app/lib/data';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import { ProjectView, ArtifactType } from '@/app/lib/definitions';
+import { ProjectView, ArtifactType, ArtifactContent, Artifact } from '@/app/lib/definitions';
 
-const getArtifactThumbnail = (artifact: { type: ArtifactType; content: string }) => {
+const getArtifactThumbnail = (artifact: Artifact) => {
+  console.log('Artifact:', JSON.stringify(artifact, null, 2));
+  
+  if (!artifact) {
+    console.log('Artifact is undefined');
+    return '/placeholder-default.png';
+  }
+
+  if (!artifact.contents || artifact.contents.length === 0) {
+    console.log('Artifact contents are undefined or empty');
+    return '/placeholder-default.png';
+  }
+
   switch (artifact.type) {
     case 'image':
-      return artifact.content;
+      return artifact.contents[0].content || '/placeholder-default.png';
     case 'text':
       return '/placeholder-text.png';
     case 'file':
@@ -25,7 +37,8 @@ export default async function ProjectsTable({
   currentPage: number;
 }) {
   const projects = await fetchProjects(ADMIN_UUID, query, currentPage);
-
+  console.log('Projects:', JSON.stringify(projects, null, 2));
+  
   return (
     <div className="mt-6 flow-root">
       <div className="overflow-x-auto">

@@ -119,19 +119,6 @@ export async function fetchProjects(accountId: string, query: string = '', curre
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   try {
     const data = await sql<ProjectView>`
-      WITH filtered_projects AS (
-        SELECT p.id
-        FROM project p
-        LEFT JOIN tag t ON p.id = t.project_id
-        LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
-        LEFT JOIN artifact a ON pal.artifact_id = a.id
-        WHERE
-          p.account_id = ${accountId} AND
-          (p.name ILIKE ${`%${query}%`} OR
-          p.description ILIKE ${`%${query}%`} OR
-          t.name ILIKE ${`%${query}%`} OR
-          a.name ILIKE ${`%${query}%`})
-      )
       SELECT
         p.id,
         p.account_id,
@@ -148,22 +135,32 @@ export async function fetchProjects(accountId: string, query: string = '', curre
           'id', a.id,
           'name', a.name,
           'type', a.type,
-          'content', (SELECT content FROM artifact_content WHERE artifact_id = a.id AND account_id = ${accountId} ORDER BY created_at DESC LIMIT 1)
-        )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifacts,
-        (SELECT COUNT(*) FROM filtered_projects) AS total_projects,
-        (SELECT COUNT(*) FROM filtered_projects fp JOIN project p ON fp.id = p.id WHERE p.status = 'pending') AS total_pending,
-        (SELECT COUNT(*) FROM filtered_projects fp JOIN project p ON fp.id = p.id WHERE p.status = 'completed') AS total_completed,
-        (SELECT COUNT(DISTINCT t.id) FROM filtered_projects fp JOIN tag t ON fp.id = t.project_id) AS total_tags,
-        (SELECT COUNT(DISTINCT a.id) FROM filtered_projects fp JOIN project_artifact_link pal ON fp.id = pal.project_id JOIN artifact a ON pal.artifact_id = a.id) AS total_associated_artifacts
+          'contents', (
+            SELECT json_agg(jsonb_build_object(
+              'id', ac.id,
+              'type', ac.type,
+              'content', ac.content,
+              'created_at', ac.created_at
+            ))
+            FROM artifact_content ac
+            WHERE ac.artifact_id = a.id AND ac.account_id = ${accountId}
+          )
+        )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifacts
       FROM project p
       LEFT JOIN tag t ON p.id = t.project_id
       LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
       LEFT JOIN artifact a ON pal.artifact_id = a.id
-      WHERE p.id IN (SELECT id FROM filtered_projects)
+      WHERE
+        p.account_id = ${accountId} AND
+        (p.name ILIKE ${`%${query}%`} OR
+        p.description ILIKE ${`%${query}%`} OR
+        t.name ILIKE ${`%${query}%`} OR
+        a.name ILIKE ${`%${query}%`})
       GROUP BY p.id
       ORDER BY p.updated_at DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}`;
 
+    console.log('Fetched projects:', JSON.stringify(data.rows, null, 2));
     return data.rows;
   } catch (error) {
     console.error('Database Error:', error);
