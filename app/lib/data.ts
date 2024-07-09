@@ -44,7 +44,7 @@ export async function fetchProject(accountId: string, id: string) {
           'content', (SELECT content FROM artifact_content WHERE artifact_id = a.id AND account_id = ${accountId} ORDER BY created_at DESC LIMIT 1)
         )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifacts
       FROM project p
-      LEFT JOIN project_tag pt ON p.id = pt.project_id
+      LEFT JOIN project_tag pt ON p.id = pt.project_id AND pt.account_id = ${accountId}
       LEFT JOIN tag t ON pt.tag_id = t.id AND t.account_id = ${accountId}
       LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
       LEFT JOIN artifact a ON pal.artifact_id = a.id
@@ -64,7 +64,7 @@ export async function fetchProjectsPages(accountId: string, query: string = '') 
     const count = await sql`
       SELECT COUNT(DISTINCT p.id)
       FROM project p
-      LEFT JOIN project_tag pt ON p.id = pt.project_id
+      LEFT JOIN project_tag pt ON p.id = pt.project_id AND pt.account_id = ${accountId}
       LEFT JOIN tag t ON pt.tag_id = t.id AND t.account_id = ${accountId}
       LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
       LEFT JOIN artifact a ON pal.artifact_id = a.id
@@ -115,7 +115,7 @@ export async function fetchLatestProjects(accountId: string, limit: number = 5) 
           )
         )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifacts
       FROM project p
-      LEFT JOIN project_tag pt ON p.id = pt.project_id
+      LEFT JOIN project_tag pt ON p.id = pt.project_id AND pt.account_id = ${accountId}
       LEFT JOIN tag t ON pt.tag_id = t.id AND t.account_id = ${accountId}
       LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
       LEFT JOIN artifact a ON pal.artifact_id = a.id
@@ -164,7 +164,7 @@ export async function fetchProjects(accountId: string, query: string = '', curre
           )
         )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifacts
       FROM project p
-      LEFT JOIN project_tag pt ON p.id = pt.project_id
+      LEFT JOIN project_tag pt ON p.id = pt.project_id AND pt.account_id = ${accountId}
       LEFT JOIN tag t ON pt.tag_id = t.id AND t.account_id = ${accountId}
       LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
       LEFT JOIN artifact a ON pal.artifact_id = a.id
@@ -214,7 +214,7 @@ export async function fetchArtifact(accountId: string, id: string) {
         )) FILTER (WHERE p.id IS NOT NULL), '[]') AS projects
       FROM artifact a
       LEFT JOIN artifact_content ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
-      LEFT JOIN artifact_tag at ON a.id = at.artifact_id
+      LEFT JOIN artifact_tag at ON a.id = at.artifact_id AND at.account_id = ${accountId}
       LEFT JOIN tag t ON at.tag_id = t.id AND t.account_id = ${accountId}
       LEFT JOIN project_artifact_link pal ON a.id = pal.artifact_id AND pal.account_id = ${accountId}
       LEFT JOIN project p ON pal.project_id = p.id
@@ -257,7 +257,7 @@ export async function fetchLatestArtifacts(accountId: string, limit: number = 5)
         )) FILTER (WHERE p.id IS NOT NULL), '[]') AS projects
       FROM artifact a
       LEFT JOIN artifact_content ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
-      LEFT JOIN artifact_tag at ON a.id = at.artifact_id
+      LEFT JOIN artifact_tag at ON a.id = at.artifact_id AND at.account_id = ${accountId}
       LEFT JOIN tag t ON at.tag_id = t.id AND t.account_id = ${accountId}
       LEFT JOIN project_artifact_link pal ON a.id = pal.artifact_id AND pal.account_id = ${accountId}
       LEFT JOIN project p ON pal.project_id = p.id
@@ -281,7 +281,7 @@ export async function fetchArtifacts(accountId: string, query: string = '', curr
         SELECT a.id
         FROM artifact a
         LEFT JOIN artifact_content ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
-        LEFT JOIN artifact_tag at ON a.id = at.artifact_id
+        LEFT JOIN artifact_tag at ON a.id = at.artifact_id AND at.account_id = ${accountId}
         LEFT JOIN tag t ON at.tag_id = t.id AND t.account_id = ${accountId}
         WHERE
           a.account_id = ${accountId} AND
@@ -319,7 +319,7 @@ export async function fetchArtifacts(accountId: string, query: string = '', curr
         (SELECT COUNT(DISTINCT p.id) FROM filtered_artifacts fa JOIN project_artifact_link pal ON fa.id = pal.artifact_id JOIN project p ON pal.project_id = p.id WHERE p.account_id = ${accountId}) AS total_associated_projects
       FROM artifact a
       LEFT JOIN artifact_content ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
-      LEFT JOIN artifact_tag at ON a.id = at.artifact_id
+      LEFT JOIN artifact_tag at ON a.id = at.artifact_id AND at.account_id = ${accountId}
       LEFT JOIN tag t ON at.tag_id = t.id AND t.account_id = ${accountId}
       LEFT JOIN project_artifact_link pal ON a.id = pal.artifact_id AND pal.account_id = ${accountId}
       LEFT JOIN project p ON pal.project_id = p.id
@@ -375,8 +375,6 @@ export async function fetchDashboardData(accountId: string) {
         (SELECT COUNT(*) FROM project WHERE account_id = ${accountId}) AS total_projects,
         (SELECT COUNT(*) FROM artifact WHERE account_id = ${accountId}) AS total_artifacts,
         (SELECT COUNT(DISTINCT t.id) FROM tag t
-         LEFT JOIN project_tag pt ON t.id = pt.tag_id
-         LEFT JOIN artifact_tag at ON t.id = at.tag_id
          WHERE t.account_id = ${accountId}) AS total_tags,
         (SELECT COUNT(*) FROM project WHERE account_id = ${accountId} AND status = 'completed') AS completed_projects,
         (SELECT COUNT(*) FROM project WHERE account_id = ${accountId} AND status = 'pending') AS pending_projects
