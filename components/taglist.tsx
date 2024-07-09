@@ -1,4 +1,3 @@
-// components/TagList.tsx
 import React, { useState, useEffect } from 'react';
 import { Tag } from '@/app/lib/definitions';
 import { addTagToProject, removeTagFromProject, getAllTags } from '@/app/lib/utils-server';
@@ -7,7 +6,7 @@ import { ADMIN_UUID } from '@/app/lib/constants';
 interface TagListProps {
   projectId: string;
   initialTags: Tag[];
-  onTagsChange?: (tags: Tag[]) => void;
+  onTagsChange: (tags: Tag[]) => void;
 }
 
 export function TagList({ projectId, initialTags, onTagsChange }: TagListProps) {
@@ -29,7 +28,7 @@ export function TagList({ projectId, initialTags, onTagsChange }: TagListProps) 
       if (addedTag) {
         const updatedTags = [...tags, addedTag];
         setTags(updatedTags);
-        onTagsChange?.(updatedTags);
+        onTagsChange(updatedTags);
       }
     }
   };
@@ -38,7 +37,7 @@ export function TagList({ projectId, initialTags, onTagsChange }: TagListProps) 
     await removeTagFromProject(ADMIN_UUID, projectId, tagId);
     const updatedTags = tags.filter(tag => tag.id !== tagId);
     setTags(updatedTags);
-    onTagsChange?.(updatedTags);
+    onTagsChange(updatedTags);
   };
 
   return (
@@ -56,7 +55,7 @@ export function TagList({ projectId, initialTags, onTagsChange }: TagListProps) 
       ))}
       {showAddForm ? (
         <AddTagForm
-          existingTags={allTags}
+          existingTags={allTags.filter(tag => !tags.some(t => t.id === tag.id))}
           onAddTag={handleAddTag}
           onClose={() => setShowAddForm(false)}
         />
