@@ -16,7 +16,8 @@ export default function Form({ artifacts }: { artifacts: ArtifactDetail[] }) {
   const initialState: State = { message: null, errors: {} };
   const createProjectWithAccount = createProject.bind(null, ADMIN_UUID);
   const [state, formAction] = useFormState(createProjectWithAccount, initialState);
-  const [projectTags, setProjectTags] = useState<Tag[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState('');
 
   useEffect(() => {
     if (state.message === 'Project created successfully') {
@@ -31,8 +32,19 @@ export default function Form({ artifacts }: { artifacts: ArtifactDetail[] }) {
     event.preventDefault();
     setIsSubmitting(true);
     const formData = new FormData(event.currentTarget);
-    projectTags.forEach(tag => formData.append('tags', tag.name));
+    tags.forEach(tag => formData.append('tags', tag));
     formAction(formData);
+  };
+
+  const handleAddTag = () => {
+    if (newTag && !tags.includes(newTag)) {
+      setTags([...tags, newTag]);
+      setNewTag('');
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
   return (
@@ -106,10 +118,30 @@ export default function Form({ artifacts }: { artifacts: ArtifactDetail[] }) {
           <label className="mb-2 block text-sm font-medium">
             Tags
           </label>
-          <TagList
-            initialTags={projectTags}
-            onTagsChange={setProjectTags}
-          />
+          <div className="flex flex-wrap gap-2 mb-2">
+            {tags.map((tag, index) => (
+              <span key={index} className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                {tag}
+                <button type="button" onClick={() => handleRemoveTag(tag)} className="ml-1 text-xs">×</button>
+              </span>
+            ))}
+          </div>
+          <div className="flex">
+            <input
+              type="text"
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              className="flex-grow border rounded-l px-2 py-1 text-sm"
+              placeholder="Add a tag"
+            />
+            <button
+              type="button"
+              onClick={handleAddTag}
+              className="bg-blue-500 text-white px-3 py-1 rounded-r text-sm"
+            >
+              Add
+            </button>
+          </div>
         </div>
 
         {state.message && (

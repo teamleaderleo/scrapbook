@@ -64,7 +64,7 @@ export async function createProject(accountId: string, prevState: State, formDat
     const projectId = result.rows[0].id;
     console.log('Project inserted, ID:', projectId);
 
-    if (tags && tags.length > 0 && tags[0] !== '') {
+    if (tags && tags.length > 0) {
       console.log('Inserting tags:', tags);
       for (const tagName of tags) {
         await addTagToProject(accountId, projectId, tagName);

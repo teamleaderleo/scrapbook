@@ -14,6 +14,7 @@ export function TagList({ initialTags = [], onTagsChange, projectId, artifactId 
   const [tags, setTags] = useState<Tag[]>(initialTags);
   const [showAddForm, setShowAddForm] = useState(false);
   const [allTags, setAllTags] = useState<Tag[]>([]);
+  const [lastUpdate, setLastUpdate] = useState(Date.now());
 
   useEffect(() => {
     async function fetchAllTags() {
@@ -21,7 +22,7 @@ export function TagList({ initialTags = [], onTagsChange, projectId, artifactId 
       setAllTags(fetchedTags);
     }
     fetchAllTags();
-  }, []);
+  }, [lastUpdate]);
 
   const handleAddTag = async (tagName: string) => {
     if (!tags.some(tag => tag.name.toLowerCase() === tagName.toLowerCase())) {
@@ -33,9 +34,12 @@ export function TagList({ initialTags = [], onTagsChange, projectId, artifactId 
       } else {
         newTag = { id: `temp-${Date.now()}`, account_id: ADMIN_UUID, name: tagName };
       }
-      const updatedTags = [...tags, newTag].filter(tag => tag !== null) as Tag[];
-      setTags(updatedTags);
-      onTagsChange(updatedTags);
+      if (newTag) {
+        const updatedTags = [...tags, newTag];
+        setTags(updatedTags);
+        onTagsChange(updatedTags);
+        setLastUpdate(Date.now()); // Trigger a refresh of allTags
+      }
     }
   };
 
