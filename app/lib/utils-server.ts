@@ -86,3 +86,17 @@ export async function getArtifactTags(accountId: string, artifactId: string): Pr
     throw error;
   }
 }
+
+export async function getAllTags(accountId: string): Promise<Tag[]> {
+  try {
+    const result = await sql`
+      SELECT id, name
+      FROM tag
+      WHERE account_id = ${accountId}
+    `;
+    return result.rows as Tag[];
+  } catch (error) {
+    console.error('Error getting all tags:', error);
+    throw error;
+  }
+}
