@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { updateProject } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import TagManager from '@/components/tagmanager';
+// import TagManager from '@/components/tagmanager';
+import { TagList } from '@/components/taglist';
 
 export default function EditProjectForm({
   project,
@@ -99,13 +100,15 @@ export default function EditProjectForm({
           <label className="mb-2 block text-sm font-medium">
             Tags
           </label>
-          <TagManager
-            entityId={project.id}
+          <TagList
+            projectId={project.id}
             initialTags={project.tags}
-            entityType="project"
-            onTagsChange={(tags) => {
-              // You can handle tag changes here if needed
-              console.log('Tags updated:', tags);
+            onTagsChange={(updatedTags) => {
+              setProjects(projects.map(p =>
+                p.id === project.id
+                  ? { ...p, tags: updatedTags }
+                  : p
+              ));
             }}
           />
         </div>
