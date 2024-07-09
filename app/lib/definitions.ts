@@ -8,7 +8,7 @@ export type Account = {
 export type Tag = {
   id: string; // Primary key
   account_id: string; // Foreign key
-  name: string;
+  name: string; // Unique per account
   artifact_id?: string;
   project_id?: string;
 };
