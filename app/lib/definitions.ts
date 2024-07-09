@@ -6,11 +6,19 @@ export type Account = {
 };
 
 export type Tag = {
-  id: string; // Primary key
-  account_id: string; // Foreign key
+  id: string; 
+  account_id: string; 
   name: string; // Unique per account
-  artifact_id?: string;
-  project_id?: string;
+};
+
+export type ProjectTag = {
+  project_id: string; 
+  tag_id: string; 
+};
+
+export type ArtifactTag = {
+  artifact_id: string; 
+  tag_id: string; 
 };
 
 export type ArtifactType = 'text' | 'image' | 'file';
