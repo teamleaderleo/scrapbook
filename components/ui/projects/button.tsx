@@ -1,6 +1,10 @@
+'use client';
+
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { deleteProject } from '@/app/lib/actions';
+import { useTransition } from 'react';
+import { ADMIN_UUID } from '@/app/lib/constants';
 
 export function CreateProject() {
   return (
@@ -25,14 +29,29 @@ export function UpdateProject({ id }: { id: string }) {
   );
 }
 
-export function DeleteProject({ id }: { id: string }) {
-  const deleteProjectWithId = deleteProject.bind(null, id);
+export function DeleteProject({ id, onDelete }: { id: string; onDelete: () => void }) {
+  const [isPending, startTransition] = useTransition();
+
+  const handleDelete = async () => {
+    startTransition(async () => {
+      const result = await deleteProject(id, ADMIN_UUID);
+      if (result.success) {
+        onDelete();
+      } else {
+        // Handle error, maybe show a toast notification
+        console.error(result.message);
+      }
+    });
+  };
+
   return (
-    <form action={deleteProjectWithId}>
-      <button className="rounded-md border p-2 hover:bg-gray-100">
-        <span className="sr-only">Delete</span>
-        <TrashIcon className="w-5" />
-      </button>
-    </form>
+    <button
+      className="rounded-md border p-2 hover:bg-gray-100"
+      onClick={handleDelete}
+      disabled={isPending}
+    >
+      <span className="sr-only">Delete</span>
+      <TrashIcon className="w-5" />
+    </button>
   );
 }

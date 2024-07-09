@@ -139,10 +139,27 @@ export async function updateProject(id: string, accountId: string, prevState: St
 
 export async function deleteProject(id: string, accountId: string) {
   try {
+    // Start a transaction
+    await sql`BEGIN`;
+
+    // Delete associated tags
+    await sql`DELETE FROM tag WHERE project_id = ${id} AND account_id = ${accountId}`;
+    
+    // Delete associated project-artifact links
+    await sql`DELETE FROM project_artifact_link WHERE project_id = ${id} AND account_id = ${accountId}`;
+
+    // Delete the project
     await sql`DELETE FROM project WHERE id = ${id} AND account_id = ${accountId}`;
+
+    // Commit the transaction
+    await sql`COMMIT`;
+
     revalidatePath('/dashboard/projects');
-    return { message: 'Deleted Project.' };
+    return { success: true, message: 'Project deleted successfully.' };
   } catch (error) {
-    return { message: 'Database Error: Failed to Delete Project.' };
+    // Rollback the transaction in case of error
+    await sql`ROLLBACK`;
+    console.error('Error deleting project:', error);
+    return { success: false, message: 'Database Error: Failed to delete project.' };
   }
 }

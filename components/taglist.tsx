@@ -4,12 +4,12 @@ import { addTagToProject, removeTagFromProject, getAllTags } from '@/app/lib/uti
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 interface TagListProps {
-  projectId: string;
-  initialTags: Tag[];
+  initialTags?: Tag[];
   onTagsChange: (tags: Tag[]) => void;
+  projectId?: string;
 }
 
-export function TagList({ projectId, initialTags, onTagsChange }: TagListProps) {
+export function TagList({ initialTags = [], onTagsChange, projectId }: TagListProps) {
   const [tags, setTags] = useState<Tag[]>(initialTags);
   const [showAddForm, setShowAddForm] = useState(false);
   const [allTags, setAllTags] = useState<Tag[]>([]);
@@ -24,17 +24,14 @@ export function TagList({ projectId, initialTags, onTagsChange }: TagListProps) 
 
   const handleAddTag = async (tagName: string) => {
     if (!tags.some(tag => tag.name.toLowerCase() === tagName.toLowerCase())) {
-      const addedTag = await addTagToProject(ADMIN_UUID, projectId, tagName);
-      if (addedTag) {
-        const updatedTags = [...tags, addedTag];
-        setTags(updatedTags);
-        onTagsChange(updatedTags);
-      }
+      const newTag: Tag = { id: `temp-${Date.now()}`, account_id: ADMIN_UUID, name: tagName };
+      const updatedTags = [...tags, newTag];
+      setTags(updatedTags);
+      onTagsChange(updatedTags);
     }
   };
 
-  const handleRemoveTag = async (tagId: string) => {
-    await removeTagFromProject(ADMIN_UUID, projectId, tagId);
+  const handleRemoveTag = (tagId: string) => {
     const updatedTags = tags.filter(tag => tag.id !== tagId);
     setTags(updatedTags);
     onTagsChange(updatedTags);

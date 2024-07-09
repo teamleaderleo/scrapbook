@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArtifactDetail } from '@/app/lib/definitions';
+import { ArtifactDetail, Tag } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { createProject, State } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
+import { TagList } from '@/components/taglist';
 
 export default function Form({ artifacts }: { artifacts: ArtifactDetail[] }) {
   const router = useRouter();
@@ -15,11 +16,12 @@ export default function Form({ artifacts }: { artifacts: ArtifactDetail[] }) {
   const initialState: State = { message: null, errors: {} };
   const createProjectWithAccount = createProject.bind(null, ADMIN_UUID);
   const [state, formAction] = useFormState(createProjectWithAccount, initialState);
+  const [projectTags, setProjectTags] = useState<Tag[]>([]);
 
   useEffect(() => {
     if (state.message === 'Project created successfully') {
       setIsSubmitting(false);
-      setTimeout(() => router.push('/dashboard/projects'), 2000); // Redirect after 2 seconds
+      setTimeout(() => router.push('/dashboard/projects'), 2000);
     } else if (state.message) {
       setIsSubmitting(false);
     }
@@ -29,6 +31,7 @@ export default function Form({ artifacts }: { artifacts: ArtifactDetail[] }) {
     event.preventDefault();
     setIsSubmitting(true);
     const formData = new FormData(event.currentTarget);
+    projectTags.forEach(tag => formData.append('tags', tag.name));
     formAction(formData);
   };
 
@@ -100,15 +103,12 @@ export default function Form({ artifacts }: { artifacts: ArtifactDetail[] }) {
 
         {/* Tags */}
         <div className="mb-4">
-          <label htmlFor="tags" className="mb-2 block text-sm font-medium">
-            Tags (comma-separated)
+          <label className="mb-2 block text-sm font-medium">
+            Tags
           </label>
-          <input
-            id="tags"
-            name="tags"
-            type="text"
-            className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-            placeholder="Enter tags"
+          <TagList
+            initialTags={projectTags}
+            onTagsChange={setProjectTags}
           />
         </div>
 

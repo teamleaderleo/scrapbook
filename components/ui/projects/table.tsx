@@ -9,6 +9,7 @@ import { getArtifactThumbnail } from '@/app/lib/utils-client';
 import { addTagToProject, removeTagFromProject } from '@/app/lib/utils-server';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { TagList } from '@/components/taglist';
+import { DeleteProject, UpdateProject } from '@/components/ui/projects/button';
 
 export default function ProjectsTable({
   initialProjects,
@@ -16,6 +17,9 @@ export default function ProjectsTable({
   initialProjects: ProjectView[];
 }) {
   const [projects, setProjects] = useState(initialProjects);
+  const handleDeleteProject = (deletedProjectId: string) => {
+    setProjects(projects.filter(project => project.id !== deletedProjectId));
+  };
   const router = useRouter();
 
   return (
@@ -79,12 +83,8 @@ export default function ProjectsTable({
                     </td>
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex justify-end">
-                        <Link
-                          href={`/dashboard/projects/${project.id}/edit`}
-                          className="text-blue-500 hover:text-blue-600"
-                        >
-                          Edit
-                        </Link>
+                        <UpdateProject id={project.id} />
+                        <DeleteProject id={project.id} onDelete={() => handleDeleteProject(project.id)} />
                       </div>
                     </td>
                   </tr>
