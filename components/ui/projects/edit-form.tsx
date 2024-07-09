@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { ArtifactDetail, ProjectDetail, Tag } from '@/app/lib/definitions';
+import React from 'react';
+import { ArtifactDetail, ProjectDetail } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { updateProject } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import { addTagToProject, getProjectTags, removeTagFromProject } from '@/app/lib/utils-server';
+import TagManager from '@/components/tagmanager';
 
 export default function EditProjectForm({
   project,
@@ -20,36 +20,9 @@ export default function EditProjectForm({
   const updateProjectWithId = updateProject.bind(null, project.id, ADMIN_UUID);
   const [state, formAction] = useFormState(updateProjectWithId, initialState);
 
-  const [tags, setTags] = useState<Tag[]>(project.tags || []);
-  const [newTag, setNewTag] = useState('');
-
-  useEffect(() => {
-    const fetchTags = async () => {
-      const projectTags = await getProjectTags(ADMIN_UUID, project.id);
-      setTags(projectTags);
-    };
-    fetchTags();
-  }, [project.id]);
-
-  const handleAddTag = async () => {
-    if (newTag.trim() !== '' && !tags.some(tag => tag.name === newTag.trim())) {
-      const addedTag = await addTagToProject(ADMIN_UUID, project.id, newTag.trim());
-      if (addedTag) {
-        setTags([...tags, addedTag]);
-        setNewTag('');
-      }
-    }
-  };
-
-  const handleRemoveTag = async (tagId: string) => {
-    await removeTagFromProject(ADMIN_UUID, project.id, tagId);
-    setTags(tags.filter(tag => tag.id !== tagId));
-  };
-
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    tags.forEach(tag => formData.append('tags', tag.name));
     formAction(formData);
   };
 
@@ -126,32 +99,15 @@ export default function EditProjectForm({
           <label className="mb-2 block text-sm font-medium">
             Tags
           </label>
-          <div className="flex flex-wrap gap-2 mb-2">
-            {tags.map(tag => (
-              <span key={tag.id} className="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
-                {tag.name}
-                <button
-                  type="button"
-                  onClick={() => handleRemoveTag(tag.id)}
-                  className="ml-2 text-blue-800 hover:text-blue-900"
-                >
-                  &times;
-                </button>
-              </span>
-            ))}
-          </div>
-          <div className="flex">
-            <input
-              type="text"
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              className="flex-grow peer rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              placeholder="Add a new tag"
-            />
-            <Button type="button" onClick={handleAddTag} className="ml-2">
-              Add Tag
-            </Button>
-          </div>
+          <TagManager
+            entityId={project.id}
+            initialTags={project.tags}
+            entityType="project"
+            onTagsChange={(tags) => {
+              // You can handle tag changes here if needed
+              console.log('Tags updated:', tags);
+            }}
+          />
         </div>
 
         {state.message && (

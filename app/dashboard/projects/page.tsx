@@ -39,7 +39,7 @@ export default async function Page({
         <CreateProject />
       </div>
        <Suspense key={query + currentPage} fallback={<ProjectsTableSkeleton />}>
-        <ProjectsTable initialProjects={projects} query={query} currentPage={currentPage} />
+        <ProjectsTable initialProjects={projects} />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={totalPages} />

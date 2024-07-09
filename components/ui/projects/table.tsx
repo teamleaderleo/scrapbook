@@ -3,43 +3,41 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { fetchProjects } from '@/app/lib/data';
-import { ADMIN_UUID } from '@/app/lib/constants';
+import { useRouter } from 'next/navigation';
 import { ProjectView, Tag } from '@/app/lib/definitions';
 import { getArtifactThumbnail } from '@/app/lib/utils-client';
 import { addTagToProject, removeTagFromProject } from '@/app/lib/utils-server';
-import { useRouter } from 'next/navigation';
+import { ADMIN_UUID } from '@/app/lib/constants';
 
 export default function ProjectsTable({
   initialProjects,
-  query,
-  currentPage,
 }: {
   initialProjects: ProjectView[];
-  query: string;
-  currentPage: number;
 }) {
   const [projects, setProjects] = useState(initialProjects);
   const router = useRouter();
 
   const handleAddTag = async (projectId: string, tagName: string) => {
-    const addedTag = await addTagToProject(ADMIN_UUID, projectId, tagName);
-    if (addedTag) {
-      setProjects(projects.map(project => 
-        project.id === projectId 
-          ? { ...project, tags: [...project.tags, addedTag] }
-          : project
-      ));
-      router.refresh();
+    const project = projects.find(p => p.id === projectId);
+    if (project && !project.tags.some(tag => tag.name.toLowerCase() === tagName.toLowerCase())) {
+      const addedTag = await addTagToProject(ADMIN_UUID, projectId, tagName);
+      if (addedTag) {
+        setProjects(projects.map(p =>
+          p.id === projectId
+            ? { ...p, tags: [...p.tags, addedTag] }
+            : p
+        ));
+        router.refresh();
+      }
     }
   };
 
   const handleRemoveTag = async (projectId: string, tagId: string) => {
     await removeTagFromProject(ADMIN_UUID, projectId, tagId);
-    setProjects(projects.map(project => 
-      project.id === projectId 
-        ? { ...project, tags: project.tags.filter(tag => tag.id !== tagId) }
-        : project
+    setProjects(projects.map(p =>
+      p.id === projectId
+        ? { ...p, tags: p.tags.filter(tag => tag.id !== tagId) }
+        : p
     ));
     router.refresh();
   };
@@ -73,20 +71,12 @@ export default function ProjectsTable({
                     <td className="px-3 py-3">{project.description}</td>
                     <td className="whitespace-nowrap px-3 py-3">{project.status}</td>
                     <td className="px-3 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {project.tags.map((tag: Tag) => (
-                          <span key={tag.id} className="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full flex items-center">
-                            {tag.name}
-                            <button
-                              onClick={() => handleRemoveTag(project.id, tag.id)}
-                              className="ml-1 text-xs text-blue-800 hover:text-blue-900"
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
-                        <AddTagForm projectId={project.id} onAddTag={handleAddTag} />
-                      </div>
+                      <TagList
+                        projectId={project.id}
+                        tags={project.tags}
+                        onAddTag={handleAddTag}
+                        onRemoveTag={handleRemoveTag}
+                      />
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">{project.artifacts.length}</td>
                     <td className="whitespace-nowrap px-3 py-3">
@@ -127,7 +117,50 @@ export default function ProjectsTable({
   );
 }
 
-function AddTagForm({ projectId, onAddTag }: { projectId: string, onAddTag: (projectId: string, tagName: string) => void }) {
+function TagList({ projectId, tags, onAddTag, onRemoveTag }: {
+  projectId: string,
+  tags: Tag[],
+  onAddTag: (projectId: string, tagName: string) => void,
+  onRemoveTag: (projectId: string, tagId: string) => void
+}) {
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  return (
+    <div className="flex flex-wrap gap-1 items-center">
+      {tags.map((tag: Tag) => (
+        <span key={tag.id} className="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full flex items-center">
+          {tag.name}
+          <button
+            onClick={() => onRemoveTag(projectId, tag.id)}
+            className="ml-1 text-xs text-blue-800 hover:text-blue-900"
+          >
+            ×
+          </button>
+        </span>
+      ))}
+      {showAddForm ? (
+        <AddTagForm
+          projectId={projectId}
+          onAddTag={onAddTag}
+          onClose={() => setShowAddForm(false)}
+        />
+      ) : (
+        <button
+          onClick={() => setShowAddForm(true)}
+          className="text-blue-500 hover:text-blue-600 text-sm"
+        >
+          + Add Tag
+        </button>
+      )}
+    </div>
+  );
+}
+
+function AddTagForm({ projectId, onAddTag, onClose }: {
+  projectId: string,
+  onAddTag: (projectId: string, tagName: string) => void,
+  onClose: () => void
+}) {
   const [newTag, setNewTag] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -135,6 +168,7 @@ function AddTagForm({ projectId, onAddTag }: { projectId: string, onAddTag: (pro
     if (newTag.trim()) {
       onAddTag(projectId, newTag.trim());
       setNewTag('');
+      onClose();
     }
   };
 
@@ -148,6 +182,7 @@ function AddTagForm({ projectId, onAddTag }: { projectId: string, onAddTag: (pro
         className="border rounded px-2 py-1 text-sm"
       />
       <button type="submit" className="ml-1 text-xs bg-blue-500 text-white px-2 py-1 rounded">Add</button>
+      <button type="button" onClick={onClose} className="ml-1 text-xs bg-gray-300 text-gray-700 px-2 py-1 rounded">Cancel</button>
     </form>
   );
 }
