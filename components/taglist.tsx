@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Tag } from '@/app/lib/definitions';
-import { addTagToProject, removeTagFromProject, getAllTags } from '@/app/lib/utils-server';
+import { addTagToProject, removeTagFromProject, addTagToArtifact, removeTagFromArtifact, getAllTags } from '@/app/lib/utils-server';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 interface TagListProps {
   initialTags?: Tag[];
   onTagsChange: (tags: Tag[]) => void;
   projectId?: string;
+  artifactId?: string;
 }
 
-export function TagList({ initialTags = [], onTagsChange, projectId }: TagListProps) {
+export function TagList({ initialTags = [], onTagsChange, projectId, artifactId }: TagListProps) {
   const [tags, setTags] = useState<Tag[]>(initialTags);
   const [showAddForm, setShowAddForm] = useState(false);
   const [allTags, setAllTags] = useState<Tag[]>([]);
@@ -24,14 +25,26 @@ export function TagList({ initialTags = [], onTagsChange, projectId }: TagListPr
 
   const handleAddTag = async (tagName: string) => {
     if (!tags.some(tag => tag.name.toLowerCase() === tagName.toLowerCase())) {
-      const newTag: Tag = { id: `temp-${Date.now()}`, account_id: ADMIN_UUID, name: tagName };
-      const updatedTags = [...tags, newTag];
+      let newTag: Tag | null;
+      if (projectId) {
+        newTag = await addTagToProject(ADMIN_UUID, projectId, tagName);
+      } else if (artifactId) {
+        newTag = await addTagToArtifact(ADMIN_UUID, artifactId, tagName);
+      } else {
+        newTag = { id: `temp-${Date.now()}`, account_id: ADMIN_UUID, name: tagName };
+      }
+      const updatedTags = [...tags, newTag].filter(tag => tag !== null) as Tag[];
       setTags(updatedTags);
       onTagsChange(updatedTags);
     }
   };
 
-  const handleRemoveTag = (tagId: string) => {
+  const handleRemoveTag = async (tagId: string) => {
+    if (projectId) {
+      await removeTagFromProject(ADMIN_UUID, projectId, tagId);
+    } else if (artifactId) {
+      await removeTagFromArtifact(ADMIN_UUID, artifactId, tagId);
+    }
     const updatedTags = tags.filter(tag => tag.id !== tagId);
     setTags(updatedTags);
     onTagsChange(updatedTags);
