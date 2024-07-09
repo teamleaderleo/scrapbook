@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArtifactDetail, ProjectDetail, Tag } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { updateProject } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
+import { addTagToProject, getProjectTags, removeTagFromProject } from '@/app/lib/utils-server';
 
 export default function EditProjectForm({
   project,
@@ -22,25 +23,33 @@ export default function EditProjectForm({
   const [tags, setTags] = useState<Tag[]>(project.tags || []);
   const [newTag, setNewTag] = useState('');
 
-  const handleAddTag = () => {
+  useEffect(() => {
+    const fetchTags = async () => {
+      const projectTags = await getProjectTags(ADMIN_UUID, project.id);
+      setTags(projectTags);
+    };
+    fetchTags();
+  }, [project.id]);
+
+  const handleAddTag = async () => {
     if (newTag.trim() !== '' && !tags.some(tag => tag.name === newTag.trim())) {
-      setTags([...tags, {
-        id: Date.now().toString(), name: newTag.trim(),
-        account_id: ADMIN_UUID
-      }]);
-      setNewTag('');
+      const addedTag = await addTagToProject(ADMIN_UUID, project.id, newTag.trim());
+      if (addedTag) {
+        setTags([...tags, addedTag]);
+        setNewTag('');
+      }
     }
   };
 
-  const handleRemoveTag = (tagId: string) => {
+  const handleRemoveTag = async (tagId: string) => {
+    await removeTagFromProject(ADMIN_UUID, project.id, tagId);
     setTags(tags.filter(tag => tag.id !== tagId));
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    formData.delete('tags'); // Remove the original tags input
-    tags.forEach(tag => formData.append('tags', tag.name)); // Add each tag separately
+    tags.forEach(tag => formData.append('tags', tag.name));
     formAction(formData);
   };
 

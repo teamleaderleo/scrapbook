@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import Image from 'next/image';
 import { lusitana } from '@/components/ui/fonts';
 import { fetchLatestProjects } from '@/app/lib/data';
-import { getArtifactThumbnail } from '@/app/lib/utils';
+import { getArtifactThumbnail } from '@/app/lib/utils-client';
 
 const ADMIN_UUID = '410544b2-4001-4271-9855-fec4b6a6442a'
 export default async function LatestProjects() {

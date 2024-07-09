@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { addTagToProject, removeTagFromProject, getProjectTags } from './utils-server';
 
 const ProjectSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
@@ -117,15 +118,19 @@ export async function updateProject(id: string, accountId: string, prevState: St
     `;
 
     // Update tags
-    await sql`DELETE FROM tag WHERE project_id = ${id}`;
-    if (tags && tags.length > 0) {
-      for (const tag of tags) {
-        await sql`
-          INSERT INTO tag (account_id, name, project_id)
-          VALUES (${accountId}, ${tag}, ${id})
-          ON CONFLICT (account_id, name, project_id) DO NOTHING
-        `;
+    const currentTags = await getProjectTags(accountId, id);
+    const newTags = tags as string[];
+
+    // Remove tags that are no longer associated with the project
+    for (const tag of currentTags) {
+      if (!newTags.includes(tag.name)) {
+        await removeTagFromProject(accountId, id, tag.id);
       }
+    }
+
+    // Add new tags
+    for (const tagName of newTags) {
+      await addTagToProject(accountId, id, tagName);
     }
 
     // Update artifacts
@@ -140,6 +145,7 @@ export async function updateProject(id: string, accountId: string, prevState: St
     }
 
   } catch (error) {
+    console.error('Error updating project:', error);
     return { message: 'Database Error: Failed to Update Project.' };
   }
  

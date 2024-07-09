@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { fetchProjects } from '@/app/lib/data';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { ProjectView, ArtifactType, ArtifactContent } from '@/app/lib/definitions';
-import { getArtifactThumbnail } from '@/app/lib/utils';
+import { getArtifactThumbnail } from '@/app/lib/utils-client';
 
 export default async function ProjectsTable({
   query,
