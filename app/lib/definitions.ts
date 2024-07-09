@@ -12,11 +12,13 @@ export type Tag = {
 };
 
 export type ProjectTag = {
+  account_id: string; 
   project_id: string; 
   tag_id: string; 
 };
 
 export type ArtifactTag = {
+  account_id: string; 
   artifact_id: string; 
   tag_id: string; 
 };
