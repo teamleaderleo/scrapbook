@@ -35,15 +35,8 @@ export type Artifact = {
 };
 
 export type ArtifactDetail = Artifact & {
-  tags: {
-    id: string;
-    name: string;
-  }[];
-  projects: {
-    id: string;
-    name: string;
-    status: 'pending' | 'completed';
-  }[];
+  tags: Tag[];
+  projects: Project[];
 };
 
 export type ProjectArtifactLink = {
@@ -64,16 +57,8 @@ export type Project = {
 };
 
 export type ProjectDetail = Project & {
-  tags: {
-    id: string;
-    name: string;
-  }[];
-  artifacts: {
-    id: string;
-    name: string;
-    type: ArtifactType;
-    content: string;
-  }[];
+  tags: Tag[];
+  artifacts: Artifact[];
 };
 
 // Type for the query result
