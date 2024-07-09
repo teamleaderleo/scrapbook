@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ArtifactDetail } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -8,12 +10,30 @@ import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 export default function Form({ artifacts }: { artifacts: ArtifactDetail[] }) {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const initialState: State = { message: null, errors: {} };
   const createProjectWithAccount = createProject.bind(null, ADMIN_UUID);
   const [state, formAction] = useFormState(createProjectWithAccount, initialState);
 
+  useEffect(() => {
+    if (state.message === 'Project created successfully') {
+      setIsSubmitting(false);
+      setTimeout(() => router.push('/dashboard/projects'), 2000); // Redirect after 2 seconds
+    } else if (state.message) {
+      setIsSubmitting(false);
+    }
+  }, [state, router]);
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    const formData = new FormData(event.currentTarget);
+    formAction(formData);
+  };
+
   return (
-    <form action={formAction}>
+    <form onSubmit={handleSubmit}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Project Name */}
         <div className="mb-4">
@@ -93,7 +113,9 @@ export default function Form({ artifacts }: { artifacts: ArtifactDetail[] }) {
         </div>
 
         {state.message && (
-          <p className="mt-2 text-sm text-red-500">{state.message}</p>
+          <p className={`mt-2 text-sm ${state.message.includes('Error') ? 'text-red-500' : 'text-green-500'}`}>
+            {state.message}
+          </p>
         )}
       </div>
       <div className="mt-6 flex justify-end gap-4">
@@ -103,7 +125,9 @@ export default function Form({ artifacts }: { artifacts: ArtifactDetail[] }) {
         >
           Cancel
         </Link>
-        <Button type="submit">Create Project</Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Creating...' : 'Create Project'}
+        </Button>
       </div>
     </form>
   );

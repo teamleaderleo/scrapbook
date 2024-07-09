@@ -82,7 +82,7 @@ export async function createProject(accountId: string, prevState: State, formDat
 
     console.log('Project creation completed successfully');
     revalidatePath('/dashboard/projects');
-    redirect('/dashboard/projects');
+    return { message: 'Project created successfully' };
   } catch (error: any) {
     console.error('Error in createProject:', error);
     return {
