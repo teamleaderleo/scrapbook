@@ -52,6 +52,9 @@ export async function createProject(accountId: string, prevState: State, formDat
   console.log('Validated data:', { name, description, status, tags, artifacts });
 
   try {
+    // Start a transaction
+    await sql`BEGIN`;
+
     console.log('Attempting to insert new project');
     const result = await sql`
       INSERT INTO project (account_id, name, description, status)
@@ -63,11 +66,8 @@ export async function createProject(accountId: string, prevState: State, formDat
 
     if (tags && tags.length > 0 && tags[0] !== '') {
       console.log('Inserting tags:', tags);
-      for (const tag of tags) {
-        await sql`
-          INSERT INTO tag (account_id, name, project_id)
-          VALUES (${accountId}, ${tag}, ${projectId})
-        `;
+      for (const tagName of tags) {
+        await addTagToProject(accountId, projectId, tagName);
       }
     }
 
@@ -81,10 +81,15 @@ export async function createProject(accountId: string, prevState: State, formDat
       }
     }
 
+    // Commit the transaction
+    await sql`COMMIT`;
+
     console.log('Project creation completed successfully');
     revalidatePath('/dashboard/projects');
     return { message: 'Project created successfully' };
   } catch (error: any) {
+    // Rollback the transaction in case of error
+    await sql`ROLLBACK`;
     console.error('Error in createProject:', error);
     return {
       message: `Database Error: Failed to Create Project. ${error.message}`,
@@ -117,6 +122,24 @@ export async function updateProject(id: string, accountId: string, prevState: St
       WHERE id = ${id} AND account_id = ${accountId}
     `;
 
+    // Update tags
+    const currentTags = await getProjectTags(accountId, id);
+    const newTags = tags as string[];
+
+    // Remove tags that are no longer associated with the project
+    for (const tag of currentTags) {
+      if (!newTags.includes(tag.name)) {
+        await removeTagFromProject(accountId, id, tag.id);
+      }
+    }
+
+    // Add new tags
+    for (const tagName of newTags) {
+      if (!currentTags.some(tag => tag.name === tagName)) {
+        await addTagToProject(accountId, id, tagName);
+      }
+    }
+
     // Update artifacts
     await sql`DELETE FROM project_artifact_link WHERE project_id = ${id}`;
     if (artifacts && artifacts.length > 0) {
@@ -142,8 +165,8 @@ export async function deleteProject(id: string, accountId: string) {
     // Start a transaction
     await sql`BEGIN`;
 
-    // Delete associated tags
-    await sql`DELETE FROM tag WHERE project_id = ${id} AND account_id = ${accountId}`;
+    // Delete associated project-tag links
+    await sql`DELETE FROM project_tag WHERE project_id = ${id}`;
     
     // Delete associated project-artifact links
     await sql`DELETE FROM project_artifact_link WHERE project_id = ${id} AND account_id = ${accountId}`;
