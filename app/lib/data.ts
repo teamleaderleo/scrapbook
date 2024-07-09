@@ -97,7 +97,16 @@ export async function fetchLatestProjects(accountId: string, limit: number = 5) 
           'id', a.id,
           'name', a.name,
           'type', a.type,
-          'content', (SELECT content FROM artifact_content WHERE artifact_id = a.id AND account_id = ${accountId} ORDER BY created_at DESC LIMIT 1)
+          'contents', (
+            SELECT json_agg(jsonb_build_object(
+              'id', ac.id,
+              'type', ac.type,
+              'content', ac.content,
+              'created_at', ac.created_at
+            ))
+            FROM artifact_content ac
+            WHERE ac.artifact_id = a.id AND ac.account_id = ${accountId}
+          )
         )) FILTER (WHERE a.id IS NOT NULL), '[]') AS artifacts
       FROM project p
       LEFT JOIN tag t ON p.id = t.project_id

@@ -1,3 +1,5 @@
+import { Artifact } from './definitions';
+
 export const formatDateToLocal = (
   dateStr: string,
   locale: string = 'en-US',
@@ -43,4 +45,28 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
     '...',
     totalPages,
   ];
+};
+export const getArtifactThumbnail = (artifact: Artifact) => {
+  console.log('Artifact:', JSON.stringify(artifact, null, 2));
+
+  if (!artifact) {
+    console.log('Artifact is undefined');
+    return '/placeholder-default.png';
+  }
+
+  if (!artifact.contents || artifact.contents.length === 0) {
+    console.log('Artifact contents are undefined or empty');
+    return '/placeholder-default.png';
+  }
+
+  switch (artifact.type) {
+    case 'image':
+      return artifact.contents[0].content || '/placeholder-default.png';
+    case 'text':
+      return '/placeholder-text.png';
+    case 'file':
+      return '/placeholder-file.png';
+    default:
+      return '/placeholder-default.png';
+  }
 };

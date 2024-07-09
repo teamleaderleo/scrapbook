@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import Image from 'next/image';
 import { lusitana } from '@/components/ui/fonts';
 import { fetchLatestProjects } from '@/app/lib/data';
+import { getArtifactThumbnail } from '@/app/lib/utils';
 
 const ADMIN_UUID = '410544b2-4001-4271-9855-fec4b6a6442a'
 export default async function LatestProjects() {
@@ -27,9 +28,9 @@ export default async function LatestProjects() {
                 )}
               >
                 <div className="flex items-center">
-                  {latestArtifact && latestArtifact.type === 'image' ? (
+                  {latestArtifact ? (
                     <Image
-                      src={latestArtifact.content}
+                      src={getArtifactThumbnail(latestArtifact)}
                       alt={`${project.name}'s latest artifact`}
                       className="mr-4 rounded-full"
                       width={32}
