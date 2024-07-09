@@ -26,7 +26,8 @@ This took a bit more thinking than I expected. And I'm still thinking about it!
 ![image](https://github.com/MikelBai/scrapbook/assets/13091533/26c5dd2d-9219-4ca0-9bf6-180f9c22366e)
 
 ### Projects:
-![image](https://github.com/MikelBai/scrapbook/assets/13091533/dc501869-ec4a-42ac-bcf6-7672438032c1)
+![image](https://github.com/MikelBai/scrapbook/assets/13091533/db48f494-da55-4d3a-8518-6a30033fad53)
+
 
 ## Vision
 
