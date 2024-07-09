@@ -1,13 +1,12 @@
 'use client';
 
-import React from 'react';
-import { ArtifactDetail, ProjectDetail } from '@/app/lib/definitions';
+import React, { useState } from 'react';
+import { ArtifactDetail, ProjectDetail, Tag } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { updateProject } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
-// import TagManager from '@/components/tagmanager';
 import { TagList } from '@/components/taglist';
 
 export default function EditProjectForm({
@@ -17,6 +16,7 @@ export default function EditProjectForm({
   project: ProjectDetail;
   artifacts: ArtifactDetail[];
 }) {
+  const [projectTags, setProjectTags] = useState<Tag[]>(project.tags);
   const initialState = { message: null, errors: {} };
   const updateProjectWithId = updateProject.bind(null, project.id, ADMIN_UUID);
   const [state, formAction] = useFormState(updateProjectWithId, initialState);
@@ -24,6 +24,12 @@ export default function EditProjectForm({
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
+    
+    // Add tags to formData
+    projectTags.forEach((tag, index) => {
+      formData.append(`tags[${index}]`, tag.name);
+    });
+
     formAction(formData);
   };
 
@@ -102,14 +108,8 @@ export default function EditProjectForm({
           </label>
           <TagList
             projectId={project.id}
-            initialTags={project.tags}
-            onTagsChange={(updatedTags) => {
-              setProjects(projects.map(p =>
-                p.id === project.id
-                  ? { ...p, tags: updatedTags }
-                  : p
-              ));
-            }}
+            initialTags={projectTags}
+            onTagsChange={setProjectTags}
           />
         </div>
 
