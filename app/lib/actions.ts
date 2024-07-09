@@ -27,6 +27,10 @@ export type State = {
 };
 
 export async function createProject(accountId: string, prevState: State, formData: FormData) {
+  console.log('Starting createProject function');
+  console.log('Account ID:', accountId);
+  console.log('Form data:', Object.fromEntries(formData));
+
   const validatedFields = ProjectSchema.safeParse({
     name: formData.get('name'),
     description: formData.get('description'),
@@ -36,6 +40,7 @@ export async function createProject(accountId: string, prevState: State, formDat
   });
 
   if (!validatedFields.success) {
+    console.log('Validation failed:', validatedFields.error);
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Missing Fields. Failed to Create Project.',
@@ -43,37 +48,47 @@ export async function createProject(accountId: string, prevState: State, formDat
   }
 
   const { name, description, status, tags, artifacts } = validatedFields.data;
+  console.log('Validated data:', { name, description, status, tags, artifacts });
 
   try {
+    console.log('Attempting to insert new project');
     const result = await sql`
       INSERT INTO project (account_id, name, description, status)
       VALUES (${accountId}, ${name}, ${description}, ${status})
       RETURNING id
     `;
     const projectId = result.rows[0].id;
+    console.log('Project inserted, ID:', projectId);
 
-    if (tags && tags.length > 0) {
-      await sql`
-        INSERT INTO tag (account_id, name, project_id)
-        VALUES ${sql(tags.map(tag => [accountId, tag, projectId]))}
-      `;
+    if (tags && tags.length > 0 && tags[0] !== '') {
+      console.log('Inserting tags:', tags);
+      for (const tag of tags) {
+        await sql`
+          INSERT INTO tag (account_id, name, project_id)
+          VALUES (${accountId}, ${tag}, ${projectId})
+        `;
+      }
     }
 
     if (artifacts && artifacts.length > 0) {
-      await sql`
-        INSERT INTO project_artifact_link (account_id, project_id, artifact_id)
-        VALUES ${sql(artifacts.map(artifactId => [accountId, projectId, artifactId]))}
-      `;
+      console.log('Linking artifacts:', artifacts);
+      for (const artifactId of artifacts) {
+        await sql`
+          INSERT INTO project_artifact_link (account_id, project_id, artifact_id)
+          VALUES (${accountId}, ${projectId}, ${artifactId})
+        `;
+      }
     }
 
-  } catch (error) {
+    console.log('Project creation completed successfully');
+    revalidatePath('/dashboard/projects');
+    redirect('/dashboard/projects');
+  } catch (error: any) {
+    console.error('Error in createProject:', error);
     return {
-      message: 'Database Error: Failed to Create Project.',
+      message: `Database Error: Failed to Create Project. ${error.message}`,
     };
   }
-
-  revalidatePath('/dashboard/projects');
-  redirect('/dashboard/projects');
 }
 
 export async function updateProject(id: string, accountId: string, prevState: State, formData: FormData) {
@@ -104,19 +119,23 @@ export async function updateProject(id: string, accountId: string, prevState: St
     // Update tags
     await sql`DELETE FROM tag WHERE project_id = ${id}`;
     if (tags && tags.length > 0) {
-      await sql`
-        INSERT INTO tag (account_id, name, project_id)
-        VALUES ${sql(tags.map(tag => [accountId, tag, id]))}
-      `;
+      for (const tag of tags) {
+        await sql`
+          INSERT INTO tag (account_id, name, project_id)
+          VALUES (${accountId}, ${tag}, ${id})
+        `;
+      }
     }
 
     // Update artifacts
     await sql`DELETE FROM project_artifact_link WHERE project_id = ${id}`;
     if (artifacts && artifacts.length > 0) {
-      await sql`
-        INSERT INTO project_artifact_link (account_id, project_id, artifact_id)
-        VALUES ${sql(artifacts.map(artifactId => [accountId, id, artifactId]))}
-      `;
+      for (const artifactId of artifacts) {
+        await sql`
+          INSERT INTO project_artifact_link (account_id, project_id, artifact_id)
+          VALUES (${accountId}, ${id}, ${artifactId})
+        `;
+      }
     }
 
   } catch (error) {
