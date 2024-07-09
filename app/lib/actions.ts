@@ -117,22 +117,6 @@ export async function updateProject(id: string, accountId: string, prevState: St
       WHERE id = ${id} AND account_id = ${accountId}
     `;
 
-    // Update tags
-    const currentTags = await getProjectTags(accountId, id);
-    const newTags = tags as string[];
-
-    // Remove tags that are no longer associated with the project
-    for (const tag of currentTags) {
-      if (!newTags.includes(tag.name)) {
-        await removeTagFromProject(accountId, id, tag.id);
-      }
-    }
-
-    // Add new tags
-    for (const tagName of newTags) {
-      await addTagToProject(accountId, id, tagName);
-    }
-
     // Update artifacts
     await sql`DELETE FROM project_artifact_link WHERE project_id = ${id}`;
     if (artifacts && artifacts.length > 0) {
