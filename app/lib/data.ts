@@ -342,15 +342,23 @@ export async function fetchCardData(accountId: string) {
         (SELECT COUNT(*) FROM project WHERE account_id = ${accountId}) AS total_projects,
         (SELECT COUNT(*) FROM artifact WHERE account_id = ${accountId}) AS total_artifacts,
         (SELECT COUNT(*) FROM project WHERE account_id = ${accountId} AND status = 'pending') AS pending_projects,
-        (SELECT COUNT(*) FROM project WHERE account_id = ${accountId} AND status = 'completed') AS completed_projects`;
+        (SELECT COUNT(*) FROM project WHERE account_id = ${accountId} AND status = 'completed') AS completed_projects,
+        (SELECT COUNT(DISTINCT pt.tag_id) FROM project_tag pt
+         JOIN project p ON pt.project_id = p.id
+         WHERE p.account_id = ${accountId}) AS total_project_tags,
+        (SELECT COUNT(DISTINCT at.tag_id) FROM artifact_tag at
+         JOIN artifact a ON at.artifact_id = a.id
+         WHERE a.account_id = ${accountId}) AS total_artifact_tags`;
 
-    const { total_projects, total_artifacts, pending_projects, completed_projects } = data.rows[0];
+    const { total_projects, total_artifacts, pending_projects, completed_projects, total_project_tags, total_artifact_tags } = data.rows[0];
 
     return {
       numberOfProjects: Number(total_projects),
       numberOfArtifacts: Number(total_artifacts),
       numberOfPendingProjects: Number(pending_projects),
       numberOfCompletedProjects: Number(completed_projects),
+      numberOfProjectTags: Number(total_project_tags),
+      numberOfArtifactTags: Number(total_artifact_tags),
     };
   } catch (error) {
     console.error('Database Error:', error);
@@ -366,7 +374,10 @@ export async function fetchDashboardData(accountId: string) {
         (SELECT COUNT(*) FROM account) AS total_accounts,
         (SELECT COUNT(*) FROM project WHERE account_id = ${accountId}) AS total_projects,
         (SELECT COUNT(*) FROM artifact WHERE account_id = ${accountId}) AS total_artifacts,
-        (SELECT COUNT(*) FROM tag WHERE account_id = ${accountId}) AS total_tags,
+        (SELECT COUNT(DISTINCT t.id) FROM tag t
+         LEFT JOIN project_tag pt ON t.id = pt.tag_id
+         LEFT JOIN artifact_tag at ON t.id = at.tag_id
+         WHERE t.account_id = ${accountId}) AS total_tags,
         (SELECT COUNT(*) FROM project WHERE account_id = ${accountId} AND status = 'completed') AS completed_projects,
         (SELECT COUNT(*) FROM project WHERE account_id = ${accountId} AND status = 'pending') AS pending_projects
     `;
