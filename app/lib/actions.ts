@@ -123,6 +123,7 @@ export async function updateProject(id: string, accountId: string, prevState: St
         await sql`
           INSERT INTO tag (account_id, name, project_id)
           VALUES (${accountId}, ${tag}, ${id})
+          ON CONFLICT (account_id, name, project_id) DO NOTHING
         `;
       }
     }
