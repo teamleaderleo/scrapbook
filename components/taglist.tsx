@@ -55,7 +55,7 @@ export function TagList({ projectId, initialTags, onTagsChange }: TagListProps) 
       ))}
       {showAddForm ? (
         <AddTagForm
-          existingTags={allTags.filter(tag => !tags.some(t => t.id === tag.id))}
+          existingTags={allTags.filter(tag => !tags.some(t => t.name.toLowerCase() === tag.name.toLowerCase()))}
           onAddTag={handleAddTag}
           onClose={() => setShowAddForm(false)}
         />
