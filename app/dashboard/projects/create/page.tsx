@@ -1,5 +1,5 @@
 import Form from '@/components/ui/projects/create-form';
-import Breadcrumbs from '@/components/ui/projects/breadcrumbs';
+import Breadcrumbs from '@/components/ui/breadcrumbs';
 import { fetchArtifacts } from '@/app/lib/data';
 import { Metadata } from 'next';
 import { ADMIN_UUID } from '@/app/lib/constants';

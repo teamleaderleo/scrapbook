@@ -47,21 +47,17 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
   ];
 };
 export const getArtifactThumbnail = (artifact: Artifact) => {
-  console.log('Artifact:', JSON.stringify(artifact, null, 2));
-
   if (!artifact) {
-    console.log('Artifact is undefined');
     return '/placeholder-default.png';
   }
 
   if (!artifact.contents || artifact.contents.length === 0) {
-    console.log('Artifact contents are undefined or empty');
     return '/placeholder-default.png';
   }
 
   switch (artifact.type) {
     case 'image':
-      return artifact.contents[0].content || '/placeholder-default.png';
+      return artifact.contents[0].content;
     case 'text':
       return '/placeholder-text.png';
     case 'file':

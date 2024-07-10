@@ -83,6 +83,15 @@ export async function fetchProjectsPages(accountId: string, query: string = '') 
   }
 }
 
+export async function fetchArtifactsPages(accountId: string, query: string = '') {
+  try {
+    const count = await sql``
+    return 1;
+  } catch (error) { 
+
+  }
+}
+
 export async function fetchLatestProjects(accountId: string, limit: number = 5) {
   try {
     const data = await sql<ProjectDetail>`

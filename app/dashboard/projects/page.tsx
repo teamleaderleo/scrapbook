@@ -1,4 +1,4 @@
-import Pagination from '@/components/ui/projects/pagination';
+import Pagination from '@/components/ui/pagination';
 import Search from '@/components/ui/search';
 import ProjectsTable from '@/components/ui/projects/table';
 import { CreateProject } from '@/components/ui/projects/button';

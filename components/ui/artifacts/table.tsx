@@ -1,43 +1,35 @@
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { lusitana } from '@/components/ui/fonts';
-import Search from '@/components/ui/search';
-import { ArtifactView, ArtifactType } from '@/app/lib/definitions';
+import { useRouter } from 'next/navigation';
+import { ArtifactView, Tag } from '@/app/lib/definitions';
+import { getArtifactThumbnail } from '@/app/lib/utils-client';
+import { ADMIN_UUID } from '@/app/lib/constants';
+import { TagList } from '@/components/taglist';
+import { DeleteArtifact, UpdateArtifact } from '@/components/ui/artifacts/button';
+import { TagProvider } from '@/components/tagcontext';
 
-const getArtifactThumbnail = (artifact: ArtifactView) => {
-  const latestContent = artifact.contents[0];
-  if (!latestContent) return '/placeholder-default.png';
-
-  switch (latestContent.type) {
-    case 'image':
-      return latestContent.content;
-    case 'text':
-      return '/placeholder-text.png';
-    case 'file':
-      return '/placeholder-file.png';
-    default:
-      return '/placeholder-default.png';
-  }
-};
-
-export default async function ArtifactsTable({
-  artifacts,
+export default function ArtifactsTable({
+  initialArtifacts,
 }: {
-  artifacts: ArtifactView[];
+  initialArtifacts: ArtifactView[];
 }) {
+  const [artifacts, setArtifacts] = useState(initialArtifacts);
+  const handleDeleteArtifact = (deletedArtifactId: string) => {
+    setArtifacts(artifacts.filter(artifact => artifact.id !== deletedArtifactId));
+  };
+  const router = useRouter();
+
   return (
-    <div className="w-full">
-      <h1 className={`${lusitana.className} mb-8 text-xl md:text-2xl`}>
-        Artifacts
-      </h1>
-      <Search placeholder="Search artifacts..." />
+    <TagProvider>
       <div className="mt-6 flow-root">
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden rounded-md bg-gray-50 p-2 md:pt-0">
-              {/* Mobile view remains unchanged */}
-              <table className="hidden min-w-full rounded-md text-gray-900 md:table">
-                <thead className="rounded-md bg-gray-50 text-left text-sm font-normal">
+              <table className="hidden min-w-full text-gray-900 md:table">
+                <thead className="rounded-lg text-left text-sm font-normal">
                   <tr>
                     <th scope="col" className="px-4 py-5 font-medium sm:pl-6">Name</th>
                     <th scope="col" className="px-3 py-5 font-medium">Type</th>
@@ -45,15 +37,16 @@ export default async function ArtifactsTable({
                     <th scope="col" className="px-3 py-5 font-medium">Tags</th>
                     <th scope="col" className="px-3 py-5 font-medium">Projects</th>
                     <th scope="col" className="px-3 py-5 font-medium">Updated</th>
+                    <th scope="col" className="px-3 py-5 font-medium">Preview</th>
                     <th scope="col" className="relative py-3 pl-6 pr-3">
                       <span className="sr-only">Edit</span>
                     </th>
                   </tr>
                 </thead>
-                <tbody>
-                  {artifacts.map((artifact) => (
-                    <tr key={artifact.id} className="group bg-white border-b last:border-none">
-                      <td className="whitespace-nowrap py-5 pl-4 pr-3 text-sm text-black group-first-of-type:rounded-tl-lg group-last-of-type:rounded-bl-lg sm:pl-6">
+                <tbody className="bg-white">
+                  {artifacts.map((artifact: ArtifactView) => (
+                    <tr key={artifact.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
+                      <td className="whitespace-nowrap py-3 pl-6 pr-3">
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0 relative overflow-hidden rounded-full">
                             <Image
@@ -68,29 +61,43 @@ export default async function ArtifactsTable({
                           </div>
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-3 py-5 text-sm">
-                        {artifact.type}
+                      <td className="whitespace-nowrap px-3 py-3">{artifact.type}</td>
+                      <td className="px-3 py-3">{artifact.description}</td>
+                      <td className="px-3 py-3">
+                        <TagList
+                          artifactId={artifact.id}
+                          initialTags={artifact.tags}
+                          onTagsChange={(updatedTags) => {
+                            setArtifacts(artifacts.map(a =>
+                              a.id === artifact.id
+                                ? { ...a, tags: updatedTags }
+                                : a
+                            ));
+                          }}
+                        />
                       </td>
-                      <td className="px-3 py-5 text-sm">
-                        {artifact.description}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-5 text-sm">
-                        {artifact.tags.length}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-5 text-sm">
-                        {artifact.projects.length}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-5 text-sm">
+                      <td className="whitespace-nowrap px-3 py-3">{artifact.projects.length}</td>
+                      <td className="whitespace-nowrap px-3 py-3">
                         {new Date(artifact.updated_at).toLocaleDateString()}
                       </td>
-                      <td className="whitespace-nowrap py-5 pl-6 pr-3 text-sm group-first-of-type:rounded-tr-lg group-last-of-type:rounded-br-lg">
+                      <td className="whitespace-nowrap px-3 py-3">
+                        <div className="flex space-x-2">
+                          {artifact.contents.slice(0, 3).map((content, index) => (
+                            <div key={index} className="w-10 h-10 relative overflow-hidden rounded-full">
+                              <Image
+                                src={getArtifactThumbnail({ ...artifact, contents: [content] })}
+                                alt={`Thumbnail for ${artifact.name} content ${index + 1}`}
+                                layout="fill"
+                                objectFit="cover"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap py-3 pl-6 pr-3">
                         <div className="flex justify-end">
-                          <Link
-                            href={`/dashboard/artifacts/${artifact.id}/edit`}
-                            className="text-blue-500 hover:text-blue-600"
-                          >
-                            Edit
-                          </Link>
+                          <UpdateArtifact id={artifact.id} />
+                          <DeleteArtifact id={artifact.id} onDelete={() => handleDeleteArtifact(artifact.id)} />
                         </div>
                       </td>
                     </tr>
@@ -101,6 +108,6 @@ export default async function ArtifactsTable({
           </div>
         </div>
       </div>
-    </div>
+    </TagProvider>
   );
 }
