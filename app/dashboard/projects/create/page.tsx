@@ -1,4 +1,4 @@
-import Form from '@/components/ui/projects/create-form';
+import Form from '@/components/ui/projects/create-project-form';
 import Breadcrumbs from '@/components/ui/breadcrumbs';
 import { fetchArtifacts } from '@/app/lib/data';
 import { Metadata } from 'next';
