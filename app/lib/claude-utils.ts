@@ -31,11 +31,13 @@ export async function getClaudeResponse(prompt: string): Promise<string> {
 }
 
 export async function suggestTags(content: string): Promise<string[]> {
-  const prompt = `Analyze the following content and suggest up to 5 relevant tags:
+  const prompt = content.trim() ?
+    `Analyze the following content and suggest up to 5 relevant tags:
 
-${content}
+    ${content}
 
-Respond with only a comma-separated list of tags.`;
+    Respond with only a comma-separated list of tags.` :
+    `Suggest 5 interesting and diverse tags that could be used to categorize various artifacts in a knowledge management system. Be creative and think broadly. Respond with only a comma-separated list of tags.`;
 
   try {
     const result = await getClaudeResponse(prompt);
@@ -47,17 +49,81 @@ Respond with only a comma-separated list of tags.`;
 }
 
 export async function suggestContentExtensions(content: string): Promise<string[]> {
-  const prompt = `Given the following content, suggest 3 ways to extend or improve it:
+  const prompt = content.trim() ?
+    `Given the following content, suggest 3 ways to extend or improve it:
 
-${content}
+    ${content}
 
-Respond with only a comma-separated list of extension ideas.`;
+    Respond with only a comma-separated list of extension ideas.` :
+    `Suggest 3 creative ideas for content that could be added to an artifact in a knowledge management system. Think broadly and innovatively. Respond with only a comma-separated list of content ideas.`;
 
   try {
     const result = await getClaudeResponse(prompt);
     return result.split(',').map(idea => idea.trim()).filter(idea => idea !== '');
   } catch (error) {
     console.error('Error in suggestContentExtensions:', error);
+    return [];
+  }
+}
+
+export async function suggestArtifactName(content: string): Promise<string> {
+  const prompt = `Based on the following content, suggest a concise and descriptive name for an artifact:
+
+  ${content}
+
+  Respond with only the suggested name.`;
+
+  try {
+    return await getClaudeResponse(prompt);
+  } catch (error) {
+    console.error('Error in suggestArtifactName:', error);
+    return '';
+  }
+}
+
+export async function summarizeContent(content: string): Promise<string> {
+  const prompt = `Summarize the following content in a brief paragraph:
+
+  ${content}
+
+  Provide only the summary.`;
+
+  try {
+    return await getClaudeResponse(prompt);
+  } catch (error) {
+    console.error('Error in summarizeContent:', error);
+    return '';
+  }
+}
+
+export async function suggestRelatedTopics(content: string): Promise<string[]> {
+  const prompt = `Based on the following content, suggest 5 related topics or areas for further exploration:
+
+  ${content}
+
+  Respond with only a comma-separated list of topics.`;
+
+  try {
+    const result = await getClaudeResponse(prompt);
+    return result.split(',').map(topic => topic.trim()).filter(topic => topic !== '');
+  } catch (error) {
+    console.error('Error in suggestRelatedTopics:', error);
+    return [];
+  }
+}
+
+export async function generateArtifactIdeas(context: string): Promise<string[]> {
+  const prompt = `Given the following context, suggest 3 ideas for new artifacts that could be created:
+
+  ${context}
+
+  Respond with only a comma-separated list of artifact ideas.`;
+
+  try {
+    const result = await getClaudeResponse(prompt);
+    return result.split(',').map(idea => idea.trim()).filter(idea => idea !== '');
+  } catch (error) {
+    console.error('Error in generateArtifactIdeas:', error);
     return [];
   }
 }

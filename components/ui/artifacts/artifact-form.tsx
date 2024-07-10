@@ -36,43 +36,32 @@ export function ArtifactForm({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const handleTagsChange = (newTags: string[]) => {
-    setTags(newTags);
-  };
-
+  const handleTagsChange = (newTags: string[]) => setTags(newTags);
   const handleAddSuggestedTag = (tag: string) => {
-    if (!tags.includes(tag)) {
-      setTags([...tags, tag]);
-    }
+    if (!tags.includes(tag)) setTags([...tags, tag]);
   };
-
   const handleAddContentExtension = (extension: string) => {
     setContentItems([...contentItems, { type: 'text', content: extension }]);
   };
-
-  const handleAddContent = () => {
-    setContentItems([...contentItems, {type: 'text', content: ''}]);
-  };
-
+  const handleAddContent = () => setContentItems([...contentItems, {type: 'text', content: ''}]);
   const handleContentTypeChange = (index: number, type: ContentType) => {
     const newContentItems = [...contentItems];
     newContentItems[index] = {type, content: ''};
     setContentItems(newContentItems);
   };
-
   const handleContentChange = (index: number, content: string | File) => {
     const newContentItems = [...contentItems];
     newContentItems[index].content = content;
     setContentItems(newContentItems);
   };
-
   const handleFileChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      handleContentChange(index, file);
-    }
+    if (file) handleContentChange(index, file);
   };
-
+  const handleAddTag = (tag: string) => {
+    if (!tags.includes(tag)) setTags([...tags, tag]);
+  };
+  const handleRemoveTag = (tagToRemove: string) => setTags(tags.filter(tag => tag !== tagToRemove));
   const handleRemoveContent = (index: number) => {
     const newContentItems = [...contentItems];
     newContentItems.splice(index, 1);
@@ -83,28 +72,26 @@ export function ArtifactForm({
     event.preventDefault();
     if (formRef.current) {
       const formData = new FormData(formRef.current);
+      formData.delete('tags');
       tags.forEach(tag => formData.append('tags', tag));
       onSubmit(formData);
     }
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">{artifact ? 'Edit' : 'Create'} Artifact</h1>
-        {onGetAISuggestions && (
-          <Button onClick={onGetAISuggestions}>
-            Get AI Suggestions
-          </Button>
-        )}
-      </div>
-      <form onSubmit={handleSubmit} ref={formRef}>
+    <form onSubmit={handleSubmit} ref={formRef}>
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">{artifact ? 'Edit' : 'Create'} Artifact</h1>
+          {onGetAISuggestions && (
+            <Button onClick={onGetAISuggestions}>Get AI Suggestions</Button>
+          )}
+        </div>
+        
         <div className="rounded-md bg-gray-50 p-4 md:p-6">
           {/* Artifact Name */}
           <div className="mb-4">
-            <label htmlFor="name" className="mb-2 block text-sm font-medium">
-              Artifact Name
-            </label>
+            <label htmlFor="name" className="mb-2 block text-sm font-medium">Artifact Name</label>
             <input
               id="name"
               name="name"
@@ -118,9 +105,7 @@ export function ArtifactForm({
 
           {/* Artifact Description */}
           <div className="mb-4">
-            <label htmlFor="description" className="mb-2 block text-sm font-medium">
-              Artifact Description
-            </label>
+            <label htmlFor="description" className="mb-2 block text-sm font-medium">Artifact Description</label>
             <textarea
               id="description"
               name="description"
@@ -133,73 +118,67 @@ export function ArtifactForm({
 
           {/* Artifact Content Items */}
           {contentItems.map((item, index) => (
-          <div key={index} className="mb-4">
-            <label className="mb-2 block text-sm font-medium">
-              Content Item {index + 1}
-            </label>
-            <select
-              name={`contentType-${index}`}
-              className="mb-2 peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
-              value={item.type}
-              onChange={(e) => handleContentTypeChange(index, e.target.value as ContentType)}
-              required
-              title={`Content Type ${index + 1}`}
-            >
-              <option value="text">Text</option>
-              <option value="image">Image</option>
-              <option value="file">File</option>
-            </select>
-            {item.type === 'text' ? (
-              <textarea
-                name={`content-${index}`}
-                className="peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
-                value={item.content as string}
-                onChange={(e) => handleContentChange(index, e.target.value)}
-                placeholder="Enter content"
+            <div key={index} className="mb-4">
+              <label className="mb-2 block text-sm font-medium">Content Item {index + 1}</label>
+              <select
+                name={`contentType-${index}`}
+                className="mb-2 peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
+                value={item.type}
+                onChange={(e) => handleContentTypeChange(index, e.target.value as ContentType)}
                 required
-                rows={5}
-              ></textarea>
-            ) : (
-              <div className="flex items-center">
-                <input
-                  type="file"
+                title={`Content Type ${index + 1}`}
+              >
+                <option value="text">Text</option>
+                <option value="image">Image</option>
+                <option value="file">File</option>
+              </select>
+              {item.type === 'text' ? (
+                <textarea
                   name={`content-${index}`}
-                  onChange={(e) => handleFileChange(index, e)}
-                  accept={item.type === 'image' ? 'image/*' : undefined}
-                  className="hidden"
-                  required={!item.id}
-                  ref={fileInputRef}
-                  title="Choose File"
-                />
-                <Button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="mr-2"
-                >
-                  {item.id ? 'Change File' : 'Choose File'}
-                </Button>
-                <span className="text-sm text-gray-500">
-                  {item.content instanceof File ? item.content.name : (item.id ? 'Existing file' : 'No file chosen')}
-                </span>
-              </div>
-            )}
-            {item.id && (
-              <input type="hidden" name={`contentId-${index}`} value={item.id} />
-            )}
-            <Button type="button" onClick={() => handleRemoveContent(index)} className="mt-2">
-              Remove Content
-            </Button>
-          </div>
-        ))}
-        <Button type="button" onClick={handleAddContent}>
-          Add Content Item
-        </Button>
+                  className="peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
+                  value={item.content as string}
+                  onChange={(e) => handleContentChange(index, e.target.value)}
+                  placeholder="Enter content"
+                  required
+                  rows={5}
+                ></textarea>
+              ) : (
+                <div className="flex items-center">
+                  <input
+                    type="file"
+                    name={`content-${index}`}
+                    onChange={(e) => handleFileChange(index, e)}
+                    accept={item.type === 'image' ? 'image/*' : undefined}
+                    className="hidden"
+                    required={!item.id}
+                    ref={fileInputRef}
+                    title="Choose File"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mr-2"
+                  >
+                    {item.id ? 'Change File' : 'Choose File'}
+                  </Button>
+                  <span className="text-sm text-gray-500">
+                    {item.content instanceof File ? item.content.name : (item.id ? 'Existing file' : 'No file chosen')}
+                  </span>
+                </div>
+              )}
+              {item.id && (
+                <input type="hidden" name={`contentId-${index}`} value={item.id} />
+              )}
+              <Button type="button" onClick={() => handleRemoveContent(index)} className="mt-2">
+                Remove Content
+              </Button>
+            </div>
+          ))}
+          <Button type="button" onClick={handleAddContent}>Add Content Item</Button>
 
           {/* Associated Projects */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-medium">
-              Associated Projects
-            </label>
+            <label className="mb-2 block text-sm font-medium">Associated Projects</label>
             {projects.map((project) => (
               <div key={project.id} className="flex items-center mb-2">
                 <input
@@ -217,21 +196,26 @@ export function ArtifactForm({
 
           {/* Tags */}
           <div className="mb-4">
-            <div>
-              <label className="mb-2 block text-sm font-medium" htmlFor="tags">Tags</label>
-              <TagManager
-                initialTags={tags}
-                onTagsChange={handleTagsChange}
-              />
+            <label className="mb-2 block text-sm font-medium">Tags</label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {tags.map((tag, index) => (
+                <span key={index} className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                  {tag}
+                  <button type="button" onClick={() => handleRemoveTag(tag)} className="ml-1 text-xs">×</button>
+                </span>
+              ))}
             </div>
+            <TagManager initialTags={tags} onTagsChange={setTags} />
           </div>
 
-          {/* AI-Suggested */}
+          {/* AI Suggestions */}
           <Suggestions
             suggestedTags={suggestedTags}
             suggestedContentExtensions={suggestedContentExtensions}
-            onAddTag={handleAddSuggestedTag}
-            onAddContentExtension={handleAddContentExtension}
+            onAddTag={handleAddTag}
+            onAddContentExtension={(extension) => {
+              setContentItems([...contentItems, { type: 'text', content: extension }]);
+            }}
           />
         </div>
 
@@ -246,7 +230,7 @@ export function ArtifactForm({
             {isSubmitting ? 'Submitting...' : submitButtonText}
           </Button>
         </div>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 }

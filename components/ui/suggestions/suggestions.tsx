@@ -3,15 +3,21 @@ import React from 'react';
 interface SuggestionsProps {
   suggestedTags?: string[];
   suggestedContentExtensions?: string[];
-  onAddTag?: (tag: string) => void;
-  onAddContentExtension?: (extension: string) => void;
+  onAddTag: (tag: string) => void;
+  onAddContentExtension: (extension: string) => void;
 }
 
 export function Suggestions({ suggestedTags, suggestedContentExtensions, onAddTag, onAddContentExtension }: SuggestionsProps) {
-  if (!suggestedTags?.length && !suggestedContentExtensions?.length) {
-    return null;
-  }
-  
+  const handleAddTag = (e: React.MouseEvent, tag: string) => {
+    e.preventDefault();  // Prevent form submission
+    onAddTag(tag);
+  };
+
+  const handleAddExtension = (e: React.MouseEvent, extension: string) => {
+    e.preventDefault();  // Prevent form submission
+    onAddContentExtension(extension);
+  };
+
   return (
     <div className="mt-6 p-4 bg-gray-50 rounded-lg">
       <h2 className="text-xl font-bold mb-4">AI Suggestions</h2>
@@ -22,7 +28,7 @@ export function Suggestions({ suggestedTags, suggestedContentExtensions, onAddTa
             {suggestedTags.map((tag, index) => (
               <button
                 key={index}
-                onClick={() => onAddTag && onAddTag(tag)}
+                onClick={(e) => handleAddTag(e, tag)}
                 className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full hover:bg-blue-200"
               >
                 {tag}
@@ -38,14 +44,12 @@ export function Suggestions({ suggestedTags, suggestedContentExtensions, onAddTa
             {suggestedContentExtensions.map((idea, index) => (
               <li key={index}>
                 {idea}
-                {onAddContentExtension && (
-                  <button
-                    onClick={() => onAddContentExtension(idea)}
-                    className="ml-2 text-blue-600 hover:text-blue-800"
-                  >
-                    Add
-                  </button>
-                )}
+                <button
+                  onClick={(e) => handleAddExtension(e, idea)}
+                  className="ml-2 text-blue-600 hover:text-blue-800"
+                >
+                  Add
+                </button>
               </li>
             ))}
           </ul>
