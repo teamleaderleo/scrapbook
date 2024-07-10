@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ArtifactDetail, Project, Tag, ContentType } from '@/app/lib/definitions';
+import React, { useState, useRef } from 'react';
+import { ArtifactDetail, Project, ContentType } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { TagManager } from '@/components/tagmanager';
@@ -23,6 +23,8 @@ export function ArtifactForm({
 }: ArtifactFormProps) {
   const [tags, setTags] = useState<string[]>(artifact?.tags.map(tag => tag.name) || []);
   const [artifactType, setArtifactType] = useState<ContentType>(artifact?.contents[0]?.type || 'text');
+  const [fileName, setFileName] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -30,6 +32,13 @@ export function ArtifactForm({
     tags.forEach(tag => formData.append('tags', tag));
     formData.append('type', artifactType);
     onSubmit(formData);
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setFileName(file.name);
+    }
   };
 
   return (
@@ -44,7 +53,7 @@ export function ArtifactForm({
             id="name"
             name="name"
             type="text"
-            className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+            className="peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
             defaultValue={artifact?.name}
             placeholder="Enter artifact name"
             required
@@ -59,9 +68,10 @@ export function ArtifactForm({
           <textarea
             id="description"
             name="description"
-            className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+            className="peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
             defaultValue={artifact?.description}
             placeholder="Enter artifact description"
+            rows={3}
           ></textarea>
         </div>
 
@@ -73,7 +83,7 @@ export function ArtifactForm({
           <select
             id="type"
             name="type"
-            className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+            className="peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
             value={artifactType}
             onChange={(e) => setArtifactType(e.target.value as ContentType)}
             required
@@ -93,30 +103,34 @@ export function ArtifactForm({
             <textarea
               id="content"
               name="content"
-              className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+              className="peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
               defaultValue={artifact?.contents[0]?.content}
               placeholder="Enter artifact content"
               required
+              rows={5}
             ></textarea>
           )}
-          {artifactType === 'image' && (
-            <input
-              type="file"
-              id="content"
-              name="content"
-              accept="image/*"
-              className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              required
-            />
-          )}
-          {artifactType === 'file' && (
-            <input
-              type="file"
-              id="content"
-              name="content"
-              className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-              required
-            />
+          {(artifactType === 'image' || artifactType === 'file') && (
+            <div className="flex items-center">
+              <input
+                type="file"
+                id="content"
+                name="content"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept={artifactType === 'image' ? 'image/*' : undefined}
+                className="hidden"
+                required
+              />
+              <Button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="mr-2"
+              >
+                Choose File
+              </Button>
+              <span className="text-sm text-gray-500">{fileName || 'No file chosen'}</span>
+            </div>
           )}
         </div>
 
@@ -126,7 +140,7 @@ export function ArtifactForm({
             Associated Projects
           </label>
           {projects.map((project) => (
-            <div key={project.id} className="flex items-center">
+            <div key={project.id} className="flex items-center mb-2">
               <input
                 type="checkbox"
                 id={`project-${project.id}`}
@@ -135,7 +149,7 @@ export function ArtifactForm({
                 defaultChecked={artifact?.projects?.some(p => p.id === project.id) || false}
                 className="mr-2"
               />
-              <label htmlFor={`project-${project.id}`}>{project.name}</label>
+              <label htmlFor={`project-${project.id}`} className="text-sm">{project.name}</label>
             </div>
           ))}
         </div>
