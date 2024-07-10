@@ -2,12 +2,12 @@ import React, { useState, useRef } from 'react';
 import { ArtifactDetail, Project, ContentType } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { TagManager } from '@/components/tagmanager';
+import { TagManager } from '@/components/ui/tags/tagmanager';
 
 interface ArtifactFormProps {
   artifact?: ArtifactDetail;
   projects: Project[];
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (formData: FormData) => void;
   isSubmitting: boolean;
   submitButtonText: string;
   cancelHref: string;
@@ -21,11 +21,12 @@ export function ArtifactForm({
   submitButtonText,
   cancelHref,
 }: ArtifactFormProps) {
-  const [tags, setTags] = useState<string[]>(artifact?.tags.map(tag => tag.name) || []);
+  const [tags, setTags] = useState<string[]>(artifact?.tags?.map(tag => tag.name) || []);
   const [contentItems, setContentItems] = useState<{id?: string, type: ContentType, content: string | File}[]>(
     artifact?.contents.map(c => ({id: c.id, type: c.type, content: c.content})) || [{type: 'text', content: ''}]
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleAddContent = () => {
     setContentItems([...contentItems, {type: 'text', content: ''}]);
@@ -56,8 +57,28 @@ export function ArtifactForm({
     setContentItems(newContentItems);
   };
 
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (formRef.current) {
+      const formData = new FormData(formRef.current);
+      
+      // Remove any existing tag fields
+      formData.delete('tags');
+      
+      // Add current tags to the form data
+      tags.forEach(tag => formData.append('tags', tag));
+      
+      // Call the onSubmit function with the updated form data
+      onSubmit(formData);
+    }
+  };
+
+  const handleTagsChange = (newTags: string[]) => {
+    setTags(newTags);
+  };
+
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={handleSubmit} ref={formRef}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Artifact Name */}
         <div className="mb-4">
@@ -176,10 +197,13 @@ export function ArtifactForm({
 
         {/* Tags */}
         <div className="mb-4">
-          <label className="mb-2 block text-sm font-medium">
-            Tags
-          </label>
-          <TagManager initialTags={tags} onTagsChange={setTags} />
+          <div>
+            <label className="mb-2 block text-sm font-medium" htmlFor="tags">Tags</label>
+            <TagManager
+              initialTags={tags}
+              onTagsChange={handleTagsChange}
+            />
+          </div>
         </div>
       </div>
       <div className="mt-6 flex justify-end gap-4">

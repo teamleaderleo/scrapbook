@@ -40,10 +40,8 @@ export default function EditArtifactForm({
     return null;
   }
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = (formData: FormData) => {
     setIsSubmitting(true);
-    const formData = new FormData(event.currentTarget);
     formAction(formData);
   };
 
