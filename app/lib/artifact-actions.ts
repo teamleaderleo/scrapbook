@@ -11,10 +11,6 @@ import { uploadToS3, deleteFromS3 } from './s3-operations';
 const ArtifactSchema = z.object({
   name: z.string().min(1, 'Artifact name is required.'),
   description: z.string().optional(),
-  type: z.enum(['text', 'image', 'file'] as const, {
-    invalid_type_error: 'Please select a valid artifact type.',
-  }),
-  content: z.string().min(1, 'Artifact content is required.'),
   tags: z.array(z.string()).optional(),
   projects: z.array(z.string()).optional(),
 });
@@ -153,7 +149,7 @@ export async function updateArtifact(id: string, accountId: string, prevState: S
     await sql`COMMIT`;
 
     revalidatePath('/dashboard/artifacts');
-    redirect('/dashboard/artifacts');
+    return { message: 'Artifact updated successfully' };
   } catch (error) {
     await sql`ROLLBACK`;
     console.error('Error updating artifact:', error);
