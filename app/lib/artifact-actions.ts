@@ -151,10 +151,10 @@ export async function updateArtifact(id: string, accountId: string, prevState: S
     const hasContent = await handleContentUpdate(accountId, id, formData);
 
     if (!hasContent) {
-      await deleteArtifact(id, accountId);
+      const deleteResult = await deleteArtifact(id, accountId);
       await sql`COMMIT`;
       revalidatePath('/dashboard/artifacts');
-      return { message: 'Artifact deleted due to lack of content' };
+      return { message: deleteResult.message };
     }
 
     await handleTagUpdate(accountId, id, tags || []);

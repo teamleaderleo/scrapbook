@@ -12,14 +12,21 @@ export default function EditArtifactForm({
   artifact,
   projects,
 }: {
-  artifact: ArtifactDetail;
+  artifact: ArtifactDetail | null;
   projects: Project[];
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const initialState = { message: null, errors: {} };
-  const updateArtifactWithId = updateArtifact.bind(null, artifact.id, ADMIN_UUID);
-  const [state, formAction] = useFormState(updateArtifactWithId, initialState);
+  const updateArtifactWithId = artifact ? updateArtifact.bind(null, artifact.id, ADMIN_UUID) : null;
+  const [state, formAction] = useFormState(updateArtifactWithId || (() => Promise.resolve({})), initialState);
+
+  useEffect(() => {
+    if (!artifact) {
+      // If artifact is null (not found), redirect to the artifacts list
+      router.replace('/dashboard/artifacts');
+    }
+  }, [artifact, router]);
 
   useEffect(() => {
     if (state.message === 'Artifact updated successfully' || state.message === 'Artifact deleted due to lack of content') {
@@ -27,6 +34,11 @@ export default function EditArtifactForm({
     }
     setIsSubmitting(false);
   }, [state, router]);
+
+  if (!artifact) {
+    // Return null to prevent any flash of content
+    return null;
+  }
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -46,7 +58,10 @@ export default function EditArtifactForm({
         cancelHref="/dashboard/artifacts"
       />
       {state.message && (
-        <p className={`mt-2 text-sm ${state.message.includes('Error') ? 'text-red-500' : 'text-green-500'}`}>
+        <p className={`mt-2 text-sm ${
+          state.message.includes('Error') ? 'text-red-500' : 
+          state.message.includes('deleted') ? 'text-yellow-500' : 'text-green-500'
+        }`}>
           {state.message}
         </p>
       )}
