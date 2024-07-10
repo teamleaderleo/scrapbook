@@ -61,7 +61,9 @@ export default function ArtifactsTable({
                           </div>
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-3 py-3">{artifact.contents[0].type}</td>
+                      <td className="whitespace-nowrap px-3 py-3">
+                        {artifact.contents && artifact.contents.length > 0 ? artifact.contents[0].type : 'No content'}
+                      </td>
                       <td className="px-3 py-3">{artifact.description}</td>
                       <td className="px-3 py-3">
                         <TagList
@@ -82,16 +84,22 @@ export default function ArtifactsTable({
                       </td>
                       <td className="whitespace-nowrap px-3 py-3">
                         <div className="flex space-x-2">
-                          {artifact.contents.slice(0, 3).map((content, index) => (
-                            <div key={index} className="w-10 h-10 relative overflow-hidden rounded-full">
-                              <Image
-                                src={getArtifactThumbnail({ ...artifact, contents: [content] })}
-                                alt={`Thumbnail for ${artifact.name} content ${index + 1}`}
-                                layout="fill"
-                                objectFit="cover"
-                              />
+                          {artifact.contents && artifact.contents.length > 0 ? (
+                            artifact.contents.slice(0, 3).map((content, index) => (
+                              <div key={index} className="w-10 h-10 relative overflow-hidden rounded-full">
+                                <Image
+                                  src={getArtifactThumbnail({ ...artifact, contents: [content] })}
+                                  alt={`Thumbnail for ${artifact.name} content ${index + 1}`}
+                                  layout="fill"
+                                  objectFit="cover"
+                                />
+                              </div>
+                            ))
+                          ) : (
+                            <div className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full">
+                              <span className="text-xs text-gray-500">No content</span>
                             </div>
-                          ))}
+                          )}
                         </div>
                       </td>
                       <td className="whitespace-nowrap py-3 pl-6 pr-3">
