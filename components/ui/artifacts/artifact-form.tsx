@@ -7,7 +7,7 @@ import { TagManager } from '@/components/tagmanager';
 interface ArtifactFormProps {
   artifact?: ArtifactDetail;
   projects: Project[];
-  onSubmit: (formData: FormData) => void;
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   isSubmitting: boolean;
   submitButtonText: string;
   cancelHref: string;
@@ -22,27 +22,36 @@ export function ArtifactForm({
   cancelHref,
 }: ArtifactFormProps) {
   const [tags, setTags] = useState<string[]>(artifact?.tags.map(tag => tag.name) || []);
-  const [artifactType, setArtifactType] = useState<ContentType>(artifact?.contents[0]?.type || 'text');
-  const [fileName, setFileName] = useState<string>('');
+  const [contentItems, setContentItems] = useState<{type: ContentType, content: string | File}[]>(
+    artifact?.contents.map(c => ({type: c.type, content: c.content})) || [{type: 'text', content: ''}]
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    tags.forEach(tag => formData.append('tags', tag));
-    formData.append('type', artifactType);
-    onSubmit(formData);
+  const handleAddContent = () => {
+    setContentItems([...contentItems, {type: 'text', content: ''}]);
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleContentTypeChange = (index: number, type: ContentType) => {
+    const newContentItems = [...contentItems];
+    newContentItems[index] = {type, content: ''};
+    setContentItems(newContentItems);
+  };
+
+  const handleContentChange = (index: number, content: string | File) => {
+    const newContentItems = [...contentItems];
+    newContentItems[index].content = content;
+    setContentItems(newContentItems);
+  };
+
+  const handleFileChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setFileName(file.name);
+      handleContentChange(index, file);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={onSubmit}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Artifact Name */}
         <div className="mb-4">
@@ -75,64 +84,63 @@ export function ArtifactForm({
           ></textarea>
         </div>
 
-        {/* Artifact Type */}
-        <div className="mb-4">
-          <label htmlFor="type" className="mb-2 block text-sm font-medium">
-            Artifact Type
-          </label>
-          <select
-            id="type"
-            name="type"
-            className="peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
-            value={artifactType}
-            onChange={(e) => setArtifactType(e.target.value as ContentType)}
-            required
-          >
-            <option value="text">Text</option>
-            <option value="image">Image</option>
-            <option value="file">File</option>
-          </select>
-        </div>
-
-        {/* Artifact Content */}
-        <div className="mb-4">
-          <label htmlFor="content" className="mb-2 block text-sm font-medium">
-            Artifact Content
-          </label>
-          {artifactType === 'text' && (
-            <textarea
-              id="content"
-              name="content"
-              className="peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue={artifact?.contents[0]?.content}
-              placeholder="Enter artifact content"
+        {/* Artifact Content Items */}
+        {contentItems.map((item, index) => (
+          <div key={index} className="mb-4">
+            <label className="mb-2 block text-sm font-medium">
+              Content Item {index + 1}
+            </label>
+            <select
+              name={`contentType-${index}`}
+              className="mb-2 peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
+              value={item.type}
+              onChange={(e) => handleContentTypeChange(index, e.target.value as ContentType)}
               required
-              rows={5}
-            ></textarea>
-          )}
-          {(artifactType === 'image' || artifactType === 'file') && (
-            <div className="flex items-center">
-              <input
-                type="file"
-                id="content"
-                name="content"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept={artifactType === 'image' ? 'image/*' : undefined}
-                className="hidden"
+              title={`Content Type ${index + 1}`}
+            >
+              <option value="text">Text</option>
+              <option value="image">Image</option>
+              <option value="file">File</option>
+            </select>
+            {item.type === 'text' ? (
+              <textarea
+                name={`content-${index}`}
+                className="peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
+                value={item.content as string}
+                onChange={(e) => handleContentChange(index, e.target.value)}
+                placeholder="Enter content"
                 required
-              />
-              <Button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="mr-2"
-              >
-                Choose File
-              </Button>
-              <span className="text-sm text-gray-500">{fileName || 'No file chosen'}</span>
-            </div>
-          )}
-        </div>
+                rows={5}
+              ></textarea>
+            ) : (
+              <div className="flex items-center">
+                <input
+                  type="file"
+                  name={`content-${index}`}
+                  onChange={(e) => handleFileChange(index, e)}
+                  accept={item.type === 'image' ? 'image/*' : undefined}
+                  className="hidden"
+                  required
+                  ref={fileInputRef}
+                  title="Choose File"
+                />
+                <Button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="mr-2"
+                >
+                  Choose File
+                </Button>
+                <span className="text-sm text-gray-500">
+                  {item.content instanceof File ? item.content.name : 'No file chosen'}
+                </span>
+              </div>
+            )}
+          </div>
+        ))}
+        <Button type="button" onClick={handleAddContent}>
+          Add Content Item
+        </Button>
 
         {/* Associated Projects */}
         <div className="mb-4">

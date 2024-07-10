@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { addTagToArtifact, removeTagFromArtifact, getArtifactTags } from './utils-server';
 import { ContentType } from './definitions';
+import { uploadToS3 } from './s3-operations';
 
 const ArtifactSchema = z.object({
   name: z.string().min(1, 'Artifact name is required.'),
@@ -127,24 +128,16 @@ export async function deleteArtifact(id: string, accountId: string) {
   }
 }
 
-export async function createArtifact(accountId: string, prevState: State, formData: FormData) {
-  const validatedFields = ArtifactSchema.safeParse({
-    name: formData.get('name'),
-    description: formData.get('description'),
-    type: formData.get('type'),
-    content: formData.get('content'),
-    tags: formData.getAll('tags'),
-    projects: formData.getAll('projects'),
-  });
+export async function createArtifact(accountId: string, formData: FormData) {
+  const name = formData.get('name') as string;
 
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to Create Artifact.',
-    };
-  }
+  const tags = formData.getAll('tags') as string[];
 
-  const { name, description, type, content, tags, projects } = validatedFields.data;
+  const description = formData.get('description') as string;
+  const contentItems = formData.getAll('content') as File[];
+  const contentTypes = formData.getAll('contentType') as string[];
+
+  const projects = formData.getAll('projects') as string[];
 
   try {
     await sql`BEGIN`;
@@ -156,10 +149,28 @@ export async function createArtifact(accountId: string, prevState: State, formDa
     `;
     const artifactId = result.rows[0].id;
 
-    await sql`
-      INSERT INTO artifact_content (account_id, artifact_id, type, content)
-      VALUES (${accountId}, ${artifactId}, ${type}, ${content})
-    `;
+    // Handle multiple content items
+    let index = 0;
+    while (formData.get(`contentType-${index}`)) {
+      const contentType = formData.get(`contentType-${index}`) as ContentType;
+      const contentItem = formData.get(`content-${index}`);
+
+      let content: string;
+      if (contentType === 'text') {
+        content = contentItem as string;
+      } else if (contentItem instanceof File) {
+        content = await uploadToS3(contentItem, contentType);
+      } else {
+        throw new Error(`Invalid content for type ${contentType}`);
+      }
+
+      await sql`
+        INSERT INTO artifact_content (account_id, artifact_id, type, content)
+        VALUES (${accountId}, ${artifactId}, ${contentType}, ${content})
+      `;
+
+      index++;
+    }
 
     if (tags && tags.length > 0) {
       for (const tagName of tags) {
@@ -183,7 +194,7 @@ export async function createArtifact(accountId: string, prevState: State, formDa
   } catch (error: any) {
     await sql`ROLLBACK`;
     return {
-      message: `Database Error: Failed to Create Artifact. ${error.message}`,
+      message: `Error: Failed to Create Artifact. ${error.message}`,
     };
   }
 }

@@ -12,7 +12,9 @@ export default function CreateArtifactForm({ projects }: { projects: Project[] }
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const initialState: State = { message: null, errors: {} };
-  const createArtifactWithAccount = createArtifact.bind(null, ADMIN_UUID);
+  const createArtifactWithAccount = async (prevState: State, formData: FormData) => {
+    return createArtifact(ADMIN_UUID, formData);
+  };
   const [state, formAction] = useFormState(createArtifactWithAccount, initialState);
 
   // Create a default artifact object
@@ -45,8 +47,10 @@ export default function CreateArtifactForm({ projects }: { projects: Project[] }
     }
   }, [state, router]);
 
-  const handleSubmit = (formData: FormData) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setIsSubmitting(true);
+    const formData = new FormData(event.currentTarget);
     formAction(formData);
   };
 
