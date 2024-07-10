@@ -72,14 +72,22 @@ const InfiniteScrollProjectGallery: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const loader = useRef<HTMLDivElement>(null);
+  const totalProjects = 16; // Total number of unique projects
 
   const loadMoreProjects = async () => {
     if (loading) return;
     setLoading(true);
     // Simulated API call - replace with actual API call
     const newProjects = await fetchProjects(page);
-    setProjects(prevProjects => [...prevProjects, ...newProjects]);
-    setPage(prevPage => prevPage + 1);
+    setProjects(prevProjects => {
+      const updatedProjects = [...prevProjects, ...newProjects];
+      // If we've loaded all projects, start removing from the beginning
+      if (updatedProjects.length > totalProjects) {
+        return updatedProjects.slice(-totalProjects);
+      }
+      return updatedProjects;
+    });
+    setPage(prevPage => (prevPage % (totalProjects / 4)) + 1); // Loop back to 1 after reaching the end
     setLoading(false);
   };
 
@@ -115,8 +123,8 @@ const InfiniteScrollProjectGallery: React.FC = () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     return Array(4).fill(null).map((_, index) => ({
-      id: `project-${page}-${index}`,
-      name: `Project ${page}-${index}`,
+      id: `project-${((page - 1) * 4 + index) % totalProjects + 1}`,
+      name: `Project ${((page - 1) * 4 + index) % totalProjects + 1}`,
       dueDate: new Date(Date.now() + Math.random() * 10000000000).toLocaleDateString(),
       progress: Math.floor(Math.random() * 100),
       images: Array(4).fill('/placeholder.svg')
