@@ -54,7 +54,7 @@ export async function updateArtifact(id: string, accountId: string, prevState: S
 
     await sql`
       UPDATE artifact
-      SET name = ${name}, description = ${description}, type = ${type}
+      SET name = ${name}, description = ${description}
       WHERE id = ${id} AND account_id = ${accountId}
     `;
 
@@ -150,8 +150,8 @@ export async function createArtifact(accountId: string, prevState: State, formDa
     await sql`BEGIN`;
 
     const result = await sql`
-      INSERT INTO artifact (account_id, name, description, type)
-      VALUES (${accountId}, ${name}, ${description}, ${type})
+      INSERT INTO artifact (account_id, name, description)
+      VALUES (${accountId}, ${name}, ${description})
       RETURNING id
     `;
     const artifactId = result.rows[0].id;
