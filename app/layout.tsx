@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     default: 'Setzen',
   },
   description: 'Setzen.',
-  metadataBase: new URL('https://next-learn-dashboard.vercel.sh'),
+  metadataBase: new URL('https://setzen.vercel.app/'),
 };
 
 export default function RootLayout({
