@@ -6,10 +6,8 @@ import { updateArtifact } from '@/app/lib/artifact-actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { ArtifactForm } from '@/components/ui/artifacts/artifact-form';
-import { Recommendations } from '@/components/ui/dashboard/recommendations';
-import { getRecommendations, suggestTags } from '@/app/lib/claude-utils';
+import { suggestTags, suggestContentExtensions } from '@/app/lib/claude-utils';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 
 export default function EditArtifactForm({
   artifact,
@@ -19,14 +17,10 @@ export default function EditArtifactForm({
   projects: Project[];
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const router = useRouter();
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
-  const [recommendations, setRecommendations] = useState<{projects: string[], artifacts: string[], tags: string[]}>({
-    projects: [],
-    artifacts: [],
-    tags: []
-  });
+  const [suggestedContentExtensions, setSuggestedContentExtensions] = useState<string[]>([]);
   const initialState = { message: null, errors: {} };
   const updateArtifactWithId = artifact ? updateArtifact.bind(null, artifact.id, ADMIN_UUID) : null;
   const [state, formAction] = useFormState(updateArtifactWithId || (() => Promise.resolve({})), initialState);
@@ -44,17 +38,6 @@ export default function EditArtifactForm({
     setIsSubmitting(false);
   }, [state, router]);
 
-  useEffect(() => {
-    if (artifact) {
-      const fetchSuggestedTags = async () => {
-        const content = artifact.contents.map(c => c.type === 'text' ? c.content : '').join(' ');
-        const tags = await suggestTags(`${artifact.name} ${artifact.description} ${content}`);
-        setSuggestedTags(tags);
-      };
-      fetchSuggestedTags();
-    }
-  }, [artifact]);
-
   if (!artifact) {
     return null;
   }
@@ -64,32 +47,23 @@ export default function EditArtifactForm({
     formAction(formData);
   };
 
-  const handleGetRecommendations = async () => {
-    setIsLoadingRecommendations(true);
+  const handleGetAISuggestions = async () => {
+    setIsLoadingSuggestions(true);
     try {
-      const result = await getRecommendations({
-        artifactId: artifact.id,
-        tags: artifact.tags.map(t => t.name),
-        includeProjects: true,
-        includeArtifacts: true,
-        includeTags: true
-      });
-      setRecommendations(result);
+      const content = artifact.contents.map(c => c.type === 'text' ? c.content : '').join(' ');
+      const tags = await suggestTags(`${artifact.name} ${artifact.description} ${content}`);
+      setSuggestedTags(tags);
+      const extensions = await suggestContentExtensions(content);
+      setSuggestedContentExtensions(extensions);
     } catch (error) {
-      console.error('Failed to fetch recommendations:', error);
+      console.error('Failed to fetch suggestions:', error);
     } finally {
-      setIsLoadingRecommendations(false);
+      setIsLoadingSuggestions(false);
     }
   };
 
   return (
     <>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Edit Artifact</h1>
-        <Button onClick={handleGetRecommendations} disabled={isLoadingRecommendations}>
-          {isLoadingRecommendations ? 'Loading...' : 'Get Recommendations'}
-        </Button>
-      </div>
       <ArtifactForm
         artifact={artifact}
         projects={projects}
@@ -98,6 +72,8 @@ export default function EditArtifactForm({
         submitButtonText="Update Artifact"
         cancelHref="/dashboard/artifacts"
         suggestedTags={suggestedTags}
+        suggestedContentExtensions={suggestedContentExtensions}
+        onGetAISuggestions={handleGetAISuggestions}
       />
       {state.message && (
         <p className={`mt-2 text-sm ${
@@ -112,13 +88,6 @@ export default function EditArtifactForm({
           {field}: {errors.join(', ')}
         </p>
       ))}
-      {(recommendations.projects.length > 0 || recommendations.artifacts.length > 0 || recommendations.tags.length > 0) && (
-        <Recommendations
-          projectId={artifact.id}
-          tags={artifact.tags.map(t => t.name)}
-          recommendations={recommendations}
-        />
-      )}
     </>
   );
 }

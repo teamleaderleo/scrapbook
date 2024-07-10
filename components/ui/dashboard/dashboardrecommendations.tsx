@@ -18,7 +18,8 @@ export function DashboardRecommendations() {
       const result = await getRecommendations({
         includeProjects: true,
         includeArtifacts: true,
-        includeTags: true
+        includeTags: true,
+        includeContentExtensions: true
       });
       setRecommendations(result);
     } catch (error) {
