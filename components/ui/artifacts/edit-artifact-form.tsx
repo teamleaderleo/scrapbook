@@ -22,7 +22,7 @@ export default function EditArtifactForm({
   const [state, formAction] = useFormState(updateArtifactWithId, initialState);
 
   useEffect(() => {
-    if (state.message === 'Artifact updated successfully') {
+    if (state.message === 'Artifact updated successfully' || state.message === 'Artifact deleted due to lack of content') {
       router.push('/dashboard/artifacts');
     }
     setIsSubmitting(false);

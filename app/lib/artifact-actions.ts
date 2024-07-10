@@ -34,6 +34,7 @@ async function handleContentUpdate(accountId: string, artifactId: string, formDa
   `;
 
   const existingContentIds = new Set(existingContents.rows.map(row => row.id));
+  let newContentCount = 0;
 
   let index = 0;
   while (formData.get(`contentType-${index}`) !== null) {
@@ -42,37 +43,39 @@ async function handleContentUpdate(accountId: string, artifactId: string, formDa
     const contentIdValue = formData.get(`contentId-${index}`);
     const contentId = typeof contentIdValue === 'string' ? contentIdValue : null;
 
-    let content: string;
+    let content: string | null = null;
     if (contentType === 'text') {
-      content = contentItem as string;
+      content = (contentItem as string).trim();
+      if (content === '') {
+        content = null;
+      }
     } else if (contentItem instanceof File) {
       content = await uploadToS3(contentItem, contentType, accountId);
     } else if (typeof contentItem === 'string' && contentItem.startsWith('data:')) {
-      // Handle base64 encoded file
       const base64Data = contentItem.split(',')[1];
       const buffer = Buffer.from(base64Data, 'base64');
       content = await uploadToS3(buffer, contentType, accountId);
     } else if (contentId) {
-      // Existing file, no change
-      content = existingContents.rows.find(row => row.id === contentId)?.content || '';
-    } else {
-      throw new Error(`Invalid content for type ${contentType}`);
+      content = existingContents.rows.find(row => row.id === contentId)?.content || null;
     }
 
-    if (contentId) {
-      // Update existing content
-      await sql`
-        UPDATE artifact_content
-        SET type = ${contentType}, content = ${content}
-        WHERE id = ${contentId} AND account_id = ${accountId}
-      `;
+    if (content) {
+      if (contentId) {
+        await sql`
+          UPDATE artifact_content
+          SET type = ${contentType}, content = ${content}
+          WHERE id = ${contentId} AND account_id = ${accountId}
+        `;
+        existingContentIds.delete(contentId);
+      } else {
+        await sql`
+          INSERT INTO artifact_content (account_id, artifact_id, type, content)
+          VALUES (${accountId}, ${artifactId}, ${contentType}, ${content})
+        `;
+      }
+      newContentCount++;
+    } else if (contentId) {
       existingContentIds.delete(contentId);
-    } else {
-      // Insert new content
-      await sql`
-        INSERT INTO artifact_content (account_id, artifact_id, type, content)
-        VALUES (${accountId}, ${artifactId}, ${contentType}, ${content})
-      `;
     }
 
     index++;
@@ -86,6 +89,9 @@ async function handleContentUpdate(accountId: string, artifactId: string, formDa
     }
     await sql`DELETE FROM artifact_content WHERE id = ${contentId} AND account_id = ${accountId}`;
   }
+
+  // If no content remains, return false to indicate the artifact should be deleted
+  return newContentCount > 0;
 }
 
 async function handleTagUpdate(accountId: string, artifactId: string, newTags: string[]) {
@@ -142,7 +148,15 @@ export async function updateArtifact(id: string, accountId: string, prevState: S
       WHERE id = ${id} AND account_id = ${accountId}
     `;
 
-    await handleContentUpdate(accountId, id, formData);
+    const hasContent = await handleContentUpdate(accountId, id, formData);
+
+    if (!hasContent) {
+      await deleteArtifact(id, accountId);
+      await sql`COMMIT`;
+      revalidatePath('/dashboard/artifacts');
+      return { message: 'Artifact deleted due to lack of content' };
+    }
+
     await handleTagUpdate(accountId, id, tags || []);
     await handleProjectUpdate(accountId, id, projects || []);
 
@@ -186,12 +200,11 @@ export async function deleteArtifact(id: string, accountId: string) {
 
     await sql`COMMIT`;
 
-    revalidatePath('/dashboard/artifacts');
     return { success: true, message: 'Artifact deleted successfully.' };
   } catch (error) {
     await sql`ROLLBACK`;
     console.error('Error deleting artifact:', error);
-    return { success: false, message: 'Database Error: Failed to delete artifact.' };
+    throw error;
   }
 }
 
