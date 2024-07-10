@@ -1,146 +1,103 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import React, { useState, useRef, useEffect } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { TagManager } from "@/components/ui/tags/tagmanager";
-import { Project } from '@/app/lib/definitions';
 
 interface ChatArtifactProps {
-  projects?: Project[];
   onSubmit: (data: ArtifactData) => void;
 }
 
-interface ContentItem {
-  type: 'text' | 'file';
-  content: string | File;
-}
-
 interface ArtifactData {
-  name: string;
-  contents: ContentItem[];
+  text: string;
+  images: File[];
   tags: string[];
-  associatedProjects: string[];
 }
 
-export default function ChatArtifact({ projects = [], onSubmit }: ChatArtifactProps) {
-  const [name, setName] = useState('');
-  const [contents, setContents] = useState<ContentItem[]>([{ type: 'text', content: '' }]);
+export default function ChatArtifact({ onSubmit }: ChatArtifactProps) {
+  const [text, setText] = useState('');
+  const [images, setImages] = useState<File[]>([]);
   const [tags, setTags] = useState<string[]>([]);
-  const [associatedProjects, setAssociatedProjects] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textInputRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleContentChange = useCallback((index: number, value: string) => {
-    setContents(prev => {
-      const newContents = [...prev];
-      newContents[index] = { ...newContents[index], content: value };
-      return newContents;
-    });
-  }, []);
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>, index: number) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      setContents(prev => [...prev, { type: 'text', content: '' }]);
-    } else if (e.key === 'Backspace' && contents[index].content === '' && contents.length > 1) {
-      e.preventDefault();
-      setContents(prev => prev.filter((_, i) => i !== index));
+  useEffect(() => {
+    if (textInputRef.current) {
+      textInputRef.current.style.height = 'auto';
+      textInputRef.current.style.height = `${textInputRef.current.scrollHeight}px`;
     }
-  }, [contents]);
+  }, [text]);
 
-  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setContents(prev => [...prev, ...files.map(file => ({ type: 'file' as const, content: file }))]);
-  }, []);
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(e.target.value);
+    processTags(e.target.value);
+  };
 
-  const handleProjectToggle = useCallback((projectId: string) => {
-    setAssociatedProjects(prev => 
-      prev.includes(projectId) 
-        ? prev.filter(id => id !== projectId)
-        : [...prev, projectId]
-    );
-  }, []);
+  const processTags = (input: string) => {
+    const tagRegex = /#(\w+)/g;
+    const foundTags = input.match(tagRegex)?.map(tag => tag.slice(1)) || [];
+    setTags([...new Set(foundTags)]);
+  };
 
-  const handleSubmit = useCallback(() => {
-    const artifactData: ArtifactData = {
-      name,
-      contents,
-      tags,
-      associatedProjects,
-    };
-    onSubmit(artifactData);
-  }, [name, contents, tags, associatedProjects, onSubmit]);
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newImages = Array.from(e.target.files || []);
+    setImages(prevImages => [...prevImages, ...newImages]);
+  };
+
+  const handleSubmit = () => {
+    onSubmit({ text, images, tags });
+    setText('');
+    setImages([]);
+    setTags([]);
+  };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>New Artifact</CardTitle>
-        <CardDescription>Create a new artifact with multiple content items.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <Input
-            placeholder="Artifact name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          {contents.map((item, index) => (
-            <div key={index} className="flex items-center gap-2">
-              {item.type === 'text' ? (
-                <textarea
-                  value={item.content as string}
-                  onChange={(e) => handleContentChange(index, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(e, index)}
-                  placeholder="Share your thoughts, ideas, or updates..."
-                  className="flex-1 min-h-[40px] p-2 border rounded resize-none"
-                  rows={1}
-                />
-              ) : (
-                <div className="flex-1 p-2 border rounded">
-                  <p>{(item.content as File).name}</p>
-                </div>
-              )}
-            </div>
-          ))}
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => fileInputRef.current?.click()}>
-              <PaperclipIcon className="w-5 h-5" />
-              <span className="sr-only">Attach file</span>
-            </Button>
-            <Input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              onChange={handleFileUpload}
-              multiple
+    <Card className="fixed bottom-0 left-0 right-0 z-10">
+      <CardContent className="p-4">
+        <div className="flex items-end space-x-2">
+          <div className="flex-grow">
+            <textarea
+              ref={textInputRef}
+              value={text}
+              onChange={handleTextChange}
+              placeholder="Share your thoughts, ideas, or updates... Use # for tags"
+              className="w-full resize-none overflow-hidden border rounded-md p-2 pr-10"
+              style={{ minHeight: '2.5rem', maxHeight: '10rem' }}
+              rows={1}
             />
-          </div>
-          <TagManager
-            initialTags={tags}
-            onTagsChange={setTags}
-          />
-          {projects.length > 0 && (
-            <div>
-              <h3 className="font-semibold mb-2">Associated Projects:</h3>
-              <div className="flex flex-wrap gap-2">
-                {projects.map((project) => (
-                  <Button
-                    key={project.id}
-                    variant={associatedProjects.includes(project.id) ? "default" : "outline"}
-                    onClick={() => handleProjectToggle(project.id)}
-                  >
-                    {project.name}
-                  </Button>
+            {tags.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {tags.map((tag, index) => (
+                  <span key={index} className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                    #{tag}
+                  </span>
                 ))}
               </div>
-            </div>
-          )}
-          <div className="flex justify-end gap-2">
-            <Button variant="outline">Cancel</Button>
-            <Button onClick={handleSubmit}>Create Artifact</Button>
+            )}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button variant="outline" size="icon" onClick={() => fileInputRef.current?.click()}>
+              <PaperclipIcon className="w-5 h-5" />
+              <span className="sr-only">Attach image</span>
+            </Button>
+            <Button onClick={handleSubmit}>Send</Button>
           </div>
         </div>
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          onChange={handleImageUpload}
+          multiple
+          accept="image/*"
+          title="Attach image"
+        />
+        {images.length > 0 && (
+          <div className="mt-2 text-sm text-gray-500">
+            {images.length} image{images.length > 1 ? 's' : ''} attached
+          </div>
+        )}
       </CardContent>
     </Card>
   );
