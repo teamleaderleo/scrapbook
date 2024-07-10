@@ -61,13 +61,13 @@ export async function addTagToArtifact(accountId: string, artifactId: string, ta
         ON CONFLICT (account_id, name) DO UPDATE SET name = EXCLUDED.name
         RETURNING id, name
       )
-      INSERT INTO artifact_tag (artifact_id, tag_id)
-      SELECT ${artifactId}, id FROM new_tag
-      ON CONFLICT (artifact_id, tag_id) DO NOTHING
+      INSERT INTO artifact_tag (account_id, artifact_id, tag_id)
+      SELECT ${accountId}, ${artifactId}, id FROM new_tag
+      ON CONFLICT (account_id, artifact_id, tag_id) DO NOTHING
       RETURNING (SELECT json_build_object('id', id, 'name', name) FROM new_tag);
     `;
     
-    return result.rows[0].json_build_object as Tag;
+    return result.rows[0]?.json_build_object as Tag | null;
   } catch (error) {
     console.error('Error adding tag to artifact:', error);
     throw error;
