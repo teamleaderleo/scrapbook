@@ -5,6 +5,7 @@ import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { addTagToProject, removeTagFromProject, getProjectTags } from './utils-server';
+import { suggestTags } from './claude-utils';
 
 const ProjectSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
@@ -63,6 +64,15 @@ export async function createProject(accountId: string, prevState: State, formDat
     `;
     const projectId = result.rows[0].id;
     console.log('Project inserted, ID:', projectId);
+
+    const suggestedTags = await suggestTags(`${name} ${description}`);
+    const allTags = [...new Set([...(tags || []), ...suggestedTags])];
+
+    if (allTags.length > 0) {
+      for (const tagName of allTags) {
+        await addTagToProject(accountId, projectId, tagName);
+      }
+    }
 
     if (tags && tags.length > 0) {
       console.log('Inserting tags:', tags);

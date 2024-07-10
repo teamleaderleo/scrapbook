@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 import { addTagToArtifact, removeTagFromArtifact, getArtifactTags } from './utils-server';
 import { ContentType } from './definitions';
 import { uploadToS3, deleteFromS3 } from './s3-operations';
+import { suggestTags } from './claude-utils';
 
 const ArtifactSchema = z.object({
   name: z.string().min(1, 'Artifact name is required.'),
@@ -157,13 +158,23 @@ export async function updateArtifact(id: string, accountId: string, prevState: S
       return { message: deleteResult.message };
     }
 
+    // Get all content for tag suggestion
+    const contents = await sql`
+      SELECT content FROM artifact_content
+      WHERE artifact_id = ${id} AND account_id = ${accountId} AND type = 'text'
+    `;
+    const allContent = contents.rows.map(row => row.content).join(' ');
+
+    // Get AI-suggested tags
+    const suggestedTags = await suggestTags(`${name} ${description} ${allContent}`);
+
     await handleTagUpdate(accountId, id, tags || []);
     await handleProjectUpdate(accountId, id, projects || []);
 
     await sql`COMMIT`;
 
     revalidatePath('/dashboard/artifacts');
-    return { message: 'Artifact updated successfully' };
+    return { message: 'Artifact updated successfully', suggestedTags };
   } catch (error) {
     await sql`ROLLBACK`;
     console.error('Error updating artifact:', error);
@@ -243,10 +254,15 @@ export async function createArtifact(accountId: string, formData: FormData) {
     const artifactId = result.rows[0].id;
 
     // Handle multiple content items
+    let allContent = '';
     let index = 0;
     while (formData.get(`contentType-${index}`)) {
       const contentType = formData.get(`contentType-${index}`) as ContentType;
       const contentItem = formData.get(`content-${index}`);
+
+      if (contentType === 'text') {
+        allContent += contentItem + ' ';
+      }
 
       let content: string;
       if (contentType === 'text') {
@@ -264,6 +280,9 @@ export async function createArtifact(accountId: string, formData: FormData) {
 
       index++;
     }
+
+    // Get AI-suggested tags
+    const suggestedTags = await suggestTags(`${name} ${description} ${allContent.trim()}`);
 
     if (tags && tags.length > 0) {
       for (const tagName of tags) {
@@ -283,7 +302,7 @@ export async function createArtifact(accountId: string, formData: FormData) {
     await sql`COMMIT`;
 
     revalidatePath('/dashboard/artifacts');
-    return { message: 'Artifact created successfully' };
+    return { message: 'Artifact created successfully', suggestedTags, artifactId };
   } catch (error: any) {
     await sql`ROLLBACK`;
     return {

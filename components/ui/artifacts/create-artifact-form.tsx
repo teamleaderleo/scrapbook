@@ -11,9 +11,12 @@ import { ArtifactForm } from '@/components/ui/artifacts/artifact-form';
 export default function CreateArtifactForm({ projects }: { projects: Project[] }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const initialState: State = { message: null, errors: {} };
   const createArtifactWithAccount = async (prevState: State, formData: FormData) => {
-    return createArtifact(ADMIN_UUID, formData);
+    const result = await createArtifact(ADMIN_UUID, formData);
+    setSuggestedTags(result.suggestedTags || []);
+    return result;
   };
   const [state, formAction] = useFormState(createArtifactWithAccount, initialState);
 
@@ -61,6 +64,7 @@ export default function CreateArtifactForm({ projects }: { projects: Project[] }
         isSubmitting={isSubmitting}
         submitButtonText="Create Artifact"
         cancelHref="/dashboard/artifacts"
+        suggestedTags={suggestedTags}
       />
       {state.message && (
         <p className={`mt-2 text-sm ${state.message.includes('Error') ? 'text-red-500' : 'text-green-500'}`}>

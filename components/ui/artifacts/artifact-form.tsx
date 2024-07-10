@@ -1,8 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { ArtifactDetail, Project, ContentType } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { TagManager } from '@/components/ui/tags/tagmanager';
+import { suggestTags } from '@/app/lib/claude-utils';
+import { SuggestedTags } from '@/components/ui/suggestions/suggestedtags';
 
 interface ArtifactFormProps {
   artifact?: ArtifactDetail;
@@ -11,6 +13,7 @@ interface ArtifactFormProps {
   isSubmitting: boolean;
   submitButtonText: string;
   cancelHref: string;
+  suggestedTags?: string[];
 }
 
 export function ArtifactForm({
@@ -20,14 +23,26 @@ export function ArtifactForm({
   isSubmitting,
   submitButtonText,
   cancelHref,
+  suggestedTags = [],
 }: ArtifactFormProps) {
   const [tags, setTags] = useState<string[]>(artifact?.tags?.map(tag => tag.name) || []);
   const [contentItems, setContentItems] = useState<{id?: string, type: ContentType, content: string | File}[]>(
     artifact?.contents.map(c => ({id: c.id, type: c.type, content: c.content})) || [{type: 'text', content: ''}]
   );
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
+  const handleTagsChange = (newTags: string[]) => {
+    setTags(newTags);
+  };
+
+  const handleAddSuggestedTag = (tag: string) => {
+    if (!tags.includes(tag)) {
+      setTags([...tags, tag]);
+    }
+  };
+  
   const handleAddContent = () => {
     setContentItems([...contentItems, {type: 'text', content: ''}]);
   };
@@ -71,10 +86,6 @@ export function ArtifactForm({
       // Call the onSubmit function with the updated form data
       onSubmit(formData);
     }
-  };
-
-  const handleTagsChange = (newTags: string[]) => {
-    setTags(newTags);
   };
 
   return (
@@ -205,7 +216,17 @@ export function ArtifactForm({
             />
           </div>
         </div>
+
+        {/* AI-Suggested Tags */}
+        {suggestedTags.length > 0 && (
+          <SuggestedTags
+            suggestedTags={suggestedTags}
+            onAddTag={handleAddSuggestedTag}
+          />
+        )}
+
       </div>
+
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href={cancelHref}
