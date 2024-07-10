@@ -19,8 +19,10 @@ export default function EditArtifactForm({
   const updateArtifactWithId = updateArtifact.bind(null, artifact.id, ADMIN_UUID);
   const [state, formAction] = useFormState(updateArtifactWithId, initialState);
 
-  const handleSubmit = (formData: FormData) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setIsSubmitting(true);
+    const formData = new FormData(event.currentTarget);
     formAction(formData);
   };
 
