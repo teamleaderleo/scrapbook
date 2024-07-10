@@ -1,32 +1,144 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useRef, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TagManager } from "@/components/ui/tags/tagmanager";
+import { Project } from '@/app/lib/definitions';
 
-export default function ChatArtifact() {
+interface ChatArtifactProps {
+  projects?: Project[];
+  onSubmit: (data: ArtifactData) => void;
+}
+
+interface ContentItem {
+  type: 'text' | 'file';
+  content: string | File;
+}
+
+interface ArtifactData {
+  name: string;
+  contents: ContentItem[];
+  tags: string[];
+  associatedProjects: string[];
+}
+
+export default function ChatArtifact({ projects = [], onSubmit }: ChatArtifactProps) {
+  const [name, setName] = useState('');
+  const [contents, setContents] = useState<ContentItem[]>([{ type: 'text', content: '' }]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [associatedProjects, setAssociatedProjects] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleContentChange = useCallback((index: number, value: string) => {
+    setContents(prev => {
+      const newContents = [...prev];
+      newContents[index] = { ...newContents[index], content: value };
+      return newContents;
+    });
+  }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>, index: number) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      setContents(prev => [...prev, { type: 'text', content: '' }]);
+    } else if (e.key === 'Backspace' && contents[index].content === '' && contents.length > 1) {
+      e.preventDefault();
+      setContents(prev => prev.filter((_, i) => i !== index));
+    }
+  }, [contents]);
+
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setContents(prev => [...prev, ...files.map(file => ({ type: 'file' as const, content: file }))]);
+  }, []);
+
+  const handleProjectToggle = useCallback((projectId: string) => {
+    setAssociatedProjects(prev => 
+      prev.includes(projectId) 
+        ? prev.filter(id => id !== projectId)
+        : [...prev, projectId]
+    );
+  }, []);
+
+  const handleSubmit = useCallback(() => {
+    const artifactData: ArtifactData = {
+      name,
+      contents,
+      tags,
+      associatedProjects,
+    };
+    onSubmit(artifactData);
+  }, [name, contents, tags, associatedProjects, onSubmit]);
+
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>New Project Artifact</CardTitle>
-        <CardDescription>Collaborate with your team to create and discuss new project items.</CardDescription>
+        <CardTitle>New Artifact</CardTitle>
+        <CardDescription>Create a new artifact with multiple content items.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
+        <div className="space-y-4">
+          <Input
+            placeholder="Artifact name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          {contents.map((item, index) => (
+            <div key={index} className="flex items-center gap-2">
+              {item.type === 'text' ? (
+                <textarea
+                  value={item.content as string}
+                  onChange={(e) => handleContentChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, index)}
+                  placeholder="Share your thoughts, ideas, or updates..."
+                  className="flex-1 min-h-[40px] p-2 border rounded resize-none"
+                  rows={1}
+                />
+              ) : (
+                <div className="flex-1 p-2 border rounded">
+                  <p>{(item.content as File).name}</p>
+                </div>
+              )}
+            </div>
+          ))}
           <div className="flex items-center gap-2">
-            <Textarea
-              placeholder="Share your thoughts, ideas, or updates..."
-              className="flex-1 min-h-[80px] resize-none"
-            />
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => fileInputRef.current?.click()}>
               <PaperclipIcon className="w-5 h-5" />
               <span className="sr-only">Attach file</span>
-              <Input type="file" className="hidden" />
             </Button>
+            <Input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={handleFileUpload}
+              multiple
+            />
           </div>
+          <TagManager
+            initialTags={tags}
+            onTagsChange={setTags}
+          />
+          {projects.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-2">Associated Projects:</h3>
+              <div className="flex flex-wrap gap-2">
+                {projects.map((project) => (
+                  <Button
+                    key={project.id}
+                    variant={associatedProjects.includes(project.id) ? "default" : "outline"}
+                    onClick={() => handleProjectToggle(project.id)}
+                  >
+                    {project.name}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="flex justify-end gap-2">
             <Button variant="outline">Cancel</Button>
-            <Button type="submit">Post</Button>
+            <Button onClick={handleSubmit}>Create Artifact</Button>
           </div>
         </div>
       </CardContent>
