@@ -1,4 +1,5 @@
 export async function getClaudeResponse(prompt: string): Promise<string> {
+  console.log('Sending request to Claude API');
   try {
     const response = await fetch('/api/claude', {
       method: 'POST',
@@ -6,12 +7,19 @@ export async function getClaudeResponse(prompt: string): Promise<string> {
       body: JSON.stringify({ prompt }),
     });
 
+    console.log('Received response:', response.status, response.statusText);
+
     if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(`HTTP error! status: ${response.status}, body: ${errorBody}`);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log('Parsed response data:', data);
+
     if (!data.result) {
+      console.error('Unexpected response structure:', data);
       throw new Error('No result in Claude response');
     }
 
