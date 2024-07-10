@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Project } from '@/app/lib/definitions';
+import { Project, ArtifactDetail, ContentType } from '@/app/lib/definitions';
 import { createArtifact, State } from '@/app/lib/artifact-actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
@@ -14,6 +14,27 @@ export default function CreateArtifactForm({ projects }: { projects: Project[] }
   const initialState: State = { message: null, errors: {} };
   const createArtifactWithAccount = createArtifact.bind(null, ADMIN_UUID);
   const [state, formAction] = useFormState(createArtifactWithAccount, initialState);
+
+  // Create a default artifact object
+  const defaultArtifact: ArtifactDetail = {
+    account_id: ADMIN_UUID,
+    id: '',
+    name: '',
+    contents: [
+      {
+        id: '',
+        account_id: ADMIN_UUID,
+        type: 'image' as ContentType,
+        content: '',
+        created_at: new Date().toISOString(),
+      }
+    ],
+    description: '',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    tags: [],
+    projects: []
+  };
 
   useEffect(() => {
     if (state.message === 'Artifact created successfully') {
@@ -32,6 +53,7 @@ export default function CreateArtifactForm({ projects }: { projects: Project[] }
   return (
     <>
       <ArtifactForm
+        artifact={defaultArtifact}
         projects={projects}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
