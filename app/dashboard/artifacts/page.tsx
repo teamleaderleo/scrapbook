@@ -3,7 +3,7 @@ import Search from '@/components/ui/search';
 import ArtifactsTable from '@/components/ui/artifacts/table';
 import { CreateArtifact } from '@/components/ui/artifacts/button';
 import { lusitana } from '@/components/ui/fonts';
-import { ArtifactsTableSkeleton } from '@/components/ui/skeletons';
+import { ProjectsTableSkeleton } from '@/components/ui/skeletons';
 import { Suspense } from 'react';
 import { fetchArtifactsPages, fetchArtifacts } from '@/app/lib/data';
 import { Metadata } from 'next';
@@ -36,7 +36,7 @@ export default async function Page({
         <Search placeholder="Search artifacts..." />
         <CreateArtifact />
       </div>
-      <Suspense key={query + currentPage} fallback={<ArtifactsTableSkeleton />}>
+      <Suspense key={query + currentPage} fallback={<ProjectsTableSkeleton />}>
         <ArtifactsTable initialArtifacts={artifacts} />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">

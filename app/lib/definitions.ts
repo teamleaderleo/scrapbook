@@ -23,12 +23,12 @@ export type ArtifactTag = {
   tag_id: string; 
 };
 
-export type ArtifactType = 'text' | 'image' | 'file';
+export type ContentType = 'text' | 'image' | 'file';
 
 export type ArtifactContent = {
   id: string;
   account_id: string;
-  type: ArtifactType;
+  type: ContentType;
   content: string;
   created_at: string;
 };
@@ -37,7 +37,6 @@ export type Artifact = {
   account_id: string;
   id: string;
   name: string;
-  type: ArtifactType;
   contents: ArtifactContent[];
   description?: string;
   created_at: string;

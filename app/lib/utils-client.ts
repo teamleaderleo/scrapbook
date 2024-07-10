@@ -1,4 +1,4 @@
-import { Artifact } from './definitions';
+import { Artifact, ArtifactContent } from './definitions';
 
 export const formatDateToLocal = (
   dateStr: string,
@@ -50,14 +50,14 @@ export const getArtifactThumbnail = (artifact: Artifact) => {
   if (!artifact) {
     return '/placeholder-default.png';
   }
-
-  if (!artifact.contents || artifact.contents.length === 0) {
+  const latestContent: ArtifactContent = artifact.contents[0];
+  if (!artifact.contents || artifact.contents.length === 0 || !latestContent) {
     return '/placeholder-default.png';
   }
 
-  switch (artifact.type) {
+  switch (latestContent.type) {
     case 'image':
-      return artifact.contents[0].content;
+      return latestContent.content;
     case 'text':
       return '/placeholder-text.png';
     case 'file':

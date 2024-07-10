@@ -61,7 +61,7 @@ export default function ArtifactsTable({
                           </div>
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-3 py-3">{artifact.type}</td>
+                      <td className="whitespace-nowrap px-3 py-3">{artifact.contents[0].type}</td>
                       <td className="px-3 py-3">{artifact.description}</td>
                       <td className="px-3 py-3">
                         <TagList

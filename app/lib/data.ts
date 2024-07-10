@@ -88,7 +88,7 @@ export async function fetchArtifactsPages(accountId: string, query: string = '')
     const count = await sql``
     return 1;
   } catch (error) { 
-
+    throw new Error('Failed to fetch total number of artifacts.');
   }
 }
 

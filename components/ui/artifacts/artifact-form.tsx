@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArtifactDetail, Project, Tag, ArtifactType } from '@/app/lib/definitions';
+import { ArtifactDetail, Project, Tag, ContentType } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { TagManager } from '@/components/tagmanager';
@@ -22,7 +22,7 @@ export function ArtifactForm({
   cancelHref,
 }: ArtifactFormProps) {
   const [tags, setTags] = useState<string[]>(artifact?.tags.map(tag => tag.name) || []);
-  const [artifactType, setArtifactType] = useState<ArtifactType>(artifact?.type || 'text');
+  const [artifactType, setArtifactType] = useState<ContentType>(artifact?.contents[0]?.type || 'text');
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -75,7 +75,7 @@ export function ArtifactForm({
             name="type"
             className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
             value={artifactType}
-            onChange={(e) => setArtifactType(e.target.value as ArtifactType)}
+            onChange={(e) => setArtifactType(e.target.value as ContentType)}
             required
           >
             <option value="text">Text</option>
