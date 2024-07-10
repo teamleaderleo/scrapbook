@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Tag } from '@/app/lib/definitions';
 import { createTag, updateTag, deleteTag, getTagUsage } from '@/app/lib/tag-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
@@ -72,19 +73,21 @@ export default function TagManagementTable({ initialTags }: { initialTags: Tag[]
                     </td>
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex justify-end gap-3">
+                        {/* UpdateTag */}
                         <button
                           onClick={() => setEditingTag(tag)}
-                          className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:bg-blue-600"
+                          className="rounded-md border p-2 hover:bg-gray-100"
                           aria-label={`Edit ${tag.name}`}
                         >
-                          Edit
+                          <PencilIcon className="w-5" />
                         </button>
+                        {/* DeleteTag */}
                         <button
                           onClick={() => handleDeleteTag(tag.id)}
-                          className="rounded bg-red-500 px-3 py-1 text-sm font-medium text-white hover:bg-red-600"
+                          className="rounded-md border p-2 hover:bg-gray-100"
                           aria-label={`Delete ${tag.name}`}
                         >
-                          Delete
+                          <TrashIcon className="w-5" />
                         </button>
                       </div>
                     </td>

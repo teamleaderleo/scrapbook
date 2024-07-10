@@ -437,6 +437,43 @@ export async function fetchCardData(accountId: string) {
   }
 }
 
+export async function fetchTagsPages(accountId: string, query: string = '') {
+  try {
+    const count = await sql`
+      SELECT COUNT(*)
+      FROM tag
+      WHERE account_id = ${accountId} AND name ILIKE ${`%${query}%`}
+    `;
+
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of tags.');
+  }
+}
+
+export async function fetchTags(accountId: string, query: string = '', currentPage: number = 1) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const tags = await sql<Tag>`
+      SELECT t.id, t.account_id, t.name,
+        (SELECT COUNT(*) FROM project_tag pt WHERE pt.tag_id = t.id) as project_count,
+        (SELECT COUNT(*) FROM artifact_tag at WHERE at.tag_id = t.id) as artifact_count
+      FROM tag t
+      WHERE t.account_id = ${accountId} AND t.name ILIKE ${`%${query}%`}
+      ORDER BY t.name
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+    `;
+
+    return tags.rows;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch tags.');
+  }
+}
+
 export async function fetchDashboardData(accountId: string) {
   try {
     const data = await sql<DashboardView>`
