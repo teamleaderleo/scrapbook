@@ -205,6 +205,24 @@ export async function createArtifact(accountId: string, formData: FormData) {
   const description = formData.get('description') as string;
   const projects = formData.getAll('projects') as string[];
 
+  // Check if there's at least one content item
+  let hasContent = false;
+  let index = 0;
+  while (formData.get(`contentType-${index}`)) {
+    const contentItem = formData.get(`content-${index}`);
+    if (contentItem && (typeof contentItem === 'string' ? contentItem.trim() !== '' : true)) {
+      hasContent = true;
+      break;
+    }
+    index++;
+  }
+
+  if (!hasContent) {
+    return {
+      message: 'Error: Artifact must have at least one content item.',
+    };
+  }
+  
   try {
     await sql`BEGIN`;
 
