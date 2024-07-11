@@ -336,75 +336,7 @@ export async function fetchLatestArtifacts(accountId: string, limit: number = 5)
   }
 }
 
-export async function fetchArtifacts(accountId: string, query: string = '', currentPage: number = 1) {
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-  try {
-    const data = await sql<ArtifactView>`
-      WITH filtered_artifacts AS (
-        SELECT a.id
-        FROM artifact a
-        LEFT JOIN artifact_content ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
-        LEFT JOIN artifact_tag at ON a.id = at.artifact_id AND at.account_id = ${accountId}
-        LEFT JOIN tag t ON at.tag_id = t.id AND t.account_id = ${accountId}
-        WHERE
-          a.account_id = ${accountId} AND
-          (a.name ILIKE ${`%${query}%`} OR
-          a.description ILIKE ${`%${query}%`} OR
-          ac.content ILIKE ${`%${query}%`} OR
-          t.name ILIKE ${`%${query}%`})
-      )
-      SELECT
-        a.id,
-        a.account_id,
-        a.name,
-        a.description,
-        a.created_at,
-        a.updated_at,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', ac.id,
-            'type', ac.type,
-            'content', ac.content,
-            'created_at', ac.created_at
-          )) FILTER (WHERE ac.id IS NOT NULL),
-          '[]'
-        ) AS contents,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', t.id,
-            'account_id', t.account_id,
-            'name', t.name
-          )) FILTER (WHERE t.id IS NOT NULL),
-          '[]'
-        ) AS tags,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', p.id,
-            'name', p.name,
-            'status', p.status
-          )) FILTER (WHERE p.id IS NOT NULL),
-          '[]'
-        ) AS projects,
-        (SELECT COUNT(*) FROM filtered_artifacts) AS total_artifacts,
-        (SELECT COUNT(DISTINCT t.id) FROM filtered_artifacts fa JOIN artifact_tag at ON fa.id = at.artifact_id JOIN tag t ON at.tag_id = t.id WHERE t.account_id = ${accountId}) AS total_tags,
-        (SELECT COUNT(DISTINCT p.id) FROM filtered_artifacts fa JOIN project_artifact_link pal ON fa.id = pal.artifact_id JOIN project p ON pal.project_id = p.id WHERE p.account_id = ${accountId}) AS total_associated_projects
-      FROM artifact a
-      LEFT JOIN artifact_content ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
-      LEFT JOIN artifact_tag at ON a.id = at.artifact_id AND at.account_id = ${accountId}
-      LEFT JOIN tag t ON at.tag_id = t.id AND t.account_id = ${accountId}
-      LEFT JOIN project_artifact_link pal ON a.id = pal.artifact_id AND pal.account_id = ${accountId}
-      LEFT JOIN project p ON pal.project_id = p.id
-      WHERE a.id IN (SELECT id FROM filtered_artifacts)
-      GROUP BY a.id
-      ORDER BY a.updated_at DESC
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}`;
 
-    return data.rows;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch artifacts.');
-  }
-}
 
 export async function fetchCardData(accountId: string) {
   try {

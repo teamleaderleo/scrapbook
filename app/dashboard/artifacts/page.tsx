@@ -5,9 +5,11 @@ import { CreateArtifact } from '@/components/ui/artifacts/button';
 import { lusitana } from '@/components/ui/fonts';
 import { ProjectsTableSkeleton } from '@/components/ui/skeletons';
 import { Suspense } from 'react';
-import { fetchArtifactsPages, fetchArtifacts } from '@/app/lib/data';
+import { fetchArtifactsPages } from '@/app/lib/data';
+import { fetchArtifacts } from '@/app/lib/artifact-data';
 import { Metadata } from 'next';
 import { ADMIN_UUID } from '@/app/lib/constants';
+import { ArtifactView } from '@/app/lib/definitions';
 
 export const metadata: Metadata = {
   title: 'Artifacts',
@@ -25,7 +27,12 @@ export default async function Page({
   const currentPage = Number(searchParams?.page) || 1;
 
   const totalPages = await fetchArtifactsPages(ADMIN_UUID, query);
-  const artifacts = await fetchArtifacts(ADMIN_UUID, query, currentPage);
+  const artifactsData = await fetchArtifacts(ADMIN_UUID, query, currentPage, {
+    searchContent: true,
+    searchTags: true,
+    includeProjects: true,
+    fullCount: true
+  });
 
   return (
     <div className="w-full">
@@ -37,7 +44,7 @@ export default async function Page({
         <CreateArtifact />
       </div>
       <Suspense key={query + currentPage} fallback={<ProjectsTableSkeleton />}>
-        <ArtifactsTable initialArtifacts={artifacts} />
+        <ArtifactsTable initialArtifacts={artifactsData.artifacts as ArtifactView[]} />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={totalPages} />

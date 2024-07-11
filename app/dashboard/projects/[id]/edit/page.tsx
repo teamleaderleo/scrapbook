@@ -1,9 +1,11 @@
 import Form from '@/components/ui/projects/edit-form';
 import Breadcrumbs from '@/components/ui/breadcrumbs';
-import { fetchProject, fetchArtifacts } from '@/app/lib/data';
+import { fetchProject} from '@/app/lib/data';
+import { fetchArtifacts } from '@/app/lib/artifact-data';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { ADMIN_UUID } from '@/app/lib/constants';
+import { ArtifactDetail } from '@/app/lib/definitions';
 
 export const metadata: Metadata = {
   title: 'Edit',
@@ -31,7 +33,7 @@ export default async function Page({ params }: { params: { id: string } }) {
           },
         ]}
       />
-      <Form project={project} artifacts={artifacts} />
+      <Form project={project} artifacts={artifacts as unknown as ArtifactDetail[]} />
     </main>
   );
 }
