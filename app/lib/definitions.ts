@@ -95,3 +95,11 @@ export type DashboardView = {
   completed_projects: number;
   pending_projects: number;
 };
+
+export type S3Usage = {
+  id: number;
+  account_id: string;
+  month: number;
+  year: number;
+  count: number;
+};
