@@ -23,21 +23,21 @@ export default function CreateArtifactForm({ projects }: { projects: Project[] }
   const [state, formAction] = useFormState(createArtifactWithAccount, initialState);
 
   const defaultArtifact: ArtifactDetail = {
-    account_id: ADMIN_UUID,
+    accountId: ADMIN_UUID,
     id: '',
     name: '',
     contents: [
       {
         id: '',
-        account_id: ADMIN_UUID,
+        accountId: ADMIN_UUID,
         type: 'text' as ContentType,
         content: '',
-        created_at: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       }
     ],
     description: '',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     tags: [],
     projects: []
   };

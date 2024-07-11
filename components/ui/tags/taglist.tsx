@@ -24,7 +24,7 @@ export function TagList({ initialTags = [], onTagsChange, projectId, artifactId 
       } else if (artifactId) {
         newTag = await addTagToArtifact(ADMIN_UUID, artifactId, tagName);
       } else {
-        newTag = { id: `temp-${Date.now()}`, account_id: ADMIN_UUID, name: tagName };
+        newTag = { id: `temp-${Date.now()}`, accountId: ADMIN_UUID, name: tagName };
       }
       if (newTag) {
         const updatedTags = [...tags, newTag];
