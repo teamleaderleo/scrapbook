@@ -32,7 +32,6 @@ export async function fetchArtifacts(
     
     const queryWhereClause = or(...queryConditions);
     
-    // Combine conditions only if accountCondition is defined
     if (accountCondition) {
       whereClause = and(accountCondition, queryWhereClause);
     } else {
@@ -83,12 +82,6 @@ export async function fetchArtifacts(
     `.as('projects');
   }
 
-  if (options.fullCount) {
-    selectObject.totalArtifacts = sql<number>`COUNT(DISTINCT ${artifacts.id}) OVER()`.as('totalArtifacts');
-    selectObject.totalTags = sql<number>`COUNT(DISTINCT ${tags.id}) OVER()`.as('totalTags');
-    selectObject.totalAssociatedProjects = sql<number>`COUNT(DISTINCT ${projects.id}) OVER()`.as('totalAssociatedProjects');
-  }
-
   const artifactsQuery = db
     .select(selectObject)
     .from(artifacts)
@@ -101,7 +94,6 @@ export async function fetchArtifacts(
       .leftJoin(projects, eq(projectArtifactLinks.projectId, projects.id));
   }
 
-  // Apply where clause only if it's defined
   const finalQuery = whereClause 
     ? artifactsQuery.where(whereClause)
     : artifactsQuery;
@@ -112,10 +104,34 @@ export async function fetchArtifacts(
     .limit(ITEMS_PER_PAGE)
     .offset(offset);
 
+  let totalCount, totalTags, totalAssociatedProjects;
+
+  if (options.fullCount) {
+    const countQuery = db.select({
+      totalArtifacts: sql`COUNT(DISTINCT ${artifacts.id})`,
+      totalTags: sql`COUNT(DISTINCT ${tags.id})`,
+      totalAssociatedProjects: sql`COUNT(DISTINCT ${projects.id})`
+    })
+    .from(artifacts)
+    .leftJoin(artifactTags, eq(artifacts.id, artifactTags.artifactId))
+    .leftJoin(tags, eq(artifactTags.tagId, tags.id))
+    .leftJoin(projectArtifactLinks, eq(artifacts.id, projectArtifactLinks.artifactId))
+    .leftJoin(projects, eq(projectArtifactLinks.projectId, projects.id))
+    .where(whereClause);
+
+    const countResult = await countQuery;
+    
+    if (countResult.length > 0) {
+      totalCount = Number(countResult[0].totalArtifacts);
+      totalTags = Number(countResult[0].totalTags);
+      totalAssociatedProjects = Number(countResult[0].totalAssociatedProjects);
+    }
+  }
+
   return {
     artifacts: result,
-    totalCount: result.length > 0 && options.fullCount ? Number(result[0].totalArtifacts) : undefined,
-    totalTags: result.length > 0 && options.fullCount ? Number(result[0].totalTags) : undefined,
-    totalAssociatedProjects: result.length > 0 && options.fullCount ? Number(result[0].totalAssociatedProjects) : undefined,
+    totalCount,
+    totalTags,
+    totalAssociatedProjects,
   };
 }
