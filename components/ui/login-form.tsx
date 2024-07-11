@@ -65,7 +65,9 @@ export default function LoginForm() {
                 <button
                   type="button"
                   onClick={() => handleSocialLogin('google')}
-                  className="flex items-center justify-center w-full px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  disabled={isPending}
+                  aria-label="Sign in with Google"
+                  className="flex items-center justify-center w-full px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FaGoogle className="w-5 h-5 mr-2" />
                   Google
@@ -73,7 +75,9 @@ export default function LoginForm() {
                 <button
                   type="button"
                   onClick={() => handleSocialLogin('github')}
-                  className="flex items-center justify-center w-full px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  disabled={isPending}
+                  aria-label="Sign in with GitHub"
+                  className="flex items-center justify-center w-full px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FaGithub className="w-5 h-5 mr-2" />
                   GitHub
