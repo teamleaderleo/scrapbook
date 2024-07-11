@@ -6,7 +6,7 @@ import { lusitana } from '@/components/ui/fonts';
 import { ProjectsTableSkeleton } from '@/components/ui/skeletons';
 import { Suspense } from 'react';
 import { fetchArtifactsPages } from '@/app/lib/data';
-import { fetchArtifacts } from '@/app/lib/artifact-data';
+import { searchArtifacts } from '@/app/lib/artifact-data';
 import { Metadata } from 'next';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { ArtifactView } from '@/app/lib/definitions';
@@ -27,11 +27,10 @@ export default async function Page({
   const currentPage = Number(searchParams?.page) || 1;
 
   const totalPages = await fetchArtifactsPages(ADMIN_UUID, query);
-  const artifactsData = await fetchArtifacts(ADMIN_UUID, query, currentPage, {
+  const artifactsData = await searchArtifacts(ADMIN_UUID, query, currentPage, {
     searchContent: true,
     searchTags: true,
-    includeProjects: true,
-    fullCount: true
+    includeProjects: true
   });
 
   return (
