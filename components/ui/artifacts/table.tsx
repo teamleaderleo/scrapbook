@@ -80,7 +80,7 @@ export default function ArtifactsTable({
                       </td>
                       <td className="whitespace-nowrap px-3 py-3">{artifact.projects.length}</td>
                       <td className="whitespace-nowrap px-3 py-3">
-                        {new Date(artifact.updated_at).toLocaleDateString()}
+                        {new Date(artifact.updatedAt).toLocaleDateString()}
                       </td>
                       <td className="whitespace-nowrap px-3 py-3">
                         <div className="flex space-x-2">

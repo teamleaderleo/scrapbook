@@ -7,40 +7,40 @@ export type Account = {
 
 export type Tag = {
   id: string; 
-  account_id: string; 
+  accountId: string; 
   name: string; // Unique per account
 };
 
 export type ProjectTag = {
-  account_id: string; 
-  project_id: string; 
-  tag_id: string; 
+  accountId: string; 
+  projectId: string; 
+  tagId: string; 
 };
 
 export type ArtifactTag = {
-  account_id: string; 
-  artifact_id: string; 
-  tag_id: string; 
+  accountId: string; 
+  artifactId: string; 
+  tagId: string; 
 };
 
 export type ContentType = 'text' | 'image' | 'file';
 
 export type ArtifactContent = {
   id: string;
-  account_id: string;
+  accountId: string;
   type: ContentType;
   content: string;
-  created_at: string;
+  createdAt: string;
 };
 
 export type Artifact = {
-  account_id: string;
+  accountId: string;
   id: string;
   name: string;
   contents: ArtifactContent[];
   description?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type ArtifactDetail = Artifact & {
@@ -49,19 +49,19 @@ export type ArtifactDetail = Artifact & {
 };
 
 export type ProjectArtifactLink = {
-  account_id: string;
-  project_id: string; 
-  artifact_id: string; 
-  added_at: string;
+  accountId: string;
+  projectId: string; 
+  artifactId: string; 
+  addedAt: string;
 };
 
 export type Project = {
   id: string;
-  account_id: string;
+  accountId: string;
   name: string;
   description?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
   status: 'pending' | 'completed';
 };
 
@@ -72,33 +72,33 @@ export type ProjectDetail = Project & {
 
 // Type for the query result
 export type ProjectView = ProjectDetail & {
-  total_projects: number;
-  total_pending: number;
-  total_completed: number;
-  total_tags: number;
-  total_associated_artifacts: number;
+  totalProjects: number;
+  totalPending: number;
+  totalCompleted: number;
+  totalTags: number;
+  totalAssociatedArtifacts: number;
 };
 
-export type ArtifactView = ArtifactDetail &{
-  total_artifacts: number;
-  total_tags: number;
-  total_associated_projects: number;
+export type ArtifactView = ArtifactDetail & {
+  totalArtifacts: number;
+  totalTags: number;
+  totalAssociatedProjects: number;
 };
 
 // Dashboard view
 export type DashboardView = {
-  account_id: string;
-  total_accounts: number;
-  total_projects: number;
-  total_artifacts: number;
-  total_tags: number;
-  completed_projects: number;
-  pending_projects: number;
+  accountId: string;
+  totalAccounts: number;
+  totalProjects: number;
+  totalArtifacts: number;
+  totalTags: number;
+  completedProjects: number;
+  pendingProjects: number;
 };
 
 export type S3Usage = {
   id: number;
-  account_id: string;
+  accountId: string;
   month: number;
   year: number;
   count: number;

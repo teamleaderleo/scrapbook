@@ -37,7 +37,27 @@ export async function fetchAllArtifacts(
     .where(eq(artifacts.accountId, accountId));
 
   return {
-    artifacts: result,
+    artifacts: result.map(artifact => ({
+      ...artifact,
+      accountId: artifact.account_id,
+      createdAt: artifact.created_at,
+      updatedAt: artifact.updated_at,
+      contents: JSON.parse(artifact.contents).map((content: any) => ({
+        ...content,
+        accountId: content.account_id,
+        createdAt: content.created_at,
+      })),
+      tags: JSON.parse(artifact.tags).map((tag: any) => ({
+        ...tag,
+        accountId: tag.account_id,
+      })),
+      projects: includeProjects ? JSON.parse(artifact.projects).map((project: any) => ({
+        ...project,
+        accountId: project.account_id,
+        createdAt: project.created_at,
+        updatedAt: project.updated_at,
+      })) : [],
+    })),
     totalCount: Number(totalCount[0].count),
   };
 }
@@ -108,18 +128,19 @@ export async function searchArtifacts(
 function getSelectObject(includeProjects: boolean = false): Record<string, any> {
   const selectObject: Record<string, any> = {
     id: artifacts.id,
-    accountId: artifacts.accountId,
+    account_id: artifacts.accountId,
     name: artifacts.name,
     description: artifacts.description,
-    createdAt: sql`to_char(${artifacts.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')`.as('createdAt'),
-    updatedAt: sql`to_char(${artifacts.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')`.as('updatedAt'),
+    created_at: artifacts.createdAt,
+    updated_at: artifacts.updatedAt,
     contents: sql<string>`
       COALESCE(
         jsonb_agg(DISTINCT jsonb_build_object(
           'id', ${artifactContents.id},
+          'account_id', ${artifactContents.accountId},
           'type', ${artifactContents.type},
           'content', ${artifactContents.content},
-          'created_at', to_json(${artifactContents.createdAt})
+          'created_at', ${artifactContents.createdAt}
         )) FILTER (WHERE ${artifactContents.id} IS NOT NULL),
         '[]'
       )
@@ -141,8 +162,11 @@ function getSelectObject(includeProjects: boolean = false): Record<string, any> 
       COALESCE(
         jsonb_agg(DISTINCT jsonb_build_object(
           'id', ${projects.id},
+          'account_id', ${projects.accountId},
           'name', ${projects.name},
-          'status', ${projects.status}
+          'status', ${projects.status},
+          'created_at', ${projects.createdAt},
+          'updated_at', ${projects.updatedAt}
         )) FILTER (WHERE ${projects.id} IS NOT NULL),
         '[]'
       )
