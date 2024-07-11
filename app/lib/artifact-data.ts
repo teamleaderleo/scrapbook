@@ -1,4 +1,4 @@
-import { eq, and, or, ilike, sql, SQL } from 'drizzle-orm';
+import { eq, and, or, ilike, sql, SQL, desc } from 'drizzle-orm';
 import { db } from './db/db';
 import { artifacts, artifactContents, artifactTags, tags, projectArtifactLinks, projects } from './db/schema';
 
@@ -44,15 +44,15 @@ export async function fetchArtifacts(
     accountId: artifacts.accountId,
     name: artifacts.name,
     description: artifacts.description,
-    createdAt: artifacts.createdAt,
-    updatedAt: artifacts.updatedAt,
+    createdAt: sql`to_char(${artifacts.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`.as('createdAt'),
+    updatedAt: sql`to_char(${artifacts.updatedAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`.as('updatedAt'),
     contents: sql<string>`
       COALESCE(
         jsonb_agg(DISTINCT jsonb_build_object(
           'id', ${artifactContents.id},
           'type', ${artifactContents.type},
           'content', ${artifactContents.content},
-          'created_at', ${artifactContents.createdAt}
+          'created_at', to_char(${artifactContents.createdAt}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
         )) FILTER (WHERE ${artifactContents.id} IS NOT NULL),
         '[]'
       )
@@ -100,7 +100,7 @@ export async function fetchArtifacts(
 
   const result = await finalQuery
     .groupBy(artifacts.id)
-    .orderBy(artifacts.updatedAt)
+    .orderBy(desc(artifacts.updatedAt))
     .limit(ITEMS_PER_PAGE)
     .offset(offset);
 
