@@ -5,7 +5,7 @@ export type Account = {
   password?: string;
   provider?: string;
   providerAccountId?: string;
-  lastLogin?: string;
+  lastLogin?: Date;
 };
 
 export type Tag = {
@@ -33,7 +33,7 @@ export type ArtifactContent = {
   accountId: string;
   type: ContentType;
   content: string;
-  createdAt: string;
+  createdAt: Date;
 };
 
 export type Artifact = {
@@ -42,8 +42,8 @@ export type Artifact = {
   name: string;
   contents: ArtifactContent[];
   description?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type ArtifactDetail = Artifact & {
@@ -55,7 +55,7 @@ export type ProjectArtifactLink = {
   accountId: string;
   projectId: string; 
   artifactId: string; 
-  addedAt: string;
+  addedAt: Date;
 };
 
 export type Project = {
@@ -63,8 +63,8 @@ export type Project = {
   accountId: string;
   name: string;
   description?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   status: 'pending' | 'completed';
 };
 

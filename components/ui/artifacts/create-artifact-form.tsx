@@ -32,12 +32,12 @@ export default function CreateArtifactForm({ projects }: { projects: Project[] }
         accountId: ADMIN_UUID,
         type: 'text' as ContentType,
         content: '',
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
       }
     ],
     description: '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
     tags: [],
     projects: []
   };

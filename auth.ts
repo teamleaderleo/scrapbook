@@ -7,11 +7,27 @@ import { sql } from '@vercel/postgres';
 import { z } from 'zod';
 import type { Account } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
+import { eq } from 'drizzle-orm';
+import { db } from './app/lib/db/db';
+import { accounts } from './app/lib//db/schema';
 
 async function getUser(email: string): Promise<Account | undefined> {
   try {
-    const user = await sql<Account>`SELECT * FROM account WHERE email=${email}`;
-    return user.rows[0];
+    const users = await db.select().from(accounts).where(eq(accounts.email, email)).limit(1);
+    const user = users[0];
+    
+    if (!user) return undefined;
+
+    // Map the database result to your Account type
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      password: user.password ?? undefined,
+      provider: user.provider ?? undefined,
+      providerAccountId: user.providerAccountId ?? undefined,
+      lastLogin: user.lastLogin ?? undefined
+    };
   } catch (error) {
     console.error('Failed to fetch user:', error);
     throw new Error('Failed to fetch user.');
@@ -50,22 +66,32 @@ export const { auth, signIn, signOut } = NextAuth({
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === 'google' || account?.provider === 'github') {
-        const existingUser = await getUser(user.email!);
+        const email = user.email;
+        if (!email) {
+          console.error('User email is missing');
+          return false;
+        }
+
+        const existingUser = await getUser(email);
         if (existingUser) {
           // User exists, update last login
-          await sql`
-            UPDATE account
-            SET last_login = CURRENT_TIMESTAMP, 
-                provider = ${account.provider},
-                provider_account_id = ${account.providerAccountId}
-            WHERE email = ${user.email}
-          `;
+          await db.update(accounts)
+            .set({
+              lastLogin: new Date(),
+              provider: account.provider,
+              providerAccountId: account.providerAccountId
+            })
+            .where(eq(accounts.email, email));
         } else {
           // New user, create account
-          await sql`
-            INSERT INTO account (id, name, email, provider, provider_account_id, last_login)
-            VALUES (${user.id}, ${user.name}, ${user.email}, ${account.provider}, ${account.providerAccountId}, CURRENT_TIMESTAMP)
-          `;
+          await db.insert(accounts).values({
+            id: user.id ?? crypto.randomUUID(), // Use provided id or generate a new one
+            name: user.name ?? 'Unknown',
+            email: email,
+            provider: account.provider,
+            providerAccountId: account.providerAccountId,
+            lastLogin: new Date()
+          });
         }
       }
       return true;
