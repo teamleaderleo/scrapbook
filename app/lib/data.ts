@@ -97,29 +97,6 @@ export async function fetchProjectsPages(accountId: string, query: string = '') 
   }
 }
 
-export async function fetchArtifactsPages(accountId: string, query: string = '') {
-  try {
-    const count = await sql`
-      SELECT COUNT(DISTINCT a.id)
-      FROM artifact a
-      LEFT JOIN artifact_content ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
-      LEFT JOIN artifact_tag at ON a.id = at.artifact_id AND at.account_id = ${accountId}
-      LEFT JOIN tag t ON at.tag_id = t.id AND t.account_id = ${accountId}
-      WHERE
-        a.account_id = ${accountId} AND
-        (a.name ILIKE ${`%${query}%`} OR
-        a.description ILIKE ${`%${query}%`} OR
-        ac.content ILIKE ${`%${query}%`} OR
-        t.name ILIKE ${`%${query}%`})`;
-
-    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
-    return totalPages;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of artifacts.');
-  }
-}
-
 export async function fetchLatestProjects(accountId: string, limit: number = 5) {
   try {
     const data = await sql<ProjectDetail>`
@@ -229,6 +206,29 @@ export async function fetchProjects(accountId: string, query: string = '', curre
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch projects.');
+  }
+}
+
+export async function fetchArtifactsPages(accountId: string, query: string = '') {
+  try {
+    const count = await sql`
+      SELECT COUNT(DISTINCT a.id)
+      FROM artifact a
+      LEFT JOIN artifact_content ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
+      LEFT JOIN artifact_tag at ON a.id = at.artifact_id AND at.account_id = ${accountId}
+      LEFT JOIN tag t ON at.tag_id = t.id AND t.account_id = ${accountId}
+      WHERE
+        a.account_id = ${accountId} AND
+        (a.name ILIKE ${`%${query}%`} OR
+        a.description ILIKE ${`%${query}%`} OR
+        ac.content ILIKE ${`%${query}%`} OR
+        t.name ILIKE ${`%${query}%`})`;
+
+    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of artifacts.');
   }
 }
 

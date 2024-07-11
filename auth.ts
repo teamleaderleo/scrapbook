@@ -5,6 +5,8 @@ import { sql } from '@vercel/postgres';
 import { z } from 'zod';
 import type { Account } from '@/app/lib/definitions';
 import { authConfig } from './auth.config';
+import GoogleProvider from "next-auth/providers/google"
+import GitHubProvider from "next-auth/providers/github"
 
 async function getUser(email: string): Promise<Account | undefined> {
   try {
@@ -19,6 +21,14 @@ async function getUser(email: string): Promise<Account | undefined> {
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET,
+    }),
     Credentials({
       async authorize(credentials) {
         const parsedCredentials = z

@@ -4,11 +4,6 @@ export const authConfig = {
   pages: {
     signIn: '/login',
   },
-  providers: [
-    // added later in auth.ts since it requires bcrypt which is only compatible with Node.js
-    // while this file is also used in non-Node.js environments
-    // Hopefully moving this to the top of the file will fix my deployment issue
-  ],
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
@@ -22,4 +17,6 @@ export const authConfig = {
       return true;
     },
   },
+  providers: [], // configured in auth.ts
+  secret: process.env.AUTH_SECRET,
 } satisfies NextAuthConfig;

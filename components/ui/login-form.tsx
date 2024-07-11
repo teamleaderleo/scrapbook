@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { lusitana } from '@/components/ui/fonts';
+import { useRouter } from 'next/navigation';
 import {
   AtSymbolIcon,
   KeyIcon,
@@ -16,25 +17,24 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
+  
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsPending(true);
-    try {
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("password", password);
-      await authenticate("", formData);
-      // Handle successful authentication
-    } catch (error) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage("An unknown error occurred");
-      }
-    } finally {
-      setIsPending(false);
+    setErrorMessage('');
+
+    const formData = new FormData(event.currentTarget);
+    const result = await authenticate('', formData);
+
+    if (result === 'CredentialSignin') {
+      setErrorMessage('Invalid email or password');
+    } else {
+      router.push('/dashboard'); // Redirect to dashboard on successful login
     }
+
+    setIsPending(false);
   };
 
   return (
