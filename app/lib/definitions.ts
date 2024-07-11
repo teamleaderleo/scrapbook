@@ -2,7 +2,10 @@ export type Account = {
   id: string; // Primary key
   name: string;
   email: string; // Unique
-  password: string; 
+  password?: string;
+  provider?: string;
+  providerAccountId?: string;
+  lastLogin?: string;
 };
 
 export type Tag = {

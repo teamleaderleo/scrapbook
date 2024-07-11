@@ -4,7 +4,10 @@ export const accounts = pgTable('account', {
   id: uuid('id').primaryKey(),
   name: text('name').notNull(),
   email: varchar('email', { length: 255 }).notNull(),
-  password: text('password').notNull(),
+  password: text('password'),
+  provider: varchar('provider', { length: 255 }),
+  providerAccountId: varchar('provider_account_id', { length: 255 }),
+  lastLogin: timestamp('last_login'),
 }, (table) => ({
   emailIndex: uniqueIndex('users_email_key').on(table.email),
 }));

@@ -19,7 +19,7 @@ export default async function Page() {
       <Suspense fallback={<div>Loading recommendations...</div>}>
         {/* <DashboardRecommendations /> */}
       </Suspense>
-      <ChatArtifact />
+      {/* <ChatArtifact /> */}
     </>
   );
 }
