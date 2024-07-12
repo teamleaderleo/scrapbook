@@ -19,7 +19,7 @@ export default async function Page({
   searchParams?: { query?: string; page?: string };
 }) {
   const artifacts = await getCachedArtifacts();
-  useArtifactStore.getState().setArtifacts(artifacts);
+  useArtifactStore.getState().setArtifacts(artifacts as ArtifactView[]);
 
   return (
     <div className="w-full">

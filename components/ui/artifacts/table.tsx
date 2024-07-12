@@ -11,7 +11,7 @@ import { DeleteArtifact, UpdateArtifact } from '@/components/ui/artifacts/button
 import { TagProvider } from '@/components/ui/tags/tagcontext';
 import Pagination from '../pagination';
 
-const ITEMS_PER_PAGE = 6;
+export const ARTIFACT_ITEMS_PER_PAGE = 6;
 
 export default function ArtifactsTable({
   initialArtifacts,
@@ -42,11 +42,11 @@ export default function ArtifactsTable({
   };
 
   const paginatedArtifacts = filteredArtifacts.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    (currentPage - 1) * ARTIFACT_ITEMS_PER_PAGE,
+    currentPage * ARTIFACT_ITEMS_PER_PAGE
   );
 
-  const totalPages = Math.ceil(filteredArtifacts.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredArtifacts.length / ARTIFACT_ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);

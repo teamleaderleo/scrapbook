@@ -1,6 +1,7 @@
 import { eq, and, or, ilike, sql, SQL, desc } from 'drizzle-orm';
 import { db } from './db/db';
 import { artifacts, artifactContents, artifactTags, tags, projectArtifactLinks, projects } from './db/schema';
+import { ARTIFACT_ITEMS_PER_PAGE } from '@/components/ui/artifacts/table';
 
 export async function fetchAllArtifacts(
   accountId: string,
