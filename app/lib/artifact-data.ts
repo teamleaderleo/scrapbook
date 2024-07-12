@@ -2,12 +2,12 @@ import { eq, and, or, ilike, sql, SQL, desc } from 'drizzle-orm';
 import { db } from './db/db';
 import { artifacts, artifactContents, artifactTags, tags, projectArtifactLinks, projects } from './db/schema';
 import { ARTIFACT_ITEMS_PER_PAGE } from '@/components/ui/artifacts/table';
+import { ArtifactWithRelations } from './definitions';
 
 export async function fetchAllArtifacts(
   accountId: string,
   includeProjects: boolean = false
-) {
-
+): Promise<ArtifactWithRelations[]> {
   const selectObject = getSelectObject(includeProjects);
 
   const query = db
@@ -27,35 +27,35 @@ export async function fetchAllArtifacts(
     .groupBy(artifacts.id)
     .orderBy(desc(artifacts.updatedAt));
 
-  const totalCount = await db
-    .select({ count: sql`COUNT(*)` })
-    .from(artifacts)
-    .where(eq(artifacts.accountId, accountId));
-
-  return {
-    artifacts: result.map(artifact => ({
-      ...artifact,
-      accountId: artifact.account_id,
-      createdAt: artifact.created_at,
-      updatedAt: artifact.updated_at,
-      contents: Array.isArray(artifact.contents) ? artifact.contents.map((content: any) => ({
-        ...content,
-        accountId: content.account_id,
-        createdAt: content.created_at,
-      })) : [],
-      tags: Array.isArray(artifact.tags) ? artifact.tags.map((tag: any) => ({
-        ...tag,
-        accountId: tag.account_id,
-      })) : [],
-      projects: includeProjects && Array.isArray(artifact.projects) ? artifact.projects.map((project: any) => ({
-        ...project,
-        accountId: project.account_id,
-        createdAt: project.created_at,
-        updatedAt: project.updated_at,
-      })) : [],
-    })),
-    totalCount: Number(totalCount[0].count),
-  };
+  return result.map(artifact => ({
+    id: artifact.id,
+    accountId: artifact.accountId,
+    name: artifact.name,
+    description: artifact.description,
+    createdAt: new Date(artifact.createdAt),
+    updatedAt: new Date(artifact.updatedAt),
+    contents: Array.isArray(artifact.contents) ? artifact.contents.map((content: any) => ({
+      id: content.id,
+      accountId: content.accountId,
+      type: content.type,
+      content: content.content,
+      createdAt: new Date(content.createdAt),
+    })) : [],
+    tags: Array.isArray(artifact.tags) ? artifact.tags.map((tag: any) => ({
+      id: tag.id,
+      accountId: tag.accountId,
+      name: tag.name,
+    })) : [],
+    projects: includeProjects && Array.isArray(artifact.projects) ? artifact.projects.map((project: any) => ({
+      id: project.id,
+      accountId: project.accountId,
+      name: project.name,
+      description: project.description,
+      createdAt: new Date(project.createdAt),
+      updatedAt: new Date(project.updatedAt),
+      status: project.status,
+    })) : [],
+  }));
 }
 
 export async function searchArtifacts(
@@ -68,8 +68,8 @@ export async function searchArtifacts(
     includeProjects?: boolean,
   } = {}
 ) {
-  const ITEMS_PER_PAGE = 6;
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  const offset = (currentPage - 1) * ARTIFACT_ITEMS_PER_PAGE;
 
   const selectObject = getSelectObject(options.includeProjects);
 
@@ -104,20 +104,11 @@ export async function searchArtifacts(
   const result = await finalQuery
     .groupBy(artifacts.id)
     .orderBy(desc(artifacts.updatedAt))
-    .limit(ITEMS_PER_PAGE)
+    .limit(ARTIFACT_ITEMS_PER_PAGE)
     .offset(offset);
-
-  const totalCount = await db
-    .select({ count: sql`COUNT(DISTINCT ${artifacts.id})` })
-    .from(artifacts)
-    .leftJoin(artifactContents, eq(artifacts.id, artifactContents.artifactId))
-    .leftJoin(artifactTags, eq(artifacts.id, artifactTags.artifactId))
-    .leftJoin(tags, eq(artifactTags.tagId, tags.id))
-    .where(and(eq(artifacts.accountId, accountId), searchCondition));
 
   return {
     artifacts: result,
-    totalCount: Number(totalCount[0].count),
   };
 }
 
