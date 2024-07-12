@@ -16,6 +16,10 @@ This took a bit more thinking than I expected. And I'm still thinking about it!
 
 ## What It Currently Looks Like
 
+### Artifacts:
+
+![image](https://github.com/user-attachments/assets/ae047a5a-9f2c-4cb5-81f8-c216fbaeee41)
+
 ### Login Page:
 ![image](https://github.com/MikelBai/scrapbook/assets/13091533/ca45a1e3-66db-4989-9ed7-850ffe2bd770)
 
