@@ -7,6 +7,7 @@ import { ProjectsTableSkeleton } from '@/components/ui/skeletons';
 import { Metadata } from 'next';
 import { getCachedArtifacts } from '@/app/lib/cached-artifact-data';
 import { ArtifactView } from '@/app/lib/definitions';
+import { useArtifactStore } from '@/app/lib/store/artifactStore';
 
 export const metadata: Metadata = {
   title: 'Artifacts',
@@ -17,9 +18,8 @@ export default async function Page({
 }: {
   searchParams?: { query?: string; page?: string };
 }) {
-  const query = searchParams?.query || '';
-  const currentPage = Number(searchParams?.page) || 1;
   const artifacts = await getCachedArtifacts();
+  useArtifactStore.getState().setArtifacts(artifacts);
 
   return (
     <div className="w-full">

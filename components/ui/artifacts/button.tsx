@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { deleteArtifact } from '@/app/lib/artifact-actions';
 import { useTransition } from 'react';
 import { ADMIN_UUID } from '@/app/lib/constants';
+import { ArtifactView } from '@/app/lib/definitions';
 
 export function CreateArtifact() {
   return (
@@ -18,10 +19,10 @@ export function CreateArtifact() {
   );
 }
 
-export function UpdateArtifact({ id }: { id: string }) {
+export function UpdateArtifact({ artifact }: { artifact: ArtifactView }) {
   return (
     <Link
-      href={`/dashboard/artifacts/${id}/edit`}
+      href={`/dashboard/artifacts/${artifact.id}/edit`}
       className="rounded-md border p-2 hover:bg-gray-100"
     >
       <PencilIcon className="w-5" />

@@ -136,7 +136,7 @@ export default function ArtifactsTable({
                       </td>
                       <td className="whitespace-nowrap py-3 pl-6 pr-3">
                         <div className="flex justify-end">
-                          <UpdateArtifact id={artifact.id} />
+                          <UpdateArtifact artifact={artifact} />
                           <DeleteArtifact id={artifact.id} onDelete={() => handleDeleteArtifact(artifact.id)} />
                         </div>
                       </td>
