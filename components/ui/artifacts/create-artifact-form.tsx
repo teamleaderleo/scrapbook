@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Project, ArtifactWithRelations, ContentType } from '@/app/lib/definitions';
+import { BaseProject, ArtifactWithRelations, ContentType } from '@/app/lib/definitions';
 import { createArtifact, State } from '@/app/lib/artifact-actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
@@ -10,7 +10,7 @@ import { ArtifactForm } from '@/components/ui/artifacts/artifact-form';
 import { suggestTags, suggestContentExtensions } from '@/app/lib/claude-utils';
 import { Button } from '@/components/ui/button';
 
-export default function CreateArtifactForm({ projects }: { projects: Project[] }) {
+export default function CreateArtifactForm({ projects }: { projects: BaseProject[] }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);

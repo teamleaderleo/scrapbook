@@ -51,7 +51,7 @@ export type Artifact = BaseArtifact &{
 
 export type ArtifactWithRelations = Artifact & {
   tags: Tag[];
-  projects: Project[];
+  projects: BaseProject[];
 };
 
 export type ProjectArtifactLink = {
@@ -61,7 +61,7 @@ export type ProjectArtifactLink = {
   addedAt: Date;
 };
 
-export type Project = {
+export type BaseProject = {
   id: string;
   accountId: string;
   name: string;
@@ -71,13 +71,13 @@ export type Project = {
   status: 'pending' | 'completed';
 };
 
-export type ProjectDetail = Project & {
+export type ProjectWithRelations = BaseProject & {
   tags: Tag[];
   artifacts: Artifact[];
 };
 
 // Type for the query result
-export type ProjectView = ProjectDetail & {
+export type ProjectView = ProjectWithRelations & {
   totalProjects: number;
   totalPending: number;
   totalCompleted: number;

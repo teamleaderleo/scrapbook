@@ -4,9 +4,9 @@ import {
   Artifact,
   ArtifactView,
   ArtifactWithRelations,
-  Project,
+  BaseProject,
   ProjectView,
-  ProjectDetail,
+  ProjectWithRelations,
   DashboardView,
   Tag
 } from './definitions';
@@ -23,7 +23,7 @@ export async function getAccount(email: string) {
 
 export async function fetchProject(accountId: string, id: string) {
   try {
-    const data = await sql<ProjectDetail>`
+    const data = await sql<ProjectWithRelations>`
       SELECT
         p.id,
         p.account_id,
@@ -99,7 +99,7 @@ export async function fetchProjectsPages(accountId: string, query: string = '') 
 
 export async function fetchLatestProjects(accountId: string, limit: number = 5) {
   try {
-    const data = await sql<ProjectDetail>`
+    const data = await sql<ProjectWithRelations>`
       SELECT
         p.id,
         p.account_id,
