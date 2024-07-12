@@ -1,15 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { ArtifactView, Tag } from '@/app/lib/definitions';
 import { getArtifactThumbnail } from '@/app/lib/utils-client';
-import { ADMIN_UUID } from '@/app/lib/constants';
 import { TagList } from '@/components/ui/tags/taglist';
 import { DeleteArtifact, UpdateArtifact } from '@/components/ui/artifacts/button';
 import { TagProvider } from '@/components/ui/tags/tagcontext';
+import Pagination from '../pagination';
+
+const ITEMS_PER_PAGE = 6;
 
 export default function ArtifactsTable({
   initialArtifacts,
@@ -17,10 +19,40 @@ export default function ArtifactsTable({
   initialArtifacts: ArtifactView[];
 }) {
   const [artifacts, setArtifacts] = useState(initialArtifacts);
+  const [filteredArtifacts, setFilteredArtifacts] = useState(initialArtifacts);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  
+  const currentPage = Number(searchParams.get('page')) || 1;
+  const query = searchParams.get('query') || '';
+
+  useEffect(() => {
+    const filtered = artifacts.filter(artifact => 
+      artifact.name.toLowerCase().includes(query.toLowerCase()) ||
+      (artifact.description && artifact.description.toLowerCase().includes(query.toLowerCase())) ||
+      artifact.tags.some(tag => tag.name.toLowerCase().includes(query.toLowerCase())) ||
+      artifact.contents.some(content => content.content.toLowerCase().includes(query.toLowerCase()))
+    );
+    setFilteredArtifacts(filtered);
+  }, [query, artifacts]);
+
   const handleDeleteArtifact = (deletedArtifactId: string) => {
     setArtifacts(artifacts.filter(artifact => artifact.id !== deletedArtifactId));
   };
-  const router = useRouter();
+
+  const paginatedArtifacts = filteredArtifacts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const totalPages = Math.ceil(filteredArtifacts.length / ITEMS_PER_PAGE);
+
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('page', page.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   return (
     <TagProvider>
@@ -44,7 +76,7 @@ export default function ArtifactsTable({
                   </tr>
                 </thead>
                 <tbody className="bg-white">
-                  {artifacts.map((artifact: ArtifactView) => (
+                  {paginatedArtifacts.map((artifact: ArtifactView) => (
                     <tr key={artifact.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
                       <td className="whitespace-nowrap py-3 pl-6 pr-3">
                         <div className="flex items-center">
@@ -115,6 +147,13 @@ export default function ArtifactsTable({
             </div>
           </div>
         </div>
+      </div>
+      <div className="mt-5 flex w-full justify-center">
+        <Pagination 
+          totalPages={totalPages} 
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+        />
       </div>
     </TagProvider>
   );

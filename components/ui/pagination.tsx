@@ -4,13 +4,21 @@ import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { generatePagination } from '@/app/lib/utils-client';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 
-export default function Pagination({ totalPages }: { totalPages: number }) {
-  // NOTE: comment in this code when you get to this point in the course
+export default function Pagination({ 
+  totalPages, 
+  currentPage, 
+  onPageChange 
+}: { 
+  totalPages: number; 
+  currentPage: number;
+  onPageChange: (page: number) => void;
+}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const currentPage = Number(searchParams.get('page')) || 1;
+  const { replace } = useRouter();
+  // const currentPage = Number(searchParams.get('page')) || 1;
   const allPages = generatePagination(currentPage, totalPages);
 
   const createPageURL = (pageNumber: number | string) => {
@@ -18,12 +26,21 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
     params.set('page', pageNumber.toString());
     return `${pathname}?${params.toString()}`;
   };
+
+  const handlePageChange = (pageNumber: number | string) => {
+    const newPath = createPageURL(pageNumber);
+    replace(newPath);
+    if (typeof pageNumber === 'number') {
+      onPageChange(pageNumber);
+    }
+  };
+
   return (
     <>
       <div className="inline-flex">
         <PaginationArrow
           direction="left"
-          href={createPageURL(currentPage - 1)}
+          onClick={() => handlePageChange(currentPage - 1)}
           isDisabled={currentPage <= 1}
         />
 
@@ -39,10 +56,10 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
             return (
               <PaginationNumber
                 key={page}
-                href={createPageURL(page)}
                 page={page}
                 position={position}
                 isActive={currentPage === page}
+                onClick={() => handlePageChange(page)}
               />
             );
           })}
@@ -50,7 +67,7 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
 
         <PaginationArrow
           direction="right"
-          href={createPageURL(currentPage + 1)}
+          onClick={() => handlePageChange(currentPage + 1)}
           isDisabled={currentPage >= totalPages}
         />
       </div>
@@ -60,14 +77,14 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
 
 function PaginationNumber({
   page,
-  href,
-  isActive,
   position,
+  isActive,
+  onClick,
 }: {
   page: number | string;
-  href: string;
   position?: 'first' | 'last' | 'middle' | 'single';
   isActive: boolean;
+  onClick: () => void;
 }) {
   const className = clsx(
     'flex h-10 w-10 items-center justify-center text-sm border',
@@ -83,20 +100,20 @@ function PaginationNumber({
   return isActive || position === 'middle' ? (
     <div className={className}>{page}</div>
   ) : (
-    <Link href={href} className={className}>
+    <button onClick={onClick} className={className}>
       {page}
-    </Link>
+    </button>
   );
 }
 
 function PaginationArrow({
-  href,
   direction,
   isDisabled,
+  onClick,
 }: {
-  href: string;
   direction: 'left' | 'right';
   isDisabled?: boolean;
+  onClick: () => void;
 }) {
   const className = clsx(
     'flex h-10 w-10 items-center justify-center rounded-md border',
@@ -118,8 +135,8 @@ function PaginationArrow({
   return isDisabled ? (
     <div className={className}>{icon}</div>
   ) : (
-    <Link className={className} href={href}>
+    <button onClick={onClick} className={className}>
       {icon}
-    </Link>
+    </button>
   );
 }

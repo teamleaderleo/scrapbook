@@ -1,14 +1,11 @@
-import Pagination from '@/components/ui/pagination';
+import { Suspense } from 'react';
 import Search from '@/components/ui/search';
 import ArtifactsTable from '@/components/ui/artifacts/table';
 import { CreateArtifact } from '@/components/ui/artifacts/button';
 import { lusitana } from '@/components/ui/fonts';
 import { ProjectsTableSkeleton } from '@/components/ui/skeletons';
-import { Suspense } from 'react';
-import { fetchArtifactsPages } from '@/app/lib/data';
-import { searchArtifacts } from '@/app/lib/artifact-data';
 import { Metadata } from 'next';
-import { ADMIN_UUID } from '@/app/lib/constants';
+import { getCachedArtifacts } from '@/app/lib/cached-artifact-data';
 import { ArtifactView } from '@/app/lib/definitions';
 
 export const metadata: Metadata = {
@@ -18,20 +15,11 @@ export const metadata: Metadata = {
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: {
-    query?: string;
-    page?: string;
-  };
+  searchParams?: { query?: string; page?: string };
 }) {
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
-
-  const totalPages = await fetchArtifactsPages(ADMIN_UUID, query);
-  const artifactsData = await searchArtifacts(ADMIN_UUID, query, currentPage, {
-    searchContent: true,
-    searchTags: true,
-    includeProjects: true
-  });
+  const artifacts = await getCachedArtifacts();
 
   return (
     <div className="w-full">
@@ -42,12 +30,11 @@ export default async function Page({
         <Search placeholder="Search artifacts..." />
         <CreateArtifact />
       </div>
-      <Suspense key={query + currentPage} fallback={<ProjectsTableSkeleton />}>
-        <ArtifactsTable initialArtifacts={artifactsData.artifacts as ArtifactView[]} />
+      <Suspense fallback={<ProjectsTableSkeleton />}>
+        <ArtifactsTable 
+          initialArtifacts={artifacts as ArtifactView[]} 
+        />
       </Suspense>
-      <div className="mt-5 flex w-full justify-center">
-        <Pagination totalPages={totalPages} />
-      </div>
     </div>
   );
 }

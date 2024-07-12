@@ -4,11 +4,8 @@ import { artifacts, artifactContents, artifactTags, tags, projectArtifactLinks, 
 
 export async function fetchAllArtifacts(
   accountId: string,
-  currentPage: number = 1,
   includeProjects: boolean = false
 ) {
-  const ITEMS_PER_PAGE = 6;
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   const selectObject = getSelectObject(includeProjects);
 
@@ -27,9 +24,7 @@ export async function fetchAllArtifacts(
 
   const result = await query
     .groupBy(artifacts.id)
-    .orderBy(desc(artifacts.updatedAt))
-    .limit(ITEMS_PER_PAGE)
-    .offset(offset);
+    .orderBy(desc(artifacts.updatedAt));
 
   const totalCount = await db
     .select({ count: sql`COUNT(*)` })
@@ -42,16 +37,16 @@ export async function fetchAllArtifacts(
       accountId: artifact.account_id,
       createdAt: artifact.created_at,
       updatedAt: artifact.updated_at,
-      contents: JSON.parse(artifact.contents).map((content: any) => ({
+      contents: Array.isArray(artifact.contents) ? artifact.contents.map((content: any) => ({
         ...content,
         accountId: content.account_id,
         createdAt: content.created_at,
-      })),
-      tags: JSON.parse(artifact.tags).map((tag: any) => ({
+      })) : [],
+      tags: Array.isArray(artifact.tags) ? artifact.tags.map((tag: any) => ({
         ...tag,
         accountId: tag.account_id,
-      })),
-      projects: includeProjects ? JSON.parse(artifact.projects).map((project: any) => ({
+      })) : [],
+      projects: includeProjects && Array.isArray(artifact.projects) ? artifact.projects.map((project: any) => ({
         ...project,
         accountId: project.account_id,
         createdAt: project.created_at,
