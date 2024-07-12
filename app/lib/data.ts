@@ -3,7 +3,7 @@ import {
   Account,
   Artifact,
   ArtifactView,
-  ArtifactDetail,
+  ArtifactWithRelations,
   Project,
   ProjectView,
   ProjectDetail,
@@ -211,7 +211,7 @@ export async function fetchProjects(accountId: string, query: string = '', curre
 
 export async function fetchArtifact(accountId: string, id: string) {
   try {
-    const data = await sql<ArtifactDetail>`
+    const data = await sql<ArtifactWithRelations>`
       SELECT
         a.id,
         a.account_id,
@@ -262,7 +262,7 @@ export async function fetchArtifact(accountId: string, id: string) {
 
 export async function fetchLatestArtifacts(accountId: string, limit: number = 5) {
   try {
-    const data = await sql<ArtifactDetail>`
+    const data = await sql<ArtifactWithRelations>`
       SELECT
         a.id,
         a.account_id,

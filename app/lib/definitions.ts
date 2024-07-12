@@ -36,17 +36,20 @@ export type ArtifactContent = {
   createdAt: Date;
 };
 
-export type Artifact = {
+export type BaseArtifact = {
   accountId: string;
   id: string;
   name: string;
-  contents: ArtifactContent[];
   description?: string;
   createdAt: Date;
   updatedAt: Date;
 };
 
-export type ArtifactDetail = Artifact & {
+export type Artifact = BaseArtifact &{
+  contents: ArtifactContent[];
+};
+
+export type ArtifactWithRelations = Artifact & {
   tags: Tag[];
   projects: Project[];
 };
@@ -82,7 +85,7 @@ export type ProjectView = ProjectDetail & {
   totalAssociatedArtifacts: number;
 };
 
-export type ArtifactView = ArtifactDetail & {
+export type ArtifactView = ArtifactWithRelations & {
   totalArtifacts: number;
   totalTags: number;
   totalAssociatedProjects: number;

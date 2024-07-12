@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ArtifactDetail, ProjectDetail } from '@/app/lib/definitions';
+import { ArtifactWithRelations, ProjectDetail } from '@/app/lib/definitions';
 import { updateProject } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
@@ -12,7 +12,7 @@ export default function EditProjectForm({
   artifacts,
 }: {
   project: ProjectDetail;
-  artifacts: ArtifactDetail[];
+  artifacts: ArtifactWithRelations[];
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const initialState = { message: null, errors: {} };

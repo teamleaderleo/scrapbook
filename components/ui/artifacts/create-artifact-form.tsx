@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Project, ArtifactDetail, ContentType } from '@/app/lib/definitions';
+import { Project, ArtifactWithRelations, ContentType } from '@/app/lib/definitions';
 import { createArtifact, State } from '@/app/lib/artifact-actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
@@ -22,7 +22,7 @@ export default function CreateArtifactForm({ projects }: { projects: Project[] }
   };
   const [state, formAction] = useFormState(createArtifactWithAccount, initialState);
 
-  const defaultArtifact: ArtifactDetail = {
+  const defaultArtifact: ArtifactWithRelations = {
     accountId: ADMIN_UUID,
     id: '',
     name: '',

@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArtifactDetail } from '@/app/lib/definitions';
+import { ArtifactWithRelations } from '@/app/lib/definitions';
 import { createProject, State } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { ProjectForm } from '@/components/ui/projects/project-form';
 
-export default function CreateProjectForm({ artifacts }: { artifacts: ArtifactDetail[] }) {
+export default function CreateProjectForm({ artifacts }: { artifacts: ArtifactWithRelations[] }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const initialState: State = { message: null, errors: {} };

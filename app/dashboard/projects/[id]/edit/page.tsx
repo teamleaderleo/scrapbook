@@ -5,7 +5,7 @@ import { fetchAllArtifacts } from '@/app/lib/artifact-data';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import { ArtifactDetail } from '@/app/lib/definitions';
+import { ArtifactWithRelations } from '@/app/lib/definitions';
 
 export const metadata: Metadata = {
   title: 'Edit',
@@ -33,7 +33,7 @@ export default async function Page({ params }: { params: { id: string } }) {
           },
         ]}
       />
-      <Form project={project} artifacts={artifacts as unknown as ArtifactDetail[]} />
+      <Form project={project} artifacts={artifacts as unknown as ArtifactWithRelations[]} />
     </main>
   );
 }

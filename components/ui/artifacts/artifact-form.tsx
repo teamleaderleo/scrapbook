@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { ArtifactDetail, Project, ContentType } from '@/app/lib/definitions';
+import { ArtifactWithRelations, Project, ContentType } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { TagManager } from '@/components/ui/tags/tagmanager';
 import { Suggestions } from '@/components/ui/suggestions/suggestions';
 
 interface ArtifactFormProps {
-  artifact?: ArtifactDetail;
+  artifact?: ArtifactWithRelations;
   projects: Project[];
   onSubmit: (formData: FormData) => void;
   isSubmitting: boolean;
