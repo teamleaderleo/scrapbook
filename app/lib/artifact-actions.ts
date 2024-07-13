@@ -1,13 +1,17 @@
 'use server';
 
 import { z } from 'zod';
-import { sql } from '@vercel/postgres';
+import { eq, and } from 'drizzle-orm';
+import { db } from './db/db.server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { addTagToArtifact, removeTagFromArtifact, getArtifactTags } from './utils-server';
-import { ContentType } from './definitions';
-import { uploadToS3, deleteFromS3 } from './s3-operations';
 import { suggestTags } from './claude-utils';
+import { artifacts, artifactContents, artifactTags, projectArtifactLinks } from './db/schema';
+import { handleContentUpdate, hasValidContent, insertContents } from './actions/artifact-content-handlers';
+import { handleTagUpdate } from './actions/tag-handlers';
+import { handleProjectUpdate } from './actions/project-handlers';
+import { deleteFromS3 } from './s3-operations';
+import { v4 as uuid } from 'uuid';
 
 const ArtifactSchema = z.object({
   name: z.string().min(1, 'Artifact name is required.'),
@@ -26,104 +30,12 @@ export type State = {
     projects?: string[];
   };
   message?: string | null;
+  suggestedTags?: string[];
+  artifactId?: string;
+  success?: boolean;
 };
 
-async function handleContentUpdate(accountId: string, artifactId: string, formData: FormData) {
-  const existingContents = await sql`
-    SELECT id, type, content FROM artifact_content
-    WHERE artifact_id = ${artifactId} AND account_id = ${accountId}
-  `;
-
-  const existingContentIds = new Set(existingContents.rows.map(row => row.id));
-  let newContentCount = 0;
-
-  let index = 0;
-  while (formData.get(`contentType-${index}`) !== null) {
-    const contentType = formData.get(`contentType-${index}`) as ContentType;
-    const contentItem = formData.get(`content-${index}`);
-    const contentIdValue = formData.get(`contentId-${index}`);
-    const contentId = typeof contentIdValue === 'string' ? contentIdValue : null;
-
-    let content: string | null = null;
-    if (contentType === 'text') {
-      content = (contentItem as string).trim();
-      if (content === '') {
-        content = null;
-      }
-    } else if (contentItem instanceof File) {
-      content = await uploadToS3(contentItem, contentType, accountId);
-    } else if (typeof contentItem === 'string' && contentItem.startsWith('data:')) {
-      const base64Data = contentItem.split(',')[1];
-      const buffer = Buffer.from(base64Data, 'base64');
-      content = await uploadToS3(buffer, contentType, accountId);
-    } else if (contentId) {
-      content = existingContents.rows.find(row => row.id === contentId)?.content || null;
-    }
-
-    if (content) {
-      if (contentId) {
-        await sql`
-          UPDATE artifact_content
-          SET type = ${contentType}, content = ${content}
-          WHERE id = ${contentId} AND account_id = ${accountId}
-        `;
-        existingContentIds.delete(contentId);
-      } else {
-        await sql`
-          INSERT INTO artifact_content (account_id, artifact_id, type, content)
-          VALUES (${accountId}, ${artifactId}, ${contentType}, ${content})
-        `;
-      }
-      newContentCount++;
-    } else if (contentId) {
-      existingContentIds.delete(contentId);
-    }
-
-    index++;
-  }
-
-  // Delete removed contents
-  for (const contentId of existingContentIds) {
-    const contentToDelete = existingContents.rows.find(row => row.id === contentId);
-    if (contentToDelete && (contentToDelete.type === 'image' || contentToDelete.type === 'file')) {
-      await deleteFromS3(contentToDelete.content);
-    }
-    await sql`DELETE FROM artifact_content WHERE id = ${contentId} AND account_id = ${accountId}`;
-  }
-
-  // If no content remains, return false to indicate the artifact should be deleted
-  return newContentCount > 0;
-}
-
-async function handleTagUpdate(accountId: string, artifactId: string, newTags: string[]) {
-  const currentTags = await getArtifactTags(accountId, artifactId);
-
-  for (const tag of currentTags) {
-    if (!newTags.includes(tag.name)) {
-      await removeTagFromArtifact(accountId, artifactId, tag.id);
-    }
-  }
-
-  for (const tagName of newTags) {
-    if (!currentTags.some(tag => tag.name === tagName)) {
-      await addTagToArtifact(accountId, artifactId, tagName);
-    }
-  }
-}
-
-async function handleProjectUpdate(accountId: string, artifactId: string, projects: string[]) {
-  await sql`DELETE FROM project_artifact_link WHERE artifact_id = ${artifactId} AND account_id = ${accountId}`;
-  if (projects && projects.length > 0) {
-    for (const projectId of projects) {
-      await sql`
-        INSERT INTO project_artifact_link (account_id, project_id, artifact_id)
-        VALUES (${accountId}, ${projectId}, ${artifactId})
-      `;
-    }
-  }
-}
-
-export async function updateArtifact(id: string, accountId: string, prevState: State, formData: FormData) {
+export async function updateArtifact(id: string, accountId: string, prevState: State, formData: FormData): Promise<State> {
   const validatedFields = ArtifactSchema.safeParse({
     name: formData.get('name'),
     description: formData.get('description'),
@@ -141,172 +53,117 @@ export async function updateArtifact(id: string, accountId: string, prevState: S
   const { name, description, tags, projects } = validatedFields.data;
 
   try {
-    await sql`BEGIN`;
+    const result = await db.transaction(async (tx) => {
+      await tx.update(artifacts)
+        .set({ name, description, updatedAt: new Date() })
+        .where(and(
+          eq(artifacts.id, id),
+          eq(artifacts.accountId, accountId)
+        ));
 
-    await sql`
-      UPDATE artifact
-      SET name = ${name}, description = ${description}
-      WHERE id = ${id} AND account_id = ${accountId}
-    `;
+      const hasContent = await handleContentUpdate(accountId, id, formData);
 
-    const hasContent = await handleContentUpdate(accountId, id, formData);
+      if (!hasContent) {
+        await deleteArtifact(id, accountId);
+        return { message: 'Artifact deleted due to lack of content' };
+      }
 
-    if (!hasContent) {
-      const deleteResult = await deleteArtifact(id, accountId);
-      await sql`COMMIT`;
-      revalidatePath('/dashboard/artifacts');
-      return { message: deleteResult.message };
-    }
+      const contents = await tx.select({ content: artifactContents.content })
+        .from(artifactContents)
+        .where(and(
+          eq(artifactContents.artifactId, id),
+          eq(artifactContents.accountId, accountId),
+          eq(artifactContents.type, 'text')
+        ));
 
-    // Get all content for tag suggestion
-    const contents = await sql`
-      SELECT content FROM artifact_content
-      WHERE artifact_id = ${id} AND account_id = ${accountId} AND type = 'text'
-    `;
-    const allContent = contents.rows.map(row => row.content).join(' ');
+      const allContent = contents.map(row => row.content).join(' ');
 
-    // Get AI-suggested tags
-    const suggestedTags = await suggestTags(`${name} ${description} ${allContent}`);
+      const suggestedTags = await suggestTags(`${name} ${description} ${allContent}`);
 
-    await handleTagUpdate(accountId, id, tags || []);
-    await handleProjectUpdate(accountId, id, projects || []);
+      await handleTagUpdate(accountId, id, tags || []);
+      await handleProjectUpdate(accountId, id, projects || []);
 
-    await sql`COMMIT`;
+      return { message: 'Artifact updated successfully', suggestedTags };
+    });
 
     revalidatePath('/dashboard/artifacts');
-    return { message: 'Artifact updated successfully', suggestedTags };
+    return result;
   } catch (error) {
-    await sql`ROLLBACK`;
     console.error('Error updating artifact:', error);
     return { message: 'Database Error: Failed to Update Artifact.' };
   }
 }
 
-export async function deleteArtifact(id: string, accountId: string) {
+export async function deleteArtifact(id: string, accountId: string): Promise<State> {
   try {
-    await sql`BEGIN`;
+    await db.transaction(async (tx) => {
+      await tx.delete(artifactTags).where(and(eq(artifactTags.artifactId, id), eq(artifactTags.accountId, accountId)));
+      await tx.delete(projectArtifactLinks).where(and(eq(projectArtifactLinks.artifactId, id), eq(projectArtifactLinks.accountId, accountId)));
+      
+      const contents = await tx.select().from(artifactContents)
+        .where(and(eq(artifactContents.artifactId, id), eq(artifactContents.accountId, accountId)));
 
-    // Delete associated artifact-tag links
-    await sql`DELETE FROM artifact_tag WHERE artifact_id = ${id}`;
-    
-    // Delete associated project-artifact links
-    await sql`DELETE FROM project_artifact_link WHERE artifact_id = ${id} AND account_id = ${accountId}`;
-
-    // Delete artifact content
-    const contents = await sql`
-      SELECT id, type, content FROM artifact_content
-      WHERE artifact_id = ${id} AND account_id = ${accountId}
-    `;
-
-    for (const content of contents.rows) {
-      if (content.type === 'image' || content.type === 'file') {
-        await deleteFromS3(content.content);
+      for (const content of contents) {
+        if (content.type === 'image' || content.type === 'file') {
+          await deleteFromS3(content.content);
+        }
       }
-    }
 
-    await sql`DELETE FROM artifact_content WHERE artifact_id = ${id} AND account_id = ${accountId}`;
+      await tx.delete(artifactContents).where(and(eq(artifactContents.artifactId, id), eq(artifactContents.accountId, accountId)));
+      await tx.delete(artifacts).where(and(eq(artifacts.id, id), eq(artifacts.accountId, accountId)));
+    });
 
-    // Delete the artifact
-    await sql`DELETE FROM artifact WHERE id = ${id} AND account_id = ${accountId}`;
-
-    await sql`COMMIT`;
-
-    return { success: true, message: 'Artifact deleted successfully.' };
+    revalidatePath('/dashboard/artifacts');
+    return { message: 'Artifact deleted successfully.', success: true };
   } catch (error) {
-    await sql`ROLLBACK`;
     console.error('Error deleting artifact:', error);
-    throw error;
+    return { message: 'Failed to delete artifact.', success: false };
   }
 }
 
-export async function createArtifact(accountId: string, formData: FormData) {
+export async function createArtifact(accountId: string, formData: FormData): Promise<State> {
   const name = formData.get('name') as string;
   const tags = formData.getAll('tags') as string[];
-  const description = formData.get('description') as string;
+  const description = formData.get('description') as string | undefined;
   const projects = formData.getAll('projects') as string[];
 
-  // Check if there's at least one content item
-  let hasContent = false;
-  let index = 0;
-  while (formData.get(`contentType-${index}`)) {
-    const contentItem = formData.get(`content-${index}`);
-    if (contentItem && (typeof contentItem === 'string' ? contentItem.trim() !== '' : true)) {
-      hasContent = true;
-      break;
-    }
-    index++;
-  }
-
-  if (!hasContent) {
-    return {
-      message: 'Error: Artifact must have at least one content item.',
-    };
+  if (!hasValidContent(formData)) {
+    return { message: 'Error: Artifact must have at least one content item.', success: false };
   }
   
   try {
-    await sql`BEGIN`;
+    const result = await db.transaction(async (tx) => {
+      const newArtifactId = uuid();
+      const now = new Date();
 
-    const result = await sql`
-      INSERT INTO artifact (account_id, name, description)
-      VALUES (${accountId}, ${name}, ${description})
-      RETURNING id
-    `;
-    const artifactId = result.rows[0].id;
+      await tx.insert(artifacts).values({ 
+        id: newArtifactId,
+        accountId, 
+        name, 
+        description, 
+        createdAt: now, 
+        updatedAt: now 
+      });
 
-    // Handle multiple content items
-    let allContent = '';
-    let index = 0;
-    while (formData.get(`contentType-${index}`)) {
-      const contentType = formData.get(`contentType-${index}`) as ContentType;
-      const contentItem = formData.get(`content-${index}`);
+      const allContent = await insertContents(tx, accountId, newArtifactId, formData);
 
-      if (contentType === 'text') {
-        allContent += contentItem + ' ';
+      const suggestedTags = await suggestTags(`${name} ${description || ''} ${allContent.trim()}`);
+
+      if (tags && tags.length > 0) {
+        await handleTagUpdate(accountId, newArtifactId, tags);
       }
 
-      let content: string;
-      if (contentType === 'text') {
-        content = contentItem as string;
-      } else if (contentItem instanceof File) {
-        content = await uploadToS3(contentItem, contentType, accountId);
-      } else {
-        throw new Error(`Invalid content for type ${contentType}`);
+      if (projects && projects.length > 0) {
+        await handleProjectUpdate(accountId, newArtifactId, projects);
       }
 
-      await sql`
-        INSERT INTO artifact_content (account_id, artifact_id, type, content)
-        VALUES (${accountId}, ${artifactId}, ${contentType}, ${content})
-      `;
-
-      index++;
-    }
-
-    // Get AI-suggested tags
-    const suggestedTags = await suggestTags(`${name} ${description} ${allContent.trim()}`);
-
-    if (tags && tags.length > 0) {
-      for (const tagName of tags) {
-        await addTagToArtifact(accountId, artifactId, tagName);
-      }
-    }
-
-    if (projects && projects.length > 0) {
-      for (const projectId of projects) {
-        await sql`
-          INSERT INTO project_artifact_link (account_id, project_id, artifact_id)
-          VALUES (${accountId}, ${projectId}, ${artifactId})
-        `;
-      }
-    }
-
-    await sql`COMMIT`;
+      return { message: 'Artifact created successfully', suggestedTags, artifactId: newArtifactId, success: true };
+    });
 
     revalidatePath('/dashboard/artifacts');
-    return { message: 'Artifact created successfully', suggestedTags, artifactId };
+    return result;
   } catch (error: any) {
-    await sql`ROLLBACK`;
-    return {
-      message: `Error: Failed to Create Artifact. ${error.message}`,
-    };
+    console.error('Error creating artifact:', error);
+    return { message: `Error: Failed to Create Artifact. ${error.message}`, success: false };
   }
 }
