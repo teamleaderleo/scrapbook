@@ -56,8 +56,10 @@ export function ArtifactsTable({
     setCurrentPage(page);
     const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
-  }, [searchParams, pathname, router, setCurrentPage]);
+    
+    // Update the URL without a page reload
+    window.history.pushState({}, '', `${pathname}?${params.toString()}`);
+  }, [searchParams, pathname, setCurrentPage]);
 
   const handleTagsChange = async (artifactId: string, newTags: Tag[]) => {
     const tagNames = newTags.map(tag => tag.name);
