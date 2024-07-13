@@ -8,6 +8,12 @@ export type Account = {
   lastLogin?: Date;
 };
 
+export interface FetchOptions { // idk why we'd want interfaces over types
+  includeTags?: boolean;
+  includeContents?: boolean;
+  includeProjects?: boolean;
+}
+
 export type Tag = {
   id: string; 
   accountId: string; 

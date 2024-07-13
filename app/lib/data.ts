@@ -1,10 +1,6 @@
 import { sql } from '@vercel/postgres';
 import {
   Account,
-  Artifact,
-  ArtifactView,
-  ArtifactWithRelations,
-  BaseProject,
   ProjectView,
   ProjectWithRelations,
   DashboardView,
@@ -208,111 +204,6 @@ export async function fetchProjects(accountId: string, query: string = '', curre
     throw new Error('Failed to fetch projects.');
   }
 }
-
-export async function fetchArtifact(accountId: string, id: string) {
-  try {
-    const data = await sql<ArtifactWithRelations>`
-      SELECT
-        a.id,
-        a.account_id,
-        a.name,
-        a.description,
-        a.created_at,
-        a.updated_at,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', ac.id,
-            'type', ac.type,
-            'content', ac.content,
-            'created_at', ac.created_at
-          )) FILTER (WHERE ac.id IS NOT NULL),
-          '[]'
-        ) AS contents,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', t.id,
-            'account_id', t.account_id,
-            'name', t.name
-          )) FILTER (WHERE t.id IS NOT NULL),
-          '[]'
-        ) AS tags,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', p.id,
-            'name', p.name,
-            'status', p.status
-          )) FILTER (WHERE p.id IS NOT NULL),
-          '[]'
-        ) AS projects
-      FROM artifact a
-      LEFT JOIN artifact_content ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
-      LEFT JOIN artifact_tag at ON a.id = at.artifact_id AND at.account_id = ${accountId}
-      LEFT JOIN tag t ON at.tag_id = t.id AND t.account_id = ${accountId}
-      LEFT JOIN project_artifact_link pal ON a.id = pal.artifact_id AND pal.account_id = ${accountId}
-      LEFT JOIN project p ON pal.project_id = p.id
-      WHERE a.id = ${id} AND a.account_id = ${accountId}
-      GROUP BY a.id`;
-
-    return data.rows[0];
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch artifact.');
-  }
-}
-
-export async function fetchLatestArtifacts(accountId: string, limit: number = 5) {
-  try {
-    const data = await sql<ArtifactWithRelations>`
-      SELECT
-        a.id,
-        a.account_id,
-        a.name,
-        a.description,
-        a.created_at,
-        a.updated_at,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', ac.id,
-            'type', ac.type,
-            'content', ac.content,
-            'created_at', ac.created_at
-          )) FILTER (WHERE ac.id IS NOT NULL),
-          '[]'
-        ) AS contents,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', t.id,
-            'account_id', t.account_id,
-            'name', t.name
-          )) FILTER (WHERE t.id IS NOT NULL),
-          '[]'
-        ) AS tags,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', p.id,
-            'name', p.name,
-            'status', p.status
-          )) FILTER (WHERE p.id IS NOT NULL),
-          '[]'
-        ) AS projects
-      FROM artifact a
-      LEFT JOIN artifact_content ac ON a.id = ac.artifact_id AND ac.account_id = ${accountId}
-      LEFT JOIN artifact_tag at ON a.id = at.artifact_id AND at.account_id = ${accountId}
-      LEFT JOIN tag t ON at.tag_id = t.id AND t.account_id = ${accountId}
-      LEFT JOIN project_artifact_link pal ON a.id = pal.artifact_id AND pal.account_id = ${accountId}
-      LEFT JOIN project p ON pal.project_id = p.id
-      WHERE a.account_id = ${accountId}
-      GROUP BY a.id
-      ORDER BY a.updated_at DESC
-      LIMIT ${limit}`;
-
-    return data.rows;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch latest artifacts.');
-  }
-}
-
 
 
 export async function fetchCardData(accountId: string) {
