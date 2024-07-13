@@ -30,7 +30,7 @@ export function ArtifactForm({
 }: ArtifactFormProps) {
   const [tags, setTags] = useState<string[]>(artifact?.tags?.map(tag => tag.name) || []);
   const [contentItems, setContentItems] = useState<{id?: string, type: ContentType, content: string | File}[]>(
-    artifact?.contents.map(c => ({id: c.id, type: c.type, content: c.content})) || [{type: 'text', content: ''}]
+    artifact?.contents?.map(c => ({id: c.id, type: c.type, content: c.content})) || [{type: 'text', content: ''}]
   );
 
   const fileInputRef = useRef<HTMLInputElement>(null);

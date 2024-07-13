@@ -9,9 +9,11 @@ import { ADMIN_UUID } from '@/app/lib/constants';
 import { ArtifactForm } from '@/components/ui/artifacts/artifact-form';
 import { suggestTags, suggestContentExtensions } from '@/app/lib/external/claude-utils';
 import { Button } from '@/components/ui/button';
+import { useArtifactStore } from '@/app/lib/store/artifact-store';
 
 export default function CreateArtifactForm({ projects }: { projects: BaseProject[] }) {
   const router = useRouter();
+  const { addArtifact } = useArtifactStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [suggestedContentExtensions, setSuggestedContentExtensions] = useState<string[]>([]);
@@ -51,9 +53,15 @@ export default function CreateArtifactForm({ projects }: { projects: BaseProject
     }
   }, [state, router]);
 
-  const handleSubmit = (formData: FormData) => {
+  const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
-    formAction(formData);
+    try {
+      await addArtifact(formData);
+      router.push('/dashboard/artifacts');
+    } catch (error) {
+      setIsSubmitting(false);
+      // Handle error TODO
+    }
   };
 
   const handleGetAISuggestions = async () => {
