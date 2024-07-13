@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Tag } from '@/app/lib/definitions';
 import { useTagStore } from '@/app/lib/store/tag-store';
-import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
+import { ensureTagsExist, handleTagUpdate } from '@/app/lib/actions/tag-actions';
 
 interface TagListProps {
   initialTags?: Tag[];
@@ -29,17 +29,17 @@ export function TagList({ initialTags = [], onTagsChange, projectId, artifactId,
       if (existingTag) {
         newTag = existingTag;
       } else {
-        newTag = await addTag(accountId, tagName);
+        const [createdTag] = await ensureTagsExist(accountId, [tagName]);
+        newTag = createdTag;
+        addTag(accountId, newTag.name);
       }
 
       const updatedTags = [...tags, newTag];
       setTags(updatedTags);
       onTagsChange(updatedTags);
 
-      if (projectId) {
-        await handleTagUpdate(accountId, projectId, updatedTags.map(t => t.name), true);
-      } else if (artifactId) {
-        await handleTagUpdate(accountId, artifactId, updatedTags.map(t => t.name), false);
+      if (projectId || artifactId) {
+        await handleTagUpdate(accountId, projectId || artifactId!, updatedTags.map(t => t.name), !!projectId);
       }
     }
   };
@@ -49,10 +49,8 @@ export function TagList({ initialTags = [], onTagsChange, projectId, artifactId,
     setTags(updatedTags);
     onTagsChange(updatedTags);
 
-    if (projectId) {
-      await handleTagUpdate(accountId, projectId, updatedTags.map(t => t.name), true);
-    } else if (artifactId) {
-      await handleTagUpdate(accountId, artifactId, updatedTags.map(t => t.name), false);
+    if (projectId || artifactId) {
+      await handleTagUpdate(accountId, projectId || artifactId!, updatedTags.map(t => t.name), !!projectId);
     }
   };
 

@@ -66,6 +66,9 @@ export const toBase64 = (str: string) =>
     ? Buffer.from(str).toString('base64')
     : window.btoa(str);
 
+export const getBlurDataUrl = (w: number, h: number) => 
+  `data:image/svg+xml;base64,${toBase64(shimmer(w, h))}`;
+
 export const getArtifactThumbnail = (artifact: Artifact) => {
   if (!artifact) {
     return '/placeholder-default.png';

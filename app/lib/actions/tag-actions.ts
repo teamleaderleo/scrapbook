@@ -1,6 +1,6 @@
 'use server';
 
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { db } from '../db/db.server';
 import { Tag } from '../definitions';
@@ -35,6 +35,67 @@ export async function deleteTag(accountId: string, tagId: string): Promise<{ suc
     console.error('Error deleting tag:', error);
     return { success: false, message: 'Failed to delete tag.' };
   }
+}
+
+export async function handleTagUpdate(accountId: string, itemId: string, newTags: string[], isProject: boolean = false): Promise<void> {
+  const tagsTable = isProject ? projectTags : artifactTags;
+  const itemColumn = isProject ? projectTags.projectId : artifactTags.artifactId;
+
+  await db.transaction(async (tx) => {
+    // Remove existing tags
+    await tx.delete(tagsTable)
+      .where(and(
+        eq(tagsTable.accountId, accountId),
+        eq(itemColumn, itemId)
+      ));
+
+    // Add new tags
+    for (const tagName of newTags) {
+      const existingTag = await tx.select().from(tags)
+        .where(and(eq(tags.name, tagName), eq(tags.accountId, accountId)))
+        .limit(1);
+
+      let tagId: string;
+      if (existingTag.length === 0) {
+        tagId = uuid();
+        await tx.insert(tags).values({ id: tagId, name: tagName, accountId });
+      } else {
+        tagId = existingTag[0].id;
+      }
+
+      await tx.insert(tagsTable).values({
+        accountId,
+        [isProject ? 'projectId' : 'artifactId']: itemId,
+        tagId
+      });
+    }
+  });
+
+  revalidatePath('/dashboard/artifacts');
+  revalidatePath('/dashboard/projects');
+}
+
+export async function ensureTagsExist(accountId: string, tagNames: string[]): Promise<Tag[]> {
+  const existingTags = await db.select().from(tags)
+    .where(and(
+      eq(tags.accountId, accountId),
+      inArray(tags.name, tagNames)
+    ));
+
+  const existingTagNames = new Set(existingTags.map(tag => tag.name));
+  const newTagNames = tagNames.filter(name => !existingTagNames.has(name));
+
+  const newTags = await db.transaction(async (tx) => {
+    const createdTags: Tag[] = [];
+    for (const name of newTagNames) {
+      const newTag = { id: uuid(), accountId, name };
+      await tx.insert(tags).values(newTag);
+      createdTags.push(newTag);
+    }
+    return createdTags;
+  });
+
+  return [...existingTags, ...newTags];
 }
 
 export async function getTagUsage(accountId: string, tagId: string): Promise<{ projectCount: number; artifactCount: number }> {

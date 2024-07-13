@@ -1,3 +1,5 @@
+'use server';
+
 import { eq, and } from 'drizzle-orm';
 import { db } from '../db/db.server';
 import { ContentType, ArtifactContent } from '../definitions';
@@ -101,7 +103,7 @@ async function deleteRemovedContents(accountId: string, existingContents: Artifa
   }
 }
 
-export function hasValidContent(formData: FormData): boolean {
+export async function hasValidContent(formData: FormData): Promise<boolean> {
   let index = 0;
   while (formData.get(`contentType-${index}`)) {
     const contentItem = formData.get(`content-${index}`);
