@@ -37,7 +37,7 @@ export async function deleteTag(accountId: string, tagId: string): Promise<{ suc
   }
 }
 
-export async function handleTagUpdate(tx: any, accountId: string, itemId: string, newTags: string[], isProject: boolean = false): Promise<void> {
+async function updateTagsCore(tx: any, accountId: string, itemId: string, newTags: string[], isProject: boolean) {
   const tagsTable = isProject ? projectTags : artifactTags;
   const itemColumn = isProject ? projectTags.projectId : artifactTags.artifactId;
 
@@ -68,6 +68,29 @@ export async function handleTagUpdate(tx: any, accountId: string, itemId: string
       tagId
     });
   }
+}
+
+// For use within an existing transaction
+export async function handleTagUpdateWithinTransaction(
+  tx: any,
+  accountId: string,
+  itemId: string,
+  newTags: string[],
+  isProject: boolean = false
+): Promise<void> {
+  await updateTagsCore(tx, accountId, itemId, newTags, isProject);
+}
+
+// For standalone use
+export async function handleTagUpdate(
+  accountId: string,
+  itemId: string,
+  newTags: string[],
+  isProject: boolean = false
+): Promise<void> {
+  await db.transaction(async (tx) => {
+    await updateTagsCore(tx, accountId, itemId, newTags, isProject);
+  });
 }
 
 export async function ensureTagsExist(accountId: string, tagNames: string[]): Promise<Tag[]> {

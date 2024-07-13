@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { suggestTags } from '../external/claude-utils';
 import { artifacts, artifactContents, artifactTags, projectArtifactLinks } from '../db/schema';
 import { handleContentUpdate, hasValidContent, insertContents } from './artifact-content-actions';
-import { handleTagUpdate } from './tag-actions';
+import { handleTagUpdateWithinTransaction } from './tag-actions';
 import { handleProjectUpdate } from './project-handlers';
 import { deleteFromS3 } from '../external/s3-operations';
 import { v4 as uuid } from 'uuid';
@@ -79,7 +79,7 @@ export async function updateArtifact(id: string, accountId: string, prevState: S
 
       const suggestedTags = await suggestTags(`${name} ${description} ${allContent}`);
 
-      await handleTagUpdate(tx, accountId, id, tags || []);
+      await handleTagUpdateWithinTransaction(tx, accountId, id, tags || []);
       await handleProjectUpdate(tx, accountId, id, projects || []);
 
       return { message: 'Artifact updated successfully', suggestedTags };
@@ -150,7 +150,7 @@ export async function createArtifact(accountId: string, formData: FormData): Pro
 
       // Handle tags
       if (tags && tags.length > 0) {
-        await handleTagUpdate(tx, accountId, newArtifactId, tags, false);
+        await handleTagUpdateWithinTransaction(tx, accountId, newArtifactId, tags, false);
       }
 
       // Handle projects
