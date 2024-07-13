@@ -1,6 +1,7 @@
 import Form from '@/components/ui/artifacts/edit-artifact-form';
 import Breadcrumbs from '@/components/ui/breadcrumbs';
-import { fetchArtifact, fetchProjects } from '@/app/lib/data';
+import { fetchProjects } from '@/app/lib/data';
+import { fetchSingleArtifact } from '@/app/lib/artifact-data';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { ADMIN_UUID } from '@/app/lib/constants';
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 export default async function Page({ params }: { params: { id: string } }) {
   const id = params.id;
   const [artifact, projects] = await Promise.all([
-    fetchArtifact(ADMIN_UUID, id),
+    fetchSingleArtifact(ADMIN_UUID, id),
     fetchProjects(ADMIN_UUID),
   ]);
 

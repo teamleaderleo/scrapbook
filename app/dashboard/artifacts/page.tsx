@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import Search from '@/components/ui/search';
-import ArtifactsTable from '@/components/ui/artifacts/table';
+import { ArtifactsTable } from '@/components/ui/artifacts/table';
 import { CreateArtifact } from '@/components/ui/artifacts/button';
 import { lusitana } from '@/components/ui/fonts';
 import { ProjectsTableSkeleton } from '@/components/ui/skeletons';
@@ -18,8 +18,7 @@ export default async function Page({
 }: {
   searchParams?: { query?: string; page?: string };
 }) {
-  const artifacts = await getCachedArtifacts();
-  useArtifactStore.getState().setArtifacts(artifacts as ArtifactView[]);
+  const initialArtifacts = await getCachedArtifacts();
 
   return (
     <div className="w-full">
@@ -31,9 +30,7 @@ export default async function Page({
         <CreateArtifact />
       </div>
       <Suspense fallback={<ProjectsTableSkeleton />}>
-        <ArtifactsTable 
-          initialArtifacts={artifacts as ArtifactView[]} 
-        />
+        <ArtifactsTable initialArtifacts={initialArtifacts} />
       </Suspense>
     </div>
   );

@@ -26,6 +26,13 @@ export type ProjectTag = {
   tagId: string; 
 };
 
+export type ProjectArtifactLink = {
+  accountId: string;
+  projectId: string; 
+  artifactId: string; 
+  addedAt: Date;
+};
+
 export type ArtifactTag = {
   accountId: string; 
   artifactId: string; 
@@ -60,11 +67,10 @@ export type ArtifactWithRelations = Artifact & {
   projects: BaseProject[];
 };
 
-export type ProjectArtifactLink = {
-  accountId: string;
-  projectId: string; 
-  artifactId: string; 
-  addedAt: Date;
+export type ArtifactView = ArtifactWithRelations & {
+  totalArtifacts: number;
+  totalTags: number;
+  totalAssociatedProjects: number;
 };
 
 export type BaseProject = {
@@ -89,12 +95,6 @@ export type ProjectView = ProjectWithRelations & {
   totalCompleted: number;
   totalTags: number;
   totalAssociatedArtifacts: number;
-};
-
-export type ArtifactView = ArtifactWithRelations & {
-  totalArtifacts: number;
-  totalTags: number;
-  totalAssociatedProjects: number;
 };
 
 // Dashboard view

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { deleteArtifact } from '@/app/lib/artifact-actions';
 import { useTransition } from 'react';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import { ArtifactView } from '@/app/lib/definitions';
+import { ArtifactWithRelations } from '@/app/lib/definitions';
 
 export function CreateArtifact() {
   return (
@@ -19,7 +19,7 @@ export function CreateArtifact() {
   );
 }
 
-export function UpdateArtifact({ artifact }: { artifact: ArtifactView }) {
+export function UpdateArtifact({ artifact }: { artifact: ArtifactWithRelations }) {
   return (
     <Link
       href={`/dashboard/artifacts/${artifact.id}/edit`}

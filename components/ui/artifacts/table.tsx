@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import Image from 'next/image';
-import { ArtifactView, Tag } from '@/app/lib/definitions';
+import { ArtifactWithRelations } from '@/app/lib/definitions';
 import { getArtifactThumbnail } from '@/app/lib/utils-client';
 import { TagList } from '@/components/ui/tags/taglist';
 import { DeleteArtifact, UpdateArtifact } from '@/components/ui/artifacts/button';
@@ -14,13 +13,12 @@ import { useArtifactStore } from '@/app/lib/store/artifactStore';
 
 export const ARTIFACT_ITEMS_PER_PAGE = 6;
 
-export default function ArtifactsTable({
+export function ArtifactsTable({
   initialArtifacts,
 }: {
-  initialArtifacts: ArtifactView[];
+  initialArtifacts: ArtifactWithRelations[];
 }) {
-  // const [artifacts, setArtifacts] = useState(initialArtifacts);
-  const { artifacts, deleteArtifact } = useArtifactStore();
+  const { artifacts, setArtifacts, deleteArtifact } = useArtifactStore();
   const [filteredArtifacts, setFilteredArtifacts] = useState(initialArtifacts);
   const router = useRouter();
   const pathname = usePathname();
@@ -28,6 +26,10 @@ export default function ArtifactsTable({
   
   const currentPage = Number(searchParams.get('page')) || 1;
   const query = searchParams.get('query') || '';
+
+  useEffect(() => {
+    setArtifacts(initialArtifacts);
+  }, [initialArtifacts, setArtifacts]);
 
   useEffect(() => {
     const filtered = artifacts.filter(artifact => 
@@ -38,10 +40,6 @@ export default function ArtifactsTable({
     );
     setFilteredArtifacts(filtered);
   }, [query, artifacts]);
-
-  // const handleDeleteArtifact = (deletedArtifactId: string) => {
-  //   setArtifacts(artifacts.filter(artifact => artifact.id !== deletedArtifactId));
-  // };
 
   const paginatedArtifacts = filteredArtifacts.slice(
     (currentPage - 1) * ARTIFACT_ITEMS_PER_PAGE,
@@ -78,7 +76,7 @@ export default function ArtifactsTable({
                   </tr>
                 </thead>
                 <tbody className="bg-white">
-                  {paginatedArtifacts.map((artifact: ArtifactView) => (
+                  {paginatedArtifacts.map((artifact: ArtifactWithRelations) => (
                     <tr key={artifact.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
                       <td className="whitespace-nowrap py-3 pl-6 pr-3">
                         <div className="flex items-center">
