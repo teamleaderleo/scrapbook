@@ -10,6 +10,7 @@ import { TagList } from '@/components/ui/tags/taglist';
 import { DeleteArtifact, UpdateArtifact } from '@/components/ui/artifacts/button';
 import { TagProvider } from '@/components/ui/tags/tagcontext';
 import Pagination from '../pagination';
+import { useArtifactStore } from '@/app/lib/store/artifactStore';
 
 export const ARTIFACT_ITEMS_PER_PAGE = 6;
 
@@ -18,7 +19,8 @@ export default function ArtifactsTable({
 }: {
   initialArtifacts: ArtifactView[];
 }) {
-  const [artifacts, setArtifacts] = useState(initialArtifacts);
+  // const [artifacts, setArtifacts] = useState(initialArtifacts);
+  const { artifacts, deleteArtifact } = useArtifactStore();
   const [filteredArtifacts, setFilteredArtifacts] = useState(initialArtifacts);
   const router = useRouter();
   const pathname = usePathname();
@@ -37,9 +39,9 @@ export default function ArtifactsTable({
     setFilteredArtifacts(filtered);
   }, [query, artifacts]);
 
-  const handleDeleteArtifact = (deletedArtifactId: string) => {
-    setArtifacts(artifacts.filter(artifact => artifact.id !== deletedArtifactId));
-  };
+  // const handleDeleteArtifact = (deletedArtifactId: string) => {
+  //   setArtifacts(artifacts.filter(artifact => artifact.id !== deletedArtifactId));
+  // };
 
   const paginatedArtifacts = filteredArtifacts.slice(
     (currentPage - 1) * ARTIFACT_ITEMS_PER_PAGE,
@@ -102,11 +104,11 @@ export default function ArtifactsTable({
                           artifactId={artifact.id}
                           initialTags={artifact.tags}
                           onTagsChange={(updatedTags) => {
-                            setArtifacts(artifacts.map(a =>
+                            artifacts.map(a =>
                               a.id === artifact.id
                                 ? { ...a, tags: updatedTags }
                                 : a
-                            ));
+                            );
                           }}
                         />
                       </td>
@@ -137,7 +139,7 @@ export default function ArtifactsTable({
                       <td className="whitespace-nowrap py-3 pl-6 pr-3">
                         <div className="flex justify-end">
                           <UpdateArtifact artifact={artifact} />
-                          <DeleteArtifact id={artifact.id} onDelete={() => handleDeleteArtifact(artifact.id)} />
+                          <DeleteArtifact id={artifact.id} onDelete={() => deleteArtifact(artifact.id)} />
                         </div>
                       </td>
                     </tr>
