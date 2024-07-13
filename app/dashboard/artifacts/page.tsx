@@ -5,7 +5,7 @@ import { CreateArtifact } from '@/components/ui/artifacts/button';
 import { lusitana } from '@/components/ui/fonts';
 import { ProjectsTableSkeleton } from '@/components/ui/skeletons';
 import { Metadata } from 'next';
-import { getCachedArtifacts } from '@/app/lib/cached-artifact-data';
+import { getCachedArtifacts } from '@/app/lib/data/cached-artifact-data';
 import { ArtifactView } from '@/app/lib/definitions';
 import { useArtifactStore } from '@/app/lib/store/artifactStore';
 

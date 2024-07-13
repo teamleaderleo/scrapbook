@@ -2,7 +2,7 @@
 
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
-import { Tag } from './definitions';
+import { Tag } from '../definitions';
 
 export async function createTag(accountId: string, name: string) {
   try {

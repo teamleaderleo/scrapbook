@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Artifact } from '@/app/lib/definitions';
-import { fetchRecommendedArtifacts } from '@/app/lib/data';
+import { fetchRecommendedArtifacts } from '@/app/lib/data/data';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

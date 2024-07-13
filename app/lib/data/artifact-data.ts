@@ -1,9 +1,9 @@
 'use server';
 
 import { eq, and, or, ilike, sql, SQL, desc } from 'drizzle-orm';
-import { db } from './db/db.server';
-import { artifacts, artifactContents, artifactTags, tags, projectArtifactLinks, projects } from './db/schema';
-import { ArtifactWithRelations, FetchOptions } from './definitions';
+import { db } from '../db/db.server';
+import { artifacts, artifactContents, artifactTags, tags, projectArtifactLinks, projects } from '../db/schema';
+import { ArtifactWithRelations, FetchOptions } from '../definitions';
 
 function buildArtifactSelectObject(options: FetchOptions = {}): Record<string, any> {
   const selectObject: Record<string, any> = {

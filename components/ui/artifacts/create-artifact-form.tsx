@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BaseProject, ArtifactWithRelations, ContentType } from '@/app/lib/definitions';
-import { createArtifact, State } from '@/app/lib/artifact-actions';
+import { createArtifact, State } from '@/app/lib/actions/artifact-actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { ArtifactForm } from '@/components/ui/artifacts/artifact-form';
-import { suggestTags, suggestContentExtensions } from '@/app/lib/claude-utils';
+import { suggestTags, suggestContentExtensions } from '@/app/lib/external/claude-utils';
 import { Button } from '@/components/ui/button';
 
 export default function CreateArtifactForm({ projects }: { projects: BaseProject[] }) {

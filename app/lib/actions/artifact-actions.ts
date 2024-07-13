@@ -2,15 +2,14 @@
 
 import { z } from 'zod';
 import { eq, and } from 'drizzle-orm';
-import { db } from './db/db.server';
+import { db } from '../db/db.server';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { suggestTags } from './claude-utils';
-import { artifacts, artifactContents, artifactTags, projectArtifactLinks } from './db/schema';
-import { handleContentUpdate, hasValidContent, insertContents } from './actions/artifact-content-handlers';
-import { handleTagUpdate } from './actions/tag-handlers';
-import { handleProjectUpdate } from './actions/project-handlers';
-import { deleteFromS3 } from './s3-operations';
+import { suggestTags } from '../external/claude-utils';
+import { artifacts, artifactContents, artifactTags, projectArtifactLinks } from '../db/schema';
+import { handleContentUpdate, hasValidContent, insertContents } from './artifact-content-handlers';
+import { handleTagUpdate } from './tag-handlers';
+import { handleProjectUpdate } from './project-handlers';
+import { deleteFromS3 } from '../external/s3-operations';
 import { v4 as uuid } from 'uuid';
 
 const ArtifactSchema = z.object({

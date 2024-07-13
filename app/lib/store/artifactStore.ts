@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { ArtifactWithRelations, FetchOptions } from '@/app/lib/definitions';
-import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/artifact-actions';
-import { fetchSingleArtifact, fetchAllArtifacts } from '@/app/lib/artifact-data';
+import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/actions/artifact-actions';
+import { fetchSingleArtifact, fetchAllArtifacts } from '@/app/lib/data/artifact-data';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 type ArtifactStore = {

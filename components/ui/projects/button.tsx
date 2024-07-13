@@ -2,7 +2,7 @@
 
 import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { deleteProject } from '@/app/lib/actions';
+import { deleteProject } from '@/app/lib/actions/actions';
 import { useTransition } from 'react';
 import { ADMIN_UUID } from '@/app/lib/constants';
 

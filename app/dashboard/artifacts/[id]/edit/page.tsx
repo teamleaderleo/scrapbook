@@ -1,7 +1,7 @@
 import Form from '@/components/ui/artifacts/edit-artifact-form';
 import Breadcrumbs from '@/components/ui/breadcrumbs';
-import { fetchProjects } from '@/app/lib/data';
-import { fetchSingleArtifact } from '@/app/lib/artifact-data';
+import { fetchProjects } from '@/app/lib/data/data';
+import { fetchSingleArtifact } from '@/app/lib/data/artifact-data';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { ADMIN_UUID } from '@/app/lib/constants';

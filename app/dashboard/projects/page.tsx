@@ -5,7 +5,7 @@ import { CreateProject } from '@/components/ui/projects/button';
 import { lusitana } from '@/components/ui/fonts';
 import { ProjectsTableSkeleton } from '@/components/ui/skeletons';
 import { Suspense } from 'react';
-import { fetchProjectsPages, fetchProjects } from '@/app/lib/data';
+import { fetchProjectsPages, fetchProjects } from '@/app/lib/data/data';
 import { Metadata } from 'next';
 import { ADMIN_UUID } from '@/app/lib/constants';
 // import ADMIN_UUID from '@/app/lib/constants';

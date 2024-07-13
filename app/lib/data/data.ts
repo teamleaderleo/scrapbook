@@ -5,7 +5,7 @@ import {
   ProjectWithRelations,
   DashboardView,
   Tag
-} from './definitions';
+} from '../definitions';
 
 export async function getAccount(email: string) {
   try {

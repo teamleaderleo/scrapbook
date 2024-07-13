@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { fetchTags, fetchTagsPages } from '@/app/lib/data';
+import { fetchTags, fetchTagsPages } from '@/app/lib/data/data';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import TagManagementTable from '@/components/ui/tags/table';
 import Search from '@/components/ui/search';

@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { ArtifactWithRelations, BaseProject } from '@/app/lib/definitions';
-import { updateArtifact } from '@/app/lib/artifact-actions';
+import { updateArtifact } from '@/app/lib/actions/artifact-actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { ArtifactForm } from '@/components/ui/artifacts/artifact-form';
-import { suggestTags, suggestContentExtensions } from '@/app/lib/claude-utils';
+import { suggestTags, suggestContentExtensions } from '@/app/lib/external/claude-utils';
 import { useRouter } from 'next/navigation';
 
 export default function EditArtifactForm({

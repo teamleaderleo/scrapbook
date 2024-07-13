@@ -4,8 +4,8 @@ import { z } from 'zod';
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { addTagToProject, removeTagFromProject, getProjectTags } from './utils-server';
-import { suggestTags } from './claude-utils';
+import { addTagToProject, removeTagFromProject, getProjectTags } from '../utils-server';
+import { suggestTags } from '../external/claude-utils';
 import { cookies } from 'next/headers';
 import { signIn } from '@/auth';
 
