@@ -5,7 +5,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { ArtifactWithRelations, Tag } from '@/app/lib/definitions';
-import { getArtifactThumbnail } from '@/app/lib/utils-client';
+import { getArtifactThumbnail, getBlurDataUrl } from '@/app/lib/utils-client';
 import { TagList } from '@/components/ui/tags/taglist';
 import { DeleteArtifact, UpdateArtifact } from '@/components/ui/artifacts/button';
 import Pagination from '../pagination';
@@ -111,8 +111,8 @@ export function ArtifactsTable({
                             alt={`Thumbnail for ${artifact.name}`}
                             layout="fill"
                             objectFit="cover"
-                            placeholder="blur"
-                            blurDataURL="/placeholder-blur.jpg"  // Create a small, blurred version of your placeholder image
+                            // placeholder="blur"
+                            // blurDataURL={ getBlurDataUrl(100, 100) }  // Create a small, blurred version of your placeholder image
                           />
                         </div>
                         <div className="ml-4">
@@ -147,8 +147,8 @@ export function ArtifactsTable({
                                 alt={`Thumbnail for ${artifact.name} content ${index + 1}`}
                                 layout="fill"
                                 objectFit="cover"
-                                placeholder="blur"
-                                blurDataURL="/placeholder-blur.jpg"  // Create a small, blurred version of your placeholder image
+                                // placeholder="blur"
+                                // blurDataURL={ getBlurDataUrl(100, 100) }  // Create a small, blurred version of your placeholder image
                                 priority={index === 0}  // Load the first image with priority
                               />
                             </div>

@@ -3,7 +3,7 @@ import Search from '@/components/ui/search';
 import { ArtifactsTable } from '@/components/ui/artifacts/table';
 import { CreateArtifact } from '@/components/ui/artifacts/button';
 import { lusitana } from '@/components/ui/fonts';
-import { ProjectsTableSkeleton } from '@/components/ui/skeletons';
+import { ArtifactsTableSkeleton } from '@/components/ui/skeletons';
 import { Metadata } from 'next';
 import { getCachedArtifacts } from '@/app/lib/data/cached-artifact-data';
 import { ArtifactView } from '@/app/lib/definitions';
@@ -29,7 +29,7 @@ export default async function Page({
         <Search placeholder="Search artifacts..." />
         <CreateArtifact />
       </div>
-      <Suspense fallback={<ProjectsTableSkeleton />}>
+      <Suspense fallback={<ArtifactsTableSkeleton />}>
         <ArtifactsTable initialArtifacts={ initialArtifacts} accountId={ADMIN_UUID}/>
       </Suspense>
     </div>

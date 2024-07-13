@@ -81,7 +81,7 @@ export function ArtifactForm({
     <form onSubmit={handleSubmit} ref={formRef}>
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">{artifact ? 'Edit' : 'Create'} Artifact</h1>
+          {/* <h1 className="text-2xl font-bold">{artifact ? 'Edit' : 'Create'} Artifact</h1> */}
           {onGetAISuggestions && (
             <Button onClick={onGetAISuggestions}>Get AI Suggestions</Button>
           )}
