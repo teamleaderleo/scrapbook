@@ -2,6 +2,7 @@
 
 import { sql } from '@vercel/postgres';
 import { Tag } from './definitions';
+import { signIn } from '@/auth';
 
 export async function addTagToProject(accountId: string, projectId: string, tagName: string): Promise<Tag | null> {
   try {
@@ -111,6 +112,19 @@ export async function getAllTags(accountId: string): Promise<Tag[]> {
     return result.rows as Tag[];
   } catch (error) {
     console.error('Error getting all tags:', error);
+    throw error;
+  }
+}
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData
+) {
+  try {
+    await signIn('credentials', Object.fromEntries(formData));
+  } catch (error) {
+    if ((error as Error).message.includes('CredentialsSignin')) {
+      return 'CredentialSignin';
+    }
     throw error;
   }
 }
