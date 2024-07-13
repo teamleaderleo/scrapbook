@@ -8,7 +8,7 @@ import { z } from 'zod';
 import type { Account } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
-import { db } from './app/lib/db/db';
+import { db } from './app/lib/db/db.server';
 import { accounts } from './app/lib//db/schema';
 
 async function getUser(email: string): Promise<Account | undefined> {

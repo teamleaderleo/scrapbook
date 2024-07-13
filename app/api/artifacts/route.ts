@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/app/lib/db/db';
+import { db } from '@/app/lib/db/db.server';
 import { artifactsView } from '@/app/lib/db/schema';
 
 export const revalidate = 60; // Cache for 60 seconds
