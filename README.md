@@ -80,7 +80,7 @@ This project will be deemed to have surpassed an MVP when I finalize a draft ver
 
 ## Contributing
 
-If you have ideas, suggestions, or improvements, feel free to create an issue or submit a pull request. I'm planning on closing this eventually.
+I will read your feedback, but I'm planning on moving development to a private repo at some point.
 
 ## The artwork source?
 
