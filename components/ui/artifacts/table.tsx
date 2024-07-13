@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
@@ -51,18 +52,31 @@ export function ArtifactsTable({
 
   const totalPages = Math.ceil(filteredArtifacts.length / itemsPerPage);
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     params.set('page', page.toString());
-    router.push(`${pathname}?${params.toString()}`);
-  };
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [searchParams, pathname, router, setCurrentPage]);
 
   const handleTagsChange = async (artifactId: string, newTags: Tag[]) => {
     const tagNames = newTags.map(tag => tag.name);
     const tags = await ensureTagsExist(ADMIN_UUID, tagNames);
     await updateArtifactTags(artifactId, tags);
   };
+  
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft' && currentPage > 1) {
+        handlePageChange(currentPage - 1);
+      } else if (event.key === 'ArrowRight' && currentPage < totalPages) {
+        handlePageChange(currentPage + 1);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentPage, totalPages, handlePageChange]);
 
   return (
     <div className="mt-6 flow-root">
@@ -95,6 +109,8 @@ export function ArtifactsTable({
                             alt={`Thumbnail for ${artifact.name}`}
                             layout="fill"
                             objectFit="cover"
+                            placeholder="blur"
+                            blurDataURL="/placeholder-blur.jpg"  // Create a small, blurred version of your placeholder image
                           />
                         </div>
                         <div className="ml-4">
@@ -129,6 +145,9 @@ export function ArtifactsTable({
                                 alt={`Thumbnail for ${artifact.name} content ${index + 1}`}
                                 layout="fill"
                                 objectFit="cover"
+                                placeholder="blur"
+                                blurDataURL="/placeholder-blur.jpg"  // Create a small, blurred version of your placeholder image
+                                priority={index === 0}  // Load the first image with priority
                               />
                             </div>
                           ))
