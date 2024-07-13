@@ -1,49 +1,58 @@
 import React, { useState, useEffect } from 'react';
 import { Tag } from '@/app/lib/definitions';
-import { addTagToProject, removeTagFromProject, addTagToArtifact, removeTagFromArtifact } from '@/app/lib/utils-server';
-import { ADMIN_UUID } from '@/app/lib/constants';
-import { useTagContext } from './tagcontext';
+import { useTagStore } from '@/app/lib/store/tag-store';
+import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 
 interface TagListProps {
   initialTags?: Tag[];
   onTagsChange: (tags: Tag[]) => void;
   projectId?: string;
   artifactId?: string;
+  accountId: string;
 }
 
-export function TagList({ initialTags = [], onTagsChange, projectId, artifactId }: TagListProps) {
+export function TagList({ initialTags = [], onTagsChange, projectId, artifactId, accountId }: TagListProps) {
   const [tags, setTags] = useState<Tag[]>(initialTags);
   const [showAddForm, setShowAddForm] = useState(false);
-  const { allTags, refreshTags } = useTagContext();
+  const { allTags, fetchAllTags, addTag } = useTagStore();
+
+  useEffect(() => {
+    fetchAllTags(accountId);
+  }, [accountId, fetchAllTags]);
 
   const handleAddTag = async (tagName: string) => {
     if (!tags.some(tag => tag.name.toLowerCase() === tagName.toLowerCase())) {
-      let newTag: Tag | null;
-      if (projectId) {
-        newTag = await addTagToProject(ADMIN_UUID, projectId, tagName);
-      } else if (artifactId) {
-        newTag = await addTagToArtifact(ADMIN_UUID, artifactId, tagName);
+      let newTag: Tag;
+      const existingTag = allTags.find(tag => tag.name.toLowerCase() === tagName.toLowerCase());
+      
+      if (existingTag) {
+        newTag = existingTag;
       } else {
-        newTag = { id: `temp-${Date.now()}`, accountId: ADMIN_UUID, name: tagName };
+        newTag = await addTag(accountId, tagName);
       }
-      if (newTag) {
-        const updatedTags = [...tags, newTag];
-        setTags(updatedTags);
-        onTagsChange(updatedTags);
-        refreshTags(); // Refresh all tags after adding a new one
+
+      const updatedTags = [...tags, newTag];
+      setTags(updatedTags);
+      onTagsChange(updatedTags);
+
+      if (projectId) {
+        await handleTagUpdate(accountId, projectId, updatedTags.map(t => t.name), true);
+      } else if (artifactId) {
+        await handleTagUpdate(accountId, artifactId, updatedTags.map(t => t.name), false);
       }
     }
   };
 
   const handleRemoveTag = async (tagId: string) => {
-    if (projectId) {
-      await removeTagFromProject(ADMIN_UUID, projectId, tagId);
-    } else if (artifactId) {
-      await removeTagFromArtifact(ADMIN_UUID, artifactId, tagId);
-    }
     const updatedTags = tags.filter(tag => tag.id !== tagId);
     setTags(updatedTags);
     onTagsChange(updatedTags);
+
+    if (projectId) {
+      await handleTagUpdate(accountId, projectId, updatedTags.map(t => t.name), true);
+    } else if (artifactId) {
+      await handleTagUpdate(accountId, artifactId, updatedTags.map(t => t.name), false);
+    }
   };
 
   return (

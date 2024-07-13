@@ -126,8 +126,8 @@ function TagUsage({ tagId }: { tagId: string }) {
     async function fetchUsage() {
       const usageData = await getTagUsage(ADMIN_UUID, tagId);
       setUsage({
-        project_count: Number(usageData.project_count),
-        artifact_count: Number(usageData.artifact_count)
+        project_count: Number(usageData.projectCount),
+        artifact_count: Number(usageData.artifactCount)
       });
     }
     fetchUsage();

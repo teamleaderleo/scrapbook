@@ -66,7 +66,7 @@ export default function ProjectsTable({
                       </td>
                       <td className="whitespace-nowrap px-3 py-3">{project.artifacts.length}</td>
                       <td className="whitespace-nowrap px-3 py-3">
-                        {new Date(project.updated_at).toLocaleDateString()}
+                        {new Date(project.updatedAt).toLocaleDateString()}
                       </td>
                       <td className="whitespace-nowrap px-3 py-3">
                         <div className="flex space-x-2">

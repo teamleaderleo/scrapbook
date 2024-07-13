@@ -76,3 +76,11 @@ async function getOrCreateTag(accountId: string, tagName: string): Promise<strin
     return newTagId;
   }
 }
+
+export async function getProjectTags(accountId: string, projectId: string): Promise<Tag[]> {
+  return fetchCurrentTags(accountId, projectId, true);
+}
+
+export async function getArtifactTags(accountId: string, artifactId: string): Promise<Tag[]> {
+  return fetchCurrentTags(accountId, artifactId, false);
+}
