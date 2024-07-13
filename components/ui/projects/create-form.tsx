@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArtifactWithRelations } from '@/app/lib/definitions';
-import { createProject, State } from '@/app/lib/actions/actions';
+import { createProject, State } from '@/app/lib/actions/project-actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { ProjectForm } from '@/components/ui/projects/project-form';

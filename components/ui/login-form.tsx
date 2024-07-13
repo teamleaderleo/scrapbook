@@ -11,7 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import { Button } from './old-button';
-import { authenticate } from '@/app/lib/actions/actions';
+import { authenticate } from '@/app/lib/actions/project-actions';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 
 export default function LoginForm() {

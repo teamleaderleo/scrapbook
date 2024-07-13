@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { ArtifactWithRelations, ProjectWithRelations } from '@/app/lib/definitions';
-import { updateProject } from '@/app/lib/actions/actions';
+import { updateProject } from '@/app/lib/actions/project-actions';
 import { useFormState } from 'react-dom';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { ProjectForm } from '@/components/ui/projects/project-form';
