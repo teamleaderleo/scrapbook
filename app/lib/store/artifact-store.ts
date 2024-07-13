@@ -8,6 +8,8 @@ import { handleTagUpdate } from '../actions/tag-handlers';
 type ArtifactStore = {
   artifacts: ArtifactWithRelations[];
   filteredArtifacts: ArtifactWithRelations[];
+  currentPage: number;
+  itemsPerPage: number;
   isLoading: boolean;
   error: string | null;
   fetchOptions: FetchOptions;
@@ -19,11 +21,14 @@ type ArtifactStore = {
   setFetchOptions: (options: FetchOptions) => void;
   searchArtifacts: (query: string) => void;
   updateArtifactTags: (artifactId: string, tags: Tag[]) => Promise<void>;
+  setCurrentPage: (page: number) => void;
 };
 
 export const useArtifactStore = create<ArtifactStore>((set, get) => ({
   artifacts: [],
   filteredArtifacts: [],
+  currentPage: 1,
+  itemsPerPage: 6,
   isLoading: false,
   error: null,
   fetchOptions: { includeTags: true, includeContents: true, includeProjects: true },
@@ -115,7 +120,8 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
         (artifact.description && artifact.description.toLowerCase().includes(query.toLowerCase())) ||
         artifact.tags.some(tag => tag.name.toLowerCase().includes(query.toLowerCase())) ||
         artifact.contents.some(content => content.content.toLowerCase().includes(query.toLowerCase()))
-      )
+      ),
+      currentPage: 1
     }));
   },
   updateArtifactTags: async (artifactId, tags) => {
@@ -135,4 +141,5 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
       set({ error: 'Failed to update artifact tags', isLoading: false });
     }
   },
+  setCurrentPage: (page) => set({ currentPage: page }),
 }));

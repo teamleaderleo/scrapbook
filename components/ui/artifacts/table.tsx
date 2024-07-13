@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { ArtifactWithRelations, Tag } from '@/app/lib/definitions';
@@ -21,14 +21,12 @@ export function ArtifactsTable({
   initialArtifacts: ArtifactWithRelations[];
   accountId: string;
 }) {
-  const { artifacts, setArtifacts, deleteArtifact, updateArtifactTags } = useArtifactStore();
+  const { artifacts, filteredArtifacts, setArtifacts, deleteArtifact, updateArtifactTags, searchArtifacts, currentPage, setCurrentPage, itemsPerPage } = useArtifactStore();
   const { allTags, ensureTagsExist } = useTagStore();
-  const [filteredArtifacts, setFilteredArtifacts] = useState(initialArtifacts);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
-  const currentPage = Number(searchParams.get('page')) || 1;
   const query = searchParams.get('query') || '';
 
   useEffect(() => {
@@ -36,23 +34,25 @@ export function ArtifactsTable({
   }, [initialArtifacts, setArtifacts]);
 
   useEffect(() => {
-    const filtered = artifacts.filter(artifact => 
-      artifact.name.toLowerCase().includes(query.toLowerCase()) ||
-      (artifact.description && artifact.description.toLowerCase().includes(query.toLowerCase())) ||
-      artifact.tags.some(tag => tag.name.toLowerCase().includes(query.toLowerCase())) ||
-      artifact.contents.some(content => content.content.toLowerCase().includes(query.toLowerCase()))
+    searchArtifacts(query);
+  }, [query, searchArtifacts]);
+
+  useEffect(() => {
+    const page = Number(searchParams.get('page')) || 1;
+    setCurrentPage(page);
+  }, [searchParams, setCurrentPage]);
+
+  const paginatedArtifacts = useMemo(() => {
+    return filteredArtifacts.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
     );
-    setFilteredArtifacts(filtered);
-  }, [query, artifacts]);
+  }, [filteredArtifacts, currentPage, itemsPerPage]);
 
-  const paginatedArtifacts = filteredArtifacts.slice(
-    (currentPage - 1) * ARTIFACT_ITEMS_PER_PAGE,
-    currentPage * ARTIFACT_ITEMS_PER_PAGE
-  );
-
-  const totalPages = Math.ceil(filteredArtifacts.length / ARTIFACT_ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredArtifacts.length / itemsPerPage);
 
   const handlePageChange = (page: number) => {
+    setCurrentPage(page);
     const params = new URLSearchParams(searchParams);
     params.set('page', page.toString());
     router.push(`${pathname}?${params.toString()}`);
