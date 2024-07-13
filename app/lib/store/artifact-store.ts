@@ -1,10 +1,14 @@
 import { create } from 'zustand';
 import Fuse from 'fuse.js';
+import { QueryClient, useQuery } from 'react-query';
 import { ArtifactWithRelations, FetchOptions, Tag } from '@/app/lib/definitions';
 import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/actions/artifact-actions';
 import { fetchSingleArtifact, fetchAllArtifacts } from '@/app/lib/data/artifact-data';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { handleTagUpdate } from '../actions/tag-actions';
+import { getCachedArtifacts } from '../data/cached-artifact-data';
+
+const queryClient = new QueryClient();
 
 type ArtifactStore = {
   artifacts: ArtifactWithRelations[];
@@ -15,10 +19,12 @@ type ArtifactStore = {
   error: string | null;
   fetchOptions: FetchOptions;
   setArtifacts: (artifacts: ArtifactWithRelations[]) => void;
+
   fetchArtifacts: () => Promise<void>;
   updateArtifact: (id: string, formData: FormData) => Promise<void>;
   deleteArtifact: (id: string) => Promise<void>;
   addArtifact: (formData: FormData) => Promise<void>;
+
   setFetchOptions: (options: FetchOptions) => void;
   fuse: Fuse<ArtifactWithRelations> | null;
   initializeFuse: () => void;
@@ -37,19 +43,18 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
   fetchOptions: { includeTags: true, includeContents: true, includeProjects: true },
   setArtifacts: (artifacts) => set({ artifacts, filteredArtifacts: artifacts }),
   fetchArtifacts: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const artifacts = await fetchAllArtifacts(ADMIN_UUID, get().fetchOptions);
-      set({ artifacts, filteredArtifacts: artifacts, isLoading: false });
-    } catch (error) {
-      set({ error: 'Failed to fetch artifacts', isLoading: false });
-    }
+    const artifacts = await queryClient.fetchQuery(
+      ['artifacts', get().fetchOptions],
+      () => getCachedArtifacts(ADMIN_UUID, get().fetchOptions)
+    );
+    set({ artifacts, filteredArtifacts: artifacts, isLoading: false });
   },
   updateArtifact: async (id, formData) => {
     set({ isLoading: true, error: null });
     try {
       const result = await updateArtifact(id, ADMIN_UUID, {}, formData);
       if (result.message === 'Artifact updated successfully') {
+        await queryClient.invalidateQueries(['artifacts']);
         const updatedArtifact = await fetchSingleArtifact(ADMIN_UUID, id, get().fetchOptions);
         if (updatedArtifact) {
           set((state) => {
@@ -75,6 +80,7 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
     try {
       const result = await deleteArtifact(id, ADMIN_UUID);
       if (result.success) {
+        await queryClient.invalidateQueries(['artifacts']);
         set((state) => {
           const updatedArtifacts = state.artifacts.filter((a) => a.id !== id);
           return {
@@ -95,6 +101,7 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
     try {
       const result = await createArtifact(ADMIN_UUID, formData);
       if (result.artifactId) {
+        await queryClient.invalidateQueries(['artifacts']);
         const newArtifact = await fetchSingleArtifact(ADMIN_UUID, result.artifactId, get().fetchOptions);
         if (newArtifact) {
           set((state) => {
@@ -156,3 +163,14 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
   },
   setCurrentPage: (page) => set({ currentPage: page }),
 }));
+
+export const useArtifacts = () => {
+  const { fetchOptions } = useArtifactStore();
+  return useQuery<ArtifactWithRelations[], Error>(
+    ['artifacts', fetchOptions],
+    () => getCachedArtifacts(ADMIN_UUID, fetchOptions),
+    {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    }
+  );
+};

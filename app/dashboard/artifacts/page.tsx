@@ -18,7 +18,7 @@ export default async function Page({
 }: {
   searchParams?: { query?: string; page?: string };
 }) {
-  const initialArtifacts = await getCachedArtifacts();
+  const initialArtifacts = await getCachedArtifacts(ADMIN_UUID, { includeContents: true, includeTags: true, includeProjects: true });
 
   return (
     <div className="w-full">
