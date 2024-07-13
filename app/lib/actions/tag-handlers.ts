@@ -1,16 +1,27 @@
-import { eq, and } from 'drizzle-orm';
-import { db } from '../db/db.server';
 import { Tag } from '../definitions';
-import { artifactTags, tags, projectTags } from '../db/schema';
 import { v4 as uuid } from 'uuid';
 
-export async function handleTagUpdate(accountId: string, itemId: string, newTags: string[], isProject: boolean = false): Promise<void> {
-  const currentTags = await fetchCurrentTags(accountId, itemId, isProject);
-  await removeDeletedTags(accountId, itemId, currentTags, newTags, isProject);
-  await addNewTags(accountId, itemId, currentTags, newTags, isProject);
+let db: any;
+
+async function getDb() {
+  if (typeof window === 'undefined') {
+    const { db: importedDb } = await import('../db/db.server');
+    db = importedDb;
+  }
+  return db;
 }
 
-async function fetchCurrentTags(accountId: string, itemId: string, isProject: boolean): Promise<Tag[]> {
+export async function handleTagUpdate(accountId: string, itemId: string, newTags: string[], isProject: boolean = false): Promise<void> {
+  const db = await getDb();
+  const currentTags = await fetchCurrentTags(db, accountId, itemId, isProject);
+  await removeDeletedTags(db, accountId, itemId, currentTags, newTags, isProject);
+  await addNewTags(db, accountId, itemId, currentTags, newTags, isProject);
+}
+
+async function fetchCurrentTags(db: any, accountId: string, itemId: string, isProject: boolean): Promise<Tag[]> {
+  const { tags, artifactTags, projectTags } = await import('../db/schema');
+  const { eq, and } = await import('drizzle-orm');
+
   const tagsTable = isProject ? projectTags : artifactTags;
   const itemColumn = isProject ? projectTags.projectId : artifactTags.artifactId;
 
@@ -26,12 +37,15 @@ async function fetchCurrentTags(accountId: string, itemId: string, isProject: bo
       eq(tagsTable.accountId, accountId)
     ));
 
-  return result.filter((tag): tag is Tag => 
+  return result.filter((tag: any): tag is Tag => 
     tag.id !== null && tag.accountId !== null && tag.name !== null
   );
 }
 
-async function removeDeletedTags(accountId: string, itemId: string, currentTags: Tag[], newTags: string[], isProject: boolean): Promise<void> {
+async function removeDeletedTags(db: any, accountId: string, itemId: string, currentTags: Tag[], newTags: string[], isProject: boolean): Promise<void> {
+  const { artifactTags, projectTags } = await import('../db/schema');
+  const { eq, and } = await import('drizzle-orm');
+
   const tagsTable = isProject ? projectTags : artifactTags;
   const itemColumn = isProject ? projectTags.projectId : artifactTags.artifactId;
 
@@ -47,12 +61,14 @@ async function removeDeletedTags(accountId: string, itemId: string, currentTags:
   }
 }
 
-async function addNewTags(accountId: string, itemId: string, currentTags: Tag[], newTags: string[], isProject: boolean): Promise<void> {
+async function addNewTags(db: any, accountId: string, itemId: string, currentTags: Tag[], newTags: string[], isProject: boolean): Promise<void> {
+  const { artifactTags, projectTags } = await import('../db/schema');
+
   const tagsTable = isProject ? projectTags : artifactTags;
 
   for (const tagName of newTags) {
     if (!currentTags.some(tag => tag.name === tagName)) {
-      let tagId = await getOrCreateTag(accountId, tagName);
+      let tagId = await getOrCreateTag(db, accountId, tagName);
       await db.insert(tagsTable).values({
         [isProject ? 'projectId' : 'artifactId']: itemId,
         tagId,
@@ -62,7 +78,10 @@ async function addNewTags(accountId: string, itemId: string, currentTags: Tag[],
   }
 }
 
-async function getOrCreateTag(accountId: string, tagName: string): Promise<string> {
+async function getOrCreateTag(db: any, accountId: string, tagName: string): Promise<string> {
+  const { tags } = await import('../db/schema');
+  const { eq, and } = await import('drizzle-orm');
+
   let existingTag = await db.select({ id: tags.id })
     .from(tags)
     .where(and(eq(tags.name, tagName), eq(tags.accountId, accountId)))
@@ -78,9 +97,11 @@ async function getOrCreateTag(accountId: string, tagName: string): Promise<strin
 }
 
 export async function getProjectTags(accountId: string, projectId: string): Promise<Tag[]> {
-  return fetchCurrentTags(accountId, projectId, true);
+  const db = await getDb();
+  return fetchCurrentTags(db, accountId, projectId, true);
 }
 
 export async function getArtifactTags(accountId: string, artifactId: string): Promise<Tag[]> {
-  return fetchCurrentTags(accountId, artifactId, false);
+  const db = await getDb();
+  return fetchCurrentTags(db, accountId, artifactId, false);
 }

@@ -36,7 +36,6 @@ export function ArtifactForm({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const handleTagsChange = (newTags: string[]) => setTags(newTags);
   const handleAddSuggestedTag = (tag: string) => {
     if (!tags.includes(tag)) setTags([...tags, tag]);
   };
@@ -201,18 +200,18 @@ export function ArtifactForm({
               {tags.map((tag, index) => (
                 <span key={index} className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                   {tag}
-                  <button type="button" onClick={() => handleRemoveTag(tag)} className="ml-1 text-xs">×</button>
+                  <button type="button" onClick={() => setTags(tags.filter(t => t !== tag))} className="ml-1 text-xs">×</button>
                 </span>
               ))}
             </div>
-            <TagManager initialTags={tags} onTagsChange={setTags} />
+            <TagManager tags={tags} onTagsChange={setTags} />
           </div>
 
           {/* AI Suggestions */}
           <Suggestions
             suggestedTags={suggestedTags}
             suggestedContentExtensions={suggestedContentExtensions}
-            onAddTag={handleAddTag}
+            onAddTag={handleAddSuggestedTag}
             onAddContentExtension={(extension) => {
               setContentItems([...contentItems, { type: 'text', content: extension }]);
             }}

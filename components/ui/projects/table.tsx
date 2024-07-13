@@ -9,7 +9,7 @@ import { getArtifactThumbnail } from '@/app/lib/utils-client';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { TagList } from '@/components/ui/tags/taglist';
 import { DeleteProject, UpdateProject } from '@/components/ui/projects/button';
-import { TagProvider } from '@/components/ui/tags/tagcontext';
+// import { TagProvider } from '@/components/ui/tags/tagcontext';
 
 export default function ProjectsTable({
   initialProjects,

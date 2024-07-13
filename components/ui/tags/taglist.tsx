@@ -9,6 +9,7 @@ interface TagListProps {
   projectId?: string;
   artifactId?: string;
   accountId: string;
+  allTags: Tag[];
 }
 
 export function TagList({ initialTags = [], onTagsChange, projectId, artifactId, accountId }: TagListProps) {

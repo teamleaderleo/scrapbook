@@ -17,6 +17,16 @@ const connectionConfig = {
 
 console.log('Using Supabase database URL:', databaseUrl.replace(/:[^:@]+@/, ':***@')); // Mask the password
 
-const pool = new Pool(connectionConfig);
+let db: ReturnType<typeof drizzle>;
 
-export const db = drizzle(pool, { schema });
+if (typeof window === 'undefined') {
+  // Server-side code
+  const pool = new Pool(connectionConfig);
+  db = drizzle(pool, { schema });
+} else {
+  // Client-side code
+  console.warn('Attempted to use database on the client-side. This is not supported.');
+  db = null as any;
+}
+
+export { db };

@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Tag } from '@/app/lib/definitions';
-import { getAllTags } from '@/app/lib/utils-server';
+import { getAllTags } from '@/app/lib/actions/tag-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 interface TagManagerProps {
-  initialTags: string[];
+  tags: string[];
   onTagsChange: (tags: string[]) => void;
 }
 
-export function TagManager({ initialTags, onTagsChange }: TagManagerProps) {
-  const [tags, setTags] = useState<string[]>(initialTags);
+export function TagManager({ tags, onTagsChange }: TagManagerProps) {
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [newTag, setNewTag] = useState('');
 
@@ -23,37 +22,23 @@ export function TagManager({ initialTags, onTagsChange }: TagManagerProps) {
 
   const handleAddTag = () => {
     if (newTag && !tags.includes(newTag)) {
-      const updatedTags = [...tags, newTag];
-      setTags(updatedTags);
-      onTagsChange(updatedTags);
+      onTagsChange([...tags, newTag]);
       setNewTag('');
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    const updatedTags = tags.filter(tag => tag !== tagToRemove);
-    setTags(updatedTags);
-    onTagsChange(updatedTags);
+    onTagsChange(tags.filter(tag => tag !== tagToRemove));
   };
 
   const handleSelectTag = (tagName: string) => {
     if (!tags.includes(tagName)) {
-      const updatedTags = [...tags, tagName];
-      setTags(updatedTags);
-      onTagsChange(updatedTags);
+      onTagsChange([...tags, tagName]);
     }
   };
 
   return (
     <div>
-      <div className="flex flex-wrap gap-2 mb-2">
-        {tags.map((tag, index) => (
-          <span key={index} className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-            {tag}
-            <button type="button" onClick={() => handleRemoveTag(tag)} className="ml-1 text-xs">×</button>
-          </span>
-        ))}
-      </div>
       <div className="flex mb-2">
         <input
           type="text"

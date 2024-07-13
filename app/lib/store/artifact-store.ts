@@ -1,8 +1,9 @@
 import { create } from 'zustand';
-import { ArtifactWithRelations, FetchOptions } from '@/app/lib/definitions';
+import { ArtifactWithRelations, FetchOptions, Tag } from '@/app/lib/definitions';
 import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/actions/artifact-actions';
 import { fetchSingleArtifact, fetchAllArtifacts } from '@/app/lib/data/artifact-data';
 import { ADMIN_UUID } from '@/app/lib/constants';
+import { handleTagUpdate } from '../actions/tag-handlers';
 
 type ArtifactStore = {
   artifacts: ArtifactWithRelations[];
@@ -17,6 +18,7 @@ type ArtifactStore = {
   addArtifact: (formData: FormData) => Promise<void>;
   setFetchOptions: (options: FetchOptions) => void;
   searchArtifacts: (query: string) => void;
+  updateArtifactTags: (artifactId: string, tags: Tag[]) => Promise<void>;
 };
 
 export const useArtifactStore = create<ArtifactStore>((set, get) => ({
@@ -115,5 +117,22 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
         artifact.contents.some(content => content.content.toLowerCase().includes(query.toLowerCase()))
       )
     }));
+  },
+  updateArtifactTags: async (artifactId, tags) => {
+    set({ isLoading: true, error: null });
+    try {
+      await handleTagUpdate(ADMIN_UUID, artifactId, tags.map(tag => tag.name), false);
+      set((state) => ({
+        artifacts: state.artifacts.map((artifact) =>
+          artifact.id === artifactId ? { ...artifact, tags } : artifact
+        ),
+        filteredArtifacts: state.filteredArtifacts.map((artifact) =>
+          artifact.id === artifactId ? { ...artifact, tags } : artifact
+        ),
+        isLoading: false
+      }));
+    } catch (error) {
+      set({ error: 'Failed to update artifact tags', isLoading: false });
+    }
   },
 }));
