@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import Fuse from 'fuse.js';
 import { ArtifactWithRelations, FetchOptions, Tag } from '@/app/lib/definitions';
 import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/actions/artifact-actions';
 import { fetchSingleArtifact, fetchAllArtifacts } from '@/app/lib/data/artifact-data';
@@ -19,6 +20,8 @@ type ArtifactStore = {
   deleteArtifact: (id: string) => Promise<void>;
   addArtifact: (formData: FormData) => Promise<void>;
   setFetchOptions: (options: FetchOptions) => void;
+  fuse: Fuse<ArtifactWithRelations> | null;
+  initializeFuse: () => void;
   searchArtifacts: (query: string) => void;
   updateArtifactTags: (artifactId: string, tags: Tag[]) => Promise<void>;
   setCurrentPage: (page: number) => void;
@@ -113,16 +116,26 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
     }
   },
   setFetchOptions: (options) => set({ fetchOptions: options }),
+  fuse: null,
+  initializeFuse: () => {
+    const options = {
+      keys: ['name', 'description', 'tags.name', 'contents.content'],
+      threshold: 0.3,
+    };
+    set({ fuse: new Fuse(get().artifacts, options) });
+  },
   searchArtifacts: (query) => {
-    set((state) => ({
-      filteredArtifacts: state.artifacts.filter(artifact => 
-        artifact.name.toLowerCase().includes(query.toLowerCase()) ||
-        (artifact.description && artifact.description.toLowerCase().includes(query.toLowerCase())) ||
-        artifact.tags.some(tag => tag.name.toLowerCase().includes(query.toLowerCase())) ||
-        artifact.contents.some(content => content.content.toLowerCase().includes(query.toLowerCase()))
-      ),
+    const { fuse, artifacts } = get();
+    if (!fuse) return;
+    
+    const results = query 
+      ? fuse.search(query).map(result => result.item)
+      : artifacts;
+
+    set({ 
+      filteredArtifacts: results,
       currentPage: 1
-    }));
+    });
   },
   updateArtifactTags: async (artifactId, tags) => {
     set({ isLoading: true, error: null });

@@ -29,6 +29,7 @@
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.32.0",
     "file-type": "^19.1.0",
+    "fuse.js": "^7.0.0",
     "lucide-react": "^0.399.0",
     "next": "^15.0.0-canary.43",
     "next-auth": "5.0.0-beta.19",
