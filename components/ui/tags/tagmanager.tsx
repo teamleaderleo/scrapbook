@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Tag } from '@/app/lib/definitions';
-import { getAllTags } from '@/app/lib/actions/tag-actions';
+import { useTagStore } from '@/app/lib/store/tag-store';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 interface TagManagerProps {
@@ -9,20 +9,22 @@ interface TagManagerProps {
 }
 
 export function TagManager({ tags, onTagsChange }: TagManagerProps) {
-  const [allTags, setAllTags] = useState<Tag[]>([]);
+  const { allTags, fetchAllTags, addTag } = useTagStore();
   const [newTag, setNewTag] = useState('');
 
   useEffect(() => {
-    async function fetchAllTags() {
-      const fetchedTags = await getAllTags(ADMIN_UUID);
-      setAllTags(fetchedTags);
-    }
-    fetchAllTags();
-  }, []);
+    fetchAllTags(ADMIN_UUID);
+  }, [fetchAllTags]);
 
-  const handleAddTag = () => {
+  const handleAddTag = async () => {
     if (newTag && !tags.includes(newTag)) {
-      onTagsChange([...tags, newTag]);
+      const existingTag = allTags.find(tag => tag.name.toLowerCase() === newTag.toLowerCase());
+      if (existingTag) {
+        onTagsChange([...tags, existingTag.name]);
+      } else {
+        const createdTag = await addTag(ADMIN_UUID, newTag);
+        onTagsChange([...tags, createdTag.name]);
+      }
       setNewTag('');
     }
   };
@@ -69,6 +71,19 @@ export function TagManager({ tags, onTagsChange }: TagManagerProps) {
           ))
         }
       </select>
+      <div className="mt-2">
+        {tags.map((tag, index) => (
+          <span key={index} className="inline-block bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">
+            {tag}
+            <button
+              onClick={() => handleRemoveTag(tag)}
+              className="ml-1 text-xs text-blue-800 hover:text-blue-900"
+            >
+              ×
+            </button>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }

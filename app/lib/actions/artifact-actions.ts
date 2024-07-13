@@ -79,8 +79,8 @@ export async function updateArtifact(id: string, accountId: string, prevState: S
 
       const suggestedTags = await suggestTags(`${name} ${description} ${allContent}`);
 
-      await handleTagUpdate(accountId, id, tags || []);
-      await handleProjectUpdate(accountId, id, projects || []);
+      await handleTagUpdate(tx, accountId, id, tags || []);
+      await handleProjectUpdate(tx, accountId, id, projects || []);
 
       return { message: 'Artifact updated successfully', suggestedTags };
     });
@@ -131,10 +131,11 @@ export async function createArtifact(accountId: string, formData: FormData): Pro
   }
   
   try {
-    const result = await db.transaction(async (tx) => {
+    return await db.transaction(async (tx) => {
       const newArtifactId = uuid();
       const now = new Date();
 
+      // Create the artifact first
       await tx.insert(artifacts).values({ 
         id: newArtifactId,
         accountId, 
@@ -144,23 +145,23 @@ export async function createArtifact(accountId: string, formData: FormData): Pro
         updatedAt: now 
       });
 
+      // Insert contents
       const allContent = await insertContents(tx, accountId, newArtifactId, formData);
+
+      // Handle tags
+      if (tags && tags.length > 0) {
+        await handleTagUpdate(tx, accountId, newArtifactId, tags, false);
+      }
+
+      // Handle projects
+      if (projects && projects.length > 0) {
+        await handleProjectUpdate(tx, accountId, newArtifactId, projects);
+      }
 
       const suggestedTags = await suggestTags(`${name} ${description || ''} ${allContent.trim()}`);
 
-      if (tags && tags.length > 0) {
-        await handleTagUpdate(accountId, newArtifactId, tags);
-      }
-
-      if (projects && projects.length > 0) {
-        await handleProjectUpdate(accountId, newArtifactId, projects);
-      }
-
       return { message: 'Artifact created successfully', suggestedTags, artifactId: newArtifactId, success: true };
     });
-
-    revalidatePath('/dashboard/artifacts');
-    return result;
   } catch (error: any) {
     console.error('Error creating artifact:', error);
     return { message: `Error: Failed to Create Artifact. ${error.message}`, success: false };

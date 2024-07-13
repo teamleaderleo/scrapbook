@@ -37,42 +37,37 @@ export async function deleteTag(accountId: string, tagId: string): Promise<{ suc
   }
 }
 
-export async function handleTagUpdate(accountId: string, itemId: string, newTags: string[], isProject: boolean = false): Promise<void> {
+export async function handleTagUpdate(tx: any, accountId: string, itemId: string, newTags: string[], isProject: boolean = false): Promise<void> {
   const tagsTable = isProject ? projectTags : artifactTags;
   const itemColumn = isProject ? projectTags.projectId : artifactTags.artifactId;
 
-  await db.transaction(async (tx) => {
-    // Remove existing tags
-    await tx.delete(tagsTable)
-      .where(and(
-        eq(tagsTable.accountId, accountId),
-        eq(itemColumn, itemId)
-      ));
+  // Remove existing tags
+  await tx.delete(tagsTable)
+    .where(and(
+      eq(tagsTable.accountId, accountId),
+      eq(itemColumn, itemId)
+    ));
 
-    // Add new tags
-    for (const tagName of newTags) {
-      const existingTag = await tx.select().from(tags)
-        .where(and(eq(tags.name, tagName), eq(tags.accountId, accountId)))
-        .limit(1);
+  // Add new tags
+  for (const tagName of newTags) {
+    const existingTag = await tx.select().from(tags)
+      .where(and(eq(tags.name, tagName), eq(tags.accountId, accountId)))
+      .limit(1);
 
-      let tagId: string;
-      if (existingTag.length === 0) {
-        tagId = uuid();
-        await tx.insert(tags).values({ id: tagId, name: tagName, accountId });
-      } else {
-        tagId = existingTag[0].id;
-      }
-
-      await tx.insert(tagsTable).values({
-        accountId,
-        [isProject ? 'projectId' : 'artifactId']: itemId,
-        tagId
-      });
+    let tagId: string;
+    if (existingTag.length === 0) {
+      tagId = uuid();
+      await tx.insert(tags).values({ id: tagId, name: tagName, accountId });
+    } else {
+      tagId = existingTag[0].id;
     }
-  });
 
-  revalidatePath('/dashboard/artifacts');
-  revalidatePath('/dashboard/projects');
+    await tx.insert(tagsTable).values({
+      accountId,
+      [isProject ? 'projectId' : 'artifactId']: itemId,
+      tagId
+    });
+  }
 }
 
 export async function ensureTagsExist(accountId: string, tagNames: string[]): Promise<Tag[]> {
