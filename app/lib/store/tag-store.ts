@@ -1,16 +1,37 @@
-import create from 'zustand';
-import { Tag } from '@/app/lib/definitions';
+import { create } from 'zustand';
+import { Tag } from '../definitions';
+import { createTag, updateTag, deleteTag, getAllTags } from '../actions/tag-actions';
 
-interface TagState {
+interface TagStore {
   tags: Tag[];
-  addTag: (tag: Tag) => void;
-  removeTag: (tagId: string) => void;
   setTags: (tags: Tag[]) => void;
+  addTag: (accountId: string, name: string) => Promise<void>;
+  updateTagName: (accountId: string, tagId: string, newName: string) => Promise<void>;
+  removeTag: (accountId: string, tagId: string) => Promise<void>;
+  fetchTags: (accountId: string) => Promise<void>;
 }
 
-export const useTagStore = create<TagState>((set) => ({
+export const useTagStore = create<TagStore>((set) => ({
   tags: [],
-  addTag: (tag) => set((state) => ({ tags: [...state.tags, tag] })),
-  removeTag: (tagId) => set((state) => ({ tags: state.tags.filter(t => t.id !== tagId) })),
   setTags: (tags) => set({ tags }),
+  addTag: async (accountId, name) => {
+    const newTag = await createTag(accountId, name);
+    set((state) => ({ tags: [...state.tags, newTag] }));
+  },
+  updateTagName: async (accountId, tagId, newName) => {
+    const updatedTag = await updateTag(accountId, tagId, newName);
+    set((state) => ({
+      tags: state.tags.map((tag) => (tag.id === tagId ? updatedTag : tag)),
+    }));
+  },
+  removeTag: async (accountId, tagId) => {
+    await deleteTag(accountId, tagId);
+    set((state) => ({
+      tags: state.tags.filter((tag) => tag.id !== tagId),
+    }));
+  },
+  fetchTags: async (accountId) => {
+    const fetchedTags = await getAllTags(accountId);
+    set({ tags: fetchedTags });
+  },
 }));
