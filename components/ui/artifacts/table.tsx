@@ -9,7 +9,7 @@ import { TagList } from '@/components/ui/tags/taglist';
 import { DeleteArtifact, UpdateArtifact } from '@/components/ui/artifacts/button';
 import { TagProvider } from '@/components/ui/tags/tagcontext';
 import Pagination from '../pagination';
-import { useArtifactStore } from '@/app/lib/store/artifactStore';
+import { useArtifactStore } from '@/app/lib/store/artifact-store';
 
 export const ARTIFACT_ITEMS_PER_PAGE = 6;
 

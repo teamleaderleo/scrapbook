@@ -3,7 +3,6 @@ import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { authConfig } from './auth.config';
-import { sql } from '@vercel/postgres';
 import { z } from 'zod';
 import type { Account } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
