@@ -11,6 +11,7 @@ import { useArtifactStore } from '@/app/lib/store/artifact-store';
 import { useTagStore } from '@/app/lib/store/tag-store';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { ArtifactThumbnail } from './artifact-thumbnail';
+import { ErrorBoundaryWithToast } from '../errors/error-boundary';
 
 export const ARTIFACT_ITEMS_PER_PAGE = 6;
 
@@ -105,12 +106,14 @@ export function ArtifactsTable({
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0 relative overflow-hidden rounded-full">
-                          <ArtifactThumbnail
-                            artifact={artifact}
-                            size={40}
-                            priority={true}
-                            className="flex-shrink-0"
-                          />
+                          <ErrorBoundaryWithToast>
+                            <ArtifactThumbnail
+                              artifact={artifact}
+                              size={40}
+                              priority={true}
+                              className="flex-shrink-0"
+                            />
+                          </ErrorBoundaryWithToast> 
                         </div>
                         <div className="ml-4">
                           <p className="font-medium">{artifact.name}</p>
@@ -139,13 +142,15 @@ export function ArtifactsTable({
                         {artifact.contents && artifact.contents.length > 0 ? (
                           artifact.contents.slice(0, 3).map((content, index) => (
                             <div key={index} className="w-10 h-10 relative overflow-hidden rounded-full">
-                              <ArtifactThumbnail 
-                                key={index}
-                                size={40}
-                                artifact={artifact}
-                                contentIndex={index}
-                                priority={index === 0}
-                              />
+                              <ErrorBoundaryWithToast> 
+                                <ArtifactThumbnail 
+                                  key={index}
+                                  size={40}
+                                  artifact={artifact}
+                                  contentIndex={index}
+                                  priority={index === 0}
+                                />
+                              </ErrorBoundaryWithToast> 
                             </div>
                           ))
                         ) : (

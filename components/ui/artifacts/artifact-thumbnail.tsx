@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { Artifact, ArtifactContent } from '@/app/lib/definitions';
 import { getBlurDataUrl } from '@/app/lib/utils-client';
@@ -18,6 +18,8 @@ export const ArtifactThumbnail: React.FC<ArtifactThumbnailProps> = ({
   priority = false,
   className = '',
 }) => {
+
+  const [isLoading, setIsLoading] = useState(true);
   const getArtifactThumbnail = (artifact: Artifact, index: number): string => {
     if (!artifact || !artifact.contents || artifact.contents.length === 0) {
       return '/placeholder-default.png';
@@ -29,10 +31,14 @@ export const ArtifactThumbnail: React.FC<ArtifactThumbnailProps> = ({
 
     switch (content.type) {
       case 'image':
-        // Handle potentially malformed URLs
         if (typeof content.content === 'string') {
-          const url = content.content.replace('https://https://', 'https://');
-          return url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
+          try {
+            const url = new URL(content.content);
+            return url.toString();
+          } catch {
+            console.warn(`Invalid URL for artifact ${artifact.id}: ${content.content}`);
+            return '/placeholder-default.png';
+          }
         }
         return '/placeholder-default.png';
       case 'text':
@@ -56,6 +62,7 @@ export const ArtifactThumbnail: React.FC<ArtifactThumbnailProps> = ({
         height={size}
         objectFit="cover"
         priority={priority}
+        loading={priority ? "eager" : "lazy"}
         placeholder='blur'
         blurDataURL={getBlurDataUrl(size, size)}
         className={`rounded-full ${className}`}
@@ -63,6 +70,6 @@ export const ArtifactThumbnail: React.FC<ArtifactThumbnailProps> = ({
     );
   } catch (error) {
     console.error('Error rendering Image:', error);
-    return <div className={`rounded-full bg-gray-200 ${className}`} style={{width: size, height: size}}></div>;
+    return <div className={`rounded-full bg-gray-200 ${className}`}></div>;
   }
 };
