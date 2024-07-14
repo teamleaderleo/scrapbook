@@ -12,6 +12,7 @@ import { useTagStore } from '@/app/lib/store/tag-store';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { ArtifactThumbnail } from './artifact-thumbnail';
 import { ErrorBoundaryWithToast } from '../errors/error-boundary';
+import { useImagePreloader } from '../image-preloader';
 
 export const ARTIFACT_ITEMS_PER_PAGE = 6;
 
@@ -80,6 +81,8 @@ export function ArtifactsTable({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentPage, totalPages, handlePageChange]);
 
+  useImagePreloader(paginatedArtifacts);
+
   return (
     <div className="mt-6 flow-root">
       <div className="overflow-x-auto">
@@ -143,12 +146,11 @@ export function ArtifactsTable({
                           artifact.contents.slice(0, 3).map((content, index) => (
                             <div key={index} className="w-10 h-10 relative overflow-hidden rounded-full">
                               <ErrorBoundaryWithToast> 
-                                <ArtifactThumbnail 
-                                  key={index}
-                                  size={40}
+                                <ArtifactThumbnail
                                   artifact={artifact}
-                                  contentIndex={index}
-                                  priority={index === 0}
+                                  size={40}
+                                  priority={index < 5} // Prioritize loading for the first 5 images
+                                  className="flex-shrink-0"
                                 />
                               </ErrorBoundaryWithToast> 
                             </div>

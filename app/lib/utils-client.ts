@@ -51,12 +51,12 @@ export const shimmer = (w: number, h: number) => `
   <svg width="${w}" height="${h}" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
       <linearGradient id="g">
-        <stop stop-color="#333" offset="20%" />
-        <stop stop-color="#222" offset="50%" />
-        <stop stop-color="#333" offset="70%" />
+        <stop stop-color="#f3f4f6" offset="20%" />
+        <stop stop-color="#fff" offset="50%" />
+        <stop stop-color="#f3f4f6" offset="70%" />
       </linearGradient>
     </defs>
-    <rect width="${w}" height="${h}" fill="#333" />
+    <rect width="${w}" height="${h}" fill="#f3f4f6" />
     <rect id="r" width="${w}" height="${h}" fill="url(#g)" />
     <animate xlink:href="#r" attributeName="x" from="-${w}" to="${w}" dur="1s" repeatCount="indefinite"  />
   </svg>`;
@@ -68,4 +68,25 @@ export const toBase64 = (str: string) =>
 
 export const getBlurDataUrl = (w: number, h: number) => 
   `data:image/svg+xml;base64,${toBase64(shimmer(w, h))}`;
+
+export const getArtifactThumbnail = (artifact: Artifact, index: number = 0): string => {
+  if (!artifact || !artifact.contents || artifact.contents.length === 0) {
+    return '/placeholder-default.png';
+  }
+  const content: ArtifactContent = artifact.contents[index];
+  if (!content) {
+    return '/placeholder-default.png';
+  }
+
+  switch (content.type) {
+    case 'image':
+      return content.content || '/placeholder-default.png';
+    case 'text':
+      return '/placeholder-text.png';
+    case 'file':
+      return '/placeholder-file.png';
+    default:
+      return '/placeholder-default.png';
+  }
+};
 
