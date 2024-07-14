@@ -8,7 +8,14 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: `${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}`,
+        port: '',
+        pathname: '/**',
+      },
     ],
+    domains: ['setzen.s3.us-east-2.amazonaws.com', 'd17l3nej64kqkk.cloudfront.net'],
   },
 };
 

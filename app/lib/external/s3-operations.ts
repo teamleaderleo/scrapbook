@@ -1,10 +1,19 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { CloudFrontClient, CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
 import { v4 as uuidv4 } from 'uuid';
 import { sql } from '@vercel/postgres';
 import FileType from 'file-type';
 import { fileTypeFromBuffer } from 'file-type';
 
 const s3Client = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+});
+
+const cloudFrontClient = new CloudFrontClient({
   region: process.env.AWS_REGION,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
@@ -91,7 +100,9 @@ export async function uploadToS3(file: File | Buffer, contentType: string, accou
 
   try {
     await s3Client.send(new PutObjectCommand(uploadParams));
-    return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+    const cloudFrontDomain = process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN;
+    const fileUrl = `${cloudFrontDomain}/${fileName}`;
+    return fileUrl.startsWith('https://') ? fileUrl : `https://${fileUrl}`;
   } catch (error) {
     console.error('Error uploading to S3:', error);
     throw new Error('Failed to upload file to S3');
@@ -111,8 +122,24 @@ export async function deleteFromS3(fileUrl: string): Promise<void> {
 
   try {
     await s3Client.send(new DeleteObjectCommand(deleteParams));
+    // Invalidate CloudFront cache
+    await cloudFrontClient.send(new CreateInvalidationCommand({
+      DistributionId: process.env.CLOUDFRONT_DISTRIBUTION_ID,
+      InvalidationBatch: {
+        CallerReference: `delete-${Date.now()}`,
+        Paths: {
+          Quantity: 1,
+          Items: [`/${fileName}`],
+        },
+      },
+    }));
   } catch (error) {
-    console.error('Error deleting from S3:', error);
-    throw new Error('Failed to delete file from S3');
+    console.error('Error deleting from S3 or invalidating CloudFront:', error);
+    throw new Error('Failed to delete file from S3 or invalidate CloudFront');
   }
+}
+
+export function getCloudFrontUrl(key: string): string {
+  const cloudFrontDomain = process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN;
+  return `${cloudFrontDomain}/${key}`;
 }

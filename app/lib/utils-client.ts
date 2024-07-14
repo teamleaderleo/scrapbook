@@ -69,23 +69,3 @@ export const toBase64 = (str: string) =>
 export const getBlurDataUrl = (w: number, h: number) => 
   `data:image/svg+xml;base64,${toBase64(shimmer(w, h))}`;
 
-export const getArtifactThumbnail = (artifact: Artifact) => {
-  if (!artifact) {
-    return '/placeholder-default.png';
-  }
-  const latestContent: ArtifactContent = artifact.contents[0];
-  if (!artifact.contents || artifact.contents.length === 0 || !latestContent) {
-    return '/placeholder-default.png';
-  }
-
-  switch (latestContent.type) {
-    case 'image':
-      return latestContent.content;
-    case 'text':
-      return '/placeholder-text.png';
-    case 'file':
-      return '/placeholder-file.png';
-    default:
-      return '/placeholder-default.png';
-  }
-};

@@ -3,15 +3,14 @@
 import { useCallback } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
 import { ArtifactWithRelations, Tag } from '@/app/lib/definitions';
-import { getArtifactThumbnail, getBlurDataUrl } from '@/app/lib/utils-client';
 import { TagList } from '@/components/ui/tags/taglist';
 import { DeleteArtifact, UpdateArtifact } from '@/components/ui/artifacts/button';
 import Pagination from '../pagination';
 import { useArtifactStore } from '@/app/lib/store/artifact-store';
 import { useTagStore } from '@/app/lib/store/tag-store';
 import { ADMIN_UUID } from '@/app/lib/constants';
+import { ArtifactThumbnail } from './artifact-thumbnail';
 
 export const ARTIFACT_ITEMS_PER_PAGE = 6;
 
@@ -106,13 +105,11 @@ export function ArtifactsTable({
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0 relative overflow-hidden rounded-full">
-                          <Image
-                            src={getArtifactThumbnail(artifact)}
-                            alt={`Thumbnail for ${artifact.name}`}
-                            layout="fill"
-                            objectFit="cover"
-                            // placeholder="blur"
-                            // blurDataURL={ getBlurDataUrl(100, 100) }  // Create a small, blurred version of your placeholder image
+                          <ArtifactThumbnail
+                            artifact={artifact}
+                            size={40}
+                            priority={true}
+                            className="flex-shrink-0"
                           />
                         </div>
                         <div className="ml-4">
@@ -142,14 +139,12 @@ export function ArtifactsTable({
                         {artifact.contents && artifact.contents.length > 0 ? (
                           artifact.contents.slice(0, 3).map((content, index) => (
                             <div key={index} className="w-10 h-10 relative overflow-hidden rounded-full">
-                              <Image
-                                src={getArtifactThumbnail({ ...artifact, contents: [content] })}
-                                alt={`Thumbnail for ${artifact.name} content ${index + 1}`}
-                                layout="fill"
-                                objectFit="cover"
-                                // placeholder="blur"
-                                // blurDataURL={ getBlurDataUrl(100, 100) }  // Create a small, blurred version of your placeholder image
-                                priority={index === 0}  // Load the first image with priority
+                              <ArtifactThumbnail 
+                                key={index}
+                                size={40}
+                                artifact={artifact}
+                                contentIndex={index}
+                                priority={index === 0}
                               />
                             </div>
                           ))
