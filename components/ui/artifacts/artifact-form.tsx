@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { ArtifactWithRelations, BaseProject, ContentType } from '@/app/lib/definitions';
+import { ArtifactWithRelations, BaseProject, ContentType, Tag } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { TagManager } from '@/components/ui/tags/tagmanager';
@@ -15,6 +15,8 @@ interface ArtifactFormProps {
   suggestedTags?: string[];
   suggestedContentExtensions?: string[];
   onGetAISuggestions?: () => void;
+  allTags: Tag[];
+  onTagsChange: (tags: Tag[]) => void;
 }
 
 export function ArtifactForm({
@@ -27,8 +29,10 @@ export function ArtifactForm({
   suggestedTags = [],
   suggestedContentExtensions = [],
   onGetAISuggestions,
+  allTags,
+  onTagsChange,
 }: ArtifactFormProps) {
-  const [tags, setTags] = useState<string[]>(artifact?.tags?.map(tag => tag.name) || []);
+  const [tags, setTags] = useState<Tag[]>(artifact?.tags || []);
   const [contentItems, setContentItems] = useState<{id?: string, type: ContentType, content: string | File}[]>(
     artifact?.contents?.map(c => ({id: c.id, type: c.type, content: c.content})) || [{type: 'text', content: ''}]
   );
@@ -36,31 +40,38 @@ export function ArtifactForm({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const handleAddSuggestedTag = (tag: string) => {
-    if (!tags.includes(tag)) setTags([...tags, tag]);
+  const handleAddSuggestedTag = (tagName: string) => {
+    const existingTag = allTags.find(t => t.name === tagName);
+    if (existingTag && !tags.some(t => t.id === existingTag.id)) {
+      const newTags = [...tags, existingTag];
+      setTags(newTags);
+      onTagsChange(newTags);
+    }
   };
+
   const handleAddContentExtension = (extension: string) => {
     setContentItems([...contentItems, { type: 'text', content: extension }]);
   };
+
   const handleAddContent = () => setContentItems([...contentItems, {type: 'text', content: ''}]);
+
   const handleContentTypeChange = (index: number, type: ContentType) => {
     const newContentItems = [...contentItems];
     newContentItems[index] = {type, content: ''};
     setContentItems(newContentItems);
   };
+
   const handleContentChange = (index: number, content: string | File) => {
     const newContentItems = [...contentItems];
     newContentItems[index].content = content;
     setContentItems(newContentItems);
   };
+
   const handleFileChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) handleContentChange(index, file);
   };
-  const handleAddTag = (tag: string) => {
-    if (!tags.includes(tag)) setTags([...tags, tag]);
-  };
-  const handleRemoveTag = (tagToRemove: string) => setTags(tags.filter(tag => tag !== tagToRemove));
+
   const handleRemoveContent = (index: number) => {
     const newContentItems = [...contentItems];
     newContentItems.splice(index, 1);
@@ -72,7 +83,7 @@ export function ArtifactForm({
     if (formRef.current) {
       const formData = new FormData(formRef.current);
       formData.delete('tags');
-      tags.forEach(tag => formData.append('tags', tag));
+      tags.forEach(tag => formData.append('tags', tag.id));
       onSubmit(formData);
     }
   };
@@ -196,26 +207,24 @@ export function ArtifactForm({
           {/* Tags */}
           <div className="mb-4">
             <label className="mb-2 block text-sm font-medium">Tags</label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {tags.map((tag, index) => (
-                <span key={index} className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                  {tag}
-                  <button type="button" onClick={() => setTags(tags.filter(t => t !== tag))} className="ml-1 text-xs">×</button>
-                </span>
-              ))}
-            </div>
-            <TagManager tags={tags} onTagsChange={setTags} />
+            <TagManager
+              selectedTags={tags}
+              onTagsChange={(newTags) => {
+                setTags(newTags);
+                onTagsChange(newTags);
+              }}
+              allTags={allTags}
+            />
           </div>
 
-          {/* AI Suggestions */}
+          {/* Suggestions */}
           <Suggestions
             suggestedTags={suggestedTags}
             suggestedContentExtensions={suggestedContentExtensions}
             onAddTag={handleAddSuggestedTag}
-            onAddContentExtension={(extension) => {
-              setContentItems([...contentItems, { type: 'text', content: extension }]);
-            }}
+            onAddContentExtension={handleAddContentExtension}
           />
+
         </div>
 
         <div className="mt-6 flex justify-end gap-4">

@@ -1,18 +1,19 @@
 import { create } from 'zustand';
 import Fuse from 'fuse.js';
 import { QueryClient, useQuery } from 'react-query';
-import { ArtifactWithRelations, FetchOptions, Tag } from '@/app/lib/definitions';
+import { ArtifactWithRelations, FetchOptions, Tag, BaseProject, ArtifactContent } from '@/app/lib/definitions';
 import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/actions/artifact-actions';
 import { fetchSingleArtifact, fetchAllArtifacts } from '@/app/lib/data/artifact-data';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import { handleTagUpdate } from '../actions/tag-actions';
-import { getCachedArtifacts } from '../data/cached-artifact-data';
-import { getArtifactThumbnail } from '../utils-client';
+import { handleTagUpdate } from '../../actions/tag-actions';
+import { getCachedArtifacts } from '../../data/cached-artifact-data';
+import { getArtifactThumbnail } from '../../utils-client';
 
 const queryClient = new QueryClient();
 
 type ArtifactStore = {
   artifacts: ArtifactWithRelations[];
+  currentArtifact: ArtifactWithRelations | null;
   filteredArtifacts: ArtifactWithRelations[];
   paginatedArtifacts: ArtifactWithRelations[];
   currentPage: number;
@@ -36,18 +37,23 @@ type ArtifactStore = {
   updateArtifact: (id: string, formData: FormData) => Promise<void>;
   deleteArtifact: (id: string) => Promise<void>;
   addArtifact: (formData: FormData) => Promise<void>;
+  setArtifacts: (artifacts: ArtifactWithRelations[]) => void;
+  setCurrentArtifact: (artifact: ArtifactWithRelations | null) => void;
 
   setFetchOptions: (options: FetchOptions) => void;
 
   initializeFuse: () => void;
   searchArtifacts: (query: string) => void;
-  updateArtifactTags: (artifactId: string, tags: Tag[]) => Promise<void>;
+  updateArtifactTags: (id: string, tags: Tag[]) => void;
+  updateArtifactContent: (id: string, contents: ArtifactContent[]) => void;
+  
   setCurrentPage: (page: number) => void;
   preloadAdjacentPages: () => void;
 };
 
 export const useArtifactStore = create<ArtifactStore>((set, get) => ({
   artifacts: [],
+  currentArtifact: null,
   filteredArtifacts: [],
   paginatedArtifacts: [],
   currentPage: 1,
@@ -57,6 +63,8 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
   isLoading: false,
   error: null,
   fetchOptions: { includeTags: true, includeContents: true, includeProjects: true },
+  setArtifacts: (artifacts) => set({ artifacts }),
+  setCurrentArtifact: (artifact) => set({ currentArtifact: artifact }),
   initializeArtifacts: (artifacts) => {
     const fuse = new Fuse(artifacts, {
       keys: ['name', 'description', 'tags.name', 'contents.content'],
@@ -195,6 +203,7 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
       set({ error: error instanceof Error ? error.message : 'An unknown error occurred', isLoading: false });
     }
   },
+  setCurrentPage: (page) => set({ currentPage: page }),
   setFetchOptions: (options) => set({ fetchOptions: options }),
   fuse: null,
   initializeFuse: () => {
@@ -217,24 +226,37 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
       currentPage: 1
     });
   },
-  updateArtifactTags: async (artifactId, tags) => {
-    set({ isLoading: true, error: null });
-    try {
-      await handleTagUpdate(ADMIN_UUID, artifactId, tags.map(tag => tag.name), false);
-      set((state) => ({
-        artifacts: state.artifacts.map((artifact) =>
-          artifact.id === artifactId ? { ...artifact, tags } : artifact
-        ),
-        filteredArtifacts: state.filteredArtifacts.map((artifact) =>
-          artifact.id === artifactId ? { ...artifact, tags } : artifact
-        ),
-        isLoading: false
-      }));
-    } catch (error) {
-      set({ error: 'Failed to update artifact tags', isLoading: false });
-    }
+  updateArtifactTags: (id, tags) => {
+    set((state) => ({
+      artifacts: state.artifacts.map(a => 
+        a.id === id ? { ...a, tags } : a
+      ),
+      currentArtifact: state.currentArtifact && state.currentArtifact.id === id
+        ? { ...state.currentArtifact, tags }
+        : state.currentArtifact,
+    }));
   },
-  setCurrentPage: (page) => set({ currentPage: page }),
+  updateArtifactContent: (id, contents) => {
+    set((state) => ({
+      artifacts: state.artifacts.map(a => 
+        a.id === id ? { ...a, contents } : a
+      ),
+      currentArtifact: state.currentArtifact && state.currentArtifact.id === id
+        ? { ...state.currentArtifact, contents }
+        : state.currentArtifact,
+    }));
+  },
+  updateArtifactProjects: (id: string, projects: BaseProject[]) => {
+    set((state) => ({
+      artifacts: state.artifacts.map(a => 
+        a.id === id ? { ...a, projects } : a
+      ),
+      currentArtifact: state.currentArtifact && state.currentArtifact.id === id
+        ? { ...state.currentArtifact, projects }
+        : state.currentArtifact,
+    }));
+  },
+  
 }));
 
 export const useArtifacts = () => {

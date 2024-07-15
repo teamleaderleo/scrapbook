@@ -7,7 +7,7 @@ import { ArtifactsTableSkeleton } from '@/components/ui/skeletons';
 import { Metadata } from 'next';
 import { getCachedArtifacts } from '@/app/lib/data/cached-artifact-data';
 import { ArtifactView } from '@/app/lib/definitions';
-import { useArtifactStore } from '@/app/lib/store/artifact-store';
+import { useArtifactStore } from '@/app/lib/store/artifacts/artifact-store';
 import { ADMIN_UUID } from '@/app/lib/constants';
 export const metadata: Metadata = {
   title: 'Artifacts',

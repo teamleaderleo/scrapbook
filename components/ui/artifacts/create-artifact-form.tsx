@@ -1,42 +1,28 @@
+// create-artifact-form.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { BaseProject, ArtifactWithRelations, ContentType } from '@/app/lib/definitions';
-import { createArtifact, State } from '@/app/lib/actions/artifact-actions';
-import { useFormState } from 'react-dom';
-import { ADMIN_UUID } from '@/app/lib/constants';
+import { BaseProject, ArtifactWithRelations, Tag } from '@/app/lib/definitions';
 import { ArtifactForm } from '@/components/ui/artifacts/artifact-form';
 import { suggestTags, suggestContentExtensions } from '@/app/lib/external/claude-utils';
-import { Button } from '@/components/ui/button';
-import { useArtifactStore } from '@/app/lib/store/artifact-store';
+import { useArtifactStore } from '@/app/lib/store/artifacts/artifact-store';
+import { useTagStore } from '@/app/lib/store/tag-store';
+import { ADMIN_UUID } from '@/app/lib/constants';
 
 export default function CreateArtifactForm({ projects }: { projects: BaseProject[] }) {
   const router = useRouter();
   const { addArtifact } = useArtifactStore();
+  const { allTags, fetchAllTags, ensureTagsExist } = useTagStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [suggestedContentExtensions, setSuggestedContentExtensions] = useState<string[]>([]);
-  const initialState: State = { message: null, errors: {} };
-  const createArtifactWithAccount = async (prevState: State, formData: FormData) => {
-    const result = await createArtifact(ADMIN_UUID, formData);
-    return result;
-  };
-  const [state, formAction] = useFormState(createArtifactWithAccount, initialState);
 
   const defaultArtifact: ArtifactWithRelations = {
     accountId: ADMIN_UUID,
     id: '',
     name: '',
-    contents: [
-      {
-        id: '',
-        accountId: ADMIN_UUID,
-        type: 'text' as ContentType,
-        content: '',
-        createdAt: new Date(),
-      }
-    ],
+    contents: [],
     description: '',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -45,13 +31,8 @@ export default function CreateArtifactForm({ projects }: { projects: BaseProject
   };
 
   useEffect(() => {
-    if (state.message === 'Artifact created successfully') {
-      setIsSubmitting(false);
-      setTimeout(() => router.push('/dashboard/artifacts'), 2000);
-    } else if (state.message) {
-      setIsSubmitting(false);
-    }
-  }, [state, router]);
+    fetchAllTags(ADMIN_UUID);
+  }, [fetchAllTags]);
 
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
@@ -59,8 +40,8 @@ export default function CreateArtifactForm({ projects }: { projects: BaseProject
       await addArtifact(formData);
       router.push('/dashboard/artifacts');
     } catch (error) {
+      console.error('Failed to create artifact:', error);
       setIsSubmitting(false);
-      // Handle error TODO
     }
   };
 
@@ -76,24 +57,24 @@ export default function CreateArtifactForm({ projects }: { projects: BaseProject
     setSuggestedContentExtensions(extensions);
   };
 
+  const handleTagsChange = async (newTags: Tag[]) => {
+    const tagNames = newTags.map(tag => tag.name);
+    await ensureTagsExist(ADMIN_UUID, tagNames);
+  };
+
   return (
-    <>
-      <ArtifactForm
-        artifact={defaultArtifact}
-        projects={projects}
-        onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
-        submitButtonText="Create Artifact"
-        cancelHref="/dashboard/artifacts"
-        suggestedTags={suggestedTags}
-        suggestedContentExtensions={suggestedContentExtensions}
-        onGetAISuggestions={handleGetAISuggestions}
-      />
-      {state.message && (
-        <p className={`mt-2 text-sm ${state.message.includes('Error') ? 'text-red-500' : 'text-green-500'}`}>
-          {state.message}
-        </p>
-      )}
-    </>
+    <ArtifactForm
+      artifact={defaultArtifact}
+      projects={projects}
+      onSubmit={handleSubmit}
+      isSubmitting={isSubmitting}
+      submitButtonText="Create Artifact"
+      cancelHref="/dashboard/artifacts"
+      suggestedTags={suggestedTags}
+      suggestedContentExtensions={suggestedContentExtensions}
+      onGetAISuggestions={handleGetAISuggestions}
+      allTags={allTags}
+      onTagsChange={handleTagsChange}
+    />
   );
 }

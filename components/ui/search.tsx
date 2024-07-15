@@ -2,7 +2,7 @@
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
-import { useArtifactStore } from '@/app/lib/store/artifact-store';
+import { useArtifactStore } from '@/app/lib/store/artifacts/artifact-store';
 import { useEffect } from 'react';
 
 export default function Search({ placeholder }: { placeholder: string }) {

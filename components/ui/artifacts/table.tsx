@@ -7,7 +7,7 @@ import { ArtifactWithRelations, Tag } from '@/app/lib/definitions';
 import { TagList } from '@/components/ui/tags/taglist';
 import { DeleteArtifact, UpdateArtifact } from '@/components/ui/artifacts/button';
 import Pagination from '../pagination';
-import { useArtifactStore } from '@/app/lib/store/artifact-store';
+import { useArtifactStore } from '@/app/lib/store/artifacts/artifact-store';
 import { useTagStore } from '@/app/lib/store/tag-store';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { ArtifactThumbnail } from './artifact-thumbnail';

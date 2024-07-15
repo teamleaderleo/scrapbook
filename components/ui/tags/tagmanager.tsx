@@ -4,38 +4,36 @@ import { useTagStore } from '@/app/lib/store/tag-store';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 interface TagManagerProps {
-  tags: string[];
-  onTagsChange: (tags: string[]) => void;
+  selectedTags: Tag[];
+  onTagsChange: (tags: Tag[]) => void;
+  allTags: Tag[];
 }
 
-export function TagManager({ tags, onTagsChange }: TagManagerProps) {
-  const { allTags, fetchAllTags, addTag } = useTagStore();
+export function TagManager({ selectedTags, onTagsChange, allTags }: TagManagerProps) {
+  const { addTag } = useTagStore();
   const [newTag, setNewTag] = useState('');
 
-  useEffect(() => {
-    fetchAllTags(ADMIN_UUID);
-  }, [fetchAllTags]);
-
   const handleAddTag = async () => {
-    if (newTag && !tags.includes(newTag)) {
+    if (newTag && !selectedTags.some(tag => tag.name.toLowerCase() === newTag.toLowerCase())) {
       const existingTag = allTags.find(tag => tag.name.toLowerCase() === newTag.toLowerCase());
       if (existingTag) {
-        onTagsChange([...tags, existingTag.name]);
+        onTagsChange([...selectedTags, existingTag]);
       } else {
         const createdTag = await addTag(ADMIN_UUID, newTag);
-        onTagsChange([...tags, createdTag.name]);
+        onTagsChange([...selectedTags, createdTag]);
       }
       setNewTag('');
     }
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    onTagsChange(tags.filter(tag => tag !== tagToRemove));
+  const handleRemoveTag = (tagToRemove: Tag) => {
+    onTagsChange(selectedTags.filter(tag => tag.id !== tagToRemove.id));
   };
 
-  const handleSelectTag = (tagName: string) => {
-    if (!tags.includes(tagName)) {
-      onTagsChange([...tags, tagName]);
+  const handleSelectTag = (tagId: string) => {
+    const tagToAdd = allTags.find(tag => tag.id === tagId);
+    if (tagToAdd && !selectedTags.some(tag => tag.id === tagToAdd.id)) {
+      onTagsChange([...selectedTags, tagToAdd]);
     }
   };
 
@@ -65,16 +63,16 @@ export function TagManager({ tags, onTagsChange }: TagManagerProps) {
       >
         <option value="" disabled>Select an existing tag</option>
         {allTags
-          .filter(tag => !tags.includes(tag.name))
+          .filter(tag => !selectedTags.some(selectedTag => selectedTag.id === tag.id))
           .map(tag => (
-            <option key={tag.id} value={tag.name}>{tag.name}</option>
+            <option key={tag.id} value={tag.id}>{tag.name}</option>
           ))
         }
       </select>
       <div className="mt-2">
-        {tags.map((tag, index) => (
-          <span key={index} className="inline-block bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">
-            {tag}
+        {selectedTags.map((tag) => (
+          <span key={tag.id} className="inline-block bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">
+            {tag.name}
             <button
               onClick={() => handleRemoveTag(tag)}
               className="ml-1 text-xs text-blue-800 hover:text-blue-900"
