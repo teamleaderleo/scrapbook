@@ -9,7 +9,8 @@ import { handleTagUpdate } from '../../actions/tag-actions';
 import { getCachedArtifacts } from '../../data/cached-artifact-data';
 import { getArtifactThumbnail } from '../../utils-client';
 import { useCoreArtifactStore } from './core-artifact-store';
-
+import { useArtifactFilterStore } from './artifact-filter-store';
+import { useArtifactPaginationStore } from './artifact-pagination-store';
 const queryClient = new QueryClient();
 
 type ArtifactStore = {
@@ -31,7 +32,6 @@ type ArtifactStore = {
 
   updateUrl: (page: number) => void;
   setUpdateUrl: (updateUrlFunction: (page: number) => void) => void;
-  handleSearch: (query: string, page: number) => void;
   handlePageChange: (page: number) => void;
   
   fetchArtifacts: () => Promise<void>;
@@ -75,13 +75,9 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
   setCurrentArtifact: (artifact) => set({ currentArtifact: artifact }),
   initializeArtifacts: (artifacts) => {
     useCoreArtifactStore.getState().setArtifacts(artifacts);
-    useCoreArtifactStore.getState().setFilteredArtifacts(artifacts);
-    const fuse = new Fuse(artifacts, {
-      keys: ['name', 'description', 'tags.name', 'contents.content'],
-      threshold: 0.3,
-    });
-    set({ fuse });
-    get().handleSearch(get().query, get().currentPage);
+    useArtifactFilterStore.getState().initializeFuse();
+    useArtifactFilterStore.getState().searchArtifacts(''); // Reset search
+    useArtifactPaginationStore.getState().updatePagination(artifacts);
   },
   initializeCoreStore: () => {
     const coreStore = useCoreArtifactStore.getState();
@@ -98,27 +94,6 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
     const { artifacts, filteredArtifacts, isLoading, error } = useCoreArtifactStore.getState();
     set({ artifacts, filteredArtifacts, isLoading, error });
     get().initializeFuse();
-  },
-
-  handleSearch: (query, page) => {
-    const { fuse, artifacts, itemsPerPage } = get();
-    const filteredArtifacts = query && fuse 
-      ? fuse.search(query).map(result => result.item)
-      : artifacts;
-    
-    const totalPages = Math.ceil(filteredArtifacts.length / itemsPerPage);
-    const paginatedArtifacts = filteredArtifacts.slice(
-      (page - 1) * itemsPerPage,
-      page * itemsPerPage
-    );
-
-    set({ 
-      query,
-      filteredArtifacts, 
-      currentPage: page,
-      totalPages,
-      paginatedArtifacts
-    });
   },
 
   preloadAdjacentPages: () => {
@@ -144,7 +119,9 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
   setUpdateUrl: (updateUrlFunction) => set({ updateUrl: updateUrlFunction }),
 
   handlePageChange: (page) => {
-    get().handleSearch(get().query, page);
+    useArtifactPaginationStore.getState().setCurrentPage(page);
+    const filteredArtifacts = useArtifactFilterStore.getState().filteredArtifacts;
+    useArtifactPaginationStore.getState().updatePagination(filteredArtifacts);
     get().updateUrl(page);
     get().preloadAdjacentPages();
   },
