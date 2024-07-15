@@ -7,6 +7,7 @@ import { fetchSingleArtifact, fetchAllArtifacts } from '@/app/lib/data/artifact-
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { handleTagUpdate } from '../actions/tag-actions';
 import { getCachedArtifacts } from '../data/cached-artifact-data';
+import { getArtifactThumbnail } from '../utils-client';
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ type ArtifactStore = {
   searchArtifacts: (query: string) => void;
   updateArtifactTags: (artifactId: string, tags: Tag[]) => Promise<void>;
   setCurrentPage: (page: number) => void;
+  preloadAdjacentPages: () => void;
 };
 
 export const useArtifactStore = create<ArtifactStore>((set, get) => ({
@@ -92,6 +94,24 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
     });
   },
 
+  preloadAdjacentPages: () => {
+    const { filteredArtifacts, currentPage, itemsPerPage } = get();
+    const prevStart = Math.max(0, (currentPage - 2) * itemsPerPage);
+    const nextEnd = Math.min(filteredArtifacts.length, (currentPage + 1) * itemsPerPage);
+    
+    const adjacentArtifacts = filteredArtifacts.slice(prevStart, nextEnd);
+
+    console.log(`Preloading ${adjacentArtifacts.length} artifacts for adjacent pages`);
+    
+    adjacentArtifacts.forEach(artifact => {
+      const thumbnailData = getArtifactThumbnail(artifact);
+      const img = new Image();
+      img.src = thumbnailData.src;
+      img.width = thumbnailData.width;
+      img.height = thumbnailData.height;
+    });
+  },
+
   updateUrl: () => {}, // Initialize with a no-op function
 
   setUpdateUrl: (updateUrlFunction) => set({ updateUrl: updateUrlFunction }),
@@ -99,6 +119,7 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
   handlePageChange: (page) => {
     get().handleSearch(get().query, page);
     get().updateUrl(page);
+    get().preloadAdjacentPages();
   },
 
   updateArtifact: async (id, formData) => {

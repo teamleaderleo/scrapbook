@@ -32,7 +32,8 @@ export function ArtifactsTable({
     handlePageChange,
     deleteArtifact,
     updateArtifactTags,
-    setUpdateUrl
+    setUpdateUrl,
+    preloadAdjacentPages,
   } = useArtifactStore();
 
   const { allTags, ensureTagsExist } = useTagStore();
@@ -43,7 +44,8 @@ export function ArtifactsTable({
   
   useEffect(() => {
     initializeArtifacts(initialArtifacts);
-  }, [initialArtifacts, initializeArtifacts]);
+    preloadAdjacentPages();
+  }, [initialArtifacts, initializeArtifacts, preloadAdjacentPages]);
 
   useEffect(() => {
     const query = searchParams.get('query') || '';
@@ -83,8 +85,6 @@ useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentPage, totalPages, handlePageChange]);
-
-  useImagePreloader(paginatedArtifacts);
 
   return (
     <div className="mt-6 flow-root">

@@ -18,7 +18,7 @@ export const ArtifactThumbnail: React.FC<ArtifactThumbnailProps> = ({
   artifact, 
   contentIndex = 0, 
   size = 40,
-  priority = false,
+  priority = true,
   className = '',
 }) => {
   const [isLoading, setIsLoading] = useState(true);
