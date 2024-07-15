@@ -8,6 +8,7 @@ import { ADMIN_UUID } from '@/app/lib/constants';
 import { handleTagUpdate } from '../../actions/tag-actions';
 import { getCachedArtifacts } from '../../data/cached-artifact-data';
 import { getArtifactThumbnail } from '../../utils-client';
+import { useCoreArtifactStore } from './core-artifact-store';
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,8 @@ type ArtifactStore = {
   
   setCurrentPage: (page: number) => void;
   preloadAdjacentPages: () => void;
+
+  initializeCoreStore: () => void;
 };
 
 export const useArtifactStore = create<ArtifactStore>((set, get) => ({
@@ -72,6 +75,16 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
     });
     set({ artifacts, filteredArtifacts: artifacts, fuse });
     get().handleSearch(get().query, get().currentPage);
+  },
+  initializeCoreStore: () => {
+    const coreStore = useCoreArtifactStore.getState();
+    set({
+      artifacts: coreStore.artifacts,
+      currentArtifact: coreStore.currentArtifact,
+      isLoading: coreStore.isLoading,
+      error: coreStore.error,
+      fetchOptions: coreStore.fetchOptions,
+    });
   },
   fetchArtifacts: async () => {
     const artifacts = await queryClient.fetchQuery(
@@ -131,77 +144,16 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
   },
 
   updateArtifact: async (id, formData) => {
-    set({ isLoading: true, error: null });
-    try {
-      const result = await updateArtifact(id, ADMIN_UUID, {}, formData);
-      if (result.message === 'Artifact updated successfully') {
-        await queryClient.invalidateQueries(['artifacts']);
-        const updatedArtifact = await fetchSingleArtifact(ADMIN_UUID, id, get().fetchOptions);
-        if (updatedArtifact) {
-          set((state) => {
-            const updatedArtifacts = state.artifacts.map((a) => a.id === id ? updatedArtifact : a);
-            return {
-              artifacts: updatedArtifacts,
-              filteredArtifacts: updatedArtifacts,
-              isLoading: false
-            };
-          });
-        } else {
-          throw new Error('Failed to fetch updated artifact');
-        }
-      } else {
-        throw new Error(result.message || 'Failed to update artifact');
-      }
-    } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'An unknown error occurred', isLoading: false });
-    }
+    await useCoreArtifactStore.getState().updateArtifact(id, formData);
+    get().initializeCoreStore();
   },
   deleteArtifact: async (id) => {
-    set({ isLoading: true, error: null });
-    try {
-      const result = await deleteArtifact(id, ADMIN_UUID);
-      if (result.success) {
-        await queryClient.invalidateQueries(['artifacts']);
-        set((state) => {
-          const updatedArtifacts = state.artifacts.filter((a) => a.id !== id);
-          return {
-            artifacts: updatedArtifacts,
-            filteredArtifacts: updatedArtifacts,
-            isLoading: false
-          };
-        });
-      } else {
-        throw new Error(result.message || 'Failed to delete artifact');
-      }
-    } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'An unknown error occurred', isLoading: false });
-    }
+    await useCoreArtifactStore.getState().deleteArtifact(id);
+    get().initializeCoreStore();
   },
   addArtifact: async (formData) => {
-    set({ isLoading: true, error: null });
-    try {
-      const result = await createArtifact(ADMIN_UUID, formData);
-      if (result.artifactId) {
-        await queryClient.invalidateQueries(['artifacts']);
-        const newArtifact = await fetchSingleArtifact(ADMIN_UUID, result.artifactId, get().fetchOptions);
-        if (newArtifact) {
-          set((state) => {
-            const updatedArtifacts = [...state.artifacts, newArtifact];
-            return {
-              artifacts: updatedArtifacts,
-              filteredArtifacts: updatedArtifacts,
-              isLoading: false
-            };
-          });
-        } else {
-          throw new Error('Failed to fetch new artifact');
-        }
-      } else {
-        throw new Error(result.message || 'Failed to create artifact');
-      }
-    } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'An unknown error occurred', isLoading: false });
-    }
+    await useCoreArtifactStore.getState().addArtifact(formData);
+    get().initializeCoreStore();
   },
   setCurrentPage: (page) => set({ currentPage: page }),
   setFetchOptions: (options) => set({ fetchOptions: options }),
