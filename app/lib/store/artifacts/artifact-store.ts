@@ -66,14 +66,21 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
   isLoading: false,
   error: null,
   fetchOptions: { includeTags: true, includeContents: true, includeProjects: true },
-  setArtifacts: (artifacts) => set({ artifacts }),
+  setArtifacts: (artifacts) => {
+    useCoreArtifactStore.getState().setArtifacts(artifacts);
+    useCoreArtifactStore.getState().setFilteredArtifacts(artifacts);
+    set({ artifacts });
+    get().initializeFuse();
+  },
   setCurrentArtifact: (artifact) => set({ currentArtifact: artifact }),
   initializeArtifacts: (artifacts) => {
+    useCoreArtifactStore.getState().setArtifacts(artifacts);
+    useCoreArtifactStore.getState().setFilteredArtifacts(artifacts);
     const fuse = new Fuse(artifacts, {
       keys: ['name', 'description', 'tags.name', 'contents.content'],
       threshold: 0.3,
     });
-    set({ artifacts, filteredArtifacts: artifacts, fuse });
+    set({ fuse });
     get().handleSearch(get().query, get().currentPage);
   },
   initializeCoreStore: () => {
@@ -87,11 +94,10 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
     });
   },
   fetchArtifacts: async () => {
-    const artifacts = await queryClient.fetchQuery(
-      ['artifacts', get().fetchOptions],
-      () => getCachedArtifacts(ADMIN_UUID, get().fetchOptions)
-    );
-    set({ artifacts, filteredArtifacts: artifacts, isLoading: false });
+    await useCoreArtifactStore.getState().fetchArtifacts();
+    const { artifacts, filteredArtifacts, isLoading, error } = useCoreArtifactStore.getState();
+    set({ artifacts, filteredArtifacts, isLoading, error });
+    get().initializeFuse();
   },
 
   handleSearch: (query, page) => {
