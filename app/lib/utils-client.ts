@@ -1,4 +1,8 @@
 import { Artifact, ArtifactContent } from './definitions';
+import { StaticImageData } from 'next/image';
+import defaultPlaceholder from '../../public/placeholder-default.png';
+import textPlaceholder from '../../public/placeholder-text.png';
+import filePlaceholder from '../../public/placeholder-file.png';
 
 export const formatDateToLocal = (
   dateStr: string,
@@ -69,24 +73,23 @@ export const toBase64 = (str: string) =>
 export const getBlurDataUrl = (w: number, h: number) => 
   `data:image/svg+xml;base64,${toBase64(shimmer(w, h))}`;
 
-export const getArtifactThumbnail = (artifact: Artifact, index: number = 0): string => {
+export const getArtifactThumbnail = (artifact: Artifact, index: number = 0): StaticImageData => {
   if (!artifact || !artifact.contents || artifact.contents.length === 0) {
-    return '/placeholder-default.png';
+    return defaultPlaceholder;
   }
   const content: ArtifactContent = artifact.contents[index];
   if (!content) {
-    return '/placeholder-default.png';
+    return defaultPlaceholder;
   }
 
   switch (content.type) {
     case 'image':
-      return content.content || '/placeholder-default.png';
+      return content.content ? { src: content.content, height: 40, width: 40 } : defaultPlaceholder;
     case 'text':
-      return '/placeholder-text.png';
+      return textPlaceholder;
     case 'file':
-      return '/placeholder-file.png';
+      return filePlaceholder;
     default:
-      return '/placeholder-default.png';
+      return defaultPlaceholder;
   }
 };
-

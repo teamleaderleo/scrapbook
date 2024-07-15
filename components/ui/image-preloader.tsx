@@ -5,8 +5,11 @@ import { getArtifactThumbnail } from '@/app/lib/utils-client';
 export const useImagePreloader = (artifacts: ArtifactWithRelations[]) => {
   useEffect(() => {
     artifacts.forEach((artifact) => {
+      const thumbnailData = getArtifactThumbnail(artifact);
       const img = new Image();
-      img.src = getArtifactThumbnail(artifact);
+      img.src = thumbnailData.src;
+      img.width = thumbnailData.width;
+      img.height = thumbnailData.height;
     });
   }, [artifacts]);
 };
