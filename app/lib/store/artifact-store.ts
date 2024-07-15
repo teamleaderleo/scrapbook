@@ -13,20 +13,31 @@ const queryClient = new QueryClient();
 type ArtifactStore = {
   artifacts: ArtifactWithRelations[];
   filteredArtifacts: ArtifactWithRelations[];
+  paginatedArtifacts: ArtifactWithRelations[];
   currentPage: number;
   itemsPerPage: number;
+  totalPages: number;
+  query: string;
+  fuse: Fuse<ArtifactWithRelations> | null;
+
   isLoading: boolean;
   error: string | null;
   fetchOptions: FetchOptions;
-  setArtifacts: (artifacts: ArtifactWithRelations[]) => void;
 
+  initializeArtifacts: (artifacts: ArtifactWithRelations[]) => void;
+
+  updateUrl: (page: number) => void;
+  setUpdateUrl: (updateUrlFunction: (page: number) => void) => void;
+  handleSearch: (query: string, page: number) => void;
+  handlePageChange: (page: number) => void;
+  
   fetchArtifacts: () => Promise<void>;
   updateArtifact: (id: string, formData: FormData) => Promise<void>;
   deleteArtifact: (id: string) => Promise<void>;
   addArtifact: (formData: FormData) => Promise<void>;
 
   setFetchOptions: (options: FetchOptions) => void;
-  fuse: Fuse<ArtifactWithRelations> | null;
+
   initializeFuse: () => void;
   searchArtifacts: (query: string) => void;
   updateArtifactTags: (artifactId: string, tags: Tag[]) => Promise<void>;
@@ -36,12 +47,22 @@ type ArtifactStore = {
 export const useArtifactStore = create<ArtifactStore>((set, get) => ({
   artifacts: [],
   filteredArtifacts: [],
+  paginatedArtifacts: [],
   currentPage: 1,
   itemsPerPage: 6,
+  totalPages: 0,
+  query: '',
   isLoading: false,
   error: null,
   fetchOptions: { includeTags: true, includeContents: true, includeProjects: true },
-  setArtifacts: (artifacts) => set({ artifacts, filteredArtifacts: artifacts }),
+  initializeArtifacts: (artifacts) => {
+    const fuse = new Fuse(artifacts, {
+      keys: ['name', 'description', 'tags.name', 'contents.content'],
+      threshold: 0.3,
+    });
+    set({ artifacts, filteredArtifacts: artifacts, fuse });
+    get().handleSearch(get().query, get().currentPage);
+  },
   fetchArtifacts: async () => {
     const artifacts = await queryClient.fetchQuery(
       ['artifacts', get().fetchOptions],
@@ -49,6 +70,37 @@ export const useArtifactStore = create<ArtifactStore>((set, get) => ({
     );
     set({ artifacts, filteredArtifacts: artifacts, isLoading: false });
   },
+
+  handleSearch: (query, page) => {
+    const { fuse, artifacts, itemsPerPage } = get();
+    const filteredArtifacts = query && fuse 
+      ? fuse.search(query).map(result => result.item)
+      : artifacts;
+    
+    const totalPages = Math.ceil(filteredArtifacts.length / itemsPerPage);
+    const paginatedArtifacts = filteredArtifacts.slice(
+      (page - 1) * itemsPerPage,
+      page * itemsPerPage
+    );
+
+    set({ 
+      query,
+      filteredArtifacts, 
+      currentPage: page,
+      totalPages,
+      paginatedArtifacts
+    });
+  },
+
+  updateUrl: () => {}, // Initialize with a no-op function
+
+  setUpdateUrl: (updateUrlFunction) => set({ updateUrl: updateUrlFunction }),
+
+  handlePageChange: (page) => {
+    get().handleSearch(get().query, page);
+    get().updateUrl(page);
+  },
+
   updateArtifact: async (id, formData) => {
     set({ isLoading: true, error: null });
     try {

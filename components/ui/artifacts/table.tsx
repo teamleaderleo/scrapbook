@@ -23,50 +23,53 @@ export function ArtifactsTable({
   initialArtifacts: ArtifactWithRelations[];
   accountId: string;
 }) {
-  const { artifacts, filteredArtifacts, setArtifacts, deleteArtifact, updateArtifactTags, searchArtifacts, currentPage, setCurrentPage, itemsPerPage } = useArtifactStore();
+  const { 
+    paginatedArtifacts,
+    currentPage,
+    totalPages,
+    initializeArtifacts,
+    handleSearch,
+    handlePageChange,
+    deleteArtifact,
+    updateArtifactTags,
+    setUpdateUrl
+  } = useArtifactStore();
+
   const { allTags, ensureTagsExist } = useTagStore();
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
-  const query = searchParams.get('query') || '';
+  useEffect(() => {
+    initializeArtifacts(initialArtifacts);
+  }, [initialArtifacts, initializeArtifacts]);
 
   useEffect(() => {
-    setArtifacts(initialArtifacts);
-  }, [initialArtifacts, setArtifacts]);
-
-  useEffect(() => {
-    searchArtifacts(query);
-  }, [query, searchArtifacts]);
-
-  useEffect(() => {
+    const query = searchParams.get('query') || '';
     const page = Number(searchParams.get('page')) || 1;
-    setCurrentPage(page);
-  }, [searchParams, setCurrentPage]);
-
-  const paginatedArtifacts = useMemo(() => {
-    return filteredArtifacts.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    );
-  }, [filteredArtifacts, currentPage, itemsPerPage]);
-
-  const totalPages = Math.ceil(filteredArtifacts.length / itemsPerPage);
-
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('page', page.toString());
-    
-    // Update the URL without a page reload
-    window.history.pushState({}, '', `${pathname}?${params.toString()}`);
-  }, [searchParams, pathname, setCurrentPage]);
+    handleSearch(query, page);
+  }, [searchParams, handleSearch]);
 
   const handleTagsChange = async (artifactId: string, newTags: Tag[]) => {
     const tagNames = newTags.map(tag => tag.name);
     const tags = await ensureTagsExist(ADMIN_UUID, tagNames);
     await updateArtifactTags(artifactId, tags);
   };
+  
+useEffect(() => {
+    setUpdateUrl((page: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('page', page.toString());
+      const newUrl = `${pathname}?${params.toString()}`;
+
+      // Instant URL update
+      window.history.pushState({}, '', newUrl);
+
+      // Update Next.js internal state
+      router.push(newUrl, undefined);
+    });
+  }, [setUpdateUrl, searchParams, pathname, router]);
   
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {

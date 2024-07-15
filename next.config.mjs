@@ -15,8 +15,6 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
-    domains: [`${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`, 
-      `${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}`],
   },
 };
 

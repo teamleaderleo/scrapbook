@@ -1,7 +1,9 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { Artifact, ArtifactContent } from '@/app/lib/definitions';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Artifact } from '@/app/lib/definitions';
 import { getArtifactThumbnail } from '@/app/lib/utils-client';
 
 interface ArtifactThumbnailProps {
@@ -19,17 +21,23 @@ export const ArtifactThumbnail: React.FC<ArtifactThumbnailProps> = ({
   priority = false,
   className = '',
 }) => {
-  
+  const [isLoading, setIsLoading] = useState(true);
   const thumbnailUrl = getArtifactThumbnail(artifact, contentIndex);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
-      className={`relative overflow-hidden ${className}`}
-      style={{ width: size, height: size }}
+    <div 
     >
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+            className={`relative overflow-hidden ${className}`}
+            style={{ width: size, height: size }}
+          />
+        )}
+      </AnimatePresence>
       <Image
         src={thumbnailUrl}
         alt={`Thumbnail for ${artifact.name}`}
@@ -37,8 +45,9 @@ export const ArtifactThumbnail: React.FC<ArtifactThumbnailProps> = ({
         sizes={`${size}px`}
         style={{ objectFit: "cover" }}
         priority={priority}
-        className="rounded-full"
+        className={`rounded-full`}
+        onLoad={() => setIsLoading(true)}
       />
-    </motion.div>
+    </div>
   );
 };
