@@ -12,6 +12,7 @@ export interface FetchOptions { // idk why we'd want interfaces over types
   includeTags?: boolean;
   includeContents?: boolean;
   includeProjects?: boolean;
+  includeArtifacts?: boolean;
 }
 
 export type Tag = {

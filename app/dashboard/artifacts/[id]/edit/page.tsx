@@ -1,10 +1,10 @@
 import Form from '@/components/ui/artifacts/edit-artifact-form';
 import Breadcrumbs from '@/components/ui/breadcrumbs';
-import { fetchProjects } from '@/app/lib/data/data';
 import { fetchSingleArtifact } from '@/app/lib/data/artifact-data';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { ADMIN_UUID } from '@/app/lib/constants';
+import { fetchAllProjects } from '@/app/lib/data/project-data';
 
 export const metadata: Metadata = {
   title: 'Edit Artifact',
@@ -14,7 +14,7 @@ export default async function Page({ params }: { params: { id: string } }) {
   const id = params.id;
   const [artifact, projects] = await Promise.all([
     fetchSingleArtifact(ADMIN_UUID, id),
-    fetchProjects(ADMIN_UUID),
+    fetchAllProjects(ADMIN_UUID),
   ]);
 
   if (!artifact) {

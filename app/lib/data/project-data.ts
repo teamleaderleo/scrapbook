@@ -1,163 +1,213 @@
+'use server';
+
+import { eq, and, or, ilike, sql, desc } from 'drizzle-orm';
+import { db } from '../db/db.server';
+import { projects, projectTags, tags, projectArtifactLinks, artifacts, artifactContents } from '../db/schema';
 import { ProjectWithRelations, FetchOptions } from '../definitions';
 
-export async function fetchSingleProject(accountId: string, id: string) {
-  try {
-    const data = await sql<ProjectWithRelations>`
-      SELECT
-        p.id,
-        p.account_id,
-        p.name,
-        p.description,
-        p.created_at,
-        p.updated_at,
-        p.status,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', t.id,
-            'account_id', t.account_id,
-            'name', t.name
-          )) FILTER (WHERE t.id IS NOT NULL),
-          '[]'
-        ) AS tags,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', a.id,
-            'name', a.name,
-            'contents', (
-              SELECT jsonb_agg(jsonb_build_object(
-                'id', ac.id,
-                'type', ac.type,
-                'content', ac.content,
-                'created_at', ac.created_at
-              ))
-              FROM artifact_content ac
-              WHERE ac.artifact_id = a.id AND ac.account_id = ${accountId}
-            )
-          )) FILTER (WHERE a.id IS NOT NULL),
-          '[]'
-        ) AS artifacts
-      FROM project p
-      LEFT JOIN project_tag pt ON p.id = pt.project_id AND pt.account_id = ${accountId}
-      LEFT JOIN tag t ON pt.tag_id = t.id AND t.account_id = ${accountId}
-      LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
-      LEFT JOIN artifact a ON pal.artifact_id = a.id
-      WHERE p.id = ${id} AND p.account_id = ${accountId}
-      GROUP BY p.id`;
+function buildProjectSelectObject(options: FetchOptions = {}): Record<string, any> {
+  const selectObject: Record<string, any> = {
+    id: projects.id,
+    accountId: projects.accountId,
+    name: projects.name,
+    description: projects.description,
+    createdAt: projects.createdAt,
+    updatedAt: projects.updatedAt,
+    status: projects.status,
+  };
 
-    return data.rows[0];
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch project.');
+  if (options.includeTags) {
+    selectObject.tags = sql<string>`
+      COALESCE(
+        jsonb_agg(DISTINCT jsonb_build_object(
+          'id', ${tags.id},
+          'accountId', ${tags.accountId},
+          'name', ${tags.name}
+        )) FILTER (WHERE ${tags.id} IS NOT NULL),
+        '[]'
+      )
+    `.as('tags');
   }
+
+  if (options.includeArtifacts) {
+    selectObject.artifacts = sql<string>`
+      COALESCE(
+        jsonb_agg(DISTINCT jsonb_build_object(
+          'id', ${artifacts.id},
+          'name', ${artifacts.name},
+          'contents', (
+            SELECT jsonb_agg(jsonb_build_object(
+              'id', ${artifactContents.id},
+              'type', ${artifactContents.type},
+              'content', ${artifactContents.content},
+              'createdAt', ${artifactContents.createdAt}
+            ))
+            FROM ${artifactContents}
+            WHERE ${artifactContents.artifactId} = ${artifacts.id} 
+              AND ${artifactContents.accountId} = ${projects.accountId}
+          )
+        )) FILTER (WHERE ${artifacts.id} IS NOT NULL),
+        '[]'
+      )
+    `.as('artifacts');
+  }
+
+  return selectObject;
 }
 
+export async function fetchSingleProject(
+  accountId: string,
+  projectId: string,
+  options: FetchOptions = {}
+): Promise<ProjectWithRelations | null> {
+  const selectObject = buildProjectSelectObject(options);
 
-export async function fetchLatestProjects(accountId: string, limit: number = 5) {
-  try {
-    const data = await sql<ProjectWithRelations>`
-      SELECT
-        p.id,
-        p.account_id,
-        p.name,
-        p.description,
-        p.created_at,
-        p.updated_at,
-        p.status,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', t.id,
-            'account_id', t.account_id,
-            'name', t.name
-          )) FILTER (WHERE t.id IS NOT NULL),
-          '[]'
-        ) AS tags,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', a.id,
-            'name', a.name,
-            'contents', (
-              SELECT jsonb_agg(jsonb_build_object(
-                'id', ac.id,
-                'type', ac.type,
-                'content', ac.content,
-                'created_at', ac.created_at
-              ))
-              FROM artifact_content ac
-              WHERE ac.artifact_id = a.id AND ac.account_id = ${accountId}
-            )
-          )) FILTER (WHERE a.id IS NOT NULL),
-          '[]'
-        ) AS artifacts
-      FROM project p
-      LEFT JOIN project_tag pt ON p.id = pt.project_id AND pt.account_id = ${accountId}
-      LEFT JOIN tag t ON pt.tag_id = t.id AND t.account_id = ${accountId}
-      LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
-      LEFT JOIN artifact a ON pal.artifact_id = a.id
-      WHERE p.account_id = ${accountId}
-      GROUP BY p.id
-      ORDER BY p.updated_at DESC
-      LIMIT ${limit}`;
+  const query = db
+    .select(selectObject)
+    .from(projects)
+    .where(and(eq(projects.accountId, accountId), eq(projects.id, projectId)));
 
-    return data.rows;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch latest projects.');
+  if (options.includeTags) {
+    query.leftJoin(projectTags, eq(projects.id, projectTags.projectId))
+         .leftJoin(tags, eq(projectTags.tagId, tags.id));
   }
+  if (options.includeArtifacts) {
+    query.leftJoin(projectArtifactLinks, eq(projects.id, projectArtifactLinks.projectId))
+         .leftJoin(artifacts, eq(projectArtifactLinks.artifactId, artifacts.id));
+  }
+
+  const result = await query.groupBy(projects.id);
+
+  if (result.length === 0) {
+    return null;
+  }
+
+  return parseProjectResult(result[0], options);
 }
 
-export async function fetchAllProjects(accountId: string, query: string = '') {
-  try {
-    const data = await sql<ProjectWithRelations>`
-      SELECT
-        p.id,
-        p.account_id,
-        p.name,
-        p.description,
-        p.created_at,
-        p.updated_at,
-        p.status,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', t.id,
-            'account_id', t.account_id,
-            'name', t.name
-          )) FILTER (WHERE t.id IS NOT NULL),
-          '[]'
-        ) AS tags,
-        COALESCE(
-          jsonb_agg(DISTINCT jsonb_build_object(
-            'id', a.id,
-            'name', a.name,
-            'contents', (
-              SELECT jsonb_agg(jsonb_build_object(
-                'id', ac.id,
-                'type', ac.type,
-                'content', ac.content,
-                'created_at', ac.created_at
-              ))
-              FROM artifact_content ac
-              WHERE ac.artifact_id = a.id AND ac.account_id = ${accountId}
-            )
-          )) FILTER (WHERE a.id IS NOT NULL),
-          '[]'
-        ) AS artifacts
-      FROM project p
-      LEFT JOIN project_tag pt ON p.id = pt.project_id AND pt.account_id = ${accountId}
-      LEFT JOIN tag t ON pt.tag_id = t.id AND t.account_id = ${accountId}
-      LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
-      LEFT JOIN artifact a ON pal.artifact_id = a.id
-      WHERE
-        p.account_id = ${accountId} AND
-        (p.name ILIKE ${`%${query}%`} OR
-        p.description ILIKE ${`%${query}%`} OR
-        t.name ILIKE ${`%${query}%`} OR
-        a.name ILIKE ${`%${query}%`})
-      GROUP BY p.id
-      ORDER BY p.updated_at DESC`;
+export async function fetchLatestProjects(
+  accountId: string,
+  limit: number = 5,
+  options: FetchOptions = {}
+): Promise<ProjectWithRelations[]> {
+  const selectObject = buildProjectSelectObject(options);
 
-    return data.rows;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch projects.');
+  const query = db
+    .select(selectObject)
+    .from(projects)
+    .where(eq(projects.accountId, accountId));
+
+  if (options.includeTags) {
+    query.leftJoin(projectTags, eq(projects.id, projectTags.projectId))
+         .leftJoin(tags, eq(projectTags.tagId, tags.id));
   }
+  if (options.includeArtifacts) {
+    query.leftJoin(projectArtifactLinks, eq(projects.id, projectArtifactLinks.projectId))
+         .leftJoin(artifacts, eq(projectArtifactLinks.artifactId, artifacts.id));
+  }
+
+  const result = await query
+    .groupBy(projects.id)
+    .orderBy(desc(projects.updatedAt))
+    .limit(limit);
+
+  return result.map(project => parseProjectResult(project, options));
+}
+
+export async function fetchAllProjects(
+  accountId: string,
+  options: FetchOptions = {}
+): Promise<ProjectWithRelations[]> {
+  const selectObject = buildProjectSelectObject(options);
+
+  const query = db
+    .select(selectObject)
+    .from(projects)
+    .where(eq(projects.accountId, accountId));
+
+  if (options.includeTags) {
+    query.leftJoin(projectTags, eq(projects.id, projectTags.projectId))
+         .leftJoin(tags, eq(projectTags.tagId, tags.id));
+  }
+  if (options.includeArtifacts) {
+    query.leftJoin(projectArtifactLinks, eq(projects.id, projectArtifactLinks.projectId))
+         .leftJoin(artifacts, eq(projectArtifactLinks.artifactId, artifacts.id));
+  }
+
+  const result = await query
+    .groupBy(projects.id)
+    .orderBy(desc(projects.updatedAt));
+
+  return result.map(project => parseProjectResult(project, options));
+}
+
+export async function searchProjects(
+  accountId: string,
+  query: string,
+  options: FetchOptions = {}
+): Promise<ProjectWithRelations[]> {
+  const selectObject = buildProjectSelectObject(options);
+
+  const baseQuery = db
+    .select(selectObject)
+    .from(projects)
+    .where(and(
+      eq(projects.accountId, accountId),
+      or(
+        ilike(projects.name, `%${query}%`),
+        ilike(projects.description, `%${query}%`)
+      )
+    ));
+
+  if (options.includeTags) {
+    baseQuery.leftJoin(projectTags, eq(projects.id, projectTags.projectId))
+             .leftJoin(tags, eq(projectTags.tagId, tags.id));
+  }
+  if (options.includeArtifacts) {
+    baseQuery.leftJoin(projectArtifactLinks, eq(projects.id, projectArtifactLinks.projectId))
+             .leftJoin(artifacts, eq(projectArtifactLinks.artifactId, artifacts.id));
+  }
+
+  const result = await baseQuery
+    .groupBy(projects.id)
+    .orderBy(desc(projects.updatedAt));
+
+  return result.map(project => parseProjectResult(project, options));
+}
+
+function parseProjectResult(project: any, options: FetchOptions): ProjectWithRelations {
+  const parsedProject: ProjectWithRelations = {
+    id: project.id,
+    accountId: project.accountId,
+    name: project.name,
+    description: project.description,
+    createdAt: new Date(project.createdAt),
+    updatedAt: new Date(project.updatedAt),
+    status: project.status,
+    tags: project.tags,
+    artifacts: project.artifacts,
+  };
+
+  if (options.includeTags && Array.isArray(project.tags)) {
+    parsedProject.tags = project.tags.map((tag: any) => ({
+      id: tag.id,
+      accountId: tag.accountId,
+      name: tag.name,
+    }));
+  }
+
+  if (options.includeArtifacts && Array.isArray(project.artifacts)) {
+    parsedProject.artifacts = project.artifacts.map((artifact: any) => ({
+      id: artifact.id,
+      name: artifact.name,
+      contents: Array.isArray(artifact.contents) ? artifact.contents.map((content: any) => ({
+        id: content.id,
+        type: content.type,
+        content: content.content,
+        createdAt: new Date(content.createdAt),
+      })) : [],
+    }));
+  }
+
+  return parsedProject;
 }
