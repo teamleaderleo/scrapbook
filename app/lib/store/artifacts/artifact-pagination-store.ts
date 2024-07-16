@@ -1,3 +1,5 @@
+// This store manages pagination.
+
 import { create } from 'zustand';
 import { ArtifactWithRelations } from '@/app/lib/definitions';
 import { eventBus, ARTIFACTS_UPDATED, FILTERED_ARTIFACTS_UPDATED } from '../../event-bus';
