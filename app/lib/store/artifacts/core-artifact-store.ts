@@ -34,9 +34,13 @@ export const useArtifacts = () => {
     () => getCachedArtifacts(ADMIN_UUID, fetchOptions),
     {
       staleTime: 5 * 60 * 1000, // 5 minutes
+      cacheTime: 10 * 60 * 1000, // 10 minutes
       onSuccess: (data) => {
         eventBus.emit(ARTIFACTS_UPDATED, data);
       },
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
     }
   );
 };
