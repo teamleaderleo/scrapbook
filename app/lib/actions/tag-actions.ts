@@ -41,13 +41,6 @@ async function updateTagsCore(tx: any, accountId: string, itemId: string, newTag
   const tagsTable = isProject ? projectTags : artifactTags;
   const itemColumn = isProject ? projectTags.projectId : artifactTags.artifactId;
 
-  // Remove existing tags
-  await tx.delete(tagsTable)
-    .where(and(
-      eq(tagsTable.accountId, accountId),
-      eq(itemColumn, itemId)
-    ));
-
   // Add new tags
   for (const tagName of newTags) {
     const existingTag = await tx.select().from(tags)
