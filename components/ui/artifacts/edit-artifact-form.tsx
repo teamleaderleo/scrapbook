@@ -17,7 +17,7 @@ export default function EditArtifactForm({
   projects: BaseProject[];
 }) {
   const router = useRouter();
-  const { queryArtifacts, updateArtifact } = useArtifactQueries();
+  const { queryArtifacts, updateArtifact, isLoading } = useArtifactQueries();
   const { allTags, fetchAllTags, ensureTagsExist } = useTagStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
@@ -26,11 +26,18 @@ export default function EditArtifactForm({
   const artifact = queryArtifacts?.find(a => a.id === artifactId);
 
   useEffect(() => {
-    if (!artifact) {
+    fetchAllTags(ADMIN_UUID);
+  }, [fetchAllTags]);
+
+  useEffect(() => {
+    if (!isLoading && !artifact) {
       router.replace('/dashboard/artifacts');
     }
-    fetchAllTags(ADMIN_UUID);
-  }, [artifact, artifactId, router, fetchAllTags]);
+  }, [artifact, artifactId, router, isLoading]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   if (!artifact) {
     return null;

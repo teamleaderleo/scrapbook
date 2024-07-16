@@ -32,7 +32,7 @@ export default async function Page({ params }: { params: { id: string } }) {
           },
         ]}
       />
-      <Form artifact={artifact} projects={projects} />
+      <Form artifactId={artifact.id} projects={projects} />
     </main>
   );
 }
