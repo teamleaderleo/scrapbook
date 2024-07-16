@@ -68,30 +68,6 @@ export async function fetchProject(accountId: string, id: string) {
   }
 }
 
-const ITEMS_PER_PAGE = 6;
-export async function fetchProjectsPages(accountId: string, query: string = '') {
-  try {
-    const count = await sql`
-      SELECT COUNT(DISTINCT p.id)
-      FROM project p
-      LEFT JOIN project_tag pt ON p.id = pt.project_id AND pt.account_id = ${accountId}
-      LEFT JOIN tag t ON pt.tag_id = t.id AND t.account_id = ${accountId}
-      LEFT JOIN project_artifact_link pal ON p.id = pal.project_id AND pal.account_id = ${accountId}
-      LEFT JOIN artifact a ON pal.artifact_id = a.id
-      WHERE
-        p.account_id = ${accountId} AND
-        (p.name ILIKE ${`%${query}%`} OR
-        p.description ILIKE ${`%${query}%`} OR
-        t.name ILIKE ${`%${query}%`} OR
-        a.name ILIKE ${`%${query}%`})`;
-
-    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
-    return totalPages;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of projects.');
-  }
-}
 
 export async function fetchLatestProjects(accountId: string, limit: number = 5) {
   try {
@@ -234,43 +210,6 @@ export async function fetchCardData(accountId: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch card data.');
-  }
-}
-
-export async function fetchTagsPages(accountId: string, query: string = '') {
-  try {
-    const count = await sql`
-      SELECT COUNT(*)
-      FROM tag
-      WHERE account_id = ${accountId} AND name ILIKE ${`%${query}%`}
-    `;
-
-    const totalPages = Math.ceil(Number(count.rows[0].count) / ITEMS_PER_PAGE);
-    return totalPages;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of tags.');
-  }
-}
-
-export async function fetchTags(accountId: string, query: string = '', currentPage: number = 1) {
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-
-  try {
-    const tags = await sql<Tag>`
-      SELECT t.id, t.account_id, t.name,
-        (SELECT COUNT(*) FROM project_tag pt WHERE pt.tag_id = t.id) as project_count,
-        (SELECT COUNT(*) FROM artifact_tag at WHERE at.tag_id = t.id) as artifact_count
-      FROM tag t
-      WHERE t.account_id = ${accountId} AND t.name ILIKE ${`%${query}%`}
-      ORDER BY t.name
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
-    `;
-
-    return tags.rows;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch tags.');
   }
 }
 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Tag } from '@/app/lib/definitions';
-import { createTag, updateTag, deleteTag, getTagUsage } from '@/app/lib/actions/tag-actions';
+import { createTag, updateTag, deleteTag, } from '@/app/lib/actions/tag-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 type TagUsage = {
@@ -122,16 +122,16 @@ export default function TagManagementTable({ initialTags }: { initialTags: Tag[]
 function TagUsage({ tagId }: { tagId: string }) {
   const [usage, setUsage] = useState<TagUsage>({ project_count: 0, artifact_count: 0 });
 
-  useEffect(() => {
-    async function fetchUsage() {
-      const usageData = await getTagUsage(ADMIN_UUID, tagId);
-      setUsage({
-        project_count: Number(usageData.projectCount),
-        artifact_count: Number(usageData.artifactCount)
-      });
-    }
-    fetchUsage();
-  }, [tagId]);
+  // useEffect(() => {
+  //   async function fetchUsage() {
+  //     const usageData = await getTagUsage(ADMIN_UUID, tagId);
+  //     setUsage({
+  //       project_count: Number(usageData.projectCount),
+  //       artifact_count: Number(usageData.artifactCount)
+  //     });
+  //   }
+  //   fetchUsage();
+  // }, [tagId]);
 
   return (
     <span>

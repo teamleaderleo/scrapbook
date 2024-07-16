@@ -43,7 +43,3 @@ export async function ensureTagsExist(accountId: string, tagNames: string[]): Pr
     return ensureTagsExistWithinTransaction(tx, accountId, tagNames);
   });
 }
-
-export async function getAllTags(accountId: string): Promise<Tag[]> {
-  return db.select().from(tags).where(eq(tags.accountId, accountId));
-}

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Tag } from '../definitions';
-import { createTag, updateTag, deleteTag, getAllTags } from '../actions/tag-actions';
+import { createTag, updateTag, deleteTag } from '../actions/tag-actions';
+import { fetchAllTags } from '../data/tag-data';
 
 interface TagStore {
   allTags: Tag[];
@@ -33,7 +34,7 @@ export const useTagStore = create<TagStore>((set, get) => ({
     }));
   },
   fetchAllTags: async (accountId) => {
-    const fetchedTags = await getAllTags(accountId);
+    const fetchedTags = await fetchAllTags(accountId);
     set({ allTags: fetchedTags });
   },
   ensureTagsExist: async (accountId, tagNames) => {
