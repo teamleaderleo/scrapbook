@@ -4,14 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BaseProject, ArtifactWithRelations, Tag } from '@/app/lib/definitions';
 import { ArtifactForm } from '@/components/ui/artifacts/artifact-form';
-import { suggestTags, suggestContentExtensions } from '@/app/lib/external/claude-utils';
-import { useArtifactQueries } from '@/app/lib/store/artifacts/use-artifact-queries';
+import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
 import { useTagStore } from '@/app/lib/store/tag-store';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 export default function CreateArtifactForm({ projects }: { projects: BaseProject[] }) {
   const router = useRouter();
-  const { addArtifact } = useArtifactQueries();
+  const { addArtifact, getAISuggestions } = useArtifacts();
   const { allTags, fetchAllTags, ensureTagsExist } = useTagStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
@@ -49,10 +48,8 @@ export default function CreateArtifactForm({ projects }: { projects: BaseProject
     const description = (document.getElementById('description') as HTMLTextAreaElement)?.value || '';
     const content = (document.querySelector('textarea[name^="content-"]') as HTMLTextAreaElement)?.value || '';
     
-    const tags = await suggestTags(`${name} ${description} ${content}`);
+    const { tags, extensions } = await getAISuggestions(name, description, content);
     setSuggestedTags(tags);
-    
-    const extensions = await suggestContentExtensions(`${name} ${description} ${content}`);
     setSuggestedContentExtensions(extensions);
   };
 
