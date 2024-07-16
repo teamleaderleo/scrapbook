@@ -1,6 +1,6 @@
 'use server';
 
-import { eq, and, inArray, not } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { db } from '../db/db.server';
 import { Tag } from '../definitions';
 import { tags, projectTags, artifactTags } from '../db/schema';
@@ -14,46 +14,26 @@ export async function handleTagUpdateWithinTransaction(
   isProject: boolean
 ): Promise<void> {
   const tagsTable = isProject ? projectTags : artifactTags;
-  const itemColumn = isProject ? projectTags.projectId : artifactTags.artifactId;
+  const itemColumn = isProject ? 'projectId' : 'artifactId';
 
-  // Remove existing tags that are not in the new tags list
-  await tx.delete(tagsTable)
-    .where(and(
-      eq(tagsTable.accountId, accountId),
-      eq(itemColumn, itemId),
-      not(inArray(tagsTable.tagId, 
-        tx.select({ id: tags.id })
-          .from(tags)
-          .where(and(
-            eq(tags.accountId, accountId),
-            inArray(tags.name, newTags)
-          ))
-      ))
-    ));
-
-  // Add new tags
   for (const tagName of newTags) {
-    const [existingTag] = await tx.select().from(tags)
+    let [existingTag] = await tx.select().from(tags)
       .where(and(eq(tags.name, tagName), eq(tags.accountId, accountId)))
       .limit(1);
 
-    let tagId: string;
     if (!existingTag) {
-      tagId = uuid();
+      const tagId = uuid();
       await tx.insert(tags).values({ id: tagId, name: tagName, accountId });
-    } else {
-      tagId = existingTag.id;
+      existingTag = { id: tagId, name: tagName, accountId };
     }
 
     await tx.insert(tagsTable)
       .values({
         accountId,
-        [isProject ? 'projectId' : 'artifactId']: itemId,
-        tagId
+        [itemColumn]: itemId,
+        tagId: existingTag.id
       })
-      .onConflictDoNothing({
-        target: [tagsTable.accountId, itemColumn, tagsTable.tagId]
-      });
+      .onConflictDoNothing();
   }
 }
 
