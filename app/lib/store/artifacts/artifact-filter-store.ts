@@ -1,15 +1,15 @@
 import { create } from 'zustand';
 import Fuse from 'fuse.js';
 import { ArtifactWithRelations } from '@/app/lib/definitions';
-import { useCoreArtifactStore } from './core-artifact-store';
-import { useArtifactPaginationStore } from './artifact-pagination-store';
+import { eventBus, ARTIFACTS_UPDATED, FILTERED_ARTIFACTS_UPDATED } from '../../event-bus';
 
 type ArtifactFilterStore = {
   filteredArtifacts: ArtifactWithRelations[];
   query: string;
   fuse: Fuse<ArtifactWithRelations> | null;
+  allArtifacts: ArtifactWithRelations[];
 
-  initializeFuse: () => void;
+  initializeFuse: (artifacts: ArtifactWithRelations[]) => void;
   searchArtifacts: (query: string) => void;
 };
 
@@ -17,27 +17,31 @@ export const useArtifactFilterStore = create<ArtifactFilterStore>((set, get) => 
   filteredArtifacts: [],
   query: '',
   fuse: null,
+  allArtifacts: [],
 
-  initializeFuse: () => {
-    const artifacts = useCoreArtifactStore.getState().artifacts;
+  initializeFuse: (artifacts: ArtifactWithRelations[]) => {
     const options = {
       keys: ['name', 'description', 'tags.name', 'contents.content'],
       threshold: 0.3,
     };
-    set({ fuse: new Fuse(artifacts, options) });
+    const fuse = new Fuse(artifacts, options);
+    set({ fuse, filteredArtifacts: artifacts });
   },
 
-  searchArtifacts: (query) => {
-    const { fuse } = get();
-    const artifacts = useCoreArtifactStore.getState().artifacts;
+  searchArtifacts: (query: string) => {
+    const { fuse, allArtifacts } = get();
     if (!fuse) return;
     
     const results = query 
       ? fuse.search(query).map(result => result.item)
-      : artifacts;
+      : allArtifacts;
 
-    set({ filteredArtifacts: results, query });
-    useCoreArtifactStore.getState().setFilteredArtifacts(results);
-    useArtifactPaginationStore.getState().updatePagination(results);
+    set({ query, filteredArtifacts: results });
+    eventBus.emit(FILTERED_ARTIFACTS_UPDATED, results);
   },
 }));
+
+// Listen for the artifactsUpdated event
+eventBus.on(ARTIFACTS_UPDATED, (artifacts: ArtifactWithRelations[]) => {
+  useArtifactFilterStore.getState().initializeFuse(artifacts);
+});

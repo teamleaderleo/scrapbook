@@ -5,12 +5,14 @@ import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/action
 import { fetchSingleArtifact, fetchAllArtifacts } from '@/app/lib/data/artifact-data';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedArtifacts } from '../../data/cached-artifact-data';
+import { eventBus, ARTIFACTS_UPDATED, FILTERED_ARTIFACTS_UPDATED } from '../../event-bus';
 
 const queryClient = new QueryClient();
 
 type CoreArtifactStore = {
   artifacts: ArtifactWithRelations[];
   filteredArtifacts: ArtifactWithRelations[];
+
   currentArtifact: ArtifactWithRelations | null;
   isLoading: boolean;
   error: string | null;
@@ -19,12 +21,8 @@ type CoreArtifactStore = {
   updateArtifact: (id: string, formData: FormData) => Promise<void>;
   deleteArtifact: (id: string) => Promise<void>;
   addArtifact: (formData: FormData) => Promise<void>;
-
   fetchArtifacts: () => Promise<void>;
   setArtifacts: (artifacts: ArtifactWithRelations[]) => void;
-  setFilteredArtifacts: (artifacts: ArtifactWithRelations[]) => void;
-  setCurrentArtifact: (artifact: ArtifactWithRelations | null) => void;
-  setFetchOptions: (options: FetchOptions) => void;
 };
 
 export const useCoreArtifactStore = create<CoreArtifactStore>((set, get) => ({
@@ -34,7 +32,6 @@ export const useCoreArtifactStore = create<CoreArtifactStore>((set, get) => ({
   isLoading: false,
   error: null,
   fetchOptions: { includeTags: true, includeContents: true, includeProjects: true },
-
 
   updateArtifact: async (id, formData) => {
     set({ isLoading: true, error: null });
@@ -46,12 +43,9 @@ export const useCoreArtifactStore = create<CoreArtifactStore>((set, get) => ({
         if (updatedArtifact) {
           set((state) => {
             const updatedArtifacts = state.artifacts.map((a) => a.id === id ? updatedArtifact : a);
-            return {
-              artifacts: updatedArtifacts,
-              filteredArtifacts: updatedArtifacts,
-              isLoading: false
-            };
+            return { artifacts: updatedArtifacts, isLoading: false };
           });
+          eventBus.emit(ARTIFACTS_UPDATED, get().artifacts);
         } else {
           throw new Error('Failed to fetch updated artifact');
         }
@@ -71,12 +65,9 @@ export const useCoreArtifactStore = create<CoreArtifactStore>((set, get) => ({
         await queryClient.invalidateQueries(['artifacts']);
         set((state) => {
           const updatedArtifacts = state.artifacts.filter((a) => a.id !== id);
-          return {
-            artifacts: updatedArtifacts,
-            filteredArtifacts: updatedArtifacts,
-            isLoading: false
-          };
+          return { artifacts: updatedArtifacts, isLoading: false };
         });
+        eventBus.emit(ARTIFACTS_UPDATED, get().artifacts);
       } else {
         throw new Error(result.message || 'Failed to delete artifact');
       }
@@ -95,12 +86,9 @@ export const useCoreArtifactStore = create<CoreArtifactStore>((set, get) => ({
         if (newArtifact) {
           set((state) => {
             const updatedArtifacts = [...state.artifacts, newArtifact];
-            return {
-              artifacts: updatedArtifacts,
-              filteredArtifacts: updatedArtifacts,
-              isLoading: false
-            };
+            return { artifacts: updatedArtifacts, isLoading: false };
           });
+          eventBus.emit(ARTIFACTS_UPDATED, get().artifacts);
         } else {
           throw new Error('Failed to fetch new artifact');
         }
@@ -119,13 +107,15 @@ export const useCoreArtifactStore = create<CoreArtifactStore>((set, get) => ({
         ['artifacts', get().fetchOptions],
         () => getCachedArtifacts(ADMIN_UUID, get().fetchOptions)
       );
-      set({ artifacts, filteredArtifacts: artifacts, isLoading: false });
+      set({ artifacts, isLoading: false });
+      eventBus.emit(ARTIFACTS_UPDATED, artifacts);
     } catch (error) {
       set({ error: 'Failed to fetch artifacts', isLoading: false });
     }
   },
-  setArtifacts: (artifacts) => set({ artifacts }),
-  setFilteredArtifacts: (artifacts) => set({ filteredArtifacts: artifacts }),
-  setCurrentArtifact: (artifact) => set({ currentArtifact: artifact }),
-  setFetchOptions: (options) => set({ fetchOptions: options }),
+
+  setArtifacts: (artifacts: ArtifactWithRelations[]) => {
+    set({ artifacts });
+    eventBus.emit(ARTIFACTS_UPDATED, artifacts);
+  },
 }));

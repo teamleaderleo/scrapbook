@@ -34,6 +34,7 @@
     "framer-motion": "^11.3.2",
     "fuse.js": "^7.0.0",
     "lucide-react": "^0.399.0",
+    "mitt": "^3.0.1",
     "next": "^15.0.0-canary.43",
     "next-auth": "5.0.0-beta.19",
     "pg": "^8.12.0",

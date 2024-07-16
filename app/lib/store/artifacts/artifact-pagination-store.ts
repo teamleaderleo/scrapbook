@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { ArtifactWithRelations } from '@/app/lib/definitions';
+import { eventBus, ARTIFACTS_UPDATED, FILTERED_ARTIFACTS_UPDATED } from '../../event-bus';
 
 type ArtifactPaginationStore = {
   currentPage: number;
@@ -18,8 +19,14 @@ export const useArtifactPaginationStore = create<ArtifactPaginationStore>((set, 
   totalPages: 0,
   paginatedArtifacts: [],
 
-  setCurrentPage: (page) => set({ currentPage: page }),
-  setItemsPerPage: (itemsPerPage) => set({ itemsPerPage }),
+  setCurrentPage: (page) => {
+    set({ currentPage: page });
+    get().updatePagination(get().paginatedArtifacts);
+  },
+  setItemsPerPage: (itemsPerPage) => {
+    set({ itemsPerPage });
+    get().updatePagination(get().paginatedArtifacts);
+  },
   updatePagination: (filteredArtifacts) => {
     const { currentPage, itemsPerPage } = get();
     const totalPages = Math.ceil(filteredArtifacts.length / itemsPerPage);
@@ -30,3 +37,8 @@ export const useArtifactPaginationStore = create<ArtifactPaginationStore>((set, 
     set({ totalPages, paginatedArtifacts });
   },
 }));
+
+// Listen for filteredArtifactsUpdated event
+eventBus.on(FILTERED_ARTIFACTS_UPDATED, (filteredArtifacts: ArtifactWithRelations[]) => {
+  useArtifactPaginationStore.getState().updatePagination(filteredArtifacts);
+});
