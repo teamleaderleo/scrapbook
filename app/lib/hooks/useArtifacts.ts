@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import Fuse from 'fuse.js';
 import { ArtifactWithRelations, FetchOptions, Tag, BaseProject } from '@/app/lib/definitions';
 import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/actions/artifact-actions';
-import { fetchSingleArtifact } from '@/app/lib/data/artifact-data';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedArtifacts } from '@/app/lib/data/cached-artifact-data';
 import { handleTagUpdate } from '@/app/lib/actions/tag-actions';
@@ -56,16 +55,8 @@ export function useArtifacts() {
   const updateArtifactMutation = useMutation(
     ({ id, formData }: { id: string; formData: FormData }) => updateArtifact(id, ADMIN_UUID, {}, formData),
     {
-      onSuccess: async (result, { id }) => {
-        if (result.message === 'Artifact updated successfully') {
-          await queryClient.invalidateQueries(['artifacts']);
-          const updatedArtifact = await fetchSingleArtifact(ADMIN_UUID, id, fetchOptions);
-          if (updatedArtifact) {
-            queryClient.setQueryData<ArtifactWithRelations[]>(['artifacts'], (oldData) => 
-              oldData?.map((a) => a.id === id ? updatedArtifact : a) ?? []
-            );
-          }
-        }
+      onSuccess: () => {
+        queryClient.invalidateQueries(['artifacts']);
       },
     }
   );
@@ -73,10 +64,8 @@ export function useArtifacts() {
   const deleteArtifactMutation = useMutation(
     (id: string) => deleteArtifact(id, ADMIN_UUID),
     {
-      onSuccess: async (result) => {
-        if (result.success) {
-          await queryClient.invalidateQueries(['artifacts']);
-        }
+      onSuccess: () => {
+        queryClient.invalidateQueries(['artifacts']);
       },
     }
   );
@@ -84,16 +73,8 @@ export function useArtifacts() {
   const addArtifactMutation = useMutation(
     (formData: FormData) => createArtifact(ADMIN_UUID, formData),
     {
-      onSuccess: async (result) => {
-        if (result.artifactId) {
-          await queryClient.invalidateQueries(['artifacts']);
-          const newArtifact = await fetchSingleArtifact(ADMIN_UUID, result.artifactId, fetchOptions);
-          if (newArtifact) {
-            queryClient.setQueryData<ArtifactWithRelations[]>(['artifacts'], (oldData) => 
-              [...(oldData ?? []), newArtifact]
-            );
-          }
-        }
+      onSuccess: () => {
+        queryClient.invalidateQueries(['artifacts']);
       },
     }
   );
@@ -107,19 +88,15 @@ export function useArtifacts() {
     setCurrentPage(page);
   }, []);
 
-  const updateArtifactTags = useCallback(async (artifactId: string, tags: Tag[]) => {
-    await handleTagUpdate(ADMIN_UUID, artifactId, tags.map(t => t.name));
-    queryClient.invalidateQueries(['artifacts']);
-  }, [queryClient]);
-
-  const updateArtifactProjects = useCallback(async (artifactId: string, projects: BaseProject[]) => {
-    await handleProjectUpdate(ADMIN_UUID, artifactId, projects.map(p => p.name));
-    queryClient.invalidateQueries(['artifacts']);
-  }, [queryClient]);
-
-  const preloadAdjacentPages = useCallback(() => {
-    // Implement preloading logic here if needed
-  }, []);
+  const updateArtifactTagsMutation = useMutation(
+    ({ artifactId, tags }: { artifactId: string; tags: Tag[] }) =>
+      handleTagUpdate(ADMIN_UUID, artifactId, tags.map(t => t.name)),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['artifacts']);
+      },
+    }
+  );
 
   return {
     artifacts,
@@ -135,9 +112,7 @@ export function useArtifacts() {
     updateArtifact: updateArtifactMutation.mutateAsync,
     deleteArtifact: deleteArtifactMutation.mutateAsync,
     addArtifact: addArtifactMutation.mutateAsync,
-    updateArtifactTags,
-    updateArtifactProjects,
-    preloadAdjacentPages,
+    updateArtifactTags: updateArtifactTagsMutation.mutateAsync,
     setFetchOptions,
   };
 }

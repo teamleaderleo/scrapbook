@@ -2,42 +2,34 @@
 
 import React, { useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { ArtifactWithRelations, Tag } from '@/app/lib/definitions';
 import { TagList } from '@/components/ui/tags/taglist';
 import { DeleteArtifact, UpdateArtifact } from '@/components/ui/artifacts/button';
 import Pagination from '../pagination';
-import { useArtifactQueries } from '@/app/lib/store/artifacts/use-artifact-queries';
+import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
 import { useTagStore } from '@/app/lib/store/tag-store';
 import { ArtifactThumbnail } from './artifact-thumbnail';
 import { ErrorBoundaryWithToast } from '../errors/error-boundary';
-
-export const ARTIFACT_ITEMS_PER_PAGE = 6;
+import { ArtifactWithRelations, Tag } from '@/app/lib/definitions';
 
 export function ArtifactsTable({ accountId }: { accountId: string }) {
   const { 
-    queryArtifacts,
+    paginatedArtifacts,
     isLoading,
     error,
     updateArtifact,
     deleteArtifact,
     handleSearch,
     handlePageChange,
-    filteredArtifacts,
     currentPage,
     totalPages,
     updateArtifactTags,
-    preloadAdjacentPages,
-  } = useArtifactQueries();
+  } = useArtifacts();
 
   const { allTags, ensureTagsExist } = useTagStore();
 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  useEffect(() => {
-    preloadAdjacentPages();
-  }, [preloadAdjacentPages]);
 
   useEffect(() => {
     const query = searchParams.get('query') || '';
@@ -47,9 +39,8 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
   }, [searchParams, handleSearch, handlePageChange]);
 
   const handleTagsChange = async (artifactId: string, newTags: Tag[]) => {
-    const tagNames = newTags.map(tag => tag.name);
-    const tags = await ensureTagsExist(accountId, tagNames);
-    await updateArtifactTags(artifactId, tags);
+    const tags = await ensureTagsExist(accountId, newTags.map(tag => tag.name));
+    await updateArtifactTags({ artifactId, tags });
   };
   
   useEffect(() => {
@@ -64,12 +55,6 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentPage, totalPages, handlePageChange]);
-
-  const paginatedArtifacts = filteredArtifacts.slice(
-    (currentPage - 1) * ARTIFACT_ITEMS_PER_PAGE,
-    currentPage * ARTIFACT_ITEMS_PER_PAGE
-  );
-
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
