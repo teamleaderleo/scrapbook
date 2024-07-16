@@ -1,3 +1,5 @@
+'use server';
+
 import { eq, and, inArray, not } from 'drizzle-orm';
 import { db } from '../db/db.server';
 import { projects, projectTags, projectArtifactLinks } from '../db/schema';

@@ -1,5 +1,6 @@
+'use server';
+
 import { eq, and } from 'drizzle-orm';
-import { db } from '../db/db.server';
 import { artifacts, artifactContents, artifactTags, projectArtifactLinks } from '../db/schema';
 import { handleContentUpdate, hasValidContent, insertContents } from './artifact-content-actions';
 import { handleTagUpdateWithinTransaction } from './tag-handlers';

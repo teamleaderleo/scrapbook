@@ -1,3 +1,5 @@
+'use server';
+
 import { eq, and, inArray, not } from 'drizzle-orm';
 import { db } from '../db/db.server';
 import { Tag } from '../definitions';
