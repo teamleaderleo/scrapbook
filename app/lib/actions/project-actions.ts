@@ -1,12 +1,13 @@
 'use server';
- 
+
 import { z } from 'zod';
-import { sql } from '@vercel/postgres';
+import { eq, and } from 'drizzle-orm';
+import { db } from '../db/db.server';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { addTagToProject, removeTagFromProject, getProjectTags } from '../utils-server';
 import { suggestTags } from '../external/claude-utils';
-import { cookies } from 'next/headers';
+import { projects, projectTags, projectArtifactLinks } from '../db/schema';
+import { handleTagUpdateWithinTransaction } from './tag-handlers';
+import { v4 as uuid } from 'uuid';
 
 const ProjectSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
@@ -27,13 +28,12 @@ export type State = {
     artifacts?: string[];
   };
   message?: string | null;
+  suggestedTags?: string[];
+  projectId?: string;
+  success?: boolean;
 };
 
-export async function createProject(accountId: string, prevState: State, formData: FormData) {
-  console.log('Starting createProject function');
-  console.log('Account ID:', accountId);
-  console.log('Form data:', Object.fromEntries(formData));
-
+export async function createProject(accountId: string, formData: FormData): Promise<State> {
   const validatedFields = ProjectSchema.safeParse({
     name: formData.get('name'),
     description: formData.get('description'),
@@ -43,7 +43,6 @@ export async function createProject(accountId: string, prevState: State, formDat
   });
 
   if (!validatedFields.success) {
-    console.log('Validation failed:', validatedFields.error);
     return {
       errors: validatedFields.error.flatten().fieldErrors,
       message: 'Missing Fields. Failed to Create Project.',
@@ -51,64 +50,52 @@ export async function createProject(accountId: string, prevState: State, formDat
   }
 
   const { name, description, status, tags, artifacts } = validatedFields.data;
-  console.log('Validated data:', { name, description, status, tags, artifacts });
 
   try {
-    // Start a transaction
-    await sql`BEGIN`;
+    return await db.transaction(async (tx) => {
+      const newProjectId = uuid();
+      const now = new Date();
 
-    console.log('Attempting to insert new project');
-    const result = await sql`
-      INSERT INTO project (account_id, name, description, status)
-      VALUES (${accountId}, ${name}, ${description}, ${status})
-      RETURNING id
-    `;
-    const projectId = result.rows[0].id;
-    console.log('Project inserted, ID:', projectId);
+      // Create the project
+      await tx.insert(projects).values({
+        id: newProjectId,
+        accountId,
+        name,
+        description,
+        status,
+        createdAt: now,
+        updatedAt: now
+      });
 
-    const suggestedTags = await suggestTags(`${name} ${description}`);
-    const allTags = [...new Set([...(tags || []), ...suggestedTags])];
-
-    if (allTags.length > 0) {
-      for (const tagName of allTags) {
-        await addTagToProject(accountId, projectId, tagName);
+      // Handle tags
+      if (tags && tags.length > 0) {
+        await handleTagUpdateWithinTransaction(tx, accountId, newProjectId, tags, true);
       }
-    }
 
-    if (tags && tags.length > 0) {
-      console.log('Inserting tags:', tags);
-      for (const tagName of tags) {
-        await addTagToProject(accountId, projectId, tagName);
+      // Handle artifacts
+      if (artifacts && artifacts.length > 0) {
+        for (const artifactId of artifacts) {
+          await tx.insert(projectArtifactLinks).values({
+            accountId,
+            projectId: newProjectId,
+            artifactId,
+            addedAt: now
+          });
+        }
       }
-    }
 
-    if (artifacts && artifacts.length > 0) {
-      console.log('Linking artifacts:', artifacts);
-      for (const artifactId of artifacts) {
-        await sql`
-          INSERT INTO project_artifact_link (account_id, project_id, artifact_id)
-          VALUES (${accountId}, ${projectId}, ${artifactId})
-        `;
-      }
-    }
+      const allContent = `${name} ${description || ''}`;
+      const suggestedTags = await suggestTags(allContent);
 
-    // Commit the transaction
-    await sql`COMMIT`;
-
-    console.log('Project creation completed successfully');
-    revalidatePath('/dashboard/projects');
-    return { message: 'Project created successfully' };
+      return { message: 'Project created successfully', suggestedTags, projectId: newProjectId, success: true };
+    });
   } catch (error: any) {
-    // Rollback the transaction in case of error
-    await sql`ROLLBACK`;
-    console.error('Error in createProject:', error);
-    return {
-      message: `Database Error: Failed to Create Project. ${error.message}`,
-    };
+    console.error('Error creating project:', error);
+    return { message: `Error: Failed to Create Project. ${error.message}`, success: false };
   }
 }
 
-export async function updateProject(id: string, accountId: string, prevState: State, formData: FormData) {
+export async function updateProject(id: string, accountId: string, formData: FormData): Promise<State> {
   const validatedFields = ProjectSchema.safeParse({
     name: formData.get('name'),
     description: formData.get('description'),
@@ -127,73 +114,63 @@ export async function updateProject(id: string, accountId: string, prevState: St
   const { name, description, status, tags, artifacts } = validatedFields.data;
 
   try {
-    await sql`
-      UPDATE project
-      SET name = ${name}, description = ${description}, status = ${status}
-      WHERE id = ${id} AND account_id = ${accountId}
-    `;
+    const result = await db.transaction(async (tx) => {
+      await tx.update(projects)
+        .set({ name, description, status, updatedAt: new Date() })
+        .where(and(
+          eq(projects.id, id),
+          eq(projects.accountId, accountId)
+        ));
 
-    // Update tags
-    const currentTags = await getProjectTags(accountId, id);
-    const newTags = tags as string[];
-
-    // Remove tags that are no longer associated with the project
-    for (const tag of currentTags) {
-      if (!newTags.includes(tag.name)) {
-        await removeTagFromProject(accountId, id, tag.id);
+      // Handle tags
+      if (tags) {
+        await handleTagUpdateWithinTransaction(tx, accountId, id, tags, true);
       }
-    }
 
-    // Add new tags
-    for (const tagName of newTags) {
-      if (!currentTags.some(tag => tag.name === tagName)) {
-        await addTagToProject(accountId, id, tagName);
+      // Handle artifacts
+      await tx.delete(projectArtifactLinks)
+        .where(and(
+          eq(projectArtifactLinks.projectId, id),
+          eq(projectArtifactLinks.accountId, accountId)
+        ));
+
+      if (artifacts && artifacts.length > 0) {
+        for (const artifactId of artifacts) {
+          await tx.insert(projectArtifactLinks).values({
+            accountId,
+            projectId: id,
+            artifactId,
+            addedAt: new Date()
+          });
+        }
       }
-    }
 
-    // Update artifacts
-    await sql`DELETE FROM project_artifact_link WHERE project_id = ${id}`;
-    if (artifacts && artifacts.length > 0) {
-      for (const artifactId of artifacts) {
-        await sql`
-          INSERT INTO project_artifact_link (account_id, project_id, artifact_id)
-          VALUES (${accountId}, ${id}, ${artifactId})
-        `;
-      }
-    }
+      const allContent = `${name} ${description || ''}`;
+      const suggestedTags = await suggestTags(allContent);
 
+      return { message: 'Project updated successfully', suggestedTags };
+    });
+
+    revalidatePath('/dashboard/projects');
+    return result;
   } catch (error) {
     console.error('Error updating project:', error);
     return { message: 'Database Error: Failed to Update Project.' };
   }
- 
-  revalidatePath('/dashboard/projects');
-  redirect('/dashboard/projects');
 }
 
-export async function deleteProject(id: string, accountId: string) {
+export async function deleteProject(id: string, accountId: string): Promise<State> {
   try {
-    // Start a transaction
-    await sql`BEGIN`;
-
-    // Delete associated project-tag links
-    await sql`DELETE FROM project_tag WHERE project_id = ${id}`;
-    
-    // Delete associated project-artifact links
-    await sql`DELETE FROM project_artifact_link WHERE project_id = ${id} AND account_id = ${accountId}`;
-
-    // Delete the project
-    await sql`DELETE FROM project WHERE id = ${id} AND account_id = ${accountId}`;
-
-    // Commit the transaction
-    await sql`COMMIT`;
+    await db.transaction(async (tx) => {
+      await tx.delete(projectTags).where(and(eq(projectTags.projectId, id), eq(projectTags.accountId, accountId)));
+      await tx.delete(projectArtifactLinks).where(and(eq(projectArtifactLinks.projectId, id), eq(projectArtifactLinks.accountId, accountId)));
+      await tx.delete(projects).where(and(eq(projects.id, id), eq(projects.accountId, accountId)));
+    });
 
     revalidatePath('/dashboard/projects');
-    return { success: true, message: 'Project deleted successfully.' };
+    return { message: 'Project deleted successfully.', success: true };
   } catch (error) {
-    // Rollback the transaction in case of error
-    await sql`ROLLBACK`;
     console.error('Error deleting project:', error);
-    return { success: false, message: 'Database Error: Failed to delete project.' };
+    return { message: 'Failed to delete project.', success: false };
   }
 }

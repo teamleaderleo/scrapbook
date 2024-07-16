@@ -5,7 +5,7 @@ import { ArtifactWithRelations, FetchOptions, Tag, BaseProject } from '@/app/lib
 import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/actions/artifact-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedArtifacts } from '@/app/lib/data/cached-artifact-data';
-import { handleTagUpdate } from '@/app/lib/actions/tag-actions';
+import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { suggestContentExtensions, suggestTags } from '../external/claude-utils';
 
 const ITEMS_PER_PAGE = 6;

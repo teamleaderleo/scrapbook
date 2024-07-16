@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Tag } from '@/app/lib/definitions';
 import { useTagStore } from '@/app/lib/store/tag-store';
-import { ensureTagsExist, handleTagUpdate } from '@/app/lib/actions/tag-actions';
 
 interface TagListProps {
   initialTags: Tag[];
