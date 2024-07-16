@@ -23,7 +23,6 @@ export default function ProjectsTable({
   const router = useRouter();
 
   return (
-    <TagProvider>
       <div className="mt-6 flow-root">
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full align-middle">
@@ -52,8 +51,7 @@ export default function ProjectsTable({
                       <td className="px-3 py-3">{project.description}</td>
                       <td className="whitespace-nowrap px-3 py-3">{project.status}</td>
                       <td className="px-3 py-3">
-                        <TagList
-                          projectId={project.id}
+                        {/* <TagList
                           initialTags={project.tags}
                           onTagsChange={(updatedTags) => {
                             setProjects(projects.map(p =>
@@ -62,7 +60,7 @@ export default function ProjectsTable({
                                 : p
                             ));
                           }}
-                        />
+                        /> */}
                       </td>
                       <td className="whitespace-nowrap px-3 py-3">{project.artifacts.length}</td>
                       <td className="whitespace-nowrap px-3 py-3">
@@ -96,6 +94,5 @@ export default function ProjectsTable({
           </div>
         </div>
       </div>
-    </TagProvider>
   );
 }

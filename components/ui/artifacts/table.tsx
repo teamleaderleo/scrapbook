@@ -105,7 +105,6 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
                     <td className="px-3 py-3">{artifact.description}</td>
                     <td className="px-3 py-3">
                       <TagList
-                        artifactId={artifact.id}
                         initialTags={artifact.tags}
                         allTags={allTags}
                         onTagsChange={(newTags) => handleTagsChange(artifact.id, newTags)}

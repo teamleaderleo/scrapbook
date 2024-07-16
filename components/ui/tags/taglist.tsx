@@ -5,12 +5,11 @@ import { useTagStore } from '@/app/lib/store/tag-store';
 interface TagListProps {
   initialTags: Tag[];
   onTagsChange: (tags: Tag[]) => void;
-  artifactId: string;
   accountId: string;
   allTags: Tag[];
 }
 
-export function TagList({ initialTags, onTagsChange, artifactId, accountId, allTags }: TagListProps) {
+export function TagList({ initialTags, onTagsChange, accountId, allTags }: TagListProps) {
   const [tags, setTags] = useState<Tag[]>(initialTags);
   const [showAddForm, setShowAddForm] = useState(false);
   const { fetchAllTags, addTag } = useTagStore();
