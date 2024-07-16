@@ -1,10 +1,10 @@
 'use server';
 
-import { eq, and, inArray, not } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { db } from '../db/db.server';
-import { projects, projectTags, projectArtifactLinks } from '../db/schema';
+import { projectArtifactLinks } from '../db/schema';
 import { handleTagUpdateWithinTransaction } from './tag-handlers';
-import { BaseProject, Tag } from '../definitions';
+import { Tag } from '../definitions';
 import { v4 as uuid } from 'uuid';
 
 export async function handleProjectUpdateWithinTransaction(
@@ -13,14 +13,6 @@ export async function handleProjectUpdateWithinTransaction(
   artifactId: string,
   projectIds: string[]
 ): Promise<void> {
-  // Remove existing project links that are not in the new projectIds list
-  await tx.delete(projectArtifactLinks)
-    .where(and(
-      eq(projectArtifactLinks.accountId, accountId),
-      eq(projectArtifactLinks.artifactId, artifactId),
-      not(inArray(projectArtifactLinks.projectId, projectIds))
-    ));
-
   // Add new project links
   for (const projectId of projectIds) {
     await tx.insert(projectArtifactLinks)
@@ -37,7 +29,6 @@ export async function handleProjectUpdateWithinTransaction(
   }
 }
 
-// For standalone use
 export async function handleProjectUpdate(
   accountId: string,
   artifactId: string,
@@ -64,20 +55,15 @@ export async function handleProjectArtifactsUpdate(
   artifactIds: string[]
 ): Promise<void> {
   await db.transaction(async (tx) => {
-    // Remove existing artifact links
-    await tx.delete(projectArtifactLinks)
-      .where(and(
-        eq(projectArtifactLinks.projectId, projectId),
-        eq(projectArtifactLinks.accountId, accountId)
-      ));
-
-    // Add new artifact links
     for (const artifactId of artifactIds) {
       await tx.insert(projectArtifactLinks).values({
         accountId,
         projectId,
         artifactId,
         addedAt: new Date()
+      })
+      .onConflictDoNothing({
+        target: [projectArtifactLinks.accountId, projectArtifactLinks.projectId, projectArtifactLinks.artifactId]
       });
     }
   });
