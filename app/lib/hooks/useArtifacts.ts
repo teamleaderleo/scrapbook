@@ -6,6 +6,7 @@ import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/action
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedArtifacts } from '@/app/lib/data/cached-artifact-data';
 import { handleTagUpdate } from '@/app/lib/actions/tag-actions';
+import { suggestContentExtensions, suggestTags } from '../external/claude-utils';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -79,15 +80,6 @@ export function useArtifacts() {
     }
   );
 
-  const handleSearch = useCallback((newQuery: string) => {
-    setQuery(newQuery);
-    setCurrentPage(1);
-  }, []);
-
-  const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-  }, []);
-
   const updateArtifactTagsMutation = useMutation(
     ({ artifactId, tags }: { artifactId: string; tags: Tag[] }) =>
       handleTagUpdate(ADMIN_UUID, artifactId, tags.map(t => t.name)),
@@ -97,6 +89,21 @@ export function useArtifacts() {
       },
     }
   );
+
+  const handleSearch = useCallback((newQuery: string) => {
+    setQuery(newQuery);
+    setCurrentPage(1);
+  }, []);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const getAISuggestions = useCallback(async (name: string, description: string, content: string) => {
+    const tags = await suggestTags(`${name} ${description} ${content}`);
+    const extensions = await suggestContentExtensions(`${name} ${description} ${content}`);
+    return { tags, extensions };
+  }, []);
 
   return {
     artifacts,
@@ -114,5 +121,6 @@ export function useArtifacts() {
     addArtifact: addArtifactMutation.mutateAsync,
     updateArtifactTags: updateArtifactTagsMutation.mutateAsync,
     setFetchOptions,
+    getAISuggestions,
   };
 }
