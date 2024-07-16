@@ -1,4 +1,3 @@
-// create-artifact-form.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -6,13 +5,13 @@ import { useRouter } from 'next/navigation';
 import { BaseProject, ArtifactWithRelations, Tag } from '@/app/lib/definitions';
 import { ArtifactForm } from '@/components/ui/artifacts/artifact-form';
 import { suggestTags, suggestContentExtensions } from '@/app/lib/external/claude-utils';
-import { useArtifactStore } from '@/app/lib/store/artifacts/artifact-store';
+import { useArtifactQueries } from '@/app/lib/store/artifacts/use-artifact-queries';
 import { useTagStore } from '@/app/lib/store/tag-store';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 export default function CreateArtifactForm({ projects }: { projects: BaseProject[] }) {
   const router = useRouter();
-  const { addArtifact } = useArtifactStore();
+  const { addArtifact } = useArtifactQueries();
   const { allTags, fetchAllTags, ensureTagsExist } = useTagStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);

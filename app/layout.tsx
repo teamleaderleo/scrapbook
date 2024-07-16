@@ -2,6 +2,7 @@ import '@/components/ui/global.css';
 import { inter } from '@/components/ui/fonts';
 import { Metadata } from 'next';
 import { ServiceWorkerRegistration } from '@/components/ui/service-worker-registration';
+import { ReactQueryProvider } from '@/components/query-client-provider';
  
 export const metadata: Metadata = {
   title: {
@@ -19,8 +20,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>{children}</body>
-      <ServiceWorkerRegistration />
+      <ReactQueryProvider>
+        <body className={`${inter.className} antialiased`}>{children}</body>
+        <ServiceWorkerRegistration />
+      </ReactQueryProvider>
     </html>
   );
 }

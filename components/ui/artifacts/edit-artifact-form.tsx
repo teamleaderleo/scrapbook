@@ -1,4 +1,3 @@
-// edit-artifact-form.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -6,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArtifactWithRelations, BaseProject, Tag } from '@/app/lib/definitions';
 import { ArtifactForm } from '@/components/ui/artifacts/artifact-form';
 import { suggestTags, suggestContentExtensions } from '@/app/lib/external/claude-utils';
-import { useArtifactStore } from '@/app/lib/store/artifacts/artifact-store';
+import { useArtifactQueries } from '@/app/lib/store/artifacts/use-artifact-queries';
 import { useTagStore } from '@/app/lib/store/tag-store';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
@@ -18,22 +17,20 @@ export default function EditArtifactForm({
   projects: BaseProject[];
 }) {
   const router = useRouter();
-  const { artifacts, updateArtifact, setCurrentArtifact } = useArtifactStore();
+  const { queryArtifacts, updateArtifact } = useArtifactQueries();
   const { allTags, fetchAllTags, ensureTagsExist } = useTagStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [suggestedContentExtensions, setSuggestedContentExtensions] = useState<string[]>([]);
 
-  const artifact = artifacts.find(a => a.id === artifactId);
+  const artifact = queryArtifacts?.find(a => a.id === artifactId);
 
   useEffect(() => {
     if (!artifact) {
       router.replace('/dashboard/artifacts');
-    } else {
-      setCurrentArtifact(artifact);
     }
     fetchAllTags(ADMIN_UUID);
-  }, [artifact, artifactId, router, fetchAllTags, setCurrentArtifact]);
+  }, [artifact, artifactId, router, fetchAllTags]);
 
   if (!artifact) {
     return null;

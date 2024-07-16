@@ -7,12 +7,20 @@
 
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useArtifactStore } from './artifact-store';
+import { useArtifactFilterStore } from './artifact-filter-store';
+import { useArtifactPaginationStore } from './artifact-pagination-store';
 import { useArtifacts, useUpdateArtifact, useDeleteArtifact, useAddArtifact } from './core-artifact-store';
 import React from 'react';
 
 export function useArtifactQueries() {
   const queryClient = useQueryClient();
+  if (!queryClient) {
+    throw new Error("useArtifactQueries must be used within a QueryClientProvider");
+  }
+
   const artifactStore = useArtifactStore();
+  const filterStore = useArtifactFilterStore();
+  const paginationStore = useArtifactPaginationStore();
   
   const { 
     data: queryArtifacts, 
@@ -24,10 +32,10 @@ export function useArtifactQueries() {
   const deleteArtifactMutation = useDeleteArtifact();
   const addArtifactMutation = useAddArtifact();
 
-  // Set artifacts in the store whenever they change
+  // Update artifacts in the store whenever they change
   React.useEffect(() => {
     if (queryArtifacts) {
-      artifactStore.setArtifacts(queryArtifacts);
+      artifactStore.updateArtifacts(queryArtifacts);
     }
   }, [queryArtifacts, artifactStore]);
 
@@ -50,6 +58,9 @@ export function useArtifactQueries() {
     updateArtifact,
     deleteArtifact,
     addArtifact,
-    ...artifactStore
+    ...artifactStore,
+    filteredArtifacts: filterStore.filteredArtifacts,
+    currentPage: paginationStore.currentPage,
+    totalPages: paginationStore.totalPages,
   };
 }

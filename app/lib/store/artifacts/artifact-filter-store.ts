@@ -13,12 +13,6 @@ type ArtifactFilterStore = {
 
   initializeFuse: (artifacts: ArtifactWithRelations[]) => void;
   searchArtifacts: (query: string) => void;
-  updateFilteredArtifacts: (artifacts: ArtifactWithRelations[]) => void;
-};
-
-const fuseOptions = {
-  keys: ['name', 'description', 'tags.name', 'contents.content'],
-  threshold: 0.3,
 };
 
 export const useArtifactFilterStore = create<ArtifactFilterStore>((set, get) => ({
@@ -28,8 +22,13 @@ export const useArtifactFilterStore = create<ArtifactFilterStore>((set, get) => 
   allArtifacts: [],
 
   initializeFuse: (artifacts: ArtifactWithRelations[]) => {
-    const fuse = new Fuse(artifacts, fuseOptions);
+    const options = {
+      keys: ['name', 'description', 'tags.name', 'contents.content'],
+      threshold: 0.3,
+    };
+    const fuse = new Fuse(artifacts, options);
     set({ fuse, allArtifacts: artifacts, filteredArtifacts: artifacts });
+    eventBus.emit(FILTERED_ARTIFACTS_UPDATED, artifacts);
   },
 
   searchArtifacts: (query: string) => {
@@ -43,19 +42,9 @@ export const useArtifactFilterStore = create<ArtifactFilterStore>((set, get) => 
     set({ query, filteredArtifacts: results });
     eventBus.emit(FILTERED_ARTIFACTS_UPDATED, results);
   },
-
-  updateFilteredArtifacts: (artifacts: ArtifactWithRelations[]) => {
-    const { query } = get();
-    const updatedFuse = new Fuse(artifacts, fuseOptions);
-    const results = query
-      ? updatedFuse.search(query).map(result => result.item)
-      : artifacts;
-    set({ fuse: updatedFuse, allArtifacts: artifacts, filteredArtifacts: results });
-    eventBus.emit(FILTERED_ARTIFACTS_UPDATED, results);
-  },
 }));
 
-// Listen for the artifactsUpdated event
+// Listen for the ARTIFACTS_UPDATED event
 eventBus.on(ARTIFACTS_UPDATED, (artifacts: ArtifactWithRelations[]) => {
   useArtifactFilterStore.getState().initializeFuse(artifacts);
 });

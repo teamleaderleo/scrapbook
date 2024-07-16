@@ -1,77 +1,56 @@
 'use client';
 
-import { useCallback } from 'react';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { ArtifactWithRelations, Tag } from '@/app/lib/definitions';
 import { TagList } from '@/components/ui/tags/taglist';
 import { DeleteArtifact, UpdateArtifact } from '@/components/ui/artifacts/button';
 import Pagination from '../pagination';
-import { useArtifactStore } from '@/app/lib/store/artifacts/artifact-store';
+import { useArtifactQueries } from '@/app/lib/store/artifacts/use-artifact-queries';
 import { useTagStore } from '@/app/lib/store/tag-store';
-import { ADMIN_UUID } from '@/app/lib/constants';
 import { ArtifactThumbnail } from './artifact-thumbnail';
 import { ErrorBoundaryWithToast } from '../errors/error-boundary';
-import { useImagePreloader } from '../image-preloader';
 
 export const ARTIFACT_ITEMS_PER_PAGE = 6;
 
-export function ArtifactsTable({
-  initialArtifacts,
-  accountId,
-}: {
-  initialArtifacts: ArtifactWithRelations[];
-  accountId: string;
-}) {
+export function ArtifactsTable({ accountId }: { accountId: string }) {
   const { 
-    paginatedArtifacts,
-    currentPage,
-    totalPages,
-    initializeArtifacts,
+    queryArtifacts,
+    isLoading,
+    error,
+    updateArtifact,
+    deleteArtifact,
     handleSearch,
     handlePageChange,
-    deleteArtifact,
+    filteredArtifacts,
+    currentPage,
+    totalPages,
     updateArtifactTags,
-    setUpdateUrl,
     preloadAdjacentPages,
-  } = useArtifactStore();
+  } = useArtifactQueries();
 
   const { allTags, ensureTagsExist } = useTagStore();
 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  
+
   useEffect(() => {
-    initializeArtifacts(initialArtifacts);
     preloadAdjacentPages();
-  }, [initialArtifacts, initializeArtifacts, preloadAdjacentPages]);
+  }, [preloadAdjacentPages]);
 
   useEffect(() => {
     const query = searchParams.get('query') || '';
     const page = Number(searchParams.get('page')) || 1;
-    handleSearch(query, page);
-  }, [searchParams, handleSearch]);
+    handleSearch(query);
+    handlePageChange(page);
+  }, [searchParams, handleSearch, handlePageChange]);
 
   const handleTagsChange = async (artifactId: string, newTags: Tag[]) => {
     const tagNames = newTags.map(tag => tag.name);
-    const tags = await ensureTagsExist(ADMIN_UUID, tagNames);
+    const tags = await ensureTagsExist(accountId, tagNames);
     await updateArtifactTags(artifactId, tags);
   };
-  
-useEffect(() => {
-    setUpdateUrl((page: number) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set('page', page.toString());
-      const newUrl = `${pathname}?${params.toString()}`;
-
-      // Instant URL update
-      window.history.pushState({}, '', newUrl);
-
-      // Update Next.js internal state
-      router.push(newUrl, undefined);
-    });
-  }, [setUpdateUrl, searchParams, pathname, router]);
   
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -85,6 +64,15 @@ useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentPage, totalPages, handlePageChange]);
+
+  const paginatedArtifacts = filteredArtifacts.slice(
+    (currentPage - 1) * ARTIFACT_ITEMS_PER_PAGE,
+    currentPage * ARTIFACT_ITEMS_PER_PAGE
+  );
+
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <div className="mt-6 flow-root">
@@ -168,7 +156,10 @@ useEffect(() => {
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex justify-end">
                         <UpdateArtifact artifact={artifact} />
-                        <DeleteArtifact id={artifact.id} onDelete={() => deleteArtifact(artifact.id)} />
+                        <DeleteArtifact 
+                          id={artifact.id} 
+                          onDelete={() => deleteArtifact(artifact.id)} 
+                        />
                       </div>
                     </td>
                   </tr>
