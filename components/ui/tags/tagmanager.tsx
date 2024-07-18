@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Tag } from '@/app/lib/definitions';
 import { useTagStore } from '@/app/lib/store/tag-store';
 import { ADMIN_UUID } from '@/app/lib/constants';
@@ -14,12 +14,16 @@ export function TagManager({ selectedTags, onTagsChange, allTags }: TagManagerPr
   const [newTag, setNewTag] = useState('');
 
   const handleAddTag = async () => {
-    if (newTag && !selectedTags.some(tag => tag.name.toLowerCase() === newTag.toLowerCase())) {
-      const existingTag = allTags.find(tag => tag.name.toLowerCase() === newTag.toLowerCase());
+    const trimmedTag = newTag.trim();
+    if (trimmedTag) {
+      const existingTag = allTags.find(tag => tag.name.toLowerCase() === trimmedTag.toLowerCase());
+      
       if (existingTag) {
-        onTagsChange([...selectedTags, existingTag]);
+        if (!selectedTags.some(tag => tag.id === existingTag.id)) {
+          onTagsChange([...selectedTags, existingTag]);
+        }
       } else {
-        const createdTag = await addTag(ADMIN_UUID, newTag);
+        const createdTag = await addTag(ADMIN_UUID, trimmedTag);
         onTagsChange([...selectedTags, createdTag]);
       }
       setNewTag('');
