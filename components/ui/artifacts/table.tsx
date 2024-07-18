@@ -6,7 +6,7 @@ import { TagList } from '@/components/ui/tags/taglist';
 import { DeleteArtifact, UpdateArtifact } from '@/components/ui/artifacts/button';
 import Pagination from '../pagination';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
-import { useTagStore } from '@/app/lib/store/tag-store';
+import { useTags } from '@/app/lib/hooks/useTags';
 import { ArtifactThumbnail } from './artifact-thumbnail';
 import { ErrorBoundaryWithToast } from '../errors/error-boundary';
 import { ArtifactWithRelations, Tag } from '@/app/lib/definitions';
@@ -25,7 +25,7 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
     updateArtifactTags,
   } = useArtifacts();
 
-  const { allTags, getOrCreateTags } = useTagStore();
+  const { tags: allTags, getOrCreateTags } = useTags();
 
   const router = useRouter();
   const pathname = usePathname();
@@ -39,7 +39,7 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
   }, [searchParams, handleSearch, handlePageChange]);
 
   const handleTagsChange = async (artifactId: string, newTags: Tag[]) => {
-    const tags = await getOrCreateTags(accountId, newTags.map(tag => tag.name));
+    const tags = await getOrCreateTags(newTags.map(tag => tag.name));
     await updateArtifactTags({ artifactId, tags });
   };
   
@@ -106,7 +106,6 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
                     <td className="px-3 py-3">
                       <TagList
                         initialTags={artifact.tags}
-                        allTags={allTags}
                         onTagsChange={(newTags) => handleTagsChange(artifact.id, newTags)}
                         accountId={accountId}
                       />

@@ -1,29 +1,21 @@
 import React, { useState } from 'react';
 import { Tag } from '@/app/lib/definitions';
-import { useTagStore } from '@/app/lib/store/tag-store';
-import { ADMIN_UUID } from '@/app/lib/constants';
+import { useTags } from '@/app/lib/hooks/useTags';
 
 interface TagManagerProps {
   selectedTags: Tag[];
   onTagsChange: (tags: Tag[]) => void;
-  allTags: Tag[];
 }
 
-export function TagManager({ selectedTags, onTagsChange, allTags }: TagManagerProps) {
-  const { addTag } = useTagStore();
+export function TagManager({ selectedTags, onTagsChange }: TagManagerProps) {
+  const { tags: allTags, addTag } = useTags();
   const [newTag, setNewTag] = useState('');
 
   const handleAddTag = async () => {
     const trimmedTag = newTag.trim();
     if (trimmedTag) {
-      const existingTag = allTags.find(tag => tag.name.toLowerCase() === trimmedTag.toLowerCase());
-      
-      if (existingTag) {
-        if (!selectedTags.some(tag => tag.id === existingTag.id)) {
-          onTagsChange([...selectedTags, existingTag]);
-        }
-      } else {
-        const createdTag = await addTag(ADMIN_UUID, trimmedTag);
+      const createdTag = await addTag(trimmedTag);
+      if (!selectedTags.some(tag => tag.id === createdTag.id)) {
         onTagsChange([...selectedTags, createdTag]);
       }
       setNewTag('');
@@ -35,7 +27,7 @@ export function TagManager({ selectedTags, onTagsChange, allTags }: TagManagerPr
   };
 
   const handleSelectTag = (tagId: string) => {
-    const tagToAdd = allTags.find(tag => tag.id === tagId);
+    const tagToAdd = allTags?.find(tag => tag.id === tagId);
     if (tagToAdd && !selectedTags.some(tag => tag.id === tagToAdd.id)) {
       onTagsChange([...selectedTags, tagToAdd]);
     }

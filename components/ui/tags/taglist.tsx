@@ -1,22 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Tag } from '@/app/lib/definitions';
-import { useTagStore } from '@/app/lib/store/tag-store';
+import { useTags } from '@/app/lib/hooks/useTags';
 
 interface TagListProps {
   initialTags: Tag[];
   onTagsChange: (tags: Tag[]) => void;
   accountId: string;
-  allTags: Tag[];
 }
 
-export function TagList({ initialTags, onTagsChange, accountId, allTags }: TagListProps) {
+export function TagList({ initialTags, onTagsChange, accountId }: TagListProps) {
   const [tags, setTags] = useState<Tag[]>(initialTags);
   const [showAddForm, setShowAddForm] = useState(false);
-  const { fetchAllTags, addTag } = useTagStore();
-
-  useEffect(() => {
-    fetchAllTags(accountId);
-  }, [accountId, fetchAllTags]);
+  const { tags: allTags, addTag } = useTags();
 
   const handleAddTag = async (tagName: string) => {
     if (!tags.some(tag => tag.name.toLowerCase() === tagName.toLowerCase())) {
@@ -26,7 +21,7 @@ export function TagList({ initialTags, onTagsChange, accountId, allTags }: TagLi
       if (existingTag) {
         newTag = existingTag;
       } else {
-        newTag = await addTag(accountId, tagName);
+        newTag = await addTag(tagName);
       }
 
       const updatedTags = [...tags, newTag];

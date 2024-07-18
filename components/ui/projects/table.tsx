@@ -6,7 +6,7 @@ import { TagList } from '@/components/ui/tags/taglist';
 import { DeleteProject, UpdateProject } from '@/components/ui/projects/button';
 import Pagination from '../pagination';
 import { useProjects } from '@/app/lib/hooks/useProjects';
-import { useTagStore } from '@/app/lib/store/tag-store';
+import { useTags } from '@/app/lib/hooks/useTags';
 import { ErrorBoundaryWithToast } from '../errors/error-boundary';
 import { ProjectWithRelations, Tag } from '@/app/lib/definitions';
 import { ArtifactThumbnail } from '../artifacts/artifact-thumbnail';
@@ -25,7 +25,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
     updateProjectTags,
   } = useProjects();
 
-  const { allTags, getOrCreateTags } = useTagStore();
+  const { tags: allTags, getOrCreateTags } = useTags();
 
   const router = useRouter();
   const pathname = usePathname();
@@ -39,7 +39,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
   }, [searchParams, handleSearch, handlePageChange]);
 
   const handleTagsChange = async (projectId: string, newTags: Tag[]) => {
-    const tags = await getOrCreateTags(accountId, newTags.map(tag => tag.name));
+    const tags = await getOrCreateTags(newTags.map(tag => tag.name));
     await updateProjectTags({ projectId, tags: tags.map(tag => tag.name) });
   };
 
@@ -90,7 +90,6 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
                     <td className="px-3 py-3">
                       <TagList
                         initialTags={project.tags}
-                        allTags={allTags}
                         onTagsChange={(newTags) => handleTagsChange(project.id, newTags)}
                         accountId={accountId}
                       />
