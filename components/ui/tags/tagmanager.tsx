@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTags } from '@/app/lib/hooks/useTags';
+import { Tag } from '@/app/lib/definitions';
 
 interface TagManagerProps {
   selectedTags: string[];
@@ -12,16 +13,18 @@ export function TagManager({ selectedTags, onTagsChange, allTags }: TagManagerPr
   const [newTag, setNewTag] = useState('');
 
   const handleAddTag = async () => {
-    const trimmedTag = newTag.trim();
+    const trimmedTag = newTag.trim().toLowerCase();
     if (trimmedTag && !selectedTags.includes(trimmedTag)) {
-      await addTag(trimmedTag);
-      onTagsChange([...selectedTags, trimmedTag]);
+      const createdTag = await addTag(trimmedTag);
+      const updatedTags = [...selectedTags, createdTag.name];
+      onTagsChange(updatedTags);
       setNewTag('');
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    onTagsChange(selectedTags.filter(tag => tag !== tagToRemove));
+    const updatedTags = selectedTags.filter(tag => tag !== tagToRemove);
+    onTagsChange(updatedTags);
   };
 
   const handleSelectTag = (tagName: string) => {

@@ -82,27 +82,23 @@ export function useTags() {
     setCurrentPage(page);
   }, []);
 
-  const addTag = useCallback(async (name: string) => {
+  const addTag = useCallback(async (name: string): Promise<Tag> => {
     const trimmedName = name.trim().toLowerCase();
     const existingTag = tags.find(tag => tag.name.toLowerCase() === trimmedName);
     if (existingTag) return existingTag;
 
-    return addTagMutation.mutateAsync(trimmedName);
+    const newTag = await addTagMutation.mutateAsync(trimmedName);
+    return newTag;
   }, [tags, addTagMutation]);
 
-  const getOrCreateTags = useCallback(async (tagNames: string[]) => {
+  const getOrCreateTags = useCallback(async (tagNames: string[]): Promise<Tag[]> => {
     const result: Tag[] = [];
     for (const name of tagNames) {
-      const existingTag = tags.find(tag => tag.name.toLowerCase() === name.toLowerCase());
-      if (existingTag) {
-        result.push(existingTag);
-      } else {
-        const newTag = await addTag(name);
-        result.push(newTag);
-      }
+      const tag = await addTag(name);
+      result.push(tag);
     }
     return result;
-  }, [tags, addTag]);
+  }, [addTag]);
 
   const tagNamesToTags = useCallback((tagNames: string[]) => {
     return tags.filter(tag => tagNames.includes(tag.name));

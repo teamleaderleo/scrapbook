@@ -80,8 +80,7 @@ export function ArtifactForm({
     if (formRef.current) {
       const formData = new FormData(formRef.current);
       formData.delete('tags');
-      const tagObjects = tagNamesToTags(selectedTags);
-      tagObjects.forEach(tag => formData.append('tags', tag.id));
+      selectedTags.forEach(tag => formData.append('tags', tag));
       onSubmit(formData);
     }
   };
