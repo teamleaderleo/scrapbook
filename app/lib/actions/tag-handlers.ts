@@ -48,35 +48,35 @@ export async function handleTagUpdate(
   });
 }
 
-export async function ensureTagsExistWithinTransaction(
-  tx: any,
-  accountId: string,
-  tagNames: string[]
-): Promise<Tag[]> {
-  const existingTags = await tx.select().from(tags)
-    .where(and(
-      eq(tags.accountId, accountId),
-      inArray(tags.name, tagNames)
-    ));
+// export async function ensureTagsExistWithinTransaction(
+//   tx: any,
+//   accountId: string,
+//   tagNames: string[]
+// ): Promise<Tag[]> {
+//   const existingTags = await tx.select().from(tags)
+//     .where(and(
+//       eq(tags.accountId, accountId),
+//       inArray(tags.name, tagNames)
+//     ));
 
-  const existingTagNames = new Set(existingTags.map((tag: { name: string; }) => tag.name));
-  const newTagNames = tagNames.filter(name => !existingTagNames.has(name));
+//   const existingTagNames = new Set(existingTags.map((tag: { name: string; }) => tag.name));
+//   const newTagNames = tagNames.filter(name => !existingTagNames.has(name));
 
-  const createdTags: Tag[] = [];
-  for (const name of newTagNames) {
-    const newTag = { id: uuid(), accountId, name };
-    await tx.insert(tags).values(newTag);
-    createdTags.push(newTag);
-  }
+//   const createdTags: Tag[] = [];
+//   for (const name of newTagNames) {
+//     const newTag = { id: uuid(), accountId, name };
+//     await tx.insert(tags).values(newTag);
+//     createdTags.push(newTag);
+//   }
 
-  return [...existingTags, ...createdTags];
-}
+//   return [...existingTags, ...createdTags];
+// }
 
-export async function ensureTagsExist(
-  accountId: string,
-  tagNames: string[]
-): Promise<Tag[]> {
-  return db.transaction(async (tx) => {
-    return ensureTagsExistWithinTransaction(tx, accountId, tagNames);
-  });
-}
+// export async function ensureTagsExist(
+//   accountId: string,
+//   tagNames: string[]
+// ): Promise<Tag[]> {
+//   return db.transaction(async (tx) => {
+//     return ensureTagsExistWithinTransaction(tx, accountId, tagNames);
+//   });
+// }

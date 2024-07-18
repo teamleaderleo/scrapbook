@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { db } from '../db/db.server';
 import { Tag } from '../definitions';
 import { tags } from '../db/schema';
-import { handleTagUpdateWithinTransaction, ensureTagsExistWithinTransaction } from './tag-handlers';
+import { handleTagUpdateWithinTransaction, } from './tag-handlers';
 import { v4 as uuid } from 'uuid';
 
 export async function createTag(accountId: string, name: string): Promise<Tag> {
@@ -38,8 +38,8 @@ export async function deleteTag(accountId: string, tagId: string): Promise<{ suc
   }
 }
 
-export async function ensureTagsExist(accountId: string, tagNames: string[]): Promise<Tag[]> {
-  return db.transaction(async (tx) => {
-    return ensureTagsExistWithinTransaction(tx, accountId, tagNames);
-  });
-}
+// export async function ensureTagsExist(accountId: string, tagNames: string[]): Promise<Tag[]> {
+//   return db.transaction(async (tx) => {
+//     return ensureTagsExistWithinTransaction(tx, accountId, tagNames);
+//   });
+// }
