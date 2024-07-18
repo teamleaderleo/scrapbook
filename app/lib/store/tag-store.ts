@@ -10,13 +10,16 @@ interface TagStore {
   updateTagName: (accountId: string, tagId: string, newName: string) => Promise<void>;
   removeTag: (accountId: string, tagId: string) => Promise<void>;
   fetchAllTags: (accountId: string) => Promise<void>;
-  ensureTagsExist: (accountId: string, tagNames: string[]) => Promise<Tag[]>;
+  getOrCreateTags: (accountId: string, tagNames: string[]) => Promise<Tag[]>;
 }
 
 export const useTagStore = create<TagStore>((set, get) => ({
   allTags: [],
   setAllTags: (allTags) => set({ allTags }),
   addTag: async (accountId, name) => {
+    const existingTag = get().allTags.find(tag => tag.name.toLowerCase() === name.toLowerCase());
+    if (existingTag) return existingTag;
+
     const newTag = await createTag(accountId, name);
     set((state) => ({ allTags: [...state.allTags, newTag] }));
     return newTag;
@@ -37,10 +40,20 @@ export const useTagStore = create<TagStore>((set, get) => ({
     const fetchedTags = await fetchAllTags(accountId);
     set({ allTags: fetchedTags });
   },
-  ensureTagsExist: async (accountId, tagNames) => {
+  getOrCreateTags: async (accountId, tagNames) => {
     const existingTags = get().allTags;
-    const newTags = tagNames.filter(name => !existingTags.some(tag => tag.name === name));
-    const createdTags = await Promise.all(newTags.map(name => get().addTag(accountId, name)));
-    return [...existingTags.filter(tag => tagNames.includes(tag.name)), ...createdTags];
+    const result: Tag[] = [];
+
+    for (const name of tagNames) {
+      const existingTag = existingTags.find(tag => tag.name.toLowerCase() === name.toLowerCase());
+      if (existingTag) {
+        result.push(existingTag);
+      } else {
+        const newTag = await get().addTag(accountId, name);
+        result.push(newTag);
+      }
+    }
+
+    return result;
   },
 }));

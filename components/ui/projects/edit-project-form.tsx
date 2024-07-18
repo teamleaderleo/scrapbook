@@ -13,7 +13,7 @@ export default function EditProjectForm({ projectId }: { projectId: string }) {
   const router = useRouter();
   const { projects, updateProject, isLoading: isLoadingProjects, getAISuggestions } = useProjects();
   const { artifacts, isLoading: isLoadingArtifacts, error: artifactsError } = useArtifacts();
-  const { allTags, fetchAllTags, ensureTagsExist } = useTagStore();
+  const { allTags, fetchAllTags, getOrCreateTags } = useTagStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
 
@@ -59,7 +59,7 @@ export default function EditProjectForm({ projectId }: { projectId: string }) {
 
   const handleTagsChange = async (newTags: Tag[]) => {
     const tagNames = newTags.map(tag => tag.name);
-    await ensureTagsExist(ADMIN_UUID, tagNames);
+    await getOrCreateTags(ADMIN_UUID, tagNames);
   };
 
   return (

@@ -25,7 +25,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
     updateProjectTags,
   } = useProjects();
 
-  const { allTags, ensureTagsExist } = useTagStore();
+  const { allTags, getOrCreateTags } = useTagStore();
 
   const router = useRouter();
   const pathname = usePathname();
@@ -39,7 +39,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
   }, [searchParams, handleSearch, handlePageChange]);
 
   const handleTagsChange = async (projectId: string, newTags: Tag[]) => {
-    const tags = await ensureTagsExist(accountId, newTags.map(tag => tag.name));
+    const tags = await getOrCreateTags(accountId, newTags.map(tag => tag.name));
     await updateProjectTags({ projectId, tags: tags.map(tag => tag.name) });
   };
 

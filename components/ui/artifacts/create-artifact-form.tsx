@@ -13,7 +13,7 @@ export default function CreateArtifactForm() {
   const router = useRouter();
   const { addArtifact, getAISuggestions } = useArtifacts();
   const { projects, isLoading: isLoadingProjects, error: projectsError } = useProjects();
-  const { allTags, fetchAllTags, ensureTagsExist } = useTagStore();
+  const { allTags, fetchAllTags, getOrCreateTags } = useTagStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [suggestedContentExtensions, setSuggestedContentExtensions] = useState<string[]>([]);
@@ -57,7 +57,7 @@ export default function CreateArtifactForm() {
 
   const handleTagsChange = async (newTags: Tag[]) => {
     const tagNames = newTags.map(tag => tag.name);
-    await ensureTagsExist(ADMIN_UUID, tagNames);
+    await getOrCreateTags(ADMIN_UUID, tagNames);
   };
 
   if (isLoadingProjects) return <div>Loading projects...</div>;

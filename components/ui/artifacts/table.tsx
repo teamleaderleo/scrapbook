@@ -25,7 +25,7 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
     updateArtifactTags,
   } = useArtifacts();
 
-  const { allTags, ensureTagsExist } = useTagStore();
+  const { allTags, getOrCreateTags } = useTagStore();
 
   const router = useRouter();
   const pathname = usePathname();
@@ -39,7 +39,7 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
   }, [searchParams, handleSearch, handlePageChange]);
 
   const handleTagsChange = async (artifactId: string, newTags: Tag[]) => {
-    const tags = await ensureTagsExist(accountId, newTags.map(tag => tag.name));
+    const tags = await getOrCreateTags(accountId, newTags.map(tag => tag.name));
     await updateArtifactTags({ artifactId, tags });
   };
   
