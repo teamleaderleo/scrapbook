@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ArtifactWithRelations, ProjectWithRelations } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -27,16 +27,18 @@ export function ProjectForm({
   suggestedTags = [],
   onGetAISuggestions,
 }: ProjectFormProps) {
-  const { tagNames, tagNamesToTags } = useTags();
+  const { tagNames } = useTags();
   const [selectedTags, setSelectedTags] = useState<string[]>(project.tags.map(t => t.name));
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    formData.delete('tags');
-    const tagObjects = tagNamesToTags(selectedTags);
-    tagObjects.forEach(tag => formData.append('tags', tag.id));
-    onSubmit(formData);
+    if (formRef.current) {
+      const formData = new FormData(formRef.current);
+      formData.delete('tags');
+      selectedTags.forEach(tag => formData.append('tags', tag));
+      onSubmit(formData);
+    }
   };
 
   const handleAddSuggestedTag = (tagName: string) => {
