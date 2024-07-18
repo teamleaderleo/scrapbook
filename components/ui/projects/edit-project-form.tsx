@@ -1,42 +1,79 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ArtifactWithRelations, ProjectWithRelations } from '@/app/lib/definitions';
-import { updateProject } from '@/app/lib/actions/project-actions';
-import { useFormState } from 'react-dom';
-import { ADMIN_UUID } from '@/app/lib/constants';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Tag } from '@/app/lib/definitions';
 import { ProjectForm } from '@/components/ui/projects/project-form';
+import { useProjects } from '@/app/lib/hooks/useProjects';
+import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
+import { useTagStore } from '@/app/lib/store/tag-store';
+import { ADMIN_UUID } from '@/app/lib/constants';
 
-export default function EditProjectForm({
-  project,
-  artifacts,
-}: {
-  project: ProjectWithRelations;
-  artifacts: ArtifactWithRelations[];
-}) {
+export default function EditProjectForm({ projectId }: { projectId: string }) {
+  const router = useRouter();
+  const { projects, updateProject, isLoading: isLoadingProjects, getAISuggestions } = useProjects();
+  const { artifacts, isLoading: isLoadingArtifacts, error: artifactsError } = useArtifacts();
+  const { allTags, fetchAllTags, ensureTagsExist } = useTagStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const initialState = { message: null, errors: {} };
-  const updateProjectWithId = updateProject.bind(null, project.id, ADMIN_UUID);
-  const [state, formAction] = useFormState(updateProjectWithId, initialState);
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
 
-  const handleSubmit = (formData: FormData) => {
+  const project = projects?.find(p => p.id === projectId);
+
+  useEffect(() => {
+    fetchAllTags(ADMIN_UUID);
+  }, [fetchAllTags]);
+
+  useEffect(() => {
+    if (!isLoadingProjects && !project) {
+      router.replace('/dashboard/projects');
+    }
+  }, [project, projectId, router, isLoadingProjects]);
+
+  if (isLoadingProjects || isLoadingArtifacts) {
+    return <div>Loading...</div>;
+  }
+
+  if (artifactsError) {
+    return <div>Error loading artifacts: {artifactsError.message}</div>;
+  }
+
+  if (!project) {
+    return null;
+  }
+
+  const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
-    formAction(formData);
+    try {
+      await updateProject({ id: projectId, formData });
+      router.push('/dashboard/projects');
+    } catch (error) {
+      console.error('Failed to update project:', error);
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGetAISuggestions = async () => {
+    const { tags } = await getAISuggestions(project.name, project.description || '');
+    setSuggestedTags(tags);
+  };
+
+  const handleTagsChange = async (newTags: Tag[]) => {
+    const tagNames = newTags.map(tag => tag.name);
+    await ensureTagsExist(ADMIN_UUID, tagNames);
   };
 
   return (
-    <>
-      <ProjectForm
-        project={project}
-        artifacts={artifacts}
-        onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
-        submitButtonText="Update Project"
-        cancelHref="/dashboard/projects"
-      />
-      {state.message && (
-        <p className="mt-2 text-sm text-red-500">{state.message}</p>
-      )}
-    </>
+    <ProjectForm
+      project={project}
+      artifacts={artifacts || []}
+      onSubmit={handleSubmit}
+      isSubmitting={isSubmitting}
+      submitButtonText="Update Project"
+      cancelHref="/dashboard/projects"
+      suggestedTags={suggestedTags}
+      onGetAISuggestions={handleGetAISuggestions}
+      allTags={allTags}
+      onTagsChange={handleTagsChange}
+    />
   );
 }

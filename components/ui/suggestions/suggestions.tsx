@@ -4,10 +4,15 @@ interface SuggestionsProps {
   suggestedTags?: string[];
   suggestedContentExtensions?: string[];
   onAddTag: (tag: string) => void;
-  onAddContentExtension: (extension: string) => void;
+  onAddContentExtension?: (extension: string) => void;
 }
 
-export function Suggestions({ suggestedTags, suggestedContentExtensions, onAddTag, onAddContentExtension }: SuggestionsProps) {
+export function Suggestions({ 
+  suggestedTags, 
+  suggestedContentExtensions, 
+  onAddTag, 
+  onAddContentExtension 
+}: SuggestionsProps) {
   const handleAddTag = (e: React.MouseEvent, tag: string) => {
     e.preventDefault();  // Prevent form submission
     onAddTag(tag);
@@ -15,7 +20,9 @@ export function Suggestions({ suggestedTags, suggestedContentExtensions, onAddTa
 
   const handleAddExtension = (e: React.MouseEvent, extension: string) => {
     e.preventDefault();  // Prevent form submission
-    onAddContentExtension(extension);
+    if (onAddContentExtension) {
+      onAddContentExtension(extension);
+    }
   };
 
   return (
@@ -37,7 +44,7 @@ export function Suggestions({ suggestedTags, suggestedContentExtensions, onAddTa
           </div>
         </div>
       )}
-      {suggestedContentExtensions && suggestedContentExtensions.length > 0 && (
+      {suggestedContentExtensions && suggestedContentExtensions.length > 0 && onAddContentExtension && (
         <div className="mt-4">
           <h3 className="font-semibold">Content Extension Ideas</h3>
           <ul className="list-disc pl-5">

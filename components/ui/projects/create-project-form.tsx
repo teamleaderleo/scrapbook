@@ -2,47 +2,76 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArtifactWithRelations } from '@/app/lib/definitions';
-import { createProject, State } from '@/app/lib/actions/project-actions';
-import { useFormState } from 'react-dom';
-import { ADMIN_UUID } from '@/app/lib/constants';
+import { Tag } from '@/app/lib/definitions';
 import { ProjectForm } from '@/components/ui/projects/project-form';
+import { useProjects } from '@/app/lib/hooks/useProjects';
+import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
+import { useTagStore } from '@/app/lib/store/tag-store';
+import { ADMIN_UUID } from '@/app/lib/constants';
 
-export default function CreateProjectForm({ artifacts }: { artifacts: ArtifactWithRelations[] }) {
+export default function CreateProjectForm() {
   const router = useRouter();
+  const { addProject, getAISuggestions } = useProjects();
+  const { artifacts, isLoading: isLoadingArtifacts, error: artifactsError } = useArtifacts();
+  const { allTags, fetchAllTags, ensureTagsExist } = useTagStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const initialState: State = { message: null, errors: {} };
-  const createProjectWithAccount = createProject.bind(null, ADMIN_UUID);
-  const [state, formAction] = useFormState(createProjectWithAccount, initialState);
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (state.message === 'Project created successfully') {
-      setIsSubmitting(false);
-      setTimeout(() => router.push('/dashboard/projects'), 2000);
-    } else if (state.message) {
-      setIsSubmitting(false);
-    }
-  }, [state, router]);
-
-  const handleSubmit = (formData: FormData) => {
-    setIsSubmitting(true);
-    formAction(formData);
+  const defaultProject = {
+    accountId: ADMIN_UUID,
+    id: '',
+    name: '',
+    description: '',
+    status: 'pending' as const,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    tags: [],
+    artifacts: []
   };
 
+  useEffect(() => {
+    fetchAllTags(ADMIN_UUID);
+  }, [fetchAllTags]);
+
+  const handleSubmit = async (formData: FormData) => {
+    setIsSubmitting(true);
+    try {
+      await addProject(formData);
+      router.push('/dashboard/projects');
+    } catch (error) {
+      console.error('Failed to create project:', error);
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGetAISuggestions = async () => {
+    const name = (document.getElementById('name') as HTMLInputElement)?.value || '';
+    const description = (document.getElementById('description') as HTMLTextAreaElement)?.value || '';
+    
+    const { tags } = await getAISuggestions(name, description);
+    setSuggestedTags(tags);
+  };
+
+  const handleTagsChange = async (newTags: Tag[]) => {
+    const tagNames = newTags.map(tag => tag.name);
+    await ensureTagsExist(ADMIN_UUID, tagNames);
+  };
+
+  if (isLoadingArtifacts) return <div>Loading artifacts...</div>;
+  if (artifactsError) return <div>Error loading artifacts: {artifactsError.message}</div>;
+
   return (
-    <>
-      <ProjectForm
-        artifacts={artifacts}
-        onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
-        submitButtonText="Create Project"
-        cancelHref="/dashboard/projects"
-      />
-      {state.message && (
-        <p className={`mt-2 text-sm ${state.message.includes('Error') ? 'text-red-500' : 'text-green-500'}`}>
-          {state.message}
-        </p>
-      )}
-    </>
+    <ProjectForm
+      project={defaultProject}
+      artifacts={artifacts || []}
+      onSubmit={handleSubmit}
+      isSubmitting={isSubmitting}
+      submitButtonText="Create Project"
+      cancelHref="/dashboard/projects"
+      suggestedTags={suggestedTags}
+      onGetAISuggestions={handleGetAISuggestions}
+      allTags={allTags}
+      onTagsChange={handleTagsChange}
+    />
   );
 }
