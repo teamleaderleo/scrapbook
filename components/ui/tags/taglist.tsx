@@ -1,48 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { Tag } from '@/app/lib/definitions';
 import { useTags } from '@/app/lib/hooks/useTags';
 
 interface TagListProps {
-  initialTags: Tag[];
-  onTagsChange: (tags: Tag[]) => void;
+  initialTags: string[];
+  onTagsChange: (tags: string[]) => void;
   accountId: string;
 }
 
 export function TagList({ initialTags, onTagsChange, accountId }: TagListProps) {
-  const [tags, setTags] = useState<Tag[]>(initialTags);
+  const [tags, setTags] = useState<string[]>(initialTags);
   const [showAddForm, setShowAddForm] = useState(false);
-  const { tags: allTags, addTag } = useTags();
+  const { tagNames, addTag } = useTags();
 
   const handleAddTag = async (tagName: string) => {
-    if (!tags.some(tag => tag.name.toLowerCase() === tagName.toLowerCase())) {
-      let newTag: Tag;
-      const existingTag = allTags.find(tag => tag.name.toLowerCase() === tagName.toLowerCase());
-      
-      if (existingTag) {
-        newTag = existingTag;
-      } else {
-        newTag = await addTag(tagName);
-      }
-
-      const updatedTags = [...tags, newTag];
+    if (!tags.includes(tagName.toLowerCase())) {
+      await addTag(tagName);
+      const updatedTags = [...tags, tagName];
       setTags(updatedTags);
       onTagsChange(updatedTags);
     }
   };
 
-  const handleRemoveTag = async (tagId: string) => {
-    const updatedTags = tags.filter(tag => tag.id !== tagId);
+  const handleRemoveTag = (tagToRemove: string) => {
+    const updatedTags = tags.filter(tag => tag !== tagToRemove);
     setTags(updatedTags);
     onTagsChange(updatedTags);
   };
 
   return (
     <div className="flex flex-wrap gap-1 items-center">
-      {tags.map((tag: Tag) => (
-        <span key={tag.id} className="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full flex items-center">
-          {tag.name}
+      {tags.map((tag) => (
+        <span key={tag} className="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full flex items-center">
+          {tag}
           <button
-            onClick={() => handleRemoveTag(tag.id)}
+            onClick={() => handleRemoveTag(tag)}
             className="ml-1 text-xs text-blue-800 hover:text-blue-900"
           >
             ×
@@ -51,7 +42,7 @@ export function TagList({ initialTags, onTagsChange, accountId }: TagListProps) 
       ))}
       {showAddForm ? (
         <AddTagForm
-          existingTags={allTags.filter(tag => !tags.some(t => t.name.toLowerCase() === tag.name.toLowerCase()))}
+          existingTags={tagNames.filter(tag => !tags.includes(tag.toLowerCase()))}
           onAddTag={handleAddTag}
           onClose={() => setShowAddForm(false)}
         />
@@ -68,22 +59,16 @@ export function TagList({ initialTags, onTagsChange, accountId }: TagListProps) 
 }
 
 interface AddTagFormProps {
-  existingTags: Tag[];
+  existingTags: string[];
   onAddTag: (tagName: string) => void;
   onClose: () => void;
 }
 
 function AddTagForm({ existingTags, onAddTag, onClose }: AddTagFormProps) {
   const [newTag, setNewTag] = useState('');
-  const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
-
-  useEffect(() => {
-    setFilteredTags(
-      existingTags.filter(tag => 
-        tag.name.toLowerCase().includes(newTag.toLowerCase())
-      )
-    );
-  }, [newTag, existingTags]);
+  const filteredTags = existingTags.filter(tag => 
+    tag.toLowerCase().includes(newTag.toLowerCase())
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,14 +96,14 @@ function AddTagForm({ existingTags, onAddTag, onClose }: AddTagFormProps) {
         <ul className="mt-2 max-h-32 overflow-y-auto">
           {filteredTags.map(tag => (
             <li 
-              key={tag.id} 
+              key={tag} 
               className="cursor-pointer hover:bg-gray-100 p-1"
               onClick={() => {
-                onAddTag(tag.name);
+                onAddTag(tag);
                 onClose();
               }}
             >
-              {tag.name}
+              {tag}
             </li>
           ))}
         </ul>

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { TagManager } from '@/components/ui/tags/tagmanager';
 import { Suggestions } from '@/components/ui/suggestions/suggestions';
+import { useTags } from '@/app/lib/hooks/useTags';
 
 interface ArtifactFormProps {
   artifact?: ArtifactWithRelations;
@@ -15,8 +16,6 @@ interface ArtifactFormProps {
   suggestedTags?: string[];
   suggestedContentExtensions?: string[];
   onGetAISuggestions?: () => void;
-  allTags: Tag[];
-  onTagsChange: (tags: Tag[]) => void;
 }
 
 export function ArtifactForm({
@@ -29,10 +28,9 @@ export function ArtifactForm({
   suggestedTags = [],
   suggestedContentExtensions = [],
   onGetAISuggestions,
-  allTags,
-  onTagsChange,
 }: ArtifactFormProps) {
-  const [tags, setTags] = useState<Tag[]>(artifact?.tags || []);
+  const { tagNames, tagNamesToTags } = useTags();
+  const [selectedTags, setSelectedTags] = useState<string[]>(artifact?.tags.map(t => t.name) || []);
   const [contentItems, setContentItems] = useState<{id?: string, type: ContentType, content: string | File}[]>(
     (artifact?.contents && artifact.contents.length > 0)
       ? artifact.contents.map(c => ({id: c.id, type: c.type, content: c.content}))
@@ -43,11 +41,8 @@ export function ArtifactForm({
   const formRef = useRef<HTMLFormElement>(null);
 
   const handleAddSuggestedTag = (tagName: string) => {
-    const existingTag = allTags.find(t => t.name === tagName);
-    if (existingTag && !tags.some(t => t.id === existingTag.id)) {
-      const newTags = [...tags, existingTag];
-      setTags(newTags);
-      onTagsChange(newTags);
+    if (!selectedTags.includes(tagName)) {
+      setSelectedTags([...selectedTags, tagName]);
     }
   };
 
@@ -85,7 +80,8 @@ export function ArtifactForm({
     if (formRef.current) {
       const formData = new FormData(formRef.current);
       formData.delete('tags');
-      tags.forEach(tag => formData.append('tags', tag.id));
+      const tagObjects = tagNamesToTags(selectedTags);
+      tagObjects.forEach(tag => formData.append('tags', tag.id));
       onSubmit(formData);
     }
   };
@@ -210,12 +206,9 @@ export function ArtifactForm({
           <div className="mb-4">
             <label className="mb-2 block text-sm font-medium">Tags</label>
             <TagManager
-              selectedTags={tags}
-              onTagsChange={(newTags) => {
-                setTags(newTags);
-                onTagsChange(newTags);
-              }}
-              allTags={allTags}
+              selectedTags={selectedTags}
+              onTagsChange={setSelectedTags}
+              allTags={tagNames}
             />
           </div>
 

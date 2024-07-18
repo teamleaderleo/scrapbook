@@ -2,26 +2,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Tag } from '@/app/lib/definitions';
 import { ProjectForm } from '@/components/ui/projects/project-form';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
-import { useTagStore } from '@/app/lib/store/tag-store';
-import { ADMIN_UUID } from '@/app/lib/constants';
+import { useTags } from '@/app/lib/hooks/useTags';
 
 export default function EditProjectForm({ projectId }: { projectId: string }) {
   const router = useRouter();
   const { projects, updateProject, isLoading: isLoadingProjects, getAISuggestions } = useProjects();
   const { artifacts, isLoading: isLoadingArtifacts, error: artifactsError } = useArtifacts();
-  const { allTags, fetchAllTags, getOrCreateTags } = useTagStore();
+  const { tagNamesToTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
 
   const project = projects?.find(p => p.id === projectId);
-
-  useEffect(() => {
-    fetchAllTags(ADMIN_UUID);
-  }, [fetchAllTags]);
 
   useEffect(() => {
     if (!isLoadingProjects && !project) {
@@ -44,6 +38,11 @@ export default function EditProjectForm({ projectId }: { projectId: string }) {
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
     try {
+      const tagNames = formData.getAll('tags') as string[];
+      formData.delete('tags');
+      const tagObjects = tagNamesToTags(tagNames);
+      tagObjects.forEach(tag => formData.append('tags', tag.id));
+
       await updateProject({ id: projectId, formData });
       router.push('/dashboard/projects');
     } catch (error) {
@@ -57,11 +56,6 @@ export default function EditProjectForm({ projectId }: { projectId: string }) {
     setSuggestedTags(tags);
   };
 
-  const handleTagsChange = async (newTags: Tag[]) => {
-    const tagNames = newTags.map(tag => tag.name);
-    await getOrCreateTags(ADMIN_UUID, tagNames);
-  };
-
   return (
     <ProjectForm
       project={project}
@@ -72,8 +66,6 @@ export default function EditProjectForm({ projectId }: { projectId: string }) {
       cancelHref="/dashboard/projects"
       suggestedTags={suggestedTags}
       onGetAISuggestions={handleGetAISuggestions}
-      allTags={allTags}
-      onTagsChange={handleTagsChange}
     />
   );
 }

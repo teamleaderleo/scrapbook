@@ -8,7 +8,7 @@ import Pagination from '../pagination';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useTags } from '@/app/lib/hooks/useTags';
 import { ErrorBoundaryWithToast } from '../errors/error-boundary';
-import { ProjectWithRelations, Tag } from '@/app/lib/definitions';
+import { ProjectWithRelations } from '@/app/lib/definitions';
 import { ArtifactThumbnail } from '../artifacts/artifact-thumbnail';
 
 export function ProjectsTable({ accountId }: { accountId: string }) {
@@ -25,7 +25,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
     updateProjectTags,
   } = useProjects();
 
-  const { tags: allTags, getOrCreateTags } = useTags();
+  const { tagNamesToTags } = useTags();
 
   const router = useRouter();
   const pathname = usePathname();
@@ -38,9 +38,8 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
     handlePageChange(page);
   }, [searchParams, handleSearch, handlePageChange]);
 
-  const handleTagsChange = async (projectId: string, newTags: Tag[]) => {
-    const tags = await getOrCreateTags(newTags.map(tag => tag.name));
-    await updateProjectTags({ projectId, tags: tags.map(tag => tag.name) });
+  const handleTagsChange = async (projectId: string, newTagNames: string[]) => {
+    await updateProjectTags({ projectId, tags: newTagNames });
   };
 
   useEffect(() => {
@@ -89,7 +88,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
                     <td className="whitespace-nowrap px-3 py-3">{project.status}</td>
                     <td className="px-3 py-3">
                       <TagList
-                        initialTags={project.tags}
+                        initialTags={project.tags.map(t => t.name)}
                         onTagsChange={(newTags) => handleTagsChange(project.id, newTags)}
                         accountId={accountId}
                       />

@@ -1,19 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArtifactWithRelations, Tag } from '@/app/lib/definitions';
+import { ArtifactWithRelations } from '@/app/lib/definitions';
 import { ArtifactForm } from '@/components/ui/artifacts/artifact-form';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
 import { useProjects } from '@/app/lib/hooks/useProjects';
-import { useTagStore } from '@/app/lib/store/tag-store';
+import { useTags } from '@/app/lib/hooks/useTags';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 export default function CreateArtifactForm() {
   const router = useRouter();
   const { addArtifact, getAISuggestions } = useArtifacts();
   const { projects, isLoading: isLoadingProjects, error: projectsError } = useProjects();
-  const { allTags, fetchAllTags, getOrCreateTags } = useTagStore();
+  const { getOrCreateTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [suggestedContentExtensions, setSuggestedContentExtensions] = useState<string[]>([]);
@@ -29,10 +29,6 @@ export default function CreateArtifactForm() {
     tags: [],
     projects: []
   };
-
-  useEffect(() => {
-    fetchAllTags(ADMIN_UUID);
-  }, [fetchAllTags]);
 
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
@@ -55,11 +51,6 @@ export default function CreateArtifactForm() {
     setSuggestedContentExtensions(extensions);
   };
 
-  const handleTagsChange = async (newTags: Tag[]) => {
-    const tagNames = newTags.map(tag => tag.name);
-    await getOrCreateTags(ADMIN_UUID, tagNames);
-  };
-
   if (isLoadingProjects) return <div>Loading projects...</div>;
   if (projectsError) return <div>Error loading projects: {projectsError.message}</div>;
 
@@ -74,8 +65,6 @@ export default function CreateArtifactForm() {
       suggestedTags={suggestedTags}
       suggestedContentExtensions={suggestedContentExtensions}
       onGetAISuggestions={handleGetAISuggestions}
-      allTags={allTags}
-      onTagsChange={handleTagsChange}
     />
   );
 }

@@ -2,27 +2,21 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Tag } from '@/app/lib/definitions';
 import { ArtifactForm } from '@/components/ui/artifacts/artifact-form';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
 import { useProjects } from '@/app/lib/hooks/useProjects';
-import { useTagStore } from '@/app/lib/store/tag-store';
-import { ADMIN_UUID } from '@/app/lib/constants';
+import { useTags } from '@/app/lib/hooks/useTags';
 
 export default function EditArtifactForm({ artifactId }: { artifactId: string }) {
   const router = useRouter();
   const { artifacts, updateArtifact, isLoading: isLoadingArtifacts, getAISuggestions } = useArtifacts();
   const { projects, isLoading: isLoadingProjects, error: projectsError } = useProjects();
-  const { allTags, fetchAllTags, getOrCreateTags } = useTagStore();
+  const { getOrCreateTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [suggestedContentExtensions, setSuggestedContentExtensions] = useState<string[]>([]);
 
   const artifact = artifacts?.find(a => a.id === artifactId);
-
-  useEffect(() => {
-    fetchAllTags(ADMIN_UUID);
-  }, [fetchAllTags]);
 
   useEffect(() => {
     if (!isLoadingArtifacts && !artifact) {
@@ -60,11 +54,6 @@ export default function EditArtifactForm({ artifactId }: { artifactId: string })
     setSuggestedContentExtensions(extensions);
   };
 
-  const handleTagsChange = async (newTags: Tag[]) => {
-    const tagNames = newTags.map(tag => tag.name);
-    await getOrCreateTags(ADMIN_UUID, tagNames);
-  };
-
   return (
     <ArtifactForm
       artifact={artifact}
@@ -76,8 +65,6 @@ export default function EditArtifactForm({ artifactId }: { artifactId: string })
       suggestedTags={suggestedTags}
       suggestedContentExtensions={suggestedContentExtensions}
       onGetAISuggestions={handleGetAISuggestions}
-      allTags={allTags}
-      onTagsChange={handleTagsChange}
     />
   );
 }

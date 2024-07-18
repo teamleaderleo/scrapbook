@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { ArtifactWithRelations, ProjectWithRelations, Tag } from '@/app/lib/definitions';
+import { ArtifactWithRelations, ProjectWithRelations } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { TagManager } from '@/components/ui/tags/tagmanager';
 import { Suggestions } from '@/components/ui/suggestions/suggestions';
+import { useTags } from '@/app/lib/hooks/useTags';
 
 interface ProjectFormProps {
   project: ProjectWithRelations;
@@ -14,8 +15,6 @@ interface ProjectFormProps {
   cancelHref: string;
   suggestedTags?: string[];
   onGetAISuggestions?: () => void;
-  allTags: Tag[];
-  onTagsChange: (tags: Tag[]) => void;
 }
 
 export function ProjectForm({
@@ -27,24 +26,22 @@ export function ProjectForm({
   cancelHref,
   suggestedTags = [],
   onGetAISuggestions,
-  allTags,
-  onTagsChange,
 }: ProjectFormProps) {
-  const [tags, setTags] = useState<Tag[]>(project.tags);
+  const { tagNames, tagNamesToTags } = useTags();
+  const [selectedTags, setSelectedTags] = useState<string[]>(project.tags.map(t => t.name));
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    tags.forEach(tag => formData.append('tags', tag.id));
+    formData.delete('tags');
+    const tagObjects = tagNamesToTags(selectedTags);
+    tagObjects.forEach(tag => formData.append('tags', tag.id));
     onSubmit(formData);
   };
 
   const handleAddSuggestedTag = (tagName: string) => {
-    const existingTag = allTags.find(t => t.name === tagName);
-    if (existingTag && !tags.some(t => t.id === existingTag.id)) {
-      const newTags = [...tags, existingTag];
-      setTags(newTags);
-      onTagsChange(newTags);
+    if (!selectedTags.includes(tagName)) {
+      setSelectedTags([...selectedTags, tagName]);
     }
   };
 
@@ -122,12 +119,9 @@ export function ProjectForm({
           <div className="mb-4">
             <label className="mb-2 block text-sm font-medium">Tags</label>
             <TagManager
-              selectedTags={tags}
-              onTagsChange={(newTags) => {
-                setTags(newTags);
-                onTagsChange(newTags);
-              }}
-              allTags={allTags}
+              selectedTags={selectedTags}
+              onTagsChange={setSelectedTags}
+              allTags={tagNames}
             />
           </div>
 

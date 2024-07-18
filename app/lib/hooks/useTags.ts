@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import Fuse from 'fuse.js';
 import { Tag } from '@/app/lib/definitions';
 import { createTag, updateTag, deleteTag } from '@/app/lib/actions/tag-actions';
-
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedTags } from '../data/cached-tag-data';
 
@@ -85,7 +84,7 @@ export function useTags() {
 
   const addTag = useCallback(async (name: string) => {
     const trimmedName = name.trim().toLowerCase();
-    const existingTag = tags?.find(tag => tag.name.toLowerCase() === trimmedName);
+    const existingTag = tags.find(tag => tag.name.toLowerCase() === trimmedName);
     if (existingTag) return existingTag;
 
     return addTagMutation.mutateAsync(trimmedName);
@@ -94,7 +93,7 @@ export function useTags() {
   const getOrCreateTags = useCallback(async (tagNames: string[]) => {
     const result: Tag[] = [];
     for (const name of tagNames) {
-      const existingTag = tags?.find(tag => tag.name.toLowerCase() === name.toLowerCase());
+      const existingTag = tags.find(tag => tag.name.toLowerCase() === name.toLowerCase());
       if (existingTag) {
         result.push(existingTag);
       } else {
@@ -105,8 +104,17 @@ export function useTags() {
     return result;
   }, [tags, addTag]);
 
+  const tagNamesToTags = useCallback((tagNames: string[]) => {
+    return tags.filter(tag => tagNames.includes(tag.name));
+  }, [tags]);
+
+  const tagsToTagNames = useCallback((tags: Tag[]) => {
+    return tags.map(tag => tag.name);
+  }, []);
+
   return {
     tags,
+    tagNames: tags.map(tag => tag.name),
     filteredTags,
     paginatedTags,
     isLoading,
@@ -120,5 +128,7 @@ export function useTags() {
     updateTag: updateTagMutation.mutateAsync,
     deleteTag: deleteTagMutation.mutateAsync,
     getOrCreateTags,
+    tagNamesToTags,
+    tagsToTagNames,
   };
 }

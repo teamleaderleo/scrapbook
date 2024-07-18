@@ -81,8 +81,8 @@ export function useArtifacts() {
   );
 
   const updateArtifactTagsMutation = useMutation(
-    ({ artifactId, tags }: { artifactId: string; tags: Tag[] }) =>
-      handleTagUpdate(ADMIN_UUID, artifactId, tags.map(t => t.name)),
+    ({ artifactId, tags }: { artifactId: string; tags: string[] }) =>
+      handleTagUpdate(ADMIN_UUID, artifactId, tags),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['artifacts']);

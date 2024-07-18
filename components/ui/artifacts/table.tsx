@@ -38,9 +38,8 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
     handlePageChange(page);
   }, [searchParams, handleSearch, handlePageChange]);
 
-  const handleTagsChange = async (artifactId: string, newTags: Tag[]) => {
-    const tags = await getOrCreateTags(newTags.map(tag => tag.name));
-    await updateArtifactTags({ artifactId, tags });
+  const handleTagsChange = async (artifactId: string, newTags: string[]) => {
+    await updateArtifactTags({ artifactId, tags: newTags });
   };
   
   useEffect(() => {
@@ -105,7 +104,7 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
                     <td className="px-3 py-3">{artifact.description}</td>
                     <td className="px-3 py-3">
                       <TagList
-                        initialTags={artifact.tags}
+                        initialTags={artifact.tags.map(t => t.name)}
                         onTagsChange={(newTags) => handleTagsChange(artifact.id, newTags)}
                         accountId={accountId}
                       />
