@@ -7,33 +7,41 @@ import { tags, projectTags, artifactTags } from '../db/schema';
 import { v4 as uuid } from 'uuid';
 
 export async function handleTagUpdateWithinTransaction(
-  tx: any,
-  accountId: string,
-  itemId: string,
-  newTags: string[],
-  isProject: boolean
+    tx: any,
+    accountId: string,
+    itemId: string,
+    newTags: string[],
+    isProject: boolean
 ): Promise<void> {
   const tagsTable = isProject ? projectTags : artifactTags;
   const itemColumn = isProject ? 'projectId' : 'artifactId';
 
   for (const tagName of newTags) {
-    let [existingTag] = await tx.select().from(tags)
+    const existingTags = await tx.select().from(tags)
       .where(and(eq(tags.name, tagName), eq(tags.accountId, accountId)))
       .limit(1);
 
-    if (!existingTag) {
-      const tagId = uuid();
-      await tx.insert(tags).values({ id: tagId, name: tagName, accountId });
-      existingTag = { id: tagId, name: tagName, accountId };
-    }
+    const selectedTag = existingTags.length > 0 ? existingTags[0] : null;
 
-    await tx.insert(tagsTable)
-      .values({
-        accountId,
-        [itemColumn]: itemId,
-        tagId: existingTag.id
-      })
-      .onConflictDoNothing();
+    if (selectedTag) {
+      await tx
+        .insert(tagsTable)
+        .values({ accountId, 
+          [itemColumn]: itemId, 
+          tagId: selectedTag.id 
+        })
+        .onConflictDoNothing();
+    } else {
+        const tagId = uuid();
+        await tx.insert(tags).values({ id: tagId, name: tagName, accountId });
+        await tx.insert(tagsTable)
+          .values({
+            accountId,
+            [itemColumn]: itemId,
+            tagId: tagId
+          })
+          .onConflictDoNothing();
+    }
   }
 }
 
