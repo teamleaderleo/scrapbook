@@ -7,6 +7,7 @@ import { ADMIN_UUID } from '@/app/lib/constants';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { suggestTags } from '../external/claude-utils';
 import { getCachedProjects } from '../data/cached-project-data';
+import { handleProjectArtifactsUpdate } from '../actions/project-handlers';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -60,6 +61,16 @@ export function useProjects() {
       },
     }
   );
+
+  const updateProjectArtifactsMutation = useMutation(
+    ({ projectId, artifactIds }: { projectId: string; artifactIds: string[] }) =>
+        handleProjectArtifactsUpdate(ADMIN_UUID, projectId, artifactIds),
+    {
+        onSuccess: () => {
+        queryClient.invalidateQueries(['projects']);
+        },
+    }
+    );
 
   const deleteProjectMutation = useMutation(
     (id: string) => deleteProject(id, ADMIN_UUID),
@@ -115,6 +126,7 @@ export function useProjects() {
     handleSearch,
     handlePageChange,
     updateProject: updateProjectMutation.mutateAsync,
+    updateProjectArtifacts: updateProjectArtifactsMutation.mutateAsync,
     deleteProject: deleteProjectMutation.mutateAsync,
     addProject: addProjectMutation.mutateAsync,
     updateProjectTags: updateProjectTagsMutation.mutateAsync,
