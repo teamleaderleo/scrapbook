@@ -4,9 +4,9 @@ import Fuse from 'fuse.js';
 import { ProjectWithRelations, FetchOptions } from '@/app/lib/definitions';
 import { createProject, updateProject, deleteProject } from '@/app/lib/actions/project-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import { fetchAllProjects } from '@/app/lib/data/project-data';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { suggestTags } from '../external/claude-utils';
+import { getCachedProjects } from '../data/cached-project-data';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -21,7 +21,7 @@ export function useProjects() {
 
   const { data: projects, isLoading, error } = useQuery<ProjectWithRelations[], Error>(
     ['projects', fetchOptions],
-    () => fetchAllProjects(ADMIN_UUID, fetchOptions),
+    () => getCachedProjects(ADMIN_UUID, fetchOptions),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,

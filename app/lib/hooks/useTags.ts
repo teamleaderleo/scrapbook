@@ -3,8 +3,8 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import Fuse from 'fuse.js';
 import { Tag } from '@/app/lib/definitions';
 import { createTag, updateTag, deleteTag,  } from '@/app/lib/actions/tag-actions';
-import { fetchAllTags } from '@/app/lib/data/tag-data';
 import { ADMIN_UUID } from '@/app/lib/constants';
+import { getCachedTags } from '../data/cached-tag-data';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -15,7 +15,7 @@ export function useTags() {
 
   const { data: tags, isLoading, error } = useQuery<Tag[], Error>(
     ['tags'],
-    () => fetchAllTags(ADMIN_UUID),
+    () => getCachedTags(ADMIN_UUID),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
