@@ -2,21 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { BaseProject, Tag } from '@/app/lib/definitions';
+import { Tag } from '@/app/lib/definitions';
 import { ArtifactForm } from '@/components/ui/artifacts/artifact-form';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
+import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useTagStore } from '@/app/lib/store/tag-store';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
-export default function EditArtifactForm({
-  artifactId,
-  projects,
-}: {
-  artifactId: string;
-  projects: BaseProject[];
-}) {
+export default function EditArtifactForm({ artifactId }: { artifactId: string }) {
   const router = useRouter();
-  const { artifacts, updateArtifact, isLoading, getAISuggestions } = useArtifacts();
+  const { artifacts, updateArtifact, isLoading: isLoadingArtifacts, getAISuggestions } = useArtifacts();
+  const { projects, isLoading: isLoadingProjects, error: projectsError } = useProjects();
   const { allTags, fetchAllTags, ensureTagsExist } = useTagStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
@@ -29,13 +25,17 @@ export default function EditArtifactForm({
   }, [fetchAllTags]);
 
   useEffect(() => {
-    if (!isLoading && !artifact) {
+    if (!isLoadingArtifacts && !artifact) {
       router.replace('/dashboard/artifacts');
     }
-  }, [artifact, artifactId, router, isLoading]);
+  }, [artifact, artifactId, router, isLoadingArtifacts]);
 
-  if (isLoading) {
+  if (isLoadingArtifacts || isLoadingProjects) {
     return <div>Loading...</div>;
+  }
+
+  if (projectsError) {
+    return <div>Error loading projects: {projectsError.message}</div>;
   }
 
   if (!artifact) {
@@ -68,7 +68,7 @@ export default function EditArtifactForm({
   return (
     <ArtifactForm
       artifact={artifact}
-      projects={projects}
+      projects={projects || []}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
       submitButtonText="Update Artifact"
