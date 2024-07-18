@@ -1,34 +1,26 @@
-import Pagination from '@/components/ui/pagination';
+import { Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import Search from '@/components/ui/search';
-import ProjectsTable from '@/components/ui/projects/table';
 import { CreateProject } from '@/components/ui/projects/button';
 import { lusitana } from '@/components/ui/fonts';
 import { ProjectsTableSkeleton } from '@/components/ui/skeletons';
-import { Suspense } from 'react';
-import { fetchProjectsPages, fetchProjects } from '@/app/lib/data/data';
 import { Metadata } from 'next';
 import { ADMIN_UUID } from '@/app/lib/constants';
-// import ADMIN_UUID from '@/app/lib/constants';
 
+const ProjectsTable = dynamic(
+  () => import('@/components/ui/projects/table').then((mod) => mod.ProjectsTable),
+  { ssr: false }
+);
 
 export const metadata: Metadata = {
   title: 'Projects',
 };
 
-export default async function Page({
+export default function Page({
   searchParams,
 }: {
-  searchParams?: {
-    query?: string;
-    page?: string;
-  };
+  searchParams?: { query?: string; page?: string };
 }) {
-  const query = searchParams?.query || '';
-  const currentPage = Number(searchParams?.page) || 1;
-
-  const totalPages = await fetchProjectsPages(ADMIN_UUID, query);
-  const projects = await fetchProjects(ADMIN_UUID, query, currentPage);
-
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
@@ -38,12 +30,9 @@ export default async function Page({
         <Search placeholder="Search projects..." />
         <CreateProject />
       </div>
-       <Suspense key={query + currentPage} fallback={<ProjectsTableSkeleton />}>
-        <ProjectsTable initialProjects={projects} />
+      <Suspense fallback={<ProjectsTableSkeleton />}>
+        <ProjectsTable accountId={ADMIN_UUID} />
       </Suspense>
-      <div className="mt-5 flex w-full justify-center">
-        <Pagination totalPages={totalPages} />
-      </div>
     </div>
   );
 }

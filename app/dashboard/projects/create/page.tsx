@@ -1,16 +1,12 @@
-import Form from '@/components/ui/projects/create-form';
-import Breadcrumbs from '@/components/ui/breadcrumbs';
-import { fetchAllArtifacts } from '@/app/lib/data/artifact-data';
 import { Metadata } from 'next';
-import { ADMIN_UUID } from '@/app/lib/constants';
+import CreateProjectForm from '@/components/ui/projects/create-project-form';
+import Breadcrumbs from '@/components/ui/breadcrumbs';
 
 export const metadata: Metadata = {
-  title: 'Create',
+  title: 'Create Project',
 };
 
-export default async function Page() {
-  const artifacts = await fetchAllArtifacts(ADMIN_UUID);
- 
+export default function Page() {
   return (
     <main>
       <Breadcrumbs
@@ -23,7 +19,7 @@ export default async function Page() {
           },
         ]}
       />
-      <Form artifacts={artifacts} />
+      <CreateProjectForm />
     </main>
   );
 }
