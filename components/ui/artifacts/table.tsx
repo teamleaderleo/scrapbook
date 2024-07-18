@@ -10,6 +10,7 @@ import { useTags } from '@/app/lib/hooks/useTags';
 import { ArtifactThumbnail } from './artifact-thumbnail';
 import { ErrorBoundaryWithToast } from '../errors/error-boundary';
 import { ArtifactWithRelations, Tag } from '@/app/lib/definitions';
+import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 
 export function ArtifactsTable({ accountId }: { accountId: string }) {
   const { 
@@ -24,6 +25,8 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
     totalPages,
     updateArtifactTags,
   } = useArtifacts();
+
+  const { showToast } = useToastMessages();
 
   const { tags: allTags, getOrCreateTags } = useTags();
 
@@ -54,6 +57,16 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentPage, totalPages, handlePageChange]);
+
+  const handleDeleteArtifact = async (id: string) => {
+    try {
+      await deleteArtifact(id);
+      showToast('success', 'delete', 'artifact');
+    } catch (error) {
+      console.error('Failed to delete artifact:', error);
+      showToast('error', 'delete', 'artifact');
+    }
+  };
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -140,7 +153,7 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
                         <UpdateArtifact artifact={artifact} />
                         <DeleteArtifact 
                           id={artifact.id} 
-                          onDelete={() => deleteArtifact(artifact.id)} 
+                          onDelete={() => handleDeleteArtifact(artifact.id)}  
                         />
                       </div>
                     </td>

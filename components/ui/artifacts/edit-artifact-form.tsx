@@ -6,6 +6,7 @@ import { ArtifactForm } from '@/components/ui/artifacts/artifact-form';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useTags } from '@/app/lib/hooks/useTags';
+import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 
 export default function EditArtifactForm({ artifactId }: { artifactId: string }) {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function EditArtifactForm({ artifactId }: { artifactId: string })
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [suggestedContentExtensions, setSuggestedContentExtensions] = useState<string[]>([]);
+  const { showToast } = useToastMessages();
 
   const artifact = artifacts?.find(a => a.id === artifactId);
 
@@ -40,9 +42,11 @@ export default function EditArtifactForm({ artifactId }: { artifactId: string })
     setIsSubmitting(true);
     try {
       await updateArtifact({ id: artifactId, formData });
+      showToast('success', 'update', 'artifact');
       router.push('/dashboard/artifacts');
     } catch (error) {
       console.error('Failed to update artifact:', error);
+      showToast('error', 'update', 'artifact');
       setIsSubmitting(false);
     }
   };

@@ -8,6 +8,7 @@ import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useTags } from '@/app/lib/hooks/useTags';
 import { ADMIN_UUID } from '@/app/lib/constants';
+import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 
 export default function CreateArtifactForm() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function CreateArtifactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [suggestedContentExtensions, setSuggestedContentExtensions] = useState<string[]>([]);
+  const { showToast } = useToastMessages();
 
   const defaultArtifact: ArtifactWithRelations = {
     accountId: ADMIN_UUID,
@@ -34,9 +36,11 @@ export default function CreateArtifactForm() {
     setIsSubmitting(true);
     try {
       await addArtifact(formData);
+      showToast('success', 'create', 'artifact');
       router.push('/dashboard/artifacts');
     } catch (error) {
       console.error('Failed to create artifact:', error);
+      showToast('error', 'create', 'artifact');
       setIsSubmitting(false);
     }
   };
