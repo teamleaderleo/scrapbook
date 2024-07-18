@@ -31,11 +31,6 @@ export default function CreateProjectForm() {
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
     try {
-      const tagNames = formData.getAll('tags') as string[];
-      formData.delete('tags');
-      const tagObjects = tagNamesToTags(tagNames);
-      tagObjects.forEach(tag => formData.append('tags', tag.id));
-      
       await addProject(formData);
       router.push('/dashboard/projects');
     } catch (error) {

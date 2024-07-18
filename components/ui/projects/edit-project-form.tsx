@@ -38,11 +38,6 @@ export default function EditProjectForm({ projectId }: { projectId: string }) {
   const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
     try {
-      const tagNames = formData.getAll('tags') as string[];
-      formData.delete('tags');
-      const tagObjects = tagNamesToTags(tagNames);
-      tagObjects.forEach(tag => formData.append('tags', tag.id));
-
       await updateProject({ id: projectId, formData });
       router.push('/dashboard/projects');
     } catch (error) {

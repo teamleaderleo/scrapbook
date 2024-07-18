@@ -48,7 +48,7 @@ export function ProjectForm({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} ref={formRef}>
       <div>
         <div className="flex justify-between items-center mb-4">
           {onGetAISuggestions && (
