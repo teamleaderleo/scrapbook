@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
         </Button>
         <Input
           className="flex-grow"
-          placeholder="Message Setzen..."
+          placeholder="Create something..."
         />
         <Button variant="ghost" size="icon">
           <Smile className="h-5 w-5" />
