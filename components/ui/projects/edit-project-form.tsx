@@ -6,6 +6,7 @@ import { ProjectForm } from '@/components/ui/projects/project-form';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
 import { useTags } from '@/app/lib/hooks/useTags';
+import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 
 export default function EditProjectForm({ projectId }: { projectId: string }) {
   const router = useRouter();
@@ -14,6 +15,8 @@ export default function EditProjectForm({ projectId }: { projectId: string }) {
   const { tagNamesToTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
+
+  const { showToast } = useToastMessages();
 
   const project = projects?.find(p => p.id === projectId);
 
@@ -39,9 +42,11 @@ export default function EditProjectForm({ projectId }: { projectId: string }) {
     setIsSubmitting(true);
     try {
       await updateProject({ id: projectId, formData });
+      showToast('success', 'update', 'project');
       router.push('/dashboard/projects');
     } catch (error) {
       console.error('Failed to update project:', error);
+      showToast('error', 'update', 'project');
       setIsSubmitting(false);
     }
   };

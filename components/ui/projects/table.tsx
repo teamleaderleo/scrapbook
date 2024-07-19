@@ -10,6 +10,7 @@ import { useTags } from '@/app/lib/hooks/useTags';
 import { ErrorBoundaryWithToast } from '../errors/error-boundary';
 import { ProjectWithRelations } from '@/app/lib/definitions';
 import { ArtifactThumbnail } from '../artifacts/artifact-thumbnail';
+import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 
 export function ProjectsTable({ accountId }: { accountId: string }) {
   const { 
@@ -25,11 +26,23 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
     updateProjectTags,
   } = useProjects();
 
+  const { showToast } = useToastMessages();
+
   const { tagNamesToTags } = useTags();
 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const handleDeleteProject = async (id: string) => {
+    try {
+      await deleteProject(id);
+      showToast('success', 'delete', 'project');
+    } catch (error) {
+      console.error('Failed to delete project:', error);
+      showToast('error', 'delete', 'project');
+    }
+  };
 
   useEffect(() => {
     const query = searchParams.get('query') || '';
@@ -118,7 +131,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
                         <UpdateProject id={project.id} />
                         <DeleteProject 
                           id={project.id} 
-                          onDelete={() => deleteProject(project.id)} 
+                          onDelete={() => handleDeleteProject(project.id)}
                         />
                       </div>
                     </td>

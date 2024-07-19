@@ -7,6 +7,7 @@ import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
 import { useTags } from '@/app/lib/hooks/useTags';
 import { ADMIN_UUID } from '@/app/lib/constants';
+import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 
 export default function CreateProjectForm() {
   const router = useRouter();
@@ -15,6 +16,8 @@ export default function CreateProjectForm() {
   const { tagNamesToTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
+
+  const { showToast } = useToastMessages();
 
   const defaultProject = {
     accountId: ADMIN_UUID,
@@ -32,9 +35,11 @@ export default function CreateProjectForm() {
     setIsSubmitting(true);
     try {
       await addProject(formData);
+      showToast('success', 'create', 'project');
       router.push('/dashboard/projects');
     } catch (error) {
       console.error('Failed to create project:', error);
+      showToast('error', 'create', 'project');
       setIsSubmitting(false);
     }
   };
