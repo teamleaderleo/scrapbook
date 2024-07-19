@@ -100,7 +100,7 @@ export function useArtifacts() {
     setCurrentPage(page);
   }, []);
 
-  useKeyNav(currentPage, totalPages, handlePageChange);
+  useKeyNav(currentPage, totalPages, handlePageChange, true);
 
   const getAISuggestions = useCallback(async (name: string, description: string, content: string) => {
     const tags = await suggestTags(`${name} ${description} ${content}`);

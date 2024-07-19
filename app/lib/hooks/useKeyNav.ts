@@ -5,7 +5,8 @@ import { NavigateOptions } from 'next/dist/shared/lib/app-router-context.shared-
 export function useKeyNav(
   currentPage: number,
   totalPages: number,
-  onPageChange: (page: number) => void
+  onPageChange: (page: number) => void,
+  loopPages: boolean = false
 ) {
   const router = useRouter();
   const pathname = usePathname();
@@ -19,12 +20,15 @@ export function useKeyNav(
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowLeft' && currentPage > 1) {
-        const newPage = currentPage - 1;
-        onPageChange(newPage);
-        updateURL(newPage);
-      } else if (event.key === 'ArrowRight' && currentPage < totalPages) {
-        const newPage = currentPage + 1;
+      let newPage = currentPage;
+
+      if (event.key === 'ArrowLeft') {
+        newPage = loopPages && currentPage === 1 ? totalPages : Math.max(1, currentPage - 1);
+      } else if (event.key === 'ArrowRight') {
+        newPage = loopPages && currentPage === totalPages ? 1 : Math.min(totalPages, currentPage + 1);
+      }
+
+      if (newPage !== currentPage) {
         onPageChange(newPage);
         updateURL(newPage);
       }
@@ -32,5 +36,5 @@ export function useKeyNav(
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentPage, totalPages, onPageChange, searchParams, router, pathname]);
+  }, [currentPage, totalPages, onPageChange, searchParams, router, pathname, loopPages]);
 }

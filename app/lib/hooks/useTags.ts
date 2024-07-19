@@ -83,7 +83,7 @@ export function useTags() {
     setCurrentPage(page);
   }, []);
 
-  useKeyNav(currentPage, totalPages, handlePageChange);
+  useKeyNav(currentPage, totalPages, handlePageChange, true);
 
   const addTag = useCallback(async (name: string): Promise<Tag> => {
     const trimmedName = name.trim().toLowerCase();

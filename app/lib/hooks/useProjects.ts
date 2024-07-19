@@ -110,7 +110,7 @@ export function useProjects() {
     setCurrentPage(page);
   }, []);
 
-  useKeyNav(currentPage, totalPages, handlePageChange);
+  useKeyNav(currentPage, totalPages, handlePageChange, true);
 
   const getAISuggestions = useCallback(async (name: string, description: string) => {
     const tags = await suggestTags(`${name} ${description}`);
