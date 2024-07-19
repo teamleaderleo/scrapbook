@@ -1,14 +1,11 @@
-// import { GlobeAltIcon } from '@heroicons/react/24/outline';
-// import { josefin_slab } from '@/app/ui/fonts';
-import { josefin_slab } from '@/components/ui/fonts';
+import { inter } from '@/components/ui/fonts';
+import { Layers } from 'lucide-react';
 
 export default function AcmeLogo() {
   return (
-    <div
-      className={`${josefin_slab.className} flex flex-row items-center leading-none text-white`}
-    >
-      {/* <GlobeAltIcon className="h-12 w-12 rotate-[15deg]" /> */}
-      <p className="text-[44px]">setzen</p>
+    <div className={`${inter.className} flex items-center space-x-2 text-white`}>
+      <Layers className="h-8 w-8" />
+      <span className="text-2xl font">Setzen</span>
     </div>
   );
 }
