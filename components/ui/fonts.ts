@@ -3,7 +3,7 @@ import { Lusitana } from 'next/font/google';
 import { Playfair_Display } from 'next/font/google';
 import { Josefin_Slab } from 'next/font/google';
 
-
+export const playfair_display = Playfair_Display({ subsets: ['latin'] });
 export const inter = Inter({ subsets: ['latin'] });
 export const lusitana = Lusitana({
     weight: ['400', '700'],

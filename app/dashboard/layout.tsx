@@ -12,7 +12,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <SideNav />
       </div>
       <div className="flex flex-col flex-grow">
-        <Header title="Dashboard" />
+        <Header />
         <main className="flex-grow overflow-y-auto p-6">
           {children}
         </main>

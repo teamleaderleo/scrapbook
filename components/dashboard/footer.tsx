@@ -1,14 +1,25 @@
-'use client';
-
 import React from 'react';
-import { Button } from '@/components/ui/button';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { PlusCircle, Smile, SendHorizontal } from 'lucide-react';
 
-const Footer = () => {
+const Footer: React.FC = () => {
   return (
     <footer className="bg-white border-t border-gray-200 p-4">
-      <div className="flex justify-between items-center">
-        <span>&copy; 2024 Setzen</span>
-        <Button variant="outline">Quick Chat</Button>
+      <div className="flex items-center space-x-2">
+        <Button variant="ghost" size="icon">
+          <PlusCircle className="h-5 w-5" />
+        </Button>
+        <Input
+          className="flex-grow"
+          placeholder="Message Setzen..."
+        />
+        <Button variant="ghost" size="icon">
+          <Smile className="h-5 w-5" />
+        </Button>
+        <Button variant="ghost" size="icon">
+          <SendHorizontal className="h-5 w-5" />
+        </Button>
       </div>
     </footer>
   );

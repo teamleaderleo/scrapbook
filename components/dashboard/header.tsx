@@ -3,7 +3,6 @@
 import React from 'react';
 import { inter } from '@/components/ui/fonts';
 import { usePathname } from 'next/navigation';
-import Link from 'next/link';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,39 +12,50 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
-interface HeaderProps {
-  title?: string;
-}
-
-const Header: React.FC<HeaderProps> = ({ title = "Setzen" }) => {
+const Header: React.FC = () => {
   const pathname = usePathname();
   const pathSegments = pathname.split('/').filter(segment => segment);
+
+  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+  const title = pathSegments.length > 0 
+    ? capitalize(pathSegments[pathSegments.length - 1])
+    : 'Dashboard';
 
   return (
     <header className="bg-white border-b border-gray-200 p-4">
       <div className="flex justify-between items-center">
-        <h1 className={`${inter.className} text-2xl font-semibold`}>{title}</h1>
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+              <BreadcrumbLink href="/dashboard">Home</BreadcrumbLink>
             </BreadcrumbItem>
             {pathSegments.map((segment, index) => (
               <React.Fragment key={index}>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  {index === pathSegments.length - 1 ? (
-                    <BreadcrumbPage>{segment}</BreadcrumbPage>
-                  ) : (
-                    <BreadcrumbLink href={`/${pathSegments.slice(0, index + 1).join('/')}`}>
-                      {segment}
-                    </BreadcrumbLink>
-                  )}
-                </BreadcrumbItem>
+                {segment !== 'dashboard' && (
+                  <>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      {index === pathSegments.length - 1 ? (
+                        <BreadcrumbPage>{capitalize(segment)}</BreadcrumbPage>
+                      ) : (
+                        <BreadcrumbLink href={`/${pathSegments.slice(0, index + 1).join('/')}`}>
+                          {capitalize(segment)}
+                        </BreadcrumbLink>
+                      )}
+                    </BreadcrumbItem>
+                  </>
+                )}
               </React.Fragment>
             ))}
           </BreadcrumbList>
         </Breadcrumb>
+        <h1 className={`${inter.className} text-2xl font-semibold absolute left-1/2 transform -translate-x-1/2`}>
+          {title}
+        </h1>
+        <div className="w-40">
+          {/* Placeholder for potential right-side content */}
+        </div>
       </div>
     </header>
   );
