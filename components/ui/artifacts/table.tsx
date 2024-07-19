@@ -11,6 +11,7 @@ import { ArtifactThumbnail } from './artifact-thumbnail';
 import { ErrorBoundaryWithToast } from '../errors/error-boundary';
 import { ArtifactWithRelations, Tag } from '@/app/lib/definitions';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
+import { NavigateOptions } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
 export function ArtifactsTable({ accountId }: { accountId: string }) {
   const { 
@@ -44,19 +45,6 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
   const handleTagsChange = async (artifactId: string, newTags: string[]) => {
     await updateArtifactTags({ artifactId, tags: newTags });
   };
-  
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowLeft' && currentPage > 1) {
-        handlePageChange(currentPage - 1);
-      } else if (event.key === 'ArrowRight' && currentPage < totalPages) {
-        handlePageChange(currentPage + 1);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentPage, totalPages, handlePageChange]);
 
   const handleDeleteArtifact = async (id: string) => {
     try {

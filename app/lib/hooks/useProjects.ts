@@ -8,6 +8,7 @@ import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { suggestTags } from '../external/claude-utils';
 import { getCachedProjects } from '../data/cached-project-data';
 import { handleProjectArtifactsUpdate } from '../actions/project-handlers';
+import { useKeyNav } from './useKeyNav';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -108,6 +109,8 @@ export function useProjects() {
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
   }, []);
+
+  useKeyNav(currentPage, totalPages, handlePageChange);
 
   const getAISuggestions = useCallback(async (name: string, description: string) => {
     const tags = await suggestTags(`${name} ${description}`);

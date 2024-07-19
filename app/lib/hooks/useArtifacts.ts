@@ -7,6 +7,7 @@ import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedArtifacts } from '@/app/lib/data/cached-artifact-data';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { suggestContentExtensions, suggestTags } from '../external/claude-utils';
+import { useKeyNav } from './useKeyNav';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -98,6 +99,8 @@ export function useArtifacts() {
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
   }, []);
+
+  useKeyNav(currentPage, totalPages, handlePageChange);
 
   const getAISuggestions = useCallback(async (name: string, description: string, content: string) => {
     const tags = await suggestTags(`${name} ${description} ${content}`);

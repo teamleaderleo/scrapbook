@@ -55,19 +55,6 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
     await updateProjectTags({ projectId, tags: newTagNames });
   };
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'ArrowLeft' && currentPage > 1) {
-        handlePageChange(currentPage - 1);
-      } else if (event.key === 'ArrowRight' && currentPage < totalPages) {
-        handlePageChange(currentPage + 1);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentPage, totalPages, handlePageChange]);
-
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
