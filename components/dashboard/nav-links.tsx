@@ -1,52 +1,45 @@
 'use client';
 
-import {
-  UserGroupIcon,
-  HashtagIcon,
-  HomeIcon,
-  DocumentDuplicateIcon,
-} from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import clsx from 'clsx';
+import { cn } from '@/lib/utils';
+import { 
+  LayoutDashboard, 
+  Folder, 
+  Image, 
+  Tag, 
+  Settings 
+} from 'lucide-react';
 
-
-// Map of links to display in the side navigation.
-// Depending on the size of the application, this would be stored in a database.
 const links = [
-  { name: 'Home', href: '/dashboard', icon: HomeIcon },
-  {
-    name: 'Projects',
-    href: '/dashboard/projects',
-    icon: DocumentDuplicateIcon,
-  },
-  { name: 'Artifacts', href: '/dashboard/artifacts', icon: UserGroupIcon },
-  { name: 'Tags', href: '/dashboard/tags', icon: HashtagIcon },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Projects', href: '/dashboard/projects', icon: Folder },
+  { name: 'Artifacts', href: '/dashboard/artifacts', icon: Image },
+  { name: 'Tags', href: '/dashboard/tags', icon: Tag },
+  // { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 
 export default function NavLinks() {
   const pathname = usePathname();
+
   return (
     <>
-      {links.map(link => {
+      {links.map((link) => {
         const LinkIcon = link.icon;
         return (
           <Link
             key={link.name}
             href={link.href}
-            className={clsx(
-              'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-indigo-600 md:flex-none md:justify-start md:p-2 md:px-3',
-              {
-                'bg-sky-100 text-indigo-600': pathname === link.href,
-              }
+            className={cn(
+              'flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-700 hover:text-white',
+              pathname === link.href ? 'bg-gray-800 text-white' : 'text-white-800'
             )}
           >
-            <LinkIcon className="w-6" />
-            <p className="hidden md:block">{link.name}</p>
+            <LinkIcon className="h-5 w-5" />
+            <span>{link.name}</span>
           </Link>
         );
       })}
     </>
-    
   );
 }
