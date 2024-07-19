@@ -16,10 +16,16 @@ Check out the deployed application: [https://setzen.vercel.app/](https://setzen.
 This took a bit more thinking than I expected. And I'm still thinking about it!
 
 ## What It Currently Looks Like
+### Dashboard:
+![image](https://github.com/user-attachments/assets/fa73a852-a669-4bf9-be60-fdc57e197aa5)
 
 ### Artifacts:
 
-![image](https://github.com/user-attachments/assets/ae047a5a-9f2c-4cb5-81f8-c216fbaeee41)
+![image](https://github.com/user-attachments/assets/b41927cd-af3d-489b-9745-72b10a18d35e)
+
+
+### Projects:
+![image](https://github.com/user-attachments/assets/42789cb7-d1c4-478d-a7d9-3971131251da)
 
 ### Login Page:
 ![image](https://github.com/MikelBai/scrapbook/assets/13091533/ca45a1e3-66db-4989-9ed7-850ffe2bd770)
@@ -27,11 +33,9 @@ This took a bit more thinking than I expected. And I'm still thinking about it!
 ### Login Page (Mobile):
 <img src="https://github.com/MikelBai/scrapbook/assets/13091533/7920ec02-4a31-4609-a7ab-3d9fa005620f" width="30%" alt="IMG_6309">
 
-### Dashboard:
-![image](https://github.com/MikelBai/scrapbook/assets/13091533/26c5dd2d-9219-4ca0-9bf6-180f9c22366e)
 
-### Projects:
-![image](https://github.com/MikelBai/scrapbook/assets/13091533/db48f494-da55-4d3a-8518-6a30033fad53)
+
+
 
 
 ## Vision
