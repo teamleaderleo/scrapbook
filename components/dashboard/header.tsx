@@ -25,7 +25,7 @@ const Header: React.FC = () => {
   return (
     <header className="bg-white border-b border-gray-200 p-4">
       <div className="flex justify-between items-center">
-        <Breadcrumb>
+        <Breadcrumb className="text-base">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/dashboard">Home</BreadcrumbLink>
@@ -50,12 +50,9 @@ const Header: React.FC = () => {
             ))}
           </BreadcrumbList>
         </Breadcrumb>
-        <h1 className={`${inter.className} text-2xl font-semibold absolute left-1/2 transform -translate-x-1/2`}>
+        <h1 className={`${inter.className} text-2xl font-semibold header-title`}>
           {title}
         </h1>
-        <div className="w-40">
-          {/* Placeholder for potential right-side content */}
-        </div>
       </div>
     </header>
   );
