@@ -2,8 +2,8 @@ import React, { useState, useRef } from 'react';
 import { ArtifactWithRelations, ProjectWithRelations } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { TagManager } from '@/components/ui/tags/tagmanager';
-import { Suggestions } from '@/components/ui/suggestions/suggestions';
+import { TagManager } from '@/components/tags/tagmanager';
+import { Suggestions } from '@/components/suggestions/suggestions';
 import { useTags } from '@/app/lib/hooks/useTags';
 
 interface ProjectFormProps {

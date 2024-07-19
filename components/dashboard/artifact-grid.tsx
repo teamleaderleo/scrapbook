@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArtifactWithRelations } from '@/app/lib/definitions';
-import { ErrorBoundaryWithToast } from '@/components/ui/errors/error-boundary';
+import { ErrorBoundaryWithToast } from '@/components/errors/error-boundary';
 import { ArtifactThumbnail } from '@/components/artifacts/artifact-thumbnail';
 
 export const ArtifactGrid = ({ artifacts }: { artifacts: ArtifactWithRelations[] }) => (

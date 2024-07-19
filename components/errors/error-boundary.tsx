@@ -1,5 +1,5 @@
 import React, { ErrorInfo } from 'react';
-import { useToast } from "../use-toast";
+import { useToast } from "../ui/use-toast";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;

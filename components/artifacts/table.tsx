@@ -2,13 +2,13 @@
 
 import React, { useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { TagList } from '@/components/ui/tags/taglist';
+import { TagList } from '@/components/tags/taglist';
 import { DeleteArtifact, UpdateArtifact } from '@/components/artifacts/button';
 import Pagination from '../ui/pagination';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
 import { useTags } from '@/app/lib/hooks/useTags';
 import { ArtifactThumbnail } from './artifact-thumbnail';
-import { ErrorBoundaryWithToast } from '../ui/errors/error-boundary';
+import { ErrorBoundaryWithToast } from '../errors/error-boundary';
 import { ArtifactWithRelations, Tag } from '@/app/lib/definitions';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { NavigateOptions } from 'next/dist/shared/lib/app-router-context.shared-runtime';

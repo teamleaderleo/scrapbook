@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import TagManagementTable from '@/components/ui/tags/table';
+import TagManagementTable from '@/components/tags/table';
 import Search from '@/components/ui/search';
 import { lusitana } from '@/components/ui/fonts';
 import { ArtifactsTableSkeleton } from '@/components/ui/skeletons';
