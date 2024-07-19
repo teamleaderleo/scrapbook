@@ -10,7 +10,7 @@ import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
 import { SearchParamsHandler } from '../search-params-handler';
 
-export default function TagManagementTable({ accountId }: { accountId: string }) {
+export function TagManagementTable({ accountId }: { accountId: string }) {
   const { 
     paginatedTags,
     isLoading,

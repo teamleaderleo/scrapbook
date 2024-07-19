@@ -13,6 +13,8 @@ export function useKeyNav(
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    if (typeof window === 'undefined') return; // Skip on server-side
+    
     const updateURL = (page: number) => {
       const params = new URLSearchParams(searchParams);
       params.set('page', page.toString());

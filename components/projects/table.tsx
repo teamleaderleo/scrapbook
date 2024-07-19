@@ -1,12 +1,10 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { TagList } from '@/components/tags/taglist';
 import { DeleteProject, UpdateProject } from '@/components/projects/button';
 import Pagination from '../ui/pagination';
 import { useProjects } from '@/app/lib/hooks/useProjects';
-import { useTags } from '@/app/lib/hooks/useTags';
 import { ErrorBoundaryWithToast } from '../errors/error-boundary';
 import { ProjectWithRelations } from '@/app/lib/definitions';
 import { ArtifactThumbnail } from '../artifacts/artifact-thumbnail';

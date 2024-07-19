@@ -16,9 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default function Page({
-  searchParams,
 }: {
-  searchParams?: { query?: string; page?: string };
 }) {
   return (
     <div className="w-full">

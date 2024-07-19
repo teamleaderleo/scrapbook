@@ -1,21 +1,21 @@
 import { Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import TagManagementTable from '@/components/tags/table';
 import Search from '@/components/ui/search';
 import { ArtifactsTableSkeleton } from '@/components/ui/skeletons';
 import { Metadata } from 'next';
+
+const TagManagementTable = dynamic(
+  () => import('@/components/tags/table').then((mod) => mod.TagManagementTable),
+  { ssr: false }
+);
 
 export const metadata: Metadata = {
   title: 'Tags',
 };
 
 export default async function TagsPage({
-  searchParams,
 }: {
-  searchParams?: {
-    query?: string;
-    page?: string;
-  };
 }) {
   return (
     <div className="w-full">
