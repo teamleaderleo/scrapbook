@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import EditProjectForm from '@/components/projects/edit-project-form';
 import Breadcrumbs from '@/components/ui/breadcrumbs';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'Edit Project',
@@ -19,7 +20,9 @@ export default function Page({ params }: { params: { id: string } }) {
           },
         ]}
       />
-      <EditProjectForm projectId={params.id} />
+      <Suspense fallback={<div>Loading form...</div>}>
+        <EditProjectForm projectId={params.id} />
+      </Suspense>
     </main>
   );
 }

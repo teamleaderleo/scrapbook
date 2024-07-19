@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import CreateProjectForm from '@/components/projects/create-project-form';
 import Breadcrumbs from '@/components/ui/breadcrumbs';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'Create Project',
@@ -19,7 +20,9 @@ export default function Page() {
           },
         ]}
       />
-      <CreateProjectForm />
+      <Suspense fallback={<div>Loading form...</div>}>
+        <CreateProjectForm />
+      </Suspense>
     </main>
   );
 }
