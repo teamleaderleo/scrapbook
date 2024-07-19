@@ -1,12 +1,13 @@
 'use server';
 
-import { eq, and, inArray } from 'drizzle-orm';
+import { eq, and, inArray, count } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { db } from '../db/db.server';
 import { Tag } from '../definitions';
 import { tags } from '../db/schema';
 import { handleTagUpdateWithinTransaction, } from './tag-handlers';
 import { v4 as uuid } from 'uuid';
+import { artifactTags,projectTags } from '../db/schema';
 
 export async function createTag(accountId: string, name: string): Promise<Tag> {
   const newTagId = uuid();
@@ -37,9 +38,3 @@ export async function deleteTag(accountId: string, tagId: string): Promise<{ suc
     return { success: false, message: 'Failed to delete tag.' };
   }
 }
-
-// export async function ensureTagsExist(accountId: string, tagNames: string[]): Promise<Tag[]> {
-//   return db.transaction(async (tx) => {
-//     return ensureTagsExistWithinTransaction(tx, accountId, tagNames);
-//   });
-// }

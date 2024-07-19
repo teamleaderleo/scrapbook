@@ -20,6 +20,7 @@ export default function TagManagementTable({ accountId }: { accountId: string })
     handlePageChange,
     currentPage,
     totalPages,
+    useTagUsage,
   } = useTags();
 
   const { showToast } = useToastMessages();
@@ -97,7 +98,7 @@ export default function TagManagementTable({ accountId }: { accountId: string })
                       )}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
-                      <TagUsage tagId={tag.id} />
+                      <TagUsage tagId={tag.id} useTagUsage={useTagUsage} />
                     </td>
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex justify-end gap-3">
@@ -154,24 +155,15 @@ export default function TagManagementTable({ accountId }: { accountId: string })
   );
 }
 
-function TagUsage({ tagId }: { tagId: string }) {
-  const [usage, setUsage] = useState({ project_count: 0, artifact_count: 0 });
+function TagUsage({ tagId, useTagUsage }: { tagId: string; useTagUsage: (tagId: string) => any }) {
+  const { data: usage, isLoading, error } = useTagUsage(tagId);
 
-  // TODO: Implement tag usage fetching
-  // useEffect(() => {
-  //   async function fetchUsage() {
-  //     const usageData = await getTagUsage(ADMIN_UUID, tagId);
-  //     setUsage({
-  //       project_count: Number(usageData.projectCount),
-  //       artifact_count: Number(usageData.artifactCount)
-  //     });
-  //   }
-  //   fetchUsage();
-  // }, [tagId]);
+  if (isLoading) return <span>Loading usage...</span>;
+  if (error) return <span>Error loading usage</span>;
 
   return (
     <span>
-      Projects: {usage.project_count}, Artifacts: {usage.artifact_count}
+      Projects: {usage.projectCount}, Artifacts: {usage.artifactCount}
     </span>
   );
 }

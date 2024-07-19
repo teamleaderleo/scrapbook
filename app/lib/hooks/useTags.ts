@@ -4,7 +4,7 @@ import Fuse from 'fuse.js';
 import { Tag } from '@/app/lib/definitions';
 import { createTag, updateTag, deleteTag } from '@/app/lib/actions/tag-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import { getCachedTags } from '../data/cached-tag-data';
+import { getCachedTags, getCachedTagUsage } from '../data/cached-tag-data';
 import { useKeyNav } from './useKeyNav';
 
 const ITEMS_PER_PAGE = 20;
@@ -111,6 +111,13 @@ export function useTags() {
     return tags.map(tag => tag.name);
   }, []);
 
+  const useTagUsage = (tagId: string) => {
+    return useQuery(['tagUsage', tagId], () => getCachedTagUsage(ADMIN_UUID, tagId), {
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 10 * 60 * 1000,
+    });
+  };
+
   return {
     tags,
     tagNames: tags.map(tag => tag.name),
@@ -129,5 +136,6 @@ export function useTags() {
     getOrCreateTags,
     tagNamesToTags,
     tagsToTagNames,
+    useTagUsage,
   };
 }
