@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import EditProjectForm from '@/components/ui/projects/edit-project-form';
+import EditProjectForm from '@/components/projects/edit-project-form';
 import Breadcrumbs from '@/components/ui/breadcrumbs';
 
 export const metadata: Metadata = {

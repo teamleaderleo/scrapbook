@@ -3,13 +3,13 @@
 import React, { useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { TagList } from '@/components/ui/tags/taglist';
-import { DeleteProject, UpdateProject } from '@/components/ui/projects/button';
-import Pagination from '../pagination';
+import { DeleteProject, UpdateProject } from '@/components/projects/button';
+import Pagination from '../ui/pagination';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useTags } from '@/app/lib/hooks/useTags';
-import { ErrorBoundaryWithToast } from '../errors/error-boundary';
+import { ErrorBoundaryWithToast } from '../ui/errors/error-boundary';
 import { ProjectWithRelations } from '@/app/lib/definitions';
-import { ArtifactThumbnail } from '../../artifacts/artifact-thumbnail';
+import { ArtifactThumbnail } from '../artifacts/artifact-thumbnail';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 
 export function ProjectsTable({ accountId }: { accountId: string }) {
