@@ -20,7 +20,9 @@ export default async function TagsPage({
   return (
     <div className="w-full">
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <Search placeholder="Search tags..." />
+        <Suspense fallback={<div>Loading search...</div>}>
+          <Search placeholder="Search tags..." />
+        </Suspense>
       </div>
       <Suspense fallback={<ArtifactsTableSkeleton />}>
         <TagManagementTable accountId={ADMIN_UUID} />

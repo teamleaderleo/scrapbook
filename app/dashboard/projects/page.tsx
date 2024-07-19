@@ -23,7 +23,9 @@ export default function Page({
   return (
     <div className="w-full">
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
-        <Search placeholder="Search projects..." />
+        <Suspense fallback={<div>Loading search...</div>}>
+          <Search placeholder="Search projects..." />
+        </Suspense>
         <CreateProject />
       </div>
       <Suspense fallback={<ProjectsTableSkeleton />}>
