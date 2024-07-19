@@ -27,12 +27,21 @@ export async function updateTag(accountId: string, tagId: string, newName: strin
 export async function deleteTag(accountId: string, tagId: string): Promise<{ success: boolean; message: string }> {
   try {
     await db.transaction(async (tx) => {
-      await handleTagUpdateWithinTransaction(tx, accountId, tagId, [], true);
-      await handleTagUpdateWithinTransaction(tx, accountId, tagId, [], false);
-      await tx.delete(tags).where(and(eq(tags.id, tagId), eq(tags.accountId, accountId)));
+      // Remove project associations
+      await tx.delete(projectTags)
+        .where(and(eq(projectTags.tagId, tagId), eq(projectTags.accountId, accountId)));
+
+      // Remove artifact associations
+      await tx.delete(artifactTags)
+        .where(and(eq(artifactTags.tagId, tagId), eq(artifactTags.accountId, accountId)));
+
+      // Delete the tag
+      await tx.delete(tags)
+        .where(and(eq(tags.id, tagId), eq(tags.accountId, accountId)));
     });
+
     revalidatePath('/dashboard/tags');
-    return { success: true, message: 'Tag deleted successfully.' };
+    return { success: true, message: 'Tag and all its associations deleted successfully.' };
   } catch (error) {
     console.error('Error deleting tag:', error);
     return { success: false, message: 'Failed to delete tag.' };

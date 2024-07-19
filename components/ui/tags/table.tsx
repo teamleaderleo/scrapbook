@@ -7,6 +7,7 @@ import { useTags } from '@/app/lib/hooks/useTags';
 import { useKeyNav } from '@/app/lib/hooks/useKeyNav';
 import Pagination from '@/components/ui/pagination';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
+import { useSearchParams } from 'next/navigation';
 
 export default function TagManagementTable({ accountId }: { accountId: string }) {
   const { 
@@ -26,6 +27,15 @@ export default function TagManagementTable({ accountId }: { accountId: string })
   const { showToast } = useToastMessages();
   const [newTagName, setNewTagName] = useState('');
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
+
+
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const query = searchParams.get('query') || '';
+    const page = Number(searchParams.get('page')) || 1;
+    handleSearch(query);
+    handlePageChange(page);
+  }, [searchParams, handleSearch, handlePageChange]);
 
   const handleCreateTag = async (e: React.FormEvent) => {
     e.preventDefault();
