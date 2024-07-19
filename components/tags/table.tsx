@@ -4,10 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Tag } from '@/app/lib/definitions';
 import { useTags } from '@/app/lib/hooks/useTags';
-import { useKeyNav } from '@/app/lib/hooks/useKeyNav';
+
 import Pagination from '@/components/ui/pagination';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
-import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+import { SearchParamsHandler } from '../search-params-handler';
 
 export default function TagManagementTable({ accountId }: { accountId: string }) {
   const { 
@@ -27,15 +28,6 @@ export default function TagManagementTable({ accountId }: { accountId: string })
   const { showToast } = useToastMessages();
   const [newTagName, setNewTagName] = useState('');
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
-
-
-  const searchParams = useSearchParams();
-  useEffect(() => {
-    const query = searchParams.get('query') || '';
-    const page = Number(searchParams.get('page')) || 1;
-    handleSearch(query);
-    handlePageChange(page);
-  }, [searchParams, handleSearch, handlePageChange]);
 
   const handleCreateTag = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +69,12 @@ export default function TagManagementTable({ accountId }: { accountId: string })
 
   return (
     <div className="mt-6 flow-root">
+      <Suspense fallback={null}>
+        <SearchParamsHandler
+          onSearchChange={handleSearch}
+          onPageChange={handlePageChange}
+        />
+      </Suspense>
       <div className="overflow-x-auto">
         <div className="inline-block min-w-full align-middle">
           <div className="overflow-hidden rounded-md bg-gray-50 p-2 md:pt-0">

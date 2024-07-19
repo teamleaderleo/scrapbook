@@ -11,7 +11,8 @@ import { ArtifactThumbnail } from './artifact-thumbnail';
 import { ErrorBoundaryWithToast } from '../errors/error-boundary';
 import { ArtifactWithRelations, Tag } from '@/app/lib/definitions';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
-import { NavigateOptions } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import { Suspense } from 'react';
+import { SearchParamsHandler } from '../search-params-handler';
 
 export function ArtifactsTable({ accountId }: { accountId: string }) {
   const { 
@@ -28,19 +29,6 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
   } = useArtifacts();
 
   const { showToast } = useToastMessages();
-
-  const { tags: allTags, getOrCreateTags } = useTags();
-
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const query = searchParams.get('query') || '';
-    const page = Number(searchParams.get('page')) || 1;
-    handleSearch(query);
-    handlePageChange(page);
-  }, [searchParams, handleSearch, handlePageChange]);
 
   const handleTagsChange = async (artifactId: string, newTags: string[]) => {
     await updateArtifactTags({ artifactId, tags: newTags });
@@ -61,6 +49,12 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
 
   return (
     <div className="mt-6 flow-root">
+      <Suspense fallback={null}>
+        <SearchParamsHandler
+          onSearchChange={handleSearch}
+          onPageChange={handlePageChange}
+        />
+      </Suspense>
       <div className="overflow-x-auto">
         <div className="inline-block min-w-full align-middle">
           <div className="overflow-hidden rounded-md bg-gray-50 p-2 md:pt-0">

@@ -11,6 +11,8 @@ import { ErrorBoundaryWithToast } from '../errors/error-boundary';
 import { ProjectWithRelations } from '@/app/lib/definitions';
 import { ArtifactThumbnail } from '../artifacts/artifact-thumbnail';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
+import { Suspense } from 'react';
+import { SearchParamsHandler } from '../search-params-handler';
 
 export function ProjectsTable({ accountId }: { accountId: string }) {
   const { 
@@ -28,12 +30,6 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
 
   const { showToast } = useToastMessages();
 
-  const { tagNamesToTags } = useTags();
-
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
   const handleDeleteProject = async (id: string) => {
     try {
       await deleteProject(id);
@@ -44,13 +40,6 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
     }
   };
 
-  useEffect(() => {
-    const query = searchParams.get('query') || '';
-    const page = Number(searchParams.get('page')) || 1;
-    handleSearch(query);
-    handlePageChange(page);
-  }, [searchParams, handleSearch, handlePageChange]);
-
   const handleTagsChange = async (projectId: string, newTagNames: string[]) => {
     await updateProjectTags({ projectId, tags: newTagNames });
   };
@@ -60,6 +49,12 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
 
   return (
     <div className="mt-6 flow-root">
+      <Suspense fallback={null}>
+        <SearchParamsHandler
+          onSearchChange={handleSearch}
+          onPageChange={handlePageChange}
+        />
+      </Suspense>
       <div className="overflow-x-auto">
         <div className="inline-block min-w-full align-middle">
           <div className="overflow-hidden rounded-md bg-gray-50 p-2 md:pt-0">

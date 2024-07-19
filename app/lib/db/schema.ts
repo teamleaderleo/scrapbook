@@ -72,45 +72,6 @@ export const projectArtifactLinks = pgTable('project_artifact_link', {
   addedAt: timestamp('added_at').notNull().defaultNow(),
 });
 
-export const artifactsView = pgView('artifacts_view').as((qb) => {
-  return qb
-    .select({
-      id: artifacts.id,
-      name: artifacts.name,
-      description: artifacts.description,
-      createdAt: artifacts.createdAt,
-      updatedAt: artifacts.updatedAt,
-      contents: sql<string>`
-        jsonb_agg(DISTINCT jsonb_build_object(
-          'id', ${artifactContents.id},
-          'type', ${artifactContents.type},
-          'content', ${artifactContents.content},
-          'createdAt', ${artifactContents.createdAt}
-        ))
-      `.as('contents'),
-      tags: sql<string>`
-        jsonb_agg(DISTINCT jsonb_build_object(
-          'id', ${tags.id},
-          'name', ${tags.name}
-        ))
-      `.as('tags'),
-      projects: sql<string>`
-        jsonb_agg(DISTINCT jsonb_build_object(
-          'id', ${projects.id},
-          'name', ${projects.name},
-          'status', ${projects.status}
-        ))
-      `.as('projects')
-    })
-    .from(artifacts)
-    .leftJoin(artifactContents, eq(artifacts.id, artifactContents.artifactId))
-    .leftJoin(artifactTags, eq(artifacts.id, artifactTags.artifactId))
-    .leftJoin(tags, eq(artifactTags.tagId, tags.id))
-    .leftJoin(projectArtifactLinks, eq(artifacts.id, projectArtifactLinks.artifactId))
-    .leftJoin(projects, eq(projectArtifactLinks.projectId, projects.id))
-    .groupBy(artifacts.id);
-});
-
 export const s3Usage = pgTable('s3_usage', {
   id: serial('id').primaryKey(),
   accountId: uuid('account_id').notNull().references(() => accounts.id),
