@@ -24,16 +24,16 @@ const Dashboard = () => {
   if (artifactsError || projectsError) return <div>Error loading dashboard data</div>;
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-full">
       <div className="w-64 bg-gray-100 border-r">
         <ProjectList projects={recentProjects} />
       </div>
-      <div className="flex-1 flex flex-col">
-        <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1">
+        <div className="p-6">
           <ArtifactGrid artifacts={featuredArtifacts} />
-        </ScrollArea>
-        <QuickAccess />
-      </div>
+          <QuickAccess />
+        </div>
+      </ScrollArea>
     </div>
   );
 };
