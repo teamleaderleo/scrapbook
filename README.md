@@ -1,7 +1,5 @@
 # Scrapbook-Style Project Management App (MVP Stage)
 
-### Outage due to database migration!
-
 ## Overview
 
 This project is a scrapbook-style project management application tailored for artists. It aims to provide an intuitive and visually appealing way to manage projects, integrating both textual and visual elements. Setzen is German for "set" or "put." It's like putting all your thoughts into neat, retrievable places. I also liked how there was "zen" in the word. This is still an MVP, so most of the time was spent thinking about the rationale behind doing anything.
