@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { lusitana } from '@/components/ui/fonts';
 import { Metadata } from 'next';
-import Dashboard from '@/components/ui/dashboard/dashboard';
+import Dashboard from '@/components/dashboard/dashboard';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
