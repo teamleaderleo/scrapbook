@@ -53,9 +53,12 @@ export default function Pagination({
             if (allPages.length === 1) position = 'single';
             if (page === '...') position = 'middle';
 
+            // Create a unique key for each element, including ellipses
+            const key = page === '...' ? `ellipsis-${index}` : page;
+
             return (
               <PaginationNumber
-                key={page}
+                key={key}
                 page={page}
                 position={position}
                 isActive={currentPage === page}
