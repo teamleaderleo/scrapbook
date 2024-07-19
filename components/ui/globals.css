@@ -1,8 +1,9 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Remove the @layer directive */
+
+@layer base {
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -64,17 +65,16 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
   }
+}
 
-
-
+@layer base {
   * {
-    border: 1px solid #000; /* Replace with the desired border style */
+    @apply border-border;
   }
   body {
-    background-color: var(--background);
-    color: var(--foreground);
+    @apply bg-background text-foreground;
   }
-
+}
 
 input[type='number'] {
   -moz-appearance: textfield;
