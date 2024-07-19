@@ -5,6 +5,7 @@ import { Tag } from '@/app/lib/definitions';
 import { createTag, updateTag, deleteTag } from '@/app/lib/actions/tag-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedTags } from '../data/cached-tag-data';
+import { useKeyNav } from './useKeyNav';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -81,6 +82,8 @@ export function useTags() {
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
   }, []);
+
+  useKeyNav(currentPage, totalPages, handlePageChange);
 
   const addTag = useCallback(async (name: string): Promise<Tag> => {
     const trimmedName = name.trim().toLowerCase();

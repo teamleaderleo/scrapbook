@@ -3,38 +3,66 @@
 import React, { useState, useEffect } from 'react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Tag } from '@/app/lib/definitions';
-import { createTag, updateTag, deleteTag, } from '@/app/lib/actions/tag-actions';
-import { ADMIN_UUID } from '@/app/lib/constants';
+import { useTags } from '@/app/lib/hooks/useTags';
+import { useKeyNav } from '@/app/lib/hooks/useKeyNav';
+import Pagination from '@/components/ui/pagination';
+import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 
-type TagUsage = {
-  project_count: number;
-  artifact_count: number;
-};
+export default function TagManagementTable({ accountId }: { accountId: string }) {
+  const { 
+    paginatedTags,
+    isLoading,
+    error,
+    addTag,
+    updateTag,
+    deleteTag,
+    handleSearch,
+    handlePageChange,
+    currentPage,
+    totalPages,
+  } = useTags();
 
-export default function TagManagementTable({ initialTags }: { initialTags: Tag[] }) {
-  const [tags, setTags] = useState(initialTags);
+  const { showToast } = useToastMessages();
   const [newTagName, setNewTagName] = useState('');
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
 
   const handleCreateTag = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newTagName.trim()) {
-      const createdTag = await createTag(ADMIN_UUID, newTagName.trim());
-      setTags([...tags, createdTag]);
-      setNewTagName('');
+      try {
+        await addTag(newTagName.trim());
+        setNewTagName('');
+        showToast('success', 'create', 'tag');
+      } catch (error) {
+        console.error('Failed to create tag:', error);
+        showToast('error', 'create', 'tag');
+      }
     }
   };
 
   const handleUpdateTag = async (tag: Tag, newName: string) => {
-    const updatedTag = await updateTag(ADMIN_UUID, tag.id, newName.trim());
-    setTags(tags.map(t => t.id === updatedTag.id ? updatedTag : t));
-    setEditingTag(null);
+    try {
+      await updateTag({ tagId: tag.id, newName: newName.trim() });
+      setEditingTag(null);
+      showToast('success', 'update', 'tag');
+    } catch (error) {
+      console.error('Failed to update tag:', error);
+      showToast('error', 'update', 'tag');
+    }
   };
 
   const handleDeleteTag = async (tagId: string) => {
-    await deleteTag(ADMIN_UUID, tagId);
-    setTags(tags.filter(t => t.id !== tagId));
+    try {
+      await deleteTag(tagId);
+      showToast('success', 'delete', 'tag');
+    } catch (error) {
+      console.error('Failed to delete tag:', error);
+      showToast('error', 'delete', 'tag');
+    }
   };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <div className="mt-6 flow-root">
@@ -52,7 +80,7 @@ export default function TagManagementTable({ initialTags }: { initialTags: Tag[]
                 </tr>
               </thead>
               <tbody className="bg-white">
-                {tags.map((tag) => (
+                {paginatedTags.map((tag) => (
                   <tr key={tag.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
                     <td className="whitespace-nowrap px-3 py-3">
                       {editingTag?.id === tag.id ? (
@@ -115,13 +143,21 @@ export default function TagManagementTable({ initialTags }: { initialTags: Tag[]
           </div>
         </div>
       </div>
+      <div className="mt-5 flex w-full justify-center">
+        <Pagination 
+          totalPages={totalPages} 
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+        />
+      </div>
     </div>
   );
 }
 
 function TagUsage({ tagId }: { tagId: string }) {
-  const [usage, setUsage] = useState<TagUsage>({ project_count: 0, artifact_count: 0 });
+  const [usage, setUsage] = useState({ project_count: 0, artifact_count: 0 });
 
+  // TODO: Implement tag usage fetching
   // useEffect(() => {
   //   async function fetchUsage() {
   //     const usageData = await getTagUsage(ADMIN_UUID, tagId);
