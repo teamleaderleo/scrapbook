@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import CreateArtifactForm from '@/components/ui/artifacts/create-artifact-form';
+import CreateArtifactForm from '@/components/artifacts/create-artifact-form';
 import Breadcrumbs from '@/components/ui/breadcrumbs';
 
 export const metadata: Metadata = {

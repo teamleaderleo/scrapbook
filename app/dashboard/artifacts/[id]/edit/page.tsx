@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import EditArtifactForm from '@/components/ui/artifacts/edit-artifact-form';
+import EditArtifactForm from '@/components/artifacts/edit-artifact-form';
 import Breadcrumbs from '@/components/ui/breadcrumbs';
 
 export const metadata: Metadata = {

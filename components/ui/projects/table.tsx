@@ -9,7 +9,7 @@ import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useTags } from '@/app/lib/hooks/useTags';
 import { ErrorBoundaryWithToast } from '../errors/error-boundary';
 import { ProjectWithRelations } from '@/app/lib/definitions';
-import { ArtifactThumbnail } from '../artifacts/artifact-thumbnail';
+import { ArtifactThumbnail } from '../../artifacts/artifact-thumbnail';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 
 export function ProjectsTable({ accountId }: { accountId: string }) {
