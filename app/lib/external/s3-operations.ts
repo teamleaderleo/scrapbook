@@ -1,7 +1,9 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { CloudFrontClient, CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
-import { v4 as uuidv4 } from 'uuid';
-import { sql } from '@vercel/postgres';
+import { v4 as uuid } from 'uuid';
+import { eq, and } from 'drizzle-orm';
+import { db } from '../db/db.server';
+import { s3Usage } from '../db/schema';
 import FileType from 'file-type';
 import { fileTypeFromBuffer } from 'file-type';
 
@@ -35,30 +37,39 @@ async function checkAndUpdateS3Usage(accountId: string): Promise<boolean> {
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
 
-  const result = await sql`
-    SELECT count FROM s3_usage
-    WHERE account_id = ${accountId} AND month = ${currentMonth} AND year = ${currentYear}
-  `;
+  const result = await db.select()
+    .from(s3Usage)
+    .where(and(
+      eq(s3Usage.accountId, accountId),
+      eq(s3Usage.month, currentMonth),
+      eq(s3Usage.year, currentYear)
+    ))
+    .limit(1);
 
-  if (result.rows.length === 0) {
-    await sql`
-      INSERT INTO s3_usage (account_id, month, year, count)
-      VALUES (${accountId}, ${currentMonth}, ${currentYear}, 1)
-    `;
+  if (result.length === 0) {
+    await db.insert(s3Usage).values({
+      id: 1,
+      accountId,
+      month: currentMonth,
+      year: currentYear,
+      count: 1
+    });
     return true;
   }
 
-  const currentCount = result.rows[0].count;
+  const currentCount = result[0].count;
 
   if (currentCount >= MONTHLY_UPLOAD_LIMIT) {
     return false;
   }
 
-  await sql`
-    UPDATE s3_usage
-    SET count = count + 1
-    WHERE account_id = ${accountId} AND month = ${currentMonth} AND year = ${currentYear}
-  `;
+  await db.update(s3Usage)
+    .set({ count: currentCount + 1 })
+    .where(and(
+      eq(s3Usage.accountId, accountId),
+      eq(s3Usage.month, currentMonth),
+      eq(s3Usage.year, currentYear)
+    ));
 
   return true;
 }
@@ -89,7 +100,7 @@ export async function uploadToS3(file: File | Buffer, contentType: string, accou
   await validateFile(file);
 
   const fileBuffer = file instanceof File ? await file.arrayBuffer() : file;
-  const fileName = `${uuidv4()}-${file instanceof File ? file.name : 'file'}`;
+  const fileName = `${uuid()}-${file instanceof File ? file.name : 'file'}`;
 
   const uploadParams = {
     Bucket: process.env.AWS_S3_BUCKET_NAME,
