@@ -48,7 +48,6 @@ async function checkAndUpdateS3Usage(accountId: string): Promise<boolean> {
 
   if (result.length === 0) {
     await db.insert(s3Usage).values({
-      id: 1,
       accountId,
       month: currentMonth,
       year: currentYear,
