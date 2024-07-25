@@ -91,7 +91,7 @@ async function validateFile(file: File | Buffer): Promise<boolean> {
   return true;
 }
 
-export async function uploadToS3(file: File | Buffer, contentType: string, accountId: string, version: 'original' | 'thumbnail' | 'compressed' = 'original'): Promise<string> {
+export async function uploadToS3(file: File | Buffer, contentType: string, accountId: string, version: string): Promise<string> {
   if (!(await checkAndUpdateS3Usage(accountId))) {
     throw new Error('Monthly S3 upload limit reached');
   }
@@ -121,14 +121,11 @@ export async function uploadToS3(file: File | Buffer, contentType: string, accou
 }
 
 export async function deleteFromS3(fileUrl: string): Promise<void> {
-  const fileName = fileUrl.split('/').pop();
-  if (!fileName) {
-    throw new Error('Invalid file URL');
-  }
+  const key = fileUrl.replace(`https://${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/`, '');
 
   const deleteParams = {
     Bucket: process.env.AWS_S3_BUCKET_NAME,
-    Key: fileName,
+    Key: key,
   };
 
   try {
@@ -140,7 +137,7 @@ export async function deleteFromS3(fileUrl: string): Promise<void> {
         CallerReference: `delete-${Date.now()}`,
         Paths: {
           Quantity: 1,
-          Items: [`/${fileName}`],
+          Items: [`/${key}`],
         },
       },
     }));

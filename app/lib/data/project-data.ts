@@ -40,7 +40,11 @@ function buildProjectSelectObject(options: FetchOptions = {}): Record<string, an
               'id', ${artifactContents.id},
               'type', ${artifactContents.type},
               'content', ${artifactContents.content},
-              'createdAt', ${artifactContents.createdAt}
+              'variants', ${artifactContents.variants},
+              'metadata', ${artifactContents.metadata},
+              'createdAt', ${artifactContents.createdAt},
+              'createdBy', ${artifactContents.createdBy},
+              'lastModifiedBy', ${artifactContents.lastModifiedBy}
             ))
             FROM ${artifactContents}
             WHERE ${artifactContents.artifactId} = ${artifacts.id} 

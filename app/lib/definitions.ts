@@ -40,14 +40,50 @@ export type ArtifactTag = {
   tagId: string; 
 };
 
-export type ContentType = 'text' | 'image' | 'file';
+export type ContentType = 'text' | 'longText' | 'image' | 'file' | 'link' | 'embed';
+
+export type ContentVariant = {
+  url: string;
+  type: string;
+};
+
+export type EmbedData = {
+  title?: string;
+  description?: string;
+  thumbnailUrl?: string;
+  authorName?: string;
+  authorUrl?: string;
+  providerName?: string;
+  providerUrl?: string;
+};
+
+export type Annotation = {
+  id: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type ImageVersions = {
+  original: string;
+  compressed: string;
+  thumbnails: { [key: string]: string };
+};
 
 export type ArtifactContent = {
   id: string;
   accountId: string;
+  artifactId: string;
   type: ContentType;
   content: string;
+  variants?: ContentVariant[];
+  metadata?: Record<string, unknown>;
+  embed?: EmbedData;
+  annotations?: Annotation[];
   createdAt: Date;
+  updatedAt: Date;
+  createdBy: string;
+  lastModifiedBy: string;
 };
 
 export type BaseArtifact = {

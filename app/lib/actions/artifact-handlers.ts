@@ -5,7 +5,7 @@ import { artifacts, artifactContents, artifactTags, projectArtifactLinks } from 
 import { handleContentUpdate, hasValidContent, insertContents } from './artifact-content-actions';
 import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { handleProjectUpdateWithinTransaction } from './project-handlers';
-import { deleteFromS3 } from '../external/s3-operations';
+import { deleteRemovedContents } from './artifact-content-actions';
 import { v4 as uuid } from 'uuid';
 
 export async function handleArtifactUpdateWithinTransaction(
@@ -40,19 +40,18 @@ export async function handleArtifactDeleteWithinTransaction(
   accountId: string,
   artifactId: string
 ): Promise<void> {
+  // Delete associated tags and project links
   await tx.delete(artifactTags).where(and(eq(artifactTags.artifactId, artifactId), eq(artifactTags.accountId, accountId)));
   await tx.delete(projectArtifactLinks).where(and(eq(projectArtifactLinks.artifactId, artifactId), eq(projectArtifactLinks.accountId, accountId)));
   
+  // Fetch all contents associated with this artifact
   const contents = await tx.select().from(artifactContents)
     .where(and(eq(artifactContents.artifactId, artifactId), eq(artifactContents.accountId, accountId)));
 
-  for (const content of contents) {
-    if (content.type === 'image' || content.type === 'file') {
-      await deleteFromS3(content.content);
-    }
-  }
+  // Delete all associated files and content records
+  deleteRemovedContents(accountId, contents, new Set(contents.map((content: { id: any; }) => content.id)));
 
-  await tx.delete(artifactContents).where(and(eq(artifactContents.artifactId, artifactId), eq(artifactContents.accountId, accountId)));
+  // Finally, delete the artifact itself
   await tx.delete(artifacts).where(and(eq(artifacts.id, artifactId), eq(artifacts.accountId, accountId)));
 }
 

@@ -36,7 +36,13 @@ function buildArtifactSelectObject(options: FetchOptions = {}): Record<string, a
           'accountId', ${artifactContents.accountId},
           'type', ${artifactContents.type},
           'content', ${artifactContents.content},
-          'createdAt', ${artifactContents.createdAt}
+          'variants', ${artifactContents.variants},
+          'metadata', ${artifactContents.metadata},
+          'embed', ${artifactContents.embed},
+          'annotations', ${artifactContents.annotations},
+          'createdAt', ${artifactContents.createdAt},
+          'createdBy', ${artifactContents.createdBy},
+          'lastModifiedBy', ${artifactContents.lastModifiedBy}
         )) FILTER (WHERE ${artifactContents.id} IS NOT NULL),
         '[]'
       )
@@ -210,7 +216,13 @@ function parseArtifactResult(artifact: any, options: FetchOptions): ArtifactWith
       accountId: content.accountId,
       type: content.type,
       content: content.content,
+      variants: content.variants,
+      metadata: content.metadata,
+      embed: content.embed,
+      annotations: content.annotations,
       createdAt: new Date(content.createdAt),
+      createdBy: content.createdBy,
+      lastModifiedBy: content.lastModifiedBy,
     }));
   }
 

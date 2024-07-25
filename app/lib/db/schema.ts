@@ -1,5 +1,4 @@
-import { pgTable, pgView, uuid, text, varchar, timestamp, integer, serial, uniqueIndex } from 'drizzle-orm/pg-core';
-import { sql,eq, ne, gt, gte, } from "drizzle-orm";
+import { pgTable, pgView, uuid, text, varchar, timestamp, integer, serial, uniqueIndex, jsonb } from 'drizzle-orm/pg-core';
 
 export const accounts = pgTable('account', {
   id: uuid('id').primaryKey(),
@@ -46,7 +45,14 @@ export const artifactContents = pgTable('artifact_content', {
   artifactId: uuid('artifact_id').notNull().references(() => artifacts.id),
   type: text('type').notNull(),
   content: text('content').notNull(),
+  variants: jsonb('variants'),
+  metadata: jsonb('metadata'),
+  embed: jsonb('embed'),
+  annotations: jsonb('annotations'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  createdBy: uuid('created_by').references(() => accounts.id),
+  lastModifiedBy: uuid('last_modified_by').references(() => accounts.id),
 });
 
 export const projectTags = pgTable('project_tag', {
