@@ -7,6 +7,7 @@ import { uploadToS3, deleteFromS3 } from '../external/s3-operations';
 import { artifactContents } from '../db/schema';
 import { v4 as uuidv4 } from 'uuid';
 import { processAndUploadImage } from '../image-processing/image-processing';
+import { S3ResourceTracker } from '../external/s3-resource-tracker';
 
 export async function handleContentUpdate(accountId: string, artifactId: string, formData: FormData): Promise<boolean> {
   const existingContents = await fetchExistingContents(accountId, artifactId);
@@ -170,59 +171,71 @@ export async function hasValidContent(formData: FormData): Promise<boolean> {
 export async function insertContents(tx: any, accountId: string, artifactId: string, formData: FormData): Promise<string> {
   let allContent = '';
   let index = 0;
-  while (formData.get(`contentType-${index}`)) {
-    const contentType = formData.get(`contentType-${index}`) as ContentType;
-    const contentItem = formData.get(`content-${index}`);
+  const resourceTracker = new S3ResourceTracker();
 
-    let content: string;
-    let variants: ContentVariant[] | undefined;
-    let metadata: Record<string, unknown> | undefined;
+  try {
+    while (formData.get(`contentType-${index}`)) {
+      const contentType = formData.get(`contentType-${index}`) as ContentType;
+      const contentItem = formData.get(`content-${index}`);
 
-    if (contentType === 'text' || contentType === 'longText') {
-      content = contentItem as string;
-      allContent += content + ' ';
-      metadata = { wordCount: content.trim().split(/\s+/).length };
-    } else if (contentType === 'image' && contentItem instanceof File) {
-      const processedImage = await processAndUploadImage(contentItem, accountId);
-      content = processedImage.original;
-      variants = Object.entries(processedImage.thumbnails).map(([key, url]) => ({ type: key, url }));
-      metadata = { 
-        originalName: contentItem.name,
-        size: contentItem.size,
-        compressed: processedImage.compressed
-      };
-    } else if (contentType === 'file' && contentItem instanceof File) {
-      content = await uploadToS3(contentItem, contentType, accountId, 'original');
-      metadata = {
-        originalName: contentItem.name,
-        size: contentItem.size,
-        mimeType: contentItem.type
-      };
-    } else if (contentType === 'link' || contentType === 'embed') {
-      content = contentItem as string;
-      metadata = {
-        title: formData.get(`${contentType}Title-${index}`),
-        description: formData.get(`${contentType}Description-${index}`)
-      };
-    } else {
-      throw new Error(`Invalid content for type ${contentType}`);
+      let content: string;
+      let variants: ContentVariant[] | undefined;
+      let metadata: Record<string, unknown> | undefined;
+
+      if (contentType === 'text' || contentType === 'longText') {
+        content = contentItem as string;
+        allContent += content + ' ';
+        metadata = { wordCount: content.trim().split(/\s+/).length };
+      } else if (contentType === 'image' && contentItem instanceof File) {
+        const processedImage = await processAndUploadImage(contentItem, accountId);
+        content = processedImage.original;
+        variants = Object.entries(processedImage.thumbnails).map(([key, url]) => ({ type: key, url }));
+        metadata = { 
+          originalName: contentItem.name,
+          size: contentItem.size,
+          compressed: processedImage.compressed
+        };
+        resourceTracker.addResource(processedImage.original);
+        resourceTracker.addResource(processedImage.compressed);
+        Object.values(processedImage.thumbnails).forEach(url => resourceTracker.addResource(url));
+      } else if (contentType === 'file' && contentItem instanceof File) {
+        content = await uploadToS3(contentItem, contentType, accountId, 'original');
+        metadata = {
+          originalName: contentItem.name,
+          size: contentItem.size,
+          mimeType: contentItem.type
+        };
+        resourceTracker.addResource(content);
+      } else if (contentType === 'link' || contentType === 'embed') {
+        content = contentItem as string;
+        metadata = {
+          title: formData.get(`${contentType}Title-${index}`),
+          description: formData.get(`${contentType}Description-${index}`)
+        };
+      } else {
+        throw new Error(`Invalid content for type ${contentType}`);
+      }
+
+      await tx.insert(artifactContents).values({
+        id: uuidv4(),
+        accountId,
+        artifactId,
+        type: contentType,
+        content,
+        variants,
+        metadata,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        createdBy: accountId,
+        lastModifiedBy: accountId
+      });
+
+      index++;
     }
-
-    await tx.insert(artifactContents).values({
-      id: uuidv4(),
-      accountId,
-      artifactId,
-      type: contentType,
-      content,
-      variants,
-      metadata,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      createdBy: accountId,
-      lastModifiedBy: accountId
-    });
-
-    index++;
+    return allContent;
+  } catch (error) {
+    // If an error occurs, rollback the uploads
+    await resourceTracker.cleanup();
+    throw error; // Re-throw the error after cleanup
   }
-  return allContent;
 }

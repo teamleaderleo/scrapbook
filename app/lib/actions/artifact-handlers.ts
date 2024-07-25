@@ -67,24 +67,30 @@ export async function handleArtifactCreateWithinTransaction(
   const newArtifactId = uuid();
   const now = new Date();
 
-  await tx.insert(artifacts).values({ 
-    id: newArtifactId,
-    accountId, 
-    name, 
-    description, 
-    createdAt: now, 
-    updatedAt: now 
-  });
+  try {
+    await tx.insert(artifacts).values({ 
+      id: newArtifactId,
+      accountId, 
+      name, 
+      description, 
+      createdAt: now, 
+      updatedAt: now 
+    });
 
-  await insertContents(tx, accountId, newArtifactId, formData);
+    await insertContents(tx, accountId, newArtifactId, formData);
 
-  if (tags.length > 0) {
-    await handleTagUpdateWithinTransaction(tx, accountId, newArtifactId, tags, false);
+    if (tags.length > 0) {
+      await handleTagUpdateWithinTransaction(tx, accountId, newArtifactId, tags, false);
+    }
+
+    if (projects.length > 0) {
+      await handleProjectUpdateWithinTransaction(tx, accountId, newArtifactId, projects);
+    }
+
+    return newArtifactId;
+  } catch (error) {
+    // If an error occurs, the transaction will be automatically rolled back
+    // The cleanup of S3 resources is handled within insertContents
+    throw error;
   }
-
-  if (projects.length > 0) {
-    await handleProjectUpdateWithinTransaction(tx, accountId, newArtifactId, projects);
-  }
-
-  return newArtifactId;
 }
