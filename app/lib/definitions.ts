@@ -77,7 +77,13 @@ export type ArtifactContent = {
   type: ContentType;
   content: string;
   variants?: ContentVariant[];
-  metadata?: Record<string, unknown>;
+  metadata?: {
+    originalName?: string;
+    size?: number;
+    mimeType?: string;
+    originalUrl?: string;
+    [key: string]: unknown;
+  };
   embed?: EmbedData;
   annotations?: Annotation[];
   createdAt: Date;

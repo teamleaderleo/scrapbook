@@ -2,11 +2,11 @@
 
 import { eq, and } from 'drizzle-orm';
 import { db } from '../db/db.server';
-import { ContentType, ArtifactContent, ContentVariant, Annotation, EmbedData, } from '../definitions';
+import { ContentType, ArtifactContent, ContentVariant, Annotation, EmbedData, ImageVersions, } from '../definitions';
 import { uploadToS3, deleteFromS3 } from '../external/s3-operations';
 import { artifactContents } from '../db/schema';
 import { v4 as uuidv4 } from 'uuid';
-import { processAndUploadImage } from '../image-processing/image-processing';
+import { deleteAllImageVersions, processAndUploadImage } from '../image-processing/image-processing';
 import { S3ResourceTracker } from '../external/s3-resource-tracker';
 
 export async function handleContentUpdate(accountId: string, artifactId: string, formData: FormData): Promise<{ shouldDelete: boolean; newContentCount: number }> {
@@ -57,30 +57,55 @@ async function fetchExistingContents(accountId: string, artifactId: string): Pro
     })));
 }
 
-async function processContentItem(accountId: string, formData: FormData, index: number): Promise<{ contentType: ContentType; content: string; contentId: string | null }> {
+async function processContentItem(accountId: string, formData: FormData, index: number): Promise<{
+  contentType: ContentType;
+  content: string;
+  contentId: string | null;
+  variants?: ContentVariant[];
+  metadata?: {
+    originalName?: string;
+    size?: number;
+    mimeType?: string;
+    originalUrl?: string;
+    [key: string]: unknown;
+  };
+}> {
   const contentType = formData.get(`contentType-${index}`) as ContentType;
   const contentItem = formData.get(`content-${index}`);
   const contentId = formData.get(`contentId-${index}`) as string | null;
 
   switch (contentType) {
-    case 'text':
-    case 'longText':
+    case 'image':
+      if (!(contentItem instanceof File)) {
+        throw new Error(`Invalid image content`);
+      }
+      const processedImage = await processAndUploadImage(contentItem, accountId);
       return {
         contentType,
-        content: (contentItem as string).trim(),
-        contentId
+        content: processedImage.compressed,
+        contentId,
+        variants: Object.entries(processedImage.thumbnails).map(([key, url]) => ({ type: key, url })),
+        metadata: { 
+          originalName: contentItem.name,
+          size: contentItem.size,
+          originalUrl: processedImage.original
+        }
       };
 
-    case 'image':
     case 'file':
       if (!(contentItem instanceof File)) {
-        throw new Error(`Invalid ${contentType} content`);
+        throw new Error(`Invalid file content`);
       }
       const fileUrl = await uploadToS3(contentItem, contentType, accountId, 'original');
       return {
         contentType,
         content: fileUrl,
-        contentId
+        contentId,
+        metadata: {
+          originalName: contentItem.name,
+          size: contentItem.size,
+          mimeType: contentItem.type
+        }
       };
 
     case 'link':
@@ -88,19 +113,41 @@ async function processContentItem(accountId: string, formData: FormData, index: 
       return {
         contentType,
         content: contentItem as string,
-        contentId
+        contentId,
+        metadata: {
+          title: formData.get(`${contentType}Title-${index}`),
+          description: formData.get(`${contentType}Description-${index}`)
+        }
       };
 
     default:
-      throw new Error(`Unsupported content type: ${contentType}`);
+      return {
+        contentType,
+        content: (contentItem as string).trim(),
+        contentId
+      };
   }
 }
 
-async function updateExistingContent(accountId: string, contentId: string, contentType: ContentType, content: string): Promise<void> {
+async function updateExistingContent(accountId: string, contentId: string, contentType: ContentType, content: string, variants?: ContentVariant[], metadata?: Record<string, unknown>): Promise<void> {
+  const existingContent = await db.select().from(artifactContents).where(and(eq(artifactContents.id, contentId), eq(artifactContents.accountId, accountId))).limit(1);
+  
+  if (existingContent.length > 0 && existingContent[0].type === 'image') {
+    // Delete existing image versions
+    const existingVersions: ImageVersions = {
+      original: (existingContent[0].metadata as { originalUrl?: string })?.originalUrl || '',
+      compressed: existingContent[0].content,
+      thumbnails: Object.fromEntries((existingContent[0].variants as ContentVariant[] || []).map(v => [v.type, v.url]))
+    };
+    await deleteAllImageVersions(existingVersions);
+  }
+
   await db.update(artifactContents)
     .set({ 
       type: contentType, 
-      content: content, 
+      content: content,
+      variants: variants,
+      metadata: metadata,
       updatedAt: new Date(),
       lastModifiedBy: accountId
     })

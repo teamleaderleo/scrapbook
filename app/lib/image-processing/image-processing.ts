@@ -12,10 +12,20 @@ const THUMBNAIL_CONFIGS: ThumbnailConfig = {
   large: { width: 400, height: 400 },
 };
 
-export async function processAndUploadImage(file: File | Buffer, accountId: string): Promise<ImageVersions> {
+const STORE_ORIGINAL = process.env.STORE_ORIGINAL_IMAGES === 'true';
+
+export async function processAndUploadImage(
+  file: File | Buffer, 
+  accountId: string, 
+  existingVersions?: ImageVersions
+): Promise<ImageVersions> {
   const fileBuffer = file instanceof File ? await file.arrayBuffer() : file;
 
-  const originalImage = await sharp(fileBuffer).webp({ quality: 90 }).toBuffer();
+  // Delete existing versions if present
+  if (existingVersions) {
+    await deleteAllImageVersions(existingVersions);
+  }
+
   const compressedImage = await sharp(fileBuffer).webp({ quality: 60 }).toBuffer();
 
   const thumbnails: { [key: string]: string } = {};
@@ -27,10 +37,13 @@ export async function processAndUploadImage(file: File | Buffer, accountId: stri
     thumbnails[size] = await uploadToS3(thumbnailBuffer, 'image/webp', accountId, `thumbnail_${size}`);
   }
 
-  const [originalUrl, compressedUrl] = await Promise.all([
-    uploadToS3(originalImage, 'image/webp', accountId, 'original'),
-    uploadToS3(compressedImage, 'image/webp', accountId, 'compressed')
-  ]);
+  const compressedUrl = await uploadToS3(compressedImage, 'image/webp', accountId, 'compressed');
+
+  let originalUrl = '';
+  if (STORE_ORIGINAL) {
+    const originalImage = await sharp(fileBuffer).webp({ quality: 90 }).toBuffer();
+    originalUrl = await uploadToS3(originalImage, 'image/webp', accountId, 'original');
+  }
 
   return {
     original: originalUrl,
@@ -39,7 +52,6 @@ export async function processAndUploadImage(file: File | Buffer, accountId: stri
   };
 }
 
-// unused function
 export async function deleteAllImageVersions(versions: ImageVersions): Promise<void> {
   const urls = [
     versions.original,
