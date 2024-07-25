@@ -91,7 +91,7 @@ async function validateFile(file: File | Buffer): Promise<boolean> {
   return true;
 }
 
-export async function uploadToS3(file: File | Buffer, contentType: string, accountId: string): Promise<string> {
+export async function uploadToS3(file: File | Buffer, contentType: string, accountId: string, version: 'original' | 'thumbnail' | 'compressed' = 'original'): Promise<string> {
   if (!(await checkAndUpdateS3Usage(accountId))) {
     throw new Error('Monthly S3 upload limit reached');
   }
@@ -100,10 +100,11 @@ export async function uploadToS3(file: File | Buffer, contentType: string, accou
 
   const fileBuffer = file instanceof File ? await file.arrayBuffer() : file;
   const fileName = `${uuid()}-${file instanceof File ? file.name : 'file'}`;
+  const key = `users/${accountId}/${version}/${fileName}`;
 
   const uploadParams = {
     Bucket: process.env.AWS_S3_BUCKET_NAME,
-    Key: fileName,
+    Key: key,
     Body: Buffer.from(fileBuffer),
     ContentType: contentType,
   };
@@ -111,7 +112,7 @@ export async function uploadToS3(file: File | Buffer, contentType: string, accou
   try {
     await s3Client.send(new PutObjectCommand(uploadParams));
     const cloudFrontDomain = process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN;
-    const fileUrl = `${cloudFrontDomain}/${fileName}`;
+    const fileUrl = `${cloudFrontDomain}/${key}`;
     return fileUrl.startsWith('https://') ? fileUrl : `https://${fileUrl}`;
   } catch (error) {
     console.error('Error uploading to S3:', error);
