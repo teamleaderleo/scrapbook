@@ -17,7 +17,14 @@ export async function handleArtifactUpdateWithinTransaction(
   tags: string[],
   projects: string[],
   formData: FormData
-): Promise<void> {
+): Promise<{ deleted: boolean }> {
+  const { shouldDelete, newContentCount } = await handleContentUpdate(accountId, artifactId, formData);
+
+  if (shouldDelete) {
+    await handleArtifactDeleteWithinTransaction(tx, accountId, artifactId);
+    return { deleted: true };
+  }
+
   await tx.update(artifacts)
     .set({ name, description, updatedAt: new Date() })
     .where(and(
@@ -25,14 +32,10 @@ export async function handleArtifactUpdateWithinTransaction(
       eq(artifacts.accountId, accountId)
     ));
 
-  const hasContent = await handleContentUpdate(accountId, artifactId, formData);
-
-  if (!hasContent) {
-    throw new Error('Artifact must have at least one content item.');
-  }
-
   await handleTagUpdateWithinTransaction(tx, accountId, artifactId, tags, false);
   await handleProjectUpdateWithinTransaction(tx, accountId, artifactId, projects);
+
+  return { deleted: false };
 }
 
 export async function handleArtifactDeleteWithinTransaction(

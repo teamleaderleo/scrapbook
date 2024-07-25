@@ -48,17 +48,21 @@ export async function updateArtifact(id: string, accountId: string, prevState: S
 
   try {
     const result = await db.transaction(async (tx) => {
-      await handleArtifactUpdateWithinTransaction(tx, accountId, id, name, description, tags || [], projects || [], formData);
+      const { deleted } = await handleArtifactUpdateWithinTransaction(tx, accountId, id, name, description, tags || [], projects || [], formData);
+
+      if (deleted) {
+        return { message: 'Artifact deleted successfully (all content removed).', success: true };
+      }
 
       const suggestedTags = await suggestTags(`${name} ${description}`);
-      return { message: 'Artifact updated successfully', suggestedTags };
+      return { message: 'Artifact updated successfully', suggestedTags, success: true };
     });
 
     revalidatePath('/dashboard/artifacts');
     return result;
   } catch (error) {
     console.error('Error updating artifact:', error);
-    return { message: 'Database Error: Failed to Update Artifact.' };
+    return { message: 'Database Error: Failed to Update Artifact.', success: false };
   }
 }
 

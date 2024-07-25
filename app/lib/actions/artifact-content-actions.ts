@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { processAndUploadImage } from '../image-processing/image-processing';
 import { S3ResourceTracker } from '../external/s3-resource-tracker';
 
-export async function handleContentUpdate(accountId: string, artifactId: string, formData: FormData): Promise<boolean> {
+export async function handleContentUpdate(accountId: string, artifactId: string, formData: FormData): Promise<{ shouldDelete: boolean; newContentCount: number }> {
   const existingContents = await fetchExistingContents(accountId, artifactId);
   const existingContentIds = new Set(existingContents.map(row => row.id));
   let newContentCount = 0;
@@ -35,7 +35,7 @@ export async function handleContentUpdate(accountId: string, artifactId: string,
 
   await deleteRemovedContents(accountId, existingContents, existingContentIds);
 
-  return newContentCount > 0;
+  return { shouldDelete: newContentCount === 0, newContentCount };
 }
 
 async function fetchExistingContents(accountId: string, artifactId: string): Promise<ArtifactContent[]> {
