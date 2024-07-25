@@ -28,6 +28,7 @@ const ALLOWED_MIME_TYPES = [
   'image/jpeg',
   'image/png',
   'image/gif',
+  'image/webp',
   'application/pdf',
   // Idk what else to allow
 ];
