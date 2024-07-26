@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a scrapbook-style project management application tailored for artists. It aims to provide an intuitive and visually appealing way to manage projects, integrating both textual and visual elements. Setzen is German for "set" or "put." It's like putting all your thoughts into neat, retrievable places. I also liked how there was "zen" in the word. This is still an MVP, so most of the time was spent thinking about the rationale behind doing anything.
+This project is a scrapbook-style project management appl. It aims to provide an intuitive and visually appealing way to manage projects. The backend is nice, but I'm working on the UI right now. Setzen is German for "set" or "put." It's like putting all your thoughts into neat, retrievable places. I also liked how there was "zen" in the word. This is still an MVP, so most of the time was spent thinking about the rationale behind doing anything.
 
 ## Live Demo
 
@@ -11,7 +11,7 @@ Check out the deployed application: [https://setzen.vercel.app/](https://setzen.
 ## Schema
 <img src="https://github.com/user-attachments/assets/8ed37c1f-a2e6-4ea4-80a0-af296482ade8" width="60%">
 
-This took a bit more thinking than I expected. And I'm still thinking about it!
+This is an ongoing effort.
 
 ## What It Currently Looks Like
 ### Dashboard:
