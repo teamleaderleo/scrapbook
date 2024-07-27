@@ -16,6 +16,7 @@ const links = [
   { name: 'Projects', href: '/dashboard/projects', icon: Folder },
   { name: 'Artifacts', href: '/dashboard/artifacts', icon: Image },
   { name: 'Tags', href: '/dashboard/tags', icon: Tag },
+  { name: 'Portfolio', href: '/dashboard/portfolio', icon: Image },
   // { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 
