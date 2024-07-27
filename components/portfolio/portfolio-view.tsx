@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
-import { PortfolioArtifact } from '../artifacts/displays/portfolio-artifact';
+import { PortfolioArtifact } from './portfolio-artifact';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 export const PortfolioView: React.FC = () => {
