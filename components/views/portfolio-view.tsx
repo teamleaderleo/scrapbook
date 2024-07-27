@@ -12,19 +12,19 @@ export const PortfolioView: React.FC = () => {
     error,
   } = useArtifacts();
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (isLoading) return <div className="text-center py-4">Loading...</div>;
+  if (error) return <div className="text-center py-4 text-red-500">Error: {error.message}</div>;
 
   // Filter artifacts that have at least one image content
-  const artArtifacts = artifacts?.filter(artifact => 
+  const portfolioArtifacts = artifacts?.filter(artifact => 
     artifact.contents.some(content => content.type === 'image')
   ) || [];
 
   return (
-    <div className="art-portfolio-view">
-      <h1>Art Portfolio</h1>
-      <div className="artifact-grid">
-        {artArtifacts.map(artifact => (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Portfolio</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {portfolioArtifacts.map(artifact => (
           <PortfolioArtifact key={artifact.id} artifact={artifact} />
         ))}
       </div>

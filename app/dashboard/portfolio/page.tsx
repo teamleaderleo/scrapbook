@@ -1,4 +1,4 @@
-import { PortfolioView } from "@/components/artifacts/displays/portfolio-view";
+import { PortfolioView } from "@/components/views/portfolio-view";
 
 export default function PortfolioPage() {
   return <PortfolioView />;
