@@ -15,7 +15,8 @@ This is an ongoing effort.
 
 ## What It Currently Looks Like
 ### Dashboard:
-![image](https://github.com/user-attachments/assets/fa73a852-a669-4bf9-be60-fdc57e197aa5)
+![image](https://github.com/user-attachments/assets/f5e1507f-541c-4485-9dd7-8d6d87a25ad8)
+
 
 ### Artifacts:
 
