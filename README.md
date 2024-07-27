@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a scrapbook-style project management appl. It aims to provide an intuitive and visually appealing way to manage projects. The backend is nice, but I'm working on the UI right now. Setzen is German for "set" or "put." It's like putting all your thoughts into neat, retrievable places. I also liked how there was "zen" in the word. This is still an MVP, so most of the time was spent thinking about the rationale behind doing anything.
+This project is a scrapbook-style project management app. It aims to provide an intuitive and visually appealing way to manage projects. The backend is nice, but I'm working on the UI right now. Setzen is German for "set" or "put." It's like putting all your thoughts into neat, retrievable places. I also liked how there was "zen" in the word. This is still an MVP, so most of the time was spent thinking about the rationale behind doing anything.
 
 ## Live Demo
 
@@ -39,7 +39,7 @@ This is an ongoing effort.
 
 ## Vision
 
-The goal of this project is to create a comprehensive tool that helps artists manage their projects with ease and creativity. Current key features include:
+The goal of this project is to make a project management app that isn't as wack as the existing options. Current key features include:
 
 - **Visual and Textual Integration:** Incorporates images, sketches, and rich text to create detailed project descriptions and progress updates.
 - **Dynamic Views:** Can toggle between different views, such as a calendar view and a scrapbook view, to visualize project timelines and progress.
