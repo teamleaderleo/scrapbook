@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import EditProjectForm from '@/components/projects/edit-project-form';
+import EditProjectForm from '@/components/projects/forms/edit-project-form';
 import Breadcrumbs from '@/components/ui/breadcrumbs';
 import { Suspense } from 'react';
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ProjectForm } from '@/components/projects/project-form';
+import { ProjectForm } from '@/components/projects/forms/project-form';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
 import { useTags } from '@/app/lib/hooks/useTags';
