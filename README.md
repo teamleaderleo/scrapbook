@@ -45,34 +45,48 @@ The goal of this project is to create a comprehensive tool that helps artists ma
 - **Dynamic Views:** Can toggle between different views, such as a calendar view and a scrapbook view, to visualize project timelines and progress.
 - **Basic Functionality:** Has features like tagging, search, pagination, and authentication to provide a starting level of usability and user experience.
 
-## Features Implemented
+## Features Implemented (just a rehash of what's on my resume)
 
-- **Deployment:** Deployed on Vercel for continuous integration.
-- **Tagging and Search:** Implemented tagging and search functionality for efficient navigation through projects.
-- **Dynamic Calendar View:** Introduced a calendar view that toggles between general tasks and day-by-day project progress.
-- **Pagination and Accessibility:** Added pagination and accessibility features to enhance user experience.
-- **Dynamic Rendering:** Implemented dynamic rendering to improve performance and interactivity.
-- **Authentication:** Integrated OAuth for user authentication (temporarily not active; only the basic one is).
+- **Development:** 
+  - Developed a scalable, high-performance project management application leveraging cutting-edge technologies such as React Server Components, Next.js, and serverless architecture for optimal performance and SEO.
+  - Implemented a robust, future-proof schema design connecting accounts, projects, artifacts, tags, and multiple content types, focusing on extensible application architecture.
+- **Microservices:** 
+  - Created and integrated a Go microservice for image compression, containerized with Docker and deployed on AWS (ECR, Lambda, API Gateway) with a documented REST API.
+- **AI Integration:** 
+  - Implemented AI-powered features using Claude’s LLM API for intelligent tag suggestions and content organization to enhance user productivity.
+- **Authentication & Storage:** 
+  - Integrated NextAuth.js for secure authentication (email, GitHub, Google) and AWS S3 for isolated user file storage.
+- **Optimization:** 
+  - Optimized database queries and implemented caching strategies using React Query, significantly reducing database fetches and achieving near-instant load times and perfect PageSpeed Insights scores.
+  - Developed custom hooks for efficient state management, replacing Zustand with React Query for server logic.
+- **Database Migration:** 
+  - Migrated the database from Vercel Postgres to Supabase, using pg_dump for 100% data preservation, and refactored the ORM layer to use Drizzle ORM for easier database management.
+- **Search & Filtering:** 
+  - Integrated Fuse.js for comprehensive fuzzy search and filtering across all data points.
+- **UI/UX Design:** 
+  - Designed and implemented a responsive UI with Tailwind CSS and shadcn/ui, featuring instant pagination, dynamic rendering, and optimized image loading.
+- **Code Quality:** 
+  - Conducted regular self-directed code reviews and refactoring sessions, maintaining a clean, modular code structure through pragmatic, delivery-first architectural decisions while preventing premature optimization/abstraction.
+- **Design Tools:** 
+  - Utilized Figma for UI/UX planning and future feature conceptualization, engaging in iterative design cycles.
 
 ## Features in Progress
 
-- **CRUD for Artifacts:** Implementing full CRUD functionality for artifacts (resources/images), including image uploads.
-- **Layout for Scrapbook Concept:** Finalizing the layout for the scrapbook view and toggling between views.
-- **OAuth Integration:** Re-integrating OAuth for secure user authentication.
-- **Animations:** Planning and implementing animations to enhance user interaction.
-- **Rich Text Editor:** Integrating Quill.js for a feature-rich Markdown editor, supporting various text formatting options.
-- **Image and Sketch Integration:** Incorporating an HTML5 Canvas for seamless inclusion of artistic content.
-- **Updating various placeholders:** The pictures for the artifacts need to be updated to at least be my own pictures.
+- **Views & Interfaces:** 
+  - Developing portfolio view, blog view, calendar view, and chat view to enhance user interaction and content management.
+- **Content Previews:** 
+  - Implementing rich previews for all content types to provide a more engaging and informative user experience.
+- **Authentication:** 
+  - Completing authentication rules to ensure secure and reliable access control.
+- **Testing:** 
+  - Conducting comprehensive integration tests to verify the functionality and interoperability of all components.
+  - Performing authentication tests to ensure robust security measures are in place.
 
 ## Future Plans
 
 - **Embeds from Various Websites:** Integrate embeds from platforms like Pinterest, Twitter/X, and Pixiv.
 - **Chatbox Command Interface:** Develop a chatbox-like way to add content, possibly using a CLI-type format for commands.
-- **Expanded Tagging:** Enhance the tagging system for better project categorization and searchability.
-- **Payment Integration:** Plan for Stripe/payment integration to charge for storage and additional features.
-- **Cloud Storage Providers:** Integrate with cloud storage providers for extended storage options.
 - **Account Setup:** Expand account setup options for a more personalized user experience.
-- **Image Compression:** I think this would just be interesting to look into.
 - **Mobile integration:** I want to be able to pull this up on my phone and send links here.
 
 ## Personal Note (Deeper vision?)
