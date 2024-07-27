@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/components/scroll-area";
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { ProjectList } from './project-list';
 import { ArtifactGrid } from './artifact-grid';
 import { QuickAccess } from './quick-access';
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Card, CardHeader, CardContent } from "@/components/ui/components/card";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/components/toggle-group";
 import { Grid, BarChart } from "lucide-react";
 
 const Dashboard = () => {

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/components/input";
+import { Button } from "@/components/ui/components/button";
 import { PlusCircle, Smile, SendHorizontal } from 'lucide-react';
 
 const Footer: React.FC = () => {

@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import Search from '@/components/ui/search';
-import { ArtifactsTableSkeleton } from '@/components/ui/skeletons';
+import Search from '@/components/ui/components/search';
+import { ArtifactsTableSkeleton } from '@/components/ui/components/skeletons';
 import { Metadata } from 'next';
 
 const TagManagementTable = dynamic(

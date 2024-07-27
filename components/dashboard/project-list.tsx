@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/components/scroll-area";
+import { Separator } from "@/components/ui/components/separator";
 import { BaseProject } from '@/app/lib/definitions';
 
 export const ProjectList = ({ projects }: { projects: BaseProject[] }) => (

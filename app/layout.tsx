@@ -3,7 +3,7 @@ import { inter } from '@/components/ui/assets/fonts';
 import { Metadata } from 'next';
 import { ServiceWorkerRegistration } from '@/components/ui/service-worker-registration';
 import { ReactQueryProvider } from '@/components/query-client-provider';
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/components/toaster";
 
 export const metadata: Metadata = {
   title: {

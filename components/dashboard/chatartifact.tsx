@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/components/card";
+import { Button } from "@/components/ui/components/button";
 
 interface ArtifactData {
   text: string;

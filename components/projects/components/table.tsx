@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { TagList } from '@/components/tags/taglist';
 import { DeleteProject, UpdateProject } from '@/components/projects/components/button';
-import Pagination from '../../ui/pagination';
+import Pagination from '../../ui/components/pagination';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
 import { ProjectWithRelations } from '@/app/lib/definitions';

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Card } from "@/components/ui/card";
+import { Card } from "@/components/ui/components/card";
 import Image from 'next/image';
 import Link from 'next/link';
 import { CheckIcon } from 'lucide-react';

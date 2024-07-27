@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import CreateProjectForm from '@/components/projects/forms/create-project-form';
-import Breadcrumbs from '@/components/ui/breadcrumbs';
+import Breadcrumbs from '@/components/ui/components/breadcrumbs';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {

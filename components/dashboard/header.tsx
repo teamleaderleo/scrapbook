@@ -10,7 +10,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+} from "@/components/ui/components/breadcrumb"
 
 const Header: React.FC = () => {
   const pathname = usePathname();

@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import NavLinks from '@/components/dashboard/nav-links';
 import AcmeLogo from '@/components/ui/assets/acme-logo';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/components/button';
+import { ScrollArea } from '@/components/ui/components/scroll-area';
 import { LogOut, Plus } from 'lucide-react';
 import { signOut } from '@/auth';
 

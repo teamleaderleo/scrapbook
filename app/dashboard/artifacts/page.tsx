@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import Search from '@/components/ui/search';
+import Search from '@/components/ui/components/search';
 import { CreateArtifact } from '@/components/artifacts/components/button';
-import { ArtifactsTableSkeleton } from '@/components/ui/skeletons';
+import { ArtifactsTableSkeleton } from '@/components/ui/components/skeletons';
 import { Metadata } from 'next';
 import { ADMIN_UUID } from '@/app/lib/constants';
 

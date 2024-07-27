@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import Search from '@/components/ui/search';
+import Search from '@/components/ui/components/search';
 import { CreateProject } from '@/components/projects/components/button';
-import { ProjectsTableSkeleton } from '@/components/ui/skeletons';
+import { ProjectsTableSkeleton } from '@/components/ui/components/skeletons';
 import { Metadata } from 'next';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
