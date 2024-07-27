@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { lusitana } from '@/components/ui/fonts';
+import { lusitana } from '@/components/ui/assets/fonts';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import {

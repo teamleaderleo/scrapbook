@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { inter } from '@/components/ui/fonts';
+import { inter } from '@/components/ui/assets/fonts';
 import { usePathname } from 'next/navigation';
 import {
   Breadcrumb,

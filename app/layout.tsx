@@ -1,5 +1,5 @@
-import '@/components/ui/globals.css';
-import { inter } from '@/components/ui/fonts';
+import '@/components/ui/assets/globals.css';
+import { inter } from '@/components/ui/assets/fonts';
 import { Metadata } from 'next';
 import { ServiceWorkerRegistration } from '@/components/ui/service-worker-registration';
 import { ReactQueryProvider } from '@/components/query-client-provider';

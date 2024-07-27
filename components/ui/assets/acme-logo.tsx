@@ -1,4 +1,4 @@
-import { inter } from '@/components/ui/fonts';
+import { inter } from '@/components/ui/assets/fonts';
 import { Layers } from 'lucide-react';
 
 export default function AcmeLogo() {

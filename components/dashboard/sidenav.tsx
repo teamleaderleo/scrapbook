@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import NavLinks from '@/components/dashboard/nav-links';
-import AcmeLogo from '@/components/ui/acme-logo';
+import AcmeLogo from '@/components/ui/assets/acme-logo';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { LogOut, Plus } from 'lucide-react';
