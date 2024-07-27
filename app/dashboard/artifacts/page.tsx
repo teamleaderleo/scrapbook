@@ -1,13 +1,13 @@
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import Search from '@/components/ui/search';
-import { CreateArtifact } from '@/components/artifacts/button';
+import { CreateArtifact } from '@/components/artifacts/components/button';
 import { ArtifactsTableSkeleton } from '@/components/ui/skeletons';
 import { Metadata } from 'next';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 const ArtifactsTable = dynamic(
-  () => import('@/components/artifacts/table').then((mod) => mod.ArtifactsTable),
+  () => import('@/components/artifacts/components/table').then((mod) => mod.ArtifactsTable),
   { ssr: false }
 );
 

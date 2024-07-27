@@ -2,15 +2,15 @@
 
 import React, { useEffect } from 'react';
 import { TagList } from '@/components/tags/taglist';
-import { DeleteArtifact, UpdateArtifact } from '@/components/artifacts/button';
-import Pagination from '../ui/pagination';
+import { DeleteArtifact, UpdateArtifact } from '@/components/artifacts/components/button';
+import Pagination from '../../ui/pagination';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
 import { ArtifactThumbnail } from './artifact-thumbnail';
-import { ErrorBoundaryWithToast } from '../errors/error-boundary';
+import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
 import { ArtifactWithRelations, Tag } from '@/app/lib/definitions';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
-import { SearchParamsHandler } from '../search-params-handler';
+import { SearchParamsHandler } from '../../search-params-handler';
 
 export function ArtifactsTable({ accountId }: { accountId: string }) {
   const { 
