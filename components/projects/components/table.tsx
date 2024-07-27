@@ -2,15 +2,15 @@
 
 import React, { useEffect } from 'react';
 import { TagList } from '@/components/tags/taglist';
-import { DeleteProject, UpdateProject } from '@/components/projects/button';
-import Pagination from '../ui/pagination';
+import { DeleteProject, UpdateProject } from '@/components/projects/components/button';
+import Pagination from '../../ui/pagination';
 import { useProjects } from '@/app/lib/hooks/useProjects';
-import { ErrorBoundaryWithToast } from '../errors/error-boundary';
+import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
 import { ProjectWithRelations } from '@/app/lib/definitions';
-import { ArtifactThumbnail } from '../artifacts/components/artifact-thumbnail';
+import { ArtifactThumbnail } from '../../artifacts/components/artifact-thumbnail';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
-import { SearchParamsHandler } from '../search-params-handler';
+import { SearchParamsHandler } from '../../search-params-handler';
 
 export function ProjectsTable({ accountId }: { accountId: string }) {
   const { 

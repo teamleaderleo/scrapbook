@@ -1,13 +1,13 @@
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import Search from '@/components/ui/search';
-import { CreateProject } from '@/components/projects/button';
+import { CreateProject } from '@/components/projects/components/button';
 import { ProjectsTableSkeleton } from '@/components/ui/skeletons';
 import { Metadata } from 'next';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 const ProjectsTable = dynamic(
-  () => import('@/components/projects/table').then((mod) => mod.ProjectsTable),
+  () => import('@/components/projects/components/table').then((mod) => mod.ProjectsTable),
   { ssr: false }
 );
 
