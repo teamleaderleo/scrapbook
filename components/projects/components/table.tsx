@@ -11,6 +11,7 @@ import { ArtifactThumbnail } from '../../artifacts/components/artifact-thumbnail
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
 import { SearchParamsHandler } from '../../search-params-handler';
+import { ProjectsTableSkeleton } from '@/components/ui/components/skeletons';
 
 export function ProjectsTable({ accountId }: { accountId: string }) {
   const { 
@@ -42,7 +43,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
     await updateProjectTags({ projectId, tags: newTagNames });
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <ProjectsTableSkeleton />;
   if (error) return <div>Error: {error.message}</div>;
 
   return (
