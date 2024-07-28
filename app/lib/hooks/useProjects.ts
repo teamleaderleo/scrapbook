@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import Fuse from 'fuse.js';
-import { ProjectWithArtifacts, FetchOptions } from '@/app/lib/definitions';
+import { ProjectWithArtifacts, ProjectFetchOptions } from '@/app/lib/definitions';
 import { createProject, updateProject, deleteProject } from '@/app/lib/actions/project-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
@@ -16,7 +16,7 @@ export function useProjects() {
   const queryClient = useQueryClient();
   const [query, setQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [fetchOptions, setFetchOptions] = useState<FetchOptions>({
+  const [fetchOptions, setFetchOptions] = useState<ProjectFetchOptions>({
     includeTags: true,
     includeArtifacts: 'withContents',
   });

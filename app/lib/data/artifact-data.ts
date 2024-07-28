@@ -3,9 +3,13 @@
 import { eq, and, or, ilike, sql, SQL, desc } from 'drizzle-orm';
 import { db } from '../db/db.server';
 import { artifacts, artifactContents, artifactTags, tags, projectArtifactLinks, projects } from '../db/schema';
-import { ArtifactWithRelations, FetchOptions } from '../definitions';
+import { ArtifactWithRelations, ArtifactFetchOptions } from '../definitions';
 
-function buildArtifactSelectObject(options: FetchOptions = {}): Record<string, any> {
+function buildArtifactSelectObject(options: ArtifactFetchOptions = {
+  includeTags: false,
+  includeContents: false,
+  includeProjects: false
+}): Record<string, any> {
   const selectObject: Record<string, any> = {
     id: artifacts.id,
     accountId: artifacts.accountId,
@@ -70,7 +74,11 @@ function buildArtifactSelectObject(options: FetchOptions = {}): Record<string, a
 
 export async function fetchAllArtifacts(
   accountId: string,
-  options: FetchOptions = {}
+  options: ArtifactFetchOptions = {
+    includeTags: true,
+    includeContents: true,
+    includeProjects: true
+  }
 ): Promise<ArtifactWithRelations[]> {
   const selectObject = buildArtifactSelectObject(options);
 
@@ -101,7 +109,11 @@ export async function fetchAllArtifacts(
 export async function fetchSingleArtifact(
   accountId: string,
   artifactId: string,
-  options: FetchOptions = {}
+  options: ArtifactFetchOptions = {
+    includeTags: false,
+    includeContents: false,
+    includeProjects: false
+  }
 ): Promise<ArtifactWithRelations | null> {
   const selectObject = buildArtifactSelectObject(options);
 
@@ -134,7 +146,11 @@ export async function fetchSingleArtifact(
 export async function fetchLatestArtifacts(
   accountId: string,
   limit: number = 5,
-  options: FetchOptions = {}
+  options: ArtifactFetchOptions = {
+    includeTags: false,
+    includeContents: false,
+    includeProjects: false
+  }
 ): Promise<ArtifactWithRelations[]> {
   const selectObject = buildArtifactSelectObject(options);
 
@@ -166,7 +182,11 @@ export async function fetchLatestArtifacts(
 export async function searchArtifacts(
   accountId: string,
   query: string,
-  options: FetchOptions = {}
+  options: ArtifactFetchOptions = {
+    includeTags: false,
+    includeContents: false,
+    includeProjects: false
+  }
 ): Promise<ArtifactWithRelations[]> {
   const selectObject = buildArtifactSelectObject(options);
 
@@ -197,7 +217,7 @@ export async function searchArtifacts(
   return result.map(artifact => parseArtifactResult(artifact, options));
 }
 
-function parseArtifactResult(artifact: any, options: FetchOptions): ArtifactWithRelations {
+function parseArtifactResult(artifact: any, options: ArtifactFetchOptions): ArtifactWithRelations {
   const parsedArtifact: ArtifactWithRelations = {
     id: artifact.id,
     accountId: artifact.accountId,

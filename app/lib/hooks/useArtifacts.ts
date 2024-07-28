@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import Fuse from 'fuse.js';
-import { ArtifactWithRelations, FetchOptions, Tag, BaseProject } from '@/app/lib/definitions';
+import { ArtifactWithRelations, ArtifactFetchOptions, Tag, BaseProject } from '@/app/lib/definitions';
 import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/actions/artifact-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedArtifacts } from '@/app/lib/data/cached-artifact-data';
@@ -15,7 +15,7 @@ export function useArtifacts() {
   const queryClient = useQueryClient();
   const [query, setQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [fetchOptions, setFetchOptions] = useState<FetchOptions>({
+  const [fetchOptions, setFetchOptions] = useState<ArtifactFetchOptions>({
     includeTags: true,
     includeContents: true,
     includeProjects: true,
