@@ -3,49 +3,27 @@
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { db } from '../db/db.server';
 import { projects, projectTags, tags, projectArtifactLinks, artifacts, artifactContents, artifactTags } from '../db/schema';
-import { ProjectWithTags, ProjectWithArtifacts, ProjectWithExtendedArtifacts, FetchOptions } from '../definitions';
+import { ProjectWithTags, ProjectWithArtifacts, ProjectWithExtendedArtifacts, FetchOptions, ProjectFetchOptions } from '../definitions';
+import { artifactTagSelect, baseProjectSelect, tagSelect, artifactSelect, artifactContentSelect } from './select-objects';
 
 export async function fetchAllProjects(
   accountId: string,
-  options: FetchOptions = {}
+  options: ProjectFetchOptions = {
+    includeTags: false,
+    includeArtifacts: 'none'
+  }
 ): Promise<(ProjectWithTags | ProjectWithArtifacts | ProjectWithExtendedArtifacts)[]> {
   const query = db
     .select({
-      project: {
-        id: projects.id,
-        accountId: projects.accountId,
-        name: projects.name,
-        description: projects.description,
-        createdAt: projects.createdAt,
-        updatedAt: projects.updatedAt,
-        status: projects.status,
-      },
-      ...(options.includeTags ? {
-        tag: {
-          id: tags.id,
-          name: tags.name,
-        },
-      } : {}),
+      project: baseProjectSelect,
+      ...(options.includeTags ? { tag: tagSelect } : {}),
       ...(options.includeArtifacts !== 'none' ? {
-        artifact: {
-          id: artifacts.id,
-          name: artifacts.name,
-          description: artifacts.description,
-          createdAt: artifacts.createdAt,
-          updatedAt: artifacts.updatedAt,
-        },
+        artifact: artifactSelect,
         ...(options.includeArtifacts === 'withContents' || options.includeArtifacts === 'extended' ? {
-          artifactContent: {
-            id: artifactContents.id,
-            type: artifactContents.type,
-            content: artifactContents.content,
-          },
+          artifactContent: artifactContentSelect,
         } : {}),
         ...(options.includeArtifacts === 'extended' ? {
-          artifactTag: {
-            id: artifactTags.artifactId,
-            name: tags.name,
-          },
+          artifactTag: artifactTagSelect,
         } : {}),
       } : {}),
     })
@@ -65,7 +43,7 @@ export async function fetchAllProjects(
   return parseProjectResults(results, options);
 }
 
-function parseProjectResults(results: any[], options: FetchOptions): (ProjectWithTags | ProjectWithArtifacts | ProjectWithExtendedArtifacts)[] {
+function parseProjectResults(results: any[], options: ProjectFetchOptions): (ProjectWithTags | ProjectWithArtifacts | ProjectWithExtendedArtifacts)[] {
   const projectMap = new Map();
 
   for (const row of results) {
