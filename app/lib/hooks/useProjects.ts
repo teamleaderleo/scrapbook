@@ -31,7 +31,9 @@ export function useProjects() {
 
 const { data: projectPreviews, isLoading: isLoadingPreviews } = useQuery<ProjectPreview[], Error>(
   ['projectPreviews', ADMIN_UUID],
-  () => getCachedProjectPreviews(projectBasics?.map(p => p.id) ?? []),
+  () => projectBasics && projectBasics.length > 0
+    ? getCachedProjectPreviews(projectBasics.map(p => p.id))
+    : Promise.resolve([]),
   {
     enabled: !!projectBasics,
     staleTime: 5 * 60 * 1000,
