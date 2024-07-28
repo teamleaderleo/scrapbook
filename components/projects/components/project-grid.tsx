@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProjectWithArtifacts } from "@/app/lib/definitions";
+import { ProjectWithArtifacts } from "@/app/lib/definitions/project-definitions";
 import { ProjectCard } from './project-card';
 
 export const ProjectGrid: React.FC<{ projects: ProjectWithArtifacts[] }> = ({ projects }) => {

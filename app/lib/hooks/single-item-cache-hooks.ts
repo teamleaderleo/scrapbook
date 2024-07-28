@@ -1,5 +1,7 @@
 import { useQueryClient } from 'react-query';
-import { ArtifactWithRelations, ProjectWithArtifacts, Tag } from '../definitions';
+import { Tag } from '../definitions';
+import { ArtifactWithRelations } from "../definitions/artifact-definitions";
+import { ProjectWithArtifacts } from "../definitions/project-definitions";
 
 export function useSingleArtifactFromCache(artifactId: string): ArtifactWithRelations | undefined {
   const queryClient = useQueryClient();

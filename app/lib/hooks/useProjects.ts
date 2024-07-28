@@ -1,7 +1,8 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient, useQueries } from 'react-query';
 import Fuse from 'fuse.js';
-import { ProjectWithArtifacts, ProjectFetchOptions, ProjectBasic, ProjectPreview } from '@/app/lib/definitions';
+import { ProjectFetchOptions } from '@/app/lib/definitions';
+import { ProjectWithArtifacts, ProjectBasic, ProjectPreview } from "../definitions/project-definitions";
 import { createProject, updateProject, deleteProject } from '@/app/lib/actions/project-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';

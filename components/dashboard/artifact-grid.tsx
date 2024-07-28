@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArtifactWithRelations } from '@/app/lib/definitions';
+import { ArtifactWithRelations } from "@/app/lib/definitions/artifact-definitions";
 import { ErrorBoundaryWithToast } from '@/components/errors/error-boundary';
 import { ArtifactThumbnail } from '@/components/artifacts/components/artifact-thumbnail';
 

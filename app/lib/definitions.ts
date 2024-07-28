@@ -1,3 +1,4 @@
+
 export type Account = {
   id: string; // Primary key
   name: string;
@@ -72,104 +73,6 @@ export type ImageVersions = {
   original: string;
   compressed: string;
   thumbnails: { [key: string]: string };
-};
-
-export type ArtifactContent = {
-  id: string;
-  accountId: string;
-  artifactId: string;
-  type: ContentType;
-  content: string;
-  variants?: ContentVariant[];
-  metadata?: {
-    originalName?: string;
-    size?: number;
-    mimeType?: string;
-    originalUrl?: string;
-    [key: string]: unknown;
-  };
-  embed?: EmbedData;
-  annotations?: Annotation[];
-  createdAt: Date;
-  updatedAt: Date;
-  createdBy: string;
-  lastModifiedBy: string;
-};
-
-export type BaseArtifact = {
-  accountId: string;
-  id: string;
-  name: string;
-  description?: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type ArtifactBasic = Pick<BaseArtifact, 'id' | 'name'>;
-
-export type ArtifactPreview = BaseArtifact & {
-  previewContent?: string;
-};
-
-export type Artifact = BaseArtifact &{
-  contents: ArtifactContent[];
-};
-
-export type ArtifactWithTags = Artifact & {
-  tags: Tag[];
-};
-
-export type ArtifactWithProjects = Artifact & {
-  projects: BaseProject[];
-};
-
-export type ArtifactWithRelations = ArtifactWithTags & ArtifactWithProjects;
-
-export type ArtifactView = ArtifactWithRelations & {
-  totalArtifacts: number;
-  totalTags: number;
-  totalAssociatedProjects: number;
-};
-
-export type BaseProject = {
-  id: string;
-  accountId: string;
-  name: string;
-  description?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  status: 'pending' | 'completed';
-};
-
-export type ProjectBasic = Pick<BaseProject, 'id' | 'name' | 'status'>;
-
-export type ProjectPreview = BaseProject & {
-  previewArtifact?: {
-    id?: string | null;
-    name?: string | null;
-    previewContent?: string | null;
-  } | null;
-};
-
-export type ProjectWithTags = BaseProject & {
-  tags: Tag[];
-};
-
-export type ProjectWithArtifacts = ProjectWithTags & {
-  artifacts: Artifact[];
-};
-
-export type ProjectWithExtendedArtifacts = ProjectWithTags & {
-  artifacts: ArtifactWithRelations[];
-};
-
-// Type for the query result
-export type ProjectView = ProjectWithArtifacts & {
-  totalProjects: number;
-  totalPending: number;
-  totalCompleted: number;
-  totalTags: number;
-  totalAssociatedArtifacts: number;
 };
 
 // Dashboard view

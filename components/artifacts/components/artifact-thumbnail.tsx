@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Artifact } from '@/app/lib/definitions';
+import { Artifact } from "@/app/lib/definitions/artifact-definitions";
 import { getArtifactThumbnail } from '@/app/lib/utils-client';
 
 interface ArtifactThumbnailProps {

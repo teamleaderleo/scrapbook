@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArtifactDisplay } from './artifact-display';
-import { ArtifactWithRelations, ProjectWithArtifacts, ProjectWithExtendedArtifacts } from '@/app/lib/definitions';
+import { ArtifactWithRelations } from "@/app/lib/definitions/artifact-definitions";
+import { ProjectWithArtifacts, ProjectWithExtendedArtifacts } from "@/app/lib/definitions/project-definitions";
 
 export const ProjectDisplay: React.FC<{ project: ProjectWithArtifacts }> = ({ project }) => {
   return (

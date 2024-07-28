@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { deleteArtifact } from '@/app/lib/actions/artifact-actions';
 import { useTransition } from 'react';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import { ArtifactWithRelations } from '@/app/lib/definitions';
+import { ArtifactWithRelations } from "@/app/lib/definitions/artifact-definitions";
 
 export function CreateArtifact() {
   return (

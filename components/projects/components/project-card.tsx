@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProjectWithArtifacts } from "@/app/lib/definitions";
+import { ProjectWithArtifacts } from "@/app/lib/definitions/project-definitions";
 import { ArtifactThumbnail } from '@/components/artifacts/components/artifact-thumbnail';
 
 export const ProjectCard: React.FC<{ project: ProjectWithArtifacts }> = ({ project }) => {

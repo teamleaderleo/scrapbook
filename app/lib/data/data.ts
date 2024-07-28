@@ -1,11 +1,13 @@
 import { sql } from '@vercel/postgres';
 import {
   Account,
-  ProjectView,
-  ProjectWithArtifacts,
   DashboardView,
   Tag
 } from '../definitions';
+import {
+  ProjectView,
+  ProjectWithArtifacts
+} from "../definitions/project-definitions";
 
 export async function getAccount(email: string) {
   try {

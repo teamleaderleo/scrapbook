@@ -3,7 +3,8 @@
 import { eq, and, or, ilike, sql, SQL, desc } from 'drizzle-orm';
 import { db } from '../db/db.server';
 import { artifacts, artifactContents, artifactTags, tags, projectArtifactLinks, projects } from '../db/schema';
-import { ArtifactWithRelations, ArtifactFetchOptions } from '../definitions';
+import { ArtifactFetchOptions } from '../definitions';
+import { ArtifactWithRelations } from "../definitions/artifact-definitions";
 
 function buildArtifactSelectObject(options: ArtifactFetchOptions = {
   includeTags: false,

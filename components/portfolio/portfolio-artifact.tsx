@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArtifactWithRelations } from "@/app/lib/definitions";
+import { ArtifactWithRelations } from "@/app/lib/definitions/artifact-definitions";
 import { ImageContent, ContentDisplay } from './artifact-display';
 
 export const PortfolioArtifact: React.FC<{ artifact: ArtifactWithRelations }> = ({ artifact }) => {

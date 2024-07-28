@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ScrollArea } from "@/components/ui/components/scroll-area";
 import { Separator } from "@/components/ui/components/separator";
-import { BaseProject } from '@/app/lib/definitions';
+import { BaseProject } from "@/app/lib/definitions/project-definitions";
 
 export const ProjectList = ({ projects }: { projects: BaseProject[] }) => (
   <ScrollArea className="h-[calc(100vh-10rem)]"> {/* Adjusted for header, footer, and card header */}
