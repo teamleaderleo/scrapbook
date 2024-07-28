@@ -43,6 +43,39 @@ export async function fetchAllProjects(
   return parseProjectResults(results, options);
 }
 
+export async function fetchProjectSkeletons(accountId: string) {
+  return db
+    .select({
+      id: projects.id,
+      name: projects.name,
+      status: projects.status,
+    })
+    .from(projects)
+    .where(eq(projects.accountId, accountId))
+    .orderBy(desc(projects.updatedAt));
+}
+
+export async function fetchProjectPreviews(accountId: string) {
+  return db
+    .select({
+      ...baseProjectSelect,
+      previewArtifact: {
+        id: artifacts.id,
+        name: artifacts.name,
+        previewContent: artifactContents.content,
+      },
+    })
+    .from(projects)
+    .leftJoin(projectArtifactLinks, eq(projects.id, projectArtifactLinks.projectId))
+    .leftJoin(artifacts, eq(projectArtifactLinks.artifactId, artifacts.id))
+    .leftJoin(artifactContents, and(
+      eq(artifactContents.artifactId, artifacts.id),
+    ))
+    .where(eq(projects.accountId, accountId))
+    .orderBy(desc(projects.updatedAt))
+    .limit(1);  // Assuming we want one preview image per project
+}
+
 function parseProjectResults(results: any[], options: ProjectFetchOptions): (ProjectWithTags | ProjectWithArtifacts | ProjectWithExtendedArtifacts)[] {
   const projectMap = new Map();
 
