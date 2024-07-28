@@ -17,14 +17,14 @@ export const getCachedProjectBasics = cache(async (accountId: string): Promise<P
 
 export const getCachedProjectPreviews = cache(async (projectIds: string[]): Promise<ProjectPreview[]> => {
   const projectPreviews = await fetchProjectPreviews(projectIds);
-  return projectPreviews.map(projectPreview => ({
+  return projectPreviews.map(({ previewArtifact, ...projectPreview }) => ({
     ...projectPreview,
-    description: projectPreview.description ?? undefined,
+    description: projectPreview.description || undefined,
     status: projectPreview.status as "pending" | "completed",
-    previewArtifact: projectPreview.previewArtifact ? {
-      id: projectPreview.previewArtifact.id ?? null,
-      name: projectPreview.previewArtifact.name ?? null,
-      previewContent: projectPreview.previewArtifact.previewContent ?? null
+    previewArtifact: previewArtifact ? {
+      id: previewArtifact.id || null,
+      name: previewArtifact.name || null,
+      previewContent: previewArtifact.previewContent || null
     } : null
   }));
 });
