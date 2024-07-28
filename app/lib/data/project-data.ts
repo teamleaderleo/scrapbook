@@ -1,9 +1,9 @@
 'use server';
 
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { db } from '../db/db.server';
 import { projects, projectTags, tags, projectArtifactLinks, artifacts, artifactContents, artifactTags } from '../db/schema';
-import { ProjectWithTags, ProjectWithArtifacts, ProjectWithExtendedArtifacts, ProjectFetchOptions } from '../definitions';
+import { ProjectWithTags, ProjectWithArtifacts, ProjectWithExtendedArtifacts, ProjectFetchOptions, Tag } from '../definitions';
 import { artifactTagSelect, baseProjectSelect, tagSelect, artifactSelect, artifactContentSelect } from './select-objects';
 
 export async function fetchAllProjects(
@@ -28,7 +28,7 @@ export async function fetchAllProjects(
       } : {}),
     })
     .from(projects)
-    .where(eq(projects.accountId, sql.placeholder('accountId')))
+    .where(eq(projects.accountId, accountId))
     .leftJoin(projectTags, eq(projects.id, projectTags.projectId))
     .leftJoin(tags, eq(projectTags.tagId, tags.id))
     .leftJoin(projectArtifactLinks, eq(projects.id, projectArtifactLinks.projectId))
@@ -37,13 +37,11 @@ export async function fetchAllProjects(
     .leftJoin(artifactTags, eq(artifacts.id, artifactTags.artifactId))
     .orderBy(desc(projects.updatedAt));
 
-  const preparedQuery = query.prepare('fetch_all_projects');
-  const results = await preparedQuery.execute({ accountId });
-
+  const results = await query.execute();
   return parseProjectResults(results, options);
 }
 
-export async function fetchProjectSkeletons(accountId: string) {
+export async function fetchProjectBasics(accountId: string) {
   return db
     .select({
       id: projects.id,
@@ -55,7 +53,7 @@ export async function fetchProjectSkeletons(accountId: string) {
     .orderBy(desc(projects.updatedAt));
 }
 
-export async function fetchProjectPreviews(accountId: string) {
+export async function fetchProjectPreviews(projectIds: string[]) {
   return db
     .select({
       ...baseProjectSelect,
@@ -68,12 +66,44 @@ export async function fetchProjectPreviews(accountId: string) {
     .from(projects)
     .leftJoin(projectArtifactLinks, eq(projects.id, projectArtifactLinks.projectId))
     .leftJoin(artifacts, eq(projectArtifactLinks.artifactId, artifacts.id))
-    .leftJoin(artifactContents, and(
-      eq(artifactContents.artifactId, artifacts.id),
-    ))
-    .where(eq(projects.accountId, accountId))
-    .orderBy(desc(projects.updatedAt))
-    .limit(1);  // Assuming we want one preview image per project
+    .leftJoin(artifactContents, eq(artifacts.id, artifactContents.artifactId))
+    .where(inArray(projects.id, projectIds))
+    .groupBy(
+      projects.id, 
+      projects.accountId, 
+      projects.name, 
+      projects.description, 
+      projects.createdAt, 
+      projects.updatedAt, 
+      projects.status,
+      artifacts.id, 
+      artifacts.name, 
+      artifactContents.content
+    );
+}
+
+export async function fetchProjectDetails(projectId: string): Promise<ProjectWithTags> {
+  const project = await db.select().from(projects).where(eq(projects.id, projectId)).limit(1);
+  
+  if (!project[0]) {
+    throw new Error(`Project with id ${projectId} not found`);
+  }
+
+  const projectTagsResult = await db.select({
+    id: tags.id,
+    name: tags.name,
+    accountId: tags.accountId
+  })
+  .from(projectTags)
+  .innerJoin(tags, eq(tags.id, projectTags.tagId))
+  .where(eq(projectTags.projectId, projectId));
+
+  return {
+    ...project[0],
+    description: project[0].description || undefined,
+    status: project[0].status as "pending" | "completed",
+    tags: projectTagsResult as Tag[]
+  };
 }
 
 function parseProjectResults(results: any[], options: ProjectFetchOptions): (ProjectWithTags | ProjectWithArtifacts | ProjectWithExtendedArtifacts)[] {

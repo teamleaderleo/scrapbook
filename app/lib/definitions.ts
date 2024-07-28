@@ -105,6 +105,12 @@ export type BaseArtifact = {
   updatedAt: Date;
 };
 
+export type ArtifactBasic = Pick<BaseArtifact, 'id' | 'name'>;
+
+export type ArtifactPreview = BaseArtifact & {
+  previewContent?: string;
+};
+
 export type Artifact = BaseArtifact &{
   contents: ArtifactContent[];
 };
@@ -133,6 +139,16 @@ export type BaseProject = {
   createdAt: Date;
   updatedAt: Date;
   status: 'pending' | 'completed';
+};
+
+export type ProjectBasic = Pick<BaseProject, 'id' | 'name' | 'status'>;
+
+export type ProjectPreview = BaseProject & {
+  previewArtifact?: {
+    id?: string | null;
+    name?: string | null;
+    previewContent?: string | null;
+  } | null;
 };
 
 export type ProjectWithTags = BaseProject & {

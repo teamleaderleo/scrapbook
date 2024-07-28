@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import EditArtifactForm from '@/components/artifacts/edit-artifact-form';
+import EditArtifactForm from '@/components/artifacts/forms/edit-artifact-form';
 import Breadcrumbs from '@/components/ui/components/breadcrumbs';
 import { Suspense } from 'react';
 

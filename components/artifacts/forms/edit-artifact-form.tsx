@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArtifactForm } from '@/components/artifacts/artifact-form';
+import { ArtifactForm } from '@/components/artifacts/forms/artifact-form';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useTags } from '@/app/lib/hooks/useTags';
