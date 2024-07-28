@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import Fuse from 'fuse.js';
-import { ProjectWithRelations, FetchOptions } from '@/app/lib/definitions';
+import { ProjectWithArtifacts, FetchOptions } from '@/app/lib/definitions';
 import { createProject, updateProject, deleteProject } from '@/app/lib/actions/project-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
@@ -18,10 +18,10 @@ export function useProjects() {
   const [currentPage, setCurrentPage] = useState(1);
   const [fetchOptions, setFetchOptions] = useState<FetchOptions>({
     includeTags: true,
-    includeArtifacts: true,
+    includeArtifacts: 'withContents',
   });
 
-  const { data: projects, isLoading, error } = useQuery<ProjectWithRelations[], Error>(
+  const { data: projects, isLoading, error } = useQuery<ProjectWithArtifacts[], Error>(
     ['projects', fetchOptions],
     () => getCachedProjects(ADMIN_UUID, fetchOptions),
     {

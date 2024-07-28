@@ -1,5 +1,5 @@
 import { useQueryClient } from 'react-query';
-import { ArtifactWithRelations, ProjectWithRelations, Tag } from '../definitions';
+import { ArtifactWithRelations, ProjectWithArtifacts, Tag } from '../definitions';
 
 export function useSingleArtifactFromCache(artifactId: string): ArtifactWithRelations | undefined {
   const queryClient = useQueryClient();
@@ -7,9 +7,9 @@ export function useSingleArtifactFromCache(artifactId: string): ArtifactWithRela
   return artifacts?.find(artifact => artifact.id === artifactId);
 }
 
-export function useSingleProjectFromCache(projectId: string): ProjectWithRelations | undefined {
+export function useSingleProjectFromCache(projectId: string): ProjectWithArtifacts | undefined {
   const queryClient = useQueryClient();
-  const projects = queryClient.getQueryData<ProjectWithRelations[]>(['projects']);
+  const projects = queryClient.getQueryData<ProjectWithArtifacts[]>(['projects']);
   return projects?.find(project => project.id === projectId);
 }
 

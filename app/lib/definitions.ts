@@ -12,7 +12,7 @@ export interface FetchOptions { // idk why we'd want interfaces over types
   includeTags?: boolean;
   includeContents?: boolean;
   includeProjects?: boolean;
-  includeArtifacts?: boolean;
+  includeArtifacts?: 'none' | 'withContents' | 'extended';
 }
 
 export type Tag = {
@@ -105,10 +105,15 @@ export type Artifact = BaseArtifact &{
   contents: ArtifactContent[];
 };
 
-export type ArtifactWithRelations = Artifact & {
+export type ArtifactWithTags = Artifact & {
   tags: Tag[];
+};
+
+export type ArtifactWithProjects = Artifact & {
   projects: BaseProject[];
 };
+
+export type ArtifactWithRelations = ArtifactWithTags & ArtifactWithProjects;
 
 export type ArtifactView = ArtifactWithRelations & {
   totalArtifacts: number;
@@ -126,13 +131,20 @@ export type BaseProject = {
   status: 'pending' | 'completed';
 };
 
-export type ProjectWithRelations = BaseProject & {
+export type ProjectWithTags = BaseProject & {
   tags: Tag[];
+};
+
+export type ProjectWithArtifacts = ProjectWithTags & {
   artifacts: Artifact[];
 };
 
+export type ProjectWithExtendedArtifacts = ProjectWithTags & {
+  artifacts: ArtifactWithRelations[];
+};
+
 // Type for the query result
-export type ProjectView = ProjectWithRelations & {
+export type ProjectView = ProjectWithArtifacts & {
   totalProjects: number;
   totalPending: number;
   totalCompleted: number;

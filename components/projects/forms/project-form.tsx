@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { ArtifactWithRelations, ProjectWithRelations } from '@/app/lib/definitions';
+import { ArtifactWithRelations, ProjectWithArtifacts } from '@/app/lib/definitions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/components/button';
 import { TagManager } from '@/components/tags/tagmanager';
@@ -7,7 +7,7 @@ import { Suggestions } from '@/components/suggestions/suggestions';
 import { useTags } from '@/app/lib/hooks/useTags';
 
 interface ProjectFormProps {
-  project: ProjectWithRelations;
+  project: ProjectWithArtifacts;
   artifacts: ArtifactWithRelations[];
   onSubmit: (formData: FormData) => void;
   isSubmitting: boolean;

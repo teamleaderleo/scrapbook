@@ -2,7 +2,7 @@ import { sql } from '@vercel/postgres';
 import {
   Account,
   ProjectView,
-  ProjectWithRelations,
+  ProjectWithArtifacts,
   DashboardView,
   Tag
 } from '../definitions';
