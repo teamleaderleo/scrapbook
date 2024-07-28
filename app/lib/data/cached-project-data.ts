@@ -1,6 +1,6 @@
 import { cache } from 'react'
 import { fetchAllProjects, fetchProjectBasics, fetchProjectPreviews } from './project-data'
-import { ProjectFetchOptions } from '../definitions';
+import { ProjectFetchOptions } from '../definitions/definitions';
 import { ProjectWithArtifacts, ProjectBasic, ProjectPreview } from "../definitions/project-definitions";
 
 export const getCachedProjects = cache(async (accountId: string, options: ProjectFetchOptions): Promise<ProjectWithArtifacts[]> => {

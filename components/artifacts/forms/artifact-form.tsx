@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { ContentType, Tag } from '@/app/lib/definitions';
+import { ContentType, Tag } from '@/app/lib/definitions/definitions';
 import { ArtifactWithRelations } from "@/app/lib/definitions/artifact-definitions";
 import { BaseProject } from "@/app/lib/definitions/project-definitions";
 import Link from 'next/link';

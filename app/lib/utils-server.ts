@@ -1,7 +1,7 @@
 'use server';
 
 import { sql } from '@vercel/postgres';
-import { Tag } from './definitions';
+import { Tag } from './definitions/definitions';
 import { signIn } from '@/auth';
 
 export async function addTagToProject(accountId: string, projectId: string, tagName: string): Promise<Tag | null> {

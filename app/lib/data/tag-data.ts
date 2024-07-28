@@ -2,7 +2,7 @@
 
 import { eq, and, count } from 'drizzle-orm';
 import { db } from '../db/db.server';
-import { Tag } from '../definitions';
+import { Tag } from '../definitions/definitions';
 import { tags, projectTags, artifactTags } from '../db/schema';
 
 export async function fetchAllTags(accountId: string): Promise<Tag[]> {

@@ -4,7 +4,7 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '../db/db.server';
 import { projectArtifactLinks } from '../db/schema';
 import { handleTagUpdateWithinTransaction } from './tag-handlers';
-import { Tag } from '../definitions';
+import { Tag } from '../definitions/definitions';
 import { v4 as uuid } from 'uuid';
 
 export async function handleProjectUpdateWithinTransaction(

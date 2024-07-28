@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 import { uploadToS3, deleteFromS3 } from '../external/s3-operations';
-import { ImageVersions } from '../definitions';
+import { ImageVersions } from '../definitions/definitions';
 
 interface ThumbnailConfig {
   [key: string]: { width: number; height: number };

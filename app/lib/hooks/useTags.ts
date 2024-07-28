@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import Fuse from 'fuse.js';
-import { Tag } from '@/app/lib/definitions';
+import { Tag } from '@/app/lib/definitions/definitions';
 import { createTag, updateTag, deleteTag } from '@/app/lib/actions/tag-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedTags, getCachedTagUsage } from '../data/cached-tag-data';

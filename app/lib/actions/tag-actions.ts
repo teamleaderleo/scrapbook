@@ -3,7 +3,7 @@
 import { eq, and, inArray, count } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { db } from '../db/db.server';
-import { Tag } from '../definitions';
+import { Tag } from '../definitions/definitions';
 import { tags } from '../db/schema';
 import { handleTagUpdateWithinTransaction, } from './tag-handlers';
 import { v4 as uuid } from 'uuid';

@@ -1,4 +1,4 @@
-import { Tag } from "../definitions";
+import { Tag } from "./definitions";
 import { Artifact, ArtifactWithRelations } from "./artifact-definitions";
 
 export type BaseProject = {

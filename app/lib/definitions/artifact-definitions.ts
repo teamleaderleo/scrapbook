@@ -1,4 +1,4 @@
-import { ContentType, ContentVariant, EmbedData, Annotation, Tag } from "../definitions";
+import { ContentType, ContentVariant, EmbedData, Annotation, Tag } from "./definitions";
 import { BaseProject } from "./project-definitions";
 
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTags } from '@/app/lib/hooks/useTags';
-import { Tag } from '@/app/lib/definitions';
+import { Tag } from '@/app/lib/definitions/definitions';
 
 interface TagManagerProps {
   selectedTags: string[];

@@ -3,7 +3,7 @@ import {
   Account,
   DashboardView,
   Tag
-} from '../definitions';
+} from '../definitions/definitions';
 import {
   ProjectView,
   ProjectWithArtifacts

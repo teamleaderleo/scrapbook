@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import Fuse from 'fuse.js';
-import { ArtifactFetchOptions, Tag } from '@/app/lib/definitions';
+import { ArtifactFetchOptions, Tag } from '@/app/lib/definitions/definitions';
 import { ArtifactWithRelations } from "../definitions/artifact-definitions";
 import { BaseProject } from "../definitions/project-definitions";
 import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/actions/artifact-actions';

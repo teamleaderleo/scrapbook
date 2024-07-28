@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { Tag } from '@/app/lib/definitions';
+import { Tag } from '@/app/lib/definitions/definitions';
 import { useTags } from '@/app/lib/hooks/useTags';
 
 import Pagination from '@/components/ui/components/pagination';

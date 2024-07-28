@@ -1,6 +1,6 @@
 import { cache } from 'react'
 import { fetchAllTags, fetchTagUsage } from './tag-data'
-import { Tag } from '../definitions';
+import { Tag } from '../definitions/definitions';
 
 export const getCachedTags = cache(async (accountId: string): Promise<Tag[]> => {
   const tags = await fetchAllTags(accountId);

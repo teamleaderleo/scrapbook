@@ -1,5 +1,5 @@
 import { useQueryClient } from 'react-query';
-import { Tag } from '../definitions';
+import { Tag } from '../definitions/definitions';
 import { ArtifactWithRelations } from "../definitions/artifact-definitions";
 import { ProjectWithArtifacts } from "../definitions/project-definitions";
 

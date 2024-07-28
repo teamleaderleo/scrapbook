@@ -3,7 +3,7 @@
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { db } from '../db/db.server';
 import { projects, projectTags, tags, projectArtifactLinks, artifacts, artifactContents, artifactTags } from '../db/schema';
-import { ProjectFetchOptions, Tag } from '../definitions';
+import { ProjectFetchOptions, Tag } from '../definitions/definitions';
 import { ProjectWithTags, ProjectWithArtifacts, ProjectWithExtendedArtifacts } from "../definitions/project-definitions";
 import { artifactTagSelect, baseProjectSelect, tagSelect, artifactSelect, artifactContentSelect } from './select-objects';
 

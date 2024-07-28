@@ -1,4 +1,3 @@
-
 export type Account = {
   id: string; // Primary key
   name: string;
