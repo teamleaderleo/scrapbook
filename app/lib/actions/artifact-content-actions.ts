@@ -49,7 +49,6 @@ export async function fetchExistingContents(accountId: string, artifactId: strin
     .then(rows => rows.map(row => ({
       ...row,
       type: row.type as ContentType,
-      variants: row.variants as ContentVariant[] | null,
       metadata: row.metadata as Record<string, unknown> | null,
       createdBy: row.createdBy || accountId,
       lastModifiedBy: row.lastModifiedBy || accountId,
