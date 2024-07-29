@@ -123,30 +123,34 @@ export const projectWithArtifactsView = pgView("project_with_artifacts_view").as
       createdAt: projects.createdAt,
       updatedAt: projects.updatedAt,
       status: projects.status,
-      tagId: tags.id,
-      tagName: tags.name,
-      artifactId: artifacts.id,
-      artifactName: artifacts.name,
-      artifactDescription: artifacts.description,
-      artifactCreatedAt: artifacts.createdAt,
-      artifactUpdatedAt: artifacts.updatedAt,
-      contentId: artifactContents.id,
-      contentType: artifactContents.type,
-      content: artifactContents.content,
-      contentVariants: artifactContents.variants,
-      contentMetadata: artifactContents.metadata,
-      contentEmbed: artifactContents.embed,
-      contentAnnotations: artifactContents.annotations,
-      contentCreatedAt: artifactContents.createdAt,
-      contentUpdatedAt: artifactContents.updatedAt,
-      contentCreatedBy: artifactContents.createdBy,
-      contentLastModifiedBy: artifactContents.lastModifiedBy,
+      tags: sql<string>`json_agg(distinct jsonb_build_object('id', ${tags.id}, 'name', ${tags.name}))`.as('tags'),
+      artifacts: sql<string>`json_agg(distinct jsonb_build_object(
+        'id', ${artifacts.id}, 
+        'name', ${artifacts.name}, 
+        'description', ${artifacts.description},
+        'createdAt', ${artifacts.createdAt},
+        'updatedAt', ${artifacts.updatedAt},
+        'contents', json_agg(distinct jsonb_build_object(
+          'id', ${artifactContents.id},
+          'type', ${artifactContents.type},
+          'content', ${artifactContents.content},
+          'variants', ${artifactContents.variants},
+          'metadata', ${artifactContents.metadata},
+          'embed', ${artifactContents.embed},
+          'annotations', ${artifactContents.annotations},
+          'createdAt', ${artifactContents.createdAt},
+          'updatedAt', ${artifactContents.updatedAt},
+          'createdBy', ${artifactContents.createdBy},
+          'lastModifiedBy', ${artifactContents.lastModifiedBy}
+        ))
+      ))`.as('artifacts'),
     })
     .from(projects)
     .leftJoin(projectTags, eq(projects.id, projectTags.projectId))
     .leftJoin(tags, eq(projectTags.tagId, tags.id))
     .leftJoin(projectArtifactLinks, eq(projects.id, projectArtifactLinks.projectId))
     .leftJoin(artifacts, eq(projectArtifactLinks.artifactId, artifacts.id))
-    .leftJoin(artifactContents, eq(artifacts.id, artifactContents.artifactId));
+    .leftJoin(artifactContents, eq(artifacts.id, artifactContents.artifactId))
+    .groupBy(projects.id);
 });
 

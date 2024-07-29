@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
-import { ProjectWithArtifactsViewRow } from "@/app/lib/definitions/definitions";
+import { ProjectWithArtifactsView } from "@/app/lib/definitions/definitions";
 import Link from 'next/link';
 import { Button } from '@/components/ui/components/button';
 import { TagManager } from '@/components/tags/tagmanager';
@@ -8,7 +8,7 @@ import { Suggestions } from '@/components/suggestions/suggestions';
 import { useTags } from '@/app/lib/hooks/useTags';
 
 interface ProjectFormProps {
-  project: ProjectWithArtifactsViewRow;
+  project: ProjectWithArtifactsView;
   artifacts: ArtifactWithRelations[];
   onSubmit: (formData: FormData) => void;
   isSubmitting: boolean;
@@ -29,7 +29,7 @@ export function ProjectForm({
   onGetAISuggestions,
 }: ProjectFormProps) {
   const { tagNames } = useTags();
-  const [selectedTags, setSelectedTags] = useState<string[]>(project.tags.map(t => t.name));
+  const [selectedTags, setSelectedTags] = useState<string[]>(project.tags ? project.tags.map(t => t.name) : []);
   const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

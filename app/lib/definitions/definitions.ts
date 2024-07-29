@@ -79,14 +79,16 @@ export type ProjectWithArtifacts = ProjectWithTags & {
   artifacts: Artifact[];
 };
 
-export const ProjectWithArtifactsViewRowSchema = z.object({
+export const ProjectWithArtifactsViewSchema = z.object({
   ...selectProjectSchema.shape,
-  tag: selectTagSchema.nullable(),
-  artifact: selectArtifactSchema.nullable(),
-  artifactContent: selectArtifactContentSchema.nullable(),
+  tags: z.array(selectTagSchema).nullable(),
+  artifacts: z.array(z.object({
+    ...selectArtifactSchema.shape,
+    contents: z.array(selectArtifactContentSchema).nullable(),
+  })).nullable(),
 });
 
-export type ProjectWithArtifactsViewRow = z.infer<typeof ProjectWithArtifactsViewRowSchema>;
+export type ProjectWithArtifactsView = z.infer<typeof ProjectWithArtifactsViewSchema>;
 
 export type ProjectWithExtendedArtifacts = ProjectWithTags & {
   artifacts: ArtifactWithRelations[];

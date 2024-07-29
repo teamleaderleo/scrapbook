@@ -3,16 +3,16 @@
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { db } from '../db/db';
 import { projects, projectWithArtifactsView } from '../db/schema';
-import { BaseProject, ProjectWithArtifactsViewRow, ProjectWithArtifactsViewRowSchema } from "../definitions/definitions";
+import { BaseProject, ProjectWithArtifactsView, ProjectWithArtifactsViewSchema } from "../definitions/definitions";
 
 
-export async function fetchAllProjects(accountId: string): Promise<ProjectWithArtifactsViewRow[]> {
+export async function fetchAllProjects(accountId: string): Promise<ProjectWithArtifactsView[]> {
   const rawResults = await db
     .select()
     .from(projectWithArtifactsView)
     .where(eq(projectWithArtifactsView.accountId, accountId));
   
-  return rawResults.map(row => ProjectWithArtifactsViewRowSchema.parse(row));
+  return rawResults.map(row => ProjectWithArtifactsViewSchema.parse(row));
 }
 
 // export async function fetchProjectsWithExtendedArtifacts(accountId: string): Promise<ProjectWithExtendedArtifacts[]> {

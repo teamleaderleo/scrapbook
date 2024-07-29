@@ -1,7 +1,7 @@
 'use server';
 
 import { eq, and, or, ilike, sql, SQL, desc } from 'drizzle-orm';
-import { db } from '../db/db.server';
+import { db } from '../db/db';
 import { artifacts, artifactContents, artifactTags, tags, projectArtifactLinks, projects } from '../db/schema';
 import { ArtifactFetchOptions } from '../definitions/definitions';
 import { ArtifactWithRelations } from "../definitions/definitions";
