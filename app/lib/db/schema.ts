@@ -49,10 +49,7 @@ export const artifactContents = pgTable('artifact_content', {
   artifactId: uuid('artifact_id').notNull().references(() => artifacts.id),
   type: varchar('type', { length: 255 }).notNull(),
   content: text('content').notNull(),
-  variants: jsonb('variants'),
   metadata: jsonb('metadata'),
-  embed: jsonb('embed'),
-  annotations: jsonb('annotations'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   createdBy: uuid('created_by').references(() => accounts.id),
@@ -93,18 +90,12 @@ export const s3Usage = pgTable('s3_usage', {
 }));
 
 export const insertArtifactContentSchema = createInsertSchema(artifactContents, {
-  variants: z.array(ContentVariantSchema).optional(),
   metadata: z.record(z.unknown()).optional(),
-  embed: EmbedDataSchema.optional(),
-  annotations: z.array(AnnotationSchema).optional(),
 });
 
 export const selectArtifactSchema = createSelectSchema(artifacts);
 export const selectArtifactContentSchema = createSelectSchema(artifactContents, {
-  variants: z.array(ContentVariantSchema).nullable(),
   metadata: z.record(z.unknown()).nullable(),
-  embed: EmbedDataSchema.nullable(),
-  annotations: z.array(AnnotationSchema).nullable(),
 });
 export const selectProjectSchema = createSelectSchema(projects);
 export const selectTagSchema = createSelectSchema(tags);
@@ -130,10 +121,7 @@ export const projectWithArtifactsView = pgView("project_with_artifacts_view").as
           'id', ${artifactContents.id},
           'type', ${artifactContents.type},
           'content', ${artifactContents.content},
-          'variants', ${artifactContents.variants},
           'metadata', ${artifactContents.metadata},
-          'embed', ${artifactContents.embed},
-          'annotations', ${artifactContents.annotations},
           'createdAt', ${artifactContents.createdAt},
           'updatedAt', ${artifactContents.updatedAt},
           'createdBy', ${artifactContents.createdBy},

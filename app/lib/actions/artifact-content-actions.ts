@@ -51,8 +51,6 @@ export async function fetchExistingContents(accountId: string, artifactId: strin
       type: row.type as ContentType,
       variants: row.variants as ContentVariant[] | null,
       metadata: row.metadata as Record<string, unknown> | null,
-      embed: row.embed as EmbedData | null,
-      annotations: row.annotations as Annotation[] | null,
       createdBy: row.createdBy || accountId,
       lastModifiedBy: row.lastModifiedBy || accountId,
     })));
@@ -148,7 +146,6 @@ async function updateExistingContent(accountId: string, contentId: string, conte
     .set({ 
       type: contentType, 
       content: content,
-      variants: variants,
       metadata: metadata,
       updatedAt: new Date(),
       lastModifiedBy: accountId

@@ -41,10 +41,7 @@ function buildArtifactSelectObject(options: ArtifactFetchOptions = {
           'accountId', ${artifactContents.accountId},
           'type', ${artifactContents.type},
           'content', ${artifactContents.content},
-          'variants', ${artifactContents.variants},
           'metadata', ${artifactContents.metadata},
-          'embed', ${artifactContents.embed},
-          'annotations', ${artifactContents.annotations},
           'createdAt', ${artifactContents.createdAt},
           'createdBy', ${artifactContents.createdBy},
           'lastModifiedBy', ${artifactContents.lastModifiedBy}
