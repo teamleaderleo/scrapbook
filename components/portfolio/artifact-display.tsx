@@ -1,4 +1,4 @@
-import { ArtifactWithRelations, ArtifactContent } from "@/app/lib/definitions/artifact-definitions";
+import { ArtifactWithRelations, ArtifactContent } from "@/app/lib/definitions/definitions";
 
 export const ArtifactDisplay = ({ artifact }: { artifact: ArtifactWithRelations }) => {
   return (

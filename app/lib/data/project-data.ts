@@ -3,7 +3,7 @@
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { db } from '../db/db';
 import { projects, projectWithArtifactsView } from '../db/schema';
-import { BaseProject, ProjectWithArtifactsViewRow, ProjectWithArtifactsViewRowSchema } from "../definitions/project-definitions";
+import { BaseProject, ProjectWithArtifactsViewRow, ProjectWithArtifactsViewRowSchema } from "../definitions/definitions";
 
 
 export async function fetchAllProjects(accountId: string): Promise<ProjectWithArtifactsViewRow[]> {

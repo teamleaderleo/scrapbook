@@ -1,4 +1,4 @@
-import { Artifact, ArtifactContent } from "./definitions/artifact-definitions";
+import { Artifact, ArtifactContent } from "./definitions/definitions";
 import { StaticImageData } from 'next/image';
 import defaultPlaceholder from '../../public/placeholder-default.png';
 import textPlaceholder from '../../public/placeholder-text.png';

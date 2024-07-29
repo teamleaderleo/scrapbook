@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { selectArtifactContentSchema, selectTagSchema } from '../db/schema';
+import { selectArtifactContentSchema, selectArtifactSchema, selectProjectSchema, selectTagSchema } from '../db/schema';
 import { ContentVariantSchema } from '../db/zod-schemas';
 
 export type Account = {
@@ -36,7 +36,6 @@ export enum ContentType {
 }
 
 export type ContentVariant = z.infer<typeof ContentVariantSchema>;
-export type ArtifactContent = z.infer<typeof selectArtifactContentSchema>;
 
 export type S3Usage = {
   id: number;
@@ -45,3 +44,51 @@ export type S3Usage = {
   year: number;
   count: number;
 };
+export type ArtifactContent = z.infer<typeof selectArtifactContentSchema>;
+export type BaseArtifact = z.infer<typeof selectArtifactSchema>;
+
+export type Artifact = BaseArtifact & {
+  contents: ArtifactContent[];
+};
+
+export type ArtifactWithTags = Artifact & {
+  tags: Tag[];
+};
+
+export type ArtifactWithProjects = Artifact & {
+  projects: BaseProject[];
+};
+
+export type ArtifactWithRelations = ArtifactWithTags & ArtifactWithProjects;
+
+export type BaseProject = z.infer<typeof selectProjectSchema>;
+
+export type ProjectPreview = BaseProject & {
+  previewArtifact?: {
+    id?: string | null;
+    name?: string | null;
+    previewContent?: string | null;
+  } | null;
+};
+
+export type ProjectWithTags = BaseProject & {
+  tags: Tag[];
+};
+
+export type ProjectWithArtifacts = ProjectWithTags & {
+  artifacts: Artifact[];
+};
+
+export const ProjectWithArtifactsViewRowSchema = z.object({
+  ...selectProjectSchema.shape,
+  tag: selectTagSchema.nullable(),
+  artifact: selectArtifactSchema.nullable(),
+  artifactContent: selectArtifactContentSchema.nullable(),
+});
+
+export type ProjectWithArtifactsViewRow = z.infer<typeof ProjectWithArtifactsViewRowSchema>;
+
+export type ProjectWithExtendedArtifacts = ProjectWithTags & {
+  artifacts: ArtifactWithRelations[];
+};
+

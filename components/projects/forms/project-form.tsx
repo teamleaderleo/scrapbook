@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { ArtifactWithRelations } from "@/app/lib/definitions/artifact-definitions";
-import { ProjectWithArtifactsViewRow } from "@/app/lib/definitions/project-definitions";
+import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
+import { ProjectWithArtifactsViewRow } from "@/app/lib/definitions/definitions";
 import Link from 'next/link';
 import { Button } from '@/components/ui/components/button';
 import { TagManager } from '@/components/tags/tagmanager';

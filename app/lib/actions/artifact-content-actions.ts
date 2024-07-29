@@ -3,7 +3,7 @@
 import { eq, and } from 'drizzle-orm';
 import { db } from '../db/db.server';
 import { ContentType } from '../definitions/definitions';
-import { ArtifactContent } from "../definitions/artifact-definitions";
+import { ArtifactContent } from "../definitions/definitions";
 import { uploadToS3, deleteFromS3 } from '../external/s3-operations';
 import { artifactContents } from '../db/schema';
 import { v4 as uuidv4 } from 'uuid';

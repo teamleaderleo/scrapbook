@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { ArtifactWithRelations } from "@/app/lib/definitions/artifact-definitions";
+import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
 import { getArtifactThumbnail } from '@/app/lib/utils-client';
 
 export const useImagePreloader = (artifacts: ArtifactWithRelations[]) => {

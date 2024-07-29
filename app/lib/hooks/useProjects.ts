@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient, useQueries } from 'react-query';
 import Fuse from 'fuse.js';
 import { ProjectFetchOptions } from '@/app/lib/definitions/definitions';
-import { ProjectWithArtifacts, ProjectPreview, BaseProject, ProjectWithExtendedArtifacts, ProjectWithTags, ProjectWithArtifactsViewRow } from "../definitions/project-definitions";
+import { ProjectWithArtifacts, ProjectPreview, BaseProject, ProjectWithExtendedArtifacts, ProjectWithTags, ProjectWithArtifactsViewRow } from "../definitions/definitions";
 import { createProject, updateProject, deleteProject } from '@/app/lib/actions/project-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';

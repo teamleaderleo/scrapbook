@@ -2,7 +2,7 @@ import { pgTable, pgView, uuid, text, varchar, timestamp, integer, serial, uniqu
 import { eq, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { Tag, } from '../definitions/definitions';
-import { Artifact } from '../definitions/artifact-definitions';
+import { Artifact } from "../definitions/definitions";
 import { z } from 'zod';
 import { AnnotationSchema, ContentVariantSchema, EmbedDataSchema } from './zod-schemas';
 

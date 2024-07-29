@@ -6,7 +6,7 @@ import { DeleteProject, UpdateProject } from '@/components/projects/components/b
 import Pagination from '../../ui/components/pagination';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
-import { ProjectWithArtifacts, ProjectWithArtifactsViewRow } from "@/app/lib/definitions/project-definitions";
+import { ProjectWithArtifacts, ProjectWithArtifactsViewRow } from "@/app/lib/definitions/definitions";
 import { ArtifactThumbnail } from '../../artifacts/components/artifact-thumbnail';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
