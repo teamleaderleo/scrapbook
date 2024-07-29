@@ -34,10 +34,10 @@ export function ArtifactForm({
   const { tagNames, tagNamesToTags } = useTags();
   const [selectedTags, setSelectedTags] = useState<string[]>(artifact?.tags.map(t => t.name) || []);
   const [contentItems, setContentItems] = useState<{id?: string, type: ContentType, content: string | File}[]>(
-    (artifact?.contents && artifact.contents.length > 0)
-      ? artifact.contents.map(c => ({id: c.id, type: c.type, content: c.content}))
-      : [{type: 'text', content: ''}]
-  );
+      (artifact?.contents && artifact.contents.length > 0)
+        ? artifact.contents.map(c => ({id: c.id, type: c.type as ContentType, content: c.content}))
+        : [{type: 'text', content: ''}]
+    );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -119,7 +119,7 @@ export function ArtifactForm({
               id="description"
               name="description"
               className="peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue={artifact?.description}
+              defaultValue={artifact?.description ?? ''}
               placeholder="Enter artifact description"
               rows={3}
             ></textarea>
