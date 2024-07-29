@@ -2,12 +2,12 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient, useQueries } from 'react-query';
 import Fuse from 'fuse.js';
 import { ProjectFetchOptions } from '@/app/lib/definitions/definitions';
-import { ProjectWithArtifacts, ProjectBasic, ProjectPreview } from "../definitions/project-definitions";
+import { ProjectWithArtifacts, ProjectPreview, BaseProject, ProjectWithExtendedArtifacts, ProjectWithTags, ProjectWithArtifactsViewRow } from "../definitions/project-definitions";
 import { createProject, updateProject, deleteProject } from '@/app/lib/actions/project-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { suggestTags } from '../external/claude-utils';
-import { getCachedProjectBasics, getCachedProjectPreviews, getCachedProjects } from '../data/cached-project-data';
+import { getCachedProjectBasics, getCachedProjects } from '../data/cached-project-data';
 import { handleProjectArtifactsUpdate } from '../actions/project-handlers';
 import { useKeyNav } from './useKeyNav';
 
@@ -19,37 +19,40 @@ export function useProjects() {
   const [currentPage, setCurrentPage] = useState(1);
   const [fetchOptions, setFetchOptions] = useState<ProjectFetchOptions>({
     includeTags: true,
-    includeArtifacts: 'withContents',
+    includeArtifacts: true,
+    artifactDetail: 'withContents',
   });
 
-  const { data: projectBasics, isLoading: isLoadingBasics } = useQuery<ProjectBasic[], Error>(
-  ['projectBasics', ADMIN_UUID],
-  () => getCachedProjectBasics(ADMIN_UUID),
-  {
-    staleTime: 5 * 60 * 1000,
-  }
-);
+  const { data: projectBasics, isLoading: isLoadingBasics } = useQuery<BaseProject[], Error>(
+    ['projectBasics', ADMIN_UUID],
+    () => getCachedProjectBasics(ADMIN_UUID),
+    {
+      staleTime: 5 * 60 * 1000,
+    }
+  );
 
-const { data: projectPreviews, isLoading: isLoadingPreviews } = useQuery<ProjectPreview[], Error>(
-  ['projectPreviews', ADMIN_UUID],
-  () => projectBasics && projectBasics.length > 0
-    ? getCachedProjectPreviews(projectBasics.map(p => p.id))
-    : Promise.resolve([]),
-  {
-    enabled: !!projectBasics,
-    staleTime: 5 * 60 * 1000,
-  }
-);
+  const { data: projects, isLoading, error } = useQuery<ProjectWithArtifactsViewRow[], Error>(
+    ['projects', ADMIN_UUID, fetchOptions],
+    async () => {
+      const fetchedProjects = await getCachedProjects(ADMIN_UUID);
+      
+      // Update artifact and tag caches
+    fetchedProjects.forEach((project: ProjectWithArtifactsViewRow) => {
+      if (project.artifact) {
+        queryClient.setQueryData(['artifact', project.artifact.id], project.artifact);
+      }
+      if (project.tag) {
+        queryClient.setQueryData(['tag', project.tag.id], project.tag);
+      }
+    });
 
-const { data: projects, isLoading, error } = useQuery<ProjectWithArtifacts[], Error>(
-  ['projects', ADMIN_UUID, fetchOptions],
-  () => getCachedProjects(ADMIN_UUID, fetchOptions),
-  {
-    enabled: !isLoadingPreviews,
-    staleTime: 5 * 60 * 1000,
-    cacheTime: 1000 * 60 * 30, // 30 minutes
-  }
-);
+      return fetchedProjects;
+    },
+    {
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 1000 * 60 * 30, // 30 minutes
+    }
+  );
 
   const fuse = useMemo(() => {
     if (!projects) return null;
@@ -138,9 +141,7 @@ const { data: projects, isLoading, error } = useQuery<ProjectWithArtifacts[], Er
   return {
     projects,
     projectBasics,
-    projectPreviews,
     isLoadingBasics,
-    isLoadingPreviews,
     isLoading,
     filteredProjects,
     paginatedProjects,

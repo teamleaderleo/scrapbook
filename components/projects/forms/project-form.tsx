@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { ArtifactWithRelations } from "@/app/lib/definitions/artifact-definitions";
-import { ProjectWithArtifacts } from "@/app/lib/definitions/project-definitions";
+import { ProjectWithArtifactsViewRow } from "@/app/lib/definitions/project-definitions";
 import Link from 'next/link';
 import { Button } from '@/components/ui/components/button';
 import { TagManager } from '@/components/tags/tagmanager';
@@ -8,7 +8,7 @@ import { Suggestions } from '@/components/suggestions/suggestions';
 import { useTags } from '@/app/lib/hooks/useTags';
 
 interface ProjectFormProps {
-  project: ProjectWithArtifacts;
+  project: ProjectWithArtifactsViewRow;
   artifacts: ArtifactWithRelations[];
   onSubmit: (formData: FormData) => void;
   isSubmitting: boolean;
@@ -79,7 +79,7 @@ export function ProjectForm({
               id="description"
               name="description"
               className="peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue={project.description}
+              defaultValue={project.description || ''}
               placeholder="Enter project description"
               rows={3}
             ></textarea>

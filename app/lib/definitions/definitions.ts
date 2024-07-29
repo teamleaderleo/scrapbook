@@ -1,3 +1,7 @@
+import { z } from 'zod';
+import { selectArtifactContentSchema, selectTagSchema } from '../db/schema';
+import { ContentVariantSchema } from '../db/zod-schemas';
+
 export type Account = {
   id: string; // Primary key
   name: string;
@@ -10,7 +14,8 @@ export type Account = {
 
 export interface ProjectFetchOptions {
   includeTags: boolean;
-  includeArtifacts: 'none' | 'basic' | 'withContents' | 'extended';
+  includeArtifacts: boolean;
+  artifactDetail: 'none' | 'basic' | 'withContents' | 'extended';
 }
 
 export interface ArtifactFetchOptions {
@@ -19,71 +24,19 @@ export interface ArtifactFetchOptions {
   includeProjects: boolean;
 }
 
-export type Tag = {
-  id: string; 
-  accountId: string; 
-  name: string; // Unique per account
-};
+export type Tag = z.infer<typeof selectTagSchema>;
 
-export type ProjectTag = {
-  accountId: string; 
-  projectId: string; 
-  tagId: string; 
-};
+export enum ContentType {
+  Text = 'text',
+  LongText = 'longText',
+  Image = 'image',
+  File = 'file',
+  Link = 'link',
+  Embed = 'embed'
+}
 
-export type ProjectArtifactLink = {
-  accountId: string;
-  projectId: string; 
-  artifactId: string; 
-  addedAt: Date;
-};
-
-export type ArtifactTag = {
-  accountId: string; 
-  artifactId: string; 
-  tagId: string; 
-};
-
-export type ContentType = 'text' | 'longText' | 'image' | 'file' | 'link' | 'embed';
-
-export type ContentVariant = {
-  url: string;
-  type: string;
-};
-
-export type EmbedData = {
-  title?: string;
-  description?: string;
-  thumbnailUrl?: string;
-  authorName?: string;
-  authorUrl?: string;
-  providerName?: string;
-  providerUrl?: string;
-};
-
-export type Annotation = {
-  id: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type ImageVersions = {
-  original: string;
-  compressed: string;
-  thumbnails: { [key: string]: string };
-};
-
-// Dashboard view
-export type DashboardView = {
-  accountId: string;
-  totalAccounts: number;
-  totalProjects: number;
-  totalArtifacts: number;
-  totalTags: number;
-  completedProjects: number;
-  pendingProjects: number;
-};
+export type ContentVariant = z.infer<typeof ContentVariantSchema>;
+export type ArtifactContent = z.infer<typeof selectArtifactContentSchema>;
 
 export type S3Usage = {
   id: number;

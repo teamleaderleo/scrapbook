@@ -6,7 +6,7 @@ import { DeleteProject, UpdateProject } from '@/components/projects/components/b
 import Pagination from '../../ui/components/pagination';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
-import { ProjectWithArtifacts } from "@/app/lib/definitions/project-definitions";
+import { ProjectWithArtifacts, ProjectWithArtifactsViewRow } from "@/app/lib/definitions/project-definitions";
 import { ArtifactThumbnail } from '../../artifacts/components/artifact-thumbnail';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
@@ -73,7 +73,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
                 </tr>
               </thead>
               <tbody className="bg-white">
-                {paginatedProjects.map((project: ProjectWithArtifacts) => (
+                {paginatedProjects.map((project: ProjectWithArtifactsViewRow) => (
                   <tr key={project.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <p className="font-medium">{project.name}</p>
@@ -82,29 +82,29 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
                     <td className="whitespace-nowrap px-3 py-3">{project.status}</td>
                     <td className="px-3 py-3">
                       <TagList
-                        initialTags={project.tags.map(t => t.name)}
+                        initialTags={project.tag?.map(t => t.name) || []}
                         onTagsChange={(newTags) => handleTagsChange(project.id, newTags)}
                         accountId={accountId}
                       />
                     </td>
-                    <td className="whitespace-nowrap px-3 py-3">{project.artifacts.length}</td>
+                    {/* <td className="whitespace-nowrap px-3 py-3">{project.artifacts.length}</td> */}
                     <td className="whitespace-nowrap px-3 py-3">
                       {new Date(project.updatedAt).toLocaleDateString()}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
                       <div className="flex space-x-2">
-                        {project.artifacts.slice(0, 3).map((artifact) => (
-                          <div key={artifact.id} className="w-10 h-10 relative overflow-hidden rounded-full">
+                        {project.artifact && (
+                          <div key={project.artifact.id} className="w-10 h-10 relative overflow-hidden rounded-full">
                             <ErrorBoundaryWithToast>
                               <ArtifactThumbnail
-                                artifact={artifact}
+                                artifact={project.artifact}
                                 size={40}
                                 priority={true}
                                 className="flex-shrink-0"
                               />
                             </ErrorBoundaryWithToast>
                           </div>
-                        ))}
+                        )}
                       </div>
                     </td>
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">

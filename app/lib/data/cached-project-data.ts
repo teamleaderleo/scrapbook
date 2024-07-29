@@ -1,31 +1,14 @@
 import { cache } from 'react'
-import { fetchAllProjects, fetchProjectBasics, fetchProjectPreviews } from './project-data'
+import { fetchAllProjects, fetchProjectsBasic } from './project-data'
 import { ProjectFetchOptions } from '../definitions/definitions';
-import { ProjectWithArtifacts, ProjectBasic, ProjectPreview } from "../definitions/project-definitions";
+import { BaseProject, ProjectWithTags, ProjectWithArtifacts, ProjectWithExtendedArtifacts, ProjectPreview, ProjectWithArtifactsViewRow } from "../definitions/project-definitions";
 
-export const getCachedProjects = cache(async (accountId: string, options: ProjectFetchOptions): Promise<ProjectWithArtifacts[]> => {
-  const projects = await fetchAllProjects(accountId, options);
-  return projects.filter((project): project is ProjectWithArtifacts => 'artifacts' in project);
+export const getCachedProjectBasics = cache(async (accountId: string): Promise<BaseProject[]> => {
+  return fetchProjectsBasic(accountId);
 });
 
-export const getCachedProjectBasics = cache(async (accountId: string): Promise<ProjectBasic[]> => {
-  const projects = await fetchProjectBasics(accountId);
-  return projects.map(project => ({
-    ...project,
-    status: project.status as "pending" | "completed"
-  }));
-});
-
-export const getCachedProjectPreviews = cache(async (projectIds: string[]): Promise<ProjectPreview[]> => {
-  const projectPreviews = await fetchProjectPreviews(projectIds);
-  return projectPreviews.map(({ previewArtifact, ...projectPreview }) => ({
-    ...projectPreview,
-    description: projectPreview.description || undefined,
-    status: projectPreview.status as "pending" | "completed",
-    previewArtifact: previewArtifact ? {
-      id: previewArtifact.id || null,
-      name: previewArtifact.name || null,
-      previewContent: previewArtifact.previewContent || null
-    } : null
-  }));
+export const getCachedProjects = cache(async (
+  accountId: string, 
+): Promise< ProjectWithArtifactsViewRow[] > => {
+  return fetchAllProjects(accountId);
 });

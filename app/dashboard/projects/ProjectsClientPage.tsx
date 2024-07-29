@@ -8,7 +8,7 @@ import Search from '@/components/ui/components/search';
 import { CreateProject } from '@/components/projects/components/button';
 import { ProjectsTableSkeleton } from '@/components/ui/components/skeletons';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import { getCachedProjectBasics, getCachedProjectPreviews } from '@/app/lib/data/cached-project-data';
+import { getCachedProjectBasics, } from '@/app/lib/data/cached-project-data';
 
 const ProjectsTable = dynamic(
   () => import('@/components/projects/components/table').then((mod) => mod.ProjectsTable),
@@ -20,7 +20,6 @@ export default function ProjectsClientPage() {
 
   useEffect(() => {
     queryClient.prefetchQuery(['projectBasics', ADMIN_UUID], () => getCachedProjectBasics(ADMIN_UUID));
-    queryClient.prefetchQuery(['projectPreviews', ADMIN_UUID], () => getCachedProjectPreviews([]));
   }, [queryClient]);
 
   return (
