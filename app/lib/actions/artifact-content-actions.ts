@@ -2,7 +2,7 @@
 
 import { eq, and } from 'drizzle-orm';
 import { db } from '../db/db.server';
-import { ContentType } from '../definitions/definitions';
+import { Annotation, ContentType, ContentTypeSchema, ContentVariant, EmbedData } from '../definitions/definitions';
 import { ArtifactContent } from "../definitions/definitions";
 import { uploadToS3, deleteFromS3 } from '../external/s3-operations';
 import { artifactContents } from '../db/schema';
@@ -39,7 +39,7 @@ export async function handleContentUpdate(accountId: string, artifactId: string,
   return { shouldDelete: newContentCount === 0, newContentCount };
 }
 
-async function fetchExistingContents(accountId: string, artifactId: string): Promise<ArtifactContent[]> {
+export async function fetchExistingContents(accountId: string, artifactId: string): Promise<ArtifactContent[]> {
   return db.select()
     .from(artifactContents)
     .where(and(
@@ -49,14 +49,15 @@ async function fetchExistingContents(accountId: string, artifactId: string): Pro
     .then(rows => rows.map(row => ({
       ...row,
       type: row.type as ContentType,
-      variants: row.variants as ContentVariant[] | undefined,
-      metadata: row.metadata as Record<string, unknown> | undefined,
-      embed: row.embed as EmbedData | undefined,
-      annotations: row.annotations as Annotation[] | undefined,
-      createdBy: row.createdBy || accountId, // Fallback to accountId if createdBy is null
-      lastModifiedBy: row.lastModifiedBy || accountId, // Fallback to accountId if lastModifiedBy is null
+      variants: row.variants as ContentVariant[] | null,
+      metadata: row.metadata as Record<string, unknown> | null,
+      embed: row.embed as EmbedData | null,
+      annotations: row.annotations as Annotation[] | null,
+      createdBy: row.createdBy || accountId,
+      lastModifiedBy: row.lastModifiedBy || accountId,
     })));
 }
+
 
 async function processContentItem(accountId: string, formData: FormData, index: number): Promise<{
   contentType: ContentType;
@@ -85,7 +86,7 @@ async function processContentItem(accountId: string, formData: FormData, index: 
         contentType,
         content: processedImage.compressed,
         contentId,
-        variants: Object.entries(processedImage.thumbnails).map(([key, url]) => ({ type: key, url })),
+        variants: Object.entries(processedImage.thumbnails).map(([key, url]) => ({ type: key as "link" | "embed" | "text" | "longText" | "image" | "file", url: url as string })),
         metadata: { 
           originalName: contentItem.name,
           size: contentItem.size,
@@ -237,7 +238,7 @@ export async function insertContents(tx: any, accountId: string, artifactId: str
       } else if (contentType === 'image' && contentItem instanceof File) {
         const processedImage = await processAndUploadImage(contentItem, accountId);
         content = processedImage.original;
-        variants = Object.entries(processedImage.thumbnails).map(([key, url]) => ({ type: key, url }));
+        variants = Object.entries(processedImage.thumbnails).map(([key, url]) => ({ type: key as "link" | "embed" | "text" | "longText" | "image" | "file", url: url as string }));
         metadata = { 
           originalName: contentItem.name,
           size: contentItem.size,
@@ -245,7 +246,7 @@ export async function insertContents(tx: any, accountId: string, artifactId: str
         };
         resourceTracker.addResource(processedImage.original);
         resourceTracker.addResource(processedImage.compressed);
-        Object.values(processedImage.thumbnails).forEach(url => resourceTracker.addResource(url));
+        Object.values(processedImage.thumbnails).forEach(url => resourceTracker.addResource(url as string));
       } else if (contentType === 'file' && contentItem instanceof File) {
         content = await uploadToS3(contentItem, contentType, accountId, 'original');
         metadata = {

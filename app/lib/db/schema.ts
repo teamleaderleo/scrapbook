@@ -1,12 +1,8 @@
 import { pgTable, pgView, uuid, text, varchar, timestamp, integer, serial, uniqueIndex, jsonb, pgEnum } from 'drizzle-orm/pg-core';
 import { eq, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { Tag, } from '../definitions/definitions';
-import { Artifact } from "../definitions/definitions";
 import { z } from 'zod';
 import { AnnotationSchema, ContentVariantSchema, EmbedDataSchema } from './zod-schemas';
-
-export const contentTypeEnum = pgEnum('content_type', ['text', 'longText', 'image', 'file', 'link', 'embed']);
 
 export const accounts = pgTable('account', {
   id: uuid('id').primaryKey(),
@@ -51,7 +47,7 @@ export const artifactContents = pgTable('artifact_content', {
   id: uuid('id').primaryKey(),
   accountId: uuid('account_id').notNull().references(() => accounts.id),
   artifactId: uuid('artifact_id').notNull().references(() => artifacts.id),
-  type: contentTypeEnum('type').notNull(),
+  type: varchar('type', { length: 255 }).notNull(),
   content: text('content').notNull(),
   variants: jsonb('variants'),
   metadata: jsonb('metadata'),

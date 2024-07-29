@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { ContentType } from '../definitions/definitions';
+import { ContentTypeSchema } from '../definitions/definitions';
 
 export const ContentVariantSchema = z.object({
   url: z.string().url(),
-  type: z.nativeEnum(ContentType)
+  type: ContentTypeSchema
 });
 
 export const EmbedDataSchema = z.object({

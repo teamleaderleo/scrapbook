@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { selectArtifactContentSchema, selectArtifactSchema, selectProjectSchema, selectTagSchema } from '../db/schema';
-import { ContentVariantSchema } from '../db/zod-schemas';
+import { AnnotationSchema, ContentVariantSchema, EmbedDataSchema } from '../db/zod-schemas';
 
 export type Account = {
   id: string; // Primary key
@@ -26,16 +26,12 @@ export interface ArtifactFetchOptions {
 
 export type Tag = z.infer<typeof selectTagSchema>;
 
-export enum ContentType {
-  Text = 'text',
-  LongText = 'longText',
-  Image = 'image',
-  File = 'file',
-  Link = 'link',
-  Embed = 'embed'
-}
-
 export type ContentVariant = z.infer<typeof ContentVariantSchema>;
+export type EmbedData = z.infer<typeof EmbedDataSchema>;
+export type Annotation = z.infer<typeof AnnotationSchema>;
+
+export const ContentTypeSchema = z.enum(['text', 'longText', 'image', 'file', 'link', 'embed']);
+export type ContentType = z.infer<typeof ContentTypeSchema>;
 
 export type S3Usage = {
   id: number;
