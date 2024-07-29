@@ -6,7 +6,7 @@ import { DeleteProject, UpdateProject } from '@/components/projects/components/b
 import Pagination from '../../ui/components/pagination';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
-import { ProjectWithArtifacts, ProjectWithArtifactsView } from "@/app/lib/definitions/definitions";
+import { Artifact, ProjectWithArtifacts, ProjectWithArtifactsView } from "@/app/lib/definitions/definitions";
 import { ArtifactThumbnail } from '../../artifacts/components/artifact-thumbnail';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
@@ -96,12 +96,14 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
                         {project.artifacts && project.artifacts.length > 0 && (
                           <div key={project.artifacts[0].id} className="w-10 h-10 relative overflow-hidden rounded-full">
                             <ErrorBoundaryWithToast>
-                              <ArtifactThumbnail
-                                artifact={project.artifacts[0]}
-                                size={40}
-                                priority={true}
-                                className="flex-shrink-0"
-                              />
+                              {project.artifacts[0] && (
+                                <ArtifactThumbnail
+                                  artifact={project.artifacts[0] as Artifact}
+                                  size={40}
+                                  priority={true}
+                                  className="flex-shrink-0"
+                                />
+                              )}
                             </ErrorBoundaryWithToast>
                           </div>
                         )}
