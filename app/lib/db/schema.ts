@@ -2,7 +2,6 @@ import { pgTable, pgView, uuid, text, varchar, timestamp, integer, serial, uniqu
 import { eq, sql } from 'drizzle-orm';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { AnnotationSchema, ContentVariantSchema, EmbedDataSchema } from './zod-schemas';
 
 export const accounts = pgTable('account', {
   id: uuid('id').primaryKey(),
