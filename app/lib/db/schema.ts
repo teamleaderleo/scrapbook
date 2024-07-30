@@ -31,6 +31,8 @@ export const projects = pgTable('project', {
   status: text('status').notNull(),
 }, (table) => ({
   accountUpdatedIndex: index('idx_projects_account_updated').on(table.accountId, table.updatedAt),
+  nameIndex: index('idx_projects_name').on(table.name),
+  statusIndex: index('idx_projects_status').on(table.status),
 }));
 
 export const artifacts = pgTable('artifact', {
@@ -42,6 +44,7 @@ export const artifacts = pgTable('artifact', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (table) => ({
   accountUpdatedIndex: index('idx_artifacts_account_updated').on(table.accountId, table.updatedAt),
+  nameIndex: index('idx_artifacts_name').on(table.name),
 }));
 
 export const artifactContents = pgTable('artifact_content', {
@@ -58,6 +61,7 @@ export const artifactContents = pgTable('artifact_content', {
 }, (table) => ({
   artifactAccountIndex: index('idx_artifact_contents_artifact').on(table.artifactId, table.accountId),
   metadataIndex: index('idx_artifact_content_metadata').on(table.metadata),
+  typeIndex: index('idx_artifact_content_type').on(table.type),
 }));
 
 export const tagAssociations = pgTable('tag_association', {
@@ -72,6 +76,7 @@ export const tagAssociations = pgTable('tag_association', {
 }, (table) => ({
   uniqueAssociation: uniqueIndex('unique_tag_association').on(table.accountId, table.tagId, table.associatedId),
   entityTypeIndex: index('idx_tag_associations_entity').on(table.entityType, table.associatedId, table.accountId),
+  tagIdIndex: index('idx_tag_associations_tag_id').on(table.tagId),
 }));
 
 export const projectArtifactLinks = pgTable('project_artifact_link', {
@@ -81,6 +86,8 @@ export const projectArtifactLinks = pgTable('project_artifact_link', {
   addedAt: timestamp('added_at').notNull().defaultNow(),
 }, (table) => ({
   projectArtifactIndex: index('idx_project_artifact_links').on(table.projectId, table.artifactId, table.accountId),
+  artifactIndex: index('idx_project_artifact_links_artifact').on(table.artifactId),
+  projectIndex: index('idx_project_artifact_links_project').on(table.projectId),
 }));
 
 export const s3Usage = pgTable('s3_usage', {
