@@ -23,13 +23,13 @@ export function useProjects() {
     artifactDetail: 'withContents',
   });
 
-  const { data: projectBasics, isLoading: isLoadingBasics } = useQuery<BaseProject[], Error>(
-    ['projectBasics', ADMIN_UUID],
-    () => getCachedProjectBasics(ADMIN_UUID),
-    {
-      staleTime: 5 * 60 * 1000,
-    }
-  );
+  // const { data: projectBasics, isLoading: isLoadingBasics } = useQuery<BaseProject[], Error>(
+  //   ['projectBasics', ADMIN_UUID],
+  //   () => getCachedProjectBasics(ADMIN_UUID),
+  //   {
+  //     staleTime: 5 * 60 * 1000,
+  //   }
+  // );
 
   const { data: projects, isLoading, error } = useQuery<ProjectWithArtifacts[], Error>(
     ['projects', ADMIN_UUID],
@@ -144,8 +144,8 @@ export function useProjects() {
 
   return {
     projects,
-    projectBasics,
-    isLoadingBasics,
+    // projectBasics,
+    // isLoadingBasics,
     isLoading,
     filteredProjects,
     paginatedProjects,
