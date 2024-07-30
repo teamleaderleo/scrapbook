@@ -11,6 +11,11 @@ import { deleteAllImageVersions, processAndUploadImage } from '../image-processi
 import { S3ResourceTracker } from '../external/s3-resource-tracker';
 import { z } from 'zod';
 
+import { processImageContent } from './content-handlers/image-content-handler';
+import { processFileContent } from './content-handlers/file-content-handler';
+import { processLinkContent } from './content-handlers/link-content-handler';
+import { processTextContent } from './content-handlers/text-content-handler';
+
 export async function handleContentUpdate(accountId: string, artifactId: string, formData: FormData): Promise<{ shouldDelete: boolean; newContentCount: number }> {
   const existingContents = await fetchExistingContents(accountId, artifactId);
   const existingContentIds = new Set(existingContents.map(row => row.id));
@@ -57,61 +62,20 @@ export async function fetchExistingContents(accountId: string, artifactId: strin
 }
 
 
-async function processContentItem(accountId: string, formData: FormData, index: number): Promise<{
-  contentType: ContentType;
-  content: string;
-  contentId: string | null;
-  metadata: z.infer<typeof ContentMetadataSchema>;
-}> {
+async function processContentItem(accountId: string, formData: FormData, index: number) {
   const contentType = formData.get(`contentType-${index}`) as ContentType;
   const contentItem = formData.get(`content-${index}`);
   const contentId = formData.get(`contentId-${index}`) as string | null;
-  const orderStr = formData.get(`order-${index}`) as string;
-  const order = isNaN(parseInt(orderStr, 10)) ? 0 : parseInt(orderStr, 10);
-
-  let metadata: z.infer<typeof ContentMetadataSchema>;
 
   switch (contentType) {
     case 'image':
-      if (!(contentItem instanceof File)) {
-        throw new Error(`Invalid image content`);
-      }
-      const processedImage = await processAndUploadImage(contentItem, accountId);
-      metadata = ContentMetadataSchema.parse({
-        type: 'image',
-        order,
-        variations: processedImage.variations
-      });
-      return { contentType, content: processedImage.compressed, contentId, metadata };
-
+      return processImageContent(accountId, contentItem as File, contentId, index, formData);
     case 'file':
-      if (!(contentItem instanceof File)) {
-        throw new Error(`Invalid file content`);
-      }
-      const fileUrl = await uploadToS3(contentItem, contentType, accountId, 'original');
-      metadata = ContentMetadataSchema.parse({
-        type: 'file',
-        order,
-      });
-      return { contentType, content: fileUrl, contentId, metadata };
-
+      return processFileContent(accountId, contentItem as File, contentId, index, formData);
     case 'link':
-      metadata = ContentMetadataSchema.parse({
-        type: 'link',
-        order,
-        title: formData.get(`linkTitle-${index}`) as string,
-        description: formData.get(`linkDescription-${index}`) as string,
-        previewImage: formData.get(`linkPreviewImage-${index}`) as string,
-      });
-      return { contentType, content: contentItem as string, contentId, metadata };
-
+      return processLinkContent(accountId, contentItem as string, contentId, index, formData);
     case 'text':
-      metadata = ContentMetadataSchema.parse({
-        type: 'text',
-        order,
-      });
-      return { contentType, content: (contentItem as string).trim(), contentId, metadata };
-
+      return processTextContent(accountId, contentItem as string, contentId, index, formData);
     default:
       throw new Error(`Invalid content type: ${contentType}`);
   }
