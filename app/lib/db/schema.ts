@@ -1,7 +1,5 @@
 import { pgTable, pgView, uuid, text, varchar, timestamp, integer, serial, uniqueIndex, jsonb, pgEnum } from 'drizzle-orm/pg-core';
-import { eq, sql } from 'drizzle-orm';
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { InferSelectModel, InferInsertModel } from 'drizzle-orm'
 
 export const accounts = pgTable('account', {
   id: uuid('id').primaryKey(),
@@ -87,78 +85,3 @@ export const s3Usage = pgTable('s3_usage', {
 }, (table) => ({
   accountMonthYearIndex: uniqueIndex('s3_usage_account_id_month_year_key').on(table.accountId, table.month, table.year),
 }));
-
-export const insertArtifactContentSchema = createInsertSchema(artifactContents, {
-  metadata: z.record(z.unknown()).optional(),
-});
-
-export const selectArtifactSchema = createSelectSchema(artifacts);
-export const selectArtifactContentSchema = createSelectSchema(artifactContents, {
-  metadata: z.record(z.unknown()).nullable(),
-});
-export const selectProjectSchema = createSelectSchema(projects);
-export const selectTagSchema = createSelectSchema(tags);
-
-export const projectWithArtifactsView = pgView("project_with_artifacts_view").as((qb) => {
-  const tagSubquery = qb
-    .select({
-      projectId: projectTags.projectId,
-      tagArray: sql<string>`json_agg(distinct jsonb_build_object('id', ${tags.id}, 'name', ${tags.name}))`.as('tag_array'),
-    })
-    .from(projectTags)
-    .leftJoin(tags, sql`${projectTags.tagId} = ${tags.id}`)
-    .groupBy(projectTags.projectId)
-    .as('tag_subquery');
-
-  const contentSubquery = qb
-    .select({
-      artifactId: artifactContents.artifactId,
-      contentArray: sql<string>`json_agg(distinct jsonb_build_object(
-        'id', ${artifactContents.id},
-        'type', ${artifactContents.type},
-        'content', ${artifactContents.content},
-        'metadata', ${artifactContents.metadata},
-        'createdAt', ${artifactContents.createdAt},
-        'updatedAt', ${artifactContents.updatedAt},
-        'createdBy', ${artifactContents.createdBy},
-        'lastModifiedBy', ${artifactContents.lastModifiedBy}
-      ))`.as('content_array'),
-    })
-    .from(artifactContents)
-    .groupBy(artifactContents.artifactId)
-    .as('content_subquery');
-
-  const artifactSubquery = qb
-    .select({
-      projectId: projectArtifactLinks.projectId,
-      artifactArray: sql<string>`json_agg(distinct jsonb_build_object(
-        'id', ${artifacts.id}, 
-        'name', ${artifacts.name}, 
-        'description', ${artifacts.description},
-        'createdAt', ${artifacts.createdAt},
-        'updatedAt', ${artifacts.updatedAt},
-        'contents', coalesce(${contentSubquery.contentArray}, '[]'::json)
-      ))`.as('artifact_array'),
-    })
-    .from(projectArtifactLinks)
-    .leftJoin(artifacts, sql`${projectArtifactLinks.artifactId} = ${artifacts.id}`)
-    .leftJoin(contentSubquery, sql`${artifacts.id} = ${contentSubquery.artifactId}`)
-    .groupBy(projectArtifactLinks.projectId)
-    .as('artifact_subquery');
-
-  return qb
-    .select({
-      id: projects.id,
-      accountId: projects.accountId,
-      name: projects.name,
-      description: projects.description,
-      createdAt: projects.createdAt,
-      updatedAt: projects.updatedAt,
-      status: projects.status,
-      tags: sql<string>`coalesce(${tagSubquery.tagArray}, '[]'::json)`.as('tags'),
-      artifacts: sql<string>`coalesce(${artifactSubquery.artifactArray}, '[]'::json)`.as('artifacts'),
-    })
-    .from(projects)
-    .leftJoin(tagSubquery, sql`${projects.id} = ${tagSubquery.projectId}`)
-    .leftJoin(artifactSubquery, sql`${projects.id} = ${artifactSubquery.projectId}`);
-});

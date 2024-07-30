@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { selectArtifactContentSchema, selectArtifactSchema, selectProjectSchema, selectTagSchema } from '../db/schema';
+import { artifactContents, artifacts, projects, tags } from '../db/schema';
+import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 
 export type Account = {
   id: string; // Primary key
@@ -23,7 +24,9 @@ export interface ArtifactFetchOptions {
   includeProjects: boolean;
 }
 
-export type Tag = z.infer<typeof selectTagSchema>;
+export type Tag = InferSelectModel<typeof tags>;
+// export type InsertTag = InferInsertModel<typeof tags>;
+
 
 export const ContentTypeSchema = z.enum(['text', 'image', 'file', 'link',]);
 export type ContentType = z.infer<typeof ContentTypeSchema>;
@@ -35,8 +38,10 @@ export type S3Usage = {
   year: number;
   count: number;
 };
-export type ArtifactContent = z.infer<typeof selectArtifactContentSchema>;
-export type BaseArtifact = z.infer<typeof selectArtifactSchema>;
+export type ArtifactContent = InferSelectModel<typeof artifactContents>;
+export type InsertArtifactContent = InferInsertModel<typeof artifactContents>;
+
+export type BaseArtifact = InferSelectModel<typeof artifacts>;
 
 export type Artifact = BaseArtifact & {
   contents: ArtifactContent[];
@@ -52,7 +57,7 @@ export type ArtifactWithProjects = Artifact & {
 
 export type ArtifactWithRelations = ArtifactWithTags & ArtifactWithProjects;
 
-export type BaseProject = z.infer<typeof selectProjectSchema>;
+export type BaseProject = InferSelectModel<typeof projects>;
 
 export type ProjectPreview = BaseProject & {
   previewArtifact?: {
@@ -69,39 +74,6 @@ export type ProjectWithTags = BaseProject & {
 export type ProjectWithArtifacts = ProjectWithTags & {
   artifacts: Artifact[];
 };
-
-export const ProjectWithArtifactsViewSchema = z.object({
-  ...selectProjectSchema.shape,
-  tags: z.array(
-    z.object({
-      id: z.string().uuid(),
-      name: z.string(),
-    })
-  ).default([]),
-  artifacts: z.array(
-    z.object({
-      id: z.string().uuid(),
-      name: z.string(),
-      description: z.string().nullable(),
-      created_at: z.string().transform((str) => new Date(str)),
-      updated_at: z.string().transform((str) => new Date(str)),
-      contents: z.array(
-        z.object({
-          id: z.string().uuid(),
-          type: z.string(),
-          content: z.string(),
-          metadata: z.record(z.unknown()).nullable(),
-          created_at: z.string().transform((str) => new Date(str)),
-          updated_at: z.string().transform((str) => new Date(str)),
-          created_by: z.string().uuid().nullable(),
-          last_modified_by: z.string().uuid().nullable(),
-        })
-      ).default([]),
-    })
-  ).default([]),
-});
-
-export type ProjectWithArtifactsView = z.infer<typeof ProjectWithArtifactsViewSchema>;
 
 export type ProjectWithExtendedArtifacts = ProjectWithTags & {
   artifacts: ArtifactWithRelations[];

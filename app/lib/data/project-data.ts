@@ -2,8 +2,8 @@
 
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { db } from '../db/db';
-import { projects, projectWithArtifactsView } from '../db/schema';
-import { BaseProject, ProjectWithArtifactsView, ProjectWithArtifactsViewSchema } from "../definitions/definitions";
+import { projects, } from '../db/schema';
+import { BaseProject, } from "../definitions/definitions";
 
 
 export async function fetchAllProjects(accountId: string): Promise<ProjectWithArtifactsView[]> {

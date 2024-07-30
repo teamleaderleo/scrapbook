@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { account, artifact_content, artifact, artifact_tag, tag, project_artifact_link, project, project_tag, s3_usage } from "./schema";
+import { account, artifact_content, artifact, artifact_tag, tag, project_artifact_link, project, project_tag, s3_usage } from "./unused-schema";
 
 export const artifact_contentRelations = relations(artifact_content, ({one}) => ({
 	account: one(account, {
