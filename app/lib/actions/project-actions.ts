@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { eq, and } from 'drizzle-orm';
-import { db } from '../db/db.server';
+import { db } from '../db/db';
 import { revalidatePath } from 'next/cache';
 import { suggestTags } from '../external/claude-utils';
 import { projects, projectTags, projectArtifactLinks } from '../db/schema';

@@ -2,7 +2,7 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client
 import { CloudFrontClient, CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
 import { v4 as uuid } from 'uuid';
 import { eq, and } from 'drizzle-orm';
-import { db } from '../db/db.server';
+import { db } from '../db/db';
 import { s3Usage } from '../db/schema';
 import FileType from 'file-type';
 import { fileTypeFromBuffer } from 'file-type';

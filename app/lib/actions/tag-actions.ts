@@ -2,7 +2,7 @@
 
 import { eq, and, inArray, count } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import { db } from '../db/db.server';
+import { db } from '../db/db';
 import { Tag } from '../definitions/definitions';
 import { tags } from '../db/schema';
 import { handleTagUpdateWithinTransaction, } from './tag-handlers';

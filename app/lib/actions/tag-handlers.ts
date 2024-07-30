@@ -1,7 +1,7 @@
 'use server';
 
 import { eq, and, inArray } from 'drizzle-orm';
-import { db } from '../db/db.server';
+import { db } from '../db/db';
 import { Tag } from '../definitions/definitions';
 import { tags, projectTags, artifactTags } from '../db/schema';
 import { v4 as uuid } from 'uuid';

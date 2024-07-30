@@ -1,7 +1,7 @@
 'use server';
 
 import { eq, and } from 'drizzle-orm';
-import { db } from '../db/db.server';
+import { db } from '../db/db';
 import { projectArtifactLinks } from '../db/schema';
 import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { Tag } from '../definitions/definitions';

@@ -1,7 +1,7 @@
 'use server';
 
 import { eq, and, count } from 'drizzle-orm';
-import { db } from '../db/db.server';
+import { db } from '../db/db';
 import { Tag } from '../definitions/definitions';
 import { tags, projectTags, artifactTags } from '../db/schema';
 

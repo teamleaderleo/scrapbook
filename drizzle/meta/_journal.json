@@ -15,6 +15,13 @@
       "when": 1721885761950,
       "tag": "0001_orange_bucky",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1722332010584,
+      "tag": "0002_special_speedball",
+      "breakpoints": true
     }
   ]
 }

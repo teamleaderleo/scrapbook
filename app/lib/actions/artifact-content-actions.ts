@@ -1,7 +1,7 @@
 'use server';
 
 import { eq, and } from 'drizzle-orm';
-import { db } from '../db/db.server';
+import { db } from '../db/db';
 import {  ContentMetadataSchema, ContentType, } from '../definitions/definitions';
 import { ArtifactContent } from "../definitions/definitions";
 import { uploadToS3, deleteFromS3 } from '../external/s3-operations';
