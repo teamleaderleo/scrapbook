@@ -32,7 +32,7 @@ export async function handleArtifactUpdateWithinTransaction(
       eq(artifacts.accountId, accountId)
     ));
 
-  await handleTagUpdateWithinTransaction(tx, accountId, artifactId, tags, false);
+  await handleTagUpdateWithinTransaction(tx, accountId, artifactId, tags);
   await handleProjectUpdateWithinTransaction(tx, accountId, artifactId, projects);
 
   return { deleted: false };
@@ -83,7 +83,7 @@ export async function handleArtifactCreateWithinTransaction(
     await insertContents(tx, accountId, newArtifactId, formData);
 
     if (tags.length > 0) {
-      await handleTagUpdateWithinTransaction(tx, accountId, newArtifactId, tags, false);
+      await handleTagUpdateWithinTransaction(tx, accountId, newArtifactId, tags);
     }
 
     if (projects.length > 0) {

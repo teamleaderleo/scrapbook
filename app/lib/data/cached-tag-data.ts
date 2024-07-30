@@ -7,7 +7,6 @@ export const getCachedTags = cache(async (accountId: string): Promise<Tag[]> => 
   return tags;
 });
 
-export const getCachedTagUsage = cache(async (accountId: string, tagId: string): Promise<{ projectCount: number; artifactCount: number }> => {
-  const usage = await fetchTagUsage(accountId, tagId);
-  return usage;
+export const getCachedTagUsage = cache(async (accountId: string, tagId: string): Promise<{ [key: string]: number }> => {
+  return await fetchTagUsage(accountId, tagId);
 });

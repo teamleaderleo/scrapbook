@@ -1,13 +1,11 @@
 'use server';
 
-import { eq, and, inArray, count } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { db } from '../db/db';
 import { Tag } from '../definitions/definitions';
-import { tags } from '../db/schema';
-import { handleTagUpdateWithinTransaction, } from './tag-handlers';
+import { tags, tagAssociations } from '../db/schema';
 import { v4 as uuid } from 'uuid';
-import { artifactTags,projectTags } from '../db/schema';
 
 export async function createTag(accountId: string, name: string): Promise<Tag> {
   const newTagId = uuid();
@@ -27,13 +25,9 @@ export async function updateTag(accountId: string, tagId: string, newName: strin
 export async function deleteTag(accountId: string, tagId: string): Promise<{ success: boolean; message: string }> {
   try {
     await db.transaction(async (tx) => {
-      // Remove project associations
-      await tx.delete(projectTags)
-        .where(and(eq(projectTags.tagId, tagId), eq(projectTags.accountId, accountId)));
-
-      // Remove artifact associations
-      await tx.delete(artifactTags)
-        .where(and(eq(artifactTags.tagId, tagId), eq(artifactTags.accountId, accountId)));
+      // Remove all associations
+      await tx.delete(tagAssociations)
+        .where(and(eq(tagAssociations.tagId, tagId), eq(tagAssociations.accountId, accountId)));
 
       // Delete the tag
       await tx.delete(tags)

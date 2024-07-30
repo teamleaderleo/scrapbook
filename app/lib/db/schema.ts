@@ -58,9 +58,10 @@ export const tagAssociations = pgTable('tag_association', {
   accountId: uuid('account_id').notNull().references(() => accounts.id),
   tagId: uuid('tag_id').notNull().references(() => tags.id),
   associatedId: uuid('associated_id').notNull(),
+  entityType: varchar('entity_type', { length: 50 }).notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  order: integer('order'), // For drag-and-drop ordering
+  order: integer('order'),
 }, (table) => ({
   uniqueAssociation: uniqueIndex('unique_tag_association').on(table.accountId, table.tagId, table.associatedId),
 }));
