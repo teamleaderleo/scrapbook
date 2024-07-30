@@ -53,20 +53,16 @@ export const artifactContents = pgTable('artifact_content', {
   lastModifiedBy: uuid('last_modified_by').references(() => accounts.id),
 });
 
-export const projectTags = pgTable('project_tag', {
+export const tagAssociations = pgTable('tag_association', {
+  id: uuid('id').primaryKey(),
   accountId: uuid('account_id').notNull().references(() => accounts.id),
-  projectId: uuid('project_id').notNull().references(() => projects.id),
   tagId: uuid('tag_id').notNull().references(() => tags.id),
+  associatedId: uuid('associated_id').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  order: integer('order'), // For drag-and-drop ordering
 }, (table) => ({
-  projectTagIndex: uniqueIndex('project_tag_project_id_tag_id_key').on(table.projectId, table.tagId),
-}));
-
-export const artifactTags = pgTable('artifact_tag', {
-  accountId: uuid('account_id').notNull().references(() => accounts.id),
-  artifactId: uuid('artifact_id').notNull().references(() => artifacts.id),
-  tagId: uuid('tag_id').notNull().references(() => tags.id),
-}, (table) => ({
-  artifactTagIndex: uniqueIndex('artifact_tag_artifact_id_tag_id_key').on(table.artifactId, table.tagId),
+  uniqueAssociation: uniqueIndex('unique_tag_association').on(table.accountId, table.tagId, table.associatedId),
 }));
 
 export const projectArtifactLinks = pgTable('project_artifact_link', {
