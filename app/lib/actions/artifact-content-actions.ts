@@ -2,13 +2,14 @@
 
 import { eq, and } from 'drizzle-orm';
 import { db } from '../db/db.server';
-import {  ContentType, } from '../definitions/definitions';
+import {  ContentMetadataSchema, ContentType, } from '../definitions/definitions';
 import { ArtifactContent } from "../definitions/definitions";
 import { uploadToS3, deleteFromS3 } from '../external/s3-operations';
 import { artifactContents } from '../db/schema';
 import { v4 as uuidv4 } from 'uuid';
 import { deleteAllImageVersions, processAndUploadImage } from '../image-processing/image-processing';
 import { S3ResourceTracker } from '../external/s3-resource-tracker';
+import { z } from 'zod';
 
 export async function handleContentUpdate(accountId: string, artifactId: string, formData: FormData): Promise<{ shouldDelete: boolean; newContentCount: number }> {
   const existingContents = await fetchExistingContents(accountId, artifactId);
@@ -17,14 +18,14 @@ export async function handleContentUpdate(accountId: string, artifactId: string,
 
   let index = 0;
   while (formData.get(`contentType-${index}`) !== null) {
-    const { contentType, content, contentId } = await processContentItem(accountId, formData, index);
+    const { contentType, content, contentId, metadata } = await processContentItem(accountId, formData, index);
 
     if (content) {
       if (contentId) {
-        await updateExistingContent(accountId, contentId, contentType, content);
+        await updateExistingContent(accountId, contentId, contentType, content, metadata);
         existingContentIds.delete(contentId);
       } else {
-        await insertNewContent(accountId, artifactId, contentType, content);
+        await insertNewContent(accountId, artifactId, contentType, content, metadata);
       }
       newContentCount++;
     } else if (contentId) {
@@ -60,18 +61,14 @@ async function processContentItem(accountId: string, formData: FormData, index: 
   contentType: ContentType;
   content: string;
   contentId: string | null;
-  variants?: ContentVariant[];
-  metadata?: {
-    originalName?: string;
-    size?: number;
-    mimeType?: string;
-    originalUrl?: string;
-    [key: string]: unknown;
-  };
+  metadata: z.infer<typeof ContentMetadataSchema>;
 }> {
   const contentType = formData.get(`contentType-${index}`) as ContentType;
   const contentItem = formData.get(`content-${index}`);
   const contentId = formData.get(`contentId-${index}`) as string | null;
+  const order = parseInt(formData.get(`order-${index}`) as string, 10);
+
+  let metadata: z.infer<typeof ContentMetadataSchema>;
 
   switch (contentType) {
     case 'image':
@@ -79,66 +76,60 @@ async function processContentItem(accountId: string, formData: FormData, index: 
         throw new Error(`Invalid image content`);
       }
       const processedImage = await processAndUploadImage(contentItem, accountId);
-      return {
-        contentType,
-        content: processedImage.compressed,
-        contentId,
-        variants: Object.entries(processedImage.thumbnails).map(([key, url]) => ({ type: key as "link" | "embed" | "text" | "longText" | "image" | "file", url: url as string })),
-        metadata: { 
-          originalName: contentItem.name,
-          size: contentItem.size,
-          originalUrl: processedImage.original
-        }
-      };
+      metadata = ContentMetadataSchema.parse({
+        type: 'image',
+        order,
+        variations: processedImage.variations
+      });
+      return { contentType, content: processedImage.compressed, contentId, metadata };
 
     case 'file':
       if (!(contentItem instanceof File)) {
         throw new Error(`Invalid file content`);
       }
       const fileUrl = await uploadToS3(contentItem, contentType, accountId, 'original');
-      return {
-        contentType,
-        content: fileUrl,
-        contentId,
-        metadata: {
-          originalName: contentItem.name,
-          size: contentItem.size,
-          mimeType: contentItem.type
-        }
-      };
+      metadata = ContentMetadataSchema.parse({
+        type: 'file',
+        order,
+      });
+      return { contentType, content: fileUrl, contentId, metadata };
 
     case 'link':
-    case 'embed':
-      return {
-        contentType,
-        content: contentItem as string,
-        contentId,
-        metadata: {
-          title: formData.get(`${contentType}Title-${index}`),
-          description: formData.get(`${contentType}Description-${index}`)
-        }
-      };
+      metadata = ContentMetadataSchema.parse({
+        type: 'link',
+        order,
+        title: formData.get(`linkTitle-${index}`) as string,
+        description: formData.get(`linkDescription-${index}`) as string,
+        previewImage: formData.get(`linkPreviewImage-${index}`) as string,
+      });
+      return { contentType, content: contentItem as string, contentId, metadata };
+
+    case 'text':
+      metadata = ContentMetadataSchema.parse({
+        type: 'text',
+        order,
+      });
+      return { contentType, content: (contentItem as string).trim(), contentId, metadata };
 
     default:
-      return {
-        contentType,
-        content: (contentItem as string).trim(),
-        contentId
-      };
+      throw new Error(`Invalid content type: ${contentType}`);
   }
 }
 
-async function updateExistingContent(accountId: string, contentId: string, contentType: ContentType, content: string, variants?: ContentVariant[], metadata?: Record<string, unknown>): Promise<void> {
+async function updateExistingContent(
+  accountId: string, 
+  contentId: string, 
+  contentType: ContentType, 
+  content: string, 
+  metadata: z.infer<typeof ContentMetadataSchema>
+): Promise<void> {
   const existingContent = await db.select().from(artifactContents).where(and(eq(artifactContents.id, contentId), eq(artifactContents.accountId, accountId))).limit(1);
   
   if (existingContent.length > 0 && existingContent[0].type === 'image') {
-    // Delete existing image versions
-    const existingVersions: ImageVersions = {
-      original: (existingContent[0].metadata as { originalUrl?: string })?.originalUrl || '',
-      compressed: existingContent[0].content,
-      thumbnails: Object.fromEntries((existingContent[0].variants as ContentVariant[] || []).map(v => [v.type, v.url]))
-    };
-    await deleteAllImageVersions(existingVersions);
+    const existingMetadata = existingContent[0].metadata as z.infer<typeof ContentMetadataSchema>;
+    if (existingMetadata.type === 'image') {
+      await deleteAllImageVersions(existingMetadata.variations || {});
+    }
   }
 
   await db.update(artifactContents)
@@ -155,13 +146,20 @@ async function updateExistingContent(accountId: string, contentId: string, conte
     ));
 }
 
-async function insertNewContent(accountId: string, artifactId: string, contentType: ContentType, content: string): Promise<void> {
+async function insertNewContent(
+  accountId: string, 
+  artifactId: string, 
+  contentType: ContentType, 
+  content: string, 
+  metadata: z.infer<typeof ContentMetadataSchema>
+): Promise<void> {
   await db.insert(artifactContents).values({
     id: uuidv4(),
     accountId,
     artifactId,
     type: contentType,
     content,
+    metadata: ensureValidMetadata(metadata),
     createdAt: new Date(),
     updatedAt: new Date(),
     createdBy: accountId,
@@ -174,24 +172,14 @@ export async function deleteRemovedContents(accountId: string, existingContents:
     const contentToDelete = existingContents.find(row => row.id === contentId);
     if (contentToDelete) {
       if (contentToDelete.type === 'image') {
-        // Delete the main content (original image)
-        await deleteFromS3(contentToDelete.content);
-        
-        // Delete variants (thumbnails and compressed version)
-        if (contentToDelete.variants) {
-          for (const variant of contentToDelete.variants) {
-            await deleteFromS3(variant.url);
-          }
-        }
-        if (contentToDelete.metadata && typeof contentToDelete.metadata.compressed === 'string') {
-          await deleteFromS3(contentToDelete.metadata.compressed);
+        const metadata = contentToDelete.metadata as z.infer<typeof ContentMetadataSchema>;
+        if (metadata.type === 'image') {
+          await deleteAllImageVersions(metadata.variations || {});
         }
       } else if (contentToDelete.type === 'file') {
-        // Delete the file
         await deleteFromS3(contentToDelete.content);
       }
 
-      // Delete the content record from the database
       await db.delete(artifactContents)
         .where(and(
           eq(artifactContents.id, contentId),
@@ -213,6 +201,14 @@ export async function hasValidContent(formData: FormData): Promise<boolean> {
   return false;
 }
 
+// Helper function to ensure metadata has valid structure
+function ensureValidMetadata(metadata: z.infer<typeof ContentMetadataSchema>): z.infer<typeof ContentMetadataSchema> {
+  if (metadata.type === 'image' && !metadata.variations) {
+    return { ...metadata, variations: {} };
+  }
+  return metadata;
+}
+
 export async function insertContents(tx: any, accountId: string, artifactId: string, formData: FormData): Promise<string> {
   let allContent = '';
   let index = 0;
@@ -220,45 +216,24 @@ export async function insertContents(tx: any, accountId: string, artifactId: str
 
   try {
     while (formData.get(`contentType-${index}`)) {
-      const contentType = formData.get(`contentType-${index}`) as ContentType;
-      const contentItem = formData.get(`content-${index}`);
+      const { contentType, content, metadata } = await processContentItem(accountId, formData, index);
 
-      let content: string;
-      let variants: ContentVariant[] | undefined;
-      let metadata: Record<string, unknown> | undefined;
-
-      if (contentType === 'text' || contentType === 'longText') {
-        content = contentItem as string;
+      if (contentType === 'text') {
         allContent += content + ' ';
-        metadata = { wordCount: content.trim().split(/\s+/).length };
-      } else if (contentType === 'image' && contentItem instanceof File) {
-        const processedImage = await processAndUploadImage(contentItem, accountId);
-        content = processedImage.original;
-        variants = Object.entries(processedImage.thumbnails).map(([key, url]) => ({ type: key as "link" | "embed" | "text" | "longText" | "image" | "file", url: url as string }));
-        metadata = { 
-          originalName: contentItem.name,
-          size: contentItem.size,
-          compressed: processedImage.compressed
-        };
-        resourceTracker.addResource(processedImage.original);
-        resourceTracker.addResource(processedImage.compressed);
-        Object.values(processedImage.thumbnails).forEach(url => resourceTracker.addResource(url as string));
-      } else if (contentType === 'file' && contentItem instanceof File) {
-        content = await uploadToS3(contentItem, contentType, accountId, 'original');
-        metadata = {
-          originalName: contentItem.name,
-          size: contentItem.size,
-          mimeType: contentItem.type
-        };
+      }
+
+      if (contentType === 'image') {
+        const imageMetadata = metadata as z.infer<typeof ContentMetadataSchema> & { type: 'image' };
+        Object.values(imageMetadata.variations || {}).forEach(url => {
+          if (url) resourceTracker.addResource(url);
+        });
+      } else if (contentType === 'file') {
         resourceTracker.addResource(content);
-      } else if (contentType === 'link' || contentType === 'embed') {
-        content = contentItem as string;
-        metadata = {
-          title: formData.get(`${contentType}Title-${index}`),
-          description: formData.get(`${contentType}Description-${index}`)
-        };
-      } else {
-        throw new Error(`Invalid content for type ${contentType}`);
+      } else if (contentType === 'link') {
+        const linkMetadata = metadata as z.infer<typeof ContentMetadataSchema> & { type: 'link' };
+        if (linkMetadata.previewImage) {
+          resourceTracker.addResource(linkMetadata.previewImage);
+        }
       }
 
       await tx.insert(artifactContents).values({
@@ -267,8 +242,7 @@ export async function insertContents(tx: any, accountId: string, artifactId: str
         artifactId,
         type: contentType,
         content,
-        variants,
-        metadata,
+        metadata: ensureValidMetadata(metadata),
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: accountId,
@@ -279,8 +253,7 @@ export async function insertContents(tx: any, accountId: string, artifactId: str
     }
     return allContent;
   } catch (error) {
-    // If an error occurs, rollback the uploads
     await resourceTracker.cleanup();
-    throw error; // Re-throw the error after cleanup
+    throw error;
   }
 }

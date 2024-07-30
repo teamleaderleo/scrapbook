@@ -25,7 +25,7 @@ export interface ArtifactFetchOptions {
 
 export type Tag = z.infer<typeof selectTagSchema>;
 
-export const ContentTypeSchema = z.enum(['text', 'longText', 'image', 'file', 'link', 'embed']);
+export const ContentTypeSchema = z.enum(['text', 'image', 'file', 'link',]);
 export type ContentType = z.infer<typeof ContentTypeSchema>;
 
 export type S3Usage = {
@@ -85,3 +85,25 @@ export type ProjectWithExtendedArtifacts = ProjectWithTags & {
   artifacts: ArtifactWithRelations[];
 };
 
+const BaseMetadataSchema = z.object({
+  order: z.number().int().nonnegative(),
+});
+
+
+const ImageMetadataSchema = BaseMetadataSchema.extend({
+  variations: z.record(z.string()).optional(),
+});
+
+const LinkMetadataSchema = BaseMetadataSchema.extend({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  previewImage: z.string().optional(),
+});
+
+// Combined metadata schema
+export const ContentMetadataSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('text'), ...BaseMetadataSchema.shape }),
+  z.object({ type: z.literal('image'), ...ImageMetadataSchema.shape }),
+  z.object({ type: z.literal('file'), ...BaseMetadataSchema.shape }),
+  z.object({ type: z.literal('link'), ...LinkMetadataSchema.shape }),
+]);
