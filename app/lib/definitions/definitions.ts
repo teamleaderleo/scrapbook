@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { accounts, artifactContents, artifacts, projects, tags } from '../db/schema';
+import { accounts, artifacts, projects, tags } from '../db/schema';
 import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 
 export type SelectAccount = InferSelectModel<typeof accounts>;
@@ -31,8 +31,6 @@ export type S3Usage = {
   year: number;
   count: number;
 };
-export type ArtifactContent = InferSelectModel<typeof artifactContents>;
-export type InsertArtifactContent = InferInsertModel<typeof artifactContents>;
 
 export type BaseArtifact = InferSelectModel<typeof artifacts>;
 
@@ -72,13 +70,20 @@ export type ProjectWithExtendedArtifacts = ProjectWithTags & {
   artifacts: ArtifactWithRelations[];
 };
 
+// Metadata schemas
 const BaseMetadataSchema = z.object({
   order: z.number().int().nonnegative(),
 });
 
-
 const ImageMetadataSchema = BaseMetadataSchema.extend({
-  variations: z.record(z.string()).optional(),
+  variations: z.record(z.string()),
+  dominantColors: z.array(z.string()).optional(),
+});
+
+const FileMetadataSchema = BaseMetadataSchema.extend({
+  originalName: z.string(),
+  size: z.number(),
+  mimeType: z.string(),
 });
 
 const LinkMetadataSchema = BaseMetadataSchema.extend({
@@ -87,10 +92,28 @@ const LinkMetadataSchema = BaseMetadataSchema.extend({
   previewImage: z.string().optional(),
 });
 
-// Combined metadata schema
-export const ContentMetadataSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('text'), ...BaseMetadataSchema.shape }),
-  z.object({ type: z.literal('image'), ...ImageMetadataSchema.shape }),
-  z.object({ type: z.literal('file'), ...BaseMetadataSchema.shape }),
-  z.object({ type: z.literal('link'), ...LinkMetadataSchema.shape }),
+// Content type union
+const ContentTypeUnion = z.union([
+  z.object({ type: z.literal('text'), metadata: BaseMetadataSchema }),
+  z.object({ type: z.literal('image'), metadata: ImageMetadataSchema }),
+  z.object({ type: z.literal('file'), metadata: FileMetadataSchema }),
+  z.object({ type: z.literal('link'), metadata: LinkMetadataSchema }),
 ]);
+
+// Full artifact content schema
+export const ArtifactContentSchema = z.intersection(
+  z.object({
+    id: z.string().uuid(),
+    accountId: z.string().uuid(),
+    artifactId: z.string().uuid(),
+    content: z.string(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    createdBy: z.string().uuid().nullable(),
+    lastModifiedBy: z.string().uuid().nullable(),
+  }),
+  ContentTypeUnion
+);
+
+// Type definitions
+export type ArtifactContent = z.infer<typeof ArtifactContentSchema>;

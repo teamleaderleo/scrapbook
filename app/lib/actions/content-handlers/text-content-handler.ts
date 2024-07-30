@@ -1,8 +1,5 @@
-import { ContentMetadataSchema } from '../../definitions/definitions';
-import { z } from 'zod';
-import { artifactContents } from '../../db/schema';
-import { v4 as uuidv4 } from 'uuid';
 import { insertNewContent } from '../artifact-content-actions';
+import { ArtifactContent, ArtifactContentSchema } from '../../definitions/definitions';
 
 export async function processTextContent(
   accountId: string,
@@ -10,34 +7,32 @@ export async function processTextContent(
   contentId: string | null,
   index: number,
   formData: FormData
-): Promise<{
-  contentType: 'text';
-  content: string;
-  contentId: string | null;
-  metadata: z.infer<typeof ContentMetadataSchema>;
-}> {
+): Promise<ArtifactContent> {
   const orderStr = formData.get(`order-${index}`) as string;
   const order = isNaN(parseInt(orderStr, 10)) ? 0 : parseInt(orderStr, 10);
 
-  const metadata = ContentMetadataSchema.parse({
+  return ArtifactContentSchema.parse({
     type: 'text',
-    order,
+    content: contentItem.trim(),
+    id: contentId || undefined,
+    accountId,
+    artifactId: formData.get('artifactId') as string,
+    metadata: {
+      order,
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: accountId,
+    lastModifiedBy: accountId,
   });
-
-  return { 
-    contentType: 'text', 
-    content: contentItem.trim(), 
-    contentId, 
-    metadata 
-  };
 }
 
 export async function insertTextContent(
   tx: any,
   accountId: string,
   artifactId: string,
-  content: string,
-  metadata: z.infer<typeof ContentMetadataSchema>
+  content: ArtifactContent
 ): Promise<void> {
-  await insertNewContent(tx, accountId, artifactId, 'text', content, metadata);
+  if (content.type !== 'text') throw new Error('Invalid content type');
+  await insertNewContent(tx, accountId, artifactId, content);
 }

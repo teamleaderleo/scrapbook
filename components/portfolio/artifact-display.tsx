@@ -1,6 +1,6 @@
-import { ArtifactWithRelations, ArtifactContent } from "@/app/lib/definitions/definitions";
+import { Artifact, ArtifactContent } from "@/app/lib/definitions/definitions";
 
-export const ArtifactDisplay = ({ artifact }: { artifact: ArtifactWithRelations }) => {
+export const ArtifactDisplay = ({ artifact }: { artifact: Artifact }) => {
   return (
     <div className="artifact">
       {artifact.name && <h3>{artifact.name}</h3>}
@@ -15,7 +15,6 @@ export const ArtifactDisplay = ({ artifact }: { artifact: ArtifactWithRelations 
 export const ContentDisplay = ({ content }: { content: ArtifactContent }) => {
   switch (content.type) {
     case 'text':
-    case 'longText':
       return <TextContent content={content} />;
     case 'image':
       return <ImageContent content={content} />;
@@ -23,8 +22,6 @@ export const ContentDisplay = ({ content }: { content: ArtifactContent }) => {
       return <FileContent content={content} />;
     case 'link':
       return <LinkContent content={content} />;
-    case 'embed':
-      return <EmbedContent content={content} />;
     default:
       return null;
   }
@@ -34,8 +31,10 @@ export const TextContent = ({ content }: { content: ArtifactContent }) => (
   <p>{content.content}</p>
 );
 
+import Image from 'next/image';
+
 export const ImageContent = ({ content }: { content: ArtifactContent }) => (
-  <img src={content.content} alt={content.metadata?.originalName || 'Image'} />
+  <Image src={content.content} alt={content.metadata ? content.metadata.toString() : 'Image'} width={500} height={500} />
 );
 
 // Implement other content type components...

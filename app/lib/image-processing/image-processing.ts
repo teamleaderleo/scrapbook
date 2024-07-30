@@ -1,13 +1,19 @@
 import sharp from 'sharp';
 import { uploadToS3, deleteFromS3 } from '../external/s3-operations';
-import { ContentMetadataSchema } from '../definitions/definitions';
+import { ArtifactContent } from '../definitions/definitions';
 import { z } from 'zod';
+import { getPalette } from 'node-vibrant';
+
+async function extractDominantColors(buffer: Buffer): Promise<string[]> {
+  const palette = await getPalette(buffer, 5);
+  return palette.map((color: { getHex: () => any; }) => color.getHex());
+}
 
 interface ThumbnailConfig {
   [key: string]: { width: number; height: number };
 }
 
-const THUMBNAIL_CONFIGS: ThumbnailConfig = {
+export const THUMBNAIL_CONFIGS: ThumbnailConfig = {
   small: { width: 40, height: 40 },
   medium: { width: 200, height: 200 },
   large: { width: 400, height: 400 },
@@ -18,19 +24,21 @@ const STORE_ORIGINAL = process.env.STORE_ORIGINAL_IMAGES === 'true';
 export async function processAndUploadImage(
   file: File | Buffer, 
   accountId: string, 
-  existingVersions?: z.infer<typeof ContentMetadataSchema> & { type: 'image' }
+  existingVersions?: ArtifactContent & { type: 'image' }
 ): Promise<{
   compressed: string;
   variations: Record<string, string>;
+  dominantColors: string[];
 }> {
   const fileBuffer = file instanceof File ? await file.arrayBuffer() : file;
 
   // Delete existing versions if present
-  if (existingVersions && existingVersions.variations) {
-    await deleteAllImageVersions(existingVersions.variations);
+  if (existingVersions && existingVersions.metadata.variations) {
+    await deleteAllImageVersions(existingVersions.metadata.variations);
   }
 
   const compressedImage = await sharp(fileBuffer).webp({ quality: 60 }).toBuffer();
+  const dominantColors = await extractDominantColors(Buffer.from(fileBuffer));
 
   const variations: Record<string, string> = {};
   for (const [size, dimensions] of Object.entries(THUMBNAIL_CONFIGS)) {
@@ -51,7 +59,8 @@ export async function processAndUploadImage(
 
   return {
     compressed: compressedUrl,
-    variations
+    variations,
+    dominantColors
   };
 }
 

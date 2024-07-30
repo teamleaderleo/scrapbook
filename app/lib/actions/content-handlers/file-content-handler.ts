@@ -1,9 +1,6 @@
 import { uploadToS3 } from '../../external/s3-operations';
-import { ContentMetadataSchema } from '../../definitions/definitions';
-import { z } from 'zod';
-import { artifactContents } from '../../db/schema';
+import { ArtifactContent, ArtifactContentSchema } from '../../definitions/definitions';
 import { S3ResourceTracker } from '../../external/s3-resource-tracker';
-import { v4 as uuidv4 } from 'uuid';
 import { insertNewContent } from '../artifact-content-actions';
 
 export async function processFileContent(
@@ -12,12 +9,7 @@ export async function processFileContent(
   contentId: string | null,
   index: number,
   formData: FormData
-): Promise<{
-  contentType: 'file';
-  content: string;
-  contentId: string | null;
-  metadata: z.infer<typeof ContentMetadataSchema>;
-}> {
+): Promise<ArtifactContent> {
   if (!(contentItem instanceof File)) {
     throw new Error(`Invalid file content`);
   }
@@ -25,28 +17,33 @@ export async function processFileContent(
   const orderStr = formData.get(`order-${index}`) as string;
   const order = isNaN(parseInt(orderStr, 10)) ? 0 : parseInt(orderStr, 10);
 
-  const metadata = ContentMetadataSchema.parse({
+  return ArtifactContentSchema.parse({
     type: 'file',
-    order,
+    content: fileUrl,
+    id: contentId || undefined,
+    accountId,
+    artifactId: formData.get('artifactId') as string,
+    metadata: {
+      order,
+      originalName: contentItem.name,
+      size: contentItem.size,
+      mimeType: contentItem.type,
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: accountId,
+    lastModifiedBy: accountId,
   });
-
-  return { 
-    contentType: 'file', 
-    content: fileUrl, 
-    contentId, 
-    metadata 
-  };
 }
 
 export async function insertFileContent(
   tx: any,
   accountId: string,
   artifactId: string,
-  content: string,
-  metadata: z.infer<typeof ContentMetadataSchema>,
+  content: ArtifactContent,
   resourceTracker: S3ResourceTracker
 ): Promise<void> {
-  resourceTracker.addResource(content);
-
-  await insertNewContent(tx, accountId, artifactId, 'file', content, metadata);
+  if (content.type !== 'file') throw new Error('Invalid content type');
+  resourceTracker.addResource(content.content);
+  await insertNewContent(tx, accountId, artifactId, content);
 }

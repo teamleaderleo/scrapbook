@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArtifactDisplay } from './artifact-display';
-import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
+import { Artifact, ArtifactWithRelations } from "@/app/lib/definitions/definitions";
 import { ProjectWithArtifacts, ProjectWithExtendedArtifacts } from "@/app/lib/definitions/definitions";
 
 export const ProjectDisplay: React.FC<{ project: ProjectWithArtifacts }> = ({ project }) => {
@@ -26,7 +26,7 @@ export const ProjectDisplay: React.FC<{ project: ProjectWithArtifacts }> = ({ pr
         </div>
       )}
       <div className="space-y-8">
-        {project.artifacts.map((artifact: ArtifactWithRelations) => (
+        {project.artifacts.map((artifact: Artifact) => (
           <div key={artifact.id} className="border-t pt-6">
             <ArtifactDisplay artifact={artifact} />
           </div>
