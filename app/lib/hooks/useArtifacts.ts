@@ -58,7 +58,7 @@ export function useArtifacts() {
   }, [filteredArtifacts, currentPage]);
 
   const updateArtifactMutation = useMutation(
-    ({ id, data }: { id: string; data: ArtifactFormSubmission }) => updateArtifact(id, ADMIN_UUID, {}, data),
+    ({ id, data }: { id: string; data: ArtifactFormSubmission }) => updateArtifact(id, ADMIN_UUID, data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['artifacts']);

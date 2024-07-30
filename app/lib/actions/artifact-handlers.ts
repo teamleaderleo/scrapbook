@@ -2,11 +2,12 @@
 
 import { eq, and } from 'drizzle-orm';
 import { artifacts, artifactContents, tagAssociations, projectArtifactLinks } from '../db/schema';
-import { handleContentUpdate, hasValidContent, insertContents } from './artifact-content-actions';
+import { handleContentUpdate, insertContents } from './artifact-content-actions';
 import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { handleProjectUpdateWithinTransaction } from './project-handlers';
 import { deleteRemovedContents } from './artifact-content-actions';
 import { v4 as uuid } from 'uuid';
+import { ArtifactFormSubmission } from '../definitions/definitions';
 
 export async function handleArtifactUpdateWithinTransaction(
   tx: any,
@@ -16,9 +17,9 @@ export async function handleArtifactUpdateWithinTransaction(
   description: string | undefined,
   tags: string[],
   projects: string[],
-  formData: FormData
+  contents: ArtifactFormSubmission['contents']
 ): Promise<{ deleted: boolean }> {
-  const { shouldDelete, newContentCount } = await handleContentUpdate(tx, accountId, artifactId, formData);
+  const { shouldDelete, newContentCount } = await handleContentUpdate(tx, accountId, artifactId, contents);
 
   if (shouldDelete) {
     await handleArtifactDeleteWithinTransaction(tx, accountId, artifactId);
@@ -65,7 +66,7 @@ export async function handleArtifactCreateWithinTransaction(
   description: string | undefined,
   tags: string[],
   projects: string[],
-  formData: FormData
+  contents: ArtifactFormSubmission['contents']
 ): Promise<string> {
   const newArtifactId = uuid();
   const now = new Date();
@@ -80,7 +81,7 @@ export async function handleArtifactCreateWithinTransaction(
       updatedAt: now 
     });
 
-    await insertContents(tx, accountId, newArtifactId, formData);
+    await insertContents(tx, accountId, newArtifactId, contents);
 
     if (tags.length > 0) {
       await handleTagUpdateWithinTransaction(tx, accountId, newArtifactId, 'artifact', tags);
@@ -92,8 +93,6 @@ export async function handleArtifactCreateWithinTransaction(
 
     return newArtifactId;
   } catch (error) {
-    // If an error occurs, the transaction will be automatically rolled back
-    // The cleanup of S3 resources is handled within insertContents
     throw error;
   }
 }

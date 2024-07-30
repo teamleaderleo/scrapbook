@@ -4,7 +4,6 @@ import { db } from '../db/db';
 import { revalidatePath } from 'next/cache';
 import { suggestTags } from '../external/claude-utils';
 import { handleArtifactUpdateWithinTransaction, handleArtifactDeleteWithinTransaction, handleArtifactCreateWithinTransaction } from './artifact-handlers';
-import { hasValidContent } from './artifact-content-actions';
 import { ArtifactFormSubmission, ArtifactFormSubmissionSchema } from '../definitions/definitions';
 
 export type State = {

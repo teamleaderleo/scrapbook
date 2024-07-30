@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { ContentType, Tag } from '@/app/lib/definitions/definitions';
+import { ArtifactFormSubmission, ContentType, Tag } from '@/app/lib/definitions/definitions';
 import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
 import { BaseProject } from "@/app/lib/definitions/definitions";
 import Link from 'next/link';
@@ -11,7 +11,7 @@ import { useTags } from '@/app/lib/hooks/useTags';
 interface ArtifactFormProps {
   artifact?: ArtifactWithRelations;
   projects: BaseProject[];
-  onSubmit: (data: ArtifactFormData) => void;
+  onSubmit: (data: ArtifactFormSubmission) => void;
   isSubmitting: boolean;
   submitButtonText: string;
   cancelHref: string;
@@ -20,18 +20,18 @@ interface ArtifactFormProps {
   onGetAISuggestions?: () => void;
 }
 
-interface ArtifactFormData {
-  name: string;
-  description?: string;
-  tags: string[];
-  projects: string[];
-  contents: Array<{
-    id?: string;
-    type: ContentType;
-    content: string | File;
-    metadata: Record<string, any>;
-  }>;
-}
+// interface ArtifactFormData {
+//   name: string;
+//   description?: string;
+//   tags: string[];
+//   projects: string[];
+//   contents: Array<{
+//     id?: string;
+//     type: ContentType;
+//     content: string | File;
+//     metadata: Record<string, any>;
+//   }>;
+// }
 
 export function ArtifactForm({
   artifact,
@@ -103,7 +103,7 @@ export function ArtifactForm({
           const content = formData.get(`content-${index}`);
           const baseMetadata = { order: index };
           let metadata;
-
+      
           switch (item.type) {
             case 'text':
               metadata = baseMetadata;
@@ -132,9 +132,9 @@ export function ArtifactForm({
               };
               break;
           }
-
+      
           return {
-            id: formData.get(`contentId-${index}`) as string | undefined,
+            id: formData.get(`contentId-${index}`) as string,
             type: item.type,
             content: content instanceof File ? content : String(content),
             metadata,

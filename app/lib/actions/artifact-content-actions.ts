@@ -1,7 +1,7 @@
 'use server';
 
 import { eq, and } from 'drizzle-orm';
-import {  ArtifactContentSchema, } from '../definitions/definitions';
+import {  ArtifactContentSchema, ArtifactFormSubmission, } from '../definitions/definitions';
 import { ArtifactContent } from "../definitions/definitions";
 import { deleteFromS3 } from '../external/s3-operations';
 import { artifactContents } from '../db/schema';
@@ -9,25 +9,22 @@ import { v4 as uuidv4 } from 'uuid';
 import { deleteAllImageVersions } from '../image-processing/image-processing';
 import { S3ResourceTracker } from '../external/s3-resource-tracker';
 
-import { processImageContent, insertImageContent } from './content-handlers/image-content-handler';
-import { processFileContent, insertFileContent } from './content-handlers/file-content-handler';
-import { processLinkContent, insertLinkContent } from './content-handlers/link-content-handler';
-import { processTextContent, insertTextContent } from './content-handlers/text-content-handler';
+import { insertImageContent } from './content-handlers/image-content-handler';
+import { insertFileContent } from './content-handlers/file-content-handler';
+import { insertLinkContent } from './content-handlers/link-content-handler';
+import { insertTextContent } from './content-handlers/text-content-handler';
 
 export async function handleContentUpdate(
   tx: any,
   accountId: string, 
   artifactId: string, 
-  formData: FormData
+  contents: ArtifactFormSubmission['contents']
 ): Promise<{ shouldDelete: boolean; newContentCount: number }> {
   const existingContents = await fetchExistingContents(tx, accountId, artifactId);
   const existingContentIds = new Set(existingContents.map(row => row.id));
   let newContentCount = 0;
 
-  let index = 0;
-  while (formData.get(`contentType-${index}`) !== null) {
-    const content = await processContentItem(accountId, formData, index);
-
+  for (const content of contents) {
     if (content.content) {
       if (content.id) {
         await updateExistingContent(tx, accountId, content);
@@ -39,8 +36,6 @@ export async function handleContentUpdate(
     } else if (content.id) {
       existingContentIds.delete(content.id);
     }
-
-    index++;
   }
 
   await deleteRemovedContents(tx, accountId, existingContents, existingContentIds);
@@ -58,30 +53,10 @@ async function fetchExistingContents(tx: any, accountId: string, artifactId: str
     .then((rows: any[]) => rows.map(row => ArtifactContentSchema.parse(row)));
 }
 
-
-async function processContentItem(accountId: string, formData: FormData, index: number): Promise<ArtifactContent> {
-  const contentType = formData.get(`contentType-${index}`) as ArtifactContent['type'];
-  const contentItem = formData.get(`content-${index}`);
-  const contentId = formData.get(`contentId-${index}`) as string | null;
-
-  switch (contentType) {
-    case 'image':
-      return processImageContent(accountId, contentItem as File, contentId, index, formData);
-    case 'file':
-      return processFileContent(accountId, contentItem as File, contentId, index, formData);
-    case 'link':
-      return processLinkContent(accountId, contentItem as string, contentId, index, formData);
-    case 'text':
-      return processTextContent(accountId, contentItem as string, contentId, index, formData);
-    default:
-      throw new Error(`Invalid content type: ${contentType}`);
-  }
-}
-
 async function updateExistingContent(
   tx: any,
   accountId: string, 
-  content: ArtifactContent
+  content: ArtifactFormSubmission['contents'][number]
 ): Promise<void> {
   const existingContent = await tx.select().from(artifactContents).where(and(eq(artifactContents.id, content.id), eq(artifactContents.accountId, accountId))).limit(1);
   
@@ -95,13 +70,13 @@ async function updateExistingContent(
   await tx.update(artifactContents)
     .set({ 
       type: content.type, 
-      content: content.content,
+      content: content.content instanceof Blob ? await content.content.text() : content.content,
       metadata: content.metadata,
       updatedAt: new Date(),
       lastModifiedBy: accountId
     })
     .where(and(
-      eq(artifactContents.id, content.id),
+      eq(artifactContents.id, content.id!),
       eq(artifactContents.accountId, accountId)
     ));
 }
@@ -110,14 +85,14 @@ export async function insertNewContent(
   tx: any,
   accountId: string, 
   artifactId: string, 
-  content: ArtifactContent
+  content: ArtifactFormSubmission['contents'][number]
 ): Promise<void> {
   await tx.insert(artifactContents).values({
     id: content.id || uuidv4(),
     accountId,
     artifactId,
     type: content.type,
-    content: content.content,
+    content: content.content instanceof Blob ? await content.content.text() : content.content,
     metadata: content.metadata,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -153,27 +128,17 @@ export async function deleteRemovedContents(
   }
 }
 
-export async function hasValidContent(formData: FormData): Promise<boolean> {
-  let index = 0;
-  while (formData.get(`contentType-${index}`)) {
-    const contentItem = formData.get(`content-${index}`);
-    if (contentItem && (typeof contentItem === 'string' ? contentItem.trim() !== '' : true)) {
-      return true;
-    }
-    index++;
-  }
-  return false;
-}
-
-export async function insertContents(tx: any, accountId: string, artifactId: string, formData: FormData): Promise<string> {
+export async function insertContents(
+  tx: any, 
+  accountId: string, 
+  artifactId: string, 
+  contents: ArtifactFormSubmission['contents']
+): Promise<string> {
   let allContent = '';
-  let index = 0;
   const resourceTracker = new S3ResourceTracker();
 
   try {
-    while (formData.get(`contentType-${index}`)) {
-      const content = await processContentItem(accountId, formData, index);
-
+    for (const content of contents) {
       switch (content.type) {
         case 'image':
           await insertImageContent(tx, accountId, artifactId, content, resourceTracker);
@@ -189,8 +154,6 @@ export async function insertContents(tx: any, accountId: string, artifactId: str
           allContent += content.content + ' ';
           break;
       }
-
-      index++;
     }
     return allContent;
   } catch (error) {
