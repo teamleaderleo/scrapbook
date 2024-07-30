@@ -22,27 +22,15 @@ export type State = {
   success?: boolean;
 };
 
-export async function updateArtifact(id: string, accountId: string, prevState: State,  data: ArtifactFormSubmission): Promise<State> {
-  const validatedFields = ArtifactFormSubmissionSchema.safeParse(data);
-
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Validation failed. Please check your input.',
-    };
-  }
-
-  const { name, description, tags, projects } = validatedFields.data;
+export async function updateArtifact(id: string, accountId: string, data: ArtifactFormSubmission): Promise<State> {
+  const { name, description, tags, projects, contents } = data;
 
   try {
     const result = await db.transaction(async (tx) => {
-      const { deleted } = await handleArtifactUpdateWithinTransaction(tx, accountId, id, name, description, tags || [], projects || [], data);
-
+      const { deleted } = await handleArtifactUpdateWithinTransaction(tx, accountId, id, name, description, tags, projects, contents);
       if (deleted) {
         return { message: 'Artifact deleted successfully (all content removed).', success: true };
       }
-
-      // const suggestedTags = await suggestTags(`${name} ${description}`);
       return { message: 'Artifact updated successfully', success: true };
     });
 
@@ -69,27 +57,12 @@ export async function deleteArtifact(id: string, accountId: string): Promise<Sta
 }
 
 export async function createArtifact(accountId: string, data: ArtifactFormSubmission): Promise<State> {
-  const validatedFields = ArtifactFormSubmissionSchema.safeParse(data);
+  // Validation can be done here if needed
+  const { name, description, tags, projects, contents } = data;
 
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Validation failed. Please check your input.',
-    };
-  }
-
-  const { name, description, tags, projects, contents } = validatedFields.data;
-
-  if (!hasValidContent(data)) {
-    return { message: 'Error: Artifact must have at least one content item.', success: false };
-  }
-  
   try {
     return await db.transaction(async (tx) => {
-      const newArtifactId = await handleArtifactCreateWithinTransaction(tx, accountId, name, description, tags || [], projects || [], data);
-
-      // const suggestedTags = await suggestTags(`${name} ${description || ''}`);
-
+      const newArtifactId = await handleArtifactCreateWithinTransaction(tx, accountId, name, description, tags, projects, contents);
       return { message: 'Artifact created successfully', artifactId: newArtifactId, success: true };
     });
   } catch (error: any) {
