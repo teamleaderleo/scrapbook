@@ -2,11 +2,11 @@ import sharp from 'sharp';
 import { uploadToS3, deleteFromS3 } from '../external/s3-operations';
 import { ArtifactContent } from '../definitions/definitions';
 import { z } from 'zod';
-import { getPalette } from 'node-vibrant';
+import getPalette from 'node-vibrant';
 
 async function extractDominantColors(buffer: Buffer): Promise<string[]> {
-  const palette = await getPalette(buffer, 5);
-  return palette.map((color: { getHex: () => any; }) => color.getHex());
+  const palette = await new getPalette(buffer, { colorCount: 5 });
+  return Object.values(palette).filter(swatch => swatch).map((swatch: any) => swatch.getHex());
 }
 
 interface ThumbnailConfig {
