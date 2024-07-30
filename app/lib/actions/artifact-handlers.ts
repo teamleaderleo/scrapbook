@@ -1,7 +1,7 @@
 'use server';
 
 import { eq, and } from 'drizzle-orm';
-import { artifacts, artifactContents, artifactTags, projectArtifactLinks } from '../db/schema';
+import { artifacts, artifactContents, tagAssociations, projectArtifactLinks } from '../db/schema';
 import { handleContentUpdate, hasValidContent, insertContents } from './artifact-content-actions';
 import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { handleProjectUpdateWithinTransaction } from './project-handlers';
@@ -44,7 +44,7 @@ export async function handleArtifactDeleteWithinTransaction(
   artifactId: string
 ): Promise<void> {
   // Delete associated tags and project links
-  await tx.delete(artifactTags).where(and(eq(artifactTags.artifactId, artifactId), eq(artifactTags.accountId, accountId)));
+  await tx.delete(tagAssociations).where(and(eq(tagAssociations.associatedId, artifactId), eq(tagAssociations.accountId, accountId)));
   await tx.delete(projectArtifactLinks).where(and(eq(projectArtifactLinks.artifactId, artifactId), eq(projectArtifactLinks.accountId, accountId)));
   
   // Fetch all contents associated with this artifact

@@ -5,7 +5,7 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '../db/db';
 import { revalidatePath } from 'next/cache';
 import { suggestTags } from '../external/claude-utils';
-import { projects, projectTags, projectArtifactLinks } from '../db/schema';
+import { projects, projectArtifactLinks, tagAssociations } from '../db/schema';
 import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { v4 as uuid } from 'uuid';
 
@@ -162,7 +162,7 @@ export async function updateProject(id: string, accountId: string, formData: For
 export async function deleteProject(id: string, accountId: string): Promise<State> {
   try {
     await db.transaction(async (tx) => {
-      await tx.delete(projectTags).where(and(eq(projectTags.projectId, id), eq(projectTags.accountId, accountId)));
+      await tx.delete(tagAssociations).where(and(eq(tagAssociations.associatedId, id), eq(tagAssociations.accountId, accountId)));
       await tx.delete(projectArtifactLinks).where(and(eq(projectArtifactLinks.projectId, id), eq(projectArtifactLinks.accountId, accountId)));
       await tx.delete(projects).where(and(eq(projects.id, id), eq(projects.accountId, accountId)));
     });

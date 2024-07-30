@@ -2,7 +2,7 @@
 
 import { eq, and, or, ilike, sql, SQL, desc } from 'drizzle-orm';
 import { db } from '../db/db';
-import { artifacts, artifactContents, artifactTags, tags, projectArtifactLinks, projects } from '../db/schema';
+import { artifacts, artifactContents, tags, tagAssociations, projectArtifactLinks, projects } from '../db/schema';
 import { ArtifactFetchOptions } from '../definitions/definitions';
 import { ArtifactWithRelations } from "../definitions/definitions";
 
@@ -89,8 +89,8 @@ export async function fetchAllArtifacts(
     query.leftJoin(artifactContents, eq(artifacts.id, artifactContents.artifactId));
   }
   if (options.includeTags) {
-    query.leftJoin(artifactTags, eq(artifacts.id, artifactTags.artifactId))
-         .leftJoin(tags, eq(artifactTags.tagId, tags.id));
+    query.leftJoin(tagAssociations, eq(artifacts.id, tagAssociations.associatedId))
+         .leftJoin(tags, eq(tagAssociations.tagId, tags.id));
   }
   if (options.includeProjects) {
     query.leftJoin(projectArtifactLinks, eq(artifacts.id, projectArtifactLinks.artifactId))
@@ -124,8 +124,8 @@ export async function fetchSingleArtifact(
     query.leftJoin(artifactContents, eq(artifacts.id, artifactContents.artifactId));
   }
   if (options.includeTags) {
-    query.leftJoin(artifactTags, eq(artifacts.id, artifactTags.artifactId))
-         .leftJoin(tags, eq(artifactTags.tagId, tags.id));
+    query.leftJoin(tagAssociations, eq(artifacts.id, tagAssociations.associatedId))
+         .leftJoin(tags, eq(tagAssociations.tagId, tags.id));
   }
   if (options.includeProjects) {
     query.leftJoin(projectArtifactLinks, eq(artifacts.id, projectArtifactLinks.artifactId))
@@ -161,8 +161,8 @@ export async function fetchLatestArtifacts(
     query.leftJoin(artifactContents, eq(artifacts.id, artifactContents.artifactId));
   }
   if (options.includeTags) {
-    query.leftJoin(artifactTags, eq(artifacts.id, artifactTags.artifactId))
-         .leftJoin(tags, eq(artifactTags.tagId, tags.id));
+    query.leftJoin(tagAssociations, eq(artifacts.id, tagAssociations.associatedId))
+         .leftJoin(tags, eq(tagAssociations.tagId, tags.id));
   }
   if (options.includeProjects) {
     query.leftJoin(projectArtifactLinks, eq(artifacts.id, projectArtifactLinks.artifactId))
@@ -200,8 +200,8 @@ export async function searchArtifacts(
     baseQuery.leftJoin(artifactContents, eq(artifacts.id, artifactContents.artifactId));
   }
   if (options.includeTags) {
-    baseQuery.leftJoin(artifactTags, eq(artifacts.id, artifactTags.artifactId))
-             .leftJoin(tags, eq(artifactTags.tagId, tags.id));
+    baseQuery.leftJoin(tagAssociations, eq(artifacts.id, tagAssociations.associatedId))
+             .leftJoin(tags, eq(tagAssociations.tagId, tags.id));
   }
   if (options.includeProjects) {
     baseQuery.leftJoin(projectArtifactLinks, eq(artifacts.id, projectArtifactLinks.artifactId))
