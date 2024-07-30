@@ -24,15 +24,11 @@ export type State = {
 export async function updateArtifact(id: string, accountId: string, data: ArtifactFormSubmission): Promise<State> {
   try {
     const result = await db.transaction(async (tx) => {
-      const { deleted } = await handleArtifactUpdateWithinTransaction(tx, accountId, id, data);
-      if (deleted) {
-        return { message: 'Artifact deleted successfully (all content removed).', success: true };
-      }
-      return { message: 'Artifact updated successfully', success: true };
+      await handleArtifactUpdateWithinTransaction(tx, accountId, id, data);
     });
 
     revalidatePath('/dashboard/artifacts');
-    return result;
+    return { message: 'Artifact updated successfully.', success: true };
   } catch (error) {
     console.error('Error updating artifact:', error);
     return { message: 'Database Error: Failed to Update Artifact.', success: false };

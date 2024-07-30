@@ -2,10 +2,9 @@
 
 import { eq, and } from 'drizzle-orm';
 import { artifacts, artifactContents, tagAssociations, projectArtifactLinks } from '../db/schema';
-import { handleContentUpdate, insertContents } from './artifact-content-actions';
+import { deleteContent, insertContents, updateContent } from './artifact-content-actions';
 import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { handleProjectUpdateWithinTransaction } from './project-handlers';
-import { deleteRemovedContents } from './artifact-content-actions';
 import { v4 as uuid } from 'uuid';
 import { ArtifactFormSubmission } from '../definitions/definitions';
 
@@ -14,15 +13,10 @@ export async function handleArtifactUpdateWithinTransaction(
   accountId: string,
   artifactId: string,
   data: ArtifactFormSubmission
-): Promise<{ deleted: boolean }> {
+): Promise<void> {
   const { name, description, tags, projects, contents } = data;
-  const { shouldDelete, newContentCount } = await handleContentUpdate(tx, accountId, artifactId, contents);
 
-  if (shouldDelete) {
-    await handleArtifactDeleteWithinTransaction(tx, accountId, artifactId, contents);
-    return { deleted: true };
-  }
-
+  // Update artifact main data
   await tx.update(artifacts)
     .set({ name, description, updatedAt: new Date() })
     .where(and(
@@ -30,10 +24,18 @@ export async function handleArtifactUpdateWithinTransaction(
       eq(artifacts.accountId, accountId)
     ));
 
+  // Update existing contents or insert new ones
+  for (const content of contents) {
+    if (content.id) {
+      await updateContent(tx, accountId, artifactId, content);
+    } else {
+      await insertContents(tx, accountId, artifactId, [content]);
+    }
+  }
+
+  // Update tags and projects
   await handleTagUpdateWithinTransaction(tx, accountId, artifactId, 'artifact', tags);
   await handleProjectUpdateWithinTransaction(tx, accountId, artifactId, projects);
-
-  return { deleted: false };
 }
 
 export async function handleArtifactDeleteWithinTransaction(
@@ -64,28 +66,30 @@ export async function handleArtifactCreateWithinTransaction(
   const newArtifactId = uuid();
   const now = new Date();
 
-  try {
-    await tx.insert(artifacts).values({ 
-      id: newArtifactId,
-      accountId, 
-      name, 
-      description, 
-      createdAt: now, 
-      updatedAt: now 
+  await tx.insert(artifacts).values({ 
+    id: newArtifactId,
+    accountId, 
+    name, 
+    description, 
+    createdAt: now, 
+    updatedAt: now 
+  });
+
+  for (const content of contents) {
+    await tx.insert(artifactContents).values({
+      id: content.id,
+      accountId,
+      artifactId: newArtifactId,
+      type: content.type,
+      content: content.content,
+      metadata: content.metadata,
+      createdAt: now,
+      updatedAt: now,
     });
-
-    await insertContents(tx, accountId, newArtifactId, contents);
-
-    if (tags.length > 0) {
-      await handleTagUpdateWithinTransaction(tx, accountId, newArtifactId, 'artifact', tags);
-    }
-
-    if (projects.length > 0) {
-      await handleProjectUpdateWithinTransaction(tx, accountId, newArtifactId, projects);
-    }
-
-    return newArtifactId;
-  } catch (error) {
-    throw error;
   }
+
+  await handleTagUpdateWithinTransaction(tx, accountId, newArtifactId, 'artifact', tags);
+  await handleProjectUpdateWithinTransaction(tx, accountId, newArtifactId, projects);
+
+  return newArtifactId;
 }
