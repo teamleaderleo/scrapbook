@@ -84,10 +84,10 @@ export async function createProject(accountId: string, formData: FormData): Prom
         }
       }
 
-      const allContent = `${name} ${description || ''}`;
-      const suggestedTags = await suggestTags(allContent);
+      // const allContent = `${name} ${description || ''}`;
+      // const suggestedTags = await suggestTags(allContent);
 
-      return { message: 'Project created successfully', suggestedTags, projectId: newProjectId, success: true };
+      return { message: 'Project created successfully', projectId: newProjectId, success: true };
     });
   } catch (error: any) {
     console.error('Error creating project:', error);
@@ -145,10 +145,10 @@ export async function updateProject(id: string, accountId: string, formData: For
         }
       }
 
-      const allContent = `${name} ${description || ''}`;
-      const suggestedTags = await suggestTags(allContent);
+      // const allContent = `${name} ${description || ''}`;
+      // const suggestedTags = await suggestTags(allContent);
 
-      return { message: 'Project updated successfully', suggestedTags };
+      return { message: 'Project updated successfully' };
     });
 
     revalidatePath('/dashboard/projects');

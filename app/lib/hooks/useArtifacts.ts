@@ -104,11 +104,11 @@ export function useArtifacts() {
 
   useKeyNav(currentPage, totalPages, handlePageChange, true);
 
-  const getAISuggestions = useCallback(async (name: string, description: string, content: string) => {
-    const tags = await suggestTags(`${name} ${description} ${content}`);
-    const extensions = await suggestContentExtensions(`${name} ${description} ${content}`);
-    return { tags, extensions };
-  }, []);
+  // const getAISuggestions = useCallback(async (name: string, description: string, content: string) => {
+  //   const tags = await suggestTags(`${name} ${description} ${content}`);
+  //   const extensions = await suggestContentExtensions(`${name} ${description} ${content}`);
+  //   return { tags, extensions };
+  // }, []);
 
   return {
     artifacts,
@@ -126,6 +126,6 @@ export function useArtifacts() {
     addArtifact: addArtifactMutation.mutateAsync,
     updateArtifactTags: updateArtifactTagsMutation.mutateAsync,
     setFetchOptions,
-    getAISuggestions,
+    // getAISuggestions,
   };
 }

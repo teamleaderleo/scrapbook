@@ -54,8 +54,8 @@ export async function updateArtifact(id: string, accountId: string, prevState: S
         return { message: 'Artifact deleted successfully (all content removed).', success: true };
       }
 
-      const suggestedTags = await suggestTags(`${name} ${description}`);
-      return { message: 'Artifact updated successfully', suggestedTags, success: true };
+      // const suggestedTags = await suggestTags(`${name} ${description}`);
+      return { message: 'Artifact updated successfully', success: true };
     });
 
     revalidatePath('/dashboard/artifacts');
@@ -105,9 +105,9 @@ export async function createArtifact(accountId: string, formData: FormData): Pro
     return await db.transaction(async (tx) => {
       const newArtifactId = await handleArtifactCreateWithinTransaction(tx, accountId, name, description, tags || [], projects || [], formData);
 
-      const suggestedTags = await suggestTags(`${name} ${description || ''}`);
+      // const suggestedTags = await suggestTags(`${name} ${description || ''}`);
 
-      return { message: 'Artifact created successfully', suggestedTags, artifactId: newArtifactId, success: true };
+      return { message: 'Artifact created successfully', artifactId: newArtifactId, success: true };
     });
   } catch (error: any) {
     console.error('Error creating artifact:', error);

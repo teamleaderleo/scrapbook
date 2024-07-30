@@ -137,10 +137,10 @@ export function useProjects() {
 
   useKeyNav(currentPage, totalPages, handlePageChange, true);
 
-  const getAISuggestions = useCallback(async (name: string, description: string) => {
-    const tags = await suggestTags(`${name} ${description}`);
-    return { tags };
-  }, []);
+  // const getAISuggestions = useCallback(async (name: string, description: string) => {
+  //   const tags = await suggestTags(`${name} ${description}`);
+  //   return { tags };
+  // }, []);
 
   return {
     projects,
@@ -161,6 +161,6 @@ export function useProjects() {
     addProject: addProjectMutation.mutateAsync,
     updateProjectTags: updateProjectTagsMutation.mutateAsync,
     setFetchOptions,
-    getAISuggestions,
+    // getAISuggestions,
   };
 }
