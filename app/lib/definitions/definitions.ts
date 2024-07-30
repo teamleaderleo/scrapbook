@@ -72,11 +72,33 @@ export type ProjectWithArtifacts = ProjectWithTags & {
 
 export const ProjectWithArtifactsViewSchema = z.object({
   ...selectProjectSchema.shape,
-  tags: z.array(selectTagSchema).nullable(),
-  artifacts: z.array(z.object({
-    ...selectArtifactSchema.shape,
-    contents: z.array(selectArtifactContentSchema).nullable(),
-  })).nullable(),
+  tags: z.array(
+    z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+    })
+  ).default([]),
+  artifacts: z.array(
+    z.object({
+      id: z.string().uuid(),
+      name: z.string(),
+      description: z.string().nullable(),
+      created_at: z.string().transform((str) => new Date(str)),
+      updated_at: z.string().transform((str) => new Date(str)),
+      contents: z.array(
+        z.object({
+          id: z.string().uuid(),
+          type: z.string(),
+          content: z.string(),
+          metadata: z.record(z.unknown()).nullable(),
+          created_at: z.string().transform((str) => new Date(str)),
+          updated_at: z.string().transform((str) => new Date(str)),
+          created_by: z.string().uuid().nullable(),
+          last_modified_by: z.string().uuid().nullable(),
+        })
+      ).default([]),
+    })
+  ).default([]),
 });
 
 export type ProjectWithArtifactsView = z.infer<typeof ProjectWithArtifactsViewSchema>;
