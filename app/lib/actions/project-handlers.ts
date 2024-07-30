@@ -45,7 +45,7 @@ export async function handleProjectTagsUpdate(
   tags: Tag[]
 ): Promise<void> {
   await db.transaction(async (tx) => {
-    await handleTagUpdateWithinTransaction(tx, accountId, projectId, tags.map(tag => tag.name));
+    await handleTagUpdateWithinTransaction(tx, accountId, projectId, 'project',tags.map(tag => tag.name));
   });
 }
 

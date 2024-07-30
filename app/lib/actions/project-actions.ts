@@ -69,7 +69,7 @@ export async function createProject(accountId: string, formData: FormData): Prom
 
       // Handle tags
       if (tags && tags.length > 0) {
-        await handleTagUpdateWithinTransaction(tx, accountId, newProjectId, tags);
+        await handleTagUpdateWithinTransaction(tx, accountId, newProjectId, 'project',tags);
       }
 
       // Handle artifacts
@@ -124,7 +124,7 @@ export async function updateProject(id: string, accountId: string, formData: For
 
       // Handle tags
       if (tags) {
-        await handleTagUpdateWithinTransaction(tx, accountId, id, tags);
+        await handleTagUpdateWithinTransaction(tx, accountId, id, 'project', tags);
       }
 
       // Handle artifacts

@@ -1,16 +1,11 @@
 import { z } from 'zod';
-import { artifactContents, artifacts, projects, tags } from '../db/schema';
+import { accounts, artifactContents, artifacts, projects, tags } from '../db/schema';
 import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 
-export type Account = {
-  id: string; // Primary key
-  name: string;
-  email: string; // Unique
-  password?: string;
-  provider?: string;
-  providerAccountId?: string;
-  lastLogin?: Date;
-};
+export type SelectAccount = InferSelectModel<typeof accounts>;
+export type Account = InferInsertModel<typeof accounts>;
+
+export type EntityType = 'project' | 'artifact';
 
 export interface ProjectFetchOptions {
   includeTags: boolean;
@@ -27,9 +22,7 @@ export interface ArtifactFetchOptions {
 export type Tag = InferSelectModel<typeof tags>;
 // export type InsertTag = InferInsertModel<typeof tags>;
 
-
-export const ContentTypeSchema = z.enum(['text', 'image', 'file', 'link',]);
-export type ContentType = z.infer<typeof ContentTypeSchema>;
+export type ContentType = 'text' | 'image' | 'file' | 'link';
 
 export type S3Usage = {
   id: number;

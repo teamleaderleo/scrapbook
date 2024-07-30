@@ -118,7 +118,7 @@ export function useProjects() {
 
   const updateProjectTagsMutation = useMutation(
     ({ projectId, tags }: { projectId: string; tags: string[] }) =>
-      handleTagUpdate(ADMIN_UUID, projectId, tags),
+      handleTagUpdate(ADMIN_UUID, projectId, 'project',tags),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['projects']);
