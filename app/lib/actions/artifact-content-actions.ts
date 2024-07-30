@@ -117,7 +117,7 @@ async function updateExistingContent(
     ));
 }
 
-async function insertNewContent(
+export async function insertNewContent(
   tx: any,
   accountId: string, 
   artifactId: string, 

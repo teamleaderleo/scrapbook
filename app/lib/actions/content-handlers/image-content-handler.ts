@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { artifactContents } from '../../db/schema';
 import { S3ResourceTracker } from '../../external/s3-resource-tracker';
 import { v4 as uuidv4 } from 'uuid';
+import { insertNewContent } from '../artifact-content-actions';
 
 export async function processImageContent(
   accountId: string,
@@ -51,16 +52,5 @@ export async function insertImageContent(
     if (url) resourceTracker.addResource(url);
   });
 
-  await tx.insert(artifactContents).values({
-    id: uuidv4(),
-    accountId,
-    artifactId,
-    type: 'image',
-    content,
-    metadata: imageMetadata,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdBy: accountId,
-    lastModifiedBy: accountId
-  });
+  await insertNewContent(tx, accountId, artifactId, 'image', content, imageMetadata);
 }

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { artifactContents } from '../../db/schema';
 import { S3ResourceTracker } from '../../external/s3-resource-tracker';
 import { v4 as uuidv4 } from 'uuid';
+import { insertNewContent } from '../artifact-content-actions';
 
 export async function processFileContent(
   accountId: string,
@@ -47,16 +48,5 @@ export async function insertFileContent(
 ): Promise<void> {
   resourceTracker.addResource(content);
 
-  await tx.insert(artifactContents).values({
-    id: uuidv4(),
-    accountId,
-    artifactId,
-    type: 'file',
-    content,
-    metadata,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdBy: accountId,
-    lastModifiedBy: accountId
-  });
+  await insertNewContent(tx, accountId, artifactId, 'file', content, metadata);
 }

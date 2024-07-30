@@ -2,6 +2,7 @@ import { ContentMetadataSchema } from '../../definitions/definitions';
 import { z } from 'zod';
 import { artifactContents } from '../../db/schema';
 import { v4 as uuidv4 } from 'uuid';
+import { insertNewContent } from '../artifact-content-actions';
 
 export async function processTextContent(
   accountId: string,
@@ -38,16 +39,5 @@ export async function insertTextContent(
   content: string,
   metadata: z.infer<typeof ContentMetadataSchema>
 ): Promise<void> {
-  await tx.insert(artifactContents).values({
-    id: uuidv4(),
-    accountId,
-    artifactId,
-    type: 'text',
-    content,
-    metadata,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdBy: accountId,
-    lastModifiedBy: accountId
-  });
+  await insertNewContent(tx, accountId, artifactId, 'text', content, metadata);
 }
