@@ -52,7 +52,7 @@ export async function fetchAllProjects(accountId: string): Promise<ProjectWithAr
     .leftJoin(artifacts, eq(artifacts.id, projectArtifactLinks.artifactId))
     .where(eq(projects.accountId, accountId))
     .groupBy(projects.id)
-    .orderBy(projects.updatedAt);
+    .orderBy(desc(projects.updatedAt));
 
   return results;
 }

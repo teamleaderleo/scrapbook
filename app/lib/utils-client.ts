@@ -1,8 +1,8 @@
 import { Artifact, ArtifactContent } from "./definitions/definitions";
 import { StaticImageData } from 'next/image';
-import defaultPlaceholder from '../../public/placeholder-default.png';
-import textPlaceholder from '../../public/placeholder-text.png';
-import filePlaceholder from '../../public/placeholder-file.png';
+const defaultPlaceholder = require('../../public/placeholder-default.png');
+const textPlaceholder = require('../../public/placeholder-text.png');
+const filePlaceholder = require('../../public/placeholder-file.png');
 
 export const formatDateToLocal = (
   dateStr: string,

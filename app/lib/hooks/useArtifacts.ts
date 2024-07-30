@@ -25,7 +25,7 @@ export function useArtifacts() {
 
   const { data: artifacts, isLoading, error } = useQuery<ArtifactWithRelations[], Error>(
     ['artifacts', fetchOptions],
-    () => getCachedArtifacts(ADMIN_UUID, fetchOptions),
+    () => getCachedArtifacts(ADMIN_UUID),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
