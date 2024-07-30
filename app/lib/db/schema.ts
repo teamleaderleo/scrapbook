@@ -1,4 +1,4 @@
-import { pgTable, pgView, uuid, text, varchar, timestamp, integer, serial, uniqueIndex, jsonb, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, pgView, uuid, text, varchar, timestamp, integer, serial, uniqueIndex, jsonb, pgEnum, index } from 'drizzle-orm/pg-core';
 import { InferSelectModel, InferInsertModel } from 'drizzle-orm'
 
 export const accounts = pgTable('account', {
@@ -29,7 +29,9 @@ export const projects = pgTable('project', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   status: text('status').notNull(),
-});
+}, (table) => ({
+  accountUpdatedIndex: index('idx_projects_account_updated').on(table.accountId, table.updatedAt),
+}));
 
 export const artifacts = pgTable('artifact', {
   id: uuid('id').primaryKey(),
@@ -38,7 +40,9 @@ export const artifacts = pgTable('artifact', {
   description: text('description'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-});
+}, (table) => ({
+  accountUpdatedIndex: index('idx_artifacts_account_updated').on(table.accountId, table.updatedAt),
+}));
 
 export const artifactContents = pgTable('artifact_content', {
   id: uuid('id').primaryKey(),
@@ -51,7 +55,10 @@ export const artifactContents = pgTable('artifact_content', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   createdBy: uuid('created_by').references(() => accounts.id),
   lastModifiedBy: uuid('last_modified_by').references(() => accounts.id),
-});
+}, (table) => ({
+  artifactAccountIndex: index('idx_artifact_contents_artifact').on(table.artifactId, table.accountId),
+  metadataIndex: index('idx_artifact_content_metadata').on(table.metadata),
+}));
 
 export const tagAssociations = pgTable('tag_association', {
   id: uuid('id').primaryKey(),
@@ -64,6 +71,7 @@ export const tagAssociations = pgTable('tag_association', {
   order: integer('order'),
 }, (table) => ({
   uniqueAssociation: uniqueIndex('unique_tag_association').on(table.accountId, table.tagId, table.associatedId),
+  entityTypeIndex: index('idx_tag_associations_entity').on(table.entityType, table.associatedId, table.accountId),
 }));
 
 export const projectArtifactLinks = pgTable('project_artifact_link', {
@@ -71,7 +79,9 @@ export const projectArtifactLinks = pgTable('project_artifact_link', {
   projectId: uuid('project_id').notNull().references(() => projects.id),
   artifactId: uuid('artifact_id').notNull().references(() => artifacts.id),
   addedAt: timestamp('added_at').notNull().defaultNow(),
-});
+}, (table) => ({
+  projectArtifactIndex: index('idx_project_artifact_links').on(table.projectId, table.artifactId, table.accountId),
+}));
 
 export const s3Usage = pgTable('s3_usage', {
   id: serial('id').primaryKey(),
