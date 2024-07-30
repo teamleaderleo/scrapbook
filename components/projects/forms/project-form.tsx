@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
-import { ProjectWithArtifactsView } from "@/app/lib/definitions/definitions";
+import { ProjectWithArtifacts } from "@/app/lib/definitions/definitions";
 import Link from 'next/link';
 import { Button } from '@/components/ui/components/button';
 import { TagManager } from '@/components/tags/tagmanager';
@@ -8,7 +8,7 @@ import { Suggestions } from '@/components/suggestions/suggestions';
 import { useTags } from '@/app/lib/hooks/useTags';
 
 interface ProjectFormProps {
-  project: ProjectWithArtifactsView;
+  project: ProjectWithArtifacts;
   artifacts: ArtifactWithRelations[];
   onSubmit: (formData: FormData) => void;
   isSubmitting: boolean;

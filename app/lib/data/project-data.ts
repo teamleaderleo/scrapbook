@@ -3,10 +3,10 @@
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { db } from '../db/db';
 import { projects, } from '../db/schema';
-import { BaseProject, } from "../definitions/definitions";
+import { BaseProject, ProjectWithArtifacts, } from "../definitions/definitions";
 
 
-export async function fetchAllProjects(accountId: string): Promise<ProjectWithArtifactsView[]> {
+export async function fetchAllProjects(accountId: string): Promise<ProjectWithArtifacts[]> {
   const rawResults = await db
     .select()
     .from(projectWithArtifactsView)

@@ -6,7 +6,7 @@ import { DeleteProject, UpdateProject } from '@/components/projects/components/b
 import Pagination from '../../ui/components/pagination';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
-import { Artifact, ProjectWithArtifacts, ProjectWithArtifactsView } from "@/app/lib/definitions/definitions";
+import { Artifact, ProjectWithArtifacts } from "@/app/lib/definitions/definitions";
 import { ArtifactThumbnail } from '../../artifacts/components/artifact-thumbnail';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
@@ -73,7 +73,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
                 </tr>
               </thead>
               <tbody className="bg-white">
-                {paginatedProjects.map((project: ProjectWithArtifactsView) => (
+                {paginatedProjects.map((project: ProjectWithArtifacts) => (
                   <tr key={project.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <p className="font-medium">{project.name}</p>
