@@ -10,9 +10,18 @@ export async function fetchAllProjects(accountId: string): Promise<ProjectWithAr
   const rawResults = await db
     .select()
     .from(projectWithArtifactsView)
-    .where(eq(projectWithArtifactsView.accountId, accountId));
+    .where(eq(projectWithArtifactsView.accountId, accountId))
+    .orderBy(desc(projectWithArtifactsView.updatedAt));
   
-  return rawResults.map(row => ProjectWithArtifactsViewSchema.parse(row));
+  return rawResults.map(row => {
+    try {
+      return ProjectWithArtifactsViewSchema.parse(row);
+    } catch (error) {
+      console.error('Error parsing project:', error);
+      console.log('Problematic row:', JSON.stringify(row, null, 2));
+      throw error;
+    }
+  });
 }
 
 // export async function fetchProjectsWithExtendedArtifacts(accountId: string): Promise<ProjectWithExtendedArtifacts[]> {
