@@ -67,7 +67,7 @@ export function useArtifacts() {
   );
 
   const deleteArtifactMutation = useMutation(
-    (id: string) => deleteArtifact(id, ADMIN_UUID),
+    ({ id, data }: { id: string; data: ArtifactFormSubmission }) => deleteArtifact(id, ADMIN_UUID, data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['artifacts']);

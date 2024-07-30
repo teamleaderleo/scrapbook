@@ -13,16 +13,13 @@ export async function handleArtifactUpdateWithinTransaction(
   tx: any,
   accountId: string,
   artifactId: string,
-  name: string,
-  description: string | undefined,
-  tags: string[],
-  projects: string[],
-  contents: ArtifactFormSubmission['contents']
+  data: ArtifactFormSubmission
 ): Promise<{ deleted: boolean }> {
+  const { name, description, tags, projects, contents } = data;
   const { shouldDelete, newContentCount } = await handleContentUpdate(tx, accountId, artifactId, contents);
 
   if (shouldDelete) {
-    await handleArtifactDeleteWithinTransaction(tx, accountId, artifactId);
+    await handleArtifactDeleteWithinTransaction(tx, accountId, artifactId, contents);
     return { deleted: true };
   }
 
@@ -42,18 +39,17 @@ export async function handleArtifactUpdateWithinTransaction(
 export async function handleArtifactDeleteWithinTransaction(
   tx: any,
   accountId: string,
-  artifactId: string
+  artifactId: string,
+  contents: ArtifactFormSubmission['contents']
 ): Promise<void> {
   // Delete associated tags and project links
   await tx.delete(tagAssociations).where(and(eq(tagAssociations.associatedId, artifactId), eq(tagAssociations.accountId, accountId)));
   await tx.delete(projectArtifactLinks).where(and(eq(projectArtifactLinks.artifactId, artifactId), eq(projectArtifactLinks.accountId, accountId)));
   
-  // Fetch all contents associated with this artifact
-  const contents = await tx.select().from(artifactContents)
-    .where(and(eq(artifactContents.artifactId, artifactId), eq(artifactContents.accountId, accountId)));
-
-  // Delete all associated files and content records
-  deleteRemovedContents(tx, accountId, contents, new Set(contents.map((content: { id: any; }) => content.id)));
+  // Delete all associated content records
+  for (const content of contents) {
+    await deleteContent(tx, accountId, artifactId, content.id);
+  }
 
   // Finally, delete the artifact itself
   await tx.delete(artifacts).where(and(eq(artifacts.id, artifactId), eq(artifacts.accountId, accountId)));
@@ -62,12 +58,9 @@ export async function handleArtifactDeleteWithinTransaction(
 export async function handleArtifactCreateWithinTransaction(
   tx: any,
   accountId: string,
-  name: string,
-  description: string | undefined,
-  tags: string[],
-  projects: string[],
-  contents: ArtifactFormSubmission['contents']
+  data: ArtifactFormSubmission
 ): Promise<string> {
+  const { name, description, tags, projects, contents } = data;
   const newArtifactId = uuid();
   const now = new Date();
 

@@ -22,11 +22,9 @@ export type State = {
 };
 
 export async function updateArtifact(id: string, accountId: string, data: ArtifactFormSubmission): Promise<State> {
-  const { name, description, tags, projects, contents } = data;
-
   try {
     const result = await db.transaction(async (tx) => {
-      const { deleted } = await handleArtifactUpdateWithinTransaction(tx, accountId, id, name, description, tags, projects, contents);
+      const { deleted } = await handleArtifactUpdateWithinTransaction(tx, accountId, id, data);
       if (deleted) {
         return { message: 'Artifact deleted successfully (all content removed).', success: true };
       }
@@ -41,10 +39,10 @@ export async function updateArtifact(id: string, accountId: string, data: Artifa
   }
 }
 
-export async function deleteArtifact(id: string, accountId: string): Promise<State> {
+export async function deleteArtifact(id: string, accountId: string, data: ArtifactFormSubmission): Promise<State> {
   try {
     await db.transaction(async (tx) => {
-      await handleArtifactDeleteWithinTransaction(tx, accountId, id);
+      await handleArtifactDeleteWithinTransaction(tx, accountId, id, data.contents);
     });
 
     revalidatePath('/dashboard/artifacts');
@@ -56,12 +54,9 @@ export async function deleteArtifact(id: string, accountId: string): Promise<Sta
 }
 
 export async function createArtifact(accountId: string, data: ArtifactFormSubmission): Promise<State> {
-  // Validation can be done here if needed
-  const { name, description, tags, projects, contents } = data;
-
   try {
     return await db.transaction(async (tx) => {
-      const newArtifactId = await handleArtifactCreateWithinTransaction(tx, accountId, name, description, tags, projects, contents);
+      const newArtifactId = await handleArtifactCreateWithinTransaction(tx, accountId, data);
       return { message: 'Artifact created successfully', artifactId: newArtifactId, success: true };
     });
   } catch (error: any) {

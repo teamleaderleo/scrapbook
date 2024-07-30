@@ -19,38 +19,27 @@ export async function handleContentUpdate(
   accountId: string, 
   artifactId: string, 
   contents: ArtifactFormSubmission['contents']
-): Promise<{ shouldDelete: boolean; newContentCount: number }> {
-  const existingContents = await fetchExistingContents(tx, accountId, artifactId);
-  const existingContentIds = new Set(existingContents.map(row => row.id));
+): Promise<{ shouldDeleteArtifact: boolean; newContentCount: number }> {
   let newContentCount = 0;
-
+// delete the stuff that is not in the new list
+// do we want to mark for deletion on the front end?
   for (const content of contents) {
     if (content.content) {
       if (content.id) {
         await updateExistingContent(tx, accountId, content);
-        existingContentIds.delete(content.id);
+        delete(content.id);
       } else {
         await insertNewContent(tx, accountId, artifactId, content);
       }
       newContentCount++;
     } else if (content.id) {
-      existingContentIds.delete(content.id);
+      delete(content.id);
     }
   }
 
   await deleteRemovedContents(tx, accountId, existingContents, existingContentIds);
 
-  return { shouldDelete: newContentCount === 0, newContentCount };
-}
-
-async function fetchExistingContents(tx: any, accountId: string, artifactId: string): Promise<ArtifactContent[]> {
-  return tx.select()
-    .from(artifactContents)
-    .where(and(
-      eq(artifactContents.artifactId, artifactId),
-      eq(artifactContents.accountId, accountId)
-    ))
-    .then((rows: any[]) => rows.map(row => ArtifactContentSchema.parse(row)));
+  return { shouldDeleteArtifact: newContentCount === 0, newContentCount };
 }
 
 async function updateExistingContent(
@@ -58,9 +47,8 @@ async function updateExistingContent(
   accountId: string, 
   content: ArtifactFormSubmission['contents'][number]
 ): Promise<void> {
-  const existingContent = await tx.select().from(artifactContents).where(and(eq(artifactContents.id, content.id), eq(artifactContents.accountId, accountId))).limit(1);
   
-  if (existingContent.length > 0 && existingContent[0].type === 'image' && content.type === 'image') {
+  if (content.type === 'image' && content.type === 'image') {
     const existingMetadata = existingContent[0].metadata as ArtifactContent['metadata'];
     if ('variations' in existingMetadata) {
       await deleteAllImageVersions(existingMetadata.variations);
@@ -101,31 +89,18 @@ export async function insertNewContent(
   });
 }
 
-export async function deleteRemovedContents(
+export async function deleteContent(
   tx: any,
-  accountId: string, 
-  existingContents: ArtifactContent[], 
-  existingContentIds: Set<string>
+  accountId: string,
+  artifactId: string,
+  contentId: string
 ): Promise<void> {
-  for (const contentId of existingContentIds) {
-    const contentToDelete = existingContents.find(row => row.id === contentId);
-    if (contentToDelete) {
-      if (contentToDelete.type === 'image') {
-        const metadata = contentToDelete.metadata;
-        if ('variations' in metadata) {
-          await deleteAllImageVersions(metadata.variations);
-        }
-      } else if (contentToDelete.type === 'file') {
-        await deleteFromS3(contentToDelete.content);
-      }
-
-      await tx.delete(artifactContents)
-        .where(and(
-          eq(artifactContents.id, contentId),
-          eq(artifactContents.accountId, accountId)
-        ));
-    }
-  }
+  await tx.delete(artifactContents)
+    .where(and(
+      eq(artifactContents.id, contentId),
+      eq(artifactContents.accountId, accountId),
+      eq(artifactContents.artifactId, artifactId)
+    ));
 }
 
 export async function insertContents(
