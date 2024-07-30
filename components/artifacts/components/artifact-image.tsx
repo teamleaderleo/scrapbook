@@ -2,18 +2,18 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Artifact } from "@/app/lib/definitions/definitions";
 import { THUMBNAIL_CONFIGS } from '@/app/lib/image-processing/image-processing';
+import { generateColorGradient } from '@/app/lib/image-processing/image-processing';
 
 interface ArtifactImageProps {
   artifact: Artifact;
   size: 'small' | 'medium' | 'large';
 }
 
-const ColorSwatch: React.FC<{ colors: string[] }> = ({ colors }) => (
-  <div className="flex h-full w-full">
-    {colors.map((color, index) => (
-      <div key={index} className="flex-1" style={{ backgroundColor: color }} />
-    ))}
-  </div>
+const ColorGradient: React.FC<{ colors: string[] }> = ({ colors }) => (
+  <div 
+    className="absolute inset-0" 
+    style={{ background: generateColorGradient(colors) }}
+  />
 );
 
 export const ArtifactImage: React.FC<ArtifactImageProps> = ({ artifact, size }) => {
@@ -27,17 +27,17 @@ export const ArtifactImage: React.FC<ArtifactImageProps> = ({ artifact, size }) 
 
   return (
     <div className="relative">
-        {!imageLoaded && content.metadata.dominantColors && (
-        <ColorSwatch colors={content.metadata.dominantColors} />
-        )}
-        <Image
+      {!imageLoaded && content.metadata.dominantColors && (
+        <ColorGradient colors={content.metadata.dominantColors} />
+      )}
+      <Image
         src={src}
         alt={artifact.name}
         width={THUMBNAIL_CONFIGS[size].width}
         height={THUMBNAIL_CONFIGS[size].height}
         layout="responsive"
         onLoad={() => setImageLoaded(true)}
-        />
+      />
     </div>
-    );
+  );
 };
