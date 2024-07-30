@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { accounts, artifacts, projects, tags } from '../db/schema';
 import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
-import { ArtifactFormSubmissionSchema } from '../actions/artifact-actions';
 
 export type SelectAccount = InferSelectModel<typeof accounts>;
 export type Account = InferInsertModel<typeof accounts>;
@@ -118,4 +117,16 @@ export const ArtifactContentSchema = z.intersection(
 
 // Type definitions
 export type ArtifactContent = z.infer<typeof ArtifactContentSchema>;
-export type ArtifactFormSubmission = z.infer<typeof ArtifactFormSubmissionSchema>;
+export type ArtifactFormSubmission = z.infer<typeof ArtifactFormSubmissionSchema>;export const ArtifactFormSubmissionSchema = z.object({
+  name: z.string().min(1, 'Artifact name is required.'),
+  description: z.string().optional(),
+  tags: z.array(z.string()),
+  projects: z.array(z.string()),
+  contents: z.array(z.object({
+    id: z.string().optional(),
+    type: z.enum(['text', 'image', 'file', 'link']),
+    content: z.union([z.string(), z.instanceof(Blob)]),
+    metadata: z.record(z.unknown()),
+  })),
+});
+

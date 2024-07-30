@@ -1,25 +1,11 @@
 'use server';
 
-import { z } from 'zod';
 import { db } from '../db/db';
 import { revalidatePath } from 'next/cache';
 import { suggestTags } from '../external/claude-utils';
 import { handleArtifactUpdateWithinTransaction, handleArtifactDeleteWithinTransaction, handleArtifactCreateWithinTransaction } from './artifact-handlers';
 import { hasValidContent } from './artifact-content-actions';
-import { ArtifactFormSubmission } from '../definitions/definitions';
-
-export const ArtifactFormSubmissionSchema = z.object({
-  name: z.string().min(1, 'Artifact name is required.'),
-  description: z.string().optional(),
-  tags: z.array(z.string()),
-  projects: z.array(z.string()),
-  contents: z.array(z.object({
-    id: z.string().optional(),
-    type: z.enum(['text', 'image', 'file', 'link']),
-    content: z.union([z.string(), z.instanceof(Blob)]),
-    metadata: z.record(z.unknown()),
-  })),
-});
+import { ArtifactFormSubmission, ArtifactFormSubmissionSchema } from '../definitions/definitions';
 
 export type State = {
   errors?: {
