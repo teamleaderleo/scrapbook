@@ -37,18 +37,18 @@ export function useProjects() {
       const fetchedProjects = await getCachedProjects(ADMIN_UUID);
       
       // Update artifact and tag caches
-      fetchedProjects.forEach((project: ProjectWithArtifacts) => {
-        if (project.artifacts) {
-          project.artifacts.forEach(artifact => {
-            queryClient.setQueryData(['artifact', artifact.id], artifact);
-          });
-        }
-        if (project.tags) {
-          project.tags.forEach(tag => {
-            queryClient.setQueryData(['tag', tag.id], tag);
-          });
-        }
-      });
+      // fetchedProjects.forEach((project: ProjectWithArtifacts) => {
+      //   if (project.artifacts) {
+      //     project.artifacts.forEach(artifact => {
+      //       queryClient.setQueryData(['artifact', artifact.id], artifact);
+      //     });
+      //   }
+      //   if (project.tags) {
+      //     project.tags.forEach(tag => {
+      //       queryClient.setQueryData(['tag', tag.id], tag);
+      //     });
+      //   }
+      // });
 
       return fetchedProjects;
     },
