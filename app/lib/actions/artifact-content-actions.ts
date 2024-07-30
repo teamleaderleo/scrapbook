@@ -66,7 +66,8 @@ async function processContentItem(accountId: string, formData: FormData, index: 
   const contentType = formData.get(`contentType-${index}`) as ContentType;
   const contentItem = formData.get(`content-${index}`);
   const contentId = formData.get(`contentId-${index}`) as string | null;
-  const order = parseInt(formData.get(`order-${index}`) as string, 10);
+  const orderStr = formData.get(`order-${index}`) as string;
+  const order = isNaN(parseInt(orderStr, 10)) ? 0 : parseInt(orderStr, 10);
 
   let metadata: z.infer<typeof ContentMetadataSchema>;
 
