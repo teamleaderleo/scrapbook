@@ -11,13 +11,18 @@ import { deleteAllImageVersions, processAndUploadImage } from '../image-processi
 import { S3ResourceTracker } from '../external/s3-resource-tracker';
 import { z } from 'zod';
 
-import { processImageContent } from './content-handlers/image-content-handler';
-import { processFileContent } from './content-handlers/file-content-handler';
-import { processLinkContent } from './content-handlers/link-content-handler';
-import { processTextContent } from './content-handlers/text-content-handler';
+import { processImageContent, insertImageContent } from './content-handlers/image-content-handler';
+import { processFileContent, insertFileContent } from './content-handlers/file-content-handler';
+import { processLinkContent, insertLinkContent } from './content-handlers/link-content-handler';
+import { processTextContent, insertTextContent } from './content-handlers/text-content-handler';
 
-export async function handleContentUpdate(accountId: string, artifactId: string, formData: FormData): Promise<{ shouldDelete: boolean; newContentCount: number }> {
-  const existingContents = await fetchExistingContents(accountId, artifactId);
+export async function handleContentUpdate(
+  tx: any,
+  accountId: string, 
+  artifactId: string, 
+  formData: FormData
+): Promise<{ shouldDelete: boolean; newContentCount: number }> {
+  const existingContents = await fetchExistingContents(tx, accountId, artifactId);
   const existingContentIds = new Set(existingContents.map(row => row.id));
   let newContentCount = 0;
 
@@ -27,10 +32,10 @@ export async function handleContentUpdate(accountId: string, artifactId: string,
 
     if (content) {
       if (contentId) {
-        await updateExistingContent(accountId, contentId, contentType, content, metadata);
+        await updateExistingContent(tx, accountId, contentId, contentType, content, metadata);
         existingContentIds.delete(contentId);
       } else {
-        await insertNewContent(accountId, artifactId, contentType, content, metadata);
+        await insertNewContent(tx, accountId, artifactId, contentType, content, metadata);
       }
       newContentCount++;
     } else if (contentId) {
@@ -40,19 +45,19 @@ export async function handleContentUpdate(accountId: string, artifactId: string,
     index++;
   }
 
-  await deleteRemovedContents(accountId, existingContents, existingContentIds);
+  await deleteRemovedContents(tx, accountId, existingContents, existingContentIds);
 
   return { shouldDelete: newContentCount === 0, newContentCount };
 }
 
-export async function fetchExistingContents(accountId: string, artifactId: string): Promise<ArtifactContent[]> {
-  return db.select()
+async function fetchExistingContents(tx: any, accountId: string, artifactId: string): Promise<ArtifactContent[]> {
+  return tx.select()
     .from(artifactContents)
     .where(and(
       eq(artifactContents.artifactId, artifactId),
       eq(artifactContents.accountId, accountId)
     ))
-    .then(rows => rows.map(row => ({
+    .then((rows: any[]) => rows.map(row => ({
       ...row,
       type: row.type as ContentType,
       metadata: row.metadata as Record<string, unknown> | null,
@@ -82,13 +87,14 @@ async function processContentItem(accountId: string, formData: FormData, index: 
 }
 
 async function updateExistingContent(
+  tx: any,
   accountId: string, 
   contentId: string, 
   contentType: ContentType, 
   content: string, 
   metadata: z.infer<typeof ContentMetadataSchema>
 ): Promise<void> {
-  const existingContent = await db.select().from(artifactContents).where(and(eq(artifactContents.id, contentId), eq(artifactContents.accountId, accountId))).limit(1);
+  const existingContent = await tx.select().from(artifactContents).where(and(eq(artifactContents.id, contentId), eq(artifactContents.accountId, accountId))).limit(1);
   
   if (existingContent.length > 0 && existingContent[0].type === 'image') {
     const existingMetadata = existingContent[0].metadata as z.infer<typeof ContentMetadataSchema>;
@@ -112,13 +118,14 @@ async function updateExistingContent(
 }
 
 async function insertNewContent(
+  tx: any,
   accountId: string, 
   artifactId: string, 
   contentType: ContentType, 
   content: string, 
   metadata: z.infer<typeof ContentMetadataSchema>
 ): Promise<void> {
-  await db.insert(artifactContents).values({
+  await tx.insert(artifactContents).values({
     id: uuidv4(),
     accountId,
     artifactId,
@@ -132,7 +139,12 @@ async function insertNewContent(
   });
 }
 
-export async function deleteRemovedContents(accountId: string, existingContents: ArtifactContent[], existingContentIds: Set<string>): Promise<void> {
+export async function deleteRemovedContents(
+  tx: any,
+  accountId: string, 
+  existingContents: ArtifactContent[], 
+  existingContentIds: Set<string>
+): Promise<void> {
   for (const contentId of existingContentIds) {
     const contentToDelete = existingContents.find(row => row.id === contentId);
     if (contentToDelete) {
@@ -145,7 +157,7 @@ export async function deleteRemovedContents(accountId: string, existingContents:
         await deleteFromS3(contentToDelete.content);
       }
 
-      await db.delete(artifactContents)
+      await tx.delete(artifactContents)
         .where(and(
           eq(artifactContents.id, contentId),
           eq(artifactContents.accountId, accountId)
@@ -183,36 +195,23 @@ export async function insertContents(tx: any, accountId: string, artifactId: str
     while (formData.get(`contentType-${index}`)) {
       const { contentType, content, metadata } = await processContentItem(accountId, formData, index);
 
-      if (contentType === 'text') {
-        allContent += content + ' ';
+      switch (contentType) {
+        case 'image':
+          await insertImageContent(tx, accountId, artifactId, content, metadata, resourceTracker);
+          break;
+        case 'file':
+          await insertFileContent(tx, accountId, artifactId, content, metadata, resourceTracker);
+          break;
+        case 'link':
+          await insertLinkContent(tx, accountId, artifactId, content, metadata);
+          break;
+        case 'text':
+          await insertTextContent(tx, accountId, artifactId, content, metadata);
+          allContent += content + ' ';
+          break;
+        default:
+          throw new Error(`Invalid content type: ${contentType}`);
       }
-
-      if (contentType === 'image') {
-        const imageMetadata = metadata as z.infer<typeof ContentMetadataSchema> & { type: 'image' };
-        Object.values(imageMetadata.variations || {}).forEach(url => {
-          if (url) resourceTracker.addResource(url);
-        });
-      } else if (contentType === 'file') {
-        resourceTracker.addResource(content);
-      } else if (contentType === 'link') {
-        const linkMetadata = metadata as z.infer<typeof ContentMetadataSchema> & { type: 'link' };
-        if (linkMetadata.previewImage) {
-          resourceTracker.addResource(linkMetadata.previewImage);
-        }
-      }
-
-      await tx.insert(artifactContents).values({
-        id: uuidv4(),
-        accountId,
-        artifactId,
-        type: contentType,
-        content,
-        metadata: ensureValidMetadata(metadata),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        createdBy: accountId,
-        lastModifiedBy: accountId
-      });
 
       index++;
     }

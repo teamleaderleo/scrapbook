@@ -1,5 +1,8 @@
 import { ContentMetadataSchema } from '../../definitions/definitions';
 import { z } from 'zod';
+import { artifactContents } from '../../db/schema';
+import { v4 as uuidv4 } from 'uuid';
+
 
 export async function processLinkContent(
   accountId: string,
@@ -30,4 +33,25 @@ export async function processLinkContent(
     contentId, 
     metadata 
   };
+}
+
+export async function insertLinkContent(
+  tx: any,
+  accountId: string,
+  artifactId: string,
+  content: string,
+  metadata: z.infer<typeof ContentMetadataSchema>
+): Promise<void> {
+  await tx.insert(artifactContents).values({
+    id: uuidv4(),
+    accountId,
+    artifactId,
+    type: 'link',
+    content,
+    metadata,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: accountId,
+    lastModifiedBy: accountId
+  });
 }

@@ -1,6 +1,9 @@
 import { uploadToS3 } from '../../external/s3-operations';
 import { ContentMetadataSchema } from '../../definitions/definitions';
 import { z } from 'zod';
+import { artifactContents } from '../../db/schema';
+import { S3ResourceTracker } from '../../external/s3-resource-tracker';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function processFileContent(
   accountId: string,
@@ -32,4 +35,28 @@ export async function processFileContent(
     contentId, 
     metadata 
   };
+}
+
+export async function insertFileContent(
+  tx: any,
+  accountId: string,
+  artifactId: string,
+  content: string,
+  metadata: z.infer<typeof ContentMetadataSchema>,
+  resourceTracker: S3ResourceTracker
+): Promise<void> {
+  resourceTracker.addResource(content);
+
+  await tx.insert(artifactContents).values({
+    id: uuidv4(),
+    accountId,
+    artifactId,
+    type: 'file',
+    content,
+    metadata,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: accountId,
+    lastModifiedBy: accountId
+  });
 }

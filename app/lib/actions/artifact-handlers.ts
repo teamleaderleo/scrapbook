@@ -18,7 +18,7 @@ export async function handleArtifactUpdateWithinTransaction(
   projects: string[],
   formData: FormData
 ): Promise<{ deleted: boolean }> {
-  const { shouldDelete, newContentCount } = await handleContentUpdate(accountId, artifactId, formData);
+  const { shouldDelete, newContentCount } = await handleContentUpdate(tx, accountId, artifactId, formData);
 
   if (shouldDelete) {
     await handleArtifactDeleteWithinTransaction(tx, accountId, artifactId);
@@ -32,7 +32,7 @@ export async function handleArtifactUpdateWithinTransaction(
       eq(artifacts.accountId, accountId)
     ));
 
-  await handleTagUpdateWithinTransaction(tx, accountId, artifactId, 'artifact',tags);
+  await handleTagUpdateWithinTransaction(tx, accountId, artifactId, 'artifact', tags);
   await handleProjectUpdateWithinTransaction(tx, accountId, artifactId, projects);
 
   return { deleted: false };
@@ -52,7 +52,7 @@ export async function handleArtifactDeleteWithinTransaction(
     .where(and(eq(artifactContents.artifactId, artifactId), eq(artifactContents.accountId, accountId)));
 
   // Delete all associated files and content records
-  deleteRemovedContents(accountId, contents, new Set(contents.map((content: { id: any; }) => content.id)));
+  deleteRemovedContents(tx, accountId, contents, new Set(contents.map((content: { id: any; }) => content.id)));
 
   // Finally, delete the artifact itself
   await tx.delete(artifacts).where(and(eq(artifacts.id, artifactId), eq(artifacts.accountId, accountId)));
