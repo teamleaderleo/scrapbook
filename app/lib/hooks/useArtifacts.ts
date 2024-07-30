@@ -10,6 +10,7 @@ import { getCachedArtifacts } from '@/app/lib/data/cached-artifact-data';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { suggestContentExtensions, suggestTags } from '../external/claude-utils';
 import { useKeyNav } from './useKeyNav';
+import { ArtifactFormSubmission } from '../definitions/definitions';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -57,7 +58,7 @@ export function useArtifacts() {
   }, [filteredArtifacts, currentPage]);
 
   const updateArtifactMutation = useMutation(
-    ({ id, formData }: { id: string; formData: FormData }) => updateArtifact(id, ADMIN_UUID, {}, formData),
+    ({ id, data }: { id: string; data: ArtifactFormSubmission }) => updateArtifact(id, ADMIN_UUID, {}, data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['artifacts']);
@@ -75,7 +76,7 @@ export function useArtifacts() {
   );
 
   const addArtifactMutation = useMutation(
-    (formData: FormData) => createArtifact(ADMIN_UUID, formData),
+    (data: ArtifactFormSubmission) => createArtifact(ADMIN_UUID, data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['artifacts']);

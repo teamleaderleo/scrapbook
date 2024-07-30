@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { accounts, artifacts, projects, tags } from '../db/schema';
 import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
+import { ArtifactFormSubmissionSchema } from '../actions/artifact-actions';
 
 export type SelectAccount = InferSelectModel<typeof accounts>;
 export type Account = InferInsertModel<typeof accounts>;
@@ -117,3 +118,4 @@ export const ArtifactContentSchema = z.intersection(
 
 // Type definitions
 export type ArtifactContent = z.infer<typeof ArtifactContentSchema>;
+export type ArtifactFormSubmission = z.infer<typeof ArtifactFormSubmissionSchema>;

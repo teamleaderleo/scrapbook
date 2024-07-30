@@ -6,12 +6,19 @@ import { revalidatePath } from 'next/cache';
 import { suggestTags } from '../external/claude-utils';
 import { handleArtifactUpdateWithinTransaction, handleArtifactDeleteWithinTransaction, handleArtifactCreateWithinTransaction } from './artifact-handlers';
 import { hasValidContent } from './artifact-content-actions';
+import { ArtifactFormSubmission } from '../definitions/definitions';
 
-const ArtifactSchema = z.object({
+export const ArtifactFormSubmissionSchema = z.object({
   name: z.string().min(1, 'Artifact name is required.'),
   description: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  projects: z.array(z.string()).optional(),
+  tags: z.array(z.string()),
+  projects: z.array(z.string()),
+  contents: z.array(z.object({
+    id: z.string().optional(),
+    type: z.enum(['text', 'image', 'file', 'link']),
+    content: z.union([z.string(), z.instanceof(Blob)]),
+    metadata: z.record(z.unknown()),
+  })),
 });
 
 export type State = {
@@ -29,18 +36,13 @@ export type State = {
   success?: boolean;
 };
 
-export async function updateArtifact(id: string, accountId: string, prevState: State, formData: FormData): Promise<State> {
-  const validatedFields = ArtifactSchema.safeParse({
-    name: formData.get('name'),
-    description: formData.get('description'),
-    tags: formData.getAll('tags'),
-    projects: formData.getAll('projects'),
-  });
+export async function updateArtifact(id: string, accountId: string, prevState: State,  data: ArtifactFormSubmission): Promise<State> {
+  const validatedFields = ArtifactFormSubmissionSchema.safeParse(data);
 
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to Update Artifact.',
+      message: 'Validation failed. Please check your input.',
     };
   }
 
@@ -48,7 +50,7 @@ export async function updateArtifact(id: string, accountId: string, prevState: S
 
   try {
     const result = await db.transaction(async (tx) => {
-      const { deleted } = await handleArtifactUpdateWithinTransaction(tx, accountId, id, name, description, tags || [], projects || [], formData);
+      const { deleted } = await handleArtifactUpdateWithinTransaction(tx, accountId, id, name, description, tags || [], projects || [], data);
 
       if (deleted) {
         return { message: 'Artifact deleted successfully (all content removed).', success: true };
@@ -80,30 +82,25 @@ export async function deleteArtifact(id: string, accountId: string): Promise<Sta
   }
 }
 
-export async function createArtifact(accountId: string, formData: FormData): Promise<State> {
-  const validatedFields = ArtifactSchema.safeParse({
-    name: formData.get('name'),
-    description: formData.get('description'),
-    tags: formData.getAll('tags'),
-    projects: formData.getAll('projects'),
-  });
+export async function createArtifact(accountId: string, data: ArtifactFormSubmission): Promise<State> {
+  const validatedFields = ArtifactFormSubmissionSchema.safeParse(data);
 
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to Create Artifact.',
+      message: 'Validation failed. Please check your input.',
     };
   }
 
-  const { name, description, tags, projects } = validatedFields.data;
+  const { name, description, tags, projects, contents } = validatedFields.data;
 
-  if (!hasValidContent(formData)) {
+  if (!hasValidContent(data)) {
     return { message: 'Error: Artifact must have at least one content item.', success: false };
   }
   
   try {
     return await db.transaction(async (tx) => {
-      const newArtifactId = await handleArtifactCreateWithinTransaction(tx, accountId, name, description, tags || [], projects || [], formData);
+      const newArtifactId = await handleArtifactCreateWithinTransaction(tx, accountId, name, description, tags || [], projects || [], data);
 
       // const suggestedTags = await suggestTags(`${name} ${description || ''}`);
 

@@ -9,10 +9,11 @@ import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useTags } from '@/app/lib/hooks/useTags';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
+import { ArtifactFormSubmission } from '@/app/lib/definitions/definitions';
 
 export default function CreateArtifactForm() {
   const router = useRouter();
-  const { addArtifact, getAISuggestions } = useArtifacts();
+  const { addArtifact } = useArtifacts();
   const { projects, isLoading: isLoadingProjects, error: projectsError } = useProjects();
   const { getOrCreateTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,10 +33,10 @@ export default function CreateArtifactForm() {
     projects: []
   };
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (data: ArtifactFormSubmission) => {
     setIsSubmitting(true);
     try {
-      await addArtifact(formData);
+      await addArtifact(data);
       showToast('success', 'create', 'artifact');
       router.push('/dashboard/artifacts');
     } catch (error) {
@@ -45,15 +46,15 @@ export default function CreateArtifactForm() {
     }
   };
 
-  const handleGetAISuggestions = async () => {
-    const name = (document.getElementById('name') as HTMLInputElement)?.value || '';
-    const description = (document.getElementById('description') as HTMLTextAreaElement)?.value || '';
-    const content = (document.querySelector('textarea[name^="content-"]') as HTMLTextAreaElement)?.value || '';
+  // const handleGetAISuggestions = async () => {
+  //   const name = (document.getElementById('name') as HTMLInputElement)?.value || '';
+  //   const description = (document.getElementById('description') as HTMLTextAreaElement)?.value || '';
+  //   const content = (document.querySelector('textarea[name^="content-"]') as HTMLTextAreaElement)?.value || '';
     
-    const { tags, extensions } = await getAISuggestions(name, description, content);
-    setSuggestedTags(tags);
-    setSuggestedContentExtensions(extensions);
-  };
+  //   const { tags, extensions } = await getAISuggestions(name, description, content);
+  //   setSuggestedTags(tags);
+  //   setSuggestedContentExtensions(extensions);
+  // };
 
   if (isLoadingProjects) return <div>Loading projects...</div>;
   if (projectsError) return <div>Error loading projects: {projectsError.message}</div>;
@@ -68,7 +69,7 @@ export default function CreateArtifactForm() {
       cancelHref="/dashboard/artifacts"
       suggestedTags={suggestedTags}
       suggestedContentExtensions={suggestedContentExtensions}
-      onGetAISuggestions={handleGetAISuggestions}
+      // onGetAISuggestions={handleGetAISuggestions}
     />
   );
 }

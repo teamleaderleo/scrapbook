@@ -11,13 +11,26 @@ import { useTags } from '@/app/lib/hooks/useTags';
 interface ArtifactFormProps {
   artifact?: ArtifactWithRelations;
   projects: BaseProject[];
-  onSubmit: (formData: FormData) => void;
+  onSubmit: (data: ArtifactFormData) => void;
   isSubmitting: boolean;
   submitButtonText: string;
   cancelHref: string;
   suggestedTags?: string[];
   suggestedContentExtensions?: string[];
   onGetAISuggestions?: () => void;
+}
+
+interface ArtifactFormData {
+  name: string;
+  description?: string;
+  tags: string[];
+  projects: string[];
+  contents: Array<{
+    id?: string;
+    type: ContentType;
+    content: string | File;
+    metadata: Record<string, any>;
+  }>;
 }
 
 export function ArtifactForm({
@@ -81,9 +94,56 @@ export function ArtifactForm({
     event.preventDefault();
     if (formRef.current) {
       const formData = new FormData(formRef.current);
-      formData.delete('tags');
-      selectedTags.forEach(tag => formData.append('tags', tag));
-      onSubmit(formData);
+      const structuredData = {
+        name: formData.get('name') as string,
+        description: formData.get('description') as string || undefined,
+        tags: selectedTags,
+        projects: Array.from(formData.getAll('projects')) as string[],
+        contents: contentItems.map((item, index) => {
+          const content = formData.get(`content-${index}`);
+          const baseMetadata = { order: index };
+          let metadata;
+
+          switch (item.type) {
+            case 'text':
+              metadata = baseMetadata;
+              break;
+            case 'image':
+              metadata = {
+                ...baseMetadata,
+                variations: {}, // This would be populated on the server
+                dominantColors: [], // This would be populated on the server
+              };
+              break;
+            case 'file':
+              metadata = {
+                ...baseMetadata,
+                originalName: content instanceof File ? content.name : 'Unknown',
+                size: content instanceof File ? content.size : 0,
+                mimeType: content instanceof File ? content.type : 'application/octet-stream',
+              };
+              break;
+            case 'link':
+              metadata = {
+                ...baseMetadata,
+                title: '', // This could be populated client-side if needed
+                description: '', // This could be populated client-side if needed
+                previewImage: '', // This would typically be populated server-side
+              };
+              break;
+          }
+
+          return {
+            id: formData.get(`contentId-${index}`) as string | undefined,
+            type: item.type,
+            content: content instanceof File ? content : String(content),
+            metadata,
+          };
+        }),
+      };
+
+      // Now we can send this structured data to our onSubmit handler
+      onSubmit(structuredData);
     }
   };
 
