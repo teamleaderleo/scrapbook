@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient, useQueries } from 'react-query';
 import Fuse from 'fuse.js';
 import { ProjectFetchOptions } from '@/app/lib/definitions/definitions';
-import { ProjectWithArtifacts, ProjectPreview, BaseProject, ProjectWithExtendedArtifacts, ProjectWithTags, ProjectWithArtifactsView } from "../definitions/definitions";
+import { ProjectWithArtifacts, ProjectPreview, BaseProject, ProjectWithExtendedArtifacts, ProjectWithTags } from "../definitions/definitions";
 import { createProject, updateProject, deleteProject } from '@/app/lib/actions/project-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
@@ -31,13 +31,13 @@ export function useProjects() {
     }
   );
 
-  const { data: projects, isLoading, error } = useQuery<ProjectWithArtifactsView[], Error>(
+  const { data: projects, isLoading, error } = useQuery<ProjectWithArtifacts[], Error>(
     ['projects', ADMIN_UUID],
     async () => {
       const fetchedProjects = await getCachedProjects(ADMIN_UUID);
       
       // Update artifact and tag caches
-      fetchedProjects.forEach((project: ProjectWithArtifactsView) => {
+      fetchedProjects.forEach((project: ProjectWithArtifacts) => {
         if (project.artifacts) {
           project.artifacts.forEach(artifact => {
             queryClient.setQueryData(['artifact', artifact.id], artifact);
@@ -118,7 +118,7 @@ export function useProjects() {
 
   const updateProjectTagsMutation = useMutation(
     ({ projectId, tags }: { projectId: string; tags: string[] }) =>
-      handleTagUpdate(ADMIN_UUID, projectId, tags, true),
+      handleTagUpdate(ADMIN_UUID, projectId, tags),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['projects']);
