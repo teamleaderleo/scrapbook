@@ -8,6 +8,7 @@ import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
 import { BlockThumbnail } from './block-thumbnail';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import TiptapEditor from '@/components/editor/editor';
 
 export function BlockTable({ accountId }: { accountId: string }) {
   const { 
@@ -26,7 +27,6 @@ export function BlockTable({ accountId }: { accountId: string }) {
   const handleTagsChange = async (blockId: string, newTags: string[]) => {
     await updateBlockTags({ blockId, tags: newTags });
   };
-
   const handleDeleteBlock = async (id: string) => {
     try {
       await deleteBlock({ id });
