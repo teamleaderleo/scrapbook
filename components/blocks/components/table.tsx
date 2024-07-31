@@ -93,7 +93,7 @@ export function BlockTable({ accountId }: { accountId: string }) {
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
-                      {block.contents && block.contents.length > 0 ? block.contents[0].type : 'No content'}
+                      {block.content && block.contents.length > 0 ? block.contents[0].type : 'No content'}
                     </td>
                     <td className="px-3 py-3">{block.description}</td>
                     <td className="px-3 py-3">
