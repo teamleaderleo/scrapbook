@@ -5,7 +5,7 @@ import { TagList } from '@/components/tags/taglist';
 import { DeleteArtifact, UpdateArtifact } from '@/components/artifacts/components/button';
 import Pagination from '../../ui/components/pagination';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
-import { ArtifactThumbnail } from './artifact-thumbnail';
+import { ArtifactThumbnail } from './block-thumbnail';
 import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
 import { Tag } from '@/app/lib/definitions/definitions';
 import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";

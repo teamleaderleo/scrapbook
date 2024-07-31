@@ -1,5 +1,5 @@
 import { cache } from 'react'
-import { fetchAllArtifacts } from './artifact-data'
+import { fetchAllArtifacts } from './block-data'
 import { ADMIN_UUID } from '../constants'
 import { ArtifactWithRelations } from "../definitions/definitions";
 import { ArtifactFetchOptions } from '../definitions/definitions';

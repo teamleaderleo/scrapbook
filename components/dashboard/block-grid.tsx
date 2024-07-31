@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
 import { ErrorBoundaryWithToast } from '@/components/errors/error-boundary';
-import { ArtifactThumbnail } from '@/components/artifacts/components/artifact-thumbnail';
+import { ArtifactThumbnail } from '@/components/artifacts/components/block-thumbnail';
 
 export const ArtifactGrid = ({ artifacts }: { artifacts: ArtifactWithRelations[] }) => (
   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">

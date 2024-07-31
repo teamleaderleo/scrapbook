@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArtifactDisplay } from './artifact-display';
+import { ArtifactDisplay } from './block-display';
 import { Artifact, ArtifactWithRelations } from "@/app/lib/definitions/definitions";
 import { ProjectWithArtifacts, ProjectWithExtendedArtifacts } from "@/app/lib/definitions/definitions";
 

@@ -6,7 +6,7 @@ import { ArtifactWithRelations } from "../definitions/definitions";
 import { BaseProject } from "../definitions/definitions";
 import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/actions/artifact-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import { getCachedArtifacts } from '@/app/lib/data/cached-artifact-data';
+import { getCachedArtifacts } from '@/app/lib/data/cached-block-data';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { suggestContentExtensions, suggestTags } from '../external/claude-utils';
 import { useKeyNav } from './useKeyNav';

@@ -2,7 +2,7 @@
 
 import { eq, and } from 'drizzle-orm';
 import { artifacts, tagAssociations, projectArtifactLinks } from '../db/schema';
-import { handleContentsUpdate, deleteAllContents } from './artifact-content-actions';
+import { handleContentsUpdate, deleteAllContents } from './block-content-actions';
 import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { handleProjectUpdateWithinTransaction } from './project-handlers';
 import { v4 as uuid } from 'uuid';

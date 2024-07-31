@@ -7,7 +7,7 @@ import Pagination from '../../ui/components/pagination';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
 import { Artifact, ProjectWithArtifacts } from "@/app/lib/definitions/definitions";
-import { ArtifactThumbnail } from '../../artifacts/components/artifact-thumbnail';
+import { ArtifactThumbnail } from '../../artifacts/components/block-thumbnail';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
 import { SearchParamsHandler } from '../../search-params-handler';

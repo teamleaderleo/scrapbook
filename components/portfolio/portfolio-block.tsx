@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
-import { ImageContent, ContentDisplay } from './artifact-display';
+import { ImageContent, ContentDisplay } from './block-display';
 
 export const PortfolioArtifact: React.FC<{ artifact: ArtifactWithRelations }> = ({ artifact }) => {
   const mainImage = artifact.contents.find(c => c.type === 'image');
