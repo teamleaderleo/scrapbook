@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { accounts, artifacts, projects, tags } from '../db/schema';
 import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
-import { JSONContent } from '@tiptap/core'
+import { JSONContent } from '@tiptap/react';
 
 export type SelectAccount = InferSelectModel<typeof accounts>;
 export type Account = InferInsertModel<typeof accounts>;
@@ -65,15 +65,9 @@ export type ProjectWithExtendedArtifacts = ProjectWithTags & {
   artifacts: ArtifactWithRelations[];
 };
 
-type ArtifactMetadata = {
-  name?: string;
-  description?: string;
-  // Add any other metadata fields you might need
-}
-
 type ArtifactContent = {
   tiptap: JSONContent;
-  metadata: ArtifactMetadata;
+  [key: string]: any;  // Allows for any additional fields
 }
 
 export type Artifact = {
