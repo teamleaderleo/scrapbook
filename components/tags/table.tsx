@@ -171,7 +171,7 @@ function TagUsage({ tagId, useTagUsage }: { tagId: string; useTagUsage: (tagId: 
 
   return (
     <span>
-      Projects: {usage.projectCount}, Artifacts: {usage.artifactCount}
+      Projects: {usage.projectCount}, Artifacts: {usage.blockCount}
     </span>
   );
 }

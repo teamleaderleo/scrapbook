@@ -9,7 +9,7 @@ import { useTags } from '@/app/lib/hooks/useTags';
 
 interface ProjectFormProps {
   project: ProjectWithArtifacts;
-  artifacts: ArtifactWithRelations[];
+  blocks: ArtifactWithRelations[];
   onSubmit: (formData: FormData) => void;
   isSubmitting: boolean;
   submitButtonText: string;
@@ -20,7 +20,7 @@ interface ProjectFormProps {
 
 export function ProjectForm({
   project,
-  artifacts,
+  blocks,
   onSubmit,
   isSubmitting,
   submitButtonText,
@@ -103,17 +103,17 @@ export function ProjectForm({
           {/* Associated Artifacts */}
           <div className="mb-4">
             <label className="mb-2 block text-sm font-medium">Associated Artifacts</label>
-            {artifacts.map((artifact) => (
-              <div key={artifact.id} className="flex items-center mb-2">
+            {blocks.map((block) => (
+              <div key={block.id} className="flex items-center mb-2">
                 <input
                   type="checkbox"
-                  id={`artifact-${artifact.id}`}
-                  name="artifacts"
-                  value={artifact.id}
-                  defaultChecked={project.artifacts?.some(a => a.id === artifact.id) || false}
+                  id={`block-${block.id}`}
+                  name="blocks"
+                  value={block.id}
+                  defaultChecked={project.blocks?.some(a => a.id === block.id) || false}
                   className="mr-2"
                 />
-                <label htmlFor={`artifact-${artifact.id}`} className="text-sm">{artifact.name}</label>
+                <label htmlFor={`block-${block.id}`} className="text-sm">{block.name}</label>
               </div>
             ))}
           </div>

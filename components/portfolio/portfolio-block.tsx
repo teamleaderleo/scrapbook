@@ -2,9 +2,9 @@ import React from 'react';
 import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
 import { ImageContent, ContentDisplay } from './block-display';
 
-export const PortfolioArtifact: React.FC<{ artifact: ArtifactWithRelations }> = ({ artifact }) => {
-  const mainImage = artifact.contents.find(c => c.type === 'image');
-  const otherContents = artifact.contents.filter(c => c !== mainImage);
+export const PortfolioArtifact: React.FC<{ block: ArtifactWithRelations }> = ({ block }) => {
+  const mainImage = block.contents.find(c => c.type === 'image');
+  const otherContents = block.contents.filter(c => c !== mainImage);
 
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
@@ -14,8 +14,8 @@ export const PortfolioArtifact: React.FC<{ artifact: ArtifactWithRelations }> = 
         </div>
       )}
       <div className="p-4">
-        <h3 className="text-lg font-semibold mb-2">{artifact.name}</h3>
-        {artifact.description && <p className="text-sm text-gray-600 mb-2">{artifact.description}</p>}
+        <h3 className="text-lg font-semibold mb-2">{block.name}</h3>
+        {block.description && <p className="text-sm text-gray-600 mb-2">{block.description}</p>}
         {otherContents.length > 0 && (
           <details className="mb-2">
             <summary className="text-sm font-medium cursor-pointer">Additional Details</summary>
@@ -26,9 +26,9 @@ export const PortfolioArtifact: React.FC<{ artifact: ArtifactWithRelations }> = 
             </div>
           </details>
         )}
-        {artifact.tags && artifact.tags.length > 0 && (
+        {block.tags && block.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {artifact.tags.map(tag => (
+            {block.tags.map(tag => (
               <span key={tag.id} className="inline-block bg-gray-200 rounded-full px-2 py-1 text-xs font-semibold text-gray-700">
                 {tag.name}
               </span>

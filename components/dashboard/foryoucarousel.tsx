@@ -6,7 +6,7 @@
 // import { Button } from "@/components/ui/button";
 
 // export default function ForYouCarousel() {
-//   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
+//   const [blocks, setArtifacts] = useState<Artifact[]>([]);
 //   const [currentIndex, setCurrentIndex] = useState(0);
 
 //   useEffect(() => {
@@ -19,18 +19,18 @@
 //   };
 
 //   const nextArtifact = () => {
-//     setCurrentIndex((prevIndex) => (prevIndex + 1) % artifacts.length);
+//     setCurrentIndex((prevIndex) => (prevIndex + 1) % blocks.length);
 //   };
 
 //   const prevArtifact = () => {
-//     setCurrentIndex((prevIndex) => (prevIndex - 1 + artifacts.length) % artifacts.length);
+//     setCurrentIndex((prevIndex) => (prevIndex - 1 + blocks.length) % blocks.length);
 //   };
 
-//   if (artifacts.length === 0) {
+//   if (blocks.length === 0) {
 //     return <div>Loading recommendations...</div>;
 //   }
 
-//   const currentArtifact = artifacts[currentIndex];
+//   const currentArtifact = blocks[currentIndex];
 
 //   return (
 //     <Card className="w-full max-w-md mx-auto">
@@ -39,7 +39,7 @@
 //         <div className="mb-4">
 //           <h3 className="text-xl font-semibold">{currentArtifact.name}</h3>
 //           <p className="text-gray-600">{currentArtifact.description}</p>
-//           {/* Display more artifact details here */}
+//           {/* Display more block details here */}
 //         </div>
 //         <div className="flex justify-between">
 //           <Button onClick={prevArtifact}>Previous</Button>

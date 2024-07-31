@@ -3,14 +3,14 @@ import { ProjectWithArtifacts } from "@/app/lib/definitions/definitions";
 import { ArtifactThumbnail } from '@/components/blocks/components/block-thumbnail';
 
 export const ProjectCard: React.FC<{ project: ProjectWithArtifacts }> = ({ project }) => {
-  const mainArtifact = project.artifacts.find(a => a.contents.some(c => c.type === 'image'));
+  const mainArtifact = project.blocks.find(a => a.contents.some(c => c.type === 'image'));
   const mainImage = mainArtifact?.contents.find(c => c.type === 'image');
 
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
       {mainImage && (
         <div className="aspect-w-16 aspect-h-9">
-          <ArtifactThumbnail artifact={mainArtifact!} size={400} priority={true} />
+          <ArtifactThumbnail block={mainArtifact!} size={400} priority={true} />
         </div>
       )}
       <div className="p-4">
@@ -20,7 +20,7 @@ export const ProjectCard: React.FC<{ project: ProjectWithArtifacts }> = ({ proje
           <span className={`text-sm font-medium ${project.status === 'completed' ? 'text-green-600' : 'text-yellow-600'}`}>
             {project.status}
           </span>
-          <span className="text-sm text-gray-500">{project.artifacts.length} artifacts</span>
+          <span className="text-sm text-gray-500">{project.blocks.length} blocks</span>
         </div>
         {project.tags && project.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">

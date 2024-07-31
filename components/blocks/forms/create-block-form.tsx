@@ -37,11 +37,11 @@ export default function CreateArtifactForm() {
     setIsSubmitting(true);
     try {
       await addArtifact(data);
-      showToast('success', 'create', 'artifact');
-      router.push('/dashboard/artifacts');
+      showToast('success', 'create', 'block');
+      router.push('/dashboard/blocks');
     } catch (error) {
-      console.error('Failed to create artifact:', error);
-      showToast('error', 'create', 'artifact');
+      console.error('Failed to create block:', error);
+      showToast('error', 'create', 'block');
       setIsSubmitting(false);
     }
   };
@@ -61,12 +61,12 @@ export default function CreateArtifactForm() {
 
   return (
     <ArtifactForm
-      artifact={defaultArtifact}
+      block={defaultArtifact}
       projects={projects || []}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
       submitButtonText="Create Artifact"
-      cancelHref="/dashboard/artifacts"
+      cancelHref="/dashboard/blocks"
       suggestedTags={suggestedTags}
       suggestedContentExtensions={suggestedContentExtensions}
       // onGetAISuggestions={handleGetAISuggestions}

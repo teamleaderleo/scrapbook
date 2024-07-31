@@ -13,7 +13,7 @@ import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
 import { SearchParamsHandler } from '../../search-params-handler';
 
-export function ArtifactsTable({ accountId }: { accountId: string }) {
+export function BlocksTable({ accountId }: { accountId: string }) {
   const { 
     paginatedArtifacts,
     isLoading,
@@ -29,17 +29,17 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
 
   const { showToast } = useToastMessages();
 
-  const handleTagsChange = async (artifactId: string, newTags: string[]) => {
-    await updateArtifactTags({ artifactId, tags: newTags });
+  const handleTagsChange = async (blockId: string, newTags: string[]) => {
+    await updateArtifactTags({ blockId, tags: newTags });
   };
 
   const handleDeleteArtifact = async (id: string) => {
     try {
       await deleteArtifact(id);
-      showToast('success', 'delete', 'artifact');
+      showToast('success', 'delete', 'block');
     } catch (error) {
-      console.error('Failed to delete artifact:', error);
-      showToast('error', 'delete', 'artifact');
+      console.error('Failed to delete block:', error);
+      showToast('error', 'delete', 'block');
     }
   };
 
@@ -73,14 +73,14 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
                 </tr>
               </thead>
               <tbody className="bg-white">
-                {paginatedArtifacts.map((artifact: ArtifactWithRelations) => (
-                  <tr key={artifact.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
+                {paginatedArtifacts.map((block: ArtifactWithRelations) => (
+                  <tr key={block.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0 relative overflow-hidden rounded-full">
                           <ErrorBoundaryWithToast>
                             <ArtifactThumbnail
-                              artifact={artifact}
+                              block={block}
                               size={40}
                               priority={true}
                               className="flex-shrink-0"
@@ -88,33 +88,33 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
                           </ErrorBoundaryWithToast> 
                         </div>
                         <div className="ml-4">
-                          <p className="font-medium">{artifact.name}</p>
+                          <p className="font-medium">{block.name}</p>
                         </div>
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
-                      {artifact.contents && artifact.contents.length > 0 ? artifact.contents[0].type : 'No content'}
+                      {block.contents && block.contents.length > 0 ? block.contents[0].type : 'No content'}
                     </td>
-                    <td className="px-3 py-3">{artifact.description}</td>
+                    <td className="px-3 py-3">{block.description}</td>
                     <td className="px-3 py-3">
                       <TagList
-                        initialTags={artifact.tags.map(t => t.name)}
-                        onTagsChange={(newTags) => handleTagsChange(artifact.id, newTags)}
+                        initialTags={block.tags.map(t => t.name)}
+                        onTagsChange={(newTags) => handleTagsChange(block.id, newTags)}
                         accountId={accountId}
                       />
                     </td>
-                    <td className="whitespace-nowrap px-3 py-3">{artifact.projects.length}</td>
+                    <td className="whitespace-nowrap px-3 py-3">{block.projects.length}</td>
                     <td className="whitespace-nowrap px-3 py-3">
-                      {new Date(artifact.updatedAt).toLocaleDateString()}
+                      {new Date(block.updatedAt).toLocaleDateString()}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
                       <div className="flex space-x-2">
-                        {artifact.contents && artifact.contents.length > 0 ? (
-                          artifact.contents.slice(0, 3).map((content, index) => (
+                        {block.contents && block.contents.length > 0 ? (
+                          block.contents.slice(0, 3).map((content, index) => (
                             <div key={index} className="w-10 h-10 relative overflow-hidden rounded-full">
                               <ErrorBoundaryWithToast> 
                                 <ArtifactThumbnail
-                                  artifact={artifact}
+                                  block={block}
                                   size={40}
                                   priority={index < 5} // Prioritize loading for the first 5 images
                                   className="flex-shrink-0"
@@ -131,10 +131,10 @@ export function ArtifactsTable({ accountId }: { accountId: string }) {
                     </td>
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex justify-end">
-                        <UpdateArtifact artifact={artifact} />
+                        <UpdateArtifact block={block} />
                         <DeleteArtifact 
-                          id={artifact.id} 
-                          onDelete={() => handleDeleteArtifact(artifact.id)}  
+                          id={block.id} 
+                          onDelete={() => handleDeleteArtifact(block.id)}  
                         />
                       </div>
                     </td>

@@ -35,7 +35,7 @@ export const projects = pgTable('project', {
   statusIndex: index('idx_projects_status').on(table.status),
 }));
 
-export const artifacts = pgTable('artifact', {
+export const blocks = pgTable('block', {
   id: uuid('id').primaryKey(),
   accountId: uuid('account_id').notNull().references(() => accounts.id),
   content: jsonb('content').notNull(),
@@ -44,7 +44,7 @@ export const artifacts = pgTable('artifact', {
   createdBy: uuid('created_by').references(() => accounts.id),
   lastModifiedBy: uuid('last_modified_by').references(() => accounts.id),
 }, (table) => ({
-  accountUpdatedIndex: index('idx_artifacts_account_updated').on(table.accountId, table.updatedAt),
+  accountUpdatedIndex: index('idx_blocks_account_updated').on(table.accountId, table.updatedAt),
 }));
 
 export const tagAssociations = pgTable('tag_association', {
@@ -62,15 +62,15 @@ export const tagAssociations = pgTable('tag_association', {
   tagIdIndex: index('idx_tag_associations_tag_id').on(table.tagId),
 }));
 
-export const projectArtifactLinks = pgTable('project_artifact_link', {
+export const projectArtifactLinks = pgTable('project_block_link', {
   accountId: uuid('account_id').notNull().references(() => accounts.id),
   projectId: uuid('project_id').notNull().references(() => projects.id),
-  artifactId: uuid('artifact_id').notNull().references(() => artifacts.id),
+  blockId: uuid('block_id').notNull().references(() => blocks.id),
   addedAt: timestamp('added_at').notNull().defaultNow(),
 }, (table) => ({
-  projectArtifactIndex: index('idx_project_artifact_links').on(table.projectId, table.artifactId, table.accountId),
-  artifactIndex: index('idx_project_artifact_links_artifact').on(table.artifactId),
-  projectIndex: index('idx_project_artifact_links_project').on(table.projectId),
+  projectArtifactIndex: index('idx_project_block_links').on(table.projectId, table.blockId, table.accountId),
+  blockIndex: index('idx_project_block_links_block').on(table.blockId),
+  projectIndex: index('idx_project_block_links_project').on(table.projectId),
 }));
 
 export const s3Usage = pgTable('s3_usage', {

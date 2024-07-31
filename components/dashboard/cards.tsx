@@ -10,7 +10,7 @@ import { ADMIN_UUID } from '@/app/lib/constants';
 
 const iconMap = {
   collected: BanknotesIcon,
-  artifacts: UserGroupIcon,
+  blocks: UserGroupIcon,
   pending: ClockIcon,
   projects: InboxIcon,
 };
@@ -31,7 +31,7 @@ export default async function CardWrapper() {
       <Card
         title="Total Artifacts"
         value={numberOfArtifacts}
-        type="artifacts"
+        type="blocks"
       />
     </>
   );
@@ -44,7 +44,7 @@ export function Card({
 }: {
   title: string;
   value: number | string;
-  type: 'projects' | 'artifacts' | 'pending' | 'collected';
+  type: 'projects' | 'blocks' | 'pending' | 'collected';
 }) {
   const Icon = iconMap[type];
 

@@ -2,28 +2,28 @@
 
 import { eq, and, or, ilike, sql, SQL, desc } from 'drizzle-orm';
 import { db } from '../db/db';
-import { artifacts, artifactContents, tags, tagAssociations, projectArtifactLinks, projects } from '../db/schema';
+import { blocks, blockContents, tags, tagAssociations, projectArtifactLinks, projects } from '../db/schema';
 import { ArtifactWithRelations } from "../definitions/definitions";
 
 export async function fetchAllArtifacts(accountId: string): Promise<ArtifactWithRelations[]> {
   const results = await db
     .select({
-      id: artifacts.id,
-      accountId: artifacts.accountId,
-      name: artifacts.name,
-      description: artifacts.description,
-      createdAt: artifacts.createdAt,
-      updatedAt: artifacts.updatedAt,
+      id: blocks.id,
+      accountId: blocks.accountId,
+      name: blocks.name,
+      description: blocks.description,
+      createdAt: blocks.createdAt,
+      updatedAt: blocks.updatedAt,
       contents: sql<any>`coalesce(json_agg(distinct jsonb_build_object(
-        'id', ${artifactContents.id},
-        'accountId', ${artifactContents.accountId},
-        'type', ${artifactContents.type},
-        'content', ${artifactContents.content},
-        'metadata', ${artifactContents.metadata},
-        'createdAt', ${artifactContents.createdAt},
-        'createdBy', ${artifactContents.createdBy},
-        'lastModifiedBy', ${artifactContents.lastModifiedBy}
-      )) filter (where ${artifactContents.id} is not null), '[]')`,
+        'id', ${blockContents.id},
+        'accountId', ${blockContents.accountId},
+        'type', ${blockContents.type},
+        'content', ${blockContents.content},
+        'metadata', ${blockContents.metadata},
+        'createdAt', ${blockContents.createdAt},
+        'createdBy', ${blockContents.createdBy},
+        'lastModifiedBy', ${blockContents.lastModifiedBy}
+      )) filter (where ${blockContents.id} is not null), '[]')`,
       tags: sql<any>`coalesce(json_agg(distinct jsonb_build_object(
         'id', ${tags.id},
         'accountId', ${tags.accountId},
@@ -38,15 +38,15 @@ export async function fetchAllArtifacts(accountId: string): Promise<ArtifactWith
         'updatedAt', ${projects.updatedAt}
       )) filter (where ${projects.id} is not null), '[]')`
     })
-    .from(artifacts)
-    .leftJoin(artifactContents, eq(artifacts.id, artifactContents.artifactId))
-    .leftJoin(tagAssociations, eq(artifacts.id, tagAssociations.associatedId))
+    .from(blocks)
+    .leftJoin(blockContents, eq(blocks.id, blockContents.blockId))
+    .leftJoin(tagAssociations, eq(blocks.id, tagAssociations.associatedId))
     .leftJoin(tags, eq(tagAssociations.tagId, tags.id))
-    .leftJoin(projectArtifactLinks, eq(artifacts.id, projectArtifactLinks.artifactId))
+    .leftJoin(projectArtifactLinks, eq(blocks.id, projectArtifactLinks.blockId))
     .leftJoin(projects, eq(projectArtifactLinks.projectId, projects.id))
-    .where(eq(artifacts.accountId, accountId))
-    .groupBy(artifacts.id)
-    .orderBy(desc(artifacts.updatedAt));
+    .where(eq(blocks.accountId, accountId))
+    .groupBy(blocks.id)
+    .orderBy(desc(blocks.updatedAt));
 
   return results;
 }

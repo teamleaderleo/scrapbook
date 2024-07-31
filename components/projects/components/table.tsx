@@ -87,18 +87,18 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
                         accountId={accountId}
                       />
                     </td>
-                    <td className="whitespace-nowrap px-3 py-3">{project.artifacts?.length}</td>
+                    <td className="whitespace-nowrap px-3 py-3">{project.blocks?.length}</td>
                     <td className="whitespace-nowrap px-3 py-3">
                       {new Date(project.updatedAt).toLocaleDateString()}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">
                       <div className="flex space-x-2">
-                        {project.artifacts && project.artifacts.length > 0 && (
-                          <div key={project.artifacts[0].id} className="w-10 h-10 relative overflow-hidden rounded-full">
+                        {project.blocks && project.blocks.length > 0 && (
+                          <div key={project.blocks[0].id} className="w-10 h-10 relative overflow-hidden rounded-full">
                             <ErrorBoundaryWithToast>
-                              {project.artifacts[0] && (
+                              {project.blocks[0] && (
                                 <ArtifactThumbnail
-                                  artifact={project.artifacts[0] as Artifact}
+                                  block={project.blocks[0] as Artifact}
                                   size={40}
                                   priority={true}
                                   className="flex-shrink-0"

@@ -16,7 +16,7 @@ const ProjectSchema = z.object({
     invalid_type_error: 'Please select a project status.',
   }),
   tags: z.array(z.string()).optional(),
-  artifacts: z.array(z.string()).optional(),
+  blocks: z.array(z.string()).optional(),
 });
 
 export type State = {
@@ -25,7 +25,7 @@ export type State = {
     description?: string[];
     status?: string[];
     tags?: string[];
-    artifacts?: string[];
+    blocks?: string[];
   };
   message?: string | null;
   suggestedTags?: string[];
@@ -39,7 +39,7 @@ export async function createProject(accountId: string, formData: FormData): Prom
     description: formData.get('description'),
     status: formData.get('status'),
     tags: formData.getAll('tags'),
-    artifacts: formData.getAll('artifacts'),
+    blocks: formData.getAll('blocks'),
   });
 
   if (!validatedFields.success) {
@@ -49,7 +49,7 @@ export async function createProject(accountId: string, formData: FormData): Prom
     };
   }
 
-  const { name, description, status, tags, artifacts } = validatedFields.data;
+  const { name, description, status, tags, blocks } = validatedFields.data;
 
   try {
     return await db.transaction(async (tx) => {
@@ -72,13 +72,13 @@ export async function createProject(accountId: string, formData: FormData): Prom
         await handleTagUpdateWithinTransaction(tx, accountId, newProjectId, 'project',tags);
       }
 
-      // Handle artifacts
-      if (artifacts && artifacts.length > 0) {
-        for (const artifactId of artifacts) {
+      // Handle blocks
+      if (blocks && blocks.length > 0) {
+        for (const blockId of blocks) {
           await tx.insert(projectArtifactLinks).values({
             accountId,
             projectId: newProjectId,
-            artifactId,
+            blockId,
             addedAt: now
           });
         }
@@ -101,7 +101,7 @@ export async function updateProject(id: string, accountId: string, formData: For
     description: formData.get('description'),
     status: formData.get('status'),
     tags: formData.getAll('tags'),
-    artifacts: formData.getAll('artifacts'),
+    blocks: formData.getAll('blocks'),
   });
 
   if (!validatedFields.success) {
@@ -111,7 +111,7 @@ export async function updateProject(id: string, accountId: string, formData: For
     };
   }
 
-  const { name, description, status, tags, artifacts } = validatedFields.data;
+  const { name, description, status, tags, blocks } = validatedFields.data;
 
   try {
     const result = await db.transaction(async (tx) => {
@@ -127,19 +127,19 @@ export async function updateProject(id: string, accountId: string, formData: For
         await handleTagUpdateWithinTransaction(tx, accountId, id, 'project', tags);
       }
 
-      // Handle artifacts
+      // Handle blocks
       await tx.delete(projectArtifactLinks)
         .where(and(
           eq(projectArtifactLinks.projectId, id),
           eq(projectArtifactLinks.accountId, accountId)
         ));
 
-      if (artifacts && artifacts.length > 0) {
-        for (const artifactId of artifacts) {
+      if (blocks && blocks.length > 0) {
+        for (const blockId of blocks) {
           await tx.insert(projectArtifactLinks).values({
             accountId,
             projectId: id,
-            artifactId,
+            blockId,
             addedAt: new Date()
           });
         }

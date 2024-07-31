@@ -5,9 +5,9 @@
 // import { Button } from '@/components/ui/button';
 
 // export function DashboardRecommendations() {
-//   const [recommendations, setRecommendations] = useState<{projects: string[], artifacts: string[], tags: string[]}>({
+//   const [recommendations, setRecommendations] = useState<{projects: string[], blocks: string[], tags: string[]}>({
 //     projects: [],
-//     artifacts: [],
+//     blocks: [],
 //     tags: []
 //   });
 //   const [isLoading, setIsLoading] = useState(false);
@@ -45,12 +45,12 @@
 //           </ul>
 //         </div>
 //       )}
-//       {recommendations.artifacts.length > 0 && (
+//       {recommendations.blocks.length > 0 && (
 //         <div className="mt-4">
 //           <h3 className="font-semibold">Recommended Artifacts</h3>
 //           <ul className="list-disc pl-5">
-//             {recommendations.artifacts.map((artifact, index) => (
-//               <li key={index}>{artifact}</li>
+//             {recommendations.blocks.map((block, index) => (
+//               <li key={index}>{block}</li>
 //             ))}
 //           </ul>
 //         </div>

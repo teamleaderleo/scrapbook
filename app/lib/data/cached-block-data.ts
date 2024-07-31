@@ -5,6 +5,6 @@ import { ArtifactWithRelations } from "../definitions/definitions";
 import { ArtifactFetchOptions } from '../definitions/definitions';
 
 export const getCachedArtifacts = cache(async (accountId: string): Promise<ArtifactWithRelations[]> => {
-  const artifacts = await fetchAllArtifacts(accountId);
-  return artifacts;
+  const blocks = await fetchAllArtifacts(accountId);
+  return blocks;
 });

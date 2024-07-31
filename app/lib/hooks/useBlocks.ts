@@ -4,7 +4,7 @@ import Fuse from 'fuse.js';
 import { ArtifactFetchOptions, Tag } from '@/app/lib/definitions/definitions';
 import { ArtifactWithRelations } from "../definitions/definitions";
 import { BaseProject } from "../definitions/definitions";
-import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/actions/artifact-actions';
+import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/actions/block-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedArtifacts } from '@/app/lib/data/cached-block-data';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
@@ -24,8 +24,8 @@ export function useArtifacts() {
     includeProjects: true,
   });
 
-  const { data: artifacts, isLoading, error } = useQuery<ArtifactWithRelations[], Error>(
-    ['artifacts', fetchOptions],
+  const { data: blocks, isLoading, error } = useQuery<ArtifactWithRelations[], Error>(
+    ['blocks', fetchOptions],
     () => getCachedArtifacts(ADMIN_UUID),
     {
       staleTime: 5 * 60 * 1000,
@@ -37,18 +37,18 @@ export function useArtifacts() {
   );
 
   const fuse = useMemo(() => {
-    if (!artifacts) return null;
-    return new Fuse(artifacts, {
+    if (!blocks) return null;
+    return new Fuse(blocks, {
       keys: ['name', 'description', 'tags.name', 'contents.content'],
       threshold: 0.3,
     });
-  }, [artifacts]);
+  }, [blocks]);
 
   const filteredArtifacts = useMemo(() => {
-    if (!artifacts) return [];
-    if (!query) return artifacts;
-    return fuse ? fuse.search(query).map(result => result.item) : artifacts;
-  }, [artifacts, query, fuse]);
+    if (!blocks) return [];
+    if (!query) return blocks;
+    return fuse ? fuse.search(query).map(result => result.item) : blocks;
+  }, [blocks, query, fuse]);
 
   const totalPages = Math.ceil(filteredArtifacts.length / ITEMS_PER_PAGE);
 
@@ -61,7 +61,7 @@ export function useArtifacts() {
     ({ id, data }: { id: string; data: ArtifactFormSubmission }) => updateArtifact(id, ADMIN_UUID, data),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(['artifacts']);
+        queryClient.invalidateQueries(['blocks']);
       },
     }
   );
@@ -70,7 +70,7 @@ export function useArtifacts() {
     ({ id, data }: { id: string; data: ArtifactFormSubmission }) => deleteArtifact(id, ADMIN_UUID, data),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(['artifacts']);
+        queryClient.invalidateQueries(['blocks']);
       },
     }
   );
@@ -79,17 +79,17 @@ export function useArtifacts() {
     (data: ArtifactFormSubmission) => createArtifact(ADMIN_UUID, data),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(['artifacts']);
+        queryClient.invalidateQueries(['blocks']);
       },
     }
   );
 
   const updateArtifactTagsMutation = useMutation(
-    ({ artifactId, tags }: { artifactId: string; tags: string[] }) =>
-      handleTagUpdate(ADMIN_UUID, artifactId, 'artifact', tags),
+    ({ blockId, tags }: { blockId: string; tags: string[] }) =>
+      handleTagUpdate(ADMIN_UUID, blockId, 'block', tags),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(['artifacts']);
+        queryClient.invalidateQueries(['blocks']);
       },
     }
   );
@@ -112,7 +112,7 @@ export function useArtifacts() {
   // }, []);
 
   return {
-    artifacts,
+    blocks,
     filteredArtifacts,
     paginatedArtifacts,
     isLoading,

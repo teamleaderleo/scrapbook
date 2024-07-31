@@ -1,7 +1,7 @@
 'use server';
 
 import { eq, and } from 'drizzle-orm';
-import { artifacts, tagAssociations, projectArtifactLinks } from '../db/schema';
+import { blocks, tagAssociations, projectArtifactLinks } from '../db/schema';
 import { handleContentsUpdate, deleteAllContents } from './block-content-actions';
 import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { handleProjectUpdateWithinTransaction } from './project-handlers';
@@ -11,41 +11,41 @@ import { ArtifactFormSubmission } from '../definitions/definitions';
 export async function handleArtifactUpdateWithinTransaction(
   tx: any,
   accountId: string,
-  artifactId: string,
+  blockId: string,
   data: ArtifactFormSubmission
 ): Promise<void> {
   const { name, description, tags, projects, contents } = data;
 
-  // Update artifact main data
-  await tx.update(artifacts)
+  // Update block main data
+  await tx.update(blocks)
     .set({ name, description, updatedAt: new Date() })
     .where(and(
-      eq(artifacts.id, artifactId),
-      eq(artifacts.accountId, accountId)
+      eq(blocks.id, blockId),
+      eq(blocks.accountId, accountId)
     ));
 
   // Handle contents
-  await handleContentsUpdate(tx, accountId, artifactId, contents);
+  await handleContentsUpdate(tx, accountId, blockId, contents);
 
   // Update tags and projects
-  await handleTagUpdateWithinTransaction(tx, accountId, artifactId, 'artifact', tags);
-  await handleProjectUpdateWithinTransaction(tx, accountId, artifactId, projects);
+  await handleTagUpdateWithinTransaction(tx, accountId, blockId, 'block', tags);
+  await handleProjectUpdateWithinTransaction(tx, accountId, blockId, projects);
 }
 
 export async function handleArtifactDeleteWithinTransaction(
   tx: any,
   accountId: string,
-  artifactId: string
+  blockId: string
 ): Promise<void> {
   // Delete associated tags and project links
-  await tx.delete(tagAssociations).where(and(eq(tagAssociations.associatedId, artifactId), eq(tagAssociations.accountId, accountId)));
-  await tx.delete(projectArtifactLinks).where(and(eq(projectArtifactLinks.artifactId, artifactId), eq(projectArtifactLinks.accountId, accountId)));
+  await tx.delete(tagAssociations).where(and(eq(tagAssociations.associatedId, blockId), eq(tagAssociations.accountId, accountId)));
+  await tx.delete(projectArtifactLinks).where(and(eq(projectArtifactLinks.blockId, blockId), eq(projectArtifactLinks.accountId, accountId)));
   
   // Delete all associated content records
-  await deleteAllContents(tx, accountId, artifactId);
+  await deleteAllContents(tx, accountId, blockId);
 
-  // Finally, delete the artifact itself
-  await tx.delete(artifacts).where(and(eq(artifacts.id, artifactId), eq(artifacts.accountId, accountId)));
+  // Finally, delete the block itself
+  await tx.delete(blocks).where(and(eq(blocks.id, blockId), eq(blocks.accountId, accountId)));
 }
 
 export async function handleArtifactCreateWithinTransaction(
@@ -57,7 +57,7 @@ export async function handleArtifactCreateWithinTransaction(
   const newArtifactId = uuid();
   const now = new Date();
 
-  await tx.insert(artifacts).values({ 
+  await tx.insert(blocks).values({ 
     id: newArtifactId,
     accountId, 
     name, 
@@ -68,7 +68,7 @@ export async function handleArtifactCreateWithinTransaction(
 
   await handleContentsUpdate(tx, accountId, newArtifactId, contents);
 
-  await handleTagUpdateWithinTransaction(tx, accountId, newArtifactId, 'artifact', tags);
+  await handleTagUpdateWithinTransaction(tx, accountId, newArtifactId, 'block', tags);
   await handleProjectUpdateWithinTransaction(tx, accountId, newArtifactId, projects);
 
   return newArtifactId;

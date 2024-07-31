@@ -17,7 +17,7 @@ export type State = {
   };
   message?: string | null;
   suggestedTags?: string[];
-  artifactId?: string;
+  blockId?: string;
   success?: boolean;
 };
 
@@ -27,10 +27,10 @@ export async function updateArtifact(id: string, accountId: string, data: Artifa
       await handleArtifactUpdateWithinTransaction(tx, accountId, id, data);
     });
 
-    revalidatePath('/dashboard/artifacts');
+    revalidatePath('/dashboard/blocks');
     return { message: 'Artifact updated successfully.', success: true };
   } catch (error) {
-    console.error('Error updating artifact:', error);
+    console.error('Error updating block:', error);
     return { message: 'Database Error: Failed to Update Artifact.', success: false };
   }
 }
@@ -41,11 +41,11 @@ export async function deleteArtifact(id: string, accountId: string, data: Artifa
       await handleArtifactDeleteWithinTransaction(tx, accountId, id);
     });
 
-    revalidatePath('/dashboard/artifacts');
+    revalidatePath('/dashboard/blocks');
     return { message: 'Artifact deleted successfully.', success: true };
   } catch (error) {
-    console.error('Error deleting artifact:', error);
-    return { message: 'Failed to delete artifact.', success: false };
+    console.error('Error deleting block:', error);
+    return { message: 'Failed to delete block.', success: false };
   }
 }
 
@@ -53,10 +53,10 @@ export async function createArtifact(accountId: string, data: ArtifactFormSubmis
   try {
     return await db.transaction(async (tx) => {
       const newArtifactId = await handleArtifactCreateWithinTransaction(tx, accountId, data);
-      return { message: 'Artifact created successfully', artifactId: newArtifactId, success: true };
+      return { message: 'Artifact created successfully', blockId: newArtifactId, success: true };
     });
   } catch (error: any) {
-    console.error('Error creating artifact:', error);
+    console.error('Error creating block:', error);
     return { message: `Error: Failed to Create Artifact. ${error.message}`, success: false };
   }
 }

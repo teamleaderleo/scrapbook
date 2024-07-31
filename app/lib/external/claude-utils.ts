@@ -37,7 +37,7 @@ export async function suggestTags(content: string): Promise<string[]> {
     ${content}
 
     Respond with only a comma-separated list of tags.` :
-    `Suggest 5 interesting and diverse tags that could be used to categorize various artifacts in a knowledge management system. Be creative and think broadly. Respond with only a comma-separated list of tags.`;
+    `Suggest 5 interesting and diverse tags that could be used to categorize various blocks in a knowledge management system. Be creative and think broadly. Respond with only a comma-separated list of tags.`;
 
   try {
     const result = await getClaudeResponse(prompt);
@@ -55,7 +55,7 @@ export async function suggestContentExtensions(content: string): Promise<string[
     ${content}
 
     Respond with only a comma-separated list of extension ideas.` :
-    `Suggest 3 creative ideas for content that could be added to an artifact in a knowledge management system. Think broadly and innovatively. Respond with only a comma-separated list of content ideas.`;
+    `Suggest 3 creative ideas for content that could be added to an block in a knowledge management system. Think broadly and innovatively. Respond with only a comma-separated list of content ideas.`;
 
   try {
     const result = await getClaudeResponse(prompt);
@@ -67,7 +67,7 @@ export async function suggestContentExtensions(content: string): Promise<string[
 }
 
 export async function suggestArtifactName(content: string): Promise<string> {
-  const prompt = `Based on the following content, suggest a concise and descriptive name for an artifact:
+  const prompt = `Based on the following content, suggest a concise and descriptive name for an block:
 
   ${content}
 
@@ -113,11 +113,11 @@ export async function suggestRelatedTopics(content: string): Promise<string[]> {
 }
 
 export async function generateArtifactIdeas(context: string): Promise<string[]> {
-  const prompt = `Given the following context, suggest 3 ideas for new artifacts that could be created:
+  const prompt = `Given the following context, suggest 3 ideas for new blocks that could be created:
 
   ${context}
 
-  Respond with only a comma-separated list of artifact ideas.`;
+  Respond with only a comma-separated list of block ideas.`;
 
   try {
     const result = await getClaudeResponse(prompt);

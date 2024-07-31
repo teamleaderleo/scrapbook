@@ -20,7 +20,7 @@ export function useProjects() {
   const [fetchOptions, setFetchOptions] = useState<ProjectFetchOptions>({
     includeTags: true,
     includeArtifacts: true,
-    artifactDetail: 'withContents',
+    blockDetail: 'withContents',
   });
 
   // const { data: projectBasics, isLoading: isLoadingBasics } = useQuery<BaseProject[], Error>(
@@ -36,11 +36,11 @@ export function useProjects() {
     async () => {
       const fetchedProjects = await getCachedProjects(ADMIN_UUID);
       
-      // Update artifact and tag caches
+      // Update block and tag caches
       // fetchedProjects.forEach((project: ProjectWithArtifacts) => {
-      //   if (project.artifacts) {
-      //     project.artifacts.forEach(artifact => {
-      //       queryClient.setQueryData(['artifact', artifact.id], artifact);
+      //   if (project.blocks) {
+      //     project.blocks.forEach(block => {
+      //       queryClient.setQueryData(['block', block.id], block);
       //     });
       //   }
       //   if (project.tags) {
@@ -89,8 +89,8 @@ export function useProjects() {
   );
 
   const updateProjectArtifactsMutation = useMutation(
-    ({ projectId, artifactIds }: { projectId: string; artifactIds: string[] }) =>
-        handleProjectArtifactsUpdate(ADMIN_UUID, projectId, artifactIds),
+    ({ projectId, blockIds }: { projectId: string; blockIds: string[] }) =>
+        handleProjectArtifactsUpdate(ADMIN_UUID, projectId, blockIds),
     {
         onSuccess: () => {
         queryClient.invalidateQueries(['projects']);

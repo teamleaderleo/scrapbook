@@ -41,8 +41,8 @@ export default function ChatArtifact() {
   };
 
   const handleSubmit = () => {
-    const artifactData: ArtifactData = { text, images, tags };
-    console.log(artifactData);
+    const blockData: ArtifactData = { text, images, tags };
+    console.log(blockData);
     // Here you would typically send the data to your server
     setText('');
     setImages([]);

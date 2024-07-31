@@ -11,7 +11,7 @@ import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 export default function EditProjectForm({ projectId }: { projectId: string }) {
   const router = useRouter();
   const { projects, updateProject, isLoading: isLoadingProjects, } = useProjects();
-  const { artifacts, isLoading: isLoadingArtifacts, error: artifactsError } = useArtifacts();
+  const { blocks, isLoading: isLoadingArtifacts, error: blocksError } = useArtifacts();
   const { tagNamesToTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
@@ -30,8 +30,8 @@ export default function EditProjectForm({ projectId }: { projectId: string }) {
     return <div>Loading...</div>;
   }
 
-  if (artifactsError) {
-    return <div>Error loading artifacts: {artifactsError.message}</div>;
+  if (blocksError) {
+    return <div>Error loading blocks: {blocksError.message}</div>;
   }
 
   if (!project) {
@@ -59,7 +59,7 @@ export default function EditProjectForm({ projectId }: { projectId: string }) {
   return (
     <ProjectForm
       project={project}
-      artifacts={artifacts || []}
+      blocks={blocks || []}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
       submitButtonText="Update Project"

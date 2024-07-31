@@ -14,10 +14,10 @@ export const PortfolioView: React.FC = () => {
   if (isLoading) return <div className="text-center py-4">Loading...</div>;
   if (error) return <div className="text-center py-4 text-red-500">Error: {error.message}</div>;
 
-  // Filter projects that have at least one artifact with an image
+  // Filter projects that have at least one block with an image
   const portfolioProjects = projects?.filter(project => 
-    project.artifacts.some(artifact => 
-      artifact.contents.some(content => content.type === 'image')
+    project.blocks.some(block => 
+      block.contents.some(content => content.type === 'image')
     )
   ) || [];
 

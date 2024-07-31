@@ -73,11 +73,11 @@ export const toBase64 = (str: string) =>
 export const getBlurDataUrl = (w: number, h: number) => 
   `data:image/svg+xml;base64,${toBase64(shimmer(w, h))}`;
 
-export const getArtifactThumbnail = (artifact: Artifact, index: number = 0): StaticImageData => {
-  if (!artifact || !artifact.contents || artifact.contents.length === 0) {
+export const getArtifactThumbnail = (block: Artifact, index: number = 0): StaticImageData => {
+  if (!block || !block.contents || block.contents.length === 0) {
     return defaultPlaceholder;
   }
-  const content: ArtifactContent = artifact.contents[index];
+  const content: ArtifactContent = block.contents[index];
   if (!content) {
     return defaultPlaceholder;
   }

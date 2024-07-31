@@ -10,7 +10,7 @@ import { v4 as uuid } from 'uuid';
 export async function handleProjectUpdateWithinTransaction(
   tx: any,
   accountId: string,
-  artifactId: string,
+  blockId: string,
   projectIds: string[]
 ): Promise<void> {
   // Add new project links
@@ -19,23 +19,23 @@ export async function handleProjectUpdateWithinTransaction(
       .values({
         id: uuid(),
         accountId,
-        artifactId,
+        blockId,
         projectId,
         addedAt: new Date()
       })
       .onConflictDoNothing({
-        target: [projectArtifactLinks.accountId, projectArtifactLinks.artifactId, projectArtifactLinks.projectId]
+        target: [projectArtifactLinks.accountId, projectArtifactLinks.blockId, projectArtifactLinks.projectId]
       });
   }
 }
 
 export async function handleProjectUpdate(
   accountId: string,
-  artifactId: string,
+  blockId: string,
   projectIds: string[]
 ): Promise<void> {
   await db.transaction(async (tx) => {
-    await handleProjectUpdateWithinTransaction(tx, accountId, artifactId, projectIds);
+    await handleProjectUpdateWithinTransaction(tx, accountId, blockId, projectIds);
   });
 }
 
@@ -52,18 +52,18 @@ export async function handleProjectTagsUpdate(
 export async function handleProjectArtifactsUpdate(
   accountId: string,
   projectId: string,
-  artifactIds: string[]
+  blockIds: string[]
 ): Promise<void> {
   await db.transaction(async (tx) => {
-    for (const artifactId of artifactIds) {
+    for (const blockId of blockIds) {
       await tx.insert(projectArtifactLinks).values({
         accountId,
         projectId,
-        artifactId,
+        blockId,
         addedAt: new Date()
       })
       .onConflictDoNothing({
-        target: [projectArtifactLinks.accountId, projectArtifactLinks.projectId, projectArtifactLinks.artifactId]
+        target: [projectArtifactLinks.accountId, projectArtifactLinks.projectId, projectArtifactLinks.blockId]
       });
     }
   });

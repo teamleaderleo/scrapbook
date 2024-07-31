@@ -1,11 +1,11 @@
 import { Artifact, ArtifactContent } from "@/app/lib/definitions/definitions";
 
-export const ArtifactDisplay = ({ artifact }: { artifact: Artifact }) => {
+export const ArtifactDisplay = ({ block }: { block: Artifact }) => {
   return (
-    <div className="artifact">
-      {artifact.name && <h3>{artifact.name}</h3>}
-      {artifact.description && <p>{artifact.description}</p>}
-      {artifact.contents.map((content) => (
+    <div className="block">
+      {block.name && <h3>{block.name}</h3>}
+      {block.description && <p>{block.description}</p>}
+      {block.contents.map((content) => (
         <ContentDisplay key={content.id} content={content} />
       ))}
     </div>

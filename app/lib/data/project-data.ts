@@ -2,7 +2,7 @@
 
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { db } from '../db/db';
-import { artifactContents, artifacts, projectArtifactLinks, projects, tagAssociations, tags, } from '../db/schema';
+import { blockContents, blocks, projectArtifactLinks, projects, tagAssociations, tags, } from '../db/schema';
 import { Artifact, BaseProject, ProjectWithArtifacts, Tag, } from "../definitions/definitions";
 
 
@@ -20,12 +20,12 @@ export async function fetchAllProjects(accountId: string): Promise<ProjectWithAr
         'id', ${tags.id},
         'name', ${tags.name}
       )) filter (where ${tags.id} is not null)`,
-      artifacts: sql<Artifact[]>`json_agg(distinct jsonb_build_object(
-        'id', ${artifacts.id},
-        'name', ${artifacts.name},
-        'description', ${artifacts.description},
-        'createdAt', ${artifacts.createdAt},
-        'updatedAt', ${artifacts.updatedAt},
+      blocks: sql<Artifact[]>`json_agg(distinct jsonb_build_object(
+        'id', ${blocks.id},
+        'name', ${blocks.name},
+        'description', ${blocks.description},
+        'createdAt', ${blocks.createdAt},
+        'updatedAt', ${blocks.updatedAt},
         'contents', (
           select json_agg(jsonb_build_object(
             'id', ac.id,
@@ -37,10 +37,10 @@ export async function fetchAllProjects(accountId: string): Promise<ProjectWithAr
             'createdBy', ac.created_by,
             'lastModifiedBy', ac.last_modified_by
           ))
-          from ${artifactContents} ac
-          where ac.artifact_id = ${artifacts.id}
+          from ${blockContents} ac
+          where ac.block_id = ${blocks.id}
         )
-      )) filter (where ${artifacts.id} is not null)`
+      )) filter (where ${blocks.id} is not null)`
     })
     .from(projects)
     .leftJoin(tagAssociations, and(
@@ -49,7 +49,7 @@ export async function fetchAllProjects(accountId: string): Promise<ProjectWithAr
     ))
     .leftJoin(tags, eq(tags.id, tagAssociations.tagId))
     .leftJoin(projectArtifactLinks, eq(projectArtifactLinks.projectId, projects.id))
-    .leftJoin(artifacts, eq(artifacts.id, projectArtifactLinks.artifactId))
+    .leftJoin(blocks, eq(blocks.id, projectArtifactLinks.blockId))
     .where(eq(projects.accountId, accountId))
     .groupBy(projects.id)
     .orderBy(desc(projects.updatedAt));
@@ -58,12 +58,12 @@ export async function fetchAllProjects(accountId: string): Promise<ProjectWithAr
 }
 
 // export async function fetchProjectsWithExtendedArtifacts(accountId: string): Promise<ProjectWithExtendedArtifacts[]> {
-//   // Similar to fetchAllProjects, but include artifact tags and projects
+//   // Similar to fetchAllProjects, but include block tags and projects
 //   // ...
 // }
 
 // export async function fetchProjectsWithTags(accountId: string): Promise<ProjectWithTags[]> {
-//   // Fetch projects with tags, but no artifacts
+//   // Fetch projects with tags, but no blocks
 //   // ...
 // }
 

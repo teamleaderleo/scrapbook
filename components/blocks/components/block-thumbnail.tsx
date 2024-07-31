@@ -7,7 +7,7 @@ import { Artifact } from "@/app/lib/definitions/definitions";
 import { getArtifactThumbnail } from '@/app/lib/utils-client';
 
 interface ArtifactThumbnailProps {
-  artifact: Artifact;
+  block: Artifact;
   contentIndex?: number;
   size?: number;
   priority?: boolean;
@@ -15,14 +15,14 @@ interface ArtifactThumbnailProps {
 }
 
 export const ArtifactThumbnail: React.FC<ArtifactThumbnailProps> = ({ 
-  artifact, 
+  block, 
   contentIndex = 0, 
   size = 40,
   priority = true,
   className = '',
 }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const thumbnailUrl = getArtifactThumbnail(artifact, contentIndex);
+  const thumbnailUrl = getArtifactThumbnail(block, contentIndex);
 
   return (
     <div 
@@ -40,7 +40,7 @@ export const ArtifactThumbnail: React.FC<ArtifactThumbnailProps> = ({
       </AnimatePresence>
       <Image
         src={thumbnailUrl}
-        alt={`Thumbnail for ${artifact.name}`}
+        alt={`Thumbnail for ${block.name}`}
         fill
         sizes={`${size}px`}
         style={{ objectFit: "cover" }}

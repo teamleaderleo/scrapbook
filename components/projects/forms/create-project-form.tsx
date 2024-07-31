@@ -12,7 +12,7 @@ import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 export default function CreateProjectForm() {
   const router = useRouter();
   const { addProject, } = useProjects();
-  const { artifacts, isLoading: isLoadingArtifacts, error: artifactsError } = useArtifacts();
+  const { blocks, isLoading: isLoadingArtifacts, error: blocksError } = useArtifacts();
   const { tagNamesToTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
@@ -28,7 +28,7 @@ export default function CreateProjectForm() {
     createdAt: new Date(),
     updatedAt: new Date(),
     tags: [],
-    artifacts: []
+    blocks: []
   };
 
   const handleSubmit = async (formData: FormData) => {
@@ -52,13 +52,13 @@ export default function CreateProjectForm() {
   //   setSuggestedTags(tags);
   // };
 
-  if (isLoadingArtifacts) return <div>Loading artifacts...</div>;
-  if (artifactsError) return <div>Error loading artifacts: {artifactsError.message}</div>;
+  if (isLoadingArtifacts) return <div>Loading blocks...</div>;
+  if (blocksError) return <div>Error loading blocks: {blocksError.message}</div>;
 
   return (
     <ProjectForm
       project={defaultProject}
-      artifacts={artifacts || []}
+      blocks={blocks || []}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
       submitButtonText="Create Project"

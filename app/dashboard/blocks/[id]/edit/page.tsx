@@ -12,16 +12,16 @@ export default function Page({ params }: { params: { id: string } }) {
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: 'Artifacts', href: '/dashboard/artifacts' },
+          { label: 'Artifacts', href: '/dashboard/blocks' },
           {
             label: 'Edit Artifact',
-            href: `/dashboard/artifacts/${params.id}/edit`,
+            href: `/dashboard/blocks/${params.id}/edit`,
             active: true,
           },
         ]}
       />
       <Suspense fallback={<div>Loading form...</div>}>
-        <EditArtifactForm artifactId={params.id} />
+        <EditArtifactForm blockId={params.id} />
       </Suspense>
     </main>
   );

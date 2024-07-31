@@ -26,9 +26,9 @@ export const ProjectDisplay: React.FC<{ project: ProjectWithArtifacts }> = ({ pr
         </div>
       )}
       <div className="space-y-8">
-        {project.artifacts.map((artifact: Artifact) => (
-          <div key={artifact.id} className="border-t pt-6">
-            <ArtifactDisplay artifact={artifact} />
+        {project.blocks.map((block: Artifact) => (
+          <div key={block.id} className="border-t pt-6">
+            <ArtifactDisplay block={block} />
           </div>
         ))}
       </div>

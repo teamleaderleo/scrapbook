@@ -9,7 +9,7 @@ import { Suggestions } from '@/components/suggestions/suggestions';
 import { useTags } from '@/app/lib/hooks/useTags';
 
 interface ArtifactFormProps {
-  artifact?: ArtifactWithRelations;
+  block?: ArtifactWithRelations;
   projects: BaseProject[];
   onSubmit: (data: ArtifactFormSubmission) => void;
   isSubmitting: boolean;
@@ -21,7 +21,7 @@ interface ArtifactFormProps {
 }
 
 export function ArtifactForm({
-  artifact,
+  block,
   projects,
   onSubmit,
   isSubmitting,
@@ -32,10 +32,10 @@ export function ArtifactForm({
   onGetAISuggestions,
 }: ArtifactFormProps) {
   const { tagNames, tagNamesToTags } = useTags();
-  const [selectedTags, setSelectedTags] = useState<string[]>(artifact?.tags.map(t => t.name) || []);
+  const [selectedTags, setSelectedTags] = useState<string[]>(block?.tags.map(t => t.name) || []);
   const [contentItems, setContentItems] = useState<{id?: string, type: ContentType, content: string | File}[]>(
-      (artifact?.contents && artifact.contents.length > 0)
-        ? artifact.contents.map(c => ({id: c.id, type: c.type as ContentType, content: c.content}))
+      (block?.contents && block.contents.length > 0)
+        ? block.contents.map(c => ({id: c.id, type: c.type as ContentType, content: c.content}))
         : [{type: 'text', content: ''}]
     );
 
@@ -138,7 +138,7 @@ export function ArtifactForm({
     <form onSubmit={handleSubmit} ref={formRef}>
       <div>
         <div className="flex justify-between items-center mb-4">
-          {/* <h1 className="text-2xl font-bold">{artifact ? 'Edit' : 'Create'} Artifact</h1> */}
+          {/* <h1 className="text-2xl font-bold">{block ? 'Edit' : 'Create'} Artifact</h1> */}
           {onGetAISuggestions && (
             <Button onClick={onGetAISuggestions}>Get AI Suggestions</Button>
           )}
@@ -153,8 +153,8 @@ export function ArtifactForm({
               name="name"
               type="text"
               className="peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue={artifact?.name}
-              placeholder="Enter artifact name"
+              defaultValue={block?.name}
+              placeholder="Enter block name"
               required
             />
           </div>
@@ -166,8 +166,8 @@ export function ArtifactForm({
               id="description"
               name="description"
               className="peer block w-full rounded-md border border-gray-200 py-2 px-3 text-sm outline-2 placeholder:text-gray-500"
-              defaultValue={artifact?.description ?? ''}
-              placeholder="Enter artifact description"
+              defaultValue={block?.description ?? ''}
+              placeholder="Enter block description"
               rows={3}
             ></textarea>
           </div>
@@ -242,7 +242,7 @@ export function ArtifactForm({
                   id={`project-${project.id}`}
                   name="projects"
                   value={project.id}
-                  defaultChecked={artifact?.projects?.some(p => p.id === project.id) || false}
+                  defaultChecked={block?.projects?.some(p => p.id === project.id) || false}
                   className="mr-2"
                 />
                 <label htmlFor={`project-${project.id}`} className="text-sm">{project.name}</label>

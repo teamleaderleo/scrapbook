@@ -49,7 +49,7 @@ The goal of this project is to make a project management app that isn't as wack 
 
 - **Development:** 
   - Developed a scalable, high-performance project management application leveraging cutting-edge technologies such as React Server Components, Next.js, and serverless architecture for optimal performance and SEO.
-  - Implemented a robust, future-proof schema design connecting accounts, projects, artifacts, tags, and multiple content types, focusing on extensible application architecture.
+  - Implemented a robust, future-proof schema design connecting accounts, projects, blocks, tags, and multiple content types, focusing on extensible application architecture.
 - **Microservices:** 
   - Created and integrated a Go microservice for image compression, containerized with Docker and deployed on AWS (ECR, Lambda, API Gateway) with a documented REST API.
 - **AI Integration:** 
@@ -93,7 +93,7 @@ The goal of this project is to make a project management app that isn't as wack 
 
 I store everything in a personal Discord server because I appreciate being able to access stuff from both PC and mobile, and the infinite storage (despite image compression). I like using channels and channel categories, the chat UI, and the automatic embeds for Twitter and other websites, which makes it easy to save references and pictures for inspiration. I want an app with similar functionality to Pinterest but with the ability to go offline, or at the very least browse without being bogged down by recommendation algorithms and layouts that seem to cater more to advertisers than to the end user.
 
-This project will be deemed to have surpassed an MVP when I finalize a draft version of the scrapbook UI as well as complete the CRUD operations of images (artifacts), and sort out the data relationships between images and projects. AKA, when I can loosely start considering actually using it for personal use.
+This project will be deemed to have surpassed an MVP when I finalize a draft version of the scrapbook UI as well as complete the CRUD operations of images (blocks), and sort out the data relationships between images and projects. AKA, when I can loosely start considering actually using it for personal use.
 
 ## Contributing
 

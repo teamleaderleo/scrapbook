@@ -2,7 +2,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 type ToastType = 'success' | 'error';
 type ActionType = 'create' | 'update' | 'delete';
-type ItemType = 'artifact' | 'project' | 'tag';
+type ItemType = 'block' | 'project' | 'tag';
 
 export function useToastMessages() {
   const { toast } = useToast();

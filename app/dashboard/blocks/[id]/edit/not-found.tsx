@@ -7,7 +7,7 @@ export default function NotFound() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/dashboard/artifacts');
+    router.replace('/dashboard/blocks');
   }, [router]);
 
   // Return null to prevent any flash of content

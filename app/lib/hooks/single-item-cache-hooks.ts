@@ -3,10 +3,10 @@ import { Tag } from '../definitions/definitions';
 import { ArtifactWithRelations } from "../definitions/definitions";
 import { ProjectWithArtifacts } from "../definitions/definitions";
 
-export function useSingleArtifactFromCache(artifactId: string): ArtifactWithRelations | undefined {
+export function useSingleArtifactFromCache(blockId: string): ArtifactWithRelations | undefined {
   const queryClient = useQueryClient();
-  const artifacts = queryClient.getQueryData<ArtifactWithRelations[]>(['artifacts']);
-  return artifacts?.find(artifact => artifact.id === artifactId);
+  const blocks = queryClient.getQueryData<ArtifactWithRelations[]>(['blocks']);
+  return blocks?.find(block => block.id === blockId);
 }
 
 export function useSingleProjectFromCache(projectId: string): ProjectWithArtifacts | undefined {

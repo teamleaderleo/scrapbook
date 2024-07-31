@@ -5,7 +5,7 @@ import { THUMBNAIL_CONFIGS } from '@/app/lib/image-processing/image-processing';
 import { generateColorGradient } from '@/app/lib/image-processing/image-processing';
 
 interface ArtifactImageProps {
-  artifact: Artifact;
+  block: Artifact;
   size: 'small' | 'medium' | 'large';
 }
 
@@ -16,9 +16,9 @@ const ColorGradient: React.FC<{ colors: string[] }> = ({ colors }) => (
   />
 );
 
-export const ArtifactImage: React.FC<ArtifactImageProps> = ({ artifact, size }) => {
+export const ArtifactImage: React.FC<ArtifactImageProps> = ({ block, size }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const content = artifact.contents.find(c => c.type === 'image');
+  const content = block.contents.find(c => c.type === 'image');
   if (!content || !content.metadata || content.type !== 'image') {
     return null; // or a placeholder
   }
@@ -32,7 +32,7 @@ export const ArtifactImage: React.FC<ArtifactImageProps> = ({ artifact, size }) 
       )}
       <Image
         src={src}
-        alt={artifact.name}
+        alt={block.name}
         width={THUMBNAIL_CONFIGS[size].width}
         height={THUMBNAIL_CONFIGS[size].height}
         layout="responsive"

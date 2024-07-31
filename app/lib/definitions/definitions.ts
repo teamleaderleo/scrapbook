@@ -1,17 +1,17 @@
 import { z } from 'zod';
-import { accounts, artifacts, projects, tags } from '../db/schema';
+import { accounts, blocks, projects, tags } from '../db/schema';
 import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 import { JSONContent } from '@tiptap/react';
 
 export type SelectAccount = InferSelectModel<typeof accounts>;
 export type Account = InferInsertModel<typeof accounts>;
 
-export type EntityType = 'project' | 'artifact';
+export type EntityType = 'project' | 'block';
 
 export interface ProjectFetchOptions {
   includeTags: boolean;
   includeArtifacts: boolean;
-  artifactDetail: 'none' | 'basic' | 'withContents' | 'extended';
+  blockDetail: 'none' | 'basic' | 'withContents' | 'extended';
 }
 
 export interface ArtifactFetchOptions {
@@ -58,11 +58,11 @@ export type ProjectWithTags = BaseProject & {
 };
 
 export type ProjectWithArtifacts = ProjectWithTags & {
-  artifacts: Artifact[];
+  blocks: Artifact[];
 };
 
 export type ProjectWithExtendedArtifacts = ProjectWithTags & {
-  artifacts: ArtifactWithRelations[];
+  blocks: ArtifactWithRelations[];
 };
 
 export type Artifact = {

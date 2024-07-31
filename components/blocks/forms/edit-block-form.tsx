@@ -9,9 +9,9 @@ import { useTags } from '@/app/lib/hooks/useTags';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { ArtifactFormSubmission } from '@/app/lib/definitions/definitions';
 
-export default function EditArtifactForm({ artifactId }: { artifactId: string }) {
+export default function EditArtifactForm({ blockId }: { blockId: string }) {
   const router = useRouter();
-  const { artifacts, updateArtifact, isLoading: isLoadingArtifacts } = useArtifacts();
+  const { blocks, updateArtifact, isLoading: isLoadingArtifacts } = useArtifacts();
   const { projects, isLoading: isLoadingProjects, error: projectsError } = useProjects();
   const { getOrCreateTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,13 +19,13 @@ export default function EditArtifactForm({ artifactId }: { artifactId: string })
   const [suggestedContentExtensions, setSuggestedContentExtensions] = useState<string[]>([]);
   const { showToast } = useToastMessages();
 
-  const artifact = artifacts?.find(a => a.id === artifactId);
+  const block = blocks?.find(a => a.id === blockId);
 
   useEffect(() => {
-    if (!isLoadingArtifacts && !artifact) {
-      router.replace('/dashboard/artifacts');
+    if (!isLoadingArtifacts && !block) {
+      router.replace('/dashboard/blocks');
     }
-  }, [artifact, artifactId, router, isLoadingArtifacts]);
+  }, [block, blockId, router, isLoadingArtifacts]);
 
   if (isLoadingArtifacts || isLoadingProjects) {
     return <div>Loading...</div>;
@@ -35,38 +35,38 @@ export default function EditArtifactForm({ artifactId }: { artifactId: string })
     return <div>Error loading projects: {projectsError.message}</div>;
   }
 
-  if (!artifact) {
+  if (!block) {
     return null;
   }
 
   const handleSubmit = async (data: ArtifactFormSubmission) => {
     setIsSubmitting(true);
     try {
-      await updateArtifact({ id: artifactId, data });
-      showToast('success', 'update', 'artifact');
-      router.push('/dashboard/artifacts');
+      await updateArtifact({ id: blockId, data });
+      showToast('success', 'update', 'block');
+      router.push('/dashboard/blocks');
     } catch (error) {
-      console.error('Failed to update artifact:', error);
-      showToast('error', 'update', 'artifact');
+      console.error('Failed to update block:', error);
+      showToast('error', 'update', 'block');
       setIsSubmitting(false);
     }
   };
 
   // const handleGetAISuggestions = async () => {
-  //   const content = artifact.contents.map(c => c.type === 'text' ? c.content : '').join(' ');
-  //   const { tags, extensions } = await getAISuggestions(artifact.name, artifact.description || '', content);
+  //   const content = block.contents.map(c => c.type === 'text' ? c.content : '').join(' ');
+  //   const { tags, extensions } = await getAISuggestions(block.name, block.description || '', content);
   //   setSuggestedTags(tags);
   //   setSuggestedContentExtensions(extensions);
   // };
 
   return (
     <ArtifactForm
-      artifact={artifact}
+      block={block}
       projects={projects || []}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
       submitButtonText="Update Artifact"
-      cancelHref="/dashboard/artifacts"
+      cancelHref="/dashboard/blocks"
       suggestedTags={suggestedTags}
       suggestedContentExtensions={suggestedContentExtensions}
       // onGetAISuggestions={handleGetAISuggestions}
