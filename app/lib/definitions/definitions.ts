@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { accounts, artifacts, projects, tags } from '../db/schema';
 import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
+import { JSONContent } from '@tiptap/core'
 
 export type SelectAccount = InferSelectModel<typeof accounts>;
 export type Account = InferInsertModel<typeof accounts>;
@@ -30,12 +31,6 @@ export type S3Usage = {
   month: number;
   year: number;
   count: number;
-};
-
-export type BaseArtifact = InferSelectModel<typeof artifacts>;
-
-export type Artifact = BaseArtifact & {
-  contents: ArtifactContent[];
 };
 
 export type ArtifactWithTags = Artifact & {
@@ -70,66 +65,25 @@ export type ProjectWithExtendedArtifacts = ProjectWithTags & {
   artifacts: ArtifactWithRelations[];
 };
 
-// Metadata schemas
-const BaseMetadataSchema = z.object({
-  order: z.number().int().nonnegative(),
-});
+type ArtifactMetadata = {
+  name?: string;
+  description?: string;
+  // Add any other metadata fields you might need
+}
 
-const ImageMetadataSchema = BaseMetadataSchema.extend({
-  variations: z.record(z.string()),
-  dominantColors: z.array(z.string()).optional(),
-});
+type ArtifactContent = {
+  tiptap: JSONContent;
+  metadata: ArtifactMetadata;
+}
 
-const FileMetadataSchema = BaseMetadataSchema.extend({
-  originalName: z.string(),
-  size: z.number(),
-  mimeType: z.string(),
-});
+export type Artifact = {
+  id: string;
+  accountId: string;
+  content: ArtifactContent;
+  createdAt?: Date;
+  updatedAt?: Date;
+  createdBy?: string | null;
+  lastModifiedBy?: string | null;
+}
 
-const LinkMetadataSchema = BaseMetadataSchema.extend({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  previewImage: z.string().optional(),
-});
 
-// Content type union
-const ContentTypeUnion = z.union([
-  z.object({ type: z.literal('text'), metadata: BaseMetadataSchema }),
-  z.object({ type: z.literal('image'), metadata: ImageMetadataSchema }),
-  z.object({ type: z.literal('file'), metadata: FileMetadataSchema }),
-  z.object({ type: z.literal('link'), metadata: LinkMetadataSchema }),
-]);
-
-// Full artifact content schema
-export const ArtifactContentSchema = z.intersection(
-  z.object({
-    id: z.string().uuid(),
-    accountId: z.string().uuid(),
-    artifactId: z.string().uuid(),
-    content: z.string(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-    createdBy: z.string().uuid().nullable(),
-    lastModifiedBy: z.string().uuid().nullable(),
-  }),
-  ContentTypeUnion
-);
-
-// Type definitions
-export type ArtifactContent = z.infer<typeof ArtifactContentSchema>;
-export type ArtifactFormSubmission = z.infer<typeof ArtifactFormSubmissionSchema>;
-
-export const ArtifactFormSubmissionSchema = z.object({
-  name: z.string().min(1, 'Artifact name is required.'),
-  description: z.string().optional(),
-  tags: z.array(z.string()),
-  projects: z.array(z.string()),
-  contents: z.array(
-    z.object({
-      id: z.string().uuid(),
-      type: z.enum(['text', 'image', 'file', 'link']),
-      content: z.union([z.string(), z.instanceof(Blob)]),
-      metadata: z.union([BaseMetadataSchema, ImageMetadataSchema, FileMetadataSchema, LinkMetadataSchema]),
-    })
-  ),
-});

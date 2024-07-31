@@ -38,30 +38,13 @@ export const projects = pgTable('project', {
 export const artifacts = pgTable('artifact', {
   id: uuid('id').primaryKey(),
   accountId: uuid('account_id').notNull().references(() => accounts.id),
-  name: text('name').notNull(),
-  description: text('description'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
-}, (table) => ({
-  accountUpdatedIndex: index('idx_artifacts_account_updated').on(table.accountId, table.updatedAt),
-  nameIndex: index('idx_artifacts_name').on(table.name),
-}));
-
-export const artifactContents = pgTable('artifact_content', {
-  id: uuid('id').primaryKey(),
-  accountId: uuid('account_id').notNull().references(() => accounts.id),
-  artifactId: uuid('artifact_id').notNull().references(() => artifacts.id),
-  type: varchar('type', { length: 255 }).notNull(),
-  content: text('content').notNull(),
-  metadata: jsonb('metadata'),
+  content: jsonb('content').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   createdBy: uuid('created_by').references(() => accounts.id),
   lastModifiedBy: uuid('last_modified_by').references(() => accounts.id),
 }, (table) => ({
-  artifactAccountIndex: index('idx_artifact_contents_artifact').on(table.artifactId, table.accountId),
-  metadataIndex: index('idx_artifact_content_metadata').on(table.metadata),
-  typeIndex: index('idx_artifact_content_type').on(table.type),
+  accountUpdatedIndex: index('idx_artifacts_account_updated').on(table.accountId, table.updatedAt),
 }));
 
 export const tagAssociations = pgTable('tag_association', {
