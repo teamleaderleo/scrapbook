@@ -2,7 +2,7 @@
 
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { db } from '../db/db';
-import { blockContents, blocks, projectBlockLinks, projects, tagAssociations, tags, } from '../db/schema';
+import { blocks, projectBlockLinks, projects, tagAssociations, tags, } from '../db/schema';
 import { Block, BaseProject, ProjectWithBlocks, Tag, } from "../definitions/definitions";
 
 
@@ -22,31 +22,15 @@ export async function fetchAllProjects(accountId: string): Promise<ProjectWithBl
       )) filter (where ${tags.id} is not null)`,
       blocks: sql<Block[]>`json_agg(distinct jsonb_build_object(
         'id', ${blocks.id},
-        'name', ${blocks.name},
-        'description', ${blocks.description},
         'createdAt', ${blocks.createdAt},
         'updatedAt', ${blocks.updatedAt},
-        'contents', (
-          select json_agg(jsonb_build_object(
-            'id', ac.id,
-            'type', ac.type,
-            'content', ac.content,
-            'metadata', ac.metadata,
-            'createdAt', ac.created_at,
-            'updatedAt', ac.updated_at,
-            'createdBy', ac.created_by,
-            'lastModifiedBy', ac.last_modified_by
-          ))
-          from ${blockContents} ac
-          where ac.block_id = ${blocks.id}
-        )
+        'content', ${blocks.content},
+        'createdBy': ${blocks.createdAt},
+        'lastModifiedBy': ${blocks.lastModifiedBy},
       )) filter (where ${blocks.id} is not null)`
     })
     .from(projects)
-    .leftJoin(tagAssociations, and(
-      eq(tagAssociations.associatedId, projects.id),
-      eq(tagAssociations.accountId, projects.accountId)
-    ))
+    .leftJoin(tagAssociations, eq(tagAssociations.associatedId, projects.id))
     .leftJoin(tags, eq(tags.id, tagAssociations.tagId))
     .leftJoin(projectBlockLinks, eq(projectBlockLinks.projectId, projects.id))
     .leftJoin(blocks, eq(blocks.id, projectBlockLinks.blockId))
