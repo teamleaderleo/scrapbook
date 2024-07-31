@@ -20,7 +20,6 @@ export function useProjects() {
   const [fetchOptions, setFetchOptions] = useState<ProjectFetchOptions>({
     includeTags: true,
     includeBlocks: true,
-    blockDetail: 'withContents',
   });
 
   // const { data: projectBasics, isLoading: isLoadingBasics } = useQuery<BaseProject[], Error>(

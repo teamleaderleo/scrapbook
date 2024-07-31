@@ -10,7 +10,6 @@ import { getCachedBlocks } from '@/app/lib/data/cached-block-data';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { suggestContentExtensions, suggestTags } from '../external/claude-utils';
 import { useKeyNav } from './useKeyNav';
-import { BlockFormSubmission } from '../definitions/definitions';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -20,7 +19,6 @@ export function useBlocks() {
   const [currentPage, setCurrentPage] = useState(1);
   const [fetchOptions, setFetchOptions] = useState<BlockFetchOptions>({
     includeTags: true,
-    includeContents: true,
     includeProjects: true,
   });
 

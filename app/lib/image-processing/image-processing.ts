@@ -1,7 +1,6 @@
 import Vibrant from 'node-vibrant';
 import sharp from 'sharp';
 import { uploadToS3, deleteFromS3 } from '../external/s3-operations';
-import { BlockContent } from '../definitions/definitions';
 
 async function extractDominantColors(buffer: Buffer): Promise<string[]> {
   try {

@@ -1,4 +1,4 @@
-import { Block, BlockContent } from "./definitions/definitions";
+import { Block } from "./definitions/definitions";
 import { StaticImageData } from 'next/image';
 const defaultPlaceholder = require('../../public/placeholder-default.png');
 const textPlaceholder = require('../../public/placeholder-text.png');
