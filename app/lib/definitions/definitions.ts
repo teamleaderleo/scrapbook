@@ -65,15 +65,10 @@ export type ProjectWithExtendedArtifacts = ProjectWithTags & {
   artifacts: ArtifactWithRelations[];
 };
 
-type ArtifactContent = {
-  tiptap: JSONContent;
-  [key: string]: any;  // Allows for any additional fields
-}
-
 export type Artifact = {
   id: string;
   accountId: string;
-  content: ArtifactContent;
+  content: JSONContent;
   createdAt?: Date;
   updatedAt?: Date;
   createdBy?: string | null;
