@@ -20,19 +20,6 @@ interface ArtifactFormProps {
   onGetAISuggestions?: () => void;
 }
 
-// interface ArtifactFormData {
-//   name: string;
-//   description?: string;
-//   tags: string[];
-//   projects: string[];
-//   contents: Array<{
-//     id?: string;
-//     type: ContentType;
-//     content: string | File;
-//     metadata: Record<string, any>;
-//   }>;
-// }
-
 export function ArtifactForm({
   artifact,
   projects,
