@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import { accounts, blocks, projects, tags } from '../db/schema';
 import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 import { JSONContent } from '@tiptap/react';
@@ -11,12 +10,10 @@ export type EntityType = 'project' | 'block';
 export interface ProjectFetchOptions {
   includeTags: boolean;
   includeBlocks: boolean;
-  blockDetail: 'none' | 'basic' | 'withContents' | 'extended';
 }
 
 export interface BlockFetchOptions {
   includeTags: boolean;
-  includeContents: boolean;
   includeProjects: boolean;
 }
 
@@ -32,6 +29,9 @@ export type S3Usage = {
   year: number;
   count: number;
 };
+
+export type Block = InferSelectModel<typeof blocks>;
+// export type InsertBlock = InferInsertModel<typeof blocks>;
 
 export type BlockWithTags = Block & {
   tags: Tag[];
@@ -64,15 +64,5 @@ export type ProjectWithBlocks = ProjectWithTags & {
 export type ProjectWithExtendedBlocks = ProjectWithTags & {
   blocks: BlockWithRelations[];
 };
-
-export type Block = {
-  id: string;
-  accountId: string;
-  content: JSONContent;
-  createdAt?: Date;
-  updatedAt?: Date;
-  createdBy?: string | null;
-  lastModifiedBy?: string | null;
-}
 
 
