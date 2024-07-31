@@ -217,7 +217,7 @@ export function ProjectsTableSkeleton() {
   );
 }
 
-export function BlocksTableSkeleton() {
+export function BlockTableSkeleton() {
   return (
     <div className="mt-6 flow-root">
       <div className="overflow-x-auto">

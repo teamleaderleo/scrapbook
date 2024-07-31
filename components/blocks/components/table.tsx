@@ -13,7 +13,7 @@ import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
 import { SearchParamsHandler } from '../../search-params-handler';
 
-export function BlocksTable({ accountId }: { accountId: string }) {
+export function BlockTable({ accountId }: { accountId: string }) {
   const { 
     paginatedBlocks,
     isLoading,
