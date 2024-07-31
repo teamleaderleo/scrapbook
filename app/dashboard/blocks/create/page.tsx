@@ -1,27 +1,27 @@
 import { Metadata } from 'next';
-import EditArtifactForm from '@/components/artifacts/forms/edit-block-form';
+import CreateArtifactForm from '@/components/blocks/forms/create-block-form';
 import Breadcrumbs from '@/components/ui/components/breadcrumbs';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Edit Artifact',
+  title: 'Create Artifact',
 };
 
-export default function Page({ params }: { params: { id: string } }) {
+export default function Page() {
   return (
     <main>
       <Breadcrumbs
         breadcrumbs={[
           { label: 'Artifacts', href: '/dashboard/artifacts' },
           {
-            label: 'Edit Artifact',
-            href: `/dashboard/artifacts/${params.id}/edit`,
+            label: 'Create Artifact',
+            href: '/dashboard/artifacts/create',
             active: true,
           },
         ]}
       />
       <Suspense fallback={<div>Loading form...</div>}>
-        <EditArtifactForm artifactId={params.id} />
+        <CreateArtifactForm />
       </Suspense>
     </main>
   );

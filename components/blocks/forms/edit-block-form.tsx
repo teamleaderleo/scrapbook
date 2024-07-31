@@ -1,19 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
-import { ArtifactForm } from '@/components/artifacts/forms/block-form';
+import { ArtifactForm } from '@/components/blocks/forms/block-form';
 import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useTags } from '@/app/lib/hooks/useTags';
-import { ADMIN_UUID } from '@/app/lib/constants';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { ArtifactFormSubmission } from '@/app/lib/definitions/definitions';
 
-export default function CreateArtifactForm() {
+export default function EditArtifactForm({ artifactId }: { artifactId: string }) {
   const router = useRouter();
-  const { addArtifact } = useArtifacts();
+  const { artifacts, updateArtifact, isLoading: isLoadingArtifacts } = useArtifacts();
   const { projects, isLoading: isLoadingProjects, error: projectsError } = useProjects();
   const { getOrCreateTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,51 +19,53 @@ export default function CreateArtifactForm() {
   const [suggestedContentExtensions, setSuggestedContentExtensions] = useState<string[]>([]);
   const { showToast } = useToastMessages();
 
-  const defaultArtifact: ArtifactWithRelations = {
-    accountId: ADMIN_UUID,
-    id: '',
-    name: '',
-    contents: [],
-    description: '',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    tags: [],
-    projects: []
-  };
+  const artifact = artifacts?.find(a => a.id === artifactId);
+
+  useEffect(() => {
+    if (!isLoadingArtifacts && !artifact) {
+      router.replace('/dashboard/artifacts');
+    }
+  }, [artifact, artifactId, router, isLoadingArtifacts]);
+
+  if (isLoadingArtifacts || isLoadingProjects) {
+    return <div>Loading...</div>;
+  }
+
+  if (projectsError) {
+    return <div>Error loading projects: {projectsError.message}</div>;
+  }
+
+  if (!artifact) {
+    return null;
+  }
 
   const handleSubmit = async (data: ArtifactFormSubmission) => {
     setIsSubmitting(true);
     try {
-      await addArtifact(data);
-      showToast('success', 'create', 'artifact');
+      await updateArtifact({ id: artifactId, data });
+      showToast('success', 'update', 'artifact');
       router.push('/dashboard/artifacts');
     } catch (error) {
-      console.error('Failed to create artifact:', error);
-      showToast('error', 'create', 'artifact');
+      console.error('Failed to update artifact:', error);
+      showToast('error', 'update', 'artifact');
       setIsSubmitting(false);
     }
   };
 
   // const handleGetAISuggestions = async () => {
-  //   const name = (document.getElementById('name') as HTMLInputElement)?.value || '';
-  //   const description = (document.getElementById('description') as HTMLTextAreaElement)?.value || '';
-  //   const content = (document.querySelector('textarea[name^="content-"]') as HTMLTextAreaElement)?.value || '';
-    
-  //   const { tags, extensions } = await getAISuggestions(name, description, content);
+  //   const content = artifact.contents.map(c => c.type === 'text' ? c.content : '').join(' ');
+  //   const { tags, extensions } = await getAISuggestions(artifact.name, artifact.description || '', content);
   //   setSuggestedTags(tags);
   //   setSuggestedContentExtensions(extensions);
   // };
 
-  if (isLoadingProjects) return <div>Loading projects...</div>;
-  if (projectsError) return <div>Error loading projects: {projectsError.message}</div>;
-
   return (
     <ArtifactForm
-      artifact={defaultArtifact}
+      artifact={artifact}
       projects={projects || []}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
-      submitButtonText="Create Artifact"
+      submitButtonText="Update Artifact"
       cancelHref="/dashboard/artifacts"
       suggestedTags={suggestedTags}
       suggestedContentExtensions={suggestedContentExtensions}

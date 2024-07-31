@@ -1,6 +1,6 @@
 import React from 'react';
 import { ProjectWithArtifacts } from "@/app/lib/definitions/definitions";
-import { ArtifactThumbnail } from '@/components/artifacts/components/block-thumbnail';
+import { ArtifactThumbnail } from '@/components/blocks/components/block-thumbnail';
 
 export const ProjectCard: React.FC<{ project: ProjectWithArtifacts }> = ({ project }) => {
   const mainArtifact = project.artifacts.find(a => a.contents.some(c => c.type === 'image'));
