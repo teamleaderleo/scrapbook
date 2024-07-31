@@ -23,7 +23,7 @@ export type State = {
 
 export async function updateArtifact(id: string, accountId: string, data: ArtifactFormSubmission): Promise<State> {
   try {
-    const result = await db.transaction(async (tx) => {
+    await db.transaction(async (tx) => {
       await handleArtifactUpdateWithinTransaction(tx, accountId, id, data);
     });
 
@@ -38,7 +38,7 @@ export async function updateArtifact(id: string, accountId: string, data: Artifa
 export async function deleteArtifact(id: string, accountId: string, data: ArtifactFormSubmission): Promise<State> {
   try {
     await db.transaction(async (tx) => {
-      await handleArtifactDeleteWithinTransaction(tx, accountId, id, data.contents);
+      await handleArtifactDeleteWithinTransaction(tx, accountId, id);
     });
 
     revalidatePath('/dashboard/artifacts');
