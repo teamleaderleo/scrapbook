@@ -10,7 +10,7 @@ import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 
 export default function EditProjectForm({ projectId }: { projectId: string }) {
   const router = useRouter();
-  const { projects, updateProject, isLoading: isLoadingProjects, getAISuggestions } = useProjects();
+  const { projects, updateProject, isLoading: isLoadingProjects, } = useProjects();
   const { artifacts, isLoading: isLoadingArtifacts, error: artifactsError } = useArtifacts();
   const { tagNamesToTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,10 +51,10 @@ export default function EditProjectForm({ projectId }: { projectId: string }) {
     }
   };
 
-  const handleGetAISuggestions = async () => {
-    const { tags } = await getAISuggestions(project.name, project.description || '');
-    setSuggestedTags(tags);
-  };
+  // const handleGetAISuggestions = async () => {
+  //   const { tags } = await getAISuggestions(project.name, project.description || '');
+  //   setSuggestedTags(tags);
+  // };
 
   return (
     <ProjectForm
@@ -65,7 +65,7 @@ export default function EditProjectForm({ projectId }: { projectId: string }) {
       submitButtonText="Update Project"
       cancelHref="/dashboard/projects"
       suggestedTags={suggestedTags}
-      onGetAISuggestions={handleGetAISuggestions}
+      // onGetAISuggestions={handleGetAISuggestions}
     />
   );
 }

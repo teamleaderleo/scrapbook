@@ -11,7 +11,7 @@ import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 
 export default function CreateProjectForm() {
   const router = useRouter();
-  const { addProject, getAISuggestions } = useProjects();
+  const { addProject, } = useProjects();
   const { artifacts, isLoading: isLoadingArtifacts, error: artifactsError } = useArtifacts();
   const { tagNamesToTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,13 +44,13 @@ export default function CreateProjectForm() {
     }
   };
 
-  const handleGetAISuggestions = async () => {
-    const name = (document.getElementById('name') as HTMLInputElement)?.value || '';
-    const description = (document.getElementById('description') as HTMLTextAreaElement)?.value || '';
+  // const handleGetAISuggestions = async () => {
+  //   const name = (document.getElementById('name') as HTMLInputElement)?.value || '';
+  //   const description = (document.getElementById('description') as HTMLTextAreaElement)?.value || '';
     
-    const { tags } = await getAISuggestions(name, description);
-    setSuggestedTags(tags);
-  };
+  //   const { tags } = await getAISuggestions(name, description);
+  //   setSuggestedTags(tags);
+  // };
 
   if (isLoadingArtifacts) return <div>Loading artifacts...</div>;
   if (artifactsError) return <div>Error loading artifacts: {artifactsError.message}</div>;
@@ -64,7 +64,7 @@ export default function CreateProjectForm() {
       submitButtonText="Create Project"
       cancelHref="/dashboard/projects"
       suggestedTags={suggestedTags}
-      onGetAISuggestions={handleGetAISuggestions}
+      // onGetAISuggestions={handleGetAISuggestions}
     />
   );
 }
