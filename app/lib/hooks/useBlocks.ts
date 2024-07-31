@@ -56,7 +56,7 @@ export function useBlocks() {
   }, [filteredBlocks, currentPage]);
 
   const updateBlockMutation = useMutation(
-    ({ id, data }: { id: string; data: BlockFormSubmission }) => updateBlock(id, ADMIN_UUID, data),
+    ({ id }: { id: string }) => updateBlock(id, ADMIN_UUID, data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['blocks']);
@@ -65,7 +65,7 @@ export function useBlocks() {
   );
 
   const deleteBlockMutation = useMutation(
-    ({ id, data }: { id: string; data: BlockFormSubmission }) => deleteBlock(id, ADMIN_UUID, data),
+    ({ id }: { id: string }) => deleteBlock(id, ADMIN_UUID, data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['blocks']);
