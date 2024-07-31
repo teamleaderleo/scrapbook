@@ -1,8 +1,8 @@
 import React from 'react';
-import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
+import { BlockWithRelations } from "@/app/lib/definitions/definitions";
 import { ImageContent, ContentDisplay } from './block-display';
 
-export const PortfolioArtifact: React.FC<{ block: ArtifactWithRelations }> = ({ block }) => {
+export const PortfolioBlock: React.FC<{ block: BlockWithRelations }> = ({ block }) => {
   const mainImage = block.contents.find(c => c.type === 'image');
   const otherContents = block.contents.filter(c => c !== mainImage);
 

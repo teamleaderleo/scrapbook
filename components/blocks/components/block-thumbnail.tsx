@@ -3,18 +3,18 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Artifact } from "@/app/lib/definitions/definitions";
-import { getArtifactThumbnail } from '@/app/lib/utils-client';
+import { Block } from "@/app/lib/definitions/definitions";
+import { getBlockThumbnail } from '@/app/lib/utils-client';
 
-interface ArtifactThumbnailProps {
-  block: Artifact;
+interface BlockThumbnailProps {
+  block: Block;
   contentIndex?: number;
   size?: number;
   priority?: boolean;
   className?: string;
 }
 
-export const ArtifactThumbnail: React.FC<ArtifactThumbnailProps> = ({ 
+export const BlockThumbnail: React.FC<BlockThumbnailProps> = ({ 
   block, 
   contentIndex = 0, 
   size = 40,
@@ -22,7 +22,7 @@ export const ArtifactThumbnail: React.FC<ArtifactThumbnailProps> = ({
   className = '',
 }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const thumbnailUrl = getArtifactThumbnail(block, contentIndex);
+  const thumbnailUrl = getBlockThumbnail(block, contentIndex);
 
   return (
     <div 

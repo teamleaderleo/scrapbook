@@ -2,13 +2,13 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient, useQueries } from 'react-query';
 import Fuse from 'fuse.js';
 import { ProjectFetchOptions } from '@/app/lib/definitions/definitions';
-import { ProjectWithArtifacts, ProjectPreview, BaseProject, ProjectWithExtendedArtifacts, ProjectWithTags } from "../definitions/definitions";
+import { ProjectWithBlocks, ProjectPreview, BaseProject, ProjectWithExtendedBlocks, ProjectWithTags } from "../definitions/definitions";
 import { createProject, updateProject, deleteProject } from '@/app/lib/actions/project-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { suggestTags } from '../external/claude-utils';
 import { getCachedProjectBasics, getCachedProjects } from '../data/cached-project-data';
-import { handleProjectArtifactsUpdate } from '../actions/project-handlers';
+import { handleProjectBlocksUpdate } from '../actions/project-handlers';
 import { useKeyNav } from './useKeyNav';
 
 const ITEMS_PER_PAGE = 6;
@@ -19,7 +19,7 @@ export function useProjects() {
   const [currentPage, setCurrentPage] = useState(1);
   const [fetchOptions, setFetchOptions] = useState<ProjectFetchOptions>({
     includeTags: true,
-    includeArtifacts: true,
+    includeBlocks: true,
     blockDetail: 'withContents',
   });
 
@@ -31,13 +31,13 @@ export function useProjects() {
   //   }
   // );
 
-  const { data: projects, isLoading, error } = useQuery<ProjectWithArtifacts[], Error>(
+  const { data: projects, isLoading, error } = useQuery<ProjectWithBlocks[], Error>(
     ['projects', ADMIN_UUID],
     async () => {
       const fetchedProjects = await getCachedProjects(ADMIN_UUID);
       
       // Update block and tag caches
-      // fetchedProjects.forEach((project: ProjectWithArtifacts) => {
+      // fetchedProjects.forEach((project: ProjectWithBlocks) => {
       //   if (project.blocks) {
       //     project.blocks.forEach(block => {
       //       queryClient.setQueryData(['block', block.id], block);
@@ -88,9 +88,9 @@ export function useProjects() {
     }
   );
 
-  const updateProjectArtifactsMutation = useMutation(
+  const updateProjectBlocksMutation = useMutation(
     ({ projectId, blockIds }: { projectId: string; blockIds: string[] }) =>
-        handleProjectArtifactsUpdate(ADMIN_UUID, projectId, blockIds),
+        handleProjectBlocksUpdate(ADMIN_UUID, projectId, blockIds),
     {
         onSuccess: () => {
         queryClient.invalidateQueries(['projects']);
@@ -156,7 +156,7 @@ export function useProjects() {
     handleSearch,
     handlePageChange,
     updateProject: updateProjectMutation.mutateAsync,
-    updateProjectArtifacts: updateProjectArtifactsMutation.mutateAsync,
+    updateProjectBlocks: updateProjectBlocksMutation.mutateAsync,
     deleteProject: deleteProjectMutation.mutateAsync,
     addProject: addProjectMutation.mutateAsync,
     updateProjectTags: updateProjectTagsMutation.mutateAsync,

@@ -3,8 +3,8 @@
 import { db } from '../db/db';
 import { revalidatePath } from 'next/cache';
 import { suggestTags } from '../external/claude-utils';
-import { handleArtifactUpdateWithinTransaction, handleArtifactDeleteWithinTransaction, handleArtifactCreateWithinTransaction } from './block-handlers';
-import { ArtifactFormSubmission, ArtifactFormSubmissionSchema } from '../definitions/definitions';
+import { handleBlockUpdateWithinTransaction, handleBlockDeleteWithinTransaction, handleBlockCreateWithinTransaction } from './block-handlers';
+import { BlockFormSubmission, BlockFormSubmissionSchema } from '../definitions/definitions';
 
 export type State = {
   errors?: {
@@ -21,42 +21,42 @@ export type State = {
   success?: boolean;
 };
 
-export async function updateArtifact(id: string, accountId: string, data: ArtifactFormSubmission): Promise<State> {
+export async function updateBlock(id: string, accountId: string, data: BlockFormSubmission): Promise<State> {
   try {
     await db.transaction(async (tx) => {
-      await handleArtifactUpdateWithinTransaction(tx, accountId, id, data);
+      await handleBlockUpdateWithinTransaction(tx, accountId, id, data);
     });
 
     revalidatePath('/dashboard/blocks');
-    return { message: 'Artifact updated successfully.', success: true };
+    return { message: 'Block updated successfully.', success: true };
   } catch (error) {
     console.error('Error updating block:', error);
-    return { message: 'Database Error: Failed to Update Artifact.', success: false };
+    return { message: 'Database Error: Failed to Update Block.', success: false };
   }
 }
 
-export async function deleteArtifact(id: string, accountId: string, data: ArtifactFormSubmission): Promise<State> {
+export async function deleteBlock(id: string, accountId: string, data: BlockFormSubmission): Promise<State> {
   try {
     await db.transaction(async (tx) => {
-      await handleArtifactDeleteWithinTransaction(tx, accountId, id);
+      await handleBlockDeleteWithinTransaction(tx, accountId, id);
     });
 
     revalidatePath('/dashboard/blocks');
-    return { message: 'Artifact deleted successfully.', success: true };
+    return { message: 'Block deleted successfully.', success: true };
   } catch (error) {
     console.error('Error deleting block:', error);
     return { message: 'Failed to delete block.', success: false };
   }
 }
 
-export async function createArtifact(accountId: string, data: ArtifactFormSubmission): Promise<State> {
+export async function createBlock(accountId: string, data: BlockFormSubmission): Promise<State> {
   try {
     return await db.transaction(async (tx) => {
-      const newArtifactId = await handleArtifactCreateWithinTransaction(tx, accountId, data);
-      return { message: 'Artifact created successfully', blockId: newArtifactId, success: true };
+      const newBlockId = await handleBlockCreateWithinTransaction(tx, accountId, data);
+      return { message: 'Block created successfully', blockId: newBlockId, success: true };
     });
   } catch (error: any) {
     console.error('Error creating block:', error);
-    return { message: `Error: Failed to Create Artifact. ${error.message}`, success: false };
+    return { message: `Error: Failed to Create Block. ${error.message}`, success: false };
   }
 }

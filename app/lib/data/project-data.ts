@@ -2,11 +2,11 @@
 
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { db } from '../db/db';
-import { blockContents, blocks, projectArtifactLinks, projects, tagAssociations, tags, } from '../db/schema';
-import { Artifact, BaseProject, ProjectWithArtifacts, Tag, } from "../definitions/definitions";
+import { blockContents, blocks, projectBlockLinks, projects, tagAssociations, tags, } from '../db/schema';
+import { Block, BaseProject, ProjectWithBlocks, Tag, } from "../definitions/definitions";
 
 
-export async function fetchAllProjects(accountId: string): Promise<ProjectWithArtifacts[]> {
+export async function fetchAllProjects(accountId: string): Promise<ProjectWithBlocks[]> {
   const results = await db
     .select({
       id: projects.id,
@@ -20,7 +20,7 @@ export async function fetchAllProjects(accountId: string): Promise<ProjectWithAr
         'id', ${tags.id},
         'name', ${tags.name}
       )) filter (where ${tags.id} is not null)`,
-      blocks: sql<Artifact[]>`json_agg(distinct jsonb_build_object(
+      blocks: sql<Block[]>`json_agg(distinct jsonb_build_object(
         'id', ${blocks.id},
         'name', ${blocks.name},
         'description', ${blocks.description},
@@ -48,8 +48,8 @@ export async function fetchAllProjects(accountId: string): Promise<ProjectWithAr
       eq(tagAssociations.accountId, projects.accountId)
     ))
     .leftJoin(tags, eq(tags.id, tagAssociations.tagId))
-    .leftJoin(projectArtifactLinks, eq(projectArtifactLinks.projectId, projects.id))
-    .leftJoin(blocks, eq(blocks.id, projectArtifactLinks.blockId))
+    .leftJoin(projectBlockLinks, eq(projectBlockLinks.projectId, projects.id))
+    .leftJoin(blocks, eq(blocks.id, projectBlockLinks.blockId))
     .where(eq(projects.accountId, accountId))
     .groupBy(projects.id)
     .orderBy(desc(projects.updatedAt));
@@ -57,7 +57,7 @@ export async function fetchAllProjects(accountId: string): Promise<ProjectWithAr
   return results;
 }
 
-// export async function fetchProjectsWithExtendedArtifacts(accountId: string): Promise<ProjectWithExtendedArtifacts[]> {
+// export async function fetchProjectsWithExtendedBlocks(accountId: string): Promise<ProjectWithExtendedBlocks[]> {
 //   // Similar to fetchAllProjects, but include block tags and projects
 //   // ...
 // }

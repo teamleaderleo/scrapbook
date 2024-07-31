@@ -62,13 +62,13 @@ export const tagAssociations = pgTable('tag_association', {
   tagIdIndex: index('idx_tag_associations_tag_id').on(table.tagId),
 }));
 
-export const projectArtifactLinks = pgTable('project_block_link', {
+export const projectBlockLinks = pgTable('project_block_link', {
   accountId: uuid('account_id').notNull().references(() => accounts.id),
   projectId: uuid('project_id').notNull().references(() => projects.id),
   blockId: uuid('block_id').notNull().references(() => blocks.id),
   addedAt: timestamp('added_at').notNull().defaultNow(),
 }, (table) => ({
-  projectArtifactIndex: index('idx_project_block_links').on(table.projectId, table.blockId, table.accountId),
+  projectBlockIndex: index('idx_project_block_links').on(table.projectId, table.blockId, table.accountId),
   blockIndex: index('idx_project_block_links_block').on(table.blockId),
   projectIndex: index('idx_project_block_links_project').on(table.projectId),
 }));

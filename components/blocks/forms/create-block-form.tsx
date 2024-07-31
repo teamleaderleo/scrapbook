@@ -2,18 +2,18 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
-import { ArtifactForm } from '@/components/blocks/forms/block-form';
-import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
+import { BlockWithRelations } from "@/app/lib/definitions/definitions";
+import { BlockForm } from '@/components/blocks/forms/block-form';
+import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useTags } from '@/app/lib/hooks/useTags';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
-import { ArtifactFormSubmission } from '@/app/lib/definitions/definitions';
+import { BlockFormSubmission } from '@/app/lib/definitions/definitions';
 
-export default function CreateArtifactForm() {
+export default function CreateBlockForm() {
   const router = useRouter();
-  const { addArtifact } = useArtifacts();
+  const { addBlock } = useBlocks();
   const { projects, isLoading: isLoadingProjects, error: projectsError } = useProjects();
   const { getOrCreateTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,7 +21,7 @@ export default function CreateArtifactForm() {
   const [suggestedContentExtensions, setSuggestedContentExtensions] = useState<string[]>([]);
   const { showToast } = useToastMessages();
 
-  const defaultArtifact: ArtifactWithRelations = {
+  const defaultBlock: BlockWithRelations = {
     accountId: ADMIN_UUID,
     id: '',
     name: '',
@@ -33,10 +33,10 @@ export default function CreateArtifactForm() {
     projects: []
   };
 
-  const handleSubmit = async (data: ArtifactFormSubmission) => {
+  const handleSubmit = async (data: BlockFormSubmission) => {
     setIsSubmitting(true);
     try {
-      await addArtifact(data);
+      await addBlock(data);
       showToast('success', 'create', 'block');
       router.push('/dashboard/blocks');
     } catch (error) {
@@ -60,12 +60,12 @@ export default function CreateArtifactForm() {
   if (projectsError) return <div>Error loading projects: {projectsError.message}</div>;
 
   return (
-    <ArtifactForm
-      block={defaultArtifact}
+    <BlockForm
+      block={defaultBlock}
       projects={projects || []}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
-      submitButtonText="Create Artifact"
+      submitButtonText="Create Block"
       cancelHref="/dashboard/blocks"
       suggestedTags={suggestedTags}
       suggestedContentExtensions={suggestedContentExtensions}

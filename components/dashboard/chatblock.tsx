@@ -4,13 +4,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/components/card";
 import { Button } from "@/components/ui/components/button";
 
-interface ArtifactData {
+interface BlockData {
   text: string;
   images: File[];
   tags: string[];
 }
 
-export default function ChatArtifact() {
+export default function ChatBlock() {
   const [text, setText] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [tags, setTags] = useState<string[]>([]);
@@ -41,7 +41,7 @@ export default function ChatArtifact() {
   };
 
   const handleSubmit = () => {
-    const blockData: ArtifactData = { text, images, tags };
+    const blockData: BlockData = { text, images, tags };
     console.log(blockData);
     // Here you would typically send the data to your server
     setText('');

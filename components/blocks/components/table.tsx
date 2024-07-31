@@ -2,40 +2,40 @@
 
 import React, { useEffect } from 'react';
 import { TagList } from '@/components/tags/taglist';
-import { DeleteArtifact, UpdateArtifact } from '@/components/blocks/components/button';
+import { DeleteBlock, UpdateBlock } from '@/components/blocks/components/button';
 import Pagination from '../../ui/components/pagination';
-import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
-import { ArtifactThumbnail } from './block-thumbnail';
+import { useBlocks } from '@/app/lib/hooks/useBlocks';
+import { BlockThumbnail } from './block-thumbnail';
 import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
 import { Tag } from '@/app/lib/definitions/definitions';
-import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
+import { BlockWithRelations } from "@/app/lib/definitions/definitions";
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
 import { SearchParamsHandler } from '../../search-params-handler';
 
 export function BlocksTable({ accountId }: { accountId: string }) {
   const { 
-    paginatedArtifacts,
+    paginatedBlocks,
     isLoading,
     error,
-    updateArtifact,
-    deleteArtifact,
+    updateBlock,
+    deleteBlock,
     handleSearch,
     handlePageChange,
     currentPage,
     totalPages,
-    updateArtifactTags,
-  } = useArtifacts();
+    updateBlockTags,
+  } = useBlocks();
 
   const { showToast } = useToastMessages();
 
   const handleTagsChange = async (blockId: string, newTags: string[]) => {
-    await updateArtifactTags({ blockId, tags: newTags });
+    await updateBlockTags({ blockId, tags: newTags });
   };
 
-  const handleDeleteArtifact = async (id: string) => {
+  const handleDeleteBlock = async (id: string) => {
     try {
-      await deleteArtifact(id);
+      await deleteBlock(id);
       showToast('success', 'delete', 'block');
     } catch (error) {
       console.error('Failed to delete block:', error);
@@ -73,13 +73,13 @@ export function BlocksTable({ accountId }: { accountId: string }) {
                 </tr>
               </thead>
               <tbody className="bg-white">
-                {paginatedArtifacts.map((block: ArtifactWithRelations) => (
+                {paginatedBlocks.map((block: BlockWithRelations) => (
                   <tr key={block.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0 relative overflow-hidden rounded-full">
                           <ErrorBoundaryWithToast>
-                            <ArtifactThumbnail
+                            <BlockThumbnail
                               block={block}
                               size={40}
                               priority={true}
@@ -113,7 +113,7 @@ export function BlocksTable({ accountId }: { accountId: string }) {
                           block.contents.slice(0, 3).map((content, index) => (
                             <div key={index} className="w-10 h-10 relative overflow-hidden rounded-full">
                               <ErrorBoundaryWithToast> 
-                                <ArtifactThumbnail
+                                <BlockThumbnail
                                   block={block}
                                   size={40}
                                   priority={index < 5} // Prioritize loading for the first 5 images
@@ -131,10 +131,10 @@ export function BlocksTable({ accountId }: { accountId: string }) {
                     </td>
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex justify-end">
-                        <UpdateArtifact block={block} />
-                        <DeleteArtifact 
+                        <UpdateBlock block={block} />
+                        <DeleteBlock 
                           id={block.id} 
-                          onDelete={() => handleDeleteArtifact(block.id)}  
+                          onDelete={() => handleDeleteBlock(block.id)}  
                         />
                       </div>
                     </td>

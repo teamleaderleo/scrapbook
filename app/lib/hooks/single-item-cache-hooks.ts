@@ -1,17 +1,17 @@
 import { useQueryClient } from 'react-query';
 import { Tag } from '../definitions/definitions';
-import { ArtifactWithRelations } from "../definitions/definitions";
-import { ProjectWithArtifacts } from "../definitions/definitions";
+import { BlockWithRelations } from "../definitions/definitions";
+import { ProjectWithBlocks } from "../definitions/definitions";
 
-export function useSingleArtifactFromCache(blockId: string): ArtifactWithRelations | undefined {
+export function useSingleBlockFromCache(blockId: string): BlockWithRelations | undefined {
   const queryClient = useQueryClient();
-  const blocks = queryClient.getQueryData<ArtifactWithRelations[]>(['blocks']);
+  const blocks = queryClient.getQueryData<BlockWithRelations[]>(['blocks']);
   return blocks?.find(block => block.id === blockId);
 }
 
-export function useSingleProjectFromCache(projectId: string): ProjectWithArtifacts | undefined {
+export function useSingleProjectFromCache(projectId: string): ProjectWithBlocks | undefined {
   const queryClient = useQueryClient();
-  const projects = queryClient.getQueryData<ProjectWithArtifacts[]>(['projects']);
+  const projects = queryClient.getQueryData<ProjectWithBlocks[]>(['projects']);
   return projects?.find(project => project.id === projectId);
 }
 

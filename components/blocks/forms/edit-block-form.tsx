@@ -2,16 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArtifactForm } from '@/components/blocks/forms/block-form';
-import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
+import { BlockForm } from '@/components/blocks/forms/block-form';
+import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useTags } from '@/app/lib/hooks/useTags';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
-import { ArtifactFormSubmission } from '@/app/lib/definitions/definitions';
+import { BlockFormSubmission } from '@/app/lib/definitions/definitions';
 
-export default function EditArtifactForm({ blockId }: { blockId: string }) {
+export default function EditBlockForm({ blockId }: { blockId: string }) {
   const router = useRouter();
-  const { blocks, updateArtifact, isLoading: isLoadingArtifacts } = useArtifacts();
+  const { blocks, updateBlock, isLoading: isLoadingBlocks } = useBlocks();
   const { projects, isLoading: isLoadingProjects, error: projectsError } = useProjects();
   const { getOrCreateTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,12 +22,12 @@ export default function EditArtifactForm({ blockId }: { blockId: string }) {
   const block = blocks?.find(a => a.id === blockId);
 
   useEffect(() => {
-    if (!isLoadingArtifacts && !block) {
+    if (!isLoadingBlocks && !block) {
       router.replace('/dashboard/blocks');
     }
-  }, [block, blockId, router, isLoadingArtifacts]);
+  }, [block, blockId, router, isLoadingBlocks]);
 
-  if (isLoadingArtifacts || isLoadingProjects) {
+  if (isLoadingBlocks || isLoadingProjects) {
     return <div>Loading...</div>;
   }
 
@@ -39,10 +39,10 @@ export default function EditArtifactForm({ blockId }: { blockId: string }) {
     return null;
   }
 
-  const handleSubmit = async (data: ArtifactFormSubmission) => {
+  const handleSubmit = async (data: BlockFormSubmission) => {
     setIsSubmitting(true);
     try {
-      await updateArtifact({ id: blockId, data });
+      await updateBlock({ id: blockId, data });
       showToast('success', 'update', 'block');
       router.push('/dashboard/blocks');
     } catch (error) {
@@ -60,12 +60,12 @@ export default function EditArtifactForm({ blockId }: { blockId: string }) {
   // };
 
   return (
-    <ArtifactForm
+    <BlockForm
       block={block}
       projects={projects || []}
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
-      submitButtonText="Update Artifact"
+      submitButtonText="Update Block"
       cancelHref="/dashboard/blocks"
       suggestedTags={suggestedTags}
       suggestedContentExtensions={suggestedContentExtensions}

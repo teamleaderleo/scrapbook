@@ -1,16 +1,16 @@
 import React from 'react';
-import { ProjectWithArtifacts } from "@/app/lib/definitions/definitions";
-import { ArtifactThumbnail } from '@/components/blocks/components/block-thumbnail';
+import { ProjectWithBlocks } from "@/app/lib/definitions/definitions";
+import { BlockThumbnail } from '@/components/blocks/components/block-thumbnail';
 
-export const ProjectCard: React.FC<{ project: ProjectWithArtifacts }> = ({ project }) => {
-  const mainArtifact = project.blocks.find(a => a.contents.some(c => c.type === 'image'));
-  const mainImage = mainArtifact?.contents.find(c => c.type === 'image');
+export const ProjectCard: React.FC<{ project: ProjectWithBlocks }> = ({ project }) => {
+  const mainBlock = project.blocks.find(a => a.contents.some(c => c.type === 'image'));
+  const mainImage = mainBlock?.contents.find(c => c.type === 'image');
 
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
       {mainImage && (
         <div className="aspect-w-16 aspect-h-9">
-          <ArtifactThumbnail block={mainArtifact!} size={400} priority={true} />
+          <BlockThumbnail block={mainBlock!} size={400} priority={true} />
         </div>
       )}
       <div className="p-4">

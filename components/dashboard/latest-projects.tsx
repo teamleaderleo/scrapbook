@@ -3,7 +3,7 @@
 // import Image from 'next/image';
 // import { lusitana } from '@/components/ui/fonts';
 // import { fetchLatestProjects } from '@/app/lib/data/data';
-// import { getArtifactThumbnail } from '@/app/lib/utils-client';
+// import { getBlockThumbnail } from '@/app/lib/utils-client';
 
 // const ADMIN_UUID = '410544b2-4001-4271-9855-fec4b6a6442a'
 // export default async function LatestProjects() {
@@ -16,7 +16,7 @@
 //       <div className="flex grow flex-col justify-between rounded-xl bg-gray-50 p-4">
 //         <div className="bg-white px-6">
 //           {latestProjects.map((project, i) => {
-//             const latestArtifact = project.blocks && project.blocks.length > 0 ? project.blocks[0] : null;
+//             const latestBlock = project.blocks && project.blocks.length > 0 ? project.blocks[0] : null;
 //             return (
 //               <div
 //                 key={project.id}
@@ -28,9 +28,9 @@
 //                 )}
 //               >
 //                 <div className="flex items-center">
-//                   {latestArtifact ? (
+//                   {latestBlock ? (
 //                     <Image
-//                       src={getArtifactThumbnail(latestArtifact)}
+//                       src={getBlockThumbnail(latestBlock)}
 //                       alt={`${project.name}'s latest block`}
 //                       className="mr-4 rounded-full"
 //                       width={32}

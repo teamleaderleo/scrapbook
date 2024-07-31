@@ -1,16 +1,16 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
+import { BlockWithRelations } from "@/app/lib/definitions/definitions";
 import { ErrorBoundaryWithToast } from '@/components/errors/error-boundary';
-import { ArtifactThumbnail } from '@/components/blocks/components/block-thumbnail';
+import { BlockThumbnail } from '@/components/blocks/components/block-thumbnail';
 
-export const ArtifactGrid = ({ blocks }: { blocks: ArtifactWithRelations[] }) => (
+export const BlockGrid = ({ blocks }: { blocks: BlockWithRelations[] }) => (
   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
     {blocks.map((block) => (
       <Link href={`/dashboard/blocks/${block.id}`} key={block.id} className="block">
         <div className="relative aspect-square overflow-hidden rounded-lg group">
           <ErrorBoundaryWithToast>
-            <ArtifactThumbnail
+            <BlockThumbnail
               block={block}
               size={300}
               priority={true}

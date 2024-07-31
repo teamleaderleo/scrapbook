@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
-import { getArtifactThumbnail } from '@/app/lib/utils-client';
+import { BlockWithRelations } from "@/app/lib/definitions/definitions";
+import { getBlockThumbnail } from '@/app/lib/utils-client';
 
-export const useImagePreloader = (blocks: ArtifactWithRelations[]) => {
+export const useImagePreloader = (blocks: BlockWithRelations[]) => {
   useEffect(() => {
     blocks.forEach((block) => {
-      const thumbnailData = getArtifactThumbnail(block);
+      const thumbnailData = getBlockThumbnail(block);
       const img = new Image();
       img.src = thumbnailData.src;
       img.width = thumbnailData.width;

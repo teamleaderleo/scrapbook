@@ -6,8 +6,8 @@ import { DeleteProject, UpdateProject } from '@/components/projects/components/b
 import Pagination from '../../ui/components/pagination';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
-import { Artifact, ProjectWithArtifacts } from "@/app/lib/definitions/definitions";
-import { ArtifactThumbnail } from '../../blocks/components/block-thumbnail';
+import { Block, ProjectWithBlocks } from "@/app/lib/definitions/definitions";
+import { BlockThumbnail } from '../../blocks/components/block-thumbnail';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
 import { SearchParamsHandler } from '../../search-params-handler';
@@ -64,7 +64,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
                   <th scope="col" className="px-3 py-5 font-medium">Description</th>
                   <th scope="col" className="px-3 py-5 font-medium">Status</th>
                   <th scope="col" className="px-3 py-5 font-medium">Tags</th>
-                  <th scope="col" className="px-3 py-5 font-medium">Artifacts</th>
+                  <th scope="col" className="px-3 py-5 font-medium">Blocks</th>
                   <th scope="col" className="px-3 py-5 font-medium">Updated</th>
                   <th scope="col" className="px-3 py-5 font-medium">Preview</th>
                   <th scope="col" className="relative py-3 pl-6 pr-3">
@@ -73,7 +73,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
                 </tr>
               </thead>
               <tbody className="bg-white">
-                {paginatedProjects.map((project: ProjectWithArtifacts) => (
+                {paginatedProjects.map((project: ProjectWithBlocks) => (
                   <tr key={project.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <p className="font-medium">{project.name}</p>
@@ -97,8 +97,8 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
                           <div key={project.blocks[0].id} className="w-10 h-10 relative overflow-hidden rounded-full">
                             <ErrorBoundaryWithToast>
                               {project.blocks[0] && (
-                                <ArtifactThumbnail
-                                  block={project.blocks[0] as Artifact}
+                                <BlockThumbnail
+                                  block={project.blocks[0] as Block}
                                   size={40}
                                   priority={true}
                                   className="flex-shrink-0"

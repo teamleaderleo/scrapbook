@@ -2,25 +2,25 @@
 
 import React, { useState, useEffect } from 'react';
 import { ScrollArea } from "@/components/ui/components/scroll-area";
-import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
+import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { ProjectList } from './project-list';
-import { ArtifactGrid } from './block-grid';
+import { BlockGrid } from './block-grid';
 import { QuickAccess } from './quick-access';
 import { Card, CardHeader, CardContent } from "@/components/ui/components/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/components/toggle-group";
 import { Grid, BarChart } from "lucide-react";
 
 const Dashboard = () => {
-  const { blocks, isLoading: blocksLoading, error: blocksError } = useArtifacts();
+  const { blocks, isLoading: blocksLoading, error: blocksError } = useBlocks();
   const { projects, isLoading: projectsLoading, error: projectsError } = useProjects();
   const [view, setView] = useState("blocks");
 
-  const [featuredArtifacts, setFeaturedArtifacts] = useState(blocks?.slice(0, 12) || []);
+  const [featuredBlocks, setFeaturedBlocks] = useState(blocks?.slice(0, 12) || []);
   const [recentProjects, setRecentProjects] = useState(projects?.slice(0, 20) || []);
 
   useEffect(() => {
-    if (blocks) setFeaturedArtifacts(blocks.slice(0, 12));
+    if (blocks) setFeaturedBlocks(blocks.slice(0, 12));
     if (projects) setRecentProjects(projects.slice(0, 20));
   }, [blocks, projects]);
 
@@ -53,7 +53,7 @@ const Dashboard = () => {
           <CardContent className="flex-1 p-0 overflow-hidden">
             {view === "blocks" ? (
               <ScrollArea className="h-full">
-                <ArtifactGrid blocks={featuredArtifacts} />
+                <BlockGrid blocks={featuredBlocks} />
               </ScrollArea>
             ) : (
               <ScrollArea className="h-full p-4">
@@ -68,7 +68,7 @@ const Dashboard = () => {
                   </Card>
                   <Card>
                     <CardHeader>
-                      <h3 className="text-sm font-medium">Total Artifacts</h3>
+                      <h3 className="text-sm font-medium">Total Blocks</h3>
                     </CardHeader>
                     <CardContent>
                       <p className="text-2xl font-bold">{blocks?.length}</p>

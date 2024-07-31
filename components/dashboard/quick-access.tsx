@@ -14,7 +14,7 @@ export const QuickAccess = () => (
     <Link href="/dashboard/blocks/create">
       <Button variant="outline" size="sm">
         <FileText className="mr-2 h-4 w-4" />
-        New Artifact
+        New Block
       </Button>
     </Link>
     <Button variant="outline" size="sm">

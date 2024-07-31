@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProjectForm } from '@/components/projects/forms/project-form';
 import { useProjects } from '@/app/lib/hooks/useProjects';
-import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
+import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { useTags } from '@/app/lib/hooks/useTags';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
@@ -12,7 +12,7 @@ import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 export default function CreateProjectForm() {
   const router = useRouter();
   const { addProject, } = useProjects();
-  const { blocks, isLoading: isLoadingArtifacts, error: blocksError } = useArtifacts();
+  const { blocks, isLoading: isLoadingBlocks, error: blocksError } = useBlocks();
   const { tagNamesToTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
@@ -52,7 +52,7 @@ export default function CreateProjectForm() {
   //   setSuggestedTags(tags);
   // };
 
-  if (isLoadingArtifacts) return <div>Loading blocks...</div>;
+  if (isLoadingBlocks) return <div>Loading blocks...</div>;
   if (blocksError) return <div>Error loading blocks: {blocksError.message}</div>;
 
   return (

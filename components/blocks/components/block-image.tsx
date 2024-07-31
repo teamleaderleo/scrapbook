@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Artifact } from "@/app/lib/definitions/definitions";
+import { Block } from "@/app/lib/definitions/definitions";
 import { THUMBNAIL_CONFIGS } from '@/app/lib/image-processing/image-processing';
 import { generateColorGradient } from '@/app/lib/image-processing/image-processing';
 
-interface ArtifactImageProps {
-  block: Artifact;
+interface BlockImageProps {
+  block: Block;
   size: 'small' | 'medium' | 'large';
 }
 
@@ -16,7 +16,7 @@ const ColorGradient: React.FC<{ colors: string[] }> = ({ colors }) => (
   />
 );
 
-export const ArtifactImage: React.FC<ArtifactImageProps> = ({ block, size }) => {
+export const BlockImage: React.FC<BlockImageProps> = ({ block, size }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const content = block.contents.find(c => c.type === 'image');
   if (!content || !content.metadata || content.type !== 'image') {

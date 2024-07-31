@@ -2,14 +2,14 @@
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
-import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
+import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { useEffect, useState } from 'react';
 
 export default function Search({ placeholder }: { placeholder: string }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
-  const { handleSearch } = useArtifacts();
+  const { handleSearch } = useBlocks();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('query')?.toString() || '');
 
   // useEffect(() => {

@@ -4,14 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProjectForm } from '@/components/projects/forms/project-form';
 import { useProjects } from '@/app/lib/hooks/useProjects';
-import { useArtifacts } from '@/app/lib/hooks/useArtifacts';
+import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { useTags } from '@/app/lib/hooks/useTags';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 
 export default function EditProjectForm({ projectId }: { projectId: string }) {
   const router = useRouter();
   const { projects, updateProject, isLoading: isLoadingProjects, } = useProjects();
-  const { blocks, isLoading: isLoadingArtifacts, error: blocksError } = useArtifacts();
+  const { blocks, isLoading: isLoadingBlocks, error: blocksError } = useBlocks();
   const { tagNamesToTags } = useTags();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
@@ -26,7 +26,7 @@ export default function EditProjectForm({ projectId }: { projectId: string }) {
     }
   }, [project, projectId, router, isLoadingProjects]);
 
-  if (isLoadingProjects || isLoadingArtifacts) {
+  if (isLoadingProjects || isLoadingBlocks) {
     return <div>Loading...</div>;
   }
 

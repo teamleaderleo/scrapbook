@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import Search from '@/components/ui/components/search';
-import { ArtifactsTableSkeleton } from '@/components/ui/components/skeletons';
+import { BlocksTableSkeleton } from '@/components/ui/components/skeletons';
 import { Metadata } from 'next';
 
 const TagManagementTable = dynamic(
@@ -24,7 +24,7 @@ export default async function TagsPage({
           <Search placeholder="Search tags..." />
         </Suspense>
       </div>
-      <Suspense fallback={<ArtifactsTableSkeleton />}>
+      <Suspense fallback={<BlocksTableSkeleton />}>
         <TagManagementTable accountId={ADMIN_UUID} />
       </Suspense>
     </div>

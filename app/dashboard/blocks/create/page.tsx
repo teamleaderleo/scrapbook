@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
-import CreateArtifactForm from '@/components/blocks/forms/create-block-form';
+import CreateBlockForm from '@/components/blocks/forms/create-block-form';
 import Breadcrumbs from '@/components/ui/components/breadcrumbs';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Create Artifact',
+  title: 'Create Block',
 };
 
 export default function Page() {
@@ -12,16 +12,16 @@ export default function Page() {
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: 'Artifacts', href: '/dashboard/blocks' },
+          { label: 'Blocks', href: '/dashboard/blocks' },
           {
-            label: 'Create Artifact',
+            label: 'Create Block',
             href: '/dashboard/blocks/create',
             active: true,
           },
         ]}
       />
       <Suspense fallback={<div>Loading form...</div>}>
-        <CreateArtifactForm />
+        <CreateBlockForm />
       </Suspense>
     </main>
   );

@@ -1,18 +1,18 @@
 'use server';
 
 import { eq, and } from 'drizzle-orm';
-import { blocks, tagAssociations, projectArtifactLinks } from '../db/schema';
+import { blocks, tagAssociations, projectBlockLinks } from '../db/schema';
 import { handleContentsUpdate, deleteAllContents } from './block-content-actions';
 import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { handleProjectUpdateWithinTransaction } from './project-handlers';
 import { v4 as uuid } from 'uuid';
-import { ArtifactFormSubmission } from '../definitions/definitions';
+import { BlockFormSubmission } from '../definitions/definitions';
 
-export async function handleArtifactUpdateWithinTransaction(
+export async function handleBlockUpdateWithinTransaction(
   tx: any,
   accountId: string,
   blockId: string,
-  data: ArtifactFormSubmission
+  data: BlockFormSubmission
 ): Promise<void> {
   const { name, description, tags, projects, contents } = data;
 
@@ -32,14 +32,14 @@ export async function handleArtifactUpdateWithinTransaction(
   await handleProjectUpdateWithinTransaction(tx, accountId, blockId, projects);
 }
 
-export async function handleArtifactDeleteWithinTransaction(
+export async function handleBlockDeleteWithinTransaction(
   tx: any,
   accountId: string,
   blockId: string
 ): Promise<void> {
   // Delete associated tags and project links
   await tx.delete(tagAssociations).where(and(eq(tagAssociations.associatedId, blockId), eq(tagAssociations.accountId, accountId)));
-  await tx.delete(projectArtifactLinks).where(and(eq(projectArtifactLinks.blockId, blockId), eq(projectArtifactLinks.accountId, accountId)));
+  await tx.delete(projectBlockLinks).where(and(eq(projectBlockLinks.blockId, blockId), eq(projectBlockLinks.accountId, accountId)));
   
   // Delete all associated content records
   await deleteAllContents(tx, accountId, blockId);
@@ -48,17 +48,17 @@ export async function handleArtifactDeleteWithinTransaction(
   await tx.delete(blocks).where(and(eq(blocks.id, blockId), eq(blocks.accountId, accountId)));
 }
 
-export async function handleArtifactCreateWithinTransaction(
+export async function handleBlockCreateWithinTransaction(
   tx: any,
   accountId: string,
-  data: ArtifactFormSubmission
+  data: BlockFormSubmission
 ): Promise<string> {
   const { name, description, tags, projects, contents } = data;
-  const newArtifactId = uuid();
+  const newBlockId = uuid();
   const now = new Date();
 
   await tx.insert(blocks).values({ 
-    id: newArtifactId,
+    id: newBlockId,
     accountId, 
     name, 
     description, 
@@ -66,10 +66,10 @@ export async function handleArtifactCreateWithinTransaction(
     updatedAt: now 
   });
 
-  await handleContentsUpdate(tx, accountId, newArtifactId, contents);
+  await handleContentsUpdate(tx, accountId, newBlockId, contents);
 
-  await handleTagUpdateWithinTransaction(tx, accountId, newArtifactId, 'block', tags);
-  await handleProjectUpdateWithinTransaction(tx, accountId, newArtifactId, projects);
+  await handleTagUpdateWithinTransaction(tx, accountId, newBlockId, 'block', tags);
+  await handleProjectUpdateWithinTransaction(tx, accountId, newBlockId, projects);
 
-  return newArtifactId;
+  return newBlockId;
 }

@@ -2,10 +2,10 @@
 
 import { eq, and, or, ilike, sql, SQL, desc } from 'drizzle-orm';
 import { db } from '../db/db';
-import { blocks, blockContents, tags, tagAssociations, projectArtifactLinks, projects } from '../db/schema';
-import { ArtifactWithRelations } from "../definitions/definitions";
+import { blocks, blockContents, tags, tagAssociations, projectBlockLinks, projects } from '../db/schema';
+import { BlockWithRelations } from "../definitions/definitions";
 
-export async function fetchAllArtifacts(accountId: string): Promise<ArtifactWithRelations[]> {
+export async function fetchAllBlocks(accountId: string): Promise<BlockWithRelations[]> {
   const results = await db
     .select({
       id: blocks.id,
@@ -42,8 +42,8 @@ export async function fetchAllArtifacts(accountId: string): Promise<ArtifactWith
     .leftJoin(blockContents, eq(blocks.id, blockContents.blockId))
     .leftJoin(tagAssociations, eq(blocks.id, tagAssociations.associatedId))
     .leftJoin(tags, eq(tagAssociations.tagId, tags.id))
-    .leftJoin(projectArtifactLinks, eq(blocks.id, projectArtifactLinks.blockId))
-    .leftJoin(projects, eq(projectArtifactLinks.projectId, projects.id))
+    .leftJoin(projectBlockLinks, eq(blocks.id, projectBlockLinks.blockId))
+    .leftJoin(projects, eq(projectBlockLinks.projectId, projects.id))
     .where(eq(blocks.accountId, accountId))
     .groupBy(blocks.id)
     .orderBy(desc(blocks.updatedAt));

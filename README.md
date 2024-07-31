@@ -18,7 +18,7 @@ This is an ongoing effort.
 ![image](https://github.com/user-attachments/assets/f5e1507f-541c-4485-9dd7-8d6d87a25ad8)
 
 
-### Artifacts:
+### Blocks:
 
 ![image](https://github.com/user-attachments/assets/b41927cd-af3d-489b-9745-72b10a18d35e)
 

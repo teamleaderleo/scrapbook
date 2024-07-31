@@ -17,7 +17,7 @@
 //     try {
 //       const result = await getRecommendations({
 //         includeProjects: true,
-//         includeArtifacts: true,
+//         includeBlocks: true,
 //         includeTags: true,
 //         includeContentExtensions: true
 //       });
@@ -47,7 +47,7 @@
 //       )}
 //       {recommendations.blocks.length > 0 && (
 //         <div className="mt-4">
-//           <h3 className="font-semibold">Recommended Artifacts</h3>
+//           <h3 className="font-semibold">Recommended Blocks</h3>
 //           <ul className="list-disc pl-5">
 //             {recommendations.blocks.map((block, index) => (
 //               <li key={index}>{block}</li>

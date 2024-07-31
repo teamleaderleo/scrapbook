@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
-import { ProjectWithArtifacts } from "@/app/lib/definitions/definitions";
+import { BlockWithRelations } from "@/app/lib/definitions/definitions";
+import { ProjectWithBlocks } from "@/app/lib/definitions/definitions";
 import Link from 'next/link';
 import { Button } from '@/components/ui/components/button';
 import { TagManager } from '@/components/tags/tagmanager';
@@ -8,8 +8,8 @@ import { Suggestions } from '@/components/suggestions/suggestions';
 import { useTags } from '@/app/lib/hooks/useTags';
 
 interface ProjectFormProps {
-  project: ProjectWithArtifacts;
-  blocks: ArtifactWithRelations[];
+  project: ProjectWithBlocks;
+  blocks: BlockWithRelations[];
   onSubmit: (formData: FormData) => void;
   isSubmitting: boolean;
   submitButtonText: string;
@@ -100,9 +100,9 @@ export function ProjectForm({
             </select>
           </div>
 
-          {/* Associated Artifacts */}
+          {/* Associated Blocks */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-medium">Associated Artifacts</label>
+            <label className="mb-2 block text-sm font-medium">Associated Blocks</label>
             {blocks.map((block) => (
               <div key={block.id} className="flex items-center mb-2">
                 <input

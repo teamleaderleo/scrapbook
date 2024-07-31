@@ -66,7 +66,7 @@ export async function suggestContentExtensions(content: string): Promise<string[
   }
 }
 
-export async function suggestArtifactName(content: string): Promise<string> {
+export async function suggestBlockName(content: string): Promise<string> {
   const prompt = `Based on the following content, suggest a concise and descriptive name for an block:
 
   ${content}
@@ -76,7 +76,7 @@ export async function suggestArtifactName(content: string): Promise<string> {
   try {
     return await getClaudeResponse(prompt);
   } catch (error) {
-    console.error('Error in suggestArtifactName:', error);
+    console.error('Error in suggestBlockName:', error);
     return '';
   }
 }
@@ -112,7 +112,7 @@ export async function suggestRelatedTopics(content: string): Promise<string[]> {
   }
 }
 
-export async function generateArtifactIdeas(context: string): Promise<string[]> {
+export async function generateBlockIdeas(context: string): Promise<string[]> {
   const prompt = `Given the following context, suggest 3 ideas for new blocks that could be created:
 
   ${context}
@@ -123,7 +123,7 @@ export async function generateArtifactIdeas(context: string): Promise<string[]> 
     const result = await getClaudeResponse(prompt);
     return result.split(',').map(idea => idea.trim()).filter(idea => idea !== '');
   } catch (error) {
-    console.error('Error in generateArtifactIdeas:', error);
+    console.error('Error in generateBlockIdeas:', error);
     return [];
   }
 }

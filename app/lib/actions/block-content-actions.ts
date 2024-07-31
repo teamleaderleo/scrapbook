@@ -1,13 +1,13 @@
 import { eq, and } from 'drizzle-orm';
 import { blockContents } from '../db/schema';
-import { ArtifactContent, ArtifactFormSubmission } from '../definitions/definitions';
+import { BlockContent, BlockFormSubmission } from '../definitions/definitions';
 import { v4 as uuid } from 'uuid';
 
 export async function handleContentsUpdate(
   tx: any,
   accountId: string,
   blockId: string,
-  contents: ArtifactFormSubmission['contents']
+  contents: BlockFormSubmission['contents']
 ): Promise<void> {
   for (const content of contents) {
     if (content.id) {
@@ -22,7 +22,7 @@ export async function insertContent(
   tx: any,
   accountId: string,
   blockId: string,
-  content: ArtifactFormSubmission['contents'][0]
+  content: BlockFormSubmission['contents'][0]
 ): Promise<void> {
   await tx.insert(blockContents).values({
     id: uuid(),
@@ -40,7 +40,7 @@ export async function updateContent(
   tx: any,
   accountId: string,
   blockId: string,
-  content: ArtifactFormSubmission['contents'][0]
+  content: BlockFormSubmission['contents'][0]
 ): Promise<void> {
   await tx.update(blockContents)
     .set({

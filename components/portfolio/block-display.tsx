@@ -1,6 +1,6 @@
-import { Artifact, ArtifactContent } from "@/app/lib/definitions/definitions";
+import { Block, BlockContent } from "@/app/lib/definitions/definitions";
 
-export const ArtifactDisplay = ({ block }: { block: Artifact }) => {
+export const BlockDisplay = ({ block }: { block: Block }) => {
   return (
     <div className="block">
       {block.name && <h3>{block.name}</h3>}
@@ -12,7 +12,7 @@ export const ArtifactDisplay = ({ block }: { block: Artifact }) => {
   );
 };
 
-export const ContentDisplay = ({ content }: { content: ArtifactContent }) => {
+export const ContentDisplay = ({ content }: { content: BlockContent }) => {
   switch (content.type) {
     case 'text':
       return <TextContent content={content} />;
@@ -27,31 +27,31 @@ export const ContentDisplay = ({ content }: { content: ArtifactContent }) => {
   }
 };
 
-export const TextContent = ({ content }: { content: ArtifactContent }) => (
+export const TextContent = ({ content }: { content: BlockContent }) => (
   <p>{content.content}</p>
 );
 
 import Image from 'next/image';
 
-export const ImageContent = ({ content }: { content: ArtifactContent }) => (
+export const ImageContent = ({ content }: { content: BlockContent }) => (
   <Image src={content.content} alt={content.metadata ? content.metadata.toString() : 'Image'} width={500} height={500} />
 );
 
 // Implement other content type components...
 // (I just made a few of them up to temporarily get rid of red lines)
-export const FileContent = ({ content }: { content: ArtifactContent }) => (
+export const FileContent = ({ content }: { content: BlockContent }) => (
   <p>
     <a href={content.content}></a>
   </p>
 );
 
-export const LinkContent = ({ content }: { content: ArtifactContent }) => (
+export const LinkContent = ({ content }: { content: BlockContent }) => (
   <p>
     <a href={content.content}></a>
   </p>
 );
 
-export const EmbedContent = ({ content }: { content: ArtifactContent }) => (
+export const EmbedContent = ({ content }: { content: BlockContent }) => (
   <p>
     <a href={content.content}></a>
   </p>

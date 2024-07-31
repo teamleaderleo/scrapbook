@@ -1,9 +1,9 @@
 import React from 'react';
-import { ArtifactDisplay } from './block-display';
-import { Artifact, ArtifactWithRelations } from "@/app/lib/definitions/definitions";
-import { ProjectWithArtifacts, ProjectWithExtendedArtifacts } from "@/app/lib/definitions/definitions";
+import { BlockDisplay } from './block-display';
+import { Block, BlockWithRelations } from "@/app/lib/definitions/definitions";
+import { ProjectWithBlocks, ProjectWithExtendedBlocks } from "@/app/lib/definitions/definitions";
 
-export const ProjectDisplay: React.FC<{ project: ProjectWithArtifacts }> = ({ project }) => {
+export const ProjectDisplay: React.FC<{ project: ProjectWithBlocks }> = ({ project }) => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">{project.name}</h2>
@@ -26,9 +26,9 @@ export const ProjectDisplay: React.FC<{ project: ProjectWithArtifacts }> = ({ pr
         </div>
       )}
       <div className="space-y-8">
-        {project.blocks.map((block: Artifact) => (
+        {project.blocks.map((block: Block) => (
           <div key={block.id} className="border-t pt-6">
-            <ArtifactDisplay block={block} />
+            <BlockDisplay block={block} />
           </div>
         ))}
       </div>

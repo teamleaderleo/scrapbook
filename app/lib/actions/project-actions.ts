@@ -5,7 +5,7 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '../db/db';
 import { revalidatePath } from 'next/cache';
 import { suggestTags } from '../external/claude-utils';
-import { projects, projectArtifactLinks, tagAssociations } from '../db/schema';
+import { projects, projectBlockLinks, tagAssociations } from '../db/schema';
 import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { v4 as uuid } from 'uuid';
 
@@ -75,7 +75,7 @@ export async function createProject(accountId: string, formData: FormData): Prom
       // Handle blocks
       if (blocks && blocks.length > 0) {
         for (const blockId of blocks) {
-          await tx.insert(projectArtifactLinks).values({
+          await tx.insert(projectBlockLinks).values({
             accountId,
             projectId: newProjectId,
             blockId,
@@ -128,15 +128,15 @@ export async function updateProject(id: string, accountId: string, formData: For
       }
 
       // Handle blocks
-      await tx.delete(projectArtifactLinks)
+      await tx.delete(projectBlockLinks)
         .where(and(
-          eq(projectArtifactLinks.projectId, id),
-          eq(projectArtifactLinks.accountId, accountId)
+          eq(projectBlockLinks.projectId, id),
+          eq(projectBlockLinks.accountId, accountId)
         ));
 
       if (blocks && blocks.length > 0) {
         for (const blockId of blocks) {
-          await tx.insert(projectArtifactLinks).values({
+          await tx.insert(projectBlockLinks).values({
             accountId,
             projectId: id,
             blockId,
@@ -163,7 +163,7 @@ export async function deleteProject(id: string, accountId: string): Promise<Stat
   try {
     await db.transaction(async (tx) => {
       await tx.delete(tagAssociations).where(and(eq(tagAssociations.associatedId, id), eq(tagAssociations.accountId, accountId)));
-      await tx.delete(projectArtifactLinks).where(and(eq(projectArtifactLinks.projectId, id), eq(projectArtifactLinks.accountId, accountId)));
+      await tx.delete(projectBlockLinks).where(and(eq(projectBlockLinks.projectId, id), eq(projectBlockLinks.accountId, accountId)));
       await tx.delete(projects).where(and(eq(projects.id, id), eq(projects.accountId, accountId)));
     });
 

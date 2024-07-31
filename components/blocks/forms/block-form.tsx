@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { ArtifactFormSubmission, ContentType, Tag } from '@/app/lib/definitions/definitions';
-import { ArtifactWithRelations } from "@/app/lib/definitions/definitions";
+import { BlockFormSubmission, ContentType, Tag } from '@/app/lib/definitions/definitions';
+import { BlockWithRelations } from "@/app/lib/definitions/definitions";
 import { BaseProject } from "@/app/lib/definitions/definitions";
 import Link from 'next/link';
 import { Button } from '@/components/ui/components/button';
@@ -8,10 +8,10 @@ import { TagManager } from '@/components/tags/tagmanager';
 import { Suggestions } from '@/components/suggestions/suggestions';
 import { useTags } from '@/app/lib/hooks/useTags';
 
-interface ArtifactFormProps {
-  block?: ArtifactWithRelations;
+interface BlockFormProps {
+  block?: BlockWithRelations;
   projects: BaseProject[];
-  onSubmit: (data: ArtifactFormSubmission) => void;
+  onSubmit: (data: BlockFormSubmission) => void;
   isSubmitting: boolean;
   submitButtonText: string;
   cancelHref: string;
@@ -20,7 +20,7 @@ interface ArtifactFormProps {
   onGetAISuggestions?: () => void;
 }
 
-export function ArtifactForm({
+export function BlockForm({
   block,
   projects,
   onSubmit,
@@ -30,7 +30,7 @@ export function ArtifactForm({
   suggestedTags = [],
   suggestedContentExtensions = [],
   onGetAISuggestions,
-}: ArtifactFormProps) {
+}: BlockFormProps) {
   const { tagNames, tagNamesToTags } = useTags();
   const [selectedTags, setSelectedTags] = useState<string[]>(block?.tags.map(t => t.name) || []);
   const [contentItems, setContentItems] = useState<{id?: string, type: ContentType, content: string | File}[]>(
@@ -138,16 +138,16 @@ export function ArtifactForm({
     <form onSubmit={handleSubmit} ref={formRef}>
       <div>
         <div className="flex justify-between items-center mb-4">
-          {/* <h1 className="text-2xl font-bold">{block ? 'Edit' : 'Create'} Artifact</h1> */}
+          {/* <h1 className="text-2xl font-bold">{block ? 'Edit' : 'Create'} Block</h1> */}
           {onGetAISuggestions && (
             <Button onClick={onGetAISuggestions}>Get AI Suggestions</Button>
           )}
         </div>
         
         <div className="rounded-md bg-gray-50 p-4 md:p-6">
-          {/* Artifact Name */}
+          {/* Block Name */}
           <div className="mb-4">
-            <label htmlFor="name" className="mb-2 block text-sm font-medium">Artifact Name</label>
+            <label htmlFor="name" className="mb-2 block text-sm font-medium">Block Name</label>
             <input
               id="name"
               name="name"
@@ -159,9 +159,9 @@ export function ArtifactForm({
             />
           </div>
 
-          {/* Artifact Description */}
+          {/* Block Description */}
           <div className="mb-4">
-            <label htmlFor="description" className="mb-2 block text-sm font-medium">Artifact Description</label>
+            <label htmlFor="description" className="mb-2 block text-sm font-medium">Block Description</label>
             <textarea
               id="description"
               name="description"
@@ -172,7 +172,7 @@ export function ArtifactForm({
             ></textarea>
           </div>
 
-          {/* Artifact Content Items */}
+          {/* Block Content Items */}
           {contentItems.map((item, index) => (
             <div key={index} className="mb-4">
               <label className="mb-2 block text-sm font-medium">Content Item {index + 1}</label>

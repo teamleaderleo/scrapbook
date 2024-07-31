@@ -10,11 +10,11 @@ export type EntityType = 'project' | 'block';
 
 export interface ProjectFetchOptions {
   includeTags: boolean;
-  includeArtifacts: boolean;
+  includeBlocks: boolean;
   blockDetail: 'none' | 'basic' | 'withContents' | 'extended';
 }
 
-export interface ArtifactFetchOptions {
+export interface BlockFetchOptions {
   includeTags: boolean;
   includeContents: boolean;
   includeProjects: boolean;
@@ -33,20 +33,20 @@ export type S3Usage = {
   count: number;
 };
 
-export type ArtifactWithTags = Artifact & {
+export type BlockWithTags = Block & {
   tags: Tag[];
 };
 
-export type ArtifactWithProjects = Artifact & {
+export type BlockWithProjects = Block & {
   projects: BaseProject[];
 };
 
-export type ArtifactWithRelations = ArtifactWithTags & ArtifactWithProjects;
+export type BlockWithRelations = BlockWithTags & BlockWithProjects;
 
 export type BaseProject = InferSelectModel<typeof projects>;
 
 export type ProjectPreview = BaseProject & {
-  previewArtifact?: {
+  previewBlock?: {
     id?: string | null;
     name?: string | null;
     previewContent?: string | null;
@@ -57,15 +57,15 @@ export type ProjectWithTags = BaseProject & {
   tags: Tag[];
 };
 
-export type ProjectWithArtifacts = ProjectWithTags & {
-  blocks: Artifact[];
+export type ProjectWithBlocks = ProjectWithTags & {
+  blocks: Block[];
 };
 
-export type ProjectWithExtendedArtifacts = ProjectWithTags & {
-  blocks: ArtifactWithRelations[];
+export type ProjectWithExtendedBlocks = ProjectWithTags & {
+  blocks: BlockWithRelations[];
 };
 
-export type Artifact = {
+export type Block = {
   id: string;
   accountId: string;
   content: JSONContent;

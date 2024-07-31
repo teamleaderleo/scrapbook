@@ -1,7 +1,7 @@
 import Vibrant from 'node-vibrant';
 import sharp from 'sharp';
 import { uploadToS3, deleteFromS3 } from '../external/s3-operations';
-import { ArtifactContent } from '../definitions/definitions';
+import { BlockContent } from '../definitions/definitions';
 
 async function extractDominantColors(buffer: Buffer): Promise<string[]> {
   try {
@@ -30,7 +30,7 @@ const STORE_ORIGINAL = process.env.STORE_ORIGINAL_IMAGES === 'true';
 export async function processAndUploadImage(
   file: File | Buffer, 
   accountId: string, 
-  existingVersions?: ArtifactContent & { type: 'image' }
+  existingVersions?: BlockContent & { type: 'image' }
 ): Promise<{
   compressed: string;
   variations: Record<string, string>;

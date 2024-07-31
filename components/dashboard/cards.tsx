@@ -17,7 +17,7 @@ const iconMap = {
 
 export default async function CardWrapper() {
   const {
-    numberOfArtifacts,
+    numberOfBlocks,
     numberOfProjects,
     numberOfPendingProjects,
     numberOfCompletedProjects,
@@ -29,8 +29,8 @@ export default async function CardWrapper() {
       <Card title="Pending" value={numberOfPendingProjects} type="pending" />
       <Card title="Total Projects" value={numberOfProjects} type="projects" />
       <Card
-        title="Total Artifacts"
-        value={numberOfArtifacts}
+        title="Total Blocks"
+        value={numberOfBlocks}
         type="blocks"
       />
     </>

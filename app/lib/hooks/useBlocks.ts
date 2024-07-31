@@ -1,32 +1,32 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import Fuse from 'fuse.js';
-import { ArtifactFetchOptions, Tag } from '@/app/lib/definitions/definitions';
-import { ArtifactWithRelations } from "../definitions/definitions";
+import { BlockFetchOptions, Tag } from '@/app/lib/definitions/definitions';
+import { BlockWithRelations } from "../definitions/definitions";
 import { BaseProject } from "../definitions/definitions";
-import { createArtifact, updateArtifact, deleteArtifact } from '@/app/lib/actions/block-actions';
+import { createBlock, updateBlock, deleteBlock } from '@/app/lib/actions/block-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import { getCachedArtifacts } from '@/app/lib/data/cached-block-data';
+import { getCachedBlocks } from '@/app/lib/data/cached-block-data';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { suggestContentExtensions, suggestTags } from '../external/claude-utils';
 import { useKeyNav } from './useKeyNav';
-import { ArtifactFormSubmission } from '../definitions/definitions';
+import { BlockFormSubmission } from '../definitions/definitions';
 
 const ITEMS_PER_PAGE = 6;
 
-export function useArtifacts() {
+export function useBlocks() {
   const queryClient = useQueryClient();
   const [query, setQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [fetchOptions, setFetchOptions] = useState<ArtifactFetchOptions>({
+  const [fetchOptions, setFetchOptions] = useState<BlockFetchOptions>({
     includeTags: true,
     includeContents: true,
     includeProjects: true,
   });
 
-  const { data: blocks, isLoading, error } = useQuery<ArtifactWithRelations[], Error>(
+  const { data: blocks, isLoading, error } = useQuery<BlockWithRelations[], Error>(
     ['blocks', fetchOptions],
-    () => getCachedArtifacts(ADMIN_UUID),
+    () => getCachedBlocks(ADMIN_UUID),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -44,21 +44,21 @@ export function useArtifacts() {
     });
   }, [blocks]);
 
-  const filteredArtifacts = useMemo(() => {
+  const filteredBlocks = useMemo(() => {
     if (!blocks) return [];
     if (!query) return blocks;
     return fuse ? fuse.search(query).map(result => result.item) : blocks;
   }, [blocks, query, fuse]);
 
-  const totalPages = Math.ceil(filteredArtifacts.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredBlocks.length / ITEMS_PER_PAGE);
 
-  const paginatedArtifacts = useMemo(() => {
+  const paginatedBlocks = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredArtifacts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredArtifacts, currentPage]);
+    return filteredBlocks.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredBlocks, currentPage]);
 
-  const updateArtifactMutation = useMutation(
-    ({ id, data }: { id: string; data: ArtifactFormSubmission }) => updateArtifact(id, ADMIN_UUID, data),
+  const updateBlockMutation = useMutation(
+    ({ id, data }: { id: string; data: BlockFormSubmission }) => updateBlock(id, ADMIN_UUID, data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['blocks']);
@@ -66,8 +66,8 @@ export function useArtifacts() {
     }
   );
 
-  const deleteArtifactMutation = useMutation(
-    ({ id, data }: { id: string; data: ArtifactFormSubmission }) => deleteArtifact(id, ADMIN_UUID, data),
+  const deleteBlockMutation = useMutation(
+    ({ id, data }: { id: string; data: BlockFormSubmission }) => deleteBlock(id, ADMIN_UUID, data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['blocks']);
@@ -75,8 +75,8 @@ export function useArtifacts() {
     }
   );
 
-  const addArtifactMutation = useMutation(
-    (data: ArtifactFormSubmission) => createArtifact(ADMIN_UUID, data),
+  const addBlockMutation = useMutation(
+    (data: BlockFormSubmission) => createBlock(ADMIN_UUID, data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['blocks']);
@@ -84,7 +84,7 @@ export function useArtifacts() {
     }
   );
 
-  const updateArtifactTagsMutation = useMutation(
+  const updateBlockTagsMutation = useMutation(
     ({ blockId, tags }: { blockId: string; tags: string[] }) =>
       handleTagUpdate(ADMIN_UUID, blockId, 'block', tags),
     {
@@ -113,8 +113,8 @@ export function useArtifacts() {
 
   return {
     blocks,
-    filteredArtifacts,
-    paginatedArtifacts,
+    filteredBlocks,
+    paginatedBlocks,
     isLoading,
     error,
     query,
@@ -122,10 +122,10 @@ export function useArtifacts() {
     totalPages,
     handleSearch,
     handlePageChange,
-    updateArtifact: updateArtifactMutation.mutateAsync,
-    deleteArtifact: deleteArtifactMutation.mutateAsync,
-    addArtifact: addArtifactMutation.mutateAsync,
-    updateArtifactTags: updateArtifactTagsMutation.mutateAsync,
+    updateBlock: updateBlockMutation.mutateAsync,
+    deleteBlock: deleteBlockMutation.mutateAsync,
+    addBlock: addBlockMutation.mutateAsync,
+    updateBlockTags: updateBlockTagsMutation.mutateAsync,
     setFetchOptions,
     // getAISuggestions,
   };

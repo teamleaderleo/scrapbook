@@ -1,10 +1,10 @@
 import { cache } from 'react'
-import { fetchAllArtifacts } from './block-data'
+import { fetchAllBlocks } from './block-data'
 import { ADMIN_UUID } from '../constants'
-import { ArtifactWithRelations } from "../definitions/definitions";
-import { ArtifactFetchOptions } from '../definitions/definitions';
+import { BlockWithRelations } from "../definitions/definitions";
+import { BlockFetchOptions } from '../definitions/definitions';
 
-export const getCachedArtifacts = cache(async (accountId: string): Promise<ArtifactWithRelations[]> => {
-  const blocks = await fetchAllArtifacts(accountId);
+export const getCachedBlocks = cache(async (accountId: string): Promise<BlockWithRelations[]> => {
+  const blocks = await fetchAllBlocks(accountId);
   return blocks;
 });

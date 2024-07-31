@@ -1,4 +1,4 @@
-import { Artifact, ArtifactContent } from "./definitions/definitions";
+import { Block, BlockContent } from "./definitions/definitions";
 import { StaticImageData } from 'next/image';
 const defaultPlaceholder = require('../../public/placeholder-default.png');
 const textPlaceholder = require('../../public/placeholder-text.png');
@@ -73,11 +73,11 @@ export const toBase64 = (str: string) =>
 export const getBlurDataUrl = (w: number, h: number) => 
   `data:image/svg+xml;base64,${toBase64(shimmer(w, h))}`;
 
-export const getArtifactThumbnail = (block: Artifact, index: number = 0): StaticImageData => {
+export const getBlockThumbnail = (block: Block, index: number = 0): StaticImageData => {
   if (!block || !block.contents || block.contents.length === 0) {
     return defaultPlaceholder;
   }
-  const content: ArtifactContent = block.contents[index];
+  const content: BlockContent = block.contents[index];
   if (!content) {
     return defaultPlaceholder;
   }
