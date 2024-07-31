@@ -7,8 +7,7 @@ import Pagination from '../../ui/components/pagination';
 import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
 import { BlockThumbnail } from './block-thumbnail';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import TiptapEditor from '@/components/editor/editor';
+import { TiptapPreview } from '@/components/editor/content-preview';
 
 export function BlockTable({ accountId }: { accountId: string }) {
   const { 
@@ -27,6 +26,7 @@ export function BlockTable({ accountId }: { accountId: string }) {
   const handleTagsChange = async (blockId: string, newTags: string[]) => {
     await updateBlockTags({ blockId, tags: newTags });
   };
+
   const handleDeleteBlock = async (id: string) => {
     try {
       await deleteBlock({ id });
@@ -49,7 +49,7 @@ export function BlockTable({ accountId }: { accountId: string }) {
             <TableHead>Tags</TableHead>
             <TableHead>Projects</TableHead>
             <TableHead>Updated</TableHead>
-            <TableHead>Preview</TableHead>
+            <TableHead>Content Preview</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -79,9 +79,7 @@ export function BlockTable({ accountId }: { accountId: string }) {
               <TableCell>{new Date(block.updatedAt).toLocaleDateString()}</TableCell>
               <TableCell>
                 {block.content ? (
-                  <Button variant="outline" onClick={() => console.log(block.content)}>
-                    View Content
-                  </Button>
+                  <TiptapPreview content={block.content} maxLength={30} />
                 ) : (
                   <span className="text-gray-500">No content</span>
                 )}
