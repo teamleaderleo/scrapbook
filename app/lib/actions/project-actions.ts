@@ -1,12 +1,9 @@
 'use server';
 
-import { z } from 'zod';
 import { eq, and } from 'drizzle-orm';
 import { db } from '../db/db';
 import { revalidatePath } from 'next/cache';
-import { suggestTags } from '../external/claude-utils';
 import { projects, projectBlockLinks, tagAssociations } from '../db/schema';
-// import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { v4 as uuid } from 'uuid';
 import { ProjectFormSubmission, ProjectFormSubmissionSchema } from '../definitions/definitions';
 
@@ -47,7 +44,6 @@ export async function createProject(accountId: string, data: ProjectFormSubmissi
         accountId,
         name,
         description,
-        status,
         createdAt: now,
         updatedAt: now
       });
@@ -70,12 +66,12 @@ export async function updateProject(id: string, accountId: string, formData: Pro
     };
   }
 
-  const { name, description, status, tags, blocks } = validatedFields.data;
+  const { name, description } = validatedFields.data;
 
   try {
     const result = await db.transaction(async (tx) => {
       await tx.update(projects)
-        .set({ name, description, status, updatedAt: new Date() })
+        .set({ name, description, updatedAt: new Date() })
         .where(and(
           eq(projects.id, id),
           eq(projects.accountId, accountId)
@@ -94,8 +90,6 @@ export async function updateProject(id: string, accountId: string, formData: Pro
 export async function deleteProject(id: string, accountId: string): Promise<State> {
   try {
     await db.transaction(async (tx) => {
-      await tx.delete(tagAssociations).where(and(eq(tagAssociations.associatedId, id), eq(tagAssociations.accountId, accountId)));
-      await tx.delete(projectBlockLinks).where(and(eq(projectBlockLinks.projectId, id), eq(projectBlockLinks.accountId, accountId)));
       await tx.delete(projects).where(and(eq(projects.id, id), eq(projects.accountId, accountId)));
     });
 

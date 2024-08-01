@@ -3,54 +3,70 @@
 import { db } from '../db/db';
 import { revalidatePath } from 'next/cache';
 import { BlockFormSubmission } from '../definitions/definitions';
+import { and, eq } from 'drizzle-orm';
+import { blocks } from '../db/schema';
+import { v4 as uuid } from 'uuid';
 
-export type State = {
+
+export type BlockState = {
   errors?: {
     content?: string[];
-    tags?: string[];
-    projects?: string[];
   };
   message?: string | null;
   blockId?: string;
-  success?: boolean;
+  success: boolean;
 };
 
-export async function updateBlock(id: string, accountId: string, data: BlockFormSubmission): Promise<State> {
+export async function updateBlock(id: string, accountId: string, data: BlockFormSubmission): Promise<BlockState> {
   try {
-    await db.transaction(async (tx) => {
-      await handleBlockUpdateWithinTransaction(tx, accountId, id, data);
-    });
+    await db.update(blocks)
+      .set({ content: data.content, updatedAt: new Date() })
+      .where(and(
+        eq(blocks.id, id),
+        eq(blocks.accountId, accountId)
+      ));
 
-    revalidatePath('/dashboard/blocks');
-    return { message: 'Block updated successfully.', success: true };
-  } catch (error) {
+    return { message: 'Block updated successfully', success: true };
+  } catch (error: any) {
     console.error('Error updating block:', error);
-    return { message: 'Database Error: Failed to Update Block.', success: false };
+    return { message: `Failed to update block: ${error.message}`, success: false };
   }
 }
 
-export async function deleteBlock(id: string, accountId: string): Promise<State> {
+export async function deleteBlock(id: string, accountId: string): Promise<BlockState> {
   try {
     await db.transaction(async (tx) => {
-      await handleBlockDeleteWithinTransaction(tx, accountId, id);
+      await tx.delete(blocks)
+        .where(and(
+          eq(blocks.id, id),
+          eq(blocks.accountId, accountId)
+        ));
     });
 
-    revalidatePath('/dashboard/blocks');
-    return { message: 'Block deleted successfully.', success: true };
-  } catch (error) {
+    return { message: 'Block deleted successfully', success: true };
+  } catch (error: any) {
     console.error('Error deleting block:', error);
-    return { message: 'Failed to delete block.', success: false };
+    return { message: `Failed to delete block: ${error.message}`, success: false };
   }
 }
 
-export async function createBlock(accountId: string, data: BlockFormSubmission): Promise<State> {
+
+export async function createBlock(accountId: string, data: BlockFormSubmission): Promise<BlockState> {
   try {
-    return await db.transaction(async (tx) => {
-      const newBlockId = await handleBlockCreateWithinTransaction(tx, accountId, data);
-      return { message: 'Block created successfully', blockId: newBlockId, success: true };
-    });
+    const newBlockId = uuid();
+    const now = new Date();
+    
+    const [newBlock] = await db.insert(blocks).values({
+      id: newBlockId,
+      accountId,
+      content: data.content,
+      createdAt: now,
+      updatedAt: now
+    }).returning();
+
+    return { message: 'Block created successfully', blockId: newBlock.id, success: true };
   } catch (error: any) {
     console.error('Error creating block:', error);
-    return { message: `Error: Failed to Create Block. ${error.message}`, success: false };
+    return { message: `Failed to create block: ${error.message}`, success: false };
   }
 }
