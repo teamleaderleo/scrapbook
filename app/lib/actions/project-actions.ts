@@ -10,16 +10,6 @@ import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { v4 as uuid } from 'uuid';
 import { ProjectFormSubmission, ProjectFormSubmissionSchema } from '../definitions/definitions';
 
-const ProjectSchema = z.object({
-  name: z.string().min(1, 'Project name is required.'),
-  description: z.string().optional(),
-  status: z.enum(['pending', 'completed'], {
-    invalid_type_error: 'Please select a project status.',
-  }),
-  tags: z.array(z.string()).optional(),
-  blocks: z.array(z.string()).optional(),
-});
-
 export type State = {
   errors?: {
     name?: string[];
