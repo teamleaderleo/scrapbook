@@ -8,6 +8,8 @@ import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
 import { BlockThumbnail } from './block-thumbnail';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TiptapPreview } from '@/components/editor/content-preview';
+import { JSONContent } from '@tiptap/react';
+import { BlockWithRelations } from '@/app/lib/definitions/definitions';
 
 export function BlockTable({ accountId }: { accountId: string }) {
   const { 
@@ -54,7 +56,7 @@ export function BlockTable({ accountId }: { accountId: string }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedBlocks.map((block) => (
+          {paginatedBlocks.map((block: BlockWithRelations) => (
             <TableRow key={block.id}>
               <TableCell className="font-medium">
                 <div className="flex items-center space-x-3">
