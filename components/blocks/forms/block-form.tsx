@@ -1,27 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TagManager } from '@/components/tags/tagmanager';
-import { BlockWithRelations, BaseProject } from "@/app/lib/definitions/definitions";
+import { BlockWithRelations, BaseProject, BlockFormSubmission, BlockFormSubmissionSchema } from "@/app/lib/definitions/definitions";
 import Link from 'next/link';
-
-// Define the form schema
-const formSchema = z.object({
-  content: z.any(), // This will be the Tiptap JSON content
-  tags: z.array(z.string()),
-  projects: z.array(z.string()),
-});
 
 type BlockFormProps = {
   block?: BlockWithRelations;
   projects: BaseProject[];
-  onSubmit: (data: z.infer<typeof formSchema>) => void;
+  onSubmit: (data: BlockFormSubmission) => void;
   isSubmitting: boolean;
   submitButtonText: string;
   cancelHref: string;
@@ -38,11 +30,10 @@ export function BlockForm({
   allTags
 }: BlockFormProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>(block?.tags.map(t => t.name) || []);
-  const [primaryTag, setPrimaryTag] = useState<string | null>(null);
 
   // Initialize the form
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<BlockFormSubmission>({
+    resolver: zodResolver(BlockFormSubmissionSchema),
     defaultValues: {
       content: block?.content || {},
       tags: selectedTags,
@@ -59,36 +50,12 @@ export function BlockForm({
     },
   });
 
-  // Effect to set primary tag
-  useEffect(() => {
-    if (selectedTags.length > 0 && !primaryTag) {
-      setPrimaryTag(selectedTags[0]);
-    }
-  }, [selectedTags, primaryTag]);
-
   // Handle form submission
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    const firstParagraph = editor?.getJSON().content?.[0]?.content?.[0]?.text || '';
-    const label = primaryTag || firstParagraph.slice(0, 50); // Use primary tag or first 50 chars of content
-
+  const handleSubmit = (values: BlockFormSubmission) => {
     onSubmit({
       ...values,
       tags: selectedTags,
-      // label,
     });
-  };
-
-  // Handle tag selection
-  const handleTagsChange = (newTags: string[]) => {
-    setSelectedTags(newTags);
-    if (!newTags.includes(primaryTag || '')) {
-      setPrimaryTag(newTags[0] || null);
-    }
-  };
-
-  // Handle primary tag selection
-  const handlePrimaryTagChange = (tag: string) => {
-    setPrimaryTag(tag);
   };
 
   return (
@@ -118,13 +85,11 @@ export function BlockForm({
               <FormControl>
                 <TagManager
                   selectedTags={selectedTags}
-                  onTagsChange={handleTagsChange}
+                  onTagsChange={setSelectedTags}
                   allTags={allTags}
-                  // primaryTag={primaryTag}
-                  // onPrimaryTagChange={handlePrimaryTagChange}
                 />
               </FormControl>
-              <FormDescription>Select or create tags for this block. The primary tag (if set) will be used as the block&apos;s label.</FormDescription>
+              <FormDescription>Select or create tags for this block.</FormDescription>
               <FormMessage />
             </FormItem>
           )}

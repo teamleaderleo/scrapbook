@@ -1,6 +1,7 @@
 import { accounts, blocks, projects, tags } from '../db/schema';
 import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 import { JSONContent } from '@tiptap/react';
+import { z } from 'zod';
 
 export type SelectAccount = InferSelectModel<typeof accounts>;
 export type Account = InferInsertModel<typeof accounts>;
@@ -42,6 +43,14 @@ export type BlockWithProjects = Block & {
 };
 
 export type BlockWithRelations = BlockWithTags & BlockWithProjects;
+
+export const BlockFormSubmissionSchema = z.object({
+  content: z.custom<JSONContent>(),
+  tags: z.array(z.string()),
+  projects: z.array(z.string()),
+});
+
+export type BlockFormSubmission = z.infer<typeof BlockFormSubmissionSchema>;
 
 export type BaseProject = InferSelectModel<typeof projects>;
 
