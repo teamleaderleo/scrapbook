@@ -41,6 +41,11 @@ export const blocks = pgTable('block', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   createdBy: uuid('created_by').references(() => accounts.id),
   lastModifiedBy: uuid('last_modified_by').references(() => accounts.id),
+  x: integer('x').default(0),
+  y: integer('y').default(0),
+  width: integer('width').default(1),
+  height: integer('height').default(1),
+  order: integer('order'),
 }, (table) => ({
   accountUpdatedIndex: index('idx_blocks_account_updated').on(table.accountId, table.updatedAt),
 }));

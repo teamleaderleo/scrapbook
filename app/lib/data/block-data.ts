@@ -15,6 +15,11 @@ export async function fetchAllBlocks(accountId: string): Promise<BlockWithRelati
       content: blocks.content,
       createdBy: blocks.createdBy,
       lastModifiedBy: blocks.lastModifiedBy,
+      x: blocks.x,
+      y: blocks.y,
+      width: blocks.width,
+      height: blocks.height,
+      order: blocks.order,
       tags: sql<Tag[]>`COALESCE(
         json_agg(DISTINCT jsonb_build_object(
           'id', ${tags.id},
