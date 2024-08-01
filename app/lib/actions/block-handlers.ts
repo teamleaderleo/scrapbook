@@ -23,8 +23,6 @@ export async function handleBlockUpdateWithinTransaction(
       eq(blocks.accountId, accountId)
     ));
 
-  // Update tags and projects
-  await handleTagUpdateWithinTransaction(tx, accountId, blockId, 'block', tags);
   await handleProjectUpdateWithinTransaction(tx, accountId, blockId, projects);
 }
 
@@ -56,7 +54,6 @@ export async function handleBlockCreateWithinTransaction(
     updatedAt: now 
   });
 
-  await handleTagUpdateWithinTransaction(tx, accountId, newBlockId, 'block', tags);
   await handleProjectUpdateWithinTransaction(tx, accountId, newBlockId, projects);
 
   return newBlockId;

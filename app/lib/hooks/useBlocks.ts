@@ -65,14 +65,6 @@ export function useBlocks() {
     },
   });
 
-  const updateBlockTagsMutation = useMutation({
-    mutationFn: ({ blockId, tags }: { blockId: string; tags: string[] }) =>
-      handleTagUpdate(ADMIN_UUID, blockId, 'block', tags),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blocks'] });
-    },
-  });
-
   const handleSearch = useCallback((newQuery: string) => {
     setQuery(newQuery);
     setCurrentPage(1);
@@ -98,6 +90,5 @@ export function useBlocks() {
     updateBlock: updateBlockMutation.mutate,
     deleteBlock: deleteBlockMutation.mutate,
     addBlock: addBlockMutation.mutate,
-    updateBlockTags: updateBlockTagsMutation.mutate,
   };
 }

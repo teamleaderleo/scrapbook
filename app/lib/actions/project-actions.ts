@@ -52,11 +52,6 @@ export async function createProject(accountId: string, data: ProjectFormSubmissi
         updatedAt: now
       });
 
-      // Handle tags
-      if (tags && tags.length > 0) {
-        await handleTagUpdateWithinTransaction(tx, accountId, newProjectId, 'project', tags);
-      }
-
       // Handle blocks
       if (blocks && blocks.length > 0) {
         for (const blockId of blocks) {
@@ -97,11 +92,6 @@ export async function updateProject(id: string, accountId: string, formData: Pro
           eq(projects.id, id),
           eq(projects.accountId, accountId)
         ));
-
-      // Handle tags
-      if (tags) {
-        await handleTagUpdateWithinTransaction(tx, accountId, id, 'project', tags);
-      }
 
       if (blocks && blocks.length > 0) {
         for (const blockId of blocks) {

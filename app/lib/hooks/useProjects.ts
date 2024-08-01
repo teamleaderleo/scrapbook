@@ -89,14 +89,6 @@ export function useProjects() {
     },
   });
 
-  const updateProjectTagsMutation = useMutation({
-    mutationFn: ({ projectId, tags }: { projectId: string; tags: string[] }) =>
-      handleTagUpdate(ADMIN_UUID, projectId, 'project', tags),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-    },
-  });
-
   const handleSearch = useCallback((newQuery: string) => {
     setQuery(newQuery);
     setCurrentPage(1);
@@ -130,7 +122,6 @@ export function useProjects() {
     updateProjectBlocks: updateProjectBlocksMutation.mutateAsync,
     deleteProject: deleteProjectMutation.mutateAsync,
     addProject: addProjectMutation.mutateAsync,
-    updateProjectTags: updateProjectTagsMutation.mutateAsync,
     setFetchOptions,
     // getAISuggestions,
   };
