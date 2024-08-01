@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Fuse from 'fuse.js';
-import { BlockWithRelations } from "../definitions/definitions";
+import { BlockWithRelations, BlockFormSubmission } from "../definitions/definitions";
 import { createBlock, updateBlock, deleteBlock } from '@/app/lib/actions/block-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedBlocks } from '@/app/lib/data/cached-block-data';
@@ -44,7 +44,8 @@ export function useBlocks() {
   }, [filteredBlocks, currentPage]);
 
   const updateBlockMutation = useMutation({
-    mutationFn: (data: { id: string; content: any }) => updateBlock(data.id, ADMIN_UUID, data.content),
+    mutationFn: (data: { id: string; data: BlockFormSubmission }) => 
+      updateBlock(data.id, ADMIN_UUID, data.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blocks'] });
     },
@@ -58,7 +59,7 @@ export function useBlocks() {
   });
 
   const addBlockMutation = useMutation({
-    mutationFn: (content: any) => createBlock(ADMIN_UUID, content),
+    mutationFn: (data: BlockFormSubmission) => createBlock(ADMIN_UUID, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blocks'] });
     },

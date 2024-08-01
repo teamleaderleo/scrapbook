@@ -8,15 +8,15 @@ import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
 import { BlockThumbnail } from './block-thumbnail';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TiptapPreview } from '@/components/editor/content-preview';
+import { BlockFormSubmission, BlockWithRelations } from '@/app/lib/definitions/definitions';
 import { JSONContent } from '@tiptap/react';
-import { BlockWithRelations } from '@/app/lib/definitions/definitions';
 
-export function BlockTable({ accountId }: { accountId: string }) {
+export function BlockTable() {
   const { 
     paginatedBlocks,
     isLoading,
     error,
-    updateBlockTags,
+    updateBlock,
     deleteBlock,
     handlePageChange,
     currentPage,
@@ -25,13 +25,28 @@ export function BlockTable({ accountId }: { accountId: string }) {
 
   const { showToast } = useToastMessages();
 
-  const handleTagsChange = async (blockId: string, newTags: string[]) => {
-    await updateBlockTags({ blockId, tags: newTags });
+  const handleTagsChange = async (block: BlockWithRelations, newTags: string[]) => {
+    try {
+      const updatedBlockData: BlockFormSubmission = {
+        content: block.content as JSONContent,
+        tags: newTags,
+        projects: block.projects.map(p => p.id)
+      };
+
+      await updateBlock({ 
+        id: block.id, 
+        data: updatedBlockData
+      });
+      showToast('success', 'updateTags', 'block');
+    } catch (error) {
+      console.error('Failed to update block tags:', error);
+      showToast('error', 'updateTags', 'block');
+    }
   };
 
   const handleDeleteBlock = async (id: string) => {
     try {
-      await deleteBlock({ id });
+      await deleteBlock(id);
       showToast('success', 'delete', 'block');
     } catch (error) {
       console.error('Failed to delete block:', error);
@@ -47,7 +62,7 @@ export function BlockTable({ accountId }: { accountId: string }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
+            <TableHead>Preview</TableHead>
             <TableHead>Tags</TableHead>
             <TableHead>Projects</TableHead>
             <TableHead>Updated</TableHead>
@@ -72,9 +87,8 @@ export function BlockTable({ accountId }: { accountId: string }) {
               </TableCell>
               <TableCell>
                 <TagList
-                  initialTags={block.tags.map(t => t.name)}
-                  onTagsChange={(newTags) => handleTagsChange(block.id, newTags)}
-                  accountId={accountId}
+                  selectedTags={block.tags.map(t => t.name)}
+                  onTagsChange={(newTags) => handleTagsChange(block, newTags)}
                 />
               </TableCell>
               <TableCell>{block.projects.length}</TableCell>
