@@ -35,7 +35,7 @@ export async function updateBlock(id: string, accountId: string, data: BlockForm
   }
 }
 
-export async function deleteBlock(id: string, accountId: string, data: BlockFormSubmission): Promise<State> {
+export async function deleteBlock(id: string, accountId: string): Promise<State> {
   try {
     await db.transaction(async (tx) => {
       await handleBlockDeleteWithinTransaction(tx, accountId, id);
