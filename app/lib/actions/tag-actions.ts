@@ -23,35 +23,45 @@ export async function deleteTag(tagId: string, tx: any = db): Promise<void> {
     .where(eq(tags.id, tagId));
 }
 
-export async function associateTag(tagId: string, associatedId: string, entityType: 'project' | 'block', accountId: string, tx: any = db): Promise<void> {
+// Tag association operations
+export async function associateTagWithProject(tagId: string, projectId: string, accountId: string, tx: any = db): Promise<void> {
   await tx.insert(tagAssociations)
-    .values({
-      tagId,
-      associatedId,
-      entityType,
-      accountId
-    })
+    .values({ tagId, associatedId: projectId, entityType: 'project', accountId })
     .onConflictDoNothing();
 }
 
-export async function disassociateTag(tagId: string, associatedId: string, entityType: 'project' | 'block', tx: any = db): Promise<void> {
-  await tx.delete(tagAssociations)
-    .where(and(
-      eq(tagAssociations.tagId, tagId),
-      eq(tagAssociations.associatedId, associatedId),
-      eq(tagAssociations.entityType, entityType)
-    ));
+export async function associateTagWithBlock(tagId: string, blockId: string, accountId: string, tx: any = db): Promise<void> {
+  await tx.insert(tagAssociations)
+    .values({ tagId, associatedId: blockId, entityType: 'block', accountId })
+    .onConflictDoNothing();
 }
 
-export async function getTagsByEntity(entityId: string, entityType: 'project' | 'block', tx: any = db): Promise<Tag[]> {
-  return tx.select()
+export async function disassociateTagFromProject(tagId: string, projectId: string, tx: any = db): Promise<void> {
+  await tx.delete(tagAssociations)
+    .where(eq(tagAssociations.tagId, tagId))
+    .where(eq(tagAssociations.associatedId, projectId))
+    .where(eq(tagAssociations.entityType, 'project'));
+}
+
+export async function disassociateTagFromBlock(tagId: string, blockId: string, tx: any = db): Promise<void> {
+  await tx.delete(tagAssociations)
+    .where(eq(tagAssociations.tagId, tagId))
+    .where(eq(tagAssociations.associatedId, blockId))
+    .where(eq(tagAssociations.entityType, 'block'));
+}
+
+export async function getTagsForProject(projectId: string, tx: any = db): Promise<Tag[]> {
+  return tx.select({ id: tags.id, name: tags.name, accountId: tags.accountId })
     .from(tags)
-    .where(
-      eq(tags.id, tx.select({ tagId: tagAssociations.tagId })
-        .from(tagAssociations)
-        .where(and(
-          eq(tagAssociations.associatedId, entityId),
-          eq(tagAssociations.entityType, entityType)
-        ))
-    ));
+    .innerJoin(tagAssociations, eq(tags.id, tagAssociations.tagId))
+    .where(eq(tagAssociations.associatedId, projectId))
+    .where(eq(tagAssociations.entityType, 'project'));
+}
+
+export async function getTagsForBlock(blockId: string, tx: any = db): Promise<Tag[]> {
+  return tx.select({ id: tags.id, name: tags.name, accountId: tags.accountId })
+    .from(tags)
+    .innerJoin(tagAssociations, eq(tags.id, tagAssociations.tagId))
+    .where(eq(tagAssociations.associatedId, blockId))
+    .where(eq(tagAssociations.entityType, 'block'));
 }
