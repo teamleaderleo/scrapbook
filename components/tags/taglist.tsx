@@ -79,7 +79,7 @@ export function TagList({ selectedTags, onTagsChange }: TagListProps) {
                 className="w-full flex items-center justify-start px-2 py-1"
               >
                 <Plus className="mr-2 h-4 w-4" />
-                Create "{inputValue}"
+                Create &quot;{inputValue}&quot;
               </Button>
             </CommandEmpty>
             <CommandGroup>
