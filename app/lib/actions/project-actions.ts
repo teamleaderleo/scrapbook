@@ -34,7 +34,7 @@ export async function createProject(accountId: string, data: ProjectFormSubmissi
     };
   }
 
-  const { name, description, status, tags, blocks } = validatedFields.data;
+  const { name, description, status, } = validatedFields.data;
 
   try {
     return await db.transaction(async (tx) => {
@@ -51,18 +51,6 @@ export async function createProject(accountId: string, data: ProjectFormSubmissi
         createdAt: now,
         updatedAt: now
       });
-
-      // Handle blocks
-      if (blocks && blocks.length > 0) {
-        for (const blockId of blocks) {
-          await tx.insert(projectBlockLinks).values({
-            accountId,
-            projectId: newProjectId,
-            blockId,
-            addedAt: now
-          });
-        }
-      }
 
       return { message: 'Project created successfully', projectId: newProjectId, success: true };
     });
@@ -92,18 +80,6 @@ export async function updateProject(id: string, accountId: string, formData: Pro
           eq(projects.id, id),
           eq(projects.accountId, accountId)
         ));
-
-      if (blocks && blocks.length > 0) {
-        for (const blockId of blocks) {
-          await tx.insert(projectBlockLinks).values({
-            accountId,
-            projectId: id,
-            blockId,
-            addedAt: new Date()
-          });
-        }
-      }
-
       return { message: 'Project updated successfully' };
     });
 

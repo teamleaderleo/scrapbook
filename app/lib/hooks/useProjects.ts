@@ -7,7 +7,6 @@ import { createProject, updateProject, deleteProject } from '@/app/lib/actions/p
 import { ADMIN_UUID } from '@/app/lib/constants';
 // import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { getCachedProjects } from '../data/cached-project-data';
-import { handleProjectBlocksUpdate } from '../actions/project-handlers';
 import { useKeyNav } from './useKeyNav';
 
 const ITEMS_PER_PAGE = 6;
@@ -67,14 +66,6 @@ export function useProjects() {
     },
   });
 
-  const updateProjectBlocksMutation = useMutation({
-    mutationFn: ({ projectId, blockIds }: { projectId: string; blockIds: string[] }) =>
-        handleProjectBlocksUpdate(ADMIN_UUID, projectId, blockIds),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-    },
-  });
-
   const deleteProjectMutation = useMutation({
     mutationFn: (id: string) => deleteProject(id, ADMIN_UUID),
     onSuccess: () => {
@@ -119,7 +110,6 @@ export function useProjects() {
     handleSearch,
     handlePageChange,
     updateProject: updateProjectMutation.mutateAsync,
-    updateProjectBlocks: updateProjectBlocksMutation.mutateAsync,
     deleteProject: deleteProjectMutation.mutateAsync,
     addProject: addProjectMutation.mutateAsync,
     setFetchOptions,
