@@ -7,7 +7,7 @@ import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { useTags } from '@/app/lib/hooks/useTags';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
-import { BlockWithRelations } from '@/app/lib/definitions/definitions';
+import { BlockFormSubmission, BlockWithRelations } from '@/app/lib/definitions/definitions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 
 interface BlockFormWrapperProps {
@@ -62,6 +62,8 @@ export function BlockFormWrapper({ blockId }: BlockFormWrapperProps) {
     content: {},
     createdAt: new Date(),
     updatedAt: new Date(),
+    createdBy: ADMIN_UUID,
+    lastModifiedBy: ADMIN_UUID,
     tags: [],
     projects: []
   };

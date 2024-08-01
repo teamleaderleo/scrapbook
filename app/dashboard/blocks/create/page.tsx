@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
-import CreateBlockForm from '@/components/blocks/forms/create-block-form';
 import Breadcrumbs from '@/components/ui/components/breadcrumbs';
 import { Suspense } from 'react';
+import { BlockFormWrapper } from '@/components/blocks/forms/block-form-wrapper';
 
 export const metadata: Metadata = {
   title: 'Create Block',
@@ -21,7 +21,7 @@ export default function Page() {
         ]}
       />
       <Suspense fallback={<div>Loading form...</div>}>
-        <CreateBlockForm />
+        <BlockFormWrapper />
       </Suspense>
     </main>
   );
