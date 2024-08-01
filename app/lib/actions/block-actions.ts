@@ -2,21 +2,16 @@
 
 import { db } from '../db/db';
 import { revalidatePath } from 'next/cache';
-import { suggestTags } from '../external/claude-utils';
 import { handleBlockUpdateWithinTransaction, handleBlockDeleteWithinTransaction, handleBlockCreateWithinTransaction } from './block-handlers';
-import { BlockFormSubmission, BlockFormSubmissionSchema } from '../definitions/definitions';
+import { BlockFormSubmission } from '../definitions/definitions';
 
 export type State = {
   errors?: {
-    name?: string[];
-    description?: string[];
-    type?: string[];
     content?: string[];
     tags?: string[];
     projects?: string[];
   };
   message?: string | null;
-  suggestedTags?: string[];
   blockId?: string;
   success?: boolean;
 };
