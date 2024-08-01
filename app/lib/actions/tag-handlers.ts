@@ -13,12 +13,6 @@ export async function handleTagUpdateWithinTransaction(
     entityType: EntityType,
     newTags: string[]
 ): Promise<void> {
-  // Remove existing associations for this item
-  await tx.delete(tagAssociations)
-    .where(and(
-      eq(tagAssociations.associatedId, associatedId),
-      eq(tagAssociations.accountId, accountId)
-    ));
 
   // Add new associations
   for (const tagName of newTags) {
