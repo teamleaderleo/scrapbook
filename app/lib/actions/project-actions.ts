@@ -103,13 +103,6 @@ export async function updateProject(id: string, accountId: string, formData: Pro
         await handleTagUpdateWithinTransaction(tx, accountId, id, 'project', tags);
       }
 
-      // Handle blocks
-      await tx.delete(projectBlockLinks)
-        .where(and(
-          eq(projectBlockLinks.projectId, id),
-          eq(projectBlockLinks.accountId, accountId)
-        ));
-
       if (blocks && blocks.length > 0) {
         for (const blockId of blocks) {
           await tx.insert(projectBlockLinks).values({
