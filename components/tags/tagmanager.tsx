@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { useTags } from '@/app/lib/hooks/useTags';
 import { Tag } from '@/app/lib/definitions/definitions';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 
 interface TagManagerProps {
   selectedTags: string[];
@@ -11,6 +17,7 @@ interface TagManagerProps {
 export function TagManager({ selectedTags, onTagsChange, allTags }: TagManagerProps) {
   const { addTag } = useTags();
   const [newTag, setNewTag] = useState('');
+  const [open, setOpen] = useState(false);
 
   const handleAddTag = async () => {
     const trimmedTag = newTag.trim().toLowerCase();
@@ -31,51 +38,71 @@ export function TagManager({ selectedTags, onTagsChange, allTags }: TagManagerPr
     if (!selectedTags.includes(tagName)) {
       onTagsChange([...selectedTags, tagName]);
     }
+    setOpen(false);
   };
 
   return (
-    <div>
-      <div className="flex mb-2">
-        <input
-          type="text"
+    <div className="space-y-4">
+      <div className="flex space-x-2">
+        <Input
           value={newTag}
           onChange={(e) => setNewTag(e.target.value)}
-          className="flex-grow border rounded-l px-2 py-1 text-sm"
           placeholder="Add a new tag"
+          className="flex-grow"
         />
-        <button
-          type="button"
-          onClick={handleAddTag}
-          className="bg-blue-500 text-white px-3 py-1 rounded-r text-sm"
-        >
-          Add
-        </button>
+        <Button onClick={handleAddTag}>Add</Button>
       </div>
-      <select
-        onChange={(e) => handleSelectTag(e.target.value)}
-        className="w-full border rounded px-2 py-1 text-sm"
-        value=""
-        title="Select an existing tag"
-      >
-        <option value="" disabled>Select an existing tag</option>
-        {allTags
-          .filter(tag => !selectedTags.includes(tag))
-          .map(tag => (
-            <option key={tag} value={tag}>{tag}</option>
-          ))
-        }
-      </select>
-      <div className="mt-2">
+
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between"
+          >
+            Select tags
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0">
+          <Command>
+            <CommandInput placeholder="Search tags..." />
+            <CommandEmpty>No tag found.</CommandEmpty>
+            <CommandGroup>
+              {allTags
+                .filter(tag => !selectedTags.includes(tag))
+                .map(tag => (
+                  <CommandItem
+                    key={tag}
+                    onSelect={() => handleSelectTag(tag)}
+                  >
+                    <Check
+                      className={`mr-2 h-4 w-4 ${
+                        selectedTags.includes(tag) ? "opacity-100" : "opacity-0"
+                      }`}
+                    />
+                    {tag}
+                  </CommandItem>
+                ))}
+            </CommandGroup>
+          </Command>
+        </PopoverContent>
+      </Popover>
+
+      <div className="flex flex-wrap gap-2">
         {selectedTags.map((tag) => (
-          <span key={tag} className="inline-block bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">
+          <Badge key={tag} variant="secondary">
             {tag}
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-2 h-4 w-4 p-0"
               onClick={() => handleRemoveTag(tag)}
-              className="ml-1 text-xs text-blue-800 hover:text-blue-900"
             >
-              ×
-            </button>
-          </span>
+              <X className="h-3 w-3" />
+            </Button>
+          </Badge>
         ))}
       </div>
     </div>
