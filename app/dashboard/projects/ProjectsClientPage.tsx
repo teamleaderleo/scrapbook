@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import Search from '@/components/ui/components/search';
@@ -19,7 +19,9 @@ export default function ProjectsClientPage() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    queryClient.prefetchQuery(['projectBasics', ADMIN_UUID], () => getCachedProjectBasics(ADMIN_UUID));
+    queryClient.prefetchQuery({
+      queryKey: ['projectBasics', ADMIN_UUID],
+    });
   }, [queryClient]);
 
   return (

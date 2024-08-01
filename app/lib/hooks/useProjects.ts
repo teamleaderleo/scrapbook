@@ -1,13 +1,12 @@
 import { useState, useCallback, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient, useQueries } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Fuse from 'fuse.js';
 import { ProjectFetchOptions, ProjectFormSubmission } from '@/app/lib/definitions/definitions';
 import { ProjectWithBlocks, ProjectPreview, BaseProject, ProjectWithExtendedBlocks, ProjectWithTags } from "../definitions/definitions";
 import { createProject, updateProject, deleteProject } from '@/app/lib/actions/project-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
-import { suggestTags } from '../external/claude-utils';
-import { getCachedProjectBasics, getCachedProjects } from '../data/cached-project-data';
+import { getCachedProjects } from '../data/cached-project-data';
 import { handleProjectBlocksUpdate } from '../actions/project-handlers';
 import { useKeyNav } from './useKeyNav';
 
@@ -30,32 +29,15 @@ export function useProjects() {
   //   }
   // );
 
-  const { data: projects, isLoading, error } = useQuery<ProjectWithBlocks[], Error>(
-    ['projects', ADMIN_UUID],
-    async () => {
+  const { data: projects, isLoading, error } = useQuery<ProjectWithBlocks[], Error>({
+    queryKey: ['projects', ADMIN_UUID],
+    queryFn: async () => {
       const fetchedProjects = await getCachedProjects(ADMIN_UUID);
-      
-      // Update block and tag caches
-      // fetchedProjects.forEach((project: ProjectWithBlocks) => {
-      //   if (project.blocks) {
-      //     project.blocks.forEach(block => {
-      //       queryClient.setQueryData(['block', block.id], block);
-      //     });
-      //   }
-      //   if (project.tags) {
-      //     project.tags.forEach(tag => {
-      //       queryClient.setQueryData(['tag', tag.id], tag);
-      //     });
-      //   }
-      // });
-
       return fetchedProjects;
     },
-    {
-      staleTime: 5 * 60 * 1000,
-      cacheTime: 1000 * 60 * 30, // 30 minutes
-    }
-  );
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000, // 30 minutes
+  });
 
   const fuse = useMemo(() => {
     if (!projects) return null;
@@ -78,52 +60,42 @@ export function useProjects() {
     return filteredProjects.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [filteredProjects, currentPage]);
 
-  const updateProjectMutation = useMutation(
-    ({ id, data }: { id: string; data: ProjectFormSubmission }) => updateProject(id, ADMIN_UUID, data),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['projects']);
-      },
-    }
-  );
+  const updateProjectMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: ProjectFormSubmission }) => updateProject(id, ADMIN_UUID, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
 
-  const updateProjectBlocksMutation = useMutation(
-    ({ projectId, blockIds }: { projectId: string; blockIds: string[] }) =>
+  const updateProjectBlocksMutation = useMutation({
+    mutationFn: ({ projectId, blockIds }: { projectId: string; blockIds: string[] }) =>
         handleProjectBlocksUpdate(ADMIN_UUID, projectId, blockIds),
-    {
-        onSuccess: () => {
-        queryClient.invalidateQueries(['projects']);
-        },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
 
-  const deleteProjectMutation = useMutation(
-    (id: string) => deleteProject(id, ADMIN_UUID),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['projects']);
-      },
-    }
-  );
+  const deleteProjectMutation = useMutation({
+    mutationFn: (id: string) => deleteProject(id, ADMIN_UUID),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
 
-  const addProjectMutation = useMutation(
-    (data: ProjectFormSubmission) => createProject(ADMIN_UUID, data),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['projects']);
-      },
-    }
-  );
+  const addProjectMutation = useMutation({
+    mutationFn: (data: ProjectFormSubmission) => createProject(ADMIN_UUID, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
 
-  const updateProjectTagsMutation = useMutation(
-    ({ projectId, tags }: { projectId: string; tags: string[] }) =>
-      handleTagUpdate(ADMIN_UUID, projectId, 'project',tags),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['projects']);
-      },
-    }
-  );
+  const updateProjectTagsMutation = useMutation({
+    mutationFn: ({ projectId, tags }: { projectId: string; tags: string[] }) =>
+      handleTagUpdate(ADMIN_UUID, projectId, 'project', tags),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
 
   const handleSearch = useCallback((newQuery: string) => {
     setQuery(newQuery);
