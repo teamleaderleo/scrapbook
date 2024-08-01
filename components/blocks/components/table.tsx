@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';

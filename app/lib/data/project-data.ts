@@ -18,10 +18,12 @@ export async function fetchAllProjects(accountId: string): Promise<ProjectWithBl
       status: projects.status,
       tags: sql<Tag[]>`json_agg(distinct jsonb_build_object(
         'id', ${tags.id},
+        'accountId', ${tags.accountId},
         'name', ${tags.name}
       )) filter (where ${tags.id} is not null)`,
       blocks: sql<Block[]>`json_agg(distinct jsonb_build_object(
         'id', ${blocks.id},
+        'accountId', ${blocks.accountId},
         'createdAt', ${blocks.createdAt},
         'updatedAt', ${blocks.updatedAt},
         'content', ${blocks.content},
