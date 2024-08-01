@@ -5,7 +5,7 @@ import { ProjectFetchOptions, ProjectFormSubmission } from '@/app/lib/definition
 import { ProjectWithBlocks, ProjectPreview, BaseProject, ProjectWithExtendedBlocks, ProjectWithTags } from "../definitions/definitions";
 import { createProject, updateProject, deleteProject } from '@/app/lib/actions/project-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
-import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
+// import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { getCachedProjects } from '../data/cached-project-data';
 import { handleProjectBlocksUpdate } from '../actions/project-handlers';
 import { useKeyNav } from './useKeyNav';

@@ -2,7 +2,7 @@
 
 import { eq, and } from 'drizzle-orm';
 import { blocks, tagAssociations, projectBlockLinks } from '../db/schema';
-import { handleTagUpdateWithinTransaction } from './tag-handlers';
+// import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { handleProjectUpdateWithinTransaction } from './project-handlers';
 import { v4 as uuid } from 'uuid';
 import { BlockFormSubmission } from '../definitions/definitions';

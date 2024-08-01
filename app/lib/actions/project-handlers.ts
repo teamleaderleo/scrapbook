@@ -3,7 +3,7 @@
 import { eq, and } from 'drizzle-orm';
 import { db } from '../db/db';
 import { projectBlockLinks } from '../db/schema';
-import { handleTagUpdateWithinTransaction } from './tag-handlers';
+// import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { Tag } from '../definitions/definitions';
 import { v4 as uuid } from 'uuid';
 
@@ -36,16 +36,6 @@ export async function handleProjectUpdate(
 ): Promise<void> {
   await db.transaction(async (tx) => {
     await handleProjectUpdateWithinTransaction(tx, accountId, blockId, projectIds);
-  });
-}
-
-export async function handleProjectTagsUpdate(
-  accountId: string,
-  projectId: string,
-  tags: Tag[]
-): Promise<void> {
-  await db.transaction(async (tx) => {
-    await handleTagUpdateWithinTransaction(tx, accountId, projectId, 'project',tags.map(tag => tag.name));
   });
 }
 

@@ -5,7 +5,7 @@ import { BlockWithRelations, BlockFormSubmission } from "../definitions/definiti
 import { createBlock, updateBlock, deleteBlock } from '@/app/lib/actions/block-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedBlocks } from '@/app/lib/data/cached-block-data';
-import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
+// import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { useKeyNav } from './useKeyNav';
 
 const ITEMS_PER_PAGE = 6;

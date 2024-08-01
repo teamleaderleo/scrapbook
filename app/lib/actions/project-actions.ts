@@ -6,7 +6,7 @@ import { db } from '../db/db';
 import { revalidatePath } from 'next/cache';
 import { suggestTags } from '../external/claude-utils';
 import { projects, projectBlockLinks, tagAssociations } from '../db/schema';
-import { handleTagUpdateWithinTransaction } from './tag-handlers';
+// import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { v4 as uuid } from 'uuid';
 import { ProjectFormSubmission, ProjectFormSubmissionSchema } from '../definitions/definitions';
 

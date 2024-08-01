@@ -27,7 +27,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
     handlePageChange,
     currentPage,
     totalPages,
-    updateProjectTags,
+    // updateProjectTags,
   } = useProjects();
 
   const { showToast } = useToastMessages();
@@ -43,7 +43,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
   };
 
   const handleTagsChange = async (projectId: string, newTags: Tag[]) => {
-    await updateProjectTags({ projectId, tags: newTags.map(tag => tag.id) });
+    // await updateProjectTags({ projectId, tags: newTags.map(tag => tag.id) });
   };
 
   const getStatusBadgeVariant = (status: string) => {

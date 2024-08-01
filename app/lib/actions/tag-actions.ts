@@ -1,43 +1,57 @@
-'use server';
-
 import { eq, and } from 'drizzle-orm';
-import { revalidatePath } from 'next/cache';
 import { db } from '../db/db';
-import { Tag } from '../definitions/definitions';
 import { tags, tagAssociations } from '../db/schema';
-import { v4 as uuid } from 'uuid';
+import { Tag } from '../definitions/definitions';
 
-export async function createTag(accountId: string, name: string): Promise<Tag> {
-  const newTagId = uuid();
-  await db.insert(tags).values({ id: newTagId, accountId, name });
-  revalidatePath('/dashboard/tags');
-  return { id: newTagId, accountId, name };
+export async function createTag(name: string, accountId: string, tx: any = db): Promise<Tag> {
+  const newTag = await tx.insert(tags)
+    .values({ name, accountId })
+    .returning();
+  return newTag;
 }
 
-export async function updateTag(accountId: string, tagId: string, newName: string): Promise<Tag> {
-  await db.update(tags)
-    .set({ name: newName })
-    .where(and(eq(tags.id, tagId), eq(tags.accountId, accountId)));
-  revalidatePath('/dashboard/tags');
-  return { id: tagId, accountId, name: newName };
+export async function updateTag(tagId: string, name: string, tx: any = db): Promise<Tag> {
+  const updatedTag = await tx.update(tags)
+    .set({ name })
+    .where(eq(tags.id, tagId))
+    .returning();
+  return updatedTag;
 }
 
-export async function deleteTag(accountId: string, tagId: string): Promise<{ success: boolean; message: string }> {
-  try {
-    await db.transaction(async (tx) => {
-      // Remove all associations
-      await tx.delete(tagAssociations)
-        .where(and(eq(tagAssociations.tagId, tagId), eq(tagAssociations.accountId, accountId)));
+export async function deleteTag(tagId: string, tx: any = db): Promise<void> {
+  await tx.delete(tags)
+    .where(eq(tags.id, tagId));
+}
 
-      // Delete the tag
-      await tx.delete(tags)
-        .where(and(eq(tags.id, tagId), eq(tags.accountId, accountId)));
-    });
+export async function associateTag(tagId: string, associatedId: string, entityType: 'project' | 'block', accountId: string, tx: any = db): Promise<void> {
+  await tx.insert(tagAssociations)
+    .values({
+      tagId,
+      associatedId,
+      entityType,
+      accountId
+    })
+    .onConflictDoNothing();
+}
 
-    revalidatePath('/dashboard/tags');
-    return { success: true, message: 'Tag and all its associations deleted successfully.' };
-  } catch (error) {
-    console.error('Error deleting tag:', error);
-    return { success: false, message: 'Failed to delete tag.' };
-  }
+export async function disassociateTag(tagId: string, associatedId: string, entityType: 'project' | 'block', tx: any = db): Promise<void> {
+  await tx.delete(tagAssociations)
+    .where(and(
+      eq(tagAssociations.tagId, tagId),
+      eq(tagAssociations.associatedId, associatedId),
+      eq(tagAssociations.entityType, entityType)
+    ));
+}
+
+export async function getTagsByEntity(entityId: string, entityType: 'project' | 'block', tx: any = db): Promise<Tag[]> {
+  return tx.select()
+    .from(tags)
+    .where(
+      eq(tags.id, tx.select({ tagId: tagAssociations.tagId })
+        .from(tagAssociations)
+        .where(and(
+          eq(tagAssociations.associatedId, entityId),
+          eq(tagAssociations.entityType, entityType)
+        ))
+    ));
 }
