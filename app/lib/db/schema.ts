@@ -28,11 +28,9 @@ export const projects = pgTable('project', {
   description: text('description'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  status: text('status').notNull(),
 }, (table) => ({
   accountUpdatedIndex: index('idx_projects_account_updated').on(table.accountId, table.updatedAt),
   nameIndex: index('idx_projects_name').on(table.name),
-  statusIndex: index('idx_projects_status').on(table.status),
 }));
 
 export const blocks = pgTable('block', {

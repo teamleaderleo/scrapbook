@@ -24,7 +24,6 @@ export async function fetchAllBlocks(accountId: string): Promise<BlockWithRelati
         'id', ${projects.id},
         'accountId', ${projects.accountId},
         'name', ${projects.name},
-        'status', ${projects.status},
         'createdAt', ${projects.createdAt},
         'updatedAt', ${projects.updatedAt}
       )) filter (where ${projects.id} is not null), '[]')`,

@@ -16,7 +16,6 @@ export async function fetchAllProjects(accountId: string): Promise<ProjectWithBl
         description: projects.description,
         createdAt: projects.createdAt,
         updatedAt: projects.updatedAt,
-        status: projects.status,
         tags: sql<Tag[]>`COALESCE(
           json_agg(DISTINCT jsonb_build_object(
             'id', ${tags.id},
