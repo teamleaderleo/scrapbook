@@ -33,11 +33,9 @@ export async function handleBlockDeleteWithinTransaction(
   accountId: string,
   blockId: string
 ): Promise<void> {
-  // Delete associated tags and project links
+
   await tx.delete(tagAssociations).where(and(eq(tagAssociations.associatedId, blockId), eq(tagAssociations.accountId, accountId)));
   await tx.delete(projectBlockLinks).where(and(eq(projectBlockLinks.blockId, blockId), eq(projectBlockLinks.accountId, accountId)));
-
-  // Delete the block itself
   await tx.delete(blocks).where(and(eq(blocks.id, blockId), eq(blocks.accountId, accountId)));
 }
 
