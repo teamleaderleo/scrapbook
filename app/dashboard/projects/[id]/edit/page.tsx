@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import EditProjectForm from '@/components/projects/forms/edit-project-form';
+import { ProjectFormWrapper } from '@/components/projects/forms/project-form-wrapper';
 import Breadcrumbs from '@/components/ui/components/breadcrumbs';
 import { Suspense } from 'react';
 
@@ -21,7 +21,7 @@ export default function Page({ params }: { params: { id: string } }) {
         ]}
       />
       <Suspense fallback={<div>Loading form...</div>}>
-        <EditProjectForm projectId={params.id} />
+        <ProjectFormWrapper projectId={params.id} />
       </Suspense>
     </main>
   );

@@ -28,7 +28,7 @@ export default async function Page({
         <CreateBlock />
       </div>
       <Suspense fallback={<BlockTableSkeleton />}>
-        <BlockTable accountId={ADMIN_UUID} />
+        <BlockTable />
       </Suspense>
     </div>
   );
