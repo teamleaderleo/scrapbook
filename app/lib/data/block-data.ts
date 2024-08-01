@@ -15,17 +15,19 @@ export async function fetchAllBlocks(accountId: string): Promise<BlockWithRelati
       content: blocks.content,
       createdBy: blocks.createdBy,
       lastModifiedBy: blocks.lastModifiedBy,
-      tags: sql<Tag[]>`coalesce(json_agg(distinct jsonb_build_object(
-        'id', ${tags.id},
-        'accountId', ${tags.accountId},
-        'name', ${tags.name}
+      tags: sql<Tag[]>`COALESCE(
+        json_agg(DISTINCT jsonb_build_object(
+          'id', ${tags.id},
+          'accountId', ${tags.accountId},
+          'name', ${tags.name}
       )) filter (where ${tags.id} is not null), '[]')`,
-      projects: sql<BaseProject[]>`coalesce(json_agg(distinct jsonb_build_object(
-        'id', ${projects.id},
-        'accountId', ${projects.accountId},
-        'name', ${projects.name},
-        'createdAt', ${projects.createdAt},
-        'updatedAt', ${projects.updatedAt}
+      projects: sql<BaseProject[]>`COALESCE(
+        json_agg(DISTINCT jsonb_build_object(
+          'id', ${projects.id},
+          'accountId', ${projects.accountId},
+          'name', ${projects.name},
+          'createdAt', ${projects.createdAt},
+          'updatedAt', ${projects.updatedAt}
       )) filter (where ${projects.id} is not null), '[]')`,
     })
     .from(blocks)
