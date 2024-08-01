@@ -44,14 +44,6 @@ export type BlockWithProjects = Block & {
 
 export type BlockWithRelations = BlockWithTags & BlockWithProjects;
 
-export const BlockFormSubmissionSchema = z.object({
-  content: z.custom<JSONContent>(),
-  tags: z.array(z.string()),
-  projects: z.array(z.string()),
-});
-
-export type BlockFormSubmission = z.infer<typeof BlockFormSubmissionSchema>;
-
 export type BaseProject = InferSelectModel<typeof projects>;
 
 export type ProjectPreview = BaseProject & {
@@ -78,8 +70,8 @@ export const ProjectFormSubmissionSchema = z.object({
   name: z.string().min(1, "Project name is required"),
   description: z.string().optional(),
   status: z.enum(["pending", "completed"]),
-  blocks: z.array(z.string()),
-  tags: z.array(z.string()),
+  // blocks: z.array(z.string()),
+  // tags: z.array(z.string()),
 });
 
 export type ProjectFormSubmission = z.infer<typeof ProjectFormSubmissionSchema>;
