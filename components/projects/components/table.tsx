@@ -82,9 +82,8 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
                     <td className="whitespace-nowrap px-3 py-3">{project.status}</td>
                     <td className="px-3 py-3">
                       <TagList
-                        initialTags={project.tags?.map(t => t.name) || []}
+                        selectedTags={project.tags?.map(t => t.name) || []}
                         onTagsChange={(newTags) => handleTagsChange(project.id, newTags)}
-                        accountId={accountId}
                       />
                     </td>
                     <td className="whitespace-nowrap px-3 py-3">{project.blocks?.length}</td>
