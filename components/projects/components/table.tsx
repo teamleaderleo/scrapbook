@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { TagList } from '@/components/tags/taglist';
 import { DeleteProject, UpdateProject } from '@/components/projects/components/button';
-import Pagination from '../../ui/components/pagination';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
 import { Block, ProjectWithBlocks } from "@/app/lib/definitions/definitions";
@@ -12,6 +11,10 @@ import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
 import { SearchParamsHandler } from '../../search-params-handler';
 import { ProjectsTableSkeleton } from '@/components/ui/components/skeletons';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Pagination from '../../ui/components/pagination';
 
 export function ProjectsTable({ accountId }: { accountId: string }) {
   const { 
@@ -43,88 +46,87 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
     await updateProjectTags({ projectId, tags: newTagNames });
   };
 
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'secondary';
+      case 'pending':
+        return 'default';
+      default:
+        return 'outline';
+    }
+  };
+
   if (isLoading) return <ProjectsTableSkeleton />;
   if (error) return <div>Error: {error.message}</div>;
 
   return (
-    <div className="mt-6 flow-root">
+    <div className="space-y-4">
       <Suspense fallback={null}>
         <SearchParamsHandler
           onSearchChange={handleSearch}
           onPageChange={handlePageChange}
         />
       </Suspense>
-      <div className="overflow-x-auto">
-        <div className="inline-block min-w-full align-middle">
-          <div className="overflow-hidden rounded-md bg-gray-50 p-2 md:pt-0">
-            <table className="hidden min-w-full text-gray-900 md:table">
-              <thead className="rounded-lg text-left text-sm font-normal">
-                <tr>
-                  <th scope="col" className="px-4 py-5 font-medium sm:pl-6">Name</th>
-                  <th scope="col" className="px-3 py-5 font-medium">Description</th>
-                  <th scope="col" className="px-3 py-5 font-medium">Status</th>
-                  <th scope="col" className="px-3 py-5 font-medium">Tags</th>
-                  <th scope="col" className="px-3 py-5 font-medium">Blocks</th>
-                  <th scope="col" className="px-3 py-5 font-medium">Updated</th>
-                  <th scope="col" className="px-3 py-5 font-medium">Preview</th>
-                  <th scope="col" className="relative py-3 pl-6 pr-3">
-                    <span className="sr-only">Edit</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white">
-                {paginatedProjects.map((project: ProjectWithBlocks) => (
-                  <tr key={project.id} className="w-full border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
-                    <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                      <p className="font-medium">{project.name}</p>
-                    </td>
-                    <td className="px-3 py-3">{project.description}</td>
-                    <td className="whitespace-nowrap px-3 py-3">{project.status}</td>
-                    <td className="px-3 py-3">
-                      <TagList
-                        selectedTags={project.tags?.map(t => t.name) || []}
-                        onTagsChange={(newTags) => handleTagsChange(project.id, newTags)}
-                      />
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-3">{project.blocks?.length}</td>
-                    <td className="whitespace-nowrap px-3 py-3">
-                      {new Date(project.updatedAt).toLocaleDateString()}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-3">
-                      <div className="flex space-x-2">
-                        {project.blocks && project.blocks.length > 0 && (
-                          <div key={project.blocks[0].id} className="w-10 h-10 relative overflow-hidden rounded-full">
-                            <ErrorBoundaryWithToast>
-                              {project.blocks[0] && (
-                                <BlockThumbnail
-                                  block={project.blocks[0] as Block}
-                                  size={40}
-                                  priority={true}
-                                  className="flex-shrink-0"
-                                />
-                              )}
-                            </ErrorBoundaryWithToast>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                      <div className="flex justify-end">
-                        <UpdateProject id={project.id} />
-                        <DeleteProject 
-                          id={project.id} 
-                          onDelete={() => handleDeleteProject(project.id)}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[100px]">Name</TableHead>
+            <TableHead>Description</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Tags</TableHead>
+            <TableHead>Blocks</TableHead>
+            <TableHead>Updated</TableHead>
+            <TableHead>Preview</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {paginatedProjects.map((project: ProjectWithBlocks) => (
+            <TableRow key={project.id}>
+              <TableCell className="font-medium">{project.name}</TableCell>
+              <TableCell>{project.description}</TableCell>
+              <TableCell>
+                <Badge variant={getStatusBadgeVariant(project.status)}>
+                  {project.status}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <TagList
+                  selectedTags={project.tags?.map(t => t.name) || []}
+                  onTagsChange={(newTags) => handleTagsChange(project.id, newTags)}
+                />
+              </TableCell>
+              <TableCell>{project.blocks?.length}</TableCell>
+              <TableCell>{new Date(project.updatedAt).toLocaleDateString()}</TableCell>
+              <TableCell>
+                {project.blocks && project.blocks.length > 0 && (
+                  <div className="w-10 h-10 relative overflow-hidden rounded-full">
+                    <ErrorBoundaryWithToast>
+                      {project.blocks[0] && (
+                        <BlockThumbnail
+                          block={project.blocks[0] as Block}
+                          size={40}
+                          priority={true}
+                          className="flex-shrink-0"
                         />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div className="mt-5 flex w-full justify-center">
+                      )}
+                    </ErrorBoundaryWithToast>
+                  </div>
+                )}
+              </TableCell>
+              <TableCell className="text-right">
+                <UpdateProject id={project.id} />
+                <DeleteProject 
+                  id={project.id} 
+                  onDelete={() => handleDeleteProject(project.id)}
+                />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <div className="flex justify-center">
         <Pagination 
           totalPages={totalPages} 
           currentPage={currentPage}
