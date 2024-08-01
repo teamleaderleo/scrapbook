@@ -74,35 +74,6 @@ export function useTags() {
 
   useKeyNav(currentPage, totalPages, handlePageChange, true);
 
-  const addTag = useCallback(async (name: string): Promise<Tag> => {
-    const trimmedName = name.trim().toLowerCase();
-    const existingTag = tags.find(tag => tag.name.toLowerCase() === trimmedName);
-    if (existingTag) return existingTag;
-
-    return addTagMutation.mutateAsync(trimmedName);
-  }, [tags, addTagMutation]);
-
-  const getOrCreateTags = useCallback(async (tagNames: string[]): Promise<Tag[]> => {
-    const result: Tag[] = [];
-    for (const name of tagNames) {
-      try {
-        const tag = await addTag(name);
-        result.push(tag);
-      } catch (error) {
-        console.error(`Failed to add tag: ${name}`, error);
-      }
-    }
-    return result;
-  }, [addTag]);
-
-  const useTagUsage = (tagId: string) => {
-    return useQuery({
-      queryKey: ['tagUsage', tagId],
-      queryFn: () => getCachedTagUsage(ADMIN_UUID, tagId),
-      staleTime: 5 * 60 * 1000,
-      gcTime: 10 * 60 * 1000,
-    });
-  };
 
   return {
     tags,
@@ -115,10 +86,8 @@ export function useTags() {
     totalPages,
     handleSearch,
     handlePageChange,
-    addTag,
+    addTag: addTagMutation.mutateAsync,
     updateTag: updateTagMutation.mutateAsync,
     deleteTag: deleteTagMutation.mutateAsync,
-    getOrCreateTags,
-    useTagUsage,
   };
 }
