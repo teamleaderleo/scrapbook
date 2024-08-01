@@ -7,40 +7,57 @@ import { Block, BaseProject, ProjectWithBlocks, Tag, } from "../definitions/defi
 
 
 export async function fetchAllProjects(accountId: string): Promise<ProjectWithBlocks[]> {
-  const results = await db
-    .select({
-      id: projects.id,
-      accountId: projects.accountId,
-      name: projects.name,
-      description: projects.description,
-      createdAt: projects.createdAt,
-      updatedAt: projects.updatedAt,
-      status: projects.status,
-      tags: sql<Tag[]>`json_agg(distinct jsonb_build_object(
-        'id', ${tags.id},
-        'accountId', ${tags.accountId},
-        'name', ${tags.name}
-      )) filter (where ${tags.id} is not null)`,
-      blocks: sql<Block[]>`json_agg(distinct jsonb_build_object(
-        'id', ${blocks.id},
-        'accountId', ${blocks.accountId},
-        'createdAt', ${blocks.createdAt},
-        'updatedAt', ${blocks.updatedAt},
-        'content', ${blocks.content},
-        'createdBy': ${blocks.createdAt},
-        'lastModifiedBy': ${blocks.lastModifiedBy},
-      )) filter (where ${blocks.id} is not null)`
-    })
-    .from(projects)
-    .leftJoin(tagAssociations, eq(tagAssociations.associatedId, projects.id))
-    .leftJoin(tags, eq(tags.id, tagAssociations.tagId))
-    .leftJoin(projectBlockLinks, eq(projectBlockLinks.projectId, projects.id))
-    .leftJoin(blocks, eq(blocks.id, projectBlockLinks.blockId))
-    .where(eq(projects.accountId, accountId))
-    .groupBy(projects.id)
-    .orderBy(desc(projects.updatedAt));
+  try {
+    const results = await db
+      .select({
+        id: projects.id,
+        accountId: projects.accountId,
+        name: projects.name,
+        description: projects.description,
+        createdAt: projects.createdAt,
+        updatedAt: projects.updatedAt,
+        status: projects.status,
+        tags: sql<Tag[]>`COALESCE(
+          json_agg(DISTINCT jsonb_build_object(
+            'id', ${tags.id},
+            'accountId', ${tags.accountId},
+            'name', ${tags.name}
+          )) FILTER (WHERE ${tags.id} IS NOT NULL),
+          '[]'
+        )`,
+        blocks: sql<Block[]>`COALESCE(
+          json_agg(DISTINCT jsonb_build_object(
+            'id', ${blocks.id},
+            'accountId', ${blocks.accountId},
+            'createdAt', ${blocks.createdAt},
+            'updatedAt', ${blocks.updatedAt},
+            'content', ${blocks.content},
+            'createdBy', ${blocks.createdBy},
+            'lastModifiedBy', ${blocks.lastModifiedBy}
+          )) FILTER (WHERE ${blocks.id} IS NOT NULL),
+          '[]'
+        )`
+      })
+      .from(projects)
+      .leftJoin(tagAssociations, and(
+        eq(tagAssociations.associatedId, projects.id),
+        eq(tagAssociations.entityType, 'project')
+      ))
+      .leftJoin(tags, eq(tags.id, tagAssociations.tagId))
+      .leftJoin(projectBlockLinks, eq(projectBlockLinks.projectId, projects.id))
+      .leftJoin(blocks, eq(blocks.id, projectBlockLinks.blockId))
+      .where(eq(projects.accountId, accountId))
+      .groupBy(projects.id)
+      .orderBy(desc(projects.updatedAt));
 
-  return results;
+    console.log('Fetch all projects query:', db.select().from(projects).toSQL());
+    console.log('Fetch all projects result:', results);
+
+    return results;
+  } catch (error) {
+    console.error('Error in fetchAllProjects:', error);
+    throw error;
+  }
 }
 
 // export async function fetchProjectsWithExtendedBlocks(accountId: string): Promise<ProjectWithExtendedBlocks[]> {

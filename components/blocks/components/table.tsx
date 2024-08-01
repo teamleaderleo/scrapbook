@@ -10,7 +10,7 @@ import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
 import { BlockThumbnail } from './block-thumbnail';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TiptapPreview } from '@/components/editor/content-preview';
-import { BlockFormSubmission, BlockWithRelations } from '@/app/lib/definitions/definitions';
+import { BlockFormSubmission, BlockWithRelations, Tag } from '@/app/lib/definitions/definitions';
 import { JSONContent } from '@tiptap/react';
 
 export function BlockTable() {
@@ -27,11 +27,11 @@ export function BlockTable() {
 
   const { showToast } = useToastMessages();
 
-  const handleTagsChange = async (block: BlockWithRelations, newTags: string[]) => {
+  const handleTagsChange = async (block: BlockWithRelations, newTags: Tag[]) => {
     try {
       const updatedBlockData: BlockFormSubmission = {
         content: block.content as JSONContent,
-        tags: newTags,
+        tags: newTags.map(tag => tag.id),
         projects: block.projects.map(p => p.id)
       };
 
@@ -77,19 +77,19 @@ export function BlockTable() {
             <TableRow key={block.id}>
               <TableCell className="font-medium">
                 <div className="flex items-center space-x-3">
-                  <ErrorBoundaryWithToast>
+                  {/* <ErrorBoundaryWithToast>
                     <BlockThumbnail
                       block={block}
                       size={40}
                       priority={true}
                       className="rounded-full"
                     />
-                  </ErrorBoundaryWithToast>
+                  </ErrorBoundaryWithToast> */}
                 </div>
               </TableCell>
               <TableCell>
                 <TagList
-                  selectedTags={block.tags.map(t => t.name)}
+                  selectedTags={block.tags || []}
                   onTagsChange={(newTags) => handleTagsChange(block, newTags)}
                 />
               </TableCell>

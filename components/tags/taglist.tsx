@@ -1,48 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTags } from '@/app/lib/hooks/useTags';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Check, ChevronsUpDown, X, Plus } from "lucide-react";
+import { Tag } from '@/app/lib/definitions/definitions';
 
 interface TagListProps {
-  selectedTags: string[];
-  onTagsChange: (tags: string[]) => void;
+  selectedTags: Tag[];
+  onTagsChange: (tags: Tag[]) => void;
 }
 
 export function TagList({ selectedTags, onTagsChange }: TagListProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const { tagNames, addTag } = useTags();
+  const { tags, addTag, isLoading, error } = useTags();
 
-  const handleSelectTag = async (tagName: string) => {
-    if (!selectedTags.includes(tagName)) {
-      const updatedTags = [...selectedTags, tagName];
+  const handleSelectTag = async (tag: Tag) => {
+    if (!selectedTags.some(t => t.id === tag.id)) {
+      const updatedTags = [...selectedTags, tag];
       onTagsChange(updatedTags);
     }
     setOpen(false);
     setInputValue('');
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    const updatedTags = selectedTags.filter(tag => tag !== tagToRemove);
+  const handleRemoveTag = (tagToRemove: Tag) => {
+    const updatedTags = selectedTags.filter(tag => tag.id !== tagToRemove.id);
     onTagsChange(updatedTags);
   };
 
   const handleCreateTag = async () => {
-    if (inputValue.trim() && !tagNames.includes(inputValue.trim())) {
+    if (inputValue.trim()) {
       const newTag = await addTag(inputValue.trim());
-      handleSelectTag(newTag.name);
+      handleSelectTag(newTag);
     }
   };
+
+  const availableTags = tags.filter(tag => !selectedTags.some(selectedTag => selectedTag.id === tag.id));
+
+  if (isLoading) {
+    return <div>Loading tags...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading tags: {error.message}</div>;
+  }
 
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2">
         {selectedTags.map((tag) => (
-          <Badge key={tag} variant="secondary">
-            {tag}
+          <Badge key={tag.id} variant="secondary">
+            {tag.name}
             <Button
               variant="ghost"
               size="sm"
@@ -83,21 +94,17 @@ export function TagList({ selectedTags, onTagsChange }: TagListProps) {
               </Button>
             </CommandEmpty>
             <CommandGroup>
-              {tagNames
-                .filter(tag => tag.toLowerCase().includes(inputValue.toLowerCase()) && !selectedTags.includes(tag))
-                .map(tag => (
-                  <CommandItem
-                    key={tag}
-                    onSelect={() => handleSelectTag(tag)}
-                  >
-                    <Check
-                      className={`mr-2 h-4 w-4 ${
-                        selectedTags.includes(tag) ? "opacity-100" : "opacity-0"
-                      }`}
-                    />
-                    {tag}
-                  </CommandItem>
-                ))}
+              {availableTags.map(tag => (
+                <CommandItem
+                  key={tag.id}
+                  onSelect={() => handleSelectTag(tag)}
+                >
+                  <Check
+                    className={`mr-2 h-4 w-4 opacity-0`}
+                  />
+                  {tag.name}
+                </CommandItem>
+              ))}
             </CommandGroup>
           </Command>
         </PopoverContent>

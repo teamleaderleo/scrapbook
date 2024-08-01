@@ -5,7 +5,7 @@ import { TagList } from '@/components/tags/taglist';
 import { DeleteProject, UpdateProject } from '@/components/projects/components/button';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { ErrorBoundaryWithToast } from '../../errors/error-boundary';
-import { Block, ProjectWithBlocks } from "@/app/lib/definitions/definitions";
+import { Block, ProjectWithBlocks, Tag } from "@/app/lib/definitions/definitions";
 import { BlockThumbnail } from '../../blocks/components/block-thumbnail';
 import { useToastMessages } from '@/app/lib/hooks/useToastMessages';
 import { Suspense } from 'react';
@@ -42,8 +42,8 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
     }
   };
 
-  const handleTagsChange = async (projectId: string, newTagNames: string[]) => {
-    await updateProjectTags({ projectId, tags: newTagNames });
+  const handleTagsChange = async (projectId: string, newTags: Tag[]) => {
+    await updateProjectTags({ projectId, tags: newTags.map(tag => tag.id) });
   };
 
   const getStatusBadgeVariant = (status: string) => {
@@ -93,7 +93,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
               </TableCell>
               <TableCell>
                 <TagList
-                  selectedTags={project.tags?.map(t => t.name) || []}
+                  selectedTags={project.tags || []}
                   onTagsChange={(newTags) => handleTagsChange(project.id, newTags)}
                 />
               </TableCell>
@@ -102,7 +102,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
               <TableCell>
                 {project.blocks && project.blocks.length > 0 && (
                   <div className="w-10 h-10 relative overflow-hidden rounded-full">
-                    <ErrorBoundaryWithToast>
+                    {/* <ErrorBoundaryWithToast>
                       {project.blocks[0] && (
                         <BlockThumbnail
                           block={project.blocks[0] as Block}
@@ -111,7 +111,7 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
                           className="flex-shrink-0"
                         />
                       )}
-                    </ErrorBoundaryWithToast>
+                    </ErrorBoundaryWithToast> */}
                   </div>
                 )}
               </TableCell>

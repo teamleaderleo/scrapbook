@@ -19,13 +19,10 @@ export function useTags() {
     queryFn: () => getCachedTags(ADMIN_UUID),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
   });
 
   const fuse = useMemo(() => {
-    if (!tags) return null;
+    if (!tags.length) return null;
     return new Fuse(tags, {
       keys: ['name'],
       threshold: 0.3,
@@ -33,12 +30,12 @@ export function useTags() {
   }, [tags]);
 
   const filteredTags = useMemo(() => {
-    if (!tags) return [];
+    if (!tags.length) return [];
     if (!query) return tags;
     return fuse ? fuse.search(query).map(result => result.item) : tags;
   }, [tags, query, fuse]);
 
-  const totalPages = Math.ceil(filteredTags.length / ITEMS_PER_PAGE);
+  const totalPages = Math.max(1, Math.ceil(filteredTags.length / ITEMS_PER_PAGE));
 
   const paginatedTags = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -72,8 +69,8 @@ export function useTags() {
   }, []);
 
   const handlePageChange = useCallback((page: number) => {
-    setCurrentPage(page);
-  }, []);
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  }, [totalPages]);
 
   useKeyNav(currentPage, totalPages, handlePageChange, true);
 
@@ -82,26 +79,21 @@ export function useTags() {
     const existingTag = tags.find(tag => tag.name.toLowerCase() === trimmedName);
     if (existingTag) return existingTag;
 
-    const newTag = await addTagMutation.mutateAsync(trimmedName);
-    return newTag;
+    return addTagMutation.mutateAsync(trimmedName);
   }, [tags, addTagMutation]);
 
   const getOrCreateTags = useCallback(async (tagNames: string[]): Promise<Tag[]> => {
     const result: Tag[] = [];
     for (const name of tagNames) {
-      const tag = await addTag(name);
-      result.push(tag);
+      try {
+        const tag = await addTag(name);
+        result.push(tag);
+      } catch (error) {
+        console.error(`Failed to add tag: ${name}`, error);
+      }
     }
     return result;
   }, [addTag]);
-
-  const tagNamesToTags = useCallback((tagNames: string[]) => {
-    return tags.filter(tag => tagNames.includes(tag.name));
-  }, [tags]);
-
-  const tagsToTagNames = useCallback((tags: Tag[]) => {
-    return tags.map(tag => tag.name);
-  }, []);
 
   const useTagUsage = (tagId: string) => {
     return useQuery({
@@ -114,7 +106,6 @@ export function useTags() {
 
   return {
     tags,
-    tagNames: tags.map(tag => tag.name),
     filteredTags,
     paginatedTags,
     isLoading,
@@ -128,8 +119,6 @@ export function useTags() {
     updateTag: updateTagMutation.mutateAsync,
     deleteTag: deleteTagMutation.mutateAsync,
     getOrCreateTags,
-    tagNamesToTags,
-    tagsToTagNames,
     useTagUsage,
   };
 }
