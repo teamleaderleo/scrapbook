@@ -1,10 +1,9 @@
 'use server';
 
 import { db } from '../db/db';
-import { revalidatePath } from 'next/cache';
 import { BlockFormSubmission } from '../definitions/definitions';
 import { and, eq } from 'drizzle-orm';
-import { blocks } from '../db/schema';
+import { blocks, projectBlockLinks, tagAssociations } from '../db/schema';
 import { v4 as uuid } from 'uuid';
 
 
@@ -36,6 +35,20 @@ export async function updateBlock(id: string, accountId: string, data: BlockForm
 export async function deleteBlock(id: string, accountId: string): Promise<BlockState> {
   try {
     await db.transaction(async (tx) => {
+
+      await tx.delete(tagAssociations)
+        .where(and(
+          eq(tagAssociations.associatedId, id),
+          eq(tagAssociations.entityType, 'block'),
+          eq(tagAssociations.accountId, accountId)
+        ));
+
+      await tx.delete(projectBlockLinks)
+        .where(and(
+          eq(projectBlockLinks.blockId, id),
+          eq(projectBlockLinks.accountId, accountId)
+        ));
+
       await tx.delete(blocks)
         .where(and(
           eq(blocks.id, id),
@@ -49,7 +62,6 @@ export async function deleteBlock(id: string, accountId: string): Promise<BlockS
     return { message: `Failed to delete block: ${error.message}`, success: false };
   }
 }
-
 
 export async function createBlock(accountId: string, data: BlockFormSubmission): Promise<BlockState> {
   try {

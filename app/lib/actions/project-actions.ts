@@ -7,7 +7,7 @@ import { projects, projectBlockLinks, tagAssociations } from '../db/schema';
 import { v4 as uuid } from 'uuid';
 import { ProjectFormSubmission, ProjectFormSubmissionSchema } from '../definitions/definitions';
 
-export type State = {
+export type ProjectState = {
   errors?: {
     name?: string[];
     description?: string[];
@@ -21,7 +21,7 @@ export type State = {
   success?: boolean;
 };
 
-export async function createProject(accountId: string, data: ProjectFormSubmission): Promise<State> {
+export async function createProject(accountId: string, data: ProjectFormSubmission): Promise<ProjectState> {
   const validatedFields = ProjectFormSubmissionSchema.safeParse(data);
 
   if (!validatedFields.success) {
@@ -31,7 +31,7 @@ export async function createProject(accountId: string, data: ProjectFormSubmissi
     };
   }
 
-  const { name, description, status, } = validatedFields.data;
+  const { name, description } = validatedFields.data;
 
   try {
     return await db.transaction(async (tx) => {
@@ -56,7 +56,7 @@ export async function createProject(accountId: string, data: ProjectFormSubmissi
   }
 }
 
-export async function updateProject(id: string, accountId: string, formData: ProjectFormSubmission): Promise<State> {
+export async function updateProject(id: string, accountId: string, formData: ProjectFormSubmission): Promise<ProjectState> {
   const validatedFields = ProjectFormSubmissionSchema.safeParse(formData);
 
   if (!validatedFields.success) {
@@ -87,10 +87,28 @@ export async function updateProject(id: string, accountId: string, formData: Pro
   }
 }
 
-export async function deleteProject(id: string, accountId: string): Promise<State> {
+export async function deleteProject(id: string, accountId: string): Promise<ProjectState> {
   try {
     await db.transaction(async (tx) => {
-      await tx.delete(projects).where(and(eq(projects.id, id), eq(projects.accountId, accountId)));
+
+      await tx.delete(tagAssociations)
+        .where(and(
+          eq(tagAssociations.associatedId, id),
+          eq(tagAssociations.entityType, 'project'),
+          eq(tagAssociations.accountId, accountId)
+        ));
+
+      await tx.delete(projectBlockLinks)
+        .where(and(
+          eq(projectBlockLinks.projectId, id),
+          eq(projectBlockLinks.accountId, accountId)
+        ));
+
+      await tx.delete(projects)
+        .where(and(
+          eq(projects.id, id),
+          eq(projects.accountId, accountId)
+        ));
     });
 
     revalidatePath('/dashboard/projects');
