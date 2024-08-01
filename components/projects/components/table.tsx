@@ -73,7 +73,6 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
           <TableRow>
             <TableHead className="w-[100px]">Name</TableHead>
             <TableHead>Description</TableHead>
-            <TableHead>Status</TableHead>
             <TableHead>Tags</TableHead>
             <TableHead>Blocks</TableHead>
             <TableHead>Updated</TableHead>
@@ -86,11 +85,6 @@ export function ProjectsTable({ accountId }: { accountId: string }) {
             <TableRow key={project.id}>
               <TableCell className="font-medium">{project.name}</TableCell>
               <TableCell>{project.description}</TableCell>
-              <TableCell>
-                <Badge variant={getStatusBadgeVariant(project.status)}>
-                  {project.status}
-                </Badge>
-              </TableCell>
               <TableCell>
                 <TagList
                   selectedTags={project.tags || []}
