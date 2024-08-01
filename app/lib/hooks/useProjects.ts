@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient, useQueries } from 'react-query';
 import Fuse from 'fuse.js';
-import { ProjectFetchOptions } from '@/app/lib/definitions/definitions';
+import { ProjectFetchOptions, ProjectFormSubmission } from '@/app/lib/definitions/definitions';
 import { ProjectWithBlocks, ProjectPreview, BaseProject, ProjectWithExtendedBlocks, ProjectWithTags } from "../definitions/definitions";
 import { createProject, updateProject, deleteProject } from '@/app/lib/actions/project-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
@@ -79,7 +79,7 @@ export function useProjects() {
   }, [filteredProjects, currentPage]);
 
   const updateProjectMutation = useMutation(
-    ({ id, formData }: { id: string; formData: FormData }) => updateProject(id, ADMIN_UUID, formData),
+    ({ id, data }: { id: string; data: ProjectFormSubmission }) => updateProject(id, ADMIN_UUID, data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['projects']);
@@ -95,7 +95,7 @@ export function useProjects() {
         queryClient.invalidateQueries(['projects']);
         },
     }
-    );
+  );
 
   const deleteProjectMutation = useMutation(
     (id: string) => deleteProject(id, ADMIN_UUID),
@@ -107,7 +107,7 @@ export function useProjects() {
   );
 
   const addProjectMutation = useMutation(
-    (formData: FormData) => createProject(ADMIN_UUID, formData),
+    (data: ProjectFormSubmission) => createProject(ADMIN_UUID, data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['projects']);

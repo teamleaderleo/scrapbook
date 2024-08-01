@@ -8,6 +8,7 @@ import { suggestTags } from '../external/claude-utils';
 import { projects, projectBlockLinks, tagAssociations } from '../db/schema';
 import { handleTagUpdateWithinTransaction } from './tag-handlers';
 import { v4 as uuid } from 'uuid';
+import { ProjectFormSubmission, ProjectFormSubmissionSchema } from '../definitions/definitions';
 
 const ProjectSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
@@ -33,14 +34,8 @@ export type State = {
   success?: boolean;
 };
 
-export async function createProject(accountId: string, formData: FormData): Promise<State> {
-  const validatedFields = ProjectSchema.safeParse({
-    name: formData.get('name'),
-    description: formData.get('description'),
-    status: formData.get('status'),
-    tags: formData.getAll('tags'),
-    blocks: formData.getAll('blocks'),
-  });
+export async function createProject(accountId: string, data: ProjectFormSubmission): Promise<State> {
+  const validatedFields = ProjectFormSubmissionSchema.safeParse(data);
 
   if (!validatedFields.success) {
     return {
@@ -69,7 +64,7 @@ export async function createProject(accountId: string, formData: FormData): Prom
 
       // Handle tags
       if (tags && tags.length > 0) {
-        await handleTagUpdateWithinTransaction(tx, accountId, newProjectId, 'project',tags);
+        await handleTagUpdateWithinTransaction(tx, accountId, newProjectId, 'project', tags);
       }
 
       // Handle blocks
@@ -84,9 +79,6 @@ export async function createProject(accountId: string, formData: FormData): Prom
         }
       }
 
-      // const allContent = `${name} ${description || ''}`;
-      // const suggestedTags = await suggestTags(allContent);
-
       return { message: 'Project created successfully', projectId: newProjectId, success: true };
     });
   } catch (error: any) {
@@ -95,14 +87,8 @@ export async function createProject(accountId: string, formData: FormData): Prom
   }
 }
 
-export async function updateProject(id: string, accountId: string, formData: FormData): Promise<State> {
-  const validatedFields = ProjectSchema.safeParse({
-    name: formData.get('name'),
-    description: formData.get('description'),
-    status: formData.get('status'),
-    tags: formData.getAll('tags'),
-    blocks: formData.getAll('blocks'),
-  });
+export async function updateProject(id: string, accountId: string, formData: ProjectFormSubmission): Promise<State> {
+  const validatedFields = ProjectFormSubmissionSchema.safeParse(formData);
 
   if (!validatedFields.success) {
     return {
@@ -144,9 +130,6 @@ export async function updateProject(id: string, accountId: string, formData: For
           });
         }
       }
-
-      // const allContent = `${name} ${description || ''}`;
-      // const suggestedTags = await suggestTags(allContent);
 
       return { message: 'Project updated successfully' };
     });
