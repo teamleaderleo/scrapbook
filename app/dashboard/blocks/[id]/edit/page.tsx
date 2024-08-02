@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import Breadcrumbs from '@/components/ui/components/breadcrumbs';
+// import Breadcrumbs from '@/components/ui/components/breadcrumbs';
 import { Suspense } from 'react';
 import { BlockFormWrapper } from '@/components/blocks/forms/block-form-wrapper';
 
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function Page({ params }: { params: { id: string } }) {
   return (
     <main>
-      <Breadcrumbs
+      {/* <Breadcrumbs
         breadcrumbs={[
           { label: 'Blocks', href: '/dashboard/blocks' },
           {
@@ -19,7 +19,7 @@ export default function Page({ params }: { params: { id: string } }) {
             active: true,
           },
         ]}
-      />
+      /> */}
       <Suspense fallback={<div>Loading form...</div>}>
         <BlockFormWrapper blockId={params.id} />
       </Suspense>

@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { ProjectFormWrapper } from '@/components/projects/forms/project-form-wrapper';
-import Breadcrumbs from '@/components/ui/components/breadcrumbs';
+// import Breadcrumbs from '@/components/ui/components/breadcrumbs';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function Page({ params }: { params: { id: string } }) {
   return (
     <main>
-      <Breadcrumbs
+      {/* <Breadcrumbs
         breadcrumbs={[
           { label: 'Projects', href: '/dashboard/projects' },
           {
@@ -19,7 +19,7 @@ export default function Page({ params }: { params: { id: string } }) {
             active: true,
           },
         ]}
-      />
+      /> */}
       <Suspense fallback={<div>Loading form...</div>}>
         {/* <ProjectFormWrapper projectId={params.id} /> */}
       </Suspense>

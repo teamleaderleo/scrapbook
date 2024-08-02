@@ -27,7 +27,7 @@ export const ProjectList = () => {
           <div className="py-1">
             {projects?.map((project, index) => (
               <React.Fragment key={project.id}>
-                <Link href={`/dashboard/projects/${project.id}/edit`}>
+                <Link href={`/dashboard/projects/${project.id}`}>
                   <div className="text-sm py-2 px-3 hover:bg-[#35373C] rounded transition-colors cursor-pointer">
                     # {project.name}
                   </div>

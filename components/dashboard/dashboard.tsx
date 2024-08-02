@@ -34,7 +34,7 @@ const Dashboard = () => {
           <h2 className="text-lg font-semibold">Projects</h2>
         </CardHeader>
         <CardContent className="p-0">
-          <ProjectList projects={recentProjects} />
+          <ProjectList />
         </CardContent>
       </Card>
       <div className="flex-1 overflow-hidden">

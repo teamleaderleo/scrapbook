@@ -3,7 +3,15 @@ import { Input } from "@/components/ui/components/input";
 import { Button } from "@/components/ui/components/button";
 import { PlusCircle, Smile, SendHorizontal } from 'lucide-react';
 
-const Footer: React.FC = () => {
+interface FooterProps {
+  projectName?: string;
+}
+
+const Footer: React.FC<FooterProps> = ({ projectName }) => {
+  const placeholder = projectName
+    ? `Create something in ${projectName}...`
+    : "Create something...";
+
   return (
     <footer className="bg-[#36393f] border-t border-[#2f3136] p-4">
       <div className="flex items-center space-x-2">
@@ -12,7 +20,7 @@ const Footer: React.FC = () => {
         </Button>
         <Input
           className="flex-grow bg-[#40444b] border-none text-white placeholder-[#72767d]"
-          placeholder="Create something..."
+          placeholder={placeholder}
         />
         <Button variant="ghost" size="icon" className="text-[#b9bbbe] hover:text-white hover:bg-[#4f545c]">
           <Smile className="h-5 w-5" />
