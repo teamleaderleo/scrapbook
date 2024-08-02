@@ -21,7 +21,7 @@ export default function Page({ params }: { params: { id: string } }) {
         ]}
       />
       <Suspense fallback={<div>Loading form...</div>}>
-        <ProjectFormWrapper projectId={params.id} />
+        {/* <ProjectFormWrapper projectId={params.id} /> */}
       </Suspense>
     </main>
   );

@@ -21,7 +21,7 @@ export default function Page() {
         ]}
       />
       <Suspense fallback={<div>Loading form...</div>}>
-        <ProjectFormWrapper />
+        {/* <ProjectFormWrapper /> */}
       </Suspense>
     </main>
   );
