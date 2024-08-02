@@ -9,7 +9,7 @@ This project is a scrapbook-style project management app. It aims to provide an 
 Check out the deployed application: [https://setzen.vercel.app/](https://setzen.vercel.app/)
 
 ## Schema
-<img src="https://github.com/user-attachments/assets/8ed37c1f-a2e6-4ea4-80a0-af296482ade8" width="60%">
+<img src="https://github.com/user-attachments/assets/51b2ccab-2821-46e0-aec1-93152fecd4b1" width="60%">
 
 This is an ongoing effort.
 
