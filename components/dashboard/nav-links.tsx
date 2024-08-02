@@ -25,7 +25,7 @@ export default function NavLinks() {
   const pathname = usePathname();
 
   return (
-    <>
+    <div className="flex flex-col items-center space-y-4 py-4">
       {links.map((link) => {
         const LinkIcon = link.icon;
         return (
@@ -33,15 +33,15 @@ export default function NavLinks() {
             key={link.name}
             href={link.href}
             className={cn(
-              'flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-gray-700 hover:text-white',
-              pathname === link.href ? 'bg-gray-800 text-white' : 'text-white-800'
+              'w-12 h-12 flex items-center justify-center bg-gray-700 hover:bg-gray-600 text-white rounded-2xl transition-all hover:rounded-xl',
+              pathname === link.href ? 'bg-gray-600' : ''
             )}
+            title={link.name}
           >
-            <LinkIcon className="h-5 w-5" />
-            <span>{link.name}</span>
+            <LinkIcon className="h-6 w-6" />
           </Link>
         );
       })}
-    </>
+    </div>
   );
 }

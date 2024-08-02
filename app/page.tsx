@@ -17,7 +17,7 @@ export default function Page() {
           <p
             className={`${lusitana.className} text-xl text-gray-800 md:text-3xl md:leading-normal`}
           >
-            <strong>This is setzen,</strong> an MVP for a 
+            <strong>This is Stensibly,</strong> an MVP for a 
             scrapbook-style project management app built by Leo. 
             Login with user@nextmail.com and 123456.
             {/* {' '}

@@ -10,9 +10,7 @@ const SideNav = () => {
   return (
     <div className="flex h-full flex-col bg-gray-900 text-white">
       <div className="p-4">
-        <Link href="/" className="mb-4 flex items-center">
-          <AcmeLogo />
-        </Link>
+        
       </div>
       <ScrollArea className="flex-grow px-3">
         <NavLinks />
