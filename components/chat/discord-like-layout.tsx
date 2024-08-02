@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useCallback, useRef } from 'react';
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"

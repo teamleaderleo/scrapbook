@@ -6,5 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function ProjectsPage() {
-  return <ProjectsClientPage />;
-}
+  return //<ProjectsClientPage />;
+} 
