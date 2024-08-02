@@ -23,23 +23,23 @@ const Header: React.FC = () => {
     : 'Dashboard';
 
   return (
-    <header className="bg-white border-b border-gray-200 p-4">
+    <header className="bg-[#36393f] border-b border-[#2f3136] p-4">
       <div className="flex justify-between items-center">
         <Breadcrumb className="text-base">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/dashboard">Home</BreadcrumbLink>
+              <BreadcrumbLink href="/dashboard" className="text-[#b9bbbe] hover:text-white">Home</BreadcrumbLink>
             </BreadcrumbItem>
             {pathSegments.map((segment, index) => (
               <React.Fragment key={index}>
                 {segment !== 'dashboard' && (
                   <>
-                    <BreadcrumbSeparator />
+                    <BreadcrumbSeparator className="text-[#b9bbbe]" />
                     <BreadcrumbItem>
                       {index === pathSegments.length - 1 ? (
-                        <BreadcrumbPage>{capitalize(segment)}</BreadcrumbPage>
+                        <BreadcrumbPage className="text-white">{capitalize(segment)}</BreadcrumbPage>
                       ) : (
-                        <BreadcrumbLink href={`/${pathSegments.slice(0, index + 1).join('/')}`}>
+                        <BreadcrumbLink href={`/${pathSegments.slice(0, index + 1).join('/')}`} className="text-[#b9bbbe] hover:text-white">
                           {capitalize(segment)}
                         </BreadcrumbLink>
                       )}
@@ -50,7 +50,7 @@ const Header: React.FC = () => {
             ))}
           </BreadcrumbList>
         </Breadcrumb>
-        <h1 className={`${inter.className} text-2xl font-semibold header-title`}>
+        <h1 className={`${inter.className} text-2xl font-semibold header-title text-white`}>
           {title}
         </h1>
       </div>
