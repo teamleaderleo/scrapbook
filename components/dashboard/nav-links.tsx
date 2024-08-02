@@ -10,6 +10,7 @@ import {
   Tag, 
   Settings 
 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 
 const links = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -25,23 +26,32 @@ export default function NavLinks() {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col items-center space-y-4 py-4">
-      {links.map((link) => {
-        const LinkIcon = link.icon;
-        return (
-          <Link
-            key={link.name}
-            href={link.href}
-            className={cn(
-              'w-12 h-12 flex items-center justify-center bg-gray-700 hover:bg-gray-600 text-white rounded-2xl transition-all hover:rounded-xl',
-              pathname === link.href ? 'bg-gray-600' : ''
-            )}
-            title={link.name}
-          >
-            <LinkIcon className="h-6 w-6" />
-          </Link>
-        );
-      })}
-    </div>
+    <TooltipProvider>
+      <div className="flex flex-col items-center space-y-2 pt-2">
+        {links.map((link) => {
+          const LinkIcon = link.icon;
+          return (
+            <Tooltip key={link.name}>
+              <TooltipTrigger asChild>
+                <Link
+                  href={link.href}
+                  className={cn(
+                    'flex h-12 w-12 items-center justify-center rounded-3xl hover:rounded-2xl transition-all duration-300 ease-linear',
+                    pathname === link.href 
+                      ? 'bg-[#5865F2] text-white' 
+                      : 'text-[#B5BAC1] hover:bg-[#36393f] hover:text-white'
+                  )}
+                >
+                  <LinkIcon className="h-5 w-5" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>{link.name}</p>
+              </TooltipContent>
+            </Tooltip>
+          );
+        })}
+      </div>
+    </TooltipProvider>
   );
 }

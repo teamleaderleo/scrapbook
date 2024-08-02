@@ -2,13 +2,13 @@ import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import Search from '@/components/ui/components/search';
-import { BlocksTableSkeleton } from '@/components/ui/components/skeletons';
+// import { BlocksTableSkeleton } from '@/components/ui/components/skeletons';
 import { Metadata } from 'next';
 
-const TagManagementTable = dynamic(
-  () => import('@/components/tags/table').then((mod) => mod.TagManagementTable),
-  { ssr: false }
-);
+// const TagManagementTable = dynamic(
+//   () => import('@/components/tags/table').then((mod) => mod.TagManagementTable),
+//   { ssr: false }
+// );
 
 export const metadata: Metadata = {
   title: 'Tags',
@@ -24,9 +24,9 @@ export default async function TagsPage({
           <Search placeholder="Search tags..." />
         </Suspense>
       </div>
-      <Suspense fallback={<BlocksTableSkeleton />}>
-        <TagManagementTable accountId={ADMIN_UUID} />
-      </Suspense>
+      {/* <Suspense fallback={<BlocksTableSkeleton />}> */}
+        {/* <TagManagementTable accountId={ADMIN_UUID} /> */}
+      {/* </Suspense> */}
     </div>
   );
 }
