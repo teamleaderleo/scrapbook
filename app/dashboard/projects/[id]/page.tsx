@@ -1,35 +1,21 @@
-import { Metadata } from 'next';
-import { Breadcrumb } from '@/components/ui/components/breadcrumb';
-import { Suspense } from 'react';
-import { getCachedProjects } from '@/app/lib/data/cached-project-data';
 import Footer from '@/components/dashboard/footer';
-import { ADMIN_UUID } from '@/app/lib/constants';
+import ProjectContent from '@/components/projects/components/project-content';
+import { Metadata } from 'next';
+import { Suspense } from 'react';
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const projects = await getCachedProjects(ADMIN_UUID);
-  const project = projects.find(p => p.id === params.id);
-  return {
-    title: project ? `Project: ${project.name}` : 'Project Not Found',
-  };
-}
+export const metadata: Metadata = {
+  title: 'Project | Stensibly',
+};
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const projects = await getCachedProjects(ADMIN_UUID);
-  const project = projects.find(p => p.id === params.id);
-
-  if (!project) {
-    return <div>Project not found</div>;
-  }
-
+export default function Page({ params }: { params: { id: string } }) {
   return (
     <main className="flex flex-col h-screen">
       <div className="flex-grow">
-        <Suspense fallback={<div>Loading project content...</div>}>
-          <h1 className="text-2xl font-bold mt-4 mb-2">{project.name}</h1>
-          <p>{project.description}</p>
-        </Suspense>
+        {/* <Suspense fallback={<div>Loading project...</div>}> */}
+          <ProjectContent projectId={params.id} />
+        {/* </Suspense> */}
       </div>
-      <Footer projectName={project.name} />
+      <Footer />
     </main>
   );
 }

@@ -3,11 +3,20 @@ import { ProjectWithBlocks } from "@/app/lib/definitions/definitions";
 
 type ViewMode = 'chronological' | 'grid' | 'columns';
 
-export const useUIStore = create((set) => ({
+interface UIState {
+  currentProject: ProjectWithBlocks | null;
+  setCurrentProject: (project: ProjectWithBlocks | null) => void;
+  viewMode: ViewMode;
+  setViewMode: (mode: ViewMode) => void;
+  selectedBlocks: string[];
+  setSelectedBlocks: (blockIds: string[]) => void;
+}
+
+export const useUIStore = create<UIState>((set) => ({
   currentProject: null,
-  setCurrentProject: (project: ProjectWithBlocks | null) => set({ currentProject: project }),
+  setCurrentProject: (project) => set({ currentProject: project }),
   viewMode: 'chronological',
-  setViewMode: (mode: ViewMode) => set({ viewMode: mode }),
+  setViewMode: (mode) => set({ viewMode: mode }),
   selectedBlocks: [],
-  setSelectedBlocks: (blockIds: any) => set({ selectedBlocks: blockIds }),
+  setSelectedBlocks: (blockIds) => set({ selectedBlocks: blockIds }),
 }));

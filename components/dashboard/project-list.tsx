@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 import { ScrollArea } from "@/components/ui/components/scroll-area";
@@ -10,9 +10,28 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from "@/components/ui/components/button";
 import { User, Settings, LogOut } from 'lucide-react';
 import { signOut } from '@/auth';
+import { useUIStore } from '@/app/lib/store/ui-store';
+import { useRouter } from 'next/navigation';
 
 export const ProjectList = () => {
+  const router = useRouter();
   const { projects, isLoading } = useProjects();
+  const setCurrentProject = useUIStore((state) => state.setCurrentProject);
+  const currentProject = useUIStore((state) => state.currentProject);
+
+  useEffect(() => {
+    if (!currentProject && projects && projects.length > 0) {
+      setCurrentProject(projects[0]);
+    }
+  }, [currentProject, projects, setCurrentProject]);
+
+  useEffect(() => {
+    if (projects) {
+      projects.forEach(project => {
+        router.prefetch(`/dashboard/projects/${project.id}`);
+      });
+    }
+  }, [projects, router]);
 
   return (
     <div className="flex flex-col h-full bg-[#2B2D31] text-[#B5BAC1] w-60">
@@ -27,7 +46,7 @@ export const ProjectList = () => {
           <div className="py-1">
             {projects?.map((project, index) => (
               <React.Fragment key={project.id}>
-                <Link href={`/dashboard/projects/${project.id}`}>
+                <Link href={`/dashboard/projects/${project.id}`} onClick={() => setCurrentProject(project)}>
                   <div className="text-sm py-2 px-3 hover:bg-[#35373C] rounded transition-colors cursor-pointer">
                     # {project.name}
                   </div>

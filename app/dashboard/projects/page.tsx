@@ -1,10 +1,9 @@
 import { Metadata } from 'next';
-import ProjectsClientPage from './ProjectsClientPage';
 
 export const metadata: Metadata = {
   title: 'Projects',
 };
 
 export default function ProjectsPage() {
-  return //<ProjectsClientPage />;
+  return //idk, maybe we want some sorta grid of all projects (that we can move around... later)?
 } 

@@ -34,8 +34,8 @@ export function useProjects() {
       const fetchedProjects = await getCachedProjects(ADMIN_UUID);
       return fetchedProjects;
     },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: Infinity,
+    gcTime: Infinity,
   });
 
   const fuse = useMemo(() => {
