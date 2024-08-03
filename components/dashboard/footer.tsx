@@ -13,10 +13,15 @@ const Footer: React.FC = () => {
   const { currentProject } = useUIStore();
   const { addBlock } = useBlocks();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const placeholder = currentProject
     ? `Create a block in ${currentProject.name}...`
     : "Create a block...";
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const editor = useEditor({
     extensions: [
@@ -31,7 +36,9 @@ const Footer: React.FC = () => {
         class: 'tiptap-editor',
       },
     },
-  });
+    editable: true,
+    immediatelyRender: false,
+  }, [isMounted]);
 
   useEffect(() => {
     if (editor && editor.isEditable) {
@@ -61,7 +68,7 @@ const Footer: React.FC = () => {
           <PlusCircle className="h-5 w-5" />
         </Button>
         <div className="flex-grow">
-          <EditorContent editor={editor} />
+          {isMounted && <EditorContent editor={editor} />}
         </div>
         <Button variant="ghost" size="icon" className="text-[#b9bbbe] hover:text-white hover:bg-[#4f545c]">
           <Smile className="h-5 w-5" />
