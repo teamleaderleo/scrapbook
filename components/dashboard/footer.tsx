@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -14,6 +14,7 @@ const Footer: React.FC = () => {
   const { addBlock } = useBlocks();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
   const placeholder = currentProject
     ? `Create a block in ${currentProject.name}...`
@@ -38,6 +39,9 @@ const Footer: React.FC = () => {
     },
     editable: true,
     immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      setIsTyping(editor.getText().trim().length > 0);
+    },
   }, [isMounted]);
 
   useEffect(() => {
@@ -49,17 +53,33 @@ const Footer: React.FC = () => {
         placeholderExtension.options['placeholder'] = placeholder;
         editor.view.dispatch(editor.state.tr);
       }
+      editor.commands.focus('end');
     }
-  }, [editor, placeholder]);
+  }, [editor, placeholder, currentProject]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (editor && editor.getText().trim() !== '') {
       setIsSubmitting(true);
       addBlock(editor.getJSON());
       editor.commands.setContent('');
+      setIsTyping(false);
       setIsSubmitting(false);
     }
-  };
+  }, [editor, addBlock]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && !event.shiftKey && isTyping) {
+        event.preventDefault();
+        handleSubmit();
+      } else if (event.key !== 'Enter' && !editor?.isFocused) {
+        editor?.commands.focus('end');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [editor, isTyping, handleSubmit]);
 
   return (
     <footer className="bg-[#36393f] border-t border-[#2f3136] p-4">
@@ -76,9 +96,9 @@ const Footer: React.FC = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="text-[#b9bbbe] hover:text-white hover:bg-[#4f545c]"
+          className={`${isTyping ? 'text-white' : 'text-[#b9bbbe]'} hover:text-white hover:bg-[#4f545c]`}
           onClick={handleSubmit}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !isTyping}
         >
           <SendHorizontal className="h-5 w-5" />
         </Button>

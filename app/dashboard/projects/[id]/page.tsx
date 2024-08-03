@@ -15,7 +15,7 @@ export default function Page({ params }: { params: { id: string } }) {
           <ProjectContent projectId={params.id} />
         {/* </Suspense> */}
       </div>
-      <Footer />
+      {/* <Footer /> */}
     </main>
   );
 }

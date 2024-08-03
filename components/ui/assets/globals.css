@@ -96,7 +96,11 @@ input[type='number']::-webkit-outer-spin-button {
 
 @layer components {
   .tiptap-editor {
-    @apply min-h-[32px] p-2 rounded bg-[#40444b] text-white text-sm;
+    @apply min-h-[32px] p-2 rounded bg-[#40444b] text-white text-sm outline-none;
+  }
+
+  .tiptap-editor:focus {
+    @apply outline-none ring-0;
   }
 
   .tiptap-editor p.is-editor-empty:first-child::before {
