@@ -86,6 +86,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.51.16
         version: 5.51.16(react@19.0.0-rc-c21bcd627b-20240624)
+      '@tiptap/extension-placeholder':
+        specifier: ^2.5.8
+        version: 2.5.8(@tiptap/core@2.5.8(@tiptap/pm@2.5.8))(@tiptap/pm@2.5.8)
       '@tiptap/pm':
         specifier: ^2.5.8
         version: 2.5.8
@@ -2345,6 +2348,12 @@ packages:
     resolution: {integrity: sha512-AMfD3lfGSiomfkSE2tUourUjVahLtIfWUQew13NTPuWoxAXaSyoCGO0ULkiou/lO3JVUUUmF9+KJrAHWGIARdA==}
     peerDependencies:
       '@tiptap/core': ^2.5.8
+
+  '@tiptap/extension-placeholder@2.5.8':
+    resolution: {integrity: sha512-mvRl73OM5jBXVtDRLSTvp8/4+0mS2J2+ZcuiAHjABwEsZRCfJsiqty5NisOxSuy/AQtm8TK2kyt6ZCXQ2VRGig==}
+    peerDependencies:
+      '@tiptap/core': ^2.5.8
+      '@tiptap/pm': ^2.5.8
 
   '@tiptap/extension-strike@2.5.8':
     resolution: {integrity: sha512-uiHhBIEqawX9Up2ofklotVQ5XpGIjwRL6wprZF38s1le3XpsgyhVV7oDnqDkC7ujCsGkOJJfXZtv3LsO3R2nzQ==}
@@ -8049,6 +8058,11 @@ snapshots:
   '@tiptap/extension-paragraph@2.5.8(@tiptap/core@2.5.8(@tiptap/pm@2.5.8))':
     dependencies:
       '@tiptap/core': 2.5.8(@tiptap/pm@2.5.8)
+
+  '@tiptap/extension-placeholder@2.5.8(@tiptap/core@2.5.8(@tiptap/pm@2.5.8))(@tiptap/pm@2.5.8)':
+    dependencies:
+      '@tiptap/core': 2.5.8(@tiptap/pm@2.5.8)
+      '@tiptap/pm': 2.5.8
 
   '@tiptap/extension-strike@2.5.8(@tiptap/core@2.5.8(@tiptap/pm@2.5.8))':
     dependencies:
