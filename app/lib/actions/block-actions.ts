@@ -1,10 +1,10 @@
 'use server';
 
 import { db } from '../db/db';
-import { BlockFormSubmission } from '../definitions/definitions';
 import { and, eq } from 'drizzle-orm';
 import { blocks, projectBlockLinks, tagAssociations } from '../db/schema';
 import { v4 as uuid } from 'uuid';
+import { JSONContent } from '@tiptap/react';
 
 
 export type BlockState = {
@@ -16,10 +16,10 @@ export type BlockState = {
   success: boolean;
 };
 
-export async function updateBlock(id: string, accountId: string, data: BlockFormSubmission): Promise<BlockState> {
+export async function updateBlock(id: string, accountId: string, data: JSONContent): Promise<BlockState> {
   try {
     await db.update(blocks)
-      .set({ content: data.content, updatedAt: new Date() })
+      .set({ content: data, updatedAt: new Date() })
       .where(and(
         eq(blocks.id, id),
         eq(blocks.accountId, accountId)
@@ -63,7 +63,7 @@ export async function deleteBlock(id: string, accountId: string): Promise<BlockS
   }
 }
 
-export async function createBlock(accountId: string, data: BlockFormSubmission): Promise<BlockState> {
+export async function createBlock(accountId: string,  data: JSONContent): Promise<BlockState> {
   try {
     const newBlockId = uuid();
     const now = new Date();
@@ -71,7 +71,7 @@ export async function createBlock(accountId: string, data: BlockFormSubmission):
     const [newBlock] = await db.insert(blocks).values({
       id: newBlockId,
       accountId,
-      content: data.content,
+      content: data,
       createdAt: now,
       updatedAt: now
     }).returning();

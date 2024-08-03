@@ -7,6 +7,7 @@ import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedBlocks } from '@/app/lib/data/cached-block-data';
 // import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { useKeyNav } from './useKeyNav';
+import { JSONContent } from '@tiptap/react';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -44,7 +45,7 @@ export function useBlocks() {
   }, [filteredBlocks, currentPage]);
 
   const updateBlockMutation = useMutation({
-    mutationFn: (data: { id: string; data: any }) => 
+    mutationFn: (data: { id: string; data: JSONContent }) => 
       updateBlock(data.id, ADMIN_UUID, data.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blocks'] });
@@ -59,7 +60,7 @@ export function useBlocks() {
   });
 
   const addBlockMutation = useMutation({
-    mutationFn: (data: any) => createBlock(ADMIN_UUID, data),
+    mutationFn: (data: JSONContent) => createBlock(ADMIN_UUID, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blocks'] });
     },
