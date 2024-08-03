@@ -1,15 +1,16 @@
+'use client';
+
 import React from 'react';
 import { Input } from "@/components/ui/components/input";
 import { Button } from "@/components/ui/components/button";
 import { PlusCircle, Smile, SendHorizontal } from 'lucide-react';
+import { useUIStore } from '@/app/lib/stores/ui-store';
 
-interface FooterProps {
-  projectName?: string;
-}
+const Footer: React.FC = () => {
+  const { currentProject } = useUIStore();
 
-const Footer: React.FC<FooterProps> = ({ projectName }) => {
-  const placeholder = projectName
-    ? `Create something in ${projectName}...`
+  const placeholder = currentProject
+    ? `Create something in ${currentProject.name}...`
     : "Create something...";
 
   return (

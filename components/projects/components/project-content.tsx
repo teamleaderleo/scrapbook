@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useUIStore } from '@/app/lib/store/ui-store';
+import { useUIStore } from '@/app/lib/stores/ui-store';
 import { useProjects } from '@/app/lib/hooks/useProjects';
 
 interface ProjectContentProps {

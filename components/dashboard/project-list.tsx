@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from "@/components/ui/components/button";
 import { User, Settings, LogOut } from 'lucide-react';
 import { signOut } from '@/auth';
-import { useUIStore } from '@/app/lib/store/ui-store';
+import { useUIStore } from '@/app/lib/stores/ui-store';
 import { useRouter } from 'next/navigation';
 
 export const ProjectList = () => {

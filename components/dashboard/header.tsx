@@ -3,6 +3,7 @@
 import React from 'react';
 import { inter } from '@/components/ui/assets/fonts';
 import { usePathname } from 'next/navigation';
+import { useUIStore } from '@/app/lib/stores/ui-store';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,12 +16,15 @@ import {
 const Header: React.FC = () => {
   const pathname = usePathname();
   const pathSegments = pathname.split('/').filter(segment => segment);
+  const { currentProject } = useUIStore();
 
   const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-  const title = pathSegments.length > 0 
-    ? capitalize(pathSegments[pathSegments.length - 1])
-    : 'Dashboard';
+  const title = currentProject
+    ? currentProject.name
+    : pathSegments.length > 0 
+      ? capitalize(pathSegments[pathSegments.length - 1])
+      : 'Dashboard';
 
   return (
     <header className="bg-[#36393f] border-b border-[#2f3136] p-4">
@@ -37,7 +41,9 @@ const Header: React.FC = () => {
                     <BreadcrumbSeparator className="text-[#b9bbbe]" />
                     <BreadcrumbItem>
                       {index === pathSegments.length - 1 ? (
-                        <BreadcrumbPage className="text-white">{capitalize(segment)}</BreadcrumbPage>
+                        <BreadcrumbPage className="text-white">
+                          {currentProject ? currentProject.name : capitalize(segment)}
+                        </BreadcrumbPage>
                       ) : (
                         <BreadcrumbLink href={`/${pathSegments.slice(0, index + 1).join('/')}`} className="text-[#b9bbbe] hover:text-white">
                           {capitalize(segment)}
