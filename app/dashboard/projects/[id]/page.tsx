@@ -1,4 +1,4 @@
-import ProjectBlocks from '@/components/projects/components/project-content';
+import ProjectBlocks from '@/components/projects/components/project-blocks';
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 
