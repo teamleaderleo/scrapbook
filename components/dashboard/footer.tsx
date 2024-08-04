@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -18,9 +18,10 @@ const Footer: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const footerRef = useRef<HTMLDivElement>(null);
 
-  const placeholder = currentProject
-    ? `Create a block in ${currentProject.name}...`
-    : "Create a block...";
+  const placeholder = useMemo(() => 
+    currentProject ? `Create a block in ${currentProject.name}...` : "Create a block...",
+    [currentProject]
+  );
 
   const editor = useEditor({
     extensions: [
@@ -57,18 +58,6 @@ const Footer: React.FC = () => {
       editor.commands.focus('end');
     }
   }, [editor, currentProject, getDraft]);
-
-  useEffect(() => {
-    if (editor) {
-      const placeholderExtension = editor.extensionManager.extensions.find(
-        (extension) => extension.name === "placeholder"
-      );
-      if (placeholderExtension) {
-        placeholderExtension.options['placeholder'] = placeholder;
-        editor.view.dispatch(editor.state.tr);
-      }
-    }
-  }, [editor, placeholder]);
 
   const handleSubmit = useCallback(async () => {
     if (editor && editor.getText().trim() !== '' && currentProject) {

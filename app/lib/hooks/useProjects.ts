@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Fuse from 'fuse.js';
 import { ProjectFetchOptions, ProjectFormSubmission } from '@/app/lib/definitions/definitions';
@@ -37,6 +37,12 @@ export function useProjects() {
     staleTime: Infinity,
     gcTime: Infinity,
   });
+
+  useEffect(() => {
+    if (projects) {
+      projects.forEach(project => queryClient.prefetchQuery({ queryKey: ['project', project.id] }));
+    }
+  }, [projects, queryClient]);
 
   const fuse = useMemo(() => {
     if (!projects) return null;
