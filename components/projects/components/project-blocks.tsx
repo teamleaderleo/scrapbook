@@ -62,6 +62,10 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
     setEditingBlockId(null);
   }, [updateBlock]);
 
+  const handleCancelEdit = useCallback(() => {
+    setEditingBlockId(null);
+  }, []);
+
   const handleDeleteBlock = useCallback((blockId: string) => {
     deleteBlock(blockId);
   }, [deleteBlock]);
@@ -81,15 +85,9 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
         content={block.content as JSONContent}
         editable={editingBlockId === block.id}
         onSave={(content) => handleSaveBlock(block.id, content)}
+        onCancel={handleCancelEdit}
       />
-      {editingBlockId === block.id ? (
-        <Button 
-          onClick={() => setEditingBlockId(null)}
-          className="mt-2 bg-[#4f545c] hover:bg-[#5d6269] text-white"
-        >
-          Cancel
-        </Button>
-      ) : (
+      {editingBlockId !== block.id && (
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <Button
             variant="ghost"
@@ -110,7 +108,7 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
         </div>
       )}
     </div>
-  ), [editingBlockId, handleEditBlock, handleDeleteBlock, handleSaveBlock]);
+  ), [editingBlockId, handleEditBlock, handleDeleteBlock, handleSaveBlock, handleCancelEdit]);
 
   const renderContent = () => {
     if (isLoading) {
