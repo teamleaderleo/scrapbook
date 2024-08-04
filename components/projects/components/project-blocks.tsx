@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useBlocks } from '@/app/lib/hooks/useBlocks';
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { Button } from "@/components/ui/button";
 import { Trash2, Edit } from 'lucide-react';
 import { JSONContent } from '@tiptap/react';
@@ -12,27 +11,47 @@ interface ProjectBlocksProps {
   projectId: string;
 }
 
+const BLOCKS_PER_PAGE = 50;
+
 const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
   const { blocks, updateBlock, deleteBlock } = useBlocks();
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
+  const [visibleBlocks, setVisibleBlocks] = useState<number>(BLOCKS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(true);
-  const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   const projectBlocks = useMemo(() => 
     blocks
       ?.filter(block => block.projects.some(project => project.id === projectId))
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) || [],
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) || [],
     [blocks, projectId]
   );
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-      // Scroll to bottom after loading
-      setTimeout(() => virtuosoRef.current?.scrollToIndex({ index: projectBlocks.length - 1, behavior: 'smooth' }), 0);
+      bottomRef.current?.scrollIntoView({ behavior: 'auto' });
     }, 100);
     return () => clearTimeout(timer);
-  }, [projectBlocks.length]);
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && visibleBlocks < projectBlocks.length) {
+          setVisibleBlocks(prev => Math.min(prev + BLOCKS_PER_PAGE, projectBlocks.length));
+        }
+      },
+      { root: containerRef.current, threshold: 0.1 }
+    );
+
+    if (containerRef.current?.firstElementChild) {
+      observer.observe(containerRef.current.firstElementChild);
+    }
+
+    return () => observer.disconnect();
+  }, [visibleBlocks, projectBlocks.length]);
 
   const handleEditBlock = useCallback((blockId: string) => {
     setEditingBlockId(blockId);
@@ -47,7 +66,7 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
     deleteBlock(blockId);
   }, [deleteBlock]);
 
-  const renderBlock = useCallback((_: number, block: typeof projectBlocks[number]) => (
+  const renderBlock = useCallback((block: typeof projectBlocks[number]) => (
     <div
       key={block.id}
       className="px-4 py-2 hover:bg-[#32353b] transition-colors duration-200 group relative"
@@ -102,25 +121,18 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
       return <div className="flex items-center justify-center h-full text-[#dcddde]">No blocks found for this project.</div>;
     }
 
+    const blocksToRender = projectBlocks.slice(0, visibleBlocks);
+
     return (
-      <Virtuoso
-        ref={virtuosoRef}
-        style={{ height: '100%' }}
-        data={projectBlocks}
-        itemContent={renderBlock}
-        initialTopMostItemIndex={projectBlocks.length - 1}
-        followOutput={false}
-        overscan={200}
-        increaseViewportBy={{ top: 600, bottom: 600 }}
-        components={{
-          Footer: () => <div style={{ height: 20 }} />,
-        }}
-      />
+      <div className="flex flex-col-reverse">
+        <div ref={bottomRef} />
+        {blocksToRender.map(renderBlock)}
+      </div>
     );
   };
 
   return (
-    <div className="h-full bg-[#36393f] text-[#dcddde]">
+    <div ref={containerRef} className="h-full bg-[#36393f] text-[#dcddde] overflow-y-auto flex flex-col-reverse">
       {renderContent()}
     </div>
   );
