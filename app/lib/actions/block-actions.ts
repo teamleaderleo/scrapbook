@@ -83,8 +83,9 @@ export async function createBlock(accountId: string, data: JSONContent): Promise
   }
 }
 
-export async function createBlockInProject(accountId: string, projectId: string, data: JSONContent): Promise<BlockState> {
+export async function createBlockInProject(accountId: string, projectId: string, dataString: string): Promise<BlockState> {
   try {
+    const data = JSON.parse(dataString) as JSONContent;
     const blockResult = await createBlock(accountId, data);
     if (!blockResult.success || !blockResult.blockId) {
       throw new Error(blockResult.message || 'Failed to create block');

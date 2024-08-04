@@ -68,7 +68,7 @@ export function useBlocks(accountId: string = ADMIN_UUID) {
 
   const createBlockInProjectMutation = useMutation({
     mutationFn: ({ projectId, data }: { projectId: string; data: JSONContent }) => 
-      createBlockInProject(accountId, projectId, data),
+      createBlockInProject(accountId, projectId, JSON.stringify(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blocks', accountId] });
     },
