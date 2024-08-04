@@ -8,9 +8,8 @@ import { Button } from "@/components/ui/components/button";
 import { PlusCircle, Smile, SendHorizontal } from 'lucide-react';
 import { useUIStore, useDraftStore } from '@/app/lib/stores/ui-store';
 import { useBlocks } from '@/app/lib/hooks/useBlocks';
-import { JSONContent } from '@tiptap/react';
-import { createBlockInProject } from '@/app/lib/actions/block-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
+import { ProjectWithBlocks } from '@/app/lib/definitions/definitions';
 
 const Footer: React.FC = () => {
   const { currentProject } = useUIStore();
@@ -19,11 +18,17 @@ const Footer: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const footerRef = useRef<HTMLDivElement>(null);
+  const currentProjectRef = useRef<ProjectWithBlocks | null>(null);
+  const editorRef = useRef<ReturnType<typeof useEditor> | null>(null);
 
   const placeholder = useMemo(() => 
     currentProject ? `Create a block in ${currentProject.name}...` : "Create a block...",
     [currentProject]
   );
+
+  useEffect(() => {
+    currentProjectRef.current = currentProject;
+  }, [currentProject]);
 
   const editor = useEditor({
     extensions: [
@@ -36,6 +41,32 @@ const Footer: React.FC = () => {
     editorProps: {
       attributes: {
         class: 'tiptap-editor',
+      },
+      // handleDOMEvents: {
+      //       keydown: (_, event) => {
+      //            if (event.key === 'Enter')  {
+      //               handleSubmit();
+      //               return true;
+      //            }
+      //       },
+      //   },
+      handleKeyDown: (view, event) => {
+        if (event.key === 'Enter') {
+          if (event.shiftKey) {
+            // Shift+Enter: create a new line
+            console.log('Shift+Enter pressed');
+            return false; // Let Tiptap handle it
+          } else {
+
+            // Regular Enter: submit
+            console.log('Enter pressed');
+            // event.preventDefault();
+            handleSubmit();
+            console.log('Handle submit called');
+            return true;
+          }
+        }
+        return false;
       },
     },
     editable: true,
@@ -74,22 +105,28 @@ const Footer: React.FC = () => {
   }, [editor, currentProject, getDraft]);
 
   const handleSubmit = useCallback(() => {
-    if (editor && editor.getText().trim() !== '' && currentProject) {
+    console.log('Submitting block...');
+    const project = currentProjectRef.current;
+    const editor = editorRef.current;
+    console.log(`editor is ${editor}`);
+    console.log(`project is ${project}`);
+    if (editor && editor.getText().trim() !== '' && project) {
+      console.log(`we're trying ${project.name}`);
       setIsSubmitting(true);
       const content = editor.getJSON();
-      console.log(`Creating block for project: ${currentProject.id}`);
+      console.log(`Creating block for project: ${project.id}`);
       console.log('Block content:', JSON.stringify(content));
       
       createBlockInProject(
-        { projectId: currentProject.id, data: content },
+        { projectId: project.id, data: content },
         {
           onSuccess: (result) => {
             if (result.success) {
               console.log('Block created and added to project successfully');
               editor.commands.setContent('');
               setIsTyping(false);
-              clearDraft(currentProject.id);
-              console.log(`Cleared draft for project: ${currentProject.id}`);
+              clearDraft(project.id);
+              console.log(`Cleared draft for project: ${project.id}`);
             } else {
               console.error('Failed to create block in project:', result.message);
             }
@@ -102,8 +139,14 @@ const Footer: React.FC = () => {
           }
         }
       );
+    } else {
+      console.error('Cannot create block: No current project, no editor, or empty content');
     }
-  }, [editor, createBlockInProject, currentProject, clearDraft]);
+  }, [createBlockInProject, clearDraft, setIsSubmitting, setIsTyping]);
+
+  useEffect(() => {
+    editorRef.current = editor;
+  }, [editor]);
 
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
@@ -111,12 +154,6 @@ const Footer: React.FC = () => {
 
       // Check if we're editing a block or if the footer editor is focused
       if (document.querySelector('.tiptap-editor:focus') || editor.isFocused) {
-        return;
-      }
-
-      if (event.key === 'Enter' && !event.shiftKey && isTyping) {
-        event.preventDefault();
-        handleSubmit();
         return;
       }
 
@@ -130,7 +167,7 @@ const Footer: React.FC = () => {
 
     document.addEventListener('keydown', handleGlobalKeyDown);
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [editor, isTyping, handleSubmit]);
+  }, [editor]);
 
   return (
     <footer ref={footerRef} className="bg-[#36393f] border-t border-[#2f3136] p-4">
