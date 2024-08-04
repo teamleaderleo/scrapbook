@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { Virtuoso } from 'react-virtuoso';
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2, Edit } from 'lucide-react';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+import { JSONContent } from '@tiptap/react';
+import TiptapEditor from './tiptap-editor';
 
 interface ProjectBlocksProps {
   projectId: string;
@@ -17,88 +16,78 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
   const { blocks, updateBlock, deleteBlock } = useBlocks();
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
 
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: '',
-    editable: true,
-    immediatelyRender: false,
-  });
+  const projectBlocks = blocks
+    ?.filter(block => block.projects.some(project => project.id === projectId))
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) || [];
 
-  const readOnlyEditor = useEditor({
-    extensions: [StarterKit],
-    editable: false,
-    immediatelyRender: false,
-  });
-
-  const projectBlocks = blocks?.filter(block => 
-    block.projects.some(project => project.id === projectId)
-  ) || [];
-
-  const handleEditBlock = (blockId: string, content: any) => {
+  const handleEditBlock = (blockId: string) => {
     setEditingBlockId(blockId);
-    editor?.commands.setContent(content);
   };
 
-  const handleSaveBlock = () => {
-    if (editingBlockId && editor) {
-      updateBlock({ id: editingBlockId, data: editor.getJSON() });
-      setEditingBlockId(null);
-    }
+  const handleSaveBlock = (blockId: string, content: JSONContent) => {
+    updateBlock({ id: blockId, data: content });
+    setEditingBlockId(null);
   };
 
   const handleDeleteBlock = (blockId: string) => {
     deleteBlock(blockId);
   };
 
-  const BlockContent = useCallback(({ content }: { content: any }) => {
-    React.useEffect(() => {
-      readOnlyEditor?.commands.setContent(content);
-    }, [content]);
-
-    return <EditorContent editor={readOnlyEditor} />;
-  }, [readOnlyEditor]);
-
   if (projectBlocks.length === 0) {
-    return <div>No blocks found for this project.</div>;
+    return <div className="text-[#dcddde]">No blocks found for this project.</div>;
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-[#36393f] text-[#dcddde]">
       <Virtuoso
         className="flex-grow"
         data={projectBlocks}
+        initialTopMostItemIndex={projectBlocks.length - 1}
+        alignToBottom
         itemContent={(index, block) => (
-          <Card key={block.id} className="mb-4">
-            <CardContent className="p-4">
-              {editingBlockId === block.id ? (
-                <>
-                  <EditorContent editor={editor} />
-                  <Button onClick={handleSaveBlock} className="mt-2">Save</Button>
-                </>
-              ) : (
-                <>
-                  <BlockContent content={block.content} />
-                  <div className="mt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditBlock(block.id, block.content)}
-                      className="mr-2"
-                    >
-                      <Edit className="w-4 h-4 mr-1" /> Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteBlock(block.id)}
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" /> Delete
-                    </Button>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
+          <div
+            key={block.id}
+            className="px-4 py-2 hover:bg-[#32353b] transition-colors duration-200 group relative"
+          >
+            <div className="flex items-center mb-1">
+              <div className="font-semibold mr-2 text-white">{block.createdBy || 'Anonymous'}</div>
+              <div className="text-xs text-[#72767d]">
+                {new Date(block.createdAt).toLocaleString()}
+              </div>
+            </div>
+            <TiptapEditor
+              content={block.content as JSONContent}
+              editable={editingBlockId === block.id}
+              onSave={(content) => handleSaveBlock(block.id, content)}
+            />
+            {editingBlockId === block.id ? (
+              <Button 
+                onClick={() => setEditingBlockId(null)}
+                className="mt-2 bg-[#4f545c] hover:bg-[#5d6269] text-white"
+              >
+                Cancel
+              </Button>
+            ) : (
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEditBlock(block.id)}
+                  className="mr-2 text-[#b9bbbe] hover:text-white"
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDeleteBlock(block.id)}
+                  className="text-[#b9bbbe] hover:text-[#ed4245]"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+          </div>
         )}
       />
     </div>
