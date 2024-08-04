@@ -16,8 +16,9 @@ export type BlockState = {
   success: boolean;
 };
 
-export async function updateBlock(id: string, accountId: string, data: JSONContent): Promise<BlockState> {
+export async function updateBlock(id: string, accountId: string, dataString: string): Promise<BlockState> {
   try {
+    const data = JSON.parse(dataString) as JSONContent;
     await db.update(blocks)
       .set({ content: data, updatedAt: new Date() })
       .where(and(
@@ -63,8 +64,9 @@ export async function deleteBlock(id: string, accountId: string): Promise<BlockS
   }
 }
 
-export async function createBlock(accountId: string, data: JSONContent): Promise<BlockState> {
+export async function createBlock(accountId: string, dataString: string): Promise<BlockState> {
   try {
+    const data = JSON.parse(dataString) as JSONContent;
     const newBlockId = uuid();
     const now = new Date();
     
@@ -85,8 +87,7 @@ export async function createBlock(accountId: string, data: JSONContent): Promise
 
 export async function createBlockInProject(accountId: string, projectId: string, dataString: string): Promise<BlockState> {
   try {
-    const data = JSON.parse(dataString) as JSONContent;
-    const blockResult = await createBlock(accountId, data);
+    const blockResult = await createBlock(accountId, dataString);
     if (!blockResult.success || !blockResult.blockId) {
       throw new Error(blockResult.message || 'Failed to create block');
     }

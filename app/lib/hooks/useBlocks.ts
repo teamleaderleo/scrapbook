@@ -46,7 +46,7 @@ export function useBlocks(accountId: string = ADMIN_UUID) {
 
   const updateBlockMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: JSONContent }) => 
-      updateBlock(id, accountId, data),
+      updateBlock(id, accountId, JSON.stringify(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blocks', accountId] });
     },
@@ -60,7 +60,7 @@ export function useBlocks(accountId: string = ADMIN_UUID) {
   });
 
   const createBlockMutation = useMutation({
-    mutationFn: (data: JSONContent) => createBlock(accountId, data),
+    mutationFn: (data: JSONContent) => createBlock(accountId, JSON.stringify(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blocks', accountId] });
     },
