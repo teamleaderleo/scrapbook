@@ -13,7 +13,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <ProjectList />
       <div className="flex flex-col flex-grow">
         <Header />
-        <main className="flex-grow overflow-y-auto p-6">
+        <main className="flex-grow overflow-hidden">
           {children}
         </main>
         <Footer />

@@ -34,16 +34,17 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
   };
 
   if (projectBlocks.length === 0) {
-    return <div className="text-[#dcddde]">No blocks found for this project.</div>;
+    return <div className="h-full flex items-center justify-center text-[#dcddde]">No blocks found for this project.</div>;
   }
 
   return (
-    <div className="h-full flex flex-col bg-[#36393f] text-[#dcddde]">
+    <div className="h-full bg-[#36393f] text-[#dcddde]">
       <Virtuoso
-        className="flex-grow"
+        className="h-full"
         data={projectBlocks}
         initialTopMostItemIndex={projectBlocks.length - 1}
         alignToBottom
+        followOutput="auto"
         itemContent={(index, block) => (
           <div
             key={block.id}
