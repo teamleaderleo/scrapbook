@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Fuse from 'fuse.js';
 import { BlockWithRelations } from "../definitions/definitions";
-import { createBlock, updateBlock, deleteBlock } from '@/app/lib/actions/block-actions';
+import { createBlock, updateBlock, deleteBlock, addBlockToProject, createBlockInProject } from '@/app/lib/actions/block-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedBlocks } from '@/app/lib/data/cached-block-data';
 // import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
@@ -11,14 +11,14 @@ import { JSONContent } from '@tiptap/react';
 
 const ITEMS_PER_PAGE = 6;
 
-export function useBlocks() {
+export function useBlocks(accountId: string = ADMIN_UUID) {
   const queryClient = useQueryClient();
   const [query, setQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
   const { data: blocks, isLoading, error } = useQuery<BlockWithRelations[], Error>({
-    queryKey: ['blocks'],
-    queryFn: () => getCachedBlocks(ADMIN_UUID),
+    queryKey: ['blocks', accountId],
+    queryFn: () => getCachedBlocks(accountId),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
@@ -45,24 +45,40 @@ export function useBlocks() {
   }, [filteredBlocks, currentPage]);
 
   const updateBlockMutation = useMutation({
-    mutationFn: (data: { id: string; data: JSONContent }) => 
-      updateBlock(data.id, ADMIN_UUID, data.data),
+    mutationFn: ({ id, data }: { id: string; data: JSONContent }) => 
+      updateBlock(id, accountId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blocks'] });
+      queryClient.invalidateQueries({ queryKey: ['blocks', accountId] });
     },
   });
 
   const deleteBlockMutation = useMutation({
-    mutationFn: (id: string) => deleteBlock(id, ADMIN_UUID),
+    mutationFn: (id: string) => deleteBlock(id, accountId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blocks'] });
+      queryClient.invalidateQueries({ queryKey: ['blocks', accountId] });
     },
   });
 
-  const addBlockMutation = useMutation({
-    mutationFn: (data: JSONContent) => createBlock(ADMIN_UUID, data),
+  const createBlockMutation = useMutation({
+    mutationFn: (data: JSONContent) => createBlock(accountId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blocks'] });
+      queryClient.invalidateQueries({ queryKey: ['blocks', accountId] });
+    },
+  });
+
+  const createBlockInProjectMutation = useMutation({
+    mutationFn: ({ projectId, data }: { projectId: string; data: JSONContent }) => 
+      createBlockInProject(accountId, projectId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blocks', accountId] });
+    },
+  });
+
+  const addBlockToProjectMutation = useMutation({
+    mutationFn: ({ blockId, projectId }: { blockId: string; projectId: string }) => 
+      addBlockToProject(blockId, projectId, accountId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blocks', accountId] });
     },
   });
 
@@ -90,6 +106,8 @@ export function useBlocks() {
     handlePageChange,
     updateBlock: updateBlockMutation.mutate,
     deleteBlock: deleteBlockMutation.mutate,
-    addBlock: addBlockMutation.mutate,
+    createBlock: createBlockMutation.mutate,
+    createBlockInProject: createBlockInProjectMutation.mutate,
+    addBlockToProject: addBlockToProjectMutation.mutate,
   };
 }

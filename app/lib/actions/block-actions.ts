@@ -83,6 +83,25 @@ export async function createBlock(accountId: string, data: JSONContent): Promise
   }
 }
 
+export async function createBlockInProject(accountId: string, projectId: string, data: JSONContent): Promise<BlockState> {
+  try {
+    const blockResult = await createBlock(accountId, data);
+    if (!blockResult.success || !blockResult.blockId) {
+      throw new Error(blockResult.message || 'Failed to create block');
+    }
+
+    const linkResult = await addBlockToProject(blockResult.blockId, projectId, accountId);
+    if (!linkResult.success) {
+      throw new Error(linkResult.message || 'Failed to add block to project');
+    }
+
+    return { message: 'Block created and added to project successfully', blockId: blockResult.blockId, success: true };
+  } catch (error: any) {
+    console.error('Error creating block in project:', error);
+    return { message: `Failed to create block in project: ${error.message}`, success: false };
+  }
+}
+
 export async function addBlockToProject(blockId: string, projectId: string, accountId: string): Promise<BlockState> {
   try {
     await db.insert(projectBlockLinks).values({
@@ -90,7 +109,7 @@ export async function addBlockToProject(blockId: string, projectId: string, acco
       blockId,
       projectId,
       accountId,
-      createdAt: new Date()
+      addedAt: new Date()
     });
 
     return { message: 'Block added to project successfully', success: true };

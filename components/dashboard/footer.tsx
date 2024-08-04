@@ -9,11 +9,13 @@ import { PlusCircle, Smile, SendHorizontal } from 'lucide-react';
 import { useUIStore, useDraftStore } from '@/app/lib/stores/ui-store';
 import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { JSONContent } from '@tiptap/react';
+import { createBlockInProject } from '@/app/lib/actions/block-actions';
+import { ADMIN_UUID } from '@/app/lib/constants';
 
 const Footer: React.FC = () => {
   const { currentProject } = useUIStore();
   const { saveDraft, getDraft, clearDraft } = useDraftStore();
-  const { addBlock } = useBlocks();
+  const { createBlockInProject } = useBlocks(ADMIN_UUID);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const footerRef = useRef<HTMLDivElement>(null);
@@ -71,20 +73,37 @@ const Footer: React.FC = () => {
     }
   }, [editor, currentProject, getDraft]);
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(() => {
     if (editor && editor.getText().trim() !== '' && currentProject) {
       setIsSubmitting(true);
       const content = editor.getJSON();
-      console.log(`Submitting block for project: ${currentProject.id}`);
+      console.log(`Creating block for project: ${currentProject.id}`);
       console.log('Block content:', JSON.stringify(content));
-      await addBlock(content);
-      editor.commands.setContent('');
-      setIsTyping(false);
-      clearDraft(currentProject.id);
-      console.log(`Cleared draft for project: ${currentProject.id}`);
-      setIsSubmitting(false);
+      
+      createBlockInProject(
+        { projectId: currentProject.id, data: content },
+        {
+          onSuccess: (result) => {
+            if (result.success) {
+              console.log('Block created and added to project successfully');
+              editor.commands.setContent('');
+              setIsTyping(false);
+              clearDraft(currentProject.id);
+              console.log(`Cleared draft for project: ${currentProject.id}`);
+            } else {
+              console.error('Failed to create block in project:', result.message);
+            }
+          },
+          onError: (error) => {
+            console.error('Error creating block in project:', error);
+          },
+          onSettled: () => {
+            setIsSubmitting(false);
+          }
+        }
+      );
     }
-  }, [editor, addBlock, currentProject, clearDraft]);
+  }, [editor, createBlockInProject, currentProject, clearDraft]);
 
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
