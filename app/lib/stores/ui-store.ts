@@ -20,7 +20,7 @@ interface UIState {
 
 interface DraftState {
   drafts: DraftMap;
-  saveDraft: (projectId: string, content: JSONContent) => void;
+  saveDraft: (content: JSONContent) => void;
   getDraft: (projectId: string) => JSONContent | null;
   clearDraft: (projectId: string) => void;
 }
@@ -38,12 +38,20 @@ const useDraftStore = create<DraftState>()(
   persist(
     (set, get) => ({
       drafts: {},
-      saveDraft: (projectId, content) => set((state) => ({
-        drafts: {
-          ...state.drafts,
-          [projectId]: content,
-        },
-      })),
+      saveDraft: (content: JSONContent) => {
+        const currentProject = useUIStore.getState().currentProject;
+        if (currentProject) {
+          set((state) => ({
+            drafts: {
+              ...state.drafts,
+              [currentProject.id]: content,
+            },
+          }));
+          console.log(`Saved draft for project: ${currentProject.id}`);
+        } else {
+          console.warn('Attempted to save draft, but no current project is set');
+        }
+      },
       getDraft: (projectId) => get().drafts[projectId] || null,
       clearDraft: (projectId) => set((state) => {
         const { [projectId]: _, ...rest } = state.drafts;
