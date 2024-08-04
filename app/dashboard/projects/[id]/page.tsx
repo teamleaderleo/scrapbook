@@ -8,10 +8,8 @@ export const metadata: Metadata = {
 
 export default function Page({ params }: { params: { id: string } }) {
   return (
-    <main className="flex flex-col h-[calc(100vh-112px)]"> {/* Adjust 112px based on your header and footer heights */}
-      <Suspense fallback={<div className="flex-grow flex items-center justify-center">Loading project...</div>}>
-        <ProjectBlocks projectId={params.id} />
-      </Suspense>
-    </main>
+    <Suspense fallback={<div className="flex-grow flex items-center justify-center">Loading project...</div>}>
+      <ProjectBlocks projectId={params.id} />
+    </Suspense>
   );
 }

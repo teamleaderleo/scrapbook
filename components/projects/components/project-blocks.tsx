@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { Virtuoso } from 'react-virtuoso';
 import { Button } from "@/components/ui/button";
@@ -15,36 +15,47 @@ interface ProjectBlocksProps {
 const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
   const { blocks, updateBlock, deleteBlock } = useBlocks();
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const projectBlocks = blocks
     ?.filter(block => block.projects.some(project => project.id === projectId))
     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) || [];
 
-  const handleEditBlock = (blockId: string) => {
-    setEditingBlockId(blockId);
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const handleSaveBlock = (blockId: string, content: JSONContent) => {
+  const handleEditBlock = useCallback((blockId: string) => {
+    setEditingBlockId(blockId);
+  }, []);
+
+  const handleSaveBlock = useCallback((blockId: string, content: JSONContent) => {
     updateBlock({ id: blockId, data: content });
     setEditingBlockId(null);
-  };
+  }, [updateBlock]);
 
-  const handleDeleteBlock = (blockId: string) => {
+  const handleDeleteBlock = useCallback((blockId: string) => {
     deleteBlock(blockId);
-  };
+  }, [deleteBlock]);
 
-  if (projectBlocks.length === 0) {
-    return <div className="h-full flex items-center justify-center text-[#dcddde]">No blocks found for this project.</div>;
-  }
+  const renderContent = () => {
+    if (isLoading) {
+      return <div className="flex items-center justify-center h-full text-[#dcddde]">Loading blocks...</div>;
+    }
 
-  return (
-    <div className="h-full bg-[#36393f] text-[#dcddde]">
+    if (projectBlocks.length === 0) {
+      return <div className="flex items-center justify-center h-full text-[#dcddde]">No blocks found for this project.</div>;
+    }
+
+    return (
       <Virtuoso
-        className="h-full"
+        style={{ height: '100%' }}
         data={projectBlocks}
         initialTopMostItemIndex={projectBlocks.length - 1}
         alignToBottom
         followOutput="auto"
+        overscan={200}
         itemContent={(index, block) => (
           <div
             key={block.id}
@@ -91,6 +102,12 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
           </div>
         )}
       />
+    );
+  };
+
+  return (
+    <div className="h-full bg-[#36393f] text-[#dcddde]">
+      {renderContent()}
     </div>
   );
 };
