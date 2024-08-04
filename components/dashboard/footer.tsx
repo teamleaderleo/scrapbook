@@ -109,20 +109,22 @@ const Footer: React.FC = () => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
       if (!editor) return;
 
+      // Check if we're editing a block or if the footer editor is focused
+      if (document.querySelector('.tiptap-editor:focus') || editor.isFocused) {
+        return;
+      }
+
       if (event.key === 'Enter' && !event.shiftKey && isTyping) {
         event.preventDefault();
         handleSubmit();
         return;
       }
 
-      // Check if the editor or any of its children are focused
-      if (!editor.isFocused && !footerRef.current?.contains(document.activeElement)) {
-        // If it's a printable character, focus the editor and insert the character
-        if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
-          event.preventDefault();
-          editor.commands.focus('end');
-          editor.commands.insertContent(event.key);
-        }
+      // If it's a printable character, focus the editor and insert the character
+      if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        event.preventDefault();
+        editor.commands.focus('end');
+        editor.commands.insertContent(event.key);
       }
     };
 
