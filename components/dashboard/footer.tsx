@@ -45,6 +45,18 @@ const Footer: React.FC = () => {
   });
 
   useEffect(() => {
+    if (editor) {
+      const placeholderExtension = editor.extensionManager.extensions.find(
+        (extension) => extension.name === "placeholder"
+      );
+      if (placeholderExtension) {
+        placeholderExtension.options['placeholder'] = placeholder;
+        editor.view.dispatch(editor.state.tr);
+      }
+    }
+  }, [editor, placeholder]);
+
+  useEffect(() => {
     if (editor && currentProject) {
       console.log(`Loading draft for project: ${currentProject.id}`);
       const draft = getDraft(currentProject.id);

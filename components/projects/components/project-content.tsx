@@ -1,51 +1,108 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { useUIStore } from '@/app/lib/stores/ui-store';
-import { useProjects } from '@/app/lib/hooks/useProjects';
+import React, { useState, useCallback } from 'react';
+import { useBlocks } from '@/app/lib/hooks/useBlocks';
+import { Virtuoso } from 'react-virtuoso';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Trash2, Edit } from 'lucide-react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 
-interface ProjectContentProps {
+interface ProjectBlocksProps {
   projectId: string;
 }
 
-const ProjectContent: React.FC<ProjectContentProps> = ({ projectId }) => {
-  const { projects, isLoading } = useProjects();
-  const { currentProject, setCurrentProject } = useUIStore(state => ({
-    currentProject: state.currentProject,
-    setCurrentProject: state.setCurrentProject
-  }));
+const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
+  const { blocks, updateBlock, deleteBlock } = useBlocks();
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (projects && (!currentProject || currentProject.id !== projectId)) {
-      const project = projects.find(p => p.id === projectId);
-      if (project) {
-        setCurrentProject(project);
-      }
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: '',
+    editable: true,
+    immediatelyRender: false,
+  });
+
+  const readOnlyEditor = useEditor({
+    extensions: [StarterKit],
+    editable: false,
+    immediatelyRender: false,
+  });
+
+  const projectBlocks = blocks?.filter(block => 
+    block.projects.some(project => project.id === projectId)
+  ) || [];
+
+  const handleEditBlock = (blockId: string, content: any) => {
+    setEditingBlockId(blockId);
+    editor?.commands.setContent(content);
+  };
+
+  const handleSaveBlock = () => {
+    if (editingBlockId && editor) {
+      updateBlock({ id: editingBlockId, data: editor.getJSON() });
+      setEditingBlockId(null);
     }
-  }, [projectId, projects, currentProject, setCurrentProject]);
+  };
 
-  useEffect(() => {
-    if (currentProject) {
-      document.title = `${currentProject.name} | Stensibly`;
-    }
-  }, [currentProject]);
+  const handleDeleteBlock = (blockId: string) => {
+    deleteBlock(blockId);
+  };
 
+  const BlockContent = useCallback(({ content }: { content: any }) => {
+    React.useEffect(() => {
+      readOnlyEditor?.commands.setContent(content);
+    }, [content]);
 
-  if (isLoading) {
-    return <div>Loading project...</div>;
-  }
+    return <EditorContent editor={readOnlyEditor} />;
+  }, [readOnlyEditor]);
 
-  if (!currentProject || currentProject.id !== projectId) {
-    return <div>Project not found</div>;
+  if (projectBlocks.length === 0) {
+    return <div>No blocks found for this project.</div>;
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mt-4 mb-2">{currentProject.name}</h1>
-      <p>{currentProject.description}</p>
-      {/* Add more project content here */}
+    <div className="h-full flex flex-col">
+      <Virtuoso
+        className="flex-grow"
+        data={projectBlocks}
+        itemContent={(index, block) => (
+          <Card key={block.id} className="mb-4">
+            <CardContent className="p-4">
+              {editingBlockId === block.id ? (
+                <>
+                  <EditorContent editor={editor} />
+                  <Button onClick={handleSaveBlock} className="mt-2">Save</Button>
+                </>
+              ) : (
+                <>
+                  <BlockContent content={block.content} />
+                  <div className="mt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditBlock(block.id, block.content)}
+                      className="mr-2"
+                    >
+                      <Edit className="w-4 h-4 mr-1" /> Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteBlock(block.id)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" /> Delete
+                    </Button>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      />
     </div>
   );
 };
 
-export default ProjectContent;
+export default ProjectBlocks;
