@@ -11,11 +11,18 @@ import { Button } from "@/components/ui/components/button";
 import { User, Settings, LogOut } from 'lucide-react';
 import { signOut } from '@/auth';
 import { useUIStore } from '@/app/lib/stores/ui-store';
+import { useRouter } from 'next/navigation';
 
 export const ProjectList = () => {
+  const router = useRouter();
   const { projects, isLoading } = useProjects();
   const setCurrentProject = useUIStore((state) => state.setCurrentProject);
   const currentProject = useUIStore((state) => state.currentProject);
+
+  const prefetchProject = (projectId: string) => {
+    console.log(`Prefetching project: ${projectId}`);
+    router.prefetch(`/dashboard/projects/${projectId}`);
+  };
 
   useEffect(() => {
     if (!currentProject && projects && projects.length > 0) {
@@ -36,7 +43,11 @@ export const ProjectList = () => {
           <div className="py-1">
             {projects?.map((project, index) => (
               <React.Fragment key={project.id}>
-                <Link href={`/dashboard/projects/${project.id}`} prefetch={true} onClick={() => setCurrentProject(project)}>
+                <Link
+                    href={`/dashboard/projects/${project.id}`}
+                    onClick={() => setCurrentProject(project)}
+                    onMouseEnter={() => prefetchProject(project.id)}
+                  >
                   <div className="text-sm py-2 px-3 hover:bg-[#35373C] rounded transition-colors cursor-pointer">
                     # {project.name}
                   </div>
