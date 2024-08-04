@@ -66,6 +66,7 @@ export const tagAssociations = pgTable('tag_association', {
 }));
 
 export const projectBlockLinks = pgTable('project_block_link', {
+  id: uuid('id').primaryKey().defaultRandom(),
   accountId: uuid('account_id').notNull().references(() => accounts.id),
   projectId: uuid('project_id').notNull().references(() => projects.id),
   blockId: uuid('block_id').notNull().references(() => blocks.id),
