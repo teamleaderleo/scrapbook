@@ -14,6 +14,11 @@ Check out the deployed application: [https://setzen.vercel.app/](https://setzen.
 This is an ongoing effort.
 
 ## What It Currently Looks Like
+
+### Revamping schema; restarted UI situation:
+![image](https://github.com/user-attachments/assets/cb225cc6-910e-4b15-b506-51161db6bde2)
+
+
 ### Dashboard:
 ![image](https://github.com/user-attachments/assets/f5e1507f-541c-4485-9dd7-8d6d87a25ad8)
 
