@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Edit, Sun, Moon, Coffee, Briefcase } from 'lucide-react';
 import { JSONContent } from '@tiptap/react';
 import TiptapEditor, { TiptapEditorRef } from '@/components/projects/components/tiptap-editor-project-blocks';
+import TagManager from './tag-manager'; 
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface ProjectBlocksProps {
   projectId: string;
@@ -25,7 +27,6 @@ const getPersonality = (date: Date): Personality => {
   if (hour >= 17 && hour < 22) return { name: 'Evening Self', icon: <Sun className="w-4 h-4" /> };
   return { name: 'Night Owl', icon: <Moon className="w-4 h-4" /> };
 };
-
 
 const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
   const { blocks, updateBlock, deleteBlock } = useBlocks();
@@ -116,25 +117,52 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
           onSave={(content) => handleSaveBlock(block.id, content)}
           onCancel={handleCancelEdit}
         />
+        <div className="mt-2">
+          <TagManager blockId={block.id} showOnHover={true} />
+        </div>
         {!isEditing && (
-          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleEditBlock(block.id)}
-              className="mr-2 text-[#b9bbbe] hover:text-white"
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDeleteBlock(block.id)}
-              className="text-[#b9bbbe] hover:text-[#ed4245]"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
+          <TooltipProvider delayDuration={0}>
+            <div className="absolute top-2 right-7 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="flex items-center bg-[#2f3136] rounded overflow-hidden">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <TagManager blockId={block.id} showOnHover={false} />
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p>Add Tag</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleEditBlock(block.id)}
+                      className="text-[#b9bbbe] hover:text-white hover:bg-[#3f4248] rounded-none h-10 w-10 p-0"
+                    >
+                      <Edit className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p>Edit Block</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleDeleteBlock(block.id)}
+                      className="text-[#b9bbbe] hover:text-[#ed4245] hover:bg-[#3f4248] rounded-none h-10 w-10 p-0"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p>Delete Block</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+          </TooltipProvider>
         )}
       </div>
     );

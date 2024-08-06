@@ -120,6 +120,23 @@ export function useTags() {
 
   useKeyNav(currentPage, totalPages, handlePageChange, true);
 
+  const useTagsForBlock = (blockId: string) => {
+    return useQuery<Tag[], Error>({
+      queryKey: ['blockTags', blockId],
+      queryFn: () => getTagsForBlock(blockId),
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+    });
+  };
+
+  const useTagsForProject = (projectId: string) => {
+    return useQuery<Tag[], Error>({
+      queryKey: ['projectTags', projectId],
+      queryFn: () => getTagsForProject(projectId),
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+    });
+  };
 
   return {
     tags,
@@ -139,7 +156,7 @@ export function useTags() {
     associateTagWithBlock: associateTagWithBlockMutation.mutateAsync,
     disassociateTagFromProject: disassociateTagFromProjectMutation.mutateAsync,
     disassociateTagFromBlock: disassociateTagFromBlockMutation.mutateAsync,
-    getTagsForProject,
-    getTagsForBlock,
+    useTagsForBlock,
+    useTagsForProject,
   };
 }
