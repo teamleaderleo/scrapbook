@@ -5,7 +5,7 @@ import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { Button } from "@/components/ui/button";
 import { Trash2, Edit } from 'lucide-react';
 import { JSONContent } from '@tiptap/react';
-import TiptapEditor from './tiptap-editor';
+import TiptapEditor from './tiptap-editor-project-blocks';
 
 interface ProjectBlocksProps {
   projectId: string;
