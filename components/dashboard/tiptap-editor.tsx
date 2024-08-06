@@ -67,6 +67,12 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
   }, [editor, editable]);
 
   useEffect(() => {
+    if (editor && content) {
+      editor.commands.setContent(content);
+    }
+  }, [editor, content]);
+
+  useEffect(() => {
     if (editor) {
       const placeholderExtension = editor.extensionManager.extensions.find(
         (extension) => extension.name === "placeholder"
