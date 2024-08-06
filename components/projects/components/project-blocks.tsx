@@ -126,7 +126,9 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
               <div className="flex items-center bg-[#2f3136] rounded overflow-hidden">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <TagManager blockId={block.id} showOnHover={false} />
+                    <div>
+                      <TagManager blockId={block.id} showOnHover={false} />
+                    </div>
                   </TooltipTrigger>
                   <TooltipContent side="bottom">
                     <p>Add Tag</p>

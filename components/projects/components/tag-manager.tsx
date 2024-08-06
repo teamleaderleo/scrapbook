@@ -2,7 +2,6 @@ import React, { useState, useCallback } from 'react';
 import { useTags } from '@/app/lib/hooks/useTags';
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from '@/components/ui/input';
 import { Smile } from 'lucide-react';
 
@@ -38,37 +37,30 @@ const TagManager: React.FC<TagManagerProps> = ({ blockId, showOnHover }) => {
   );
 
   const addTagButton = (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Popover open={isAddingTag} onOpenChange={setIsAddingTag}>
-          <PopoverTrigger asChild>
-            <Button 
-              variant="ghost" 
-              className="text-[#b9bbbe] hover:text-white hover:bg-[#3f4248] rounded-none h-10 w-10 p-0"
-            >
-              <Smile className="h-5 w-5" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80">
-            <div className="space-y-4">
-              <h4 className="font-medium leading-none">Add Tag</h4>
-              <Input
-                placeholder="Enter tag or emoji"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleAddTag(e.currentTarget.value);
-                    e.currentTarget.value = '';
-                  }
-                }}
-              />
-            </div>
-          </PopoverContent>
-        </Popover>
-      </TooltipTrigger>
-      <TooltipContent side="bottom">
-        <p>Add Tag</p>
-      </TooltipContent>
-    </Tooltip>
+    <Popover open={isAddingTag} onOpenChange={setIsAddingTag}>
+      <PopoverTrigger asChild>
+        <Button 
+          variant="ghost" 
+          className="text-[#b9bbbe] hover:text-white hover:bg-[#3f4248] rounded-none h-10 w-10 p-0"
+        >
+          <Smile className="h-5 w-5" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80">
+        <div className="space-y-4">
+          <h4 className="font-medium leading-none">Add Tag</h4>
+          <Input
+            placeholder="Enter tag or emoji"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleAddTag(e.currentTarget.value);
+                e.currentTarget.value = '';
+              }
+            }}
+          />
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 
   if (showOnHover) {
