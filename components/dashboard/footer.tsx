@@ -8,7 +8,7 @@ import { useUIStore, useDraftStore } from '@/app/lib/stores/ui-store';
 import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { ProjectWithBlocks } from '@/app/lib/definitions/definitions';
-import TiptapEditor from './tiptap-editor';
+import TiptapEditor, { TiptapEditorRef } from './tiptap-editor';
 
 const Footer: React.FC = () => {
   const { currentProject } = useUIStore();
@@ -19,6 +19,7 @@ const Footer: React.FC = () => {
   const footerRef = useRef<HTMLDivElement>(null);
   const currentProjectRef = useRef<ProjectWithBlocks | null>(null);
   const editorRef = useRef<Editor | null>(null);
+  const tiptapRef = useRef<TiptapEditorRef>(null);
 
   const placeholder = useMemo(() => 
     currentProject ? `Create a block in ${currentProject.name}...` : "Create a block...",
@@ -37,6 +38,9 @@ const Footer: React.FC = () => {
 
   useEffect(() => {
     currentProjectRef.current = currentProject;
+    if (currentProject) {
+      tiptapRef.current?.focus();
+    }
   }, [currentProject]);
 
   const handleUpdate = useCallback((editor: Editor) => {
@@ -59,6 +63,7 @@ const Footer: React.FC = () => {
               editor.commands.setContent({ type: 'doc', content: [{ type: 'paragraph' }] });
               setIsTyping(false);
               clearDraft(project.id);
+              tiptapRef.current?.focus();
             } else {
               console.error('Failed to create block in project:', result.message);
             }
@@ -84,6 +89,7 @@ const Footer: React.FC = () => {
         </Button>
         <div className="flex-grow">
           <TiptapEditor
+            ref={tiptapRef}
             content={editorContent}
             placeholder={placeholder}
             onUpdate={(editor) => {
@@ -92,6 +98,9 @@ const Footer: React.FC = () => {
             }}
             onSubmit={handleSubmit}
             globalKeyListener={true}
+            autoFocus={true}
+            handleEnterKey={true}
+            handleEscapeKey={false}
           />
         </div>
         <Button variant="ghost" size="icon" className="text-[#b9bbbe] hover:text-white hover:bg-[#4f545c]">

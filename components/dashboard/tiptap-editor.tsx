@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { useEditor, EditorContent, JSONContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -11,9 +11,17 @@ interface TiptapEditorProps {
   onSubmit?: () => void;
   onCancel?: () => void;
   globalKeyListener?: boolean;
+  autoFocus?: boolean;
+  handleEnterKey?: boolean;
+  handleEscapeKey?: boolean;
 }
 
-const TiptapEditor: React.FC<TiptapEditorProps> = ({
+export interface TiptapEditorRef {
+  focus: () => void;
+  editor: Editor | null;
+}
+
+const TiptapEditor = forwardRef<TiptapEditorRef, TiptapEditorProps>(({
   content,
   placeholder,
   editable = true,
@@ -21,7 +29,10 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
   onSubmit,
   onCancel,
   globalKeyListener = false,
-}) => {
+  autoFocus = false,
+  handleEnterKey = true,
+  handleEscapeKey = true,
+}, ref) => {
   const editorRef = useRef<Editor | null>(null);
 
   const editor = useEditor({
@@ -38,13 +49,15 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
         class: 'tiptap-editor',
       },
       handleKeyDown: (view, event) => {
-        if (event.key === 'Enter') {
-          if (event.shiftKey) {
-            return false; // Let Tiptap handle Shift+Enter
-          } else {
-            onSubmit?.();
-            return true;
-          }
+        if (event.key === 'Enter' && !event.shiftKey && handleEnterKey) {
+          event.preventDefault();
+          onSubmit?.();
+          return true;
+        }
+        if (event.key === 'Escape' && handleEscapeKey) {
+          event.preventDefault();
+          onCancel?.();
+          return true;
         }
         return false;
       },
@@ -56,9 +69,19 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
     },
   });
 
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      editor?.commands.focus('end');
+    },
+    editor: editor,
+  }), [editor]);
+
   useEffect(() => {
     editorRef.current = editor;
-  }, [editor]);
+    if (autoFocus && editor) {
+      editor.commands.focus('end');
+    }
+  }, [editor, autoFocus]);
 
   useEffect(() => {
     if (editor) {
@@ -102,6 +125,8 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
   }, [globalKeyListener]);
 
   return <EditorContent editor={editor} />;
-};
+});
+
+TiptapEditor.displayName = 'TiptapEditor';
 
 export default React.memo(TiptapEditor);

@@ -5,7 +5,7 @@ import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { Button } from "@/components/ui/button";
 import { Trash2, Edit } from 'lucide-react';
 import { JSONContent } from '@tiptap/react';
-import TiptapEditor from './tiptap-editor-project-blocks';
+import TiptapEditor, { TiptapEditorRef } from '@/components/projects/components/tiptap-editor-project-blocks';
 
 interface ProjectBlocksProps {
   projectId: string;
@@ -20,6 +20,7 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
   const [isLoading, setIsLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const editorRefs = useRef<{ [key: string]: TiptapEditorRef }>({});
 
   const projectBlocks = useMemo(() => 
     blocks
@@ -55,6 +56,9 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
 
   const handleEditBlock = useCallback((blockId: string) => {
     setEditingBlockId(blockId);
+    setTimeout(() => {
+      editorRefs.current[blockId]?.focus();
+    }, 0);
   }, []);
 
   const handleSaveBlock = useCallback((blockId: string, content: JSONContent) => {
@@ -70,45 +74,52 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
     deleteBlock(blockId);
   }, [deleteBlock]);
 
-  const renderBlock = useCallback((block: typeof projectBlocks[number]) => (
-    <div
-      key={block.id}
-      className="px-4 py-2 hover:bg-[#32353b] transition-colors duration-200 group relative"
-    >
-      <div className="flex items-center mb-1">
-        <div className="font-semibold mr-2 text-white">{block.createdBy || 'Anonymous'}</div>
-        <div className="text-xs text-[#72767d]">
-          {new Date(block.createdAt).toLocaleString()}
+  const renderBlock = useCallback((block: typeof projectBlocks[number]) => {
+    const isEditing = editingBlockId === block.id;
+
+    return (
+      <div
+        key={block.id}
+        className="px-4 py-2 hover:bg-[#32353b] transition-colors duration-200 group relative"
+      >
+        <div className="flex items-center mb-1">
+          <div className="font-semibold mr-2 text-white">{block.createdBy || 'Anonymous'}</div>
+          <div className="text-xs text-[#72767d]">
+            {new Date(block.createdAt).toLocaleString()}
+          </div>
         </div>
+        <TiptapEditor
+          ref={(el) => {
+            if (el) editorRefs.current[block.id] = el;
+          }}
+          content={block.content as JSONContent}
+          editable={isEditing}
+          onSave={(content) => handleSaveBlock(block.id, content)}
+          onCancel={handleCancelEdit}
+        />
+        {!isEditing && (
+          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleEditBlock(block.id)}
+              className="mr-2 text-[#b9bbbe] hover:text-white"
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDeleteBlock(block.id)}
+              className="text-[#b9bbbe] hover:text-[#ed4245]"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
       </div>
-      <TiptapEditor
-        content={block.content as JSONContent}
-        editable={editingBlockId === block.id}
-        onSave={(content) => handleSaveBlock(block.id, content)}
-        onCancel={handleCancelEdit}
-      />
-      {editingBlockId !== block.id && (
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEditBlock(block.id)}
-            className="mr-2 text-[#b9bbbe] hover:text-white"
-          >
-            <Edit className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDeleteBlock(block.id)}
-            className="text-[#b9bbbe] hover:text-[#ed4245]"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      )}
-    </div>
-  ), [editingBlockId, handleEditBlock, handleDeleteBlock, handleSaveBlock, handleCancelEdit]);
+    );
+  }, [editingBlockId, handleEditBlock, handleDeleteBlock, handleSaveBlock, handleCancelEdit]);
 
   const renderContent = () => {
     if (isLoading) {

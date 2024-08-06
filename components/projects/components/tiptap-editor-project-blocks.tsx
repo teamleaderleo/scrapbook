@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useEditor, EditorContent, JSONContent } from '@tiptap/react';
+import React, { useCallback, useEffect, useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useEditor, EditorContent, JSONContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
 interface TiptapEditorProps {
@@ -9,8 +9,14 @@ interface TiptapEditorProps {
   onCancel: () => void;
 }
 
-const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, editable, onSave, onCancel }) => {
+export interface TiptapEditorRef {
+  focus: () => void;
+  editor: Editor | null;
+}
+
+const TiptapEditor = forwardRef<TiptapEditorRef, TiptapEditorProps>(({ content, editable, onSave, onCancel }, ref) => {
   const [originalContent, setOriginalContent] = useState<JSONContent>(content);
+  const editorRef = useRef<Editor | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -26,44 +32,49 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({ content, editable, onSave, 
       attributes: {
         class: 'tiptap-editor bg-gray-800 rounded p-2 focus:outline-none',
       },
+      handleKeyDown: (view, event) => {
+        if (!editorRef.current) return false;
+
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          onSave(editorRef.current.getJSON());
+          return true;
+        }
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          editorRef.current.commands.setContent(originalContent);
+          onCancel();
+          return true;
+        }
+        return false;
+      },
     },
-    immediatelyRender: false,
   });
 
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      editorRef.current?.commands.focus('end');
+    },
+    editor: editorRef.current,
+  }), []);
+
   useEffect(() => {
-    if (editor) {
-      editor.setEditable(editable);
+    editorRef.current = editor;
+  }, [editor]);
+
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.setEditable(editable);
       if (editable) {
         setOriginalContent(content);
-        editor.commands.setContent(content);
+        editorRef.current.commands.setContent(content);
       }
     }
-  }, [editor, editable, content]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!editor || !editable) return;
-
-      if (event.key === 'Enter') {
-        if (!event.shiftKey) {
-          event.preventDefault();
-          onSave(editor.getJSON());
-        } else {
-          // Allow Shift+Enter for new lines
-          editor.commands.enter();
-        }
-      } else if (event.key === 'Escape') {
-        event.preventDefault();
-        editor.commands.setContent(originalContent);
-        onCancel();
-      }
-    };
-
-    editor?.view.dom.addEventListener('keydown', handleKeyDown);
-    return () => editor?.view.dom.removeEventListener('keydown', handleKeyDown);
-  }, [editor, editable, onSave, onCancel, originalContent]);
+  }, [editable, content]);
 
   return <EditorContent editor={editor} />;
-};
+});
+
+TiptapEditor.displayName = 'TiptapEditor';
 
 export default React.memo(TiptapEditor);
