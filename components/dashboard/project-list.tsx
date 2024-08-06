@@ -9,14 +9,14 @@ import ViewSwitcher from './view-switcher';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/components/button";
 import { User, Settings, LogOut } from 'lucide-react';
-import { signOut } from '@/auth';
 import { useUIStore } from '@/app/lib/stores/ui-store';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export const ProjectList = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { projects, isLoading } = useProjects();
-  const setCurrentProject = useUIStore((state) => state.setCurrentProject);
+  const { currentProject, setCurrentProject } = useUIStore();
 
   const prefetchProject = (projectId: string) => {
     console.log(`Prefetching project: ${projectId}`);
@@ -24,7 +24,7 @@ export const ProjectList = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#2B2D31] text-[#B5BAC1] w-60">
+    <div className="flex flex-col h-full bg-[#2B2D31] text-[#B5BAC1] w-60 min-w-[240px]">
       <div className="p-3">
         <ViewSwitcher />
       </div>
@@ -34,20 +34,25 @@ export const ProjectList = () => {
           <p className="text-sm text-[#B5BAC1] px-3">Loading projects...</p>
         ) : (
           <div className="py-1">
-            {projects?.map((project, index) => (
-              <React.Fragment key={project.id}>
-                <Link
+            {projects?.map((project, index) => {
+              const isSelected = pathname === `/dashboard/projects/${project.id}`;
+              return (
+                <React.Fragment key={project.id}>
+                  <Link
                     href={`/dashboard/projects/${project.id}`}
                     onClick={() => setCurrentProject(project)}
                     onMouseEnter={() => prefetchProject(project.id)}
                   >
-                  <div className="text-sm py-2 px-3 hover:bg-[#35373C] rounded transition-colors cursor-pointer">
-                    # {project.name}
-                  </div>
-                </Link>
-                {index < projects.length - 1 && <Separator className="my-1 bg-[#35373C]" />}
-              </React.Fragment>
-            ))}
+                    <div className={`text-sm py-2 px-3 rounded transition-colors cursor-pointer ${
+                      isSelected ? 'bg-[#393C43] text-white' : 'hover:bg-[#35373C]'
+                    }`}>
+                      # {project.name}
+                    </div>
+                  </Link>
+                  {index < projects.length - 1 && <Separator className="my-1 bg-[#35373C]" />}
+                </React.Fragment>
+              );
+            })}
           </div>
         )}
       </ScrollArea>
@@ -64,10 +69,6 @@ export const ProjectList = () => {
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
             </DropdownMenuItem>
-            {/* <DropdownMenuItem onSelect={() => signOut()}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
-            </DropdownMenuItem> */}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
