@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useEditor, EditorContent, JSONContent } from '@tiptap/react';
+import { useEditor, EditorContent, JSONContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 
@@ -7,7 +7,7 @@ interface TiptapEditorProps {
   content: JSONContent;
   placeholder: string;
   editable?: boolean;
-  onUpdate?: (content: JSONContent) => void;
+  onUpdate?: (editor: Editor) => void;
   onSubmit?: () => void;
   onCancel?: () => void;
   globalKeyListener?: boolean;
@@ -22,7 +22,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
   onCancel,
   globalKeyListener = false,
 }) => {
-  const editorRef = useRef<ReturnType<typeof useEditor> | null>(null);
+  const editorRef = useRef<Editor | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -50,7 +50,9 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
       },
     },
     onUpdate: ({ editor }) => {
-      onUpdate?.(editor.getJSON());
+      if (onUpdate) {
+        onUpdate(editor as Editor);
+      }
     },
   });
 
