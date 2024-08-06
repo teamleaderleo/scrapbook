@@ -25,11 +25,19 @@ const links = [
 export default function NavLinks() {
   const pathname = usePathname();
 
+  const isActive = (href: string) => {
+    if (href === '/dashboard') {
+      return pathname === href;
+    }
+    return pathname.startsWith(href);
+  };
+
   return (
     <TooltipProvider>
       <div className="flex flex-col items-center space-y-2 pt-2">
         {links.map((link) => {
           const LinkIcon = link.icon;
+          const active = isActive(link.href);
           return (
             <Tooltip key={link.name}>
               <TooltipTrigger asChild>
@@ -37,7 +45,7 @@ export default function NavLinks() {
                   href={link.href}
                   className={cn(
                     'flex h-12 w-12 items-center justify-center rounded-3xl hover:rounded-2xl transition-all duration-300 ease-linear',
-                    pathname === link.href 
+                    active 
                       ? 'bg-[#5865F2] text-white' 
                       : 'text-[#B5BAC1] hover:bg-[#36393f] hover:text-white'
                   )}
