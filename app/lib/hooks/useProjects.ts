@@ -8,6 +8,8 @@ import { ADMIN_UUID } from '@/app/lib/constants';
 // import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { getCachedProjects } from '../data/cached-project-data';
 import { useKeyNav } from './useKeyNav';
+import { usePathname } from 'next/navigation';
+import { useUIStore } from '../stores/ui-store';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -19,6 +21,9 @@ export function useProjects() {
     includeTags: true,
     includeBlocks: true,
   });
+
+  const pathname = usePathname();
+  const setCurrentProject = useUIStore((state) => state.setCurrentProject);
 
   // const { data: projectBasics, isLoading: isLoadingBasics } = useQuery<BaseProject[], Error>(
   //   ['projectBasics', ADMIN_UUID],
@@ -37,12 +42,26 @@ export function useProjects() {
     staleTime: Infinity,
     gcTime: Infinity,
   });
-
+  
   useEffect(() => {
     if (projects) {
       projects.forEach(project => queryClient.prefetchQuery({ queryKey: ['project', project.id] }));
     }
   }, [projects, queryClient]);
+  
+  useEffect(() => {
+    if (projects && pathname) {
+      const projectId = pathname.split('/').pop();
+      const currentProject = projects.find(project => project.id === projectId);
+      if (currentProject) {
+        setCurrentProject(currentProject);
+      } else if (projects.length > 0) {
+        // If no matching project found, default to the first project
+        setCurrentProject(projects[0]);
+      }
+    }
+  }, [projects, pathname, setCurrentProject]);
+
 
   const fuse = useMemo(() => {
     if (!projects) return null;

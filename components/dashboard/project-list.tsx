@@ -17,18 +17,11 @@ export const ProjectList = () => {
   const router = useRouter();
   const { projects, isLoading } = useProjects();
   const setCurrentProject = useUIStore((state) => state.setCurrentProject);
-  const currentProject = useUIStore((state) => state.currentProject);
 
   const prefetchProject = (projectId: string) => {
     console.log(`Prefetching project: ${projectId}`);
     router.prefetch(`/dashboard/projects/${projectId}`);
   };
-
-  useEffect(() => {
-    if (!currentProject && projects && projects.length > 0) {
-      setCurrentProject(projects[0]);
-    }
-  }, [currentProject, projects, setCurrentProject]);
 
   return (
     <div className="flex flex-col h-full bg-[#2B2D31] text-[#B5BAC1] w-60">
