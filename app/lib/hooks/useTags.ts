@@ -2,7 +2,17 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Fuse from 'fuse.js';
 import { Tag } from '@/app/lib/definitions/definitions';
-import { createTag, updateTag, deleteTag } from '@/app/lib/actions/tag-actions';
+import { 
+  createTag, 
+  updateTag, 
+  deleteTag, 
+  associateTagWithProject, 
+  associateTagWithBlock, 
+  disassociateTagFromProject, 
+  disassociateTagFromBlock, 
+  getTagsForProject, 
+  getTagsForBlock 
+} from '@/app/lib/actions/tag-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedTags, getCachedTagUsage } from '../data/cached-tag-data';
 import { useKeyNav } from './useKeyNav';
@@ -63,6 +73,42 @@ export function useTags() {
     },
   });
 
+  const associateTagWithProjectMutation = useMutation({
+    mutationFn: ({ tagId, projectId }: { tagId: string; projectId: string }) => 
+      associateTagWithProject(tagId, projectId, ADMIN_UUID),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+
+  const associateTagWithBlockMutation = useMutation({
+    mutationFn: ({ tagId, blockId }: { tagId: string; blockId: string }) => 
+      associateTagWithBlock(tagId, blockId, ADMIN_UUID),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
+      queryClient.invalidateQueries({ queryKey: ['blocks'] });
+    },
+  });
+
+  const disassociateTagFromProjectMutation = useMutation({
+    mutationFn: ({ tagId, projectId }: { tagId: string; projectId: string }) => 
+      disassociateTagFromProject(tagId, projectId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+
+  const disassociateTagFromBlockMutation = useMutation({
+    mutationFn: ({ tagId, blockId }: { tagId: string; blockId: string }) => 
+      disassociateTagFromBlock(tagId, blockId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tags'] });
+      queryClient.invalidateQueries({ queryKey: ['blocks'] });
+    },
+  });
+
   const handleSearch = useCallback((newQuery: string) => {
     setQuery(newQuery);
     setCurrentPage(1);
@@ -89,5 +135,11 @@ export function useTags() {
     addTag: addTagMutation.mutateAsync,
     updateTag: updateTagMutation.mutateAsync,
     deleteTag: deleteTagMutation.mutateAsync,
+    associateTagWithProject: associateTagWithProjectMutation.mutateAsync,
+    associateTagWithBlock: associateTagWithBlockMutation.mutateAsync,
+    disassociateTagFromProject: disassociateTagFromProjectMutation.mutateAsync,
+    disassociateTagFromBlock: disassociateTagFromBlockMutation.mutateAsync,
+    getTagsForProject,
+    getTagsForBlock,
   };
 }
