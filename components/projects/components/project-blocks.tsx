@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { Button } from "@/components/ui/button";
-import { Trash2, Edit } from 'lucide-react';
+import { Trash2, Edit, Sun, Moon, Coffee, Briefcase } from 'lucide-react';
 import { JSONContent } from '@tiptap/react';
 import TiptapEditor, { TiptapEditorRef } from '@/components/projects/components/tiptap-editor-project-blocks';
 
@@ -11,7 +11,21 @@ interface ProjectBlocksProps {
   projectId: string;
 }
 
+interface Personality {
+  name: string;
+  icon: React.ReactNode;
+}
+
 const BLOCKS_PER_PAGE = 50;
+
+const getPersonality = (date: Date): Personality => {
+  const hour = date.getHours();
+  if (hour >= 5 && hour < 9) return { name: 'Early Bird', icon: <Coffee className="w-4 h-4" /> };
+  if (hour >= 9 && hour < 17) return { name: 'Work Mode', icon: <Briefcase className="w-4 h-4" /> };
+  if (hour >= 17 && hour < 22) return { name: 'Evening Self', icon: <Sun className="w-4 h-4" /> };
+  return { name: 'Night Owl', icon: <Moon className="w-4 h-4" /> };
+};
+
 
 const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
   const { blocks, updateBlock, deleteBlock } = useBlocks();
@@ -76,6 +90,8 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
 
   const renderBlock = useCallback((block: typeof projectBlocks[number]) => {
     const isEditing = editingBlockId === block.id;
+    const createdDate = new Date(block.createdAt);
+    const personality = getPersonality(createdDate);
 
     return (
       <div
@@ -83,9 +99,12 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
         className="px-4 py-2 hover:bg-[#32353b] transition-colors duration-200 group relative"
       >
         <div className="flex items-center mb-1">
-          <div className="font-semibold mr-2 text-white">{block.createdBy || 'Anonymous'}</div>
+          <div className="font-semibold mr-2 text-white flex items-center">
+            {personality.icon}
+            <span className="ml-2">{personality.name}</span>
+          </div>
           <div className="text-xs text-[#72767d]">
-            {new Date(block.createdAt).toLocaleString()}
+            {createdDate.toLocaleString()}
           </div>
         </div>
         <TiptapEditor
