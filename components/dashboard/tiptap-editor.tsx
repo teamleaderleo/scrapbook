@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useEditor, EditorContent, JSONContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -26,27 +26,25 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        hardBreak: { keepMarks: true },
+      StarterKit,
+      Placeholder.configure({
+        placeholder: placeholder,
       }),
-      Placeholder.configure({ placeholder }),
     ],
     content,
     editable,
     editorProps: {
       attributes: {
-        class: 'tiptap-editor bg-gray-800 rounded p-2 focus:outline-none',
+        class: 'tiptap-editor',
       },
       handleKeyDown: (view, event) => {
-        if (event.key === 'Enter' && !event.shiftKey) {
-          event.preventDefault();
-          onSubmit?.();
-          return true;
-        }
-        if (event.key === 'Escape') {
-          event.preventDefault();
-          onCancel?.();
-          return true;
+        if (event.key === 'Enter') {
+          if (event.shiftKey) {
+            return false; // Let Tiptap handle Shift+Enter
+          } else {
+            onSubmit?.();
+            return true;
+          }
         }
         return false;
       },
@@ -65,6 +63,18 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({
       editor.setEditable(editable);
     }
   }, [editor, editable]);
+
+  useEffect(() => {
+    if (editor) {
+      const placeholderExtension = editor.extensionManager.extensions.find(
+        (extension) => extension.name === "placeholder"
+      );
+      if (placeholderExtension) {
+        placeholderExtension.options['placeholder'] = placeholder;
+        editor.view.dispatch(editor.state.tr);
+      }
+    }
+  }, [editor, placeholder]);
 
   useEffect(() => {
     if (globalKeyListener) {

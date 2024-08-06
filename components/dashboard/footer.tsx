@@ -42,14 +42,6 @@ const Footer: React.FC = () => {
       attributes: {
         class: 'tiptap-editor',
       },
-      // handleDOMEvents: {
-      //       keydown: (_, event) => {
-      //            if (event.key === 'Enter')  {
-      //               handleSubmit();
-      //               return true;
-      //            }
-      //       },
-      //   },
       handleKeyDown: (view, event) => {
         if (event.key === 'Enter') {
           if (event.shiftKey) {
