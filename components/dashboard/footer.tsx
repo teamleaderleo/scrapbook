@@ -54,15 +54,12 @@ const Footer: React.FC = () => {
         if (event.key === 'Enter') {
           if (event.shiftKey) {
             // Shift+Enter: create a new line
-            console.log('Shift+Enter pressed');
             return false; // Let Tiptap handle it
           } else {
 
             // Regular Enter: submit
-            console.log('Enter pressed');
-            // event.preventDefault();
+            // event.preventDefault(); breaks
             handleSubmit();
-            console.log('Handle submit called');
             return true;
           }
         }
@@ -91,13 +88,10 @@ const Footer: React.FC = () => {
 
   useEffect(() => {
     if (editor && currentProject) {
-      console.log(`Loading draft for project: ${currentProject.id}`);
       const draft = getDraft(currentProject.id);
       if (draft) {
-        console.log('Loaded draft:', JSON.stringify(draft));
         editor.commands.setContent(draft);
       } else {
-        console.log('No draft found, clearing editor');
         editor.commands.setContent('');
       }
       editor.commands.focus('end');
@@ -105,28 +99,20 @@ const Footer: React.FC = () => {
   }, [editor, currentProject, getDraft]);
 
   const handleSubmit = useCallback(() => {
-    console.log('Submitting block...');
     const project = currentProjectRef.current;
     const editor = editorRef.current;
-    console.log(`editor is ${editor}`);
-    console.log(`project is ${project}`);
     if (editor && editor.getText().trim() !== '' && project) {
-      console.log(`we're trying ${project.name}`);
       setIsSubmitting(true);
       const content = editor.getJSON();
-      console.log(`Creating block for project: ${project.id}`);
-      console.log('Block content:', JSON.stringify(content));
       
       createBlockInProject(
         { projectId: project.id, data: content },
         {
           onSuccess: (result) => {
             if (result.success) {
-              console.log('Block created and added to project successfully');
               editor.commands.setContent('');
               setIsTyping(false);
               clearDraft(project.id);
-              console.log(`Cleared draft for project: ${project.id}`);
             } else {
               console.error('Failed to create block in project:', result.message);
             }
