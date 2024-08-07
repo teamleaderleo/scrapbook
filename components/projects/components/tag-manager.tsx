@@ -117,11 +117,11 @@ const TagManager: React.FC<TagManagerProps> = ({ blockId, onOpenChange }) => {
                         size="sm"
                         onClick={() => !isTagAlreadyAdded(tag.name) && handleAddTag(tag.name)}
                         disabled={isTagAlreadyAdded(tag.name)}
-                        className={`justify-between ${isTagAlreadyAdded(tag.name) ? "opacity-50" : ""}`}
+                        className={`flex items-center justify-between w-full ${isTagAlreadyAdded(tag.name) ? "opacity-50" : ""}`}
                       >
-                        <span className="truncate mr-2">{tag.name}</span>
+                        <span className="truncate mr-2 flex-grow text-left">{tag.name}</span>
                         <Trash2
-                          className="h-4 w-4 text-red-500 hover:text-red-700"
+                          className="h-4 w-4 flex-shrink-0 text-red-500 hover:text-red-700"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteTag(tag.id);
