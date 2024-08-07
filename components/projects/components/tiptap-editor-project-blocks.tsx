@@ -50,6 +50,7 @@ const TiptapEditor = forwardRef<TiptapEditorRef, TiptapEditorProps>(({ content, 
         return false;
       },
     },
+    immediatelyRender: false,
   });
 
   useImperativeHandle(ref, () => ({

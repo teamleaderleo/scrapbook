@@ -67,6 +67,7 @@ const TiptapEditor = forwardRef<TiptapEditorRef, TiptapEditorProps>(({
         onUpdate(editor as Editor);
       }
     },
+    immediatelyRender: false,
   });
 
   useImperativeHandle(ref, () => ({
