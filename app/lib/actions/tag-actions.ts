@@ -4,6 +4,7 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '../db/db';
 import { tags, tagAssociations } from '../db/schema';
 import { Tag } from '../definitions/definitions';
+import { v4 as uuidv4 } from 'uuid';
 
 export type TagState = {
   message?: string | null;
@@ -14,7 +15,7 @@ export type TagState = {
 export async function createTag(name: string, accountId: string, tx: any = db): Promise<TagState> {
   try {
     const [newTag] = await tx.insert(tags)
-      .values({ name, accountId })
+      .values({ id: uuidv4(), name, accountId })
       .returning();
     return { tag: newTag, success: true };
   } catch (error: any) {
@@ -53,7 +54,15 @@ export async function deleteTag(tagId: string, tx: any = db): Promise<TagState> 
 async function associateTag(tagId: string, entityId: string, entityType: 'project' | 'block', accountId: string, tx: any = db): Promise<TagState> {
   try {
     await tx.insert(tagAssociations)
-      .values({ tagId, associatedId: entityId, entityType, accountId })
+      .values({ 
+        id: uuidv4(),
+        tagId, 
+        associatedId: entityId, 
+        entityType, 
+        accountId,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
       .onConflictDoNothing();
     return { message: 'Tag associated successfully', success: true };
   } catch (error: any) {

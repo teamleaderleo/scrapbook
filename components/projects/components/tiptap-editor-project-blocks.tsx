@@ -7,6 +7,7 @@ interface TiptapEditorProps {
   editable: boolean;
   onSave: (content: JSONContent) => void;
   onCancel: () => void;
+  isTagManagerActive: boolean;
 }
 
 export interface TiptapEditorRef {
@@ -14,7 +15,7 @@ export interface TiptapEditorRef {
   editor: Editor | null;
 }
 
-const TiptapEditor = forwardRef<TiptapEditorRef, TiptapEditorProps>(({ content, editable, onSave, onCancel }, ref) => {
+const TiptapEditor = forwardRef<TiptapEditorRef, TiptapEditorProps>(({ content, editable, onSave, onCancel, isTagManagerActive }, ref) => {
   const [originalContent, setOriginalContent] = useState<JSONContent>(content);
   const editorRef = useRef<Editor | null>(null);
 
@@ -33,7 +34,7 @@ const TiptapEditor = forwardRef<TiptapEditorRef, TiptapEditorProps>(({ content, 
         class: 'tiptap-editor bg-gray-800 rounded p-2 focus:outline-none',
       },
       handleKeyDown: (view, event) => {
-        if (!editorRef.current) return false;
+        if (!editorRef.current || isTagManagerActive) return false;
 
         if (event.key === 'Enter' && !event.shiftKey) {
           event.preventDefault();

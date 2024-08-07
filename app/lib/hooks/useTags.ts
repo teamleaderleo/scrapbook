@@ -29,6 +29,8 @@ export function useTags() {
     queryFn: () => getCachedTags(ADMIN_UUID),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const fuse = useMemo(() => {
@@ -53,7 +55,7 @@ export function useTags() {
   }, [filteredTags, currentPage]);
 
   const addTagMutation = useMutation({
-    mutationFn: (name: string) => createTag(ADMIN_UUID, name),
+    mutationFn: (name: string) => createTag(name, ADMIN_UUID),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tags'] });
     },

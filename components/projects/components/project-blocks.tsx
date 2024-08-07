@@ -8,6 +8,7 @@ import { JSONContent } from '@tiptap/react';
 import TiptapEditor, { TiptapEditorRef } from '@/components/projects/components/tiptap-editor-project-blocks';
 import TagManager from './tag-manager'; 
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import BlockTags from '@/components/blocks/components/block-tags';
 
 interface ProjectBlocksProps {
   projectId: string;
@@ -36,6 +37,7 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const editorRefs = useRef<{ [key: string]: TiptapEditorRef }>({});
+  const [isTagManagerActive, setIsTagManagerActive] = useState(false);
 
   const projectBlocks = useMemo(() => 
     blocks
@@ -116,10 +118,9 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
           editable={isEditing}
           onSave={(content) => handleSaveBlock(block.id, content)}
           onCancel={handleCancelEdit}
+          isTagManagerActive={isTagManagerActive}
         />
-        <div className="mt-2">
-          <TagManager blockId={block.id} showOnHover={true} />
-        </div>
+        <BlockTags blockId={block.id} />
         {!isEditing && (
           <TooltipProvider delayDuration={0}>
             <div className="absolute top-2 right-7 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -127,7 +128,10 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div>
-                      <TagManager blockId={block.id} showOnHover={false} />
+                      <TagManager
+                        blockId={block.id}
+                        onOpenChange={(isOpen) => setIsTagManagerActive(isOpen)}
+                      />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="bottom">
@@ -168,7 +172,7 @@ const ProjectBlocks: React.FC<ProjectBlocksProps> = ({ projectId }) => {
         )}
       </div>
     );
-  }, [editingBlockId, handleEditBlock, handleDeleteBlock, handleSaveBlock, handleCancelEdit]);
+  }, [editingBlockId, handleEditBlock, handleDeleteBlock, handleSaveBlock, handleCancelEdit, isTagManagerActive]);
 
   const renderContent = () => {
     if (isLoading) {
