@@ -8,7 +8,7 @@ import { useUIStore, useDraftStore } from '@/app/lib/stores/ui-store';
 import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { ProjectWithBlocks } from '@/app/lib/definitions/definitions';
-import TiptapEditor, { TiptapEditorRef } from './tiptap-editor';
+import TiptapEditor, { TiptapEditorRef } from './footer-tiptap-editor';
 
 const Footer: React.FC = () => {
   const { currentProject } = useUIStore();
