@@ -31,7 +31,7 @@ const TiptapEditor = forwardRef<TiptapEditorRef, TiptapEditorProps>(({ content, 
     editable,
     editorProps: {
       attributes: {
-        class: 'tiptap-editor bg-gray-800 rounded p-2 focus:outline-none',
+        class: 'tiptap-editor bg-[#36393f] text-[#dcddde] rounded p-2 focus:outline-none',
       },
       handleKeyDown: (view, event) => {
         if (!editorRef.current || isTagManagerActive) return false;
