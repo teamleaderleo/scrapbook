@@ -3,8 +3,9 @@ import { useTags } from '@/app/lib/hooks/useTags';
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
-import { Smile, Plus } from 'lucide-react';
+import { Smile, Plus, X, Trash2 } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TagManagerProps {
   blockId: string;
@@ -12,11 +13,18 @@ interface TagManagerProps {
 }
 
 const TagManager: React.FC<TagManagerProps> = ({ blockId, onOpenChange }) => {
-  const { tags, addTag, associateTagWithBlock, useTagsForBlock } = useTags();
+  const { 
+    tags, 
+    addTag, 
+    associateTagWithBlock, 
+    useTagsForBlock, 
+    disassociateTagFromBlock,
+    deleteTag 
+  } = useTags();
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
-  const { data: blockTags } = useTagsForBlock(blockId);
+  const { data: blockTags, refetch: refetchBlockTags } = useTagsForBlock(blockId);
 
   useEffect(() => {
     if (isOpen) {
@@ -41,7 +49,18 @@ const TagManager: React.FC<TagManagerProps> = ({ blockId, onOpenChange }) => {
 
     await associateTagWithBlock({ tagId, blockId });
     setInputValue('');
-  }, [addTag, associateTagWithBlock, blockId, tags]);
+    refetchBlockTags();
+  }, [addTag, associateTagWithBlock, blockId, tags, refetchBlockTags]);
+
+  const handleRemoveTag = useCallback(async (tagId: string) => {
+    await disassociateTagFromBlock({ tagId, blockId });
+    refetchBlockTags();
+  }, [disassociateTagFromBlock, blockId, refetchBlockTags]);
+
+  const handleDeleteTag = useCallback(async (tagId: string) => {
+    await deleteTag(tagId);
+    refetchBlockTags();
+  }, [deleteTag, refetchBlockTags]);
 
   const isTagAlreadyAdded = (tagName: string) => {
     return blockTags?.some(tag => tag.name.toLowerCase() === tagName.toLowerCase());
@@ -65,7 +84,7 @@ const TagManager: React.FC<TagManagerProps> = ({ blockId, onOpenChange }) => {
       </PopoverTrigger>
       <PopoverContent className="w-80">
         <div className="space-y-4">
-          <h4 className="font-medium leading-none">Add Tag</h4>
+          <h4 className="font-medium leading-none">Manage Tags</h4>
           <div className="flex items-center space-x-2">
             <Input
               ref={inputRef}
@@ -90,16 +109,29 @@ const TagManager: React.FC<TagManagerProps> = ({ blockId, onOpenChange }) => {
           <ScrollArea className="h-[200px]">
             <div className="grid grid-cols-2 gap-2">
               {tags.map((tag) => (
-                <Button
-                  key={tag.id}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleAddTag(tag.name)}
-                  disabled={isTagAlreadyAdded(tag.name)}
-                  className={isTagAlreadyAdded(tag.name) ? "opacity-50" : ""}
-                >
-                  {tag.name}
-                </Button>
+                <TooltipProvider key={tag.id}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => !isTagAlreadyAdded(tag.name) && handleAddTag(tag.name)}
+                        disabled={isTagAlreadyAdded(tag.name)}
+                        className={`justify-between ${isTagAlreadyAdded(tag.name) ? "opacity-50" : ""}`}
+                      >
+                        <span className="truncate mr-2">{tag.name}</span>
+                        <Trash2
+                          className="h-4 w-4 text-red-500 hover:text-red-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteTag(tag.id);
+                          }}
+                        />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{tag.name}</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               ))}
             </div>
           </ScrollArea>

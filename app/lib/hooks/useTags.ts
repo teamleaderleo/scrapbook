@@ -69,7 +69,7 @@ export function useTags() {
   });
 
   const deleteTagMutation = useMutation({
-    mutationFn: (tagId: string) => deleteTag(ADMIN_UUID, tagId),
+    mutationFn: (tagId: string) => deleteTag(tagId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tags'] });
     },
