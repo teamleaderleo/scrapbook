@@ -15,7 +15,10 @@ This is an ongoing effort.
 
 ## What It Currently Looks Like
 
-### Revamping schema; restarted UI situation:
+### Revamping schema; restarted UI situation (top is most recent):
+
+![image](https://github.com/user-attachments/assets/724013e9-515f-4a34-9405-19c9d8a97d99)
+
 ![image](https://github.com/user-attachments/assets/cb225cc6-910e-4b15-b506-51161db6bde2)
 
 
