@@ -1,12 +1,12 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Fuse from 'fuse.js';
-import { ProjectFetchOptions, ProjectFormSubmission } from '@/app/lib/definitions/definitions';
+import { ProjectFetchOptions, ProjectFormSubmission, ProjectWithBlocksWithTags } from '@/app/lib/definitions/definitions';
 import { ProjectWithBlocks, ProjectPreview, BaseProject, ProjectWithExtendedBlocks, ProjectWithTags } from "../definitions/definitions";
 import { createProject, updateProject, deleteProject } from '@/app/lib/actions/project-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 // import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
-import { getCachedProjects } from '../data/cached-project-data';
+import { getCachedProjects, getCachedProjectsWithBlocksWithTags } from '../data/cached-project-data';
 import { useKeyNav } from './useKeyNav';
 import { usePathname } from 'next/navigation';
 import { useUIStore } from '../stores/ui-store';
@@ -33,10 +33,10 @@ export function useProjects() {
   //   }
   // );
 
-  const { data: projects, isLoading, error } = useQuery<ProjectWithBlocks[], Error>({
-    queryKey: ['projects', ADMIN_UUID],
+  const { data: projects, isLoading, error } = useQuery<ProjectWithBlocksWithTags[], Error>({
+    queryKey: ['projectsWithBlocksWithTags', ADMIN_UUID],
     queryFn: async () => {
-      const fetchedProjects = await getCachedProjects(ADMIN_UUID);
+      const fetchedProjects = await getCachedProjectsWithBlocksWithTags(ADMIN_UUID);
       return fetchedProjects;
     },
     staleTime: Infinity,

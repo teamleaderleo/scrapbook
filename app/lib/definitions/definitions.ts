@@ -62,6 +62,10 @@ export type ProjectWithBlocks = ProjectWithTags & {
   blocks: Block[];
 };
 
+export type ProjectWithBlocksWithTags = ProjectWithTags & {
+  blocks: BlockWithTags[];
+};
+
 export type ProjectWithExtendedBlocks = ProjectWithTags & {
   blocks: BlockWithRelations[];
 };

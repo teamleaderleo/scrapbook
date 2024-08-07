@@ -16,6 +16,9 @@ interface UIState {
   setViewMode: (mode: ViewMode) => void;
   selectedBlocks: string[];
   setSelectedBlocks: (blockIds: string[]) => void;
+  editingBlockId: string | null;
+  setEditingBlockId: (blockId: string | null) => void;
+  isAnyBlockEditing: () => boolean;
 }
 
 interface DraftState {
@@ -25,13 +28,16 @@ interface DraftState {
   clearDraft: (projectId: string) => void;
 }
 
-const useUIStore = create<UIState>((set) => ({
+const useUIStore = create<UIState>((set, get) => ({
   currentProject: null,
   setCurrentProject: (project) => set({ currentProject: project }),
   viewMode: 'chronological',
   setViewMode: (mode) => set({ viewMode: mode }),
   selectedBlocks: [],
   setSelectedBlocks: (blockIds) => set({ selectedBlocks: blockIds }),
+  editingBlockId: null,
+  setEditingBlockId: (blockId) => set({ editingBlockId: blockId }),
+  isAnyBlockEditing: () => get().editingBlockId !== null,
 }));
 
 const useDraftStore = create<DraftState>()(
