@@ -34,7 +34,7 @@ export function useProjects() {
   // );
 
   const { data: projects, isLoading, error } = useQuery<ProjectWithBlocksWithTags[], Error>({
-    queryKey: ['projectsWithBlocksWithTags', ADMIN_UUID],
+    queryKey: ['projects', ADMIN_UUID],
     queryFn: async () => {
       const fetchedProjects = await getCachedProjectsWithBlocksWithTags(ADMIN_UUID);
       return fetchedProjects;
