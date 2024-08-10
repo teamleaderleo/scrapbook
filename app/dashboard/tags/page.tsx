@@ -14,10 +14,10 @@
 //   title: 'Tags',
 // };
 
-// export default async function TagsPage({
-// }: {
-// }) {
-//   return (
+export default async function TagsPage({
+}: {
+}) {
+  // return (
 //     <div className="w-full">
 //       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
 //         <Suspense fallback={<div>Loading search...</div>}>
@@ -28,5 +28,5 @@
 //         {/* <TagManagementTable accountId={ADMIN_UUID} /> */}
 //       {/* </Suspense> */}
 //     </div>
-//   );
-// }
+  // );
+}

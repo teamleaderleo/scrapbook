@@ -7,7 +7,7 @@
 //   title: 'Edit Project',
 // };
 
-// export default function Page({ params }: { params: { id: string } }) {
+export default function Page({ params }: { params: { id: string } }) {
 //   return (
 //     <main>
 //       {/* <Breadcrumbs
@@ -25,4 +25,4 @@
 //       </Suspense>
 //     </main>
 //   );
-// }
+}
