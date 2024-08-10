@@ -15,7 +15,7 @@ import {
 } from '@/app/lib/actions/tag-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedTags, getCachedTagUsage } from '../data/cached-tag-data';
-import { useKeyNav } from './useKeyNav';
+// import { useKeyNav } from './useKeyNav';
 
 const ITEMS_PER_PAGE = 20;
 
@@ -120,7 +120,7 @@ export function useTags() {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   }, [totalPages]);
 
-  useKeyNav(currentPage, totalPages, handlePageChange, true);
+  // useKeyNav(currentPage, totalPages, handlePageChange, true);
 
   const useTagsForBlock = (blockId: string) => {
     return useQuery<Tag[], Error>({

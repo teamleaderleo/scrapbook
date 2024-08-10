@@ -7,7 +7,7 @@ import { createProject, updateProject, deleteProject } from '@/app/lib/actions/p
 import { ADMIN_UUID } from '@/app/lib/constants';
 // import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
 import { getCachedProjects, getCachedProjectsWithBlocksWithTags } from '../data/cached-project-data';
-import { useKeyNav } from './useKeyNav';
+// import { useKeyNav } from './useKeyNav';
 import { usePathname } from 'next/navigation';
 import { useUIStore } from '../stores/ui-store';
 
@@ -114,7 +114,7 @@ export function useProjects() {
     setCurrentPage(page);
   }, []);
 
-  useKeyNav(currentPage, totalPages, handlePageChange, true);
+  // useKeyNav(currentPage, totalPages, handlePageChange, true);
 
   // const getAISuggestions = useCallback(async (name: string, description: string) => {
   //   const tags = await suggestTags(`${name} ${description}`);

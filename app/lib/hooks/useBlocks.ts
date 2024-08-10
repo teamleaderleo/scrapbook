@@ -6,7 +6,7 @@ import { createBlock, updateBlock, deleteBlock, addBlockToProject, createBlockIn
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { getCachedBlocks } from '@/app/lib/data/cached-block-data';
 // import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
-import { useKeyNav } from './useKeyNav';
+// import { useKeyNav } from './useKeyNav';
 import { JSONContent } from '@tiptap/react';
 
 const ITEMS_PER_PAGE = 6;
@@ -91,7 +91,7 @@ export function useBlocks(accountId: string = ADMIN_UUID) {
     setCurrentPage(page);
   }, []);
 
-  useKeyNav(currentPage, totalPages, handlePageChange, true);
+  // useKeyNav(currentPage, totalPages, handlePageChange, true);
 
   return {
     blocks,
