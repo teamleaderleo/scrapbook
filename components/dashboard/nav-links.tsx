@@ -15,10 +15,10 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/comp
 const links = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Projects', href: '/dashboard/projects', icon: Folder },
-  { name: 'Blocks', href: '/dashboard/blocks', icon: Image },
-  { name: 'Tags', href: '/dashboard/tags', icon: Tag },
-  { name: 'Portfolio', href: '/dashboard/portfolio', icon: Image },
-  { name: 'Discord', href: '/dashboard/discord', icon: Image },
+  // { name: 'Blocks', href: '/dashboard/blocks', icon: Image },
+  // { name: 'Tags', href: '/dashboard/tags', icon: Tag },
+  // { name: 'Portfolio', href: '/dashboard/portfolio', icon: Image },
+  // { name: 'Discord', href: '/dashboard/discord', icon: Image },
   // { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 

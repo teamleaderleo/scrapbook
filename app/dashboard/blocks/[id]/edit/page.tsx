@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 // import Breadcrumbs from '@/components/ui/components/breadcrumbs';
 import { Suspense } from 'react';
-import { BlockFormWrapper } from '@/components/blocks/forms/block-form-wrapper';
+// import { BlockFormWrapper } from '@/components/blocks/forms/block-form-wrapper';
 
 export const metadata: Metadata = {
   title: 'Edit Block',
@@ -21,7 +21,7 @@ export default function Page({ params }: { params: { id: string } }) {
         ]}
       /> */}
       <Suspense fallback={<div>Loading form...</div>}>
-        <BlockFormWrapper blockId={params.id} />
+        {/* <BlockFormWrapper blockId={params.id} /> */}
       </Suspense>
     </main>
   );

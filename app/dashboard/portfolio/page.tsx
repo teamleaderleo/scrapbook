@@ -1,5 +1,5 @@
-import { PortfolioView } from "@/components/portfolio/portfolio-view";
+// import { PortfolioView } from "@/components/portfolio/portfolio-view";
 
 export default function PortfolioPage() {
-  return <PortfolioView />;
+//   return <PortfolioView />;
 }

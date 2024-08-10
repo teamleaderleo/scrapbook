@@ -86,12 +86,12 @@ export async function fetchAllProjectsWithBlocksWithTags(accountId: string): Pro
             'tags', (
               SELECT COALESCE(json_agg(DISTINCT jsonb_build_object(
                 'id', bt.id,
-                'accountId', bt.accountId,
+                'accountId', bt.account_id,
                 'name', bt.name
               )), '[]')
               FROM ${tagAssociations} AS bta
-              JOIN ${tags} AS bt ON bt.id = bta.tagId
-              WHERE bta.associatedId = ${blocks.id} AND bta.entityType = 'block'
+              JOIN ${tags} AS bt ON bt.id = bta.tag_id
+              WHERE bta.associated_id = ${blocks.id} AND bta.entity_type = 'block'
             )
           )) FILTER (WHERE ${blocks.id} IS NOT NULL),
           '[]'

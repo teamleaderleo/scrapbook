@@ -73,23 +73,23 @@ export const toBase64 = (str: string) =>
 export const getBlurDataUrl = (w: number, h: number) => 
   `data:image/svg+xml;base64,${toBase64(shimmer(w, h))}`;
 
-export const getBlockThumbnail = (block: Block, index: number = 0): StaticImageData => {
-  if (!block || !block.contents || block.contents.length === 0) {
-    return defaultPlaceholder;
-  }
-  const content: BlockContent = block.contents[index];
-  if (!content) {
-    return defaultPlaceholder;
-  }
+// export const getBlockThumbnail = (block: Block, index: number = 0): StaticImageData => {
+//   if (!block || !block.contents || block.contents.length === 0) {
+//     return defaultPlaceholder;
+//   }
+//   const content: BlockContent = block.contents[index];
+//   if (!content) {
+//     return defaultPlaceholder;
+//   }
 
-  switch (content.type) {
-    case 'image':
-      return content.content ? { src: content.content, height: 40, width: 40 } : defaultPlaceholder;
-    case 'text':
-      return textPlaceholder;
-    case 'file':
-      return filePlaceholder;
-    default:
-      return defaultPlaceholder;
-  }
-};
+//   switch (content.type) {
+//     case 'image':
+//       return content.content ? { src: content.content, height: 40, width: 40 } : defaultPlaceholder;
+//     case 'text':
+//       return textPlaceholder;
+//     case 'file':
+//       return filePlaceholder;
+//     default:
+//       return defaultPlaceholder;
+//   }
+// };

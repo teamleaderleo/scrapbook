@@ -1,11 +1,11 @@
-import { Metadata } from 'next';
-// import Breadcrumbs from '@/components/ui/components/breadcrumbs';
-import { Suspense } from 'react';
-import { BlockFormWrapper } from '@/components/blocks/forms/block-form-wrapper';
+// import { Metadata } from 'next';
+// // import Breadcrumbs from '@/components/ui/components/breadcrumbs';
+// import { Suspense } from 'react';
+// import { BlockFormWrapper } from '@/components/blocks/forms/block-form-wrapper';
 
-export const metadata: Metadata = {
-  title: 'Create Block',
-};
+// export const metadata: Metadata = {
+//   title: 'Create Block',
+// };
 
 export default function Page() {
   return (
@@ -20,9 +20,9 @@ export default function Page() {
           },
         ]}
       /> */}
-      <Suspense fallback={<div>Loading form...</div>}>
-        <BlockFormWrapper />
-      </Suspense>
+      {/* <Suspense fallback={<div>Loading form...</div>}> */}
+        {/* <BlockFormWrapper /> */}
+      {/* </Suspense> */}
     </main>
   );
 }
