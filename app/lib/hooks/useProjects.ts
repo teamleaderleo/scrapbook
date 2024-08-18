@@ -6,7 +6,7 @@ import { ProjectWithBlocks, ProjectPreview, BaseProject, ProjectWithExtendedBloc
 import { createProject, updateProject, deleteProject } from '@/app/lib/actions/project-actions';
 import { ADMIN_UUID } from '@/app/lib/constants';
 // import { handleTagUpdate } from '@/app/lib/actions/tag-handlers';
-import { getCachedProjects, getCachedProjectsWithBlocksWithTags } from '../data/cached-project-data';
+import { getCachedProjectsWithBlocksWithTags } from '../data/cached-project-data';
 // import { useKeyNav } from './useKeyNav';
 import { usePathname } from 'next/navigation';
 import { useUIStore } from '../stores/ui-store';
