@@ -5,8 +5,8 @@ import { updateBlock, deleteBlock, createBlockInProject } from '@/app/lib/action
 import { ADMIN_UUID } from '@/app/lib/constants';
 import { JSONContent } from '@tiptap/react';
 
-const INITIAL_LOAD_COUNT = 20;
-const LOAD_MORE_COUNT = 10;
+const INITIAL_LOAD_COUNT = 50;
+const LOAD_MORE_COUNT = 20;
 
 export function useProjectBlocks(projectId: string, accountId: string = ADMIN_UUID) {
   const queryClient = useQueryClient();
@@ -26,9 +26,14 @@ export function useProjectBlocks(projectId: string, accountId: string = ADMIN_UU
     [project]
   );
 
+  const sortedBlocks = useMemo(() => 
+    [...blocks].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+    [blocks]
+  );
+
   const paginatedBlocks = useMemo(() => 
-    blocks.slice(0, visibleBlocks),
-    [blocks, visibleBlocks]
+    sortedBlocks.slice(0, visibleBlocks),
+    [sortedBlocks, visibleBlocks]
   );
 
   const hasNextPage = blocks.length > visibleBlocks;

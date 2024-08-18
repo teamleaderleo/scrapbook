@@ -5,6 +5,7 @@ import { useBlocks } from '@/app/lib/hooks/useBlocks';
 import { JSONContent } from '@tiptap/react';
 import ProjectBlockItem from './project-block-item';
 import { BlockWithRelations } from '@/app/lib/definitions/definitions';
+import { useUIStore } from '@/app/lib/stores/ui-store';
 
 interface ProjectBlocksContainerProps {
   projectId: string;
@@ -14,7 +15,7 @@ const BLOCKS_PER_PAGE = 50;
 
 const ProjectBlocksContainer: React.FC<ProjectBlocksContainerProps> = ({ projectId }) => {
   const { blocks, updateBlock, deleteBlock } = useBlocks();
-  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
+  const { editingBlockId, setEditingBlockId } = useUIStore();
   const [visibleBlocks, setVisibleBlocks] = useState<number>(BLOCKS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -54,16 +55,16 @@ const ProjectBlocksContainer: React.FC<ProjectBlocksContainerProps> = ({ project
 
   const handleEditBlock = useCallback((blockId: string) => {
     setEditingBlockId(blockId);
-  }, []);
+  }, [setEditingBlockId]);
 
   const handleSaveBlock = useCallback((blockId: string, content: JSONContent) => {
     updateBlock({ id: blockId, data: content });
     setEditingBlockId(null);
-  }, [updateBlock]);
+  }, [updateBlock, setEditingBlockId]);
 
   const handleCancelEdit = useCallback(() => {
     setEditingBlockId(null);
-  }, []);
+  }, [setEditingBlockId]);
 
   const handleDeleteBlock = useCallback((blockId: string) => {
     deleteBlock(blockId);
