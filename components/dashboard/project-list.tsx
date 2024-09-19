@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/components/button";
 import { User, Settings, LogOut } from 'lucide-react';
 import { useUIStore } from '@/app/lib/stores/ui-store';
 import { useRouter, usePathname } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 
 export const ProjectList = () => {
   const router = useRouter();
@@ -21,6 +22,10 @@ export const ProjectList = () => {
   const prefetchProject = (projectId: string) => {
     console.log(`Prefetching project: ${projectId}`);
     router.prefetch(`/dashboard/projects/${projectId}`);
+  };
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/' });
   };
 
   return (
@@ -68,6 +73,10 @@ export const ProjectList = () => {
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
