@@ -4,20 +4,20 @@ import { Button } from "@/components/ui/button";
 
 export default function Page() {
   return (
-    <main className="flex flex-col min-h-screen bg-white">
-      <nav className="bg-gradient-to-r from-indigo-900 to-indigo-600 text-white">
+    <main className="flex flex-col min-h-screen bg-white text-gray-900">
+      <nav className="border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
+            <Link href="/" className="text-xl font-bold text-gray-900">Stensibly</Link>
             <div className="flex items-center space-x-6">
-              <Link href="/" className="text-xl font-bold">Stensibly</Link>
-              <Link href="/blog" className="hover:underline">Blog</Link>
-              <Link href="/about" className="hover:underline">About</Link>
+              <Link href="/blog" className="text-gray-600 hover:text-gray-900">Blog</Link>
+              <Link href="/about" className="text-gray-600 hover:text-gray-900">About</Link>
+              <Link href="/support" className="text-gray-600 hover:text-gray-900">Support</Link>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm opacity-75">user@nextmail.com / 123456</span>
-              <Link href="/login">
-                <Button variant="secondary" size="sm">
-                  Login
+            <div>
+              <Link href="/app">
+                <Button variant="default" size="sm" className="bg-black text-white hover:bg-gray-800">
+                  Open Stensibly
                 </Button>
               </Link>
             </div>
@@ -27,6 +27,11 @@ export default function Page() {
       <div className="flex-grow flex items-center justify-center p-6">
         <FeatureShowcase />
       </div>
+      <footer className="border-t border-gray-200 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-600">
+          © 2024 Stensibly. All rights reserved.
+        </div>
+      </footer>
     </main>
   );
 }
