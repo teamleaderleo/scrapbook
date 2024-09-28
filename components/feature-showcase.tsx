@@ -7,7 +7,7 @@ import Link from 'next/link';
 const features = [
   "a project management tool.",
   "a calendar.",
-  "an organize.r",
+  "an organizer.",
   "a portfolio showcase.",
   "a resume."
 ];
