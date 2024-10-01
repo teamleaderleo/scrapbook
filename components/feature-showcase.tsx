@@ -32,7 +32,7 @@ export default function FeatureShowcase() {
             {features.map((feature, index) => (
               <span
                 key={index}
-                className={`absolute top-0 left-0 whitespace-nowrap transition-opacity duration-300 ${
+                className={`absolute top-0 left-0 whitespace-nowrap transition-opacity duration-300 bg-black text-white px-2 py-3 -mt-2 ${
                   index === featureIndex ? 'opacity-100' : 'opacity-0'
                 }`}
               >
@@ -44,7 +44,7 @@ export default function FeatureShowcase() {
       </div>
       <p className="text-xl mb-8 text-gray-600 text-left w-full">
         Organize your life, manage your projects, and showcase your work.
-        Stensibly is the all-in-one tool for personal and professional growth.
+        Ostensibly.
       </p>
       <div className="flex justify-center w-full gap-4">
         <Link
