@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import FeatureShowcase from '@/components/feature-showcase';
 import { Button } from "@/components/ui/button";
+import HardcodedStickyNote from '@/components/hardcoded-sticky-note';
 
 export default function Page() {
   return (
@@ -15,6 +16,7 @@ export default function Page() {
               <Link href="/support" className="text-sm hover:text-indigo-200">Support</Link>
             </div>
             <div>
+              <HardcodedStickyNote />
               <Link href="/app">
                 <Button variant="secondary" size="sm" className="bg-white text-indigo-700 hover:bg-indigo-100 text-xs py-1 px-2">
                   Open Stensibly
