@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 export default function Page() {
   return (
     <main className="flex flex-col min-h-screen bg-white">
-      <nav className="bg-gradient-to-r from-indigo-900 to-indigo-600 text-white border-b border-indigo-300">
+      <nav className="bg-gradient-to-r from-indigo-700 to-indigo-600 text-white border-b border-indigo-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-12">
             <Link href="/" className="text-lg font-bold">Stensibly</Link>

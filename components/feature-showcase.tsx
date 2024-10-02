@@ -7,9 +7,9 @@ import Link from 'next/link';
 const features = [
   "a project management tool.",
   "a calendar.",
-  "an organizer.",
-  "a portfolio showcase.",
-  "a resume."
+  "a scrapbook.",
+  "a blog.",
+  "a playground."
 ];
 
 export default function FeatureShowcase() {
