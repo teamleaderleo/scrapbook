@@ -43,7 +43,7 @@ export default function FeatureShowcase() {
         </h1>
       </div>
       <p className="text-xl mb-8 text-gray-600 text-left w-full">
-        Organize your life, manage your projects, and showcase your work.
+        (Yes, this is Leo&apos;s side project) Organize your life, manage your projects, and showcase your work.
         Ostensibly.
       </p>
       <div className="flex justify-center w-full gap-4">
