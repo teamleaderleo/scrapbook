@@ -2,6 +2,7 @@ import Link from 'next/link';
 import FeatureShowcase from '@/components/feature-showcase';
 import { Button } from "@/components/ui/button";
 import HardcodedStickyNote from '@/components/hardcoded-sticky-note';
+import { HeaderConnectionStatus } from '@/components/connection-status';
 
 export default function Page() {
   return (
@@ -15,7 +16,8 @@ export default function Page() {
               <Link href="/about" className="text-sm hover:text-indigo-200">About</Link>
               <Link href="/support" className="text-sm hover:text-indigo-200">Support</Link>
             </div>
-            <div>
+            <div className="flex items-center h-full">
+              <HeaderConnectionStatus />
               <HardcodedStickyNote />
               <Link href="/app">
                 <Button variant="secondary" size="sm" className="bg-white text-indigo-700 hover:bg-indigo-100 text-xs py-1 px-2">

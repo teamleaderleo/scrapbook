@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     "app/lib/placeholder-data.js",
     "scripts/seed.js"
-, "components/dashboard/scrapbook.jsx", "app/dashboard/scrapbook/page.tsx"  ],
+, "components/dashboard/scrapbook.jsx", "app/dashboard/scrapbook/page.tsx", "app/lib/websocket/socket-server.nts", "app/lib/websocket/socket-server.cjs"  ],
   "exclude": ["node_modules"]
 }
