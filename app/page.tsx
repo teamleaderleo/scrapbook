@@ -20,7 +20,7 @@ export default function Page() {
             <div className="flex items-center h-full">
               <HeaderConnectionStatus />
               <HardcodedStickyNote />
-              <Link href="/app">
+              <Link href="/dashboard">
                 <Button variant="secondary" size="sm" className="bg-black text-white hover:bg-gray-800 text-xs py-1 px-2">
                   Open Stensibly
                 </Button>
