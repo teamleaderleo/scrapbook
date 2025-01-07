@@ -33,7 +33,7 @@ export default function Page() {
       </div>
       <footer className="bg-gray-100 py-3">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-gray-600">
-          © 2024 Stensibly. All rights reserved.
+          © 2025 Stensibly. All rights reserved.
         </div>
       </footer>
     </main>
