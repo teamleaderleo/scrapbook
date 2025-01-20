@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import HardcodedStickyNote from '@/components/hardcoded-sticky-note';
 import { HeaderConnectionStatus } from '@/components/connection-status';
 import ScrapbookEntry from '@/components/scrapbook-entry';
+import ScrapbookBoard from '@/components/scrapbook-board';
 
 export default function Page() {
   return (
@@ -30,7 +31,7 @@ export default function Page() {
         </div>
       </nav>
       
-      <div className="w-full px-8 mt-4">
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-4 mb-6">
         <div className="max-w-md">
           <h1 className="text-2xl font-normal text-black leading-snug">
             This is Leo&apos;s personal website! For quicker reference, I&apos;ve gathered my resume&apos;s bullet points in one place! 😊
@@ -38,8 +39,8 @@ export default function Page() {
         </div>
       </div>
       
-      <div className="flex-grow flex flex-col items-start max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <ScrapbookEntry text='• Reduced GET request latency from 300ms to 50ms through optimized queries and TanStack Query caching.'/>
+      <div className="px-4 sm:px-6 lg:px-8">
+        <ScrapbookBoard />
       </div>
       
       <footer className="py-3">
