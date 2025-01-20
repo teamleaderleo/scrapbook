@@ -34,7 +34,7 @@ export default function Page() {
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-4 mb-6">
         <div className="max-w-md">
           <h1 className="text-2xl font-normal text-black leading-snug">
-            This is Leo&apos;s personal website! For quicker reference, I&apos;ve gathered my resume&apos;s bullet points in one place! 😊
+            This is Leo&apos;s personal website! I&apos;m currently working on interesting ways to preview my resume&apos;s bullet points! 😊
           </h1>
         </div>
       </div>

@@ -8,12 +8,12 @@ import { X } from "lucide-react";
 
 const HardcodedStickyNote: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
-  const [content, setContent] = useState("This is a sticky note.");
+  const [content, setContent] = useState("Demo Account:\nuser@nextmail.com\npassword: 123456");
 
   if (!isVisible) return null;
 
   return (
-    <Card className="fixed bottom-4 right-4 w-64 shadow-lg">
+    <Card className="fixed top-10 right-4 w-64 shadow-lg">
       <CardContent className="p-2">
         <Button
           variant="ghost"

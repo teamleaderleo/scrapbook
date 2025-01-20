@@ -38,6 +38,20 @@ const SCRAPBOOK_DATA = [
   {
     id: 'performance',
     text: "• Reduced GET request latency from 300ms to 50ms through optimized queries and TanStack Query caching.",
+    attachments: {
+    code: [{
+        title: 'TanStack Query Caching',
+        content: `const { data: projects, isLoading, error } = useQuery<ProjectWithBlocksWithTags[], Error>({
+    queryKey: ['projects', ADMIN_UUID],
+    queryFn: async () => {
+      const fetchedProjects = await getCachedProjectsWithBlocksWithTags(ADMIN_UUID);
+      return fetchedProjects;
+    },
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });`
+      }],
+    }
   },
   {
     id: 'websockets',
