@@ -30,9 +30,9 @@ export default function Page() {
         </div>
       </nav>
       <div className="w-full px-8 mt-8">
-        <div className="max-w-lg">
-          <h1 className="text-3xl font-normal text-black leading-snug">
-            For quicker reference, I&apos;ve gathered the details of some of my resume&apos;s bullet points in one place! 😊
+        <div className="max-w-md">
+          <h1 className="text-2xl font-normal text-black leading-snug">
+            This is Leo&apos;s personal website! For quicker reference, I&apos;ve gathered my resume&apos;s bullet points in one place! 😊
           </h1>
         </div>
       </div>
