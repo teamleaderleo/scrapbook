@@ -13,8 +13,8 @@ const HardcodedStickyNote: React.FC = () => {
   if (!isVisible) return null;
 
   return (
-    <Card className="fixed top-10 right-4 w-64 shadow-lg">
-      <CardContent className="p-2">
+    <Card className="fixed top-10 right-4 w-48 shadow-lg">
+      <CardContent className="p-1">
         <Button
           variant="ghost"
           size="icon"
@@ -27,7 +27,7 @@ const HardcodedStickyNote: React.FC = () => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           className="w-full resize-none border-none focus:ring-0"
-          rows={4}
+          rows={3}
         />
       </CardContent>
     </Card>
