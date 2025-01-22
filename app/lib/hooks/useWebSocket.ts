@@ -10,12 +10,36 @@ export function useWebSocket() {
   
   const ws = useRef<WebSocket | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const retryCount = useRef(0);
+  const maxRetries = 5;
 
-  useEffect(() => {
+  const connectWebSocket = useCallback(() => {
+    if (retryCount.current >= maxRetries) {
+      console.warn('Max retries reached, stopping reconnection attempts');
+      return;
+    }
+
     ws.current = new WebSocket('ws://localhost:8080');
 
     ws.current.onopen = () => {
+      console.log('Connected to WebSocket');
       setStatus(prev => ({ ...prev, isOnline: true }));
+      retryCount.current = 0;
+    };
+
+    ws.current.onclose = () => {
+      console.log('WebSocket connection closed');
+      setStatus(prev => ({ ...prev, isOnline: false }));
+      
+      const backoffTime = Math.min(1000 * Math.pow(2, retryCount.current), 10000);
+      console.log(`Attempting to reconnect in ${backoffTime}ms`);
+      
+      setTimeout(() => {
+        if (ws.current?.readyState === WebSocket.CLOSED) {
+          retryCount.current++;
+          connectWebSocket();
+        }
+      }, backoffTime);
     };
 
     ws.current.onmessage = (event) => {
@@ -37,12 +61,19 @@ export function useWebSocket() {
           break;
 
         case 'ping':
-          // Calculate latency
           const latency = Date.now() - message.timestamp;
           setStatus(prev => ({ ...prev, latency }));
           break;
       }
     };
+
+    ws.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+  }, []);
+
+  useEffect(() => {
+    connectWebSocket();
 
     return () => {
       ws.current?.close();
@@ -50,7 +81,7 @@ export function useWebSocket() {
         clearInterval(timerRef.current);
       }
     };
-  }, []);
+  }, [connectWebSocket]);
 
   return status;
 }
