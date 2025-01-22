@@ -16,7 +16,7 @@ export default function Page() {
             <p className="text-gray-600 text-sm">
               If you&apos;d like, you can open the app and test out the text editing and tag adding for yourself. 
               Those are the most technically impressive features.<br/>
-              Below is a gallery of my resume bullet points' content.
+              Below is a gallery of my resume bullet points&apos; content.
             </p>
           </div>
 
@@ -26,15 +26,15 @@ export default function Page() {
               <ul className="space-y-2">
                 <li className="text-sm">
                   <Link href="/blog/post-1" className="text-gray-600 hover:text-gray-900">
-                    What's the deal with JavaScript bundlers?
+                    What&apos;s the deal with JavaScript bundlers?
                   </Link>
                   <span className="block text-gray-500 text-xs">Headaches with dynamic imports...</span>
                 </li>
                 <li className="text-sm">
                   <Link href="/blog/post-1" className="text-gray-600 hover:text-gray-900">
-                    What I'm learning from building a blog
+                    What I&apos;m learning from building a blog
                   </Link>
-                  <span className="block text-gray-500 text-xs">There's a lot.</span>
+                  <span className="block text-gray-500 text-xs">There&apos;s a lot.</span>
                 </li>
                 <li className="text-sm">
                   <Link href="/blog/post-2" className="text-gray-600 hover:text-gray-900">
