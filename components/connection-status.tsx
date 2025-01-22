@@ -31,10 +31,10 @@ export function HeaderConnectionStatus() {
       <span className="text-gray-600">
         {isOnline ? (
           <>
-            <span className="mr-1">
+            <span className="">
               {activeUsers > 1 
                 ? `${activeUsers} people are here! We've been here for ` 
-                : "We've been here for "}
+                : "We've been here for"}
             </span>
             <span className="font-medium">{formatElapsedTime(sessionTime)}!</span>
             {latency !== null && <span className="ml-1 text-gray-400">({latency}ms)</span>}
