@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import HardcodedStickyNote from '@/components/hardcoded-sticky-note';
 import { HeaderConnectionStatus } from '@/components/connection-status';
 import { Book } from 'lucide-react';
-import ScrapbookBoard from '@/components/scrapbook-board';
+import ScrapbookBoard from '@/components/scrapbook/scrapbook-board';
 
 export default function Page() {
   return (
