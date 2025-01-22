@@ -11,11 +11,12 @@ export default function Page() {
         <div className="flex justify-start items-start gap-16">
           <div className="max-w-sm flex-shrink-0">
             <h1 className="text-2xl font-normal text-black leading-snug mb-2">
-              This is Leo&apos;s personal website! I&apos;m currently working on interesting ways to preview my resume&apos;s bullet points! 😊
+              This is Leo&apos;s personal website!😊
             </h1>
             <p className="text-gray-600 text-sm">
-              January 20, 2025: A lot of stuff is still unpolished! For instance, I&apos;m still deciding on which pictures would be best to add under here. 
-              If you&apos;d like, you can open the app and test out the text editing and tag adding for yourself. There are still a lot of things I need to sort out there, though.
+              If you&apos;d like, you can open the app and test out the text editing and tag adding for yourself. 
+              Those are the most technically impressive features.<br/>
+              Below is a gallery of my resume bullet points' content.
             </p>
           </div>
 
