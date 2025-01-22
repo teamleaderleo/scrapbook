@@ -5,7 +5,9 @@ export function useWebSocket() {
     isOnline: false,
     connectTime: null as number | null,
     sessionTime: 0,
-    latency: null as number | null
+    latency: null as number | null,
+    activeUsers: 0,
+    clientId: null as string | null
   });
   
   const ws = useRef<WebSocket | null>(null);
@@ -49,7 +51,9 @@ export function useWebSocket() {
         case 'connected':
           setStatus(prev => ({ 
             ...prev, 
-            connectTime: message.serverTime 
+            connectTime: message.serverTime,
+            clientId: message.clientId,
+            activeUsers: message.activeUsers
           }));
 
           timerRef.current = setInterval(() => {
@@ -63,6 +67,13 @@ export function useWebSocket() {
         case 'ping':
           const latency = Date.now() - message.timestamp;
           setStatus(prev => ({ ...prev, latency }));
+          break;
+
+        case 'presence':
+          setStatus(prev => ({
+            ...prev,
+            activeUsers: message.activeUsers
+          }));
           break;
       }
     };

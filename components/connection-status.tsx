@@ -17,7 +17,7 @@ function formatElapsedTime(ms: number) {
 }
 
 export function HeaderConnectionStatus() {
-  const { isOnline, latency, sessionTime } = useWebSocket();
+  const { isOnline, latency, sessionTime, activeUsers } = useWebSocket();
   
   return (
     <div className="flex items-center space-x-2 mr-4 text-xs">
@@ -31,7 +31,11 @@ export function HeaderConnectionStatus() {
       <span className="text-gray-600">
         {isOnline ? (
           <>
-            <span className="mr-1">We&apos;ve been here for</span>
+            <span className="mr-1">
+              {activeUsers > 1 
+                ? `${activeUsers} people are here! We've been here for ` 
+                : "We've been here for "}
+            </span>
             <span className="font-medium">{formatElapsedTime(sessionTime)}!</span>
             {latency !== null && <span className="ml-1 text-gray-400">({latency}ms)</span>}
           </>
