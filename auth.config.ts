@@ -9,12 +9,15 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
       const isOnLandingPage = nextUrl.pathname === '/';
+      
+      // Blog is only public route for now
+      const isPublicRoute = nextUrl.pathname.startsWith('/blog');
 
       if (isOnDashboard) {
         if (isLoggedIn) return true;
         return false; // Redirect unauthenticated users to login page
-      } else if (isOnLandingPage) {
-        return true; // Always allow access to the landing page
+      } else if (isOnLandingPage || isPublicRoute) {
+        return true; // Allow access to landing page and blog
       } else if (isLoggedIn) {
         return Response.redirect(new URL('/dashboard', nextUrl));
       }
