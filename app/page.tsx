@@ -15,7 +15,10 @@ export default function Page() {
               <Link href="/" className="text-lg font-bold">Stensibly</Link>
             </div>
             <div className="w-1/3 flex justify-center">
-              <Link href="/blog" className="text-sm hover:text-gray-600">Blog (Not set up yet!)</Link>
+              <Link href="/blog" className="text-sm hover:text-gray-600 flex items-center gap-1">
+                <Book size={14} />
+                <span>Blog</span>
+              </Link>
             </div>
             <div className="w-1/3 flex justify-end items-center">
               <HeaderConnectionStatus />
