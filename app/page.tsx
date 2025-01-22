@@ -10,12 +10,14 @@ export default function Page() {
     <main className="flex flex-col min-h-screen bg-white">
       <nav className="bg-white text-black border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-12">
-            <Link href="/" className="text-lg font-bold">Stensibly</Link>
-            <div className="flex items-center space-x-4">
+          <div className="flex h-12 items-center">
+            <div className="w-1/3">
+              <Link href="/" className="text-lg font-bold">Stensibly</Link>
+            </div>
+            <div className="w-1/3 flex justify-center">
               <Link href="/blog" className="text-sm hover:text-gray-600">Blog (Not set up yet!)</Link>
             </div>
-            <div className="flex items-center h-full">
+            <div className="w-1/3 flex justify-end items-center">
               <HeaderConnectionStatus />
               <HardcodedStickyNote />
               <Link href="/dashboard">
