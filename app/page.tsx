@@ -38,7 +38,7 @@ export default function Page() {
                 </li>
                 <li className="text-sm">
                   <Link href="/blog/post-2" className="text-gray-600 hover:text-gray-900">
-                    What I've learned from building Scrapbook
+                    What I&apos;ve learned from building Scrapbook
                   </Link>
                   <span className="block text-gray-500 text-xs">Polishing is sometimes worth it.</span>
                 </li>
