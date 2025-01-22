@@ -24,10 +24,10 @@ const ImagePreview = ({
         <Image
           src={image.src}
           alt={image.alt}
-          className="rounded w-full h-auto"
-          layout="responsive"
+          className="rounded-md w-full h-auto"
           width={500}
           height={300}
+          priority
       />
     ) : (
       <div className="h-[120px]">

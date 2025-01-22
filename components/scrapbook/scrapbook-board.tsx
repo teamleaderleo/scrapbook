@@ -9,6 +9,12 @@ const SCRAPBOOK_DATA = [
   {
     id: 'platform',
     text: "• Built experimental full-stack platform for prototyping developer experience improvements, featuring optimized CRUD operations and specialized tooling implementations.",
+    attachments: {
+    images: [{
+      src: '/scrapbook/platform-vscode-overview.webp',
+      alt: 'VSCode project structure showing full-stack architecture'
+    }]
+  }
   },
   {
     id: 'server-components',
