@@ -21,35 +21,55 @@ export default function Page() {
           </div>
 
           <div className="flex flex-row gap-12 items-start flex-shrink-0">
-            <div className="w-64">
-              <h2 className="text-sm font-semibold text-gray-900 mb-3">Recent Blog Posts</h2>
+            <div className="w-64 max-h-128 overflow-auto">
+              <h2 className="text-sm font-semibold text-gray-900 mb-3">Some blog posts I intend on writing</h2>
               <ul className="space-y-2">
                 <li className="text-sm">
                   <Link href="/blog/post-1" className="text-gray-600 hover:text-gray-900">
-                    Lorem ipsum dolor sit amet consectetur
+                    What's the deal with JavaScript bundlers?
                   </Link>
-                  <span className="block text-gray-500 text-xs">Jan 15, 2025</span>
+                  <span className="block text-gray-500 text-xs">Headaches with dynamic imports...</span>
+                </li>
+                <li className="text-sm">
+                  <Link href="/blog/post-1" className="text-gray-600 hover:text-gray-900">
+                    What I'm learning from building a blog
+                  </Link>
+                  <span className="block text-gray-500 text-xs">There's a lot.</span>
                 </li>
                 <li className="text-sm">
                   <Link href="/blog/post-2" className="text-gray-600 hover:text-gray-900">
-                    Adipiscing elit sed do eiusmod tempor
+                    What I've learned from building Scrapbook
                   </Link>
-                  <span className="block text-gray-500 text-xs">Jan 10, 2025</span>
+                  <span className="block text-gray-500 text-xs">Polishing is sometimes worth it.</span>
                 </li>
+                {/* <li className="text-sm">
+                  <Link href="/blog/post-3" className="text-gray-600 hover:text-gray-900">
+                    Observations on modern sites and their decision-making
+                  </Link>
+                  <span className="block text-gray-500 text-xs">Given infinite time, we could do better.</span>
+                </li> */}
               </ul>
             </div>
 
-            <div className="w-64">
-              <h2 className="text-sm font-semibold text-gray-900 mb-3">Currently Reading / Working On</h2>
+            <div className="w-64 max-h-128 overflow-auto">
+              <h2 className="text-sm font-semibold text-gray-900 mb-3">Currently Reading:</h2>
               <ul className="space-y-3">
                 <li className="text-sm text-gray-600">
-                  <span className="block font-medium text-gray-900">Lorem Ipsum</span>
-                  <span className="text-gray-500">Consectetur adipiscing elit</span>
+                  <span className="block font-medium text-gray-900">Designing Data-Intensive Applications</span>
+                  <span className="text-gray-500">Page 217/601</span>
                 </li>
                 <li className="text-sm text-gray-600">
-                  <span className="block font-medium text-gray-900">Dolor Sit</span>
-                  <span className="text-gray-500">Sed do eiusmod tempor</span>
+                  <span className="block font-medium text-gray-900">The Pragmatic Programmer</span>
+                  <span className="text-gray-500">Page 66/489</span>
                 </li>
+                <li className="text-sm text-gray-600">
+                  <span className="block font-medium text-gray-900">A Philosophy of Software Design</span>
+                  <span className="text-gray-500">Page 65/157</span>
+                </li>
+                {/* <li className="text-sm text-gray-600">
+                  <span className="block font-medium text-gray-900">The Ultimate Hitchhiker's Guide to the Galaxy</span>
+                  <span className="text-gray-500">Page 31/725</span>
+                </li> */}
               </ul>
             </div>
           </div>
