@@ -1,66 +1,56 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-interface ConnectionStatus {
-  isOnline: boolean;
-  latency: number | null;
-  lastPing: number | null;
-}
-
 export function useWebSocket() {
-  const [status, setStatus] = useState<ConnectionStatus>({
+  const [status, setStatus] = useState({
     isOnline: false,
-    latency: null,
-    lastPing: null
+    connectTime: null as number | null,
+    sessionTime: 0,
+    latency: null as number | null
   });
   
   const ws = useRef<WebSocket | null>(null);
-  const reconnectTimeout = useRef<NodeJS.Timeout>();
-
-  const connect = useCallback(() => {
-    try {
-      ws.current = new WebSocket('ws://localhost:8080');
-
-      ws.current.onopen = () => {
-        setStatus(prev => ({ ...prev, isOnline: true }));
-        console.log('Connected to WebSocket');
-      };
-
-      ws.current.onclose = () => {
-        setStatus(prev => ({ ...prev, isOnline: false }));
-        console.log('Disconnected from WebSocket');
-        
-        // Try to reconnect after 3 seconds
-        reconnectTimeout.current = setTimeout(connect, 3000);
-      };
-
-      ws.current.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        
-        if (message.type === 'latency') {
-          const latency = Date.now() - message.data;
-          setStatus(prev => ({ 
-            ...prev, 
-            latency,
-            lastPing: Date.now()
-          }));
-        }
-      };
-    } catch (error) {
-      console.error('WebSocket connection error:', error);
-      setStatus(prev => ({ ...prev, isOnline: false }));
-    }
-  }, []);
+  const timerRef = useRef<ReturnType<typeof setInterval>>();
 
   useEffect(() => {
-    connect();
+    ws.current = new WebSocket('ws://localhost:8080');
+
+    ws.current.onopen = () => {
+      setStatus(prev => ({ ...prev, isOnline: true }));
+    };
+
+    ws.current.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      
+      switch(message.type) {
+        case 'connected':
+          setStatus(prev => ({ 
+            ...prev, 
+            connectTime: message.serverTime 
+          }));
+
+          timerRef.current = setInterval(() => {
+            setStatus(prev => ({
+              ...prev,
+              sessionTime: Date.now() - message.serverTime
+            }));
+          }, 1000);
+          break;
+
+        case 'ping':
+          // Calculate latency
+          const latency = Date.now() - message.timestamp;
+          setStatus(prev => ({ ...prev, latency }));
+          break;
+      }
+    };
 
     return () => {
       ws.current?.close();
-      if (reconnectTimeout.current) {
-        clearTimeout(reconnectTimeout.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
       }
     };
-  }, [connect]);
+  }, []);
 
   return status;
 }

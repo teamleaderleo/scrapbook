@@ -5,26 +5,25 @@ const server = createServer();
 const wss = new WebSocket.Server({ server });
 
 wss.on('connection', (ws) => {
-  console.log('Client has been connected');
-
-  // Confirmation
-  ws.send(JSON.stringify({ type: 'status', data: 'connected' }));
+  console.log('Client connected, sending initial message');
+  ws.send(JSON.stringify({ 
+    type: 'connected', 
+    serverTime: Date.now() 
+  }));
   
-  // Ping client every 30 seconds to keep connection
   const pingInterval = setInterval(() => {
     if (ws.readyState === WebSocket.OPEN) {
-      ws.ping();
+      // console.log('Sending ping message');
+      ws.send(JSON.stringify({ 
+        type: 'ping', 
+        timestamp: Date.now() 
+      }));
     }
-  }, 30000);
+  }, 5000);
 
   ws.on('close', () => {
-    console.log('Client has disconnected');
+    console.log('Client disconnected');
     clearInterval(pingInterval);
-  });
-
-  ws.on('pong', () => {
-    // Client responded to ping
-    ws.send(JSON.stringify({ type: 'latency', data: Date.now() }));
   });
 });
 

@@ -3,11 +3,24 @@
 import { useWebSocket } from '@/app/lib/hooks/useWebSocket';
 import { cn } from '@/lib/utils';
 
+function formatElapsedTime(ms: number) {
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+
+  if (hours > 0) {
+    return `${hours}h ${minutes % 60}m`;
+  } else if (minutes > 0) {
+    return `${minutes}m ${seconds % 60}s`;
+  }
+  return `${seconds}s`;
+}
+
 export function HeaderConnectionStatus() {
-  const { isOnline, latency } = useWebSocket();
+  const { isOnline, latency, sessionTime } = useWebSocket();
   
   return (
-    <div className="flex items-center space-x-1 mr-4 text-xs">
+    <div className="flex items-center space-x-2 mr-4 text-xs">
       <div 
         className={cn(
           "w-2 h-2 rounded-full",
@@ -15,10 +28,16 @@ export function HeaderConnectionStatus() {
           "animate-pulse"
         )}
       />
-      <span className="text-indigo-200">
-        {isOnline ? 
-          latency ? `Connected (${latency}ms)` : 'Connected' 
-          : 'Offline'}
+      <span className="text-gray-600">
+        {isOnline ? (
+          <>
+            <span className="mr-1">We&apos;ve been here for</span>
+            <span className="font-medium">{formatElapsedTime(sessionTime)}!</span>
+            {latency !== null && <span className="ml-1 text-gray-400">({latency}ms)</span>}
+          </>
+        ) : (
+          'Offline'
+        )}
       </span>
     </div>
   );
