@@ -17,45 +17,96 @@ const SCRAPBOOK_DATA = [
   }
   },
   {
+    id: 'blog',
+    text: "• Built personal blog CMS where I write about software development.",
+    attachments: {
+      images: [{
+        src: '/scrapbook/blog-landing-preview.webp',
+        alt: 'Preview of Stensibly blog landing page'
+      }]
+    }
+  },
+  {
     id: 'server-components',
-    text: "• Built scalable architecture for interactive features using React Server Components."
+    text: "• Built scalable architecture for interactive features using React Server Components.",
+    attachments: {
+      images: [{
+        src: '/scrapbook/server-actions-example.webp',
+        alt: 'Example of Server Actions implementation'
+      }],
+      code: [{
+        title: 'Server Action Implementation',
+        content: `export async function createBlock(accountId: string, dataString: string): Promise<BlockState> {
+          try {
+            const data = JSON.parse(dataString) as JSONContent;
+            const newBlockId = uuid();
+            const now = new Date();
+            
+            const [newBlock] = await db.insert(blocks).values({
+              id: newBlockId,
+              accountId,
+              content: data,
+              createdAt: now,
+              updatedAt: now
+            }).returning();
+        
+            return { message: 'Block created successfully', blockId: newBlock.id, success: true };
+          } catch (error: any) {
+            console.error('Error creating block:', error);
+            return { message: \`Failed to create block: \${error.message}\`, success: false };
+          }
+        }`
+      }]
+    }
   },
   {
     id: 'tiptap',
     text: "• Implemented rich text editing system with TipTap, featuring Discord-like message caching and preview states.",
     attachments: {
+      images: [{
+        src: '/scrapbook/tiptap-editor-demo.webp',
+        alt: 'TipTap rich text editor with preview state'
+      }],
       code: [{
         title: 'TipTap Configuration',
-        content: `const editor = useEditor({
-  extensions: [StarterKit],
-  content: initialContent,
-  onUpdate: ({ editor }) => {
-    messageCache.set(id, editor.getHTML());
-    setPreview(editor.getHTML());
-  },
-});`
+        content: `      handleKeyDown: (view, event) => {
+        if (!editorRef.current || isTagManagerActive) return false;
+
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          onSave(editorRef.current.getJSON());
+          return true;
+        }
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          editorRef.current.commands.setContent(originalContent);
+          onCancel();
+          return true;
+        }
+        return false;
+      },`
       }],
-      images: [{
-        src: '/api/placeholder/400/300',
-        alt: 'TipTap Editor Interface'
-      }]
     }
   },
   {
     id: 'performance',
     text: "• Reduced GET request latency from 300ms to 50ms through optimized queries and TanStack Query caching.",
     attachments: {
-    code: [{
+      images: [{
+        src: '/scrapbook/network-performance-diff.webp',
+        alt: 'Network tab showing improved request times'
+      }],
+      code: [{
         title: 'TanStack Query Caching',
         content: `const { data: projects, isLoading, error } = useQuery<ProjectWithBlocksWithTags[], Error>({
-    queryKey: ['projects', ADMIN_UUID],
-    queryFn: async () => {
-      const fetchedProjects = await getCachedProjectsWithBlocksWithTags(ADMIN_UUID);
-      return fetchedProjects;
-    },
-    staleTime: Infinity,
-    gcTime: Infinity,
-  });`
+                  queryKey: ['projects', ADMIN_UUID],
+                  queryFn: async () => {
+                    const fetchedProjects = await getCachedProjectsWithBlocksWithTags(ADMIN_UUID);
+                    return fetchedProjects;
+                  },
+                  staleTime: Infinity,
+                  gcTime: Infinity,
+                });`
       }],
     }
   },
