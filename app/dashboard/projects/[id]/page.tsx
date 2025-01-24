@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
-  title: 'Project | Stensibly',
+  title: 'Project | teamleaderleo',
 };
 
 export default function Page({ params }: { params: { id: string } }) {

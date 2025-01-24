@@ -7,10 +7,10 @@ import { Toaster } from "@/components/ui/components/toaster";
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Stensibly',
-    default: 'Stensibly',
+    template: '%s | teamleaderleo',
+    default: 'teamleaderleo',
   },
-  description: 'Stensibly.',
+  description: 'teamleaderleo.',
   metadataBase: new URL('https://setzen.vercel.app/'),
 };
 

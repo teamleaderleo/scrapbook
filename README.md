@@ -6,7 +6,7 @@ This project is a scrapbook-style project management app. It aims to provide an 
 
 ## Live Demo
 
-Check out the deployed application: [https://stensibly.com/](https://stensibly.com/)
+Check out the deployed application: [https://teamleaderleo.com/](https://teamleaderleo.com/)
 
 ## Schema
 <img src="https://github.com/user-attachments/assets/51b2ccab-2821-46e0-aec1-93152fecd4b1" width="60%">

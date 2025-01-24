@@ -10,7 +10,7 @@ export default function SiteNav() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-12 items-center">
           <div className="w-1/3">
-            <Link href="/" className="text-lg font-bold">Stensibly</Link>
+            <Link href="/" className="text-lg font-bold">teamleaderleo</Link>
           </div>
           <div className="w-1/3 flex justify-center">
             <Link href="/blog" className="text-sm hover:text-gray-600 flex items-center gap-1">

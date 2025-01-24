@@ -22,7 +22,7 @@ const SCRAPBOOK_DATA = [
     attachments: {
       images: [{
         src: '/scrapbook/blog-landing-preview.webp',
-        alt: 'Preview of Stensibly blog landing page'
+        alt: 'Preview of teamleaderleo blog landing page'
       }]
     }
   },
