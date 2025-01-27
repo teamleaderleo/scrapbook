@@ -5,7 +5,13 @@ import SiteNav from '@/components/site-nav';
 const firstPost = `
 # My First Blog Post
 
-Hey, this is my first blog post. Nothing fancy here yet, just getting things started.
+Hold on, this is still under construction. I will be working on posting some more posts this week.
+
+Stay tuned? 🤔
+
+January 27, 2025, 4:48 AM.
+
+..
 
 ## What I'm Working On
 
