@@ -1,5 +1,7 @@
+'use client';
+
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
+import { MDXRemote } from 'next-mdx-remote/rsc';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlogPost, categories } from '@/app/lib/definitions/blog';
@@ -21,9 +23,9 @@ const FeaturedPost = ({ post }: FeaturedPostProps) => {
                 {categories[post.category]}
               </span>
             </div>
-            <ReactMarkdown>
+            <div className="mdx-content">
               {post.content}
-            </ReactMarkdown>
+            </div>
           </article>
         </ScrollArea>
       </CardContent>
