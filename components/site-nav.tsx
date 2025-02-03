@@ -22,7 +22,7 @@ export default function SiteNav() {
             <HeaderConnectionStatus />
             <Link href="/dashboard">
               <Button variant="secondary" size="sm" className="bg-black text-white hover:bg-gray-800 text-xs py-1 px-2">
-                Open Stensibly
+                Open App
               </Button>
             </Link>
             <div className="absolute left-0 right-0 top-8">

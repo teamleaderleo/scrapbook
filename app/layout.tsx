@@ -11,7 +11,10 @@ export const metadata: Metadata = {
     default: 'teamleaderleo',
   },
   description: 'teamleaderleo.',
-  metadataBase: new URL('https://setzen.vercel.app/'),
+  metadataBase: new URL('https://teamleaderleo.com'),
+  alternates: {
+    canonical: 'https://teamleaderleo.com'
+  }
 };
 
 export default function RootLayout({
