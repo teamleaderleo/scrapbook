@@ -1,0 +1,16 @@
+---
+id: 2
+title: Fantastic Bugs and How to Fix Them
+date: 2025-02-02
+category: fragments
+blurb: Hold on, this is still under construction...
+---
+
+Unfortunately, I don't have all the answers yet. But writing some past solutions down for posterity might be nice.
+
+1. Components aren't filling in the gaps. Solution: h-full, w-full on everything.
+2. Error: Object Date is... Solution: Format it into a string. Make sure all instances are formatted.
+3. My pages are slow to load. Solution: cache your queries.
+4. My component with a variable in the constructor isn't changing at runtime. Solution: use a hook. Use a store.
+Create a new instance of it per big state change. If it's in the constructor, it kinda can't change in the usual ways.
+
