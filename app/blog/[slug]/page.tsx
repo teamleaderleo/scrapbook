@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import { getBlogPost } from '@/app/lib/blog-utils';
 import { MDXRemote } from 'next-mdx-remote/rsc';
+import { categories } from '@/app/lib/definitions/blog';
+import Link from 'next/link';
 
 export default async function BlogPost({ params }: { params: { slug: string } }) {
   const post = await getBlogPost(params.slug);
@@ -10,14 +12,21 @@ export default async function BlogPost({ params }: { params: { slug: string } })
   }
 
   return (
-    <article className="prose prose-lg mx-auto py-8">
-      <h1>{post.title}</h1>
-      <div className="flex gap-2 text-gray-600 mb-8">
-        <time>{post.date}</time>
+    <article className="max-w-4xl mx-auto py-8 px-4">
+      <h1 className="text-3xl font-bold">{post.title}</h1>
+      <div className="flex items-center gap-2 mt-2 mb-8">
+        <time className="text-gray-600">{post.date}</time>
         <span>•</span>
-        <span>{post.category}</span>
+        <Link
+          href={`/blog/category/${post.category}`}
+          className="text-sm bg-gray-100 rounded px-2 py-1 hover:bg-gray-200"
+        >
+          {categories[post.category]}
+        </Link>
       </div>
-      <MDXRemote source={post.content} />
+      <div className="prose max-w-none">
+        <MDXRemote source={post.content} />
+      </div>
     </article>
   );
 }
