@@ -33,7 +33,7 @@ const BlogLayout = ({ posts }: BlogLayoutProps) => {
             />
           </div>
 
-          <div className="col-span-6 min-w-0">
+          <div className="col-span-6 min-w-0 max-h-[calc(100vh-16rem)]">
             <FeaturedPost post={latestPost} />
           </div>
 
