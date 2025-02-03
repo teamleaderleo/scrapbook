@@ -28,11 +28,13 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
     
     const { data, content } = matter(fileContents);
     
+    const formattedDate = formatDate(data.date);
+    
     return {
       id: data.id,
       slug,
       title: data.title,
-      date: formatDate(data.date),
+      date: formattedDate,
       category: data.category as PostCategory,
       blurb: data.blurb,
       content: content,
@@ -51,11 +53,13 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
     
     const { data, content } = matter(fileContents);
     
+    const formattedDate = formatDate(data.date);
+    
     return {
       id: data.id,
       slug,
       title: data.title,
-      date: data.date,
+      date: formattedDate,
       category: data.category as PostCategory,
       blurb: data.blurb,
       content: content,
