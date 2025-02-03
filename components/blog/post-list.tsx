@@ -10,12 +10,12 @@ interface PostListProps {
 
 const PostList = ({ posts, title }: PostListProps) => {
   return (
-    <Card className="h-full">
+    <Card className="h-full w-full">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[calc(100%-4rem)]">
+      <CardContent className="h-[calc(100%-5rem)]">
+        <ScrollArea className="h-full w-full">
           <div className="space-y-4 pr-4">
             {posts.map(post => (
               <div key={post.id} className="border-b pb-2">

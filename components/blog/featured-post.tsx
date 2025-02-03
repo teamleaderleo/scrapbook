@@ -12,10 +12,10 @@ interface FeaturedPostProps {
 
 const FeaturedPost = ({ post }: FeaturedPostProps) => {
   return (
-    <Card className="h-full">
-      <CardContent className="p-6">
-        <ScrollArea className="h-full">
-          <article className="prose prose-sm max-w-none">
+    <Card className="h-full w-full">
+      <CardContent className="p-6 h-full">
+        <ScrollArea className="h-full w-full">
+          <article className="prose prose-sm w-full">
             <h2 className="text-xl font-bold mt-0">{post.title}</h2>
             <div className="flex items-center gap-2 my-2">
               <span className="text-sm text-gray-500">{post.date}</span>
@@ -23,7 +23,7 @@ const FeaturedPost = ({ post }: FeaturedPostProps) => {
                 {categories[post.category]}
               </span>
             </div>
-            <div className="mdx-content">
+            <div className="mdx-content w-full">
               {post.content}
             </div>
           </article>
