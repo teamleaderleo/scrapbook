@@ -1,6 +1,20 @@
 import { getPostsByCategory } from '@/app/lib/blog-utils';
 import { PostCategory } from '@/app/lib/definitions/blog';
 import PostList from '@/components/blog/post-list';
+import { Metadata } from 'next';
+import { categories } from '@/app/lib/definitions/blog';
+
+export async function generateMetadata({ params }: { params: { category: PostCategory } }): Promise<Metadata> {
+  const categoryName = categories[params.category];
+  
+  return {
+    title: categoryName,
+    description: `Blog posts about ${categoryName.toLowerCase()} by teamleaderleo`,
+    alternates: {
+      canonical: `https://teamleaderleo.com/blog/category/${params.category}`
+    }
+  };
+}
 
 export default async function CategoryPage({ 
   params 

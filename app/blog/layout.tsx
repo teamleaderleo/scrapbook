@@ -1,4 +1,10 @@
+import { Metadata } from 'next';
 import SiteNav from '@/components/site-nav';
+
+export const metadata: Metadata = {
+  title: 'Blog',
+  description: 'teamleaderleo\'s blog - thoughts on... life',
+};
 
 export default function BlogLayout({
   children,
