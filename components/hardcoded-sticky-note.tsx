@@ -13,7 +13,7 @@ const HardcodedStickyNote: React.FC = () => {
   if (!isVisible) return null;
 
   return (
-    <Card className="fixed top-10 right-4 w-48 shadow-lg">
+    <Card className="w-48 shadow-lg">
       <CardContent className="p-1">
         <Button
           variant="ghost"

@@ -18,14 +18,18 @@ export default function SiteNav() {
               <span>Blog</span>
             </Link>
           </div>
-          <div className="w-1/3 flex justify-end items-center">
+          <div className="w-1/3 flex justify-end items-center relative">
             <HeaderConnectionStatus />
-            <HardcodedStickyNote />
             <Link href="/dashboard">
               <Button variant="secondary" size="sm" className="bg-black text-white hover:bg-gray-800 text-xs py-1 px-2">
                 Open Stensibly
               </Button>
             </Link>
+            <div className="absolute left-0 right-0 top-8">
+              <div className="flex justify-end">
+                <HardcodedStickyNote />
+              </div>
+            </div>
           </div>
         </div>
       </div>
