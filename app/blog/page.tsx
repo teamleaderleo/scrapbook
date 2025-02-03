@@ -3,23 +3,25 @@ import ReactMarkdown from 'react-markdown';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import SiteNav from '@/components/site-nav';
+import { BlogPost, PostCategory, categories } from '@/app/lib/definitions/blog';
 
-const posts = [
+const posts: BlogPost[] = [
   {
     id: 1,
     title: "My First Blog Post",
     date: "January 27, 2025",
     content: `# My First Blog Post\n\nHold on, this is still under construction...`,
     blurb: "Hold on, this is still under construction. I will be working on posting some more posts this week.",
-    category: "fragments",
+    category: "fragments" as PostCategory,
     slug: "first-post"
   },
   {
     id: 2,
     title: "Learning TypeScript Generics",
     date: "January 25, 2025",
+    content: "",  // We need to add this to match the type
     blurb: "A deep dive into TypeScript generics and their practical applications...",
-    category: "learning",
+    category: "learning" as PostCategory,
     slug: "typescript-generics"
   },
 ];
@@ -30,19 +32,14 @@ const BlogLayout = () => {
   );
   
   const latestPost = sortedPosts[0];
-  const categories = {
-    fragments: "Fragments",
-    polished: "Polished",
-    learning: "Learning & Review"
-  };
 
-  const postsByCategory = sortedPosts.reduce((acc, post) => {
+  const postsByCategory = sortedPosts.reduce<Record<PostCategory, BlogPost[]>>((acc, post) => {
     if (!acc[post.category]) {
       acc[post.category] = [];
     }
     acc[post.category].push(post);
     return acc;
-  }, {});
+  }, {} as Record<PostCategory, BlogPost[]>);
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -134,7 +131,7 @@ const BlogLayout = () => {
                 <CardContent>
                   <ScrollArea className="h-16">
                     <div className="space-y-2">
-                      {postsByCategory[key]?.slice(0, 3).map(post => (
+                      {postsByCategory[key as PostCategory]?.slice(0, 3).map(post => (
                         <div key={post.id} className="text-sm">
                           <p className="font-medium truncate">{post.title}</p>
                           <p className="text-xs text-gray-500">{post.date}</p>
