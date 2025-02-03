@@ -10,16 +10,16 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   
   if (!post) {
     return {
-      title: 'Post Not Found',
+      title: 'Post Not Found | teamleaderleo',
       description: 'The requested blog post could not be found.'
     };
   }
 
   return {
-    title: post.title,
-    description: `${post.title} - a blog post by teamleaderleo`,
+    title: `${post.title} | teamleaderleo`,
+    description: post.blurb,
     openGraph: {
-      title: post.title,
+      title: `${post.title} | teamleaderleo`,
       type: 'article',
       publishedTime: post.date,
     },

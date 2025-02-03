@@ -8,7 +8,7 @@ export async function generateMetadata({ params }: { params: { category: PostCat
   const categoryName = categories[params.category];
   
   return {
-    title: categoryName,
+    title: `${categoryName} | teamleaderleo`,
     description: `Blog posts about ${categoryName.toLowerCase()} by teamleaderleo`,
     alternates: {
       canonical: `https://teamleaderleo.com/blog/category/${params.category}`
