@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlogPost, categories } from '@/app/lib/definitions/blog';
+import ReactMarkdown from 'react-markdown';
 
 interface FeaturedPostProps {
   post: BlogPost;
@@ -29,7 +30,9 @@ const FeaturedPost = ({ post }: FeaturedPostProps) => {
               </Link>
             </div>
             <div className="mdx-content w-full">
-              {post.content}
+              <ReactMarkdown className="prose prose-sm">
+                {post.content}
+              </ReactMarkdown>
             </div>
           </article>
         </ScrollArea>
