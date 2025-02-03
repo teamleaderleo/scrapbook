@@ -17,7 +17,7 @@ const PostList = ({ posts, title }: PostListProps) => {
       <CardHeader className="pb-3">
         <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="h-[calc(100%-5rem)]">
+      <CardContent className="h-[calc(100%-5rem)] overflow-hidden">
         <ScrollArea className="h-full w-full">
           <div className="space-y-4 pr-4">
             {posts.map(post => (
