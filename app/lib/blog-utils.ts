@@ -5,6 +5,17 @@ import { BlogPost, PostCategory } from '@/app/lib/definitions/blog';
 
 const POSTS_PATH = path.join(process.cwd(), 'content/posts');
 
+function formatDate(date: Date | string): string {
+  if (typeof date === 'string') {
+    date = new Date(date);
+  }
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+}
+
 export async function getBlogPosts(): Promise<BlogPost[]> {
   const postFiles = fs
     .readdirSync(POSTS_PATH)
@@ -21,7 +32,7 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
       id: data.id,
       slug,
       title: data.title,
-      date: data.date,
+      date: formatDate(data.date),
       category: data.category as PostCategory,
       blurb: data.blurb,
       content: content,
