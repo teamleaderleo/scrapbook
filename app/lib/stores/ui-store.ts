@@ -51,7 +51,7 @@ const useDraftStore = create<DraftState>()(
             drafts: {
               ...state.drafts,
               [currentProject.id]: content,
-            },
+            },fd
           }));
           console.log(`Saved draft for project: ${currentProject.id}`);
         } else {
