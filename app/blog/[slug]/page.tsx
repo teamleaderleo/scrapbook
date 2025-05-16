@@ -5,8 +5,13 @@ import { categories } from '@/app/lib/definitions/blog';
 import Link from 'next/link';
 import { Metadata } from 'next';
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const post = await getBlogPost(params.slug);
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: Promise<{ slug: string }> | { slug: string } 
+}): Promise<Metadata> {
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const post = await getBlogPost(resolvedParams.slug);
   
   if (!post) {
     return {
@@ -24,13 +29,18 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       publishedTime: post.date,
     },
     alternates: {
-      canonical: `https://teamleaderleo.com/blog/${params.slug}`
+      canonical: `https://teamleaderleo.com/blog/${resolvedParams.slug}`
     }
   };
 }
 
-export default async function BlogPost({ params }: { params: { slug: string } }) {
-  const post = await getBlogPost(params.slug);
+export default async function BlogPost({ 
+  params 
+}: { 
+  params: Promise<{ slug: string }> | { slug: string } 
+}) {
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const post = await getBlogPost(resolvedParams.slug);
   
   if (!post) {
     notFound();
