@@ -95,6 +95,7 @@
     "@types/react": "19.1.4",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-dom": "19.1.5",
+    "@types/three": "^0.176.0",
     "@types/uuid": "^10.0.0",
     "@types/ws": "^8.5.13",
     "@vercel/style-guide": "^5.2.0",
