@@ -5,33 +5,24 @@ import { categories } from '@/app/lib/definitions/blog';
 import Link from 'next/link';
 import { Metadata } from 'next';
 
-type SlugParams = {
+type SlugParam = {
   slug: string;
-};
-
-// Next.js 15.3.2 page props expect this
-type PageProps = {
-  params: Promise<SlugParams> | SlugParams | undefined;
-  searchParams?: Record<string, string | string[] | undefined>;
 };
 
 export async function generateMetadata({ 
   params 
-}: PageProps): Promise<Metadata> {
-  // Add type assertions for slug params
-  let resolvedParams: SlugParams;
+}: {
+  params: Promise<any> | undefined;
+}): Promise<Metadata> {
+  let slug = '';
   
-  if (!params) {
-    throw new Error('Params is undefined');
+  if (params) {
+    // If params is a Promise, await it
+    const resolvedParams = params instanceof Promise ? await params : params;
+    slug = resolvedParams.slug;
   }
   
-  if (params instanceof Promise) {
-    resolvedParams = await params;
-  } else {
-    resolvedParams = params;
-  }
-  
-  const post = await getBlogPost(resolvedParams.slug);
+  const post = await getBlogPost(slug);
   
   if (!post) {
     return {
@@ -49,28 +40,25 @@ export async function generateMetadata({
       publishedTime: post.date,
     },
     alternates: {
-      canonical: `https://teamleaderleo.com/blog/${resolvedParams.slug}`
+      canonical: `https://teamleaderleo.com/blog/${slug}`
     }
   };
 }
 
 export default async function BlogPost({ 
   params 
-}: PageProps) {
-  // Add type assertions for slug params here too (lil duplicate)
-  let resolvedParams: SlugParams;
+}: {
+  params: Promise<any> | undefined;
+}) {
+  let slug = '';
   
-  if (!params) {
-    throw new Error('Params is undefined');
+  if (params) {
+    // If params is a Promise, await it
+    const resolvedParams = params instanceof Promise ? await params : params;
+    slug = resolvedParams.slug;
   }
   
-  if (params instanceof Promise) {
-    resolvedParams = await params;
-  } else {
-    resolvedParams = params;
-  }
-  
-  const post = await getBlogPost(resolvedParams.slug);
+  const post = await getBlogPost(slug);
   
   if (!post) {
     notFound();
