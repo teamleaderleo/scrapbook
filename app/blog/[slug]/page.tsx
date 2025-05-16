@@ -5,12 +5,32 @@ import { categories } from '@/app/lib/definitions/blog';
 import Link from 'next/link';
 import { Metadata } from 'next';
 
+type SlugParams = {
+  slug: string;
+};
+
+// Next.js 15.3.2 page props expect this
+type PageProps = {
+  params: Promise<SlugParams> | SlugParams | undefined;
+  searchParams?: Record<string, string | string[] | undefined>;
+};
+
 export async function generateMetadata({ 
   params 
-}: { 
-  params: Promise<{ slug: string }> | { slug: string } 
-}): Promise<Metadata> {
-  const resolvedParams = params instanceof Promise ? await params : params;
+}: PageProps): Promise<Metadata> {
+  // Add type assertions for slug params
+  let resolvedParams: SlugParams;
+  
+  if (!params) {
+    throw new Error('Params is undefined');
+  }
+  
+  if (params instanceof Promise) {
+    resolvedParams = await params;
+  } else {
+    resolvedParams = params;
+  }
+  
   const post = await getBlogPost(resolvedParams.slug);
   
   if (!post) {
@@ -36,10 +56,20 @@ export async function generateMetadata({
 
 export default async function BlogPost({ 
   params 
-}: { 
-  params: Promise<{ slug: string }> | { slug: string } 
-}) {
-  const resolvedParams = params instanceof Promise ? await params : params;
+}: PageProps) {
+  // Add type assertions for slug params here too (lil duplicate)
+  let resolvedParams: SlugParams;
+  
+  if (!params) {
+    throw new Error('Params is undefined');
+  }
+  
+  if (params instanceof Promise) {
+    resolvedParams = await params;
+  } else {
+    resolvedParams = params;
+  }
+  
   const post = await getBlogPost(resolvedParams.slug);
   
   if (!post) {
