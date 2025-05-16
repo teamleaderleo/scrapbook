@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import HardcodedStickyNote from '@/components/hardcoded-sticky-note';
-import { HeaderConnectionStatus } from '@/components/connection-status';
+// import { HeaderConnectionStatus } from '@/components/connection-status';
 import { Book } from 'lucide-react';
 
 export default function SiteNav() {
@@ -19,7 +19,7 @@ export default function SiteNav() {
             </Link>
           </div>
           <div className="w-1/3 flex justify-end items-center relative">
-            <HeaderConnectionStatus />
+            {/* <HeaderConnectionStatus /> */}
             <Link href="/dashboard">
               <Button variant="secondary" size="sm" className="bg-black text-white hover:bg-gray-800 text-xs py-1 px-2">
                 Open App
