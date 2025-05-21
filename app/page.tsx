@@ -7,7 +7,7 @@ export default function Page() {
   return (
     <main className="flex flex-col min-h-screen bg-white">
       <SiteNav />
-      <Scene3D />
+      {/* <Scene3D /> */}
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-4 mb-6">
         <div className="flex justify-start items-start gap-16">
           <div className="max-w-sm flex-shrink-0">
