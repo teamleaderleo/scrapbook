@@ -3,6 +3,9 @@ import SiteNav from '@/components/site-nav';
 import ScrapbookBoard from '@/components/scrapbook/scrapbook-board';
 import Scene3D from '@/components/three-carousel/scene-3d';
 import { SCRAPBOOK_DATA } from '@/components/scrapbook/scrapbook-data';
+import { GIT_INLINE_DATA } from '@/components/scrapbook/git-inline-data';
+import { POTATO_DATA } from '@/components/scrapbook/potato-compressor-data';
+import { FOLD_COMMENTS_DATA } from '@/components/scrapbook/fold-comments-data';
 
 export default function Page() {
   return (
@@ -16,10 +19,14 @@ export default function Page() {
               This is Leo&apos;s personal website!😊
             </h1>
             <p className="text-gray-600 text-sm">
-              If you&apos;d like, you can open the app and test out the text editing and tag adding for yourself. 
+              If you&apos;d like, you can open the <b>app</b> and test out the text editing and tag adding for yourself. 
               Those are the most technically impressive features.<br/>
-              Below is a gallery of my resume bullet points&apos; content.
+              Below is a gallery of my resume bullet points&apos; content.<br/>
+              I&apos;m still figuring out how to best present this stuff.<br/><br/>
+              (WE&apos;RE JUST GONNA USE A LIBRARY LATER. MAYBE MASONRY. MAYBE SOMETHING CUTER.)<br/>
+              The github source code may be more interesting&#58;
             </p>
+            <a href="https://github.com/teamleaderleo">https://github.com/teamleaderleo</a>
           </div>
 
           <div className="flex flex-row gap-12 items-start flex-shrink-0">
@@ -78,8 +85,22 @@ export default function Page() {
         </div>
       </div>
       
-      <div className="px-4 sm:px-6 lg:px-8">
-        <ScrapbookBoard data={SCRAPBOOK_DATA} title='Scrapbook'/>
+      <div className="space-y-32">
+        <div className="px-4 sm:px-6 lg:px-8">
+          <ScrapbookBoard data={SCRAPBOOK_DATA} title='Scrapbook'/>
+        </div>
+        
+        <div className="px-4 sm:px-6 lg:px-8">
+          <ScrapbookBoard data={GIT_INLINE_DATA} title='Git Inline'/>
+        </div>
+        
+        <div className="px-4 sm:px-6 lg:px-8">
+          <ScrapbookBoard data={POTATO_DATA} title='Potato Image Compressor'/>
+        </div>
+        
+        <div className="px-4 sm:px-6 lg:px-8">
+          <ScrapbookBoard data={FOLD_COMMENTS_DATA} title='Fold Single-Line Comments'/>
+        </div>
       </div>
       
       <footer className="py-3">
