@@ -2,6 +2,7 @@ import Link from 'next/link';
 import SiteNav from '@/components/site-nav';
 import ScrapbookBoard from '@/components/scrapbook/scrapbook-board';
 import Scene3D from '@/components/three-carousel/scene-3d';
+import { SCRAPBOOK_DATA } from '@/components/scrapbook/scrapbook-data';
 
 export default function Page() {
   return (
@@ -78,7 +79,7 @@ export default function Page() {
       </div>
       
       <div className="px-4 sm:px-6 lg:px-8">
-        <ScrapbookBoard />
+        <ScrapbookBoard data={SCRAPBOOK_DATA} title='Scrapbook'/>
       </div>
       
       <footer className="py-3">

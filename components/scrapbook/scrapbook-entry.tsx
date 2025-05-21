@@ -7,7 +7,7 @@ import Image from 'next/image';
 import CodePreview from './code-preview';
 import ImagePreview from './image-preview';
 
-interface ScrapbookItem {
+export interface ScrapbookItem {
   id: string;
   text: string;
   attachments?: {
