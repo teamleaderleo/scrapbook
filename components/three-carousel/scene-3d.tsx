@@ -3,6 +3,8 @@
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, ScrollControls, useScroll } from '@react-three/drei';
+import { DragPreventer } from './DragPreventer';
+import { WrapFixer } from './WrapFixer';
 import * as THREE from 'three';
 
 function RotatingCube() {
@@ -11,7 +13,7 @@ function RotatingCube() {
   
   useFrame(() => {
     if (ref.current) {
-      // Rotating based off of scroll position
+      // Rotate based on scroll position
       ref.current.rotation.y = scroll.offset * Math.PI * 2;
     }
   });
@@ -30,7 +32,7 @@ function Scene() {
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} />
       <RotatingCube />
-      {/* OrbitControls might conflict with ScrollControls, but i think it's working for now */}
+      {/* Keep OrbitControls for now, but they might conflict with scroll controls */}
       <OrbitControls enableZoom={false} enablePan={false} />
     </>
   );
@@ -49,6 +51,8 @@ export default function Scene3D() {
     <div style={{ width: '100%', height: '400px' }}>
       <Canvas camera={{ position: [3, 3, 3] }}>
         <ScrollControls pages={3} infinite={true}>
+          <DragPreventer />
+          <WrapFixer />
           <Suspense fallback={null}>
             <Scene />
           </Suspense>
