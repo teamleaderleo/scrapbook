@@ -11,7 +11,7 @@ export default function Page() {
   return (
     <main className="flex flex-col min-h-screen bg-white">
       <SiteNav />
-      {/* <Scene3D /> */}
+      <Scene3D />
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-4 mb-6">
         <div className="flex justify-start items-start gap-16">
           <div className="max-w-sm flex-shrink-0">
@@ -75,17 +75,18 @@ export default function Page() {
                   <span className="block font-medium text-gray-900">A Philosophy of Software Design</span>
                   <span className="text-gray-500">Page 65/157</span>
                 </li>
-                {/* <li className="text-sm text-gray-600">
-                  <span className="block font-medium text-gray-900">The Ultimate Hitchhiker's Guide to the Galaxy</span>
+                <li className="text-sm text-gray-600">
+                  <span className="block font-medium text-gray-900">The Ultimate Hitchhiker&apos;s Guide to the Galaxy</span>
                   <span className="text-gray-500">Page 31/725</span>
-                </li> */}
+                </li>
               </ul>
             </div>
+
           </div>
         </div>
       </div>
       
-      <div className="space-y-32">
+      {/* <div className="space-y-32">
         <div className="px-4 sm:px-6 lg:px-8">
           <ScrapbookBoard data={SCRAPBOOK_DATA} title='Scrapbook'/>
         </div>
@@ -101,13 +102,13 @@ export default function Page() {
         <div className="px-4 sm:px-6 lg:px-8">
           <ScrapbookBoard data={FOLD_COMMENTS_DATA} title='Fold Single-Line Comments'/>
         </div>
-      </div>
+      </div> */}
       
-      <footer className="py-3">
+      {/* <footer className="py-3">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-gray-600">
           © 2025 teamleaderleo. All rights reserved.
         </div>
-      </footer>
+      </footer> */}
     </main>
   );
 }
