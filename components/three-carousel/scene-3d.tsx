@@ -1,15 +1,38 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { useState, useEffect, Suspense, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, ScrollControls, useScroll } from '@react-three/drei';
+import * as THREE from 'three';
 
-function Cube() {
+function RotatingCube() {
+  const ref = useRef<THREE.Mesh>(null);
+  const scroll = useScroll();
+  
+  useFrame(() => {
+    if (ref.current) {
+      // Rotating based off of scroll position
+      ref.current.rotation.y = scroll.offset * Math.PI * 2;
+    }
+  });
+
   return (
-    <mesh>
+    <mesh ref={ref}>
       <boxGeometry args={[1, 1, 1]} />
       <meshStandardMaterial color="royalblue" />
     </mesh>
+  );
+}
+
+function Scene() {
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} />
+      <RotatingCube />
+      {/* OrbitControls might conflict with ScrollControls, but i think it's working for now */}
+      <OrbitControls enableZoom={false} enablePan={false} />
+    </>
   );
 }
 
@@ -25,12 +48,11 @@ export default function Scene3D() {
   return (
     <div style={{ width: '100%', height: '400px' }}>
       <Canvas camera={{ position: [3, 3, 3] }}>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} />
-        <Suspense fallback={null}>
-          <Cube />
-          <OrbitControls />
-        </Suspense>
+        <ScrollControls pages={3} infinite={true}>
+          <Suspense fallback={null}>
+            <Scene />
+          </Suspense>
+        </ScrollControls>
       </Canvas>
     </div>
   );
