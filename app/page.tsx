@@ -31,7 +31,11 @@ export default function Page() {
 
           <div className="flex flex-row gap-12 items-start flex-shrink-0">
             <div className="w-64 max-h-128 overflow-auto">
-              <h2 className="text-sm font-semibold text-gray-900 mb-3">Some blog posts I intend on writing</h2>
+              <h2 className="text-sm font-semibold text-gray-900 mb-3">Latest updates:</h2>
+              <p className="text-sm text-gray-600 mb-2">
+                Spin the cube! Click and drag or scroll on it!
+              </p>
+              {/* <h2 className="text-sm font-semibold text-gray-900 mb-3">Some blog posts I intend on writing</h2>
               <ul className="space-y-2">
                 <li className="text-sm">
                   <Link href="/blog/post-1" className="text-gray-600 hover:text-gray-900">
@@ -51,13 +55,13 @@ export default function Page() {
                   </Link>
                   <span className="block text-gray-500 text-xs">Polishing is sometimes worth it.</span>
                 </li>
-                {/* <li className="text-sm">
+                <li className="text-sm">
                   <Link href="/blog/post-3" className="text-gray-600 hover:text-gray-900">
                     Observations on modern sites and their decision-making
                   </Link>
                   <span className="block text-gray-500 text-xs">Given infinite time, we could do better.</span>
-                </li> */}
-              </ul>
+                </li>
+              </ul> */}
             </div>
 
             <div className="w-64 max-h-128 overflow-auto">
@@ -83,6 +87,7 @@ export default function Page() {
             </div>
 
           </div>
+          
         </div>
       </div>
       
