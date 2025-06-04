@@ -3,11 +3,12 @@ import SiteNav from '@/components/site-nav';
 
 export default function GalleryPage() {
   return (
+    // TODO: fix the z level issue
     <div className="h-screen relative">
-      <div className="absolute top-0 left-0 right-0">
+      <Scene3D />
+      <div className="absolute top-0 left-0 right-0 z-[0]">
         <SiteNav />
       </div>
-      <Scene3D />
     </div>
   );
 }
