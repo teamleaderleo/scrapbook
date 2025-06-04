@@ -3,11 +3,11 @@ import SiteNav from '@/components/site-nav';
 
 export default function GalleryPage() {
   return (
-    <div className="h-screen flex flex-col">
-      <SiteNav />
-      <div className="flex-1">
-        <Scene3D />
+    <div className="h-screen relative">
+      <div className="absolute top-0 left-0 right-0">
+        <SiteNav />
       </div>
+      <Scene3D />
     </div>
   );
 }

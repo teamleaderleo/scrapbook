@@ -48,7 +48,7 @@ export default function Scene3D() {
   if (!mounted) return null;
   
   return (
-    <div style={{ width: '100%', height: '400px' }}>
+    <div style={{ width: '100%', height: '100%' }}>
       <Canvas camera={{ position: [3, 3, 3] }}>
         <ScrollControls pages={3} infinite={true}>
           <DragPreventer />
