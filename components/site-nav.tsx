@@ -15,7 +15,7 @@ export default function SiteNav() {
           <div className="w-1/3 flex justify-center">
             <Link href="/blog" className="text-sm hover:text-gray-600 flex items-center gap-1">
               <Book size={14} />
-              <span>Blog</span>
+              <span>blog</span>
             </Link>
           </div>
           <div className="w-1/3 flex justify-end items-center relative">
