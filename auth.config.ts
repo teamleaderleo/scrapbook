@@ -10,13 +10,15 @@ export const authConfig = {
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
       const isOnLandingPage = nextUrl.pathname === '/';
       
+      // TODO: deal with this situation
       // Blog is only public route for now
       const isPublicRoute = nextUrl.pathname.startsWith('/blog');
+      const isGalleryRoute = nextUrl.pathname.startsWith('/gallery');
 
       if (isOnDashboard) {
         if (isLoggedIn) return true;
         return false; // Redirect unauthenticated users to login page
-      } else if (isOnLandingPage || isPublicRoute) {
+      } else if (isOnLandingPage || isPublicRoute || isGalleryRoute) {
         return true; // Allow access to landing page and blog
       } else if (isLoggedIn) {
         return Response.redirect(new URL('/dashboard', nextUrl));

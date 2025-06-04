@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import HardcodedStickyNote from '@/components/hardcoded-sticky-note';
 // import { HeaderConnectionStatus } from '@/components/connection-status';
-import { Book } from 'lucide-react';
+import { Book, Box } from 'lucide-react';
 
 export default function SiteNav() {
   return (
@@ -12,10 +12,14 @@ export default function SiteNav() {
           <div className="w-1/3">
             <Link href="/" className="text-lg font-bold">teamleaderleo</Link>
           </div>
-          <div className="w-1/3 flex justify-center">
+          <div className="w-1/3 flex justify-center gap-6">
             <Link href="/blog" className="text-sm hover:text-gray-600 flex items-center gap-1">
               <Book size={14} />
               <span>blog</span>
+            </Link>
+            <Link href="/gallery" className="text-sm hover:text-gray-600 flex items-center gap-1">
+              <Box size={14} />
+              <span>gallery</span>
             </Link>
           </div>
           <div className="w-1/3 flex justify-end items-center relative">
