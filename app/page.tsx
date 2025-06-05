@@ -11,7 +11,7 @@ export default function Page() {
           <div className="space-y-8">
             {/* Next.js */}
             <div>
-              <h2 className="text-xl font-semibold mb-3">Next.js (By Vercel) | Open Source Contributor</h2>
+              <h2 className="text-xl font-semibold mb-3">Next.js (By Vercel) | Open Source Contributor (We are not affiliated with Vercel, we just think this is a nice way to learn!)</h2>
               <p className="text-sm text-gray-600 mb-4">Remote | June 2025 - Present</p>
               
               <ul className="space-y-3 text-sm">
