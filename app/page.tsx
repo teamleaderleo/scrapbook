@@ -17,7 +17,7 @@ export default function Page() {
               <ul className="space-y-3 text-sm">
                 <li>
                   <div>• Fixed dark mode styling in Next.js development tools, improving accessibility for 4.9M+ developers, merged in #80025.</div>
-                  <div className="ml-4 mt-1 text-gray-700">This was actually a pretty straightforward fix, but has theoretical massive impact. The dev tools preferences were uncomfortable to look at, since it was white text on a white backgrounds. I dug into their design system and found they had the right CSS variables, just weren&apos;t being applied on the options.</div>
+                  <div className="ml-4 mt-1 text-gray-700">This was actually a pretty straightforward fix, but has theoretical massive impact. The dev tools preferences were uncomfortable to look at, since it was white text on a white background. I dug into their design system and found they had the right CSS variables, just weren&apos;t being applied on the options.</div>
                 </li>
                 <li>
                   <div>• Identified and resolved critical UX issue causing unreadable white-on-white text in dropdowns.</div>
