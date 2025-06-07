@@ -17,9 +17,10 @@ export default function SiteNav() {
               <Book size={14} />
               <span>blog</span>
             </Link>
+            {/* TODO: Add real gallery */}
             <Link href="/gallery" className="text-sm hover:text-gray-600 flex items-center gap-1">
               <Box size={14} />
-              <span>gallery</span>
+              <span>cube</span>
             </Link>
             
             {/* Social Links */}
