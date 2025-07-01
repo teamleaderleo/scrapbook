@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import HardcodedStickyNote from '@/components/hardcoded-sticky-note';
 // import { HeaderConnectionStatus } from '@/components/connection-status';
-import { Book, Box, Twitter, Github } from 'lucide-react';
+import { Book, Box, Twitter, Github, Sparkles } from 'lucide-react';
 
 export default function SiteNav() {
   return (
@@ -16,6 +16,15 @@ export default function SiteNav() {
             <Link href="/blog" className="text-sm hover:text-gray-600 flex items-center gap-1">
               <Book size={14} />
               <span>blog</span>
+            </Link>
+            <Link 
+              href="https://glossless.app/"
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm hover:text-purple-500 transition-colors flex items-center gap-1"
+            >
+              <Sparkles size={14} />
+              <span>glossless</span>
             </Link>
             {/* TODO: Add real gallery */}
             <Link href="/gallery" className="text-sm hover:text-gray-600 flex items-center gap-1">

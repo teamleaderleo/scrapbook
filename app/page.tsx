@@ -58,6 +58,29 @@ export default function Page() {
 
           {/* Column 2 */}
           <div className="space-y-8">
+            <div>
+              <h2 className="text-xl font-semibold mb-3">Glossless (AI Pose-Inference Tool)</h2>
+              <p className="text-sm text-gray-600 mb-4">glossless.app | June 2024 - Present</p>
+              
+              <ul className="space-y-3 text-sm">
+                <li>
+                  <div>• Engineered and deployed a production-grade AI backend, refactoring research code (Bizarre Pose Estimator, VideoPose3D) into a robust, GPU-powered API on Modal.</div>
+                  <div className="ml-4 mt-1 text-gray-700">This was the core challenge. The original research code was all command-line based and had a rat&apos;s nest of dependencies. I had to solve a lot of PyTorch/NumPy version hell to get it containerized and deployed as a reliable web service.</div>
+                </li>
+                <li>
+                  <div>• Optimized the serverless API, reducing P95 cold-start latency by 78% (from 45s to 10s) using Modal&apos;s memory snapshot feature.</div>
+                  <div className="ml-4 mt-1 text-gray-700">The initial cold starts were brutal, which is a dealbreaker for an interactive tool. By structuring the model loading into a two-stage process (CPU then GPU) and enabling memory snapshots, we got the worst-case startup time down to a much more acceptable 10 seconds.</div>
+                </li>
+                <li>
+                  <div>• Architected a novel validation system using a multimodal LLM (Llama 3.2) on Cloudflare Workers AI to generate keypoint suggestions from images.</div>
+                  <div className="ml-4 mt-1 text-gray-700">This is a feature I&apos;m really excited about. I send the image binary to a multimodal LLM with a highly structured prompt, and it returns a plausible description and keypoint data. It acts as a great sanity check against the main ML model. The token count is low enough that we get 400+ free calls a day from Cloudflare.</div>
+                </li>
+                <li>
+                  <div>• Built a hybrid AI system that routes photos to the client-side MediaPipe API and illustrations to the custom backend for optimal results.</div>
+                  <div className="ml-4 mt-1 text-gray-700">No single model is perfect for everything. The app inspects the upload and decides where to send it. Real photos go to the fast MediaPipe API in the browser, while stylized art goes to my more powerful custom backend. It gives the user the best of both worlds without them needing to think about it.</div>
+                </li>
+              </ul>
+            </div>
             {/* Scrapbook */}
             <div>
               <h2 className="text-xl font-semibold mb-3">Scrapbook (Full-Stack Blog)</h2>
