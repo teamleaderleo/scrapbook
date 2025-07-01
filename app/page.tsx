@@ -84,7 +84,7 @@ export default function Page() {
                   <div className="ml-4 mt-1 text-gray-700">The Trade-off: Instead of relying solely on the expensive GPU model, this pipeline uses a cost-effective multimodal LLM as a &quot;sanity check&quot; and validation layer. It&apos;s a novel approach that improves robustness while dramatically reducing cost—a critical consideration for any real-world AI product.</div>
                 </li>
                 <li>
-                  <div>• Developed real-time 3D editor and AI system using React, Three.js, and Supabase, featuring a bidirectionally synchronized canvas, interactive joint manipulation, and a routing gateway that sends photos to MediaPipe and illustrations to the custom COCO API.</div>
+                  <div>• Developed lightweight and stable 60fps+ real-time 3D editor and AI system using React, Three.js, and Supabase, featuring a bidirectionally synchronized canvas, interactive joint manipulation, and a routing gateway that sends photos to MediaPipe and illustrations to the custom COCO API..</div>
                   <div className="ml-4 mt-1 text-gray-700">Architectural Goal: Performance and stability were non-negotiable. Many web-based 3D tools lag or crash browsers under load. This editor was architected from the ground up to be lightweight, delivering a stable 60fps+ experience by creating a hybrid system that intelligently routes different image types to the optimal model (client-side MediaPipe vs. custom backend).</div>
                 </li>
               </ul>
