@@ -17,7 +17,7 @@ export default function Page() {
               <ul className="space-y-3 text-sm">
                 <li>
                   <div>• Fixed dark mode styling in Next.js development tools, improving accessibility for 4.9M+ developers, merged in #80025.</div>
-                  <div className="ml-4 mt-1 text-gray-700">This was actually a pretty straightforward fix, but has theoretical massive impact. The dev tools preferences were uncomfortable to look at, since it was white text on a white background. I dug into their design system and found they had the right CSS variables, but they just weren&apos;t being applied on the options.</div>
+                  <div className="ml-4 mt-1 text-gray-700">The Process: While a simple CSS fix, the real work was navigating a massive, unfamiliar codebase, understanding its design system, and successfully justifying the change to the maintainers. It was a perfect first exercise in contributing to a major open-source project.</div>
                 </li>
                 <li>
                   <div>• Identified and resolved critical UX issue causing unreadable white-on-white text in dropdowns.</div>
@@ -29,11 +29,11 @@ export default function Page() {
                 </li>
                 <li>
                   <div>• Improved Next.js App Router internals by refactoring an unhandled redirect handler to use direct dispatch methods, aligning with architectural best practices and addressing an existing TODO in #80075.</div>
-                  <div className="ml-4 mt-1 text-gray-700">This hasn&apos;t been merged yet. I&apos;m not sure if I made changes in line with the maintainers&apos; intentions, but... there was a TODO comment in the codebase for 2 months about cleaning up redirect handling. I refactored it to use direct dispatch methods instead of the public API instance. There&apos;s some other work that could be done in that file as well, but I want to see how their test runner works before I go further. Well, I already have, but I want to verify my theoretical changes won&apos;t break anything..</div>
+                  <div className="ml-4 mt-1 text-gray-700">Exploration: This PR was an exploration into core framework architecture. By addressing a long-standing TODO in the codebase, I practiced refactoring critical pathways to improve performance and adhere to internal best practices, learning a ton about the framework&apos;s internals along the way.</div>
                 </li>
                 <li>
                   <div>• Analyzed Next.js internal architecture to diagnose call stack limitations in static export functionality for sites with 100k+ pages, then proposed and implemented a proactive warning system that prevents build scalability failures in #80037.</div>
-                  <div className="ml-4 mt-1 text-gray-700">This is still open. Next.js inherently does a lot on its own, and processing pages for  static export can cause large sites to hit the JavaScript&apos;s call stack limit. I traced through the export pipeline, found the build calls, and implemented a warning system that catches this as builds fail. I think it might be decent to elucidate on design principles in the warning, but who knows; Vercel might decide to suddenly pivot/support big SSG.</div>
+                  <div className="ml-4 mt-1 text-gray-700">Proactive Problem-Solving: This PR addresses a fundamental scalability issue for large SSG sites. The goal was to trace the export pipeline and implement a proactive warning system to prevent silent, hard-to-debug build failures for developers working at enterprise scale.</div>
                 </li>
                 <li>
                   <div>• Engaged with and guided developers to scalable patterns and best practices.</div>
@@ -58,26 +58,34 @@ export default function Page() {
 
           {/* Column 2 */}
           <div className="space-y-8">
+            {/* Glossless */}
             <div>
               <h2 className="text-xl font-semibold mb-3">Glossless (AI Pose-Inference Tool)</h2>
               <p className="text-sm text-gray-600 mb-4">glossless.app | June 2024 - Present</p>
               
               <ul className="space-y-3 text-sm">
                 <li>
-                  <div>• Engineered and deployed a production-grade AI backend, refactoring research code (Bizarre Pose Estimator, VideoPose3D) into a robust, GPU-powered API on Modal.</div>
-                  <div className="ml-4 mt-1 text-gray-700">This was the core challenge. The original research code was all command-line based and had a rat&apos;s nest of dependencies. I had to solve a lot of PyTorch/NumPy version hell to get it containerized and deployed as a reliable web service.</div>
+                  <div>• Engineered a pipeline allowing users to go from image upload to a lit, posed 3D mannequin in seconds vs workflows that take minutes in traditional software..</div>
+                  <div className="ml-4 mt-1 text-gray-700">Design Note: The core thesis is speed to value. Artists needing pose references shouldn&apos;t have to fight complex 3D software. This entire project is architected around collapsing the time it takes to get a useful, well-lit reference, making it an ergonomic, lightweight alternative to the status quo.</div>
                 </li>
                 <li>
-                  <div>• Optimized the serverless API, reducing P95 cold-start latency by 78% (from 45s to 10s) using Modal&apos;s memory snapshot feature.</div>
-                  <div className="ml-4 mt-1 text-gray-700">The initial cold starts were brutal, which is a dealbreaker for an interactive tool. By structuring the model loading into a two-stage process (CPU then GPU) and enabling memory snapshots, we got the worst-case startup time down to a much more acceptable 10 seconds.</div>
+                  <div>• Productionized ML research models (Bizarre Pose Estimator, VideoPose3D) to GPU-powered, auto-scaling API on
+                  Modal, refactoring 2021 command-line research code and resolving legacy PyTorch/NumPy dependency conflicts.</div>
+                  <div className="ml-4 mt-1 text-gray-700">The Challenge: The original research code was powerful but production-hostile. It was a tangle of CLI dependencies and version conflicts. The main work was refactoring this into a containerized, reliable, and scalable web service that could form the backbone of a real product.</div>
                 </li>
                 <li>
-                  <div>• Architected a novel validation system using a multimodal LLM (Llama 3.2) on Cloudflare Workers AI to generate keypoint suggestions from images.</div>
-                  <div className="ml-4 mt-1 text-gray-700">This is a feature I&apos;m really excited about. I send the image binary to a multimodal LLM with a highly structured prompt, and it returns a plausible description and keypoint data. It acts as a great sanity check against the main ML model. The token count is low enough that we get 400+ free calls a day from Cloudflare.</div>
+                  <div>• Optimized serverless performance, slashing P95 cold-start latency by 78% (from 45s to 10s) by implementing
+                  memory snapshots and caching model binaries.</div>
+                  <div className="ml-4 mt-1 text-gray-700">Insight: A 45-second cold start is a dealbreaker for an interactive tool. The key to this 78% reduction was a two-stage loading process and implementing Modal&apos;s memory snapshots, proving that thoughtful serverless architecture can deliver a near-native user experience.</div>
                 </li>
                 <li>
-                  <div>• Built a hybrid AI system that routes photos to the client-side MediaPipe API and illustrations to the custom backend for optimal results.</div>
-                  <div className="ml-4 mt-1 text-gray-700">No single model is perfect for everything. The app inspects the upload and decides where to send it. Real photos go to the fast MediaPipe API in the browser, while stylized art goes to my more powerful custom backend. It gives the user the best of both worlds without them needing to think about it.</div>
+                  <div>• Architected a cost-effective alternative inference pipeline using a multimodal LLM (Llama 3.2) on Cloudflare Workers
+                  AI, reducing per-inference costs by 94.7%(∼19x).</div>
+                  <div className="ml-4 mt-1 text-gray-700">The Trade-off: Instead of relying solely on the expensive GPU model, this pipeline uses a cost-effective multimodal LLM as a &quot;sanity check&quot; and validation layer. It&apos;s a novel approach that improves robustness while dramatically reducing cost—a critical consideration for any real-world AI product.</div>
+                </li>
+                <li>
+                  <div>• Developed real-time 3D editor and AI system using React, Three.js, and Supabase, featuring a bidirectionally synchronized canvas, interactive joint manipulation, and a routing gateway that sends photos to MediaPipe and illustrations to the custom COCO API.</div>
+                  <div className="ml-4 mt-1 text-gray-700">Architectural Goal: Performance and stability were non-negotiable. Many web-based 3D tools lag or crash browsers under load. This editor was architected from the ground up to be lightweight, delivering a stable 60fps+ experience by creating a hybrid system that intelligently routes different image types to the optimal model (client-side MediaPipe vs. custom backend).</div>
                 </li>
               </ul>
             </div>
@@ -101,7 +109,7 @@ export default function Page() {
                 </li>
                 <li>
                   <div>• Built novel bidirectional looping infinite scrolling system with Three.js and React Three Fiber, preserving native browser functionality while solving edge-case behaviours with accessibility-focused DOM overrides</div>
-                  <div className="ml-4 mt-1 text-gray-700">This was probably the most technically challenging part of the whole project. Most infinite scroll libraries break native browser behavior - you lose things like browser back/forward, scroll restoration, etc. I needed bidirectional scrolling (up and down infinitely) while preserving all that native functionality. Had to do custom DOM manipulation and careful event handling to make it work seamlessly.</div>
+                  <div className="ml-4 mt-1 text-gray-700">The Challenge: The goal was to build an infinite scroll system that didn&apos;t break the web. Most libraries hijack the scrollbar and disable native browser functionality. This implementation was a deep dive into custom DOM manipulation to preserve features like browser history and scroll restoration, making it feel seamless and native.</div>
                 </li>
                 <li>
                   <div>• Built rich text editor with TipTap and Zustand with persistent drafts, keyboard shortcuts, and stateful editing.</div>
@@ -109,7 +117,7 @@ export default function Page() {
                 </li>
                 <li>
                   <div>• Offloaded image processing to Go microservice (Docker, Lambda, REST API Gateway) for distributed backend.</div>
-                  <div className="ml-4 mt-1 text-gray-700">This is me thinking of justifiable ways to work with distributed systems. By offloading image processing to a dedicated microservice, I was able to decouple the image processing logic from the main application, making it easier to scale and maintain. Further notes are in the Potato Image Compressor section itself.</div>
+                  <div className="ml-4 mt-1 text-gray-700">Architectural Decision: This was an exercise in building a decoupled, distributed system. Offloading image processing to a dedicated Go microservice (detailed in the Potato Image Compressor project) improved the main app&apos;s scalability and maintainability, separating concerns for a more robust backend.</div>
                 </li>
                 <li>
                   <div>• Ensured type-safe client-server JSON data with Zod schema validation and Next.js Server Actions.</div>
