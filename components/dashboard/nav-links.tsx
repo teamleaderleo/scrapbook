@@ -8,13 +8,15 @@ import {
   Folder, 
   Image, 
   Tag, 
-  Settings 
+  Settings,
+  Brain
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 
 const links = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Projects', href: '/dashboard/projects', icon: Folder },
+  { name: 'Space', href: '/dashboard/space', icon: Brain },
   // { name: 'Blocks', href: '/dashboard/blocks', icon: Image },
   // { name: 'Tags', href: '/dashboard/tags', icon: Tag },
   // { name: 'Portfolio', href: '/dashboard/portfolio', icon: Image },
