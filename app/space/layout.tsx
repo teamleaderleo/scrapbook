@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import SiteNav from '@/components/site-nav';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/app-sidebar';
+import MinimalSiteNav from '@/components/minimal-site-nav';
 
 export const metadata: Metadata = {
   title: 'Space',
@@ -16,9 +17,10 @@ export default function SpaceLayout({
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-white flex w-full">
-        <AppSidebar />
+        {/* <SpaceSidebar /> */}
+        <AppSidebar/>
         <div className="flex flex-col flex-1">
-          <SiteNav />
+          {/* <MinimalSiteNav /> */}
           {children}
         </div>
       </div>
