@@ -13,12 +13,13 @@ export const authConfig = {
       // TODO: deal with this situation
       // Blog is only public route for now
       const isPublicRoute = nextUrl.pathname.startsWith('/blog');
+      const isSpaceRoute = nextUrl.pathname.startsWith('/space');
       const isGalleryRoute = nextUrl.pathname.startsWith('/gallery');
 
       if (isOnDashboard) {
         if (isLoggedIn) return true;
         return false; // Redirect unauthenticated users to login page
-      } else if (isOnLandingPage || isPublicRoute || isGalleryRoute) {
+      } else if (isOnLandingPage || isPublicRoute || isGalleryRoute || isSpaceRoute ) {
         return true; // Allow access to landing page and blog
       } else if (isLoggedIn) {
         return Response.redirect(new URL('/dashboard', nextUrl));
