@@ -1,9 +1,11 @@
 import React from 'react';
-// import { getSpaceCards } from '@/app/lib/space-utils';
-// import SpaceReview from '@/components/space/space-review';
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export default async function Page() {
-  // const dueCards = await getSpaceCards(); // Fetch from GitHub API
-  
-  // return <SpaceReview cards={dueCards} />;
+  return (
+    <main className="p-4">
+      <SidebarTrigger />
+      <div>yo</div>
+    </main>
+  );
 }

@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
 import SiteNav from '@/components/site-nav';
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from '@/components/app-sidebar';
 
 export const metadata: Metadata = {
   title: 'Space',
@@ -12,9 +14,14 @@ export default function SpaceLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-white flex flex-col w-full">
-      <SiteNav />
-      {children}
-    </div>
+    <SidebarProvider>
+      <div className="min-h-screen bg-white flex w-full">
+        <AppSidebar />
+        <div className="flex flex-col flex-1">
+          <SiteNav />
+          {children}
+        </div>
+      </div>
+    </SidebarProvider>
   );
 }
