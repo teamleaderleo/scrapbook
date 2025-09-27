@@ -1,4 +1,4 @@
-import '@/components/ui/assets/globals.css';
+import '@/app/globals.css';
 import { inter } from '@/components/ui/assets/fonts';
 import { Metadata } from 'next';
 import { ServiceWorkerRegistration } from '@/components/ui/service-worker-registration';
