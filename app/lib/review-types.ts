@@ -1,7 +1,6 @@
 import type { State } from "ts-fsrs";
 
 export type ReviewState = {
-  // FSRS “Card” fields we care about
   due: number;                // ms epoch
   stability: number;          // days (interval when R=target)
   difficulty: number;         // ~1..10
