@@ -90,7 +90,7 @@ export function SpaceView({
     <main className="p-4">
       <h1 className="text-xl font-semibold mb-2">LeetCode</h1>
       <p className="text-sm text-muted-foreground mb-4">
-        Query: {tagsParam ?? "(none)"} | Mutations: {Object.keys(mutations).length}
+        Query: {tagsParam ?? "(none)"}
       </p>
       <ResultsClient items={items} onReview={onReview} nowMs={nowMs} />
     </main>

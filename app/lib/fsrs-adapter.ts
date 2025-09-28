@@ -60,20 +60,21 @@ function fromCard(c: Card): ReviewState {
   };
 }
 
+// ISN'T USEFUL AT ALL
 // Preview all rating options
-export function previewAll(r: ReviewState | undefined, nowMs: number): Omit<Record<Rating, RecordLogItem>, Rating.Manual> {
-  const card = toCard(r, nowMs);
-  const now = new Date(nowMs);
+// export function previewAll(r: ReviewState | undefined, nowMs: number): Omit<Record<Rating, RecordLogItem>, Rating.Manual> {
+//   const card = toCard(r, nowMs);
+//   const now = new Date(nowMs);
   
-  const schedulingCards = F.repeat(card, now);
+//   const schedulingCards = F.repeat(card, now);
   
-  return {
-    [Rating.Again]: schedulingCards[1],
-    [Rating.Hard]: schedulingCards[2],
-    [Rating.Good]: schedulingCards[3],
-    [Rating.Easy]: schedulingCards[4],
-  };
-}
+//   return {
+//     [Rating.Again]: schedulingCards[1],
+//     [Rating.Hard]: schedulingCards[2],
+//     [Rating.Good]: schedulingCards[3],
+//     [Rating.Easy]: schedulingCards[4],
+//   };
+// }
 
 
 export function reviewOnce(r: ReviewState | undefined, rating: Rating, nowMs: number): ReviewState {

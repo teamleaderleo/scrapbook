@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Rating } from "ts-fsrs";
-import { previewAll } from "@/app/lib/fsrs-adapter";
+// import { previewAll } from "@/app/lib/fsrs-adapter";
 import type { LCItem } from "@/app/lib/leetcode-data";
 import { formatInterval, formatDueRelative } from "@/app/lib/interval-format";
 
@@ -25,8 +25,8 @@ export function ResultsClient({
 }
 
 function Row({ it, onReview, nowMs }: { it: LCItem; onReview: (id: string, r: Rating) => void; nowMs: number }) {
-  const [showPrev, setShowPrev] = useState(false);
-  const previews = it.review && showPrev ? previewAll(it.review, nowMs) : null;
+  // const [showPrev, setShowPrev] = useState(false);
+  // const previews = it.review && showPrev ? previewAll(it.review, nowMs) : null;
 
   return (
     <li className="rounded border p-3">
@@ -59,12 +59,12 @@ function Row({ it, onReview, nowMs }: { it: LCItem; onReview: (id: string, r: Ra
             <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Hard)}>Hard</button>
             <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Good)}>Good</button>
             <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Easy)}>Easy</button>
-            <button className="ml-auto text-xs underline" onClick={() => setShowPrev(v => !v)}>
+            {/* <button className="ml-auto text-xs underline" onClick={() => setShowPrev(v => !v)}>
               {showPrev ? "hide preview" : "preview"}
-            </button>
+            </button> */}
           </div>
 
-          {previews && (
+          {/* {previews && (
             <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
               {([Rating.Again, Rating.Hard, Rating.Good, Rating.Easy] as const).map((r) => {
                 const rec = previews[r];
@@ -79,7 +79,7 @@ function Row({ it, onReview, nowMs }: { it: LCItem; onReview: (id: string, r: Ra
                 );
               })}
             </div>
-          )}
+          )} */}
         </>
       )}
     </li>
