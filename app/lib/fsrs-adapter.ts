@@ -1,84 +1,119 @@
 import {
-  fsrs,                   // factory -> FSRS instance
-  Rating,                 // enum { Manual, Again, Hard, Good, Easy }
-  State,                  // enum { New, Learning, Review, Relearning }
+  fsrs,
+  createEmptyCard,
+  Rating,
+  State,
   type Card,
-  type CardInput,
   type RecordLogItem,
-  type Grade,
+  type FSRS,
+  generatorParameters,
 } from "ts-fsrs";
 import type { ReviewState } from "./review-types";
 
-// Create a single FSRS instance (we might wanna adjust what goes on here)
-export const F = fsrs({
+
+export const F: FSRS = fsrs(generatorParameters({
   request_retention: 0.9,
   maximum_interval: 36500,
+  w: [0.4, 0.6, 2.4, 5.8, 4.93, 0.94, 0.86, 0.01, 1.49, 0.14, 0.94, 2.18, 0.05, 0.34, 1.26, 0.29, 2.61],
   enable_fuzz: false,
-  enable_short_term: true,  // can tweak to false or customize steps
-  // learning_steps: ["10m","30m","2h","1d"],
-  // relearning_steps: ["10m","30m"],
-});
+  enable_short_term: true,
+}));
 
-// helper: Rating -> Grade (remove the first indexed thing, "Manual")
-function toGrade(r: Rating): Grade {
-  if (r === Rating.Manual) {
-    throw new Error("Grade cannot be Manual (Rating.Manual). Use Again/Hard/Good/Easy.");
+// Convert ReviewState to Card
+function toCard(r: ReviewState | undefined, nowMs: number): Card {
+  // For new or undefined cards, create an empty card
+  if (!r || (r.state === State.New && r.reps === 0)) {
+    const emptyCard = createEmptyCard(new Date(nowMs));
+    // IMPORTANT: Set the due date to now for new cards
+    emptyCard.due = new Date(nowMs);
+    return emptyCard;
   }
-  // Rating.Again..Easy are 1..4, which matches Grade's domain
-  return r as unknown as Grade;
-}
-
-// Convert stored ReviewState -> FSRS CardInput
-export function toCardInput(r: ReviewState, nowMs: number): CardInput {
+  
+  // Convert existing state
   return {
     state: r.state,
-    due: r.due ?? nowMs,
-    last_review: r.last_review ?? null,
-    stability: r.stability ?? 0,
-    difficulty: r.difficulty ?? 0,
-    elapsed_days: r.elapsed_days ?? 0,
-    scheduled_days: r.scheduled_days ?? 0,
+    due: new Date(r.due),
+    last_review: r.last_review ? new Date(r.last_review) : null,
+    stability: r.stability,
+    difficulty: r.difficulty,
+    elapsed_days: r.elapsed_days,
+    scheduled_days: r.scheduled_days,
     learning_steps: r.learning_steps ?? 0,
-    reps: r.reps ?? 0,
-    lapses: r.lapses ?? 0,
-  };
+    reps: r.reps,
+    lapses: r.lapses,
+  } as Card;
 }
 
-// Convert FSRS return (RecordLogItem) -> ReviewState
-export function fromRecordLogItem(rec: RecordLogItem): ReviewState {
-  const { card, log } = rec;
+// Convert Card to ReviewState
+function fromCard(c: Card): ReviewState {
   return {
-    due: +log.due,
-    stability: log.stability,
-    difficulty: log.difficulty,
-    elapsed_days: log.elapsed_days, // deprecated upstream, keep for now for some reason
-    scheduled_days: log.scheduled_days,
-    learning_steps: log.learning_steps,
-    reps: card.reps,
-    lapses: card.lapses,
-    state: card.state,
-    last_review: +log.review,
+    state: c.state,
+    due: c.due.getTime(),
+    last_review: c.last_review ? c.last_review.getTime() : null,
+    stability: c.stability,
+    difficulty: c.difficulty,
+    elapsed_days: c.elapsed_days,
+    scheduled_days: c.scheduled_days,
+    learning_steps: c.learning_steps,
+    reps: c.reps,
+    lapses: c.lapses,
   };
 }
 
-// Preview all possible buttons (Again/Hard/Good/Easy) without committing
-export function previewAll(r: ReviewState, nowMs: number) {
-  const it = F.repeat(toCardInput(r, nowMs), new Date(nowMs));
-  // Not sure why we use partial here
-  const out: Partial<Record<Rating, RecordLogItem>> = {};
-  for (const rec of it) {
-    out[rec.log.rating as Rating] = rec;
+// Preview all rating options
+export function previewAll(r: ReviewState | undefined, nowMs: number): Omit<Record<Rating, RecordLogItem>, Rating.Manual> {
+  const card = toCard(r, nowMs);
+  const now = new Date(nowMs);
+  
+  const schedulingCards = F.repeat(card, now);
+  
+  return {
+    [Rating.Again]: schedulingCards[1],
+    [Rating.Hard]: schedulingCards[2],
+    [Rating.Good]: schedulingCards[3],
+    [Rating.Easy]: schedulingCards[4],
+  };
+}
+
+
+export function reviewOnce(r: ReviewState | undefined, rating: Rating, nowMs: number): ReviewState {
+  if (rating < 1 || rating > 4) {
+    throw new Error(`Invalid rating: ${rating}`);
   }
-  return out as Record<Rating, RecordLogItem>;
+  
+  const card = toCard(r, nowMs);
+  
+  const reviewTime = new Date(nowMs);
+  
+  const schedulingCards = F.repeat(card, reviewTime);
+  const selected = schedulingCards[rating as Rating.Again | Rating.Hard | Rating.Good | Rating.Easy];
+  
+  if (!selected) {
+    throw new Error(`No scheduling card for rating ${rating}`);
+  }
+  
+  return fromCard(selected.card);
 }
 
-// Commit a review with one rating, return updated ReviewState
-export function reviewOnce(r: ReviewState, rating: Rating, nowMs: number): ReviewState {
-  const rec = F.next(toCardInput(r, nowMs), new Date(nowMs), toGrade(rating));
-  return fromRecordLogItem(rec);
+// Get retrievability for sorting
+export function retrievabilityNow(r: ReviewState | undefined, nowMs: number): number {
+  const card = toCard(r, nowMs);
+  return F.get_retrievability(card, new Date(nowMs), false);
 }
 
-// For fsrs urgency sorting
-export function retrievabilityNow(r: ReviewState, nowMs: number): number {
-  return F.get_retrievability(toCardInput(r, nowMs), new Date(nowMs), false);
+// Debug helper with more detail
+export function debugCard(r: ReviewState | undefined, label: string = ""): void {
+  if (!r) {
+    console.log(`${label} - No review state`);
+    return;
+  }
+  
+  const stateNames = ["New", "Learning", "Review", "Relearning"];
+  console.log(
+    `${label} - State: ${stateNames[r.state]} (${r.state}), ` +
+    `Reps: ${r.reps}, Lapses: ${r.lapses}, ` +
+    `Due: ${new Date(r.due).toLocaleString()}, ` +
+    `Stability: ${r.stability?.toFixed(2)}, ` +
+    `Difficulty: ${r.difficulty?.toFixed(2)} `
+  );
 }
