@@ -5,7 +5,6 @@ export type ReviewState = {
   due: number;                // ms epoch
   stability: number;          // days (interval when R=target)
   difficulty: number;         // ~1..10
-  elapsed_days: number;       // deprecated upstream, keep for now
   scheduled_days: number;     // next interval (days)
   learning_steps: number;     // internal counter
   reps: number;
