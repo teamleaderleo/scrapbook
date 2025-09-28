@@ -11,7 +11,6 @@ export function ensureSeedReview(items: LCItem[], now: number): LCItem[] {
       last_review: null,
       stability: 0,
       difficulty: 0,
-      elapsed_days: 0,
       scheduled_days: 0,
       learning_steps: 0,
       reps: 0,
