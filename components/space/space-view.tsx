@@ -10,6 +10,10 @@ import { reviewOnce } from "@/app/lib/fsrs-adapter";
 import type { LCItem } from "@/app/lib/leetcode-data";
 import type { ReviewState } from "@/app/lib/review-types";
 import { ResultsClient } from "./space-results-client";
+import { ensureSeedReview } from "@/app/lib/seed-review";
+
+const SEEDED = ensureSeedReview(ITEMS);
+
 
 export function SpaceView() {
   const sp = useSearchParams();
@@ -17,7 +21,7 @@ export function SpaceView() {
 
   // 1) derive base list from URL (no app state here)
   const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
-  const base = useMemo<LCItem[]>(() => searchLeetcode(ITEMS, q), [q]);
+  const base = useMemo<LCItem[]>(() => searchLeetcode(SEEDED, q), [q]);
 
   // 2) hold only the *mutations* we make via FSRS clicks (id -> ReviewState)
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
