@@ -1,3 +1,5 @@
+import type { ReviewState } from "./review-types";
+
 export type LCItem = {
   id: string;
   title: string;
@@ -10,6 +12,7 @@ export type LCItem = {
   createdAt: number;
   updatedAt: number;
   score?: number;
+  review?: ReviewState;
 };
 
 export const ITEMS: LCItem[] = [
