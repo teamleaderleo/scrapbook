@@ -3,7 +3,7 @@ import { ParsedQuery } from "./searchlang";
 import { compareNumber } from "./num-compare";
 import { retrievabilityNow } from "./fsrs-adapter";
 
-export function searchLeetcode(items: LCItem[], q: ParsedQuery): LCItem[] {
+export function searchLeetcode(items: LCItem[], q: ParsedQuery, nowMs: number): LCItem[] {
   let res = items.slice();
 
   // plain tags
@@ -24,46 +24,31 @@ export function searchLeetcode(items: LCItem[], q: ParsedQuery): LCItem[] {
       case "difficulty":
         res = res.filter(it => vals.includes(it.difficulty));
         break;
-      case "is": {
+      case "is":
         for (const flag of vals) {
           if (flag === "due") {
-            const now = Date.now();
-            res = res.filter(it => it.review && !it.review.suspended && it.review.due <= now);
+            res = res.filter(it => it.review && !it.review.suspended && it.review.due <= nowMs);
           }
           if (flag === "suspended") {
             res = res.filter(it => it.review?.suspended);
           }
         }
         break;
-      }
-      case "interval": {
-        // matches interval:>3, interval:<=10 etc. (scheduled_days in FSRS)
+      case "interval":
         res = res.filter(it => it.review && vals.every(v => compareNumber(it.review!.scheduled_days, v)));
         break;
-      }
-      case "stability": {
+      case "stability":
         res = res.filter(it => it.review && vals.every(v => compareNumber(it.review!.stability, v)));
         break;
-      }
-      case "difficulty": {
+      case "difficulty":
         res = res.filter(it => it.review && vals.every(v => compareNumber(it.review!.difficulty, v)));
         break;
-      }
     }
   }
 
-  // sort
-  const order = q.order ?? "updatedAt:desc";
-  const isFsrs = (q as any).order === "fsrs";
-
-  if (isFsrs) {
-    res.sort((a, b) => {
-      const ra = a.review ? retrievabilityNow(a.review) : 1;
-      const rb = b.review ? retrievabilityNow(b.review) : 1;
-      return ra - rb;
-    });
-  } else {
-    const [by, dir] = order.split(":") as ["score"|"updatedAt"|"createdAt","asc"|"desc"];
+  // normal sort
+  if (q.order && q.order !== "fsrs") {
+    const [by, dir] = q.order.split(":") as ["score"|"updatedAt"|"createdAt","asc"|"desc"];
     res.sort((a, b) => {
       const av = (a as any)[by] ?? 0;
       const bv = (b as any)[by] ?? 0;
@@ -71,7 +56,14 @@ export function searchLeetcode(items: LCItem[], q: ParsedQuery): LCItem[] {
     });
   }
 
-  
+  // FSRS urgency sort
+  if (q.order === "fsrs") {
+    res.sort((a, b) => {
+      const ra = a.review ? retrievabilityNow(a.review, nowMs) : 1;
+      const rb = b.review ? retrievabilityNow(b.review, nowMs) : 1;
+      return ra - rb;
+    });
+  }
 
   return res;
 }

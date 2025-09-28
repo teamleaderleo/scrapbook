@@ -4,27 +4,29 @@ import { useState } from "react";
 import { Rating } from "ts-fsrs";
 import { previewAll } from "@/app/lib/fsrs-adapter";
 import type { LCItem } from "@/app/lib/leetcode-data";
-import { formatInterval } from "@/app/lib/interval-format";
+import { formatInterval, formatDueRelative } from "@/app/lib/interval-format";
 
 export function ResultsClient({
   items,
   onReview,
+  nowMs,
 }: {
   items: LCItem[];
   onReview: (id: string, rating: Rating) => void;
+  nowMs: number;
 }) {
   return (
     <ul className="space-y-2">
       {items.map((it) => (
-        <Row key={it.id} it={it} onReview={onReview} />
+        <Row key={it.id} it={it} onReview={onReview} nowMs={nowMs} />
       ))}
     </ul>
   );
 }
 
-function Row({ it, onReview }: { it: LCItem; onReview: (id: string, r: Rating) => void }) {
+function Row({ it, onReview, nowMs }: { it: LCItem; onReview: (id: string, r: Rating) => void; nowMs: number }) {
   const [showPrev, setShowPrev] = useState(false);
-  const previews = it.review && showPrev ? previewAll(it.review) : null;
+  const previews = it.review && showPrev ? previewAll(it.review, nowMs) : null;
 
   return (
     <li className="rounded border p-3">
@@ -40,10 +42,10 @@ function Row({ it, onReview }: { it: LCItem; onReview: (id: string, r: Rating) =
         {it.review && (
           <>
             {" · next: "}
-            {new Date(it.review.due).toLocaleString()}  {/* show time, not just date */}
+            {formatDueRelative(nowMs, new Date(it.review.due))}
             {" · ivl: "}
-            {formatInterval(Date.now(), new Date(it.review.due), it.review.scheduled_days)}
-            {it.review.due <= Date.now() && (
+            {formatInterval(nowMs, new Date(it.review.due), it.review.scheduled_days)}
+            {it.review.due <= nowMs && (
               <span className="ml-2 rounded bg-red-100 text-red-700 px-1 py-0.5">due</span>
             )}
           </>

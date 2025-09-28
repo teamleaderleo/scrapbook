@@ -2,10 +2,10 @@ import { State } from "ts-fsrs";
 import type { LCItem } from "./leetcode-data";
 import type { ReviewState } from "./review-types";
 
-export function ensureSeedReview(items: LCItem[], now = Date.now()): LCItem[] {
-  return items.map((it) => {
-    if (it.review) return it;
-    const review: ReviewState = {
+export function ensureSeedReview(items: LCItem[], now: number): LCItem[] {
+  return items.map(it => it.review ? it : ({
+    ...it,
+    review: {
       state: State.New,
       due: now,
       last_review: null,
@@ -17,7 +17,6 @@ export function ensureSeedReview(items: LCItem[], now = Date.now()): LCItem[] {
       reps: 0,
       lapses: 0,
       suspended: false,
-    };
-    return { ...it, review };
-  });
+    } satisfies ReviewState
+  }));
 }

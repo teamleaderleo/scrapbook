@@ -14,8 +14,9 @@ export const F = fsrs({
   request_retention: 0.9,
   maximum_interval: 36500,
   enable_fuzz: false,
-  enable_short_term: true,
-  // learning_steps / relearning_steps can be customized too
+  enable_short_term: true,  // can tweak to false or customize steps
+  // learning_steps: ["10m","30m","2h","1d"],
+  // relearning_steps: ["10m","30m"],
 });
 
 // helper: Rating -> Grade (remove the first indexed thing, "Manual")
@@ -28,10 +29,10 @@ function toGrade(r: Rating): Grade {
 }
 
 // Convert stored ReviewState -> FSRS CardInput
-export function toCardInput(r: ReviewState, now = Date.now()): CardInput {
+export function toCardInput(r: ReviewState, nowMs: number): CardInput {
   return {
-    state: r.state, // can pass the numeric State enum directly
-    due: r.due ?? now,
+    state: r.state,
+    due: r.due ?? nowMs,
     last_review: r.last_review ?? null,
     stability: r.stability ?? 0,
     difficulty: r.difficulty ?? 0,
@@ -50,7 +51,7 @@ export function fromRecordLogItem(rec: RecordLogItem): ReviewState {
     due: +log.due,
     stability: log.stability,
     difficulty: log.difficulty,
-    elapsed_days: log.elapsed_days,     // still present in current typings
+    elapsed_days: log.elapsed_days, // deprecated upstream, keep for now for some reason
     scheduled_days: log.scheduled_days,
     learning_steps: log.learning_steps,
     reps: card.reps,
@@ -61,25 +62,23 @@ export function fromRecordLogItem(rec: RecordLogItem): ReviewState {
 }
 
 // Preview all possible buttons (Again/Hard/Good/Easy) without committing
-export function previewAll(r: ReviewState, now = Date.now()) {
-  const it = F.repeat(toCardInput(r, now), new Date(now))[Symbol.iterator]();
-  // iterator yields 4 entries in Again..Easy order
-  const results: Record<Rating, RecordLogItem> = {} as any;
-  for (const rec of F.repeat(toCardInput(r, now), new Date(now))) {
-    results[rec.log.rating as Rating] = rec;
+export function previewAll(r: ReviewState, nowMs: number) {
+  const it = F.repeat(toCardInput(r, nowMs), new Date(nowMs));
+  // Not sure why we use partial here
+  const out: Partial<Record<Rating, RecordLogItem>> = {};
+  for (const rec of it) {
+    out[rec.log.rating as Rating] = rec;
   }
-  return results;
+  return out as Record<Rating, RecordLogItem>;
 }
 
 // Commit a review with one rating, return updated ReviewState
-export function reviewOnce(r: ReviewState, rating: Rating | Grade, now = Date.now()): ReviewState {
-  const grade = typeof rating === "number" ? (rating as Rating) : Rating.Good; // TS appeasement; we convert back next line
-  const rec = F.next(toCardInput(r, now), new Date(now), toGrade(grade));
+export function reviewOnce(r: ReviewState, rating: Rating, nowMs: number): ReviewState {
+  const rec = F.next(toCardInput(r, nowMs), new Date(nowMs), toGrade(rating));
   return fromRecordLogItem(rec);
 }
 
-// Optional: compute retrievability now (0..1) for ordering
-export function retrievabilityNow(r: ReviewState, now = Date.now()): number {
-  const card = toCardInput(r, now);
-  return F.get_retrievability(card, new Date(now), false);
+// For fsrs urgency sorting
+export function retrievabilityNow(r: ReviewState, nowMs: number): number {
+  return F.get_retrievability(toCardInput(r, nowMs), new Date(nowMs), false);
 }
