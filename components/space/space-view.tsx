@@ -29,13 +29,6 @@ export function SpaceView({
   );
 
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
-  
-  // not sure if needed but Fix for React StrictMode double-firing
-  const isMountedRef = useRef(false);
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => { isMountedRef.current = false; };
-  }, []);
 
   const items = useMemo<LCItem[]>(
     () =>
@@ -47,8 +40,6 @@ export function SpaceView({
   );
 
   const onReview = useCallback((id: string, rating: Rating) => {
-    // Only process if mounted (prevents double-fire in StrictMode)
-    if (!isMountedRef.current) return;
     
     console.group(`Review: ${id} with Rating.${Rating[rating]}`);
     
@@ -67,14 +58,12 @@ export function SpaceView({
           console.log(`📍 State transition: ${stateNames[current.state]} → ${stateNames[next.state]}`);
         }
         
-        // Log interval changes
         const oldInterval = current.scheduled_days || 0;
         const newInterval = next.scheduled_days || 0;
         if (oldInterval !== newInterval) {
           console.log(`⏰ Interval: ${oldInterval}d → ${newInterval}d`);
         }
         
-        // Log stability changes
         if (current.stability !== next.stability) {
           console.log(`📊 Stability: ${current.stability?.toFixed(2)} → ${next.stability?.toFixed(2)}`);
         }
