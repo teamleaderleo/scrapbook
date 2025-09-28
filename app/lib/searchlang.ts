@@ -4,14 +4,15 @@ export type SortDir = "asc" | "desc";
 export type ParsedQuery = {
   tags: string[];                  // free tags like ["leetcode","inspiration"]
   ops: Record<string, string[]>;   // structured ops: { company:["amazon"], diff:["easy"] }
-  order?: `${SortBy}:${SortDir}`;  // normalized order field
+  order?: `${SortBy}:${SortDir}` | "fsrs";  // normalized order field
 };
 
-const ORDER_MAP: Record<string, `${SortBy}:${SortDir}`> = {
+const ORDER_MAP: Record<string, `${SortBy}:${SortDir}` | "fsrs"> = {
   recent: "updatedAt:desc",
   newest: "createdAt:desc",
   oldest: "createdAt:asc",
   score: "score:desc",
+  fsrs: "fsrs",
 };
 
 
