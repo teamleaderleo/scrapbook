@@ -1,8 +1,8 @@
-export function formatInterval(nowMs: number, due: Date, scheduledDays: number) {
-  if (scheduledDays >= 1) return `${Math.round(scheduledDays)}d`;
-  const mins = Math.max(1, Math.round((+due - nowMs) / 60000));
-  if (mins >= 60) return `${Math.round(mins / 60)}h`;
-  return `${mins}m`;
+export function formatInterval(_nowMs: number, _due: Date, scheduledDays: number) {
+  const totalMinutes = Math.max(1, Math.round(scheduledDays * 24 * 60));
+  if (totalMinutes >= 60 * 24) return `${Math.round(totalMinutes / (60 * 24))}d`;
+  if (totalMinutes >= 60)     return `${Math.round(totalMinutes / 60)}h`;
+  return `${totalMinutes}m`;
 }
 
 export function formatDueRelative(nowMs: number, due: Date) {
