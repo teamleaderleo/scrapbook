@@ -52,25 +52,6 @@ export function SpaceView({
       
       debugCard(next, "AFTER");
       
-      if (current && next) {
-        const stateNames = ["New", "Learning", "Review", "Relearning"];
-        if (current.state !== next.state) {
-          console.log(`📍 State transition: ${stateNames[current.state]} → ${stateNames[next.state]}`);
-        }
-        
-        const oldInterval = current.scheduled_days || 0;
-        const newInterval = next.scheduled_days || 0;
-        if (oldInterval !== newInterval) {
-          console.log(`⏰ Interval: ${oldInterval}d → ${newInterval}d`);
-        }
-        
-        if (current.stability !== next.stability) {
-          console.log(`📊 Stability: ${current.stability?.toFixed(2)} → ${next.stability?.toFixed(2)}`);
-        }
-      }
-      
-      console.groupEnd();
-      
       return { ...prev, [id]: next };
     });
   }, [base]);
