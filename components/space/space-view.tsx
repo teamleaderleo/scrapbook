@@ -1,66 +1,81 @@
 "use client";
-import { useMemo, useState, useCallback, useEffect, useRef } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { parseQuery } from "@/app/lib/searchlang";
-import { searchLeetcode } from "@/app/lib/leetcode-search";
-import type { LCItem } from "@/app/lib/leetcode-data";
+import { searchItems } from "@/app/lib/item-search";
+import type { Item } from "@/app/lib/item-types";
 import type { ReviewState } from "@/app/lib/review-types";
 import { ResultsClient } from "./space-results-client";
-import { Rating, State } from "ts-fsrs";
+import { Rating } from "ts-fsrs";
 import { useNow } from "@/app/lib/hooks/useNow";
 import { reviewOnce, debugCard } from "@/app/lib/fsrs-adapter";
+import { useAllItems } from "@/app/lib/hooks/useAllItems";
+import { supabase } from "@/app/lib/db/supabase";
 
-export function SpaceView({
-  serverNow,
-  seeded,
-}: { serverNow: number; seeded: LCItem[] }) {
-  if (!Number.isFinite(serverNow)) {
-    throw new Error(`serverNow not finite: ${serverNow}`);
-  }
-
+export function SpaceView({ serverNow }: { serverNow: number }) {
   const nowMs = useNow(serverNow, 30000);
   const sp = useSearchParams();
   const tagsParam = sp.get("tags") ?? undefined;
 
-  const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
-  const base = useMemo(
-    () => searchLeetcode(seeded, q, serverNow),
-    [seeded, q, serverNow]
-  );
+  const { items: allItems, loading } = useAllItems();
 
+  const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
+  
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
 
-  const items = useMemo<LCItem[]>(
-    () =>
-      base.map((it) => {
-        const mutation = mutations[it.id];
-        return mutation ? { ...it, review: mutation } : it;
-      }),
-    [base, mutations]
-  );
+  const items = useMemo<Item[]>(() => {
+    const withMutations = allItems.map(it => {
+      const mutation = mutations[it.id];
+      return mutation ? { ...it, review: mutation } : it;
+    });
+    return searchItems(withMutations, q, nowMs);
+  }, [allItems, mutations, q, nowMs]);
 
-  const onReview = useCallback((id: string, rating: Rating) => {
-    
+  const onReview = useCallback(async (id: string, rating: Rating) => {
     console.group(`Review: ${id} with Rating.${Rating[rating]}`);
     
-    setMutations(prev => {
-      const current = prev[id] ?? base.find(x => x.id === id)?.review;
-      
-      debugCard(current, "BEFORE");
-      
-      const next = reviewOnce(current, rating, Date.now());
-      
-      debugCard(next, "AFTER");
-      
-      return { ...prev, [id]: next };
+    const current = mutations[id] ?? allItems.find(x => x.id === id)?.review;
+    debugCard(current, "BEFORE");
+    
+    const next = reviewOnce(current, rating, Date.now());
+    debugCard(next, "AFTER");
+    
+    setMutations(prev => ({ ...prev, [id]: next }));
+    
+    console.groupEnd();
+
+    const { error } = await supabase.from('reviews').upsert({
+      item_id: id,
+      state: next.state,
+      due: next.due,
+      last_review: next.last_review,
+      stability: next.stability,
+      difficulty: next.difficulty,
+      scheduled_days: next.scheduled_days,
+      learning_steps: next.learning_steps,
+      reps: next.reps,
+      lapses: next.lapses,
+      suspended: next.suspended || false,
     });
-  }, [base]);
+
+    if (error) {
+      console.error('Failed to save review:', error);
+    }
+  }, [allItems, mutations]);
+
+  if (loading) {
+    return (
+      <main className="p-4">
+        <div className="text-muted-foreground">Loading...</div>
+      </main>
+    );
+  }
 
   return (
     <main className="p-4">
-      <h1 className="text-xl font-semibold mb-2">LeetCode</h1>
+      <h1 className="text-xl font-semibold mb-2">Second Brain</h1>
       <p className="text-sm text-muted-foreground mb-4">
-        Query: {tagsParam ?? "(none)"}
+        Query: {tagsParam ?? "(none)"} · {items.length} items
       </p>
       <ResultsClient items={items} onReview={onReview} nowMs={nowMs} />
     </main>

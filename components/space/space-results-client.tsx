@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { Rating } from "ts-fsrs";
-import type { LCItem } from "@/app/lib/leetcode-data";
+import type { Item } from "@/app/lib/item-types";
 import { formatInterval, formatDueRelative } from "@/app/lib/interval-format";
 
 export function ResultsClient({
@@ -9,7 +9,7 @@ export function ResultsClient({
   onReview,
   nowMs,
 }: {
-  items: LCItem[];
+  items: Item[];
   onReview: (id: string, rating: Rating) => void;
   nowMs: number;
 }) {
@@ -22,19 +22,25 @@ export function ResultsClient({
   );
 }
 
-function Row({ it, onReview, nowMs }: { it: LCItem; onReview: (id: string, r: Rating) => void; nowMs: number }) {
+function Row({ it, onReview, nowMs }: { it: Item; onReview: (id: string, r: Rating) => void; nowMs: number }) {
+  // Extract display tags (strip namespaces for cleaner display)
+  const displayTags = it.tags.map(t => t.includes(':') ? t.split(':')[1] : t);
 
   return (
     <li className="rounded border p-3">
       <div className="flex items-center justify-between">
-        <Link href={it.url} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline">
-          {it.title}
-        </Link>
-        <span className="text-xs text-muted-foreground capitalize">{it.difficulty}</span>
+        {it.url ? (
+          <Link href={it.url} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline">
+            {it.title}
+          </Link>
+        ) : (
+          <span className="font-medium">{it.title}</span>
+        )}
+        <span className="text-xs text-muted-foreground capitalize">{it.category}</span>
       </div>
 
       <div className="mt-1 text-xs text-muted-foreground">
-        companies: {it.companies.join(", ")} · topics: {it.topics.join(", ")}
+        tags: {displayTags.join(", ")}
         {it.review && (
           <>
             {" · next: "}
@@ -49,15 +55,12 @@ function Row({ it, onReview, nowMs }: { it: LCItem; onReview: (id: string, r: Ra
       </div>
 
       {it.review && (
-        <>
-          <div className="flex gap-2 mt-2 text-xs">
-            <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Again)}>Again</button>
-            <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Hard)}>Hard</button>
-            <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Good)}>Good</button>
-            <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Easy)}>Easy</button>
-
-          </div>
-        </>
+        <div className="flex gap-2 mt-2 text-xs">
+          <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Again)}>Again</button>
+          <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Hard)}>Hard</button>
+          <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Good)}>Good</button>
+          <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Easy)}>Easy</button>
+        </div>
       )}
     </li>
   );
