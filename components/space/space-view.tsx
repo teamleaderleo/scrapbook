@@ -9,7 +9,7 @@ import { ResultsClient } from "./space-results-client";
 import { Rating } from "ts-fsrs";
 import { useNow } from "@/app/lib/hooks/useNow";
 import { reviewOnce, debugCard } from "@/app/lib/fsrs-adapter";
-import { useAllItems } from "@/app/lib/hooks/useAllItems";
+import { useItems } from "@/app/lib/contexts/item-context";
 import { supabase } from "@/app/lib/db/supabase";
 
 export function SpaceView({ serverNow }: { serverNow: number }) {
@@ -17,7 +17,7 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
   const sp = useSearchParams();
   const tagsParam = sp.get("tags") ?? undefined;
 
-  const { items: allItems, loading } = useAllItems();
+  const { items: allItems, loading } = useItems();
 
   const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
   

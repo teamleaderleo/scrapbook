@@ -3,13 +3,13 @@ import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { parseQuery } from "@/app/lib/searchlang";
 import { searchItems } from "@/app/lib/item-search";
-import { useAllItems } from "@/app/lib/hooks/useAllItems";
 import { useNow } from "@/app/lib/hooks/useNow";
 import ReactMarkdown from 'react-markdown';
 import { Rating } from "ts-fsrs";
 import { reviewOnce } from "@/app/lib/fsrs-adapter";
 import { supabase } from "@/app/lib/db/supabase";
 import type { ReviewState } from "@/app/lib/review-types";
+import { useItems } from "@/app/lib/contexts/item-context";
 
 export function ReviewGallery({ serverNow }: { serverNow: number }) {
   const nowMs = useNow(serverNow, 30000);
@@ -17,7 +17,7 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
   const router = useRouter();
   const tagsParam = sp.get("tags") ?? undefined;
 
-  const { items: allItems, loading } = useAllItems();
+  const { items: allItems, loading } = useItems();
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showCode, setShowCode] = useState(false);
