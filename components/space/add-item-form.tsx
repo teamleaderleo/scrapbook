@@ -3,6 +3,8 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/app/lib/db/supabase";
 import { useItems } from "@/app/lib/contexts/item-context";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export function AddItemFormContent() {
   const router = useRouter();
@@ -17,7 +19,7 @@ export function AddItemFormContent() {
   "tags": ["type:leetcode", "company:google", "topic:array", "difficulty:easy"],
   "category": "leetcode",
   "content": "# Approach\\n\\nYour writeup here",
-  "code": "function solution() {\\n  // code\\n}"
+  "code": "def solution():\\n  # code\\n"
 }`);
   const [preview, setPreview] = useState<any>(null);
   const [error, setError] = useState("");
@@ -118,7 +120,16 @@ export function AddItemFormContent() {
               {preview.code && (
                 <div className="border-t pt-2 mt-2">
                   <strong>Code:</strong>
-                  <pre className="text-xs mt-1 bg-gray-900 text-gray-100 p-2 rounded">{preview.code}</pre>
+                  <div className="mt-1 bg-gray-900 rounded overflow-hidden">
+                    <SyntaxHighlighter 
+                      language="python"
+                      style={vscDarkPlus}
+                      customStyle={{ margin: 0, background: 'transparent', padding: '0.5rem' }}
+                      className="text-xs"
+                    >
+                      {preview.code}
+                    </SyntaxHighlighter>
+                  </div>
                 </div>
               )}
               <button

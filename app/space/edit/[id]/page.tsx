@@ -4,6 +4,8 @@ import { supabase } from "@/app/lib/db/supabase";
 import { useParams, useRouter } from "next/navigation";
 import { useItems } from "@/app/lib/contexts/item-context";
 import { Button } from "@/components/ui/button";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export default function EditItemPage() {
   const params = useParams();
@@ -112,15 +114,51 @@ export default function EditItemPage() {
 
         <div>
           <h2 className="text-sm font-semibold mb-2">Code</h2>
-          <textarea
-            value={code}
-            onChange={(e) => {
-              setIsEditingRaw(false);
-              setCode(e.target.value);
-            }}
-            className="w-full h-96 p-3 border rounded font-mono text-sm bg-gray-900 text-gray-100"
-            placeholder="function solution() {&#10;  // code&#10;}"
-          />
+          <div className="relative h-96 border rounded overflow-hidden bg-gray-900">
+            {/* Syntax highlighted background */}
+            <div className="absolute inset-0 overflow-auto pointer-events-none" id="code-highlight">
+              <SyntaxHighlighter 
+                language="python"
+                style={vscDarkPlus}
+                customStyle={{ 
+                  margin: 0, 
+                  background: 'transparent',
+                  padding: '0.75rem',
+                }}
+                className="text-sm"
+              >
+                {code || ' '}
+              </SyntaxHighlighter>
+            </div>
+            
+            {/* Transparent textarea overlay */}
+            <textarea
+              value={code}
+              onChange={(e) => {
+                setIsEditingRaw(false);
+                setCode(e.target.value);
+              }}
+              onScroll={(e) => {
+                // Sync scroll
+                const highlight = document.getElementById('code-highlight');
+                if (highlight) {
+                  highlight.scrollTop = e.currentTarget.scrollTop;
+                  highlight.scrollLeft = e.currentTarget.scrollLeft;
+                }
+              }}
+              className="absolute inset-0 w-full h-full p-3 font-mono text-sm bg-transparent text-transparent caret-white resize-none outline-none"
+              style={{ 
+                caretColor: 'white',
+                fontSize: '13px',
+                lineHeight: '1.5',
+                fontFamily: 'Menlo, Monaco, Consolas, "Andale Mono", "Ubuntu Mono", "Courier New", monospace',
+                padding: '0.75rem',
+                tabSize: 4,
+              }}
+              placeholder="function solution() {&#10;  // code&#10;}"
+              spellCheck={false}
+            />
+          </div>
         </div>
       </div>
 
@@ -155,7 +193,16 @@ export default function EditItemPage() {
             {code && (
               <div className="border-t pt-2 mt-2">
                 <strong>Code:</strong>
-                <pre className="text-xs mt-1 bg-gray-900 text-gray-100 p-2 rounded">{code}</pre>
+                <div className="mt-1 bg-gray-900 rounded overflow-hidden">
+                  <SyntaxHighlighter 
+                    language="python"
+                    style={vscDarkPlus}
+                    customStyle={{ margin: 0, background: 'transparent', padding: '0.5rem' }}
+                    className="text-xs"
+                  >
+                    {code}
+                  </SyntaxHighlighter>
+                </div>
               </div>
             )}
           </div>
