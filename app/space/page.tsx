@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { SpaceView } from "@/components/space/space-view";
 
+export const dynamic = 'force-dynamic';
+
 export default function SpacePage() {
   const serverNow = Date.now();
 
