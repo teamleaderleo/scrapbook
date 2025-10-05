@@ -11,6 +11,9 @@ export default function EditItemPage() {
   const [item, setItem] = useState<any>(null);
   const [content, setContent] = useState("");
   const [code, setCode] = useState("");
+  const [rawInput, setRawInput] = useState("");
+  const [jsonError, setJsonError] = useState("");
+  const [isEditingRaw, setIsEditingRaw] = useState(false);
 
   useEffect(() => {
     loadItem();
@@ -27,8 +30,46 @@ export default function EditItemPage() {
       setItem(data);
       setContent(data.content || '');
       setCode(data.code || '');
+      setRawInput(JSON.stringify({
+        id: data.id,
+        title: data.title,
+        url: data.url,
+        tags: data.tags,
+        category: data.category,
+        content: data.content || '',
+        code: data.code || '',
+      }, null, 2));
     }
   }
+
+  // Sync raw input changes to content and code
+  useEffect(() => {
+    if (!isEditingRaw) return;
+    
+    try {
+      const parsed = JSON.parse(rawInput);
+      setContent(parsed.content || '');
+      setCode(parsed.code || '');
+      setJsonError("");
+    } catch (e) {
+      setJsonError("Invalid JSON");
+    }
+  }, [rawInput, isEditingRaw]);
+
+  // Sync content/code changes to raw input
+  useEffect(() => {
+    if (item && !isEditingRaw) {
+      setRawInput(JSON.stringify({
+        id: item.id,
+        title: item.title,
+        url: item.url,
+        tags: item.tags,
+        category: item.category,
+        content: content,
+        code: code,
+      }, null, 2));
+    }
+  }, [content, code, item, isEditingRaw]);
 
   async function handleSave() {
     const { error } = await supabase
@@ -54,7 +95,10 @@ export default function EditItemPage() {
           <h2 className="text-sm font-semibold mb-2">Content (Markdown)</h2>
           <textarea
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e) => {
+              setIsEditingRaw(false);
+              setContent(e.target.value);
+            }}
             className="w-full h-96 p-3 border rounded font-mono text-sm"
             placeholder="# Approach&#10;&#10;Your writeup here..."
           />
@@ -64,7 +108,10 @@ export default function EditItemPage() {
           <h2 className="text-sm font-semibold mb-2">Code</h2>
           <textarea
             value={code}
-            onChange={(e) => setCode(e.target.value)}
+            onChange={(e) => {
+              setIsEditingRaw(false);
+              setCode(e.target.value);
+            }}
             className="w-full h-96 p-3 border rounded font-mono text-sm bg-gray-900 text-gray-100"
             placeholder="function solution() {&#10;  // code&#10;}"
           />
@@ -75,17 +122,15 @@ export default function EditItemPage() {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <h2 className="text-sm font-semibold mb-2">Raw (as stored)</h2>
-          <div className="border rounded p-4 bg-gray-50 h-96 overflow-auto">
-            <pre className="text-xs font-mono whitespace-pre-wrap">{JSON.stringify({
-              id: item.id,
-              title: item.title,
-              url: item.url,
-              tags: item.tags,
-              category: item.category,
-              content: content,
-              code: code,
-            }, null, 2)}</pre>
-          </div>
+          {jsonError && <div className="text-red-600 text-sm mb-2">{jsonError}</div>}
+          <textarea
+            value={rawInput}
+            onChange={(e) => {
+              setIsEditingRaw(true);
+              setRawInput(e.target.value);
+            }}
+            className="w-full h-96 p-3 border rounded font-mono text-sm bg-gray-50"
+          />
         </div>
 
         <div>
