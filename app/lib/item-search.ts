@@ -66,7 +66,7 @@ export function searchItems(items: Item[], q: ParsedQuery, nowMs: number): Item[
 
 function hasTag(it: Item, tag: string) {
   return (
-    it.tags.some(t => t === tag || t.endsWith(`:${tag}`)) ||
+    it.tags.includes(tag) ||  // exact match only
     it.category === tag
   );
 }
