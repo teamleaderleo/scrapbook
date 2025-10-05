@@ -48,19 +48,28 @@ function Row({
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center justify-between">
-          {it.url ? (
-            <Link 
-              href={it.url} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="font-medium hover:underline"
+          <div className="flex items-center gap-2">
+            {it.url ? (
+              <Link 
+                href={it.url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="font-medium hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {it.title}
+              </Link>
+            ) : (
+              <span className="font-medium">{it.title}</span>
+            )}
+            <Link
+              href={`/space/edit/${it.id}`}
+              className="text-xs text-blue-600 hover:underline"
               onClick={(e) => e.stopPropagation()}
             >
-              {it.title}
+              edit
             </Link>
-          ) : (
-            <span className="font-medium">{it.title}</span>
-          )}
+          </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground capitalize">{it.category}</span>
             <span className="text-sm">{expanded ? '▼' : '▶'}</span>
