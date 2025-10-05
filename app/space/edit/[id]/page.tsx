@@ -2,10 +2,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/app/lib/db/supabase";
 import { useParams, useRouter } from "next/navigation";
+import { useItems } from "@/app/lib/contexts/item-context";
 
 export default function EditItemPage() {
   const params = useParams();
   const router = useRouter();
+  const { reload } = useItems();
   const [item, setItem] = useState<any>(null);
   const [content, setContent] = useState("");
   const [code, setCode] = useState("");
@@ -31,10 +33,11 @@ export default function EditItemPage() {
   async function handleSave() {
     const { error } = await supabase
       .from('items')
-      .update({ content, code })
+      .update({ content, code, updated_at: new Date().toISOString() })
       .eq('id', params.id);
     
     if (!error) {
+      await reload(); // Refresh cache
       router.push('/space');
     }
   }
