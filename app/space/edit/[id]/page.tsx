@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/app/lib/db/supabase";
 import { useParams, useRouter } from "next/navigation";
 import { useItems } from "@/app/lib/contexts/item-context";
+import { Button } from "@/components/ui/button";
 
 export default function EditItemPage() {
   const params = useParams();
@@ -87,7 +88,12 @@ export default function EditItemPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Edit: {item.title}</h1>
+      <div className="flex items-center gap-4 mb-4">
+        <h1 className="text-2xl font-bold">Edit: {item.title}</h1>
+        <Button onClick={handleSave}>
+          Save Changes
+        </Button>
+      </div>
       
       {/* Top Row: Editors */}
       <div className="grid grid-cols-2 gap-4 mb-4">
@@ -152,13 +158,6 @@ export default function EditItemPage() {
                 <pre className="text-xs mt-1 bg-gray-900 text-gray-100 p-2 rounded">{code}</pre>
               </div>
             )}
-            
-            <button
-              onClick={handleSave}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Save Changes
-            </button>
           </div>
         </div>
       </div>
