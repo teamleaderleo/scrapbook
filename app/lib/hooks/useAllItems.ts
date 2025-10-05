@@ -53,6 +53,7 @@ export function useAllItems() {
       url: item.url,
       content: item.content,
       contentType: item.content_type as 'markdown' | 'html' | 'plaintext',
+      code: item.code || null,
       tags: item.tags || [],
       category: item.category,
       createdAt: new Date(item.created_at).getTime(),
