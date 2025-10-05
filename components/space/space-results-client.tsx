@@ -69,6 +69,13 @@ function Row({
             >
               edit
             </Link>
+            <Link
+              href={`/space/add?duplicate=${it.id}`}
+              className="text-xs text-blue-600 hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              duplicate
+            </Link>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground capitalize">{it.category}</span>

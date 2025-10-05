@@ -1,10 +1,13 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/app/lib/db/supabase";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function AddItemPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const duplicateId = searchParams.get('duplicate');
+  
   const [input, setInput] = useState(`{
   "id": "unique-slug",
   "title": "Problem Title",
@@ -17,7 +20,36 @@ export default function AddItemPage() {
   const [preview, setPreview] = useState<any>(null);
   const [error, setError] = useState("");
 
-  const handlePreview = () => {
+  // Load duplicate item if requested
+  useEffect(() => {
+    if (duplicateId) {
+      loadDuplicate(duplicateId);
+    }
+  }, [duplicateId]);
+
+  async function loadDuplicate(id: string) {
+    const { data } = await supabase
+      .from('items')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (data) {
+      const template = {
+        id: `${data.id}-copy`,
+        title: `${data.title} (Copy)`,
+        url: data.url,
+        tags: data.tags,
+        category: data.category,
+        content: data.content,
+        code: data.code,
+      };
+      setInput(JSON.stringify(template, null, 2));
+    }
+  }
+
+  // Auto-preview whenever input changes
+  useEffect(() => {
     try {
       const parsed = JSON.parse(input);
       setPreview(parsed);
@@ -26,7 +58,7 @@ export default function AddItemPage() {
       setError("Invalid JSON");
       setPreview(null);
     }
-  };
+  }, [input]);
 
   const handleSave = async () => {
     if (!preview) return;
@@ -58,21 +90,15 @@ export default function AddItemPage() {
       <div className="grid grid-cols-2 gap-4">
         {/* Input */}
         <div>
-          <h2 className="text-sm font-semibold mb-2">Paste JSON</h2>
+          <h2 className="text-sm font-semibold mb-2">JSON</h2>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             className="w-full h-96 p-3 border rounded font-mono text-sm"
           />
-          <button
-            onClick={handlePreview}
-            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Preview
-          </button>
         </div>
 
-        {/* Preview */}
+        {/* Auto Preview */}
         <div>
           <h2 className="text-sm font-semibold mb-2">Preview</h2>
           {error && <div className="text-red-600 mb-2">{error}</div>}
