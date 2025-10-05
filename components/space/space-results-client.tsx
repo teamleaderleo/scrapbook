@@ -3,26 +3,40 @@ import Link from "next/link";
 import { Rating } from "ts-fsrs";
 import type { Item } from "@/app/lib/item-types";
 import { formatInterval, formatDueRelative } from "@/app/lib/interval-format";
+import { useState } from "react";
+import { supabase } from "@/app/lib/db/supabase";
 
 export function ResultsClient({
   items,
   onReview,
+  onEnroll,
   nowMs,
 }: {
   items: Item[];
   onReview: (id: string, rating: Rating) => void;
+  onEnroll: (id: string) => void;
   nowMs: number;
 }) {
   return (
     <ul className="space-y-2">
       {items.map((it) => (
-        <Row key={it.id} it={it} onReview={onReview} nowMs={nowMs} />
+        <Row key={it.id} it={it} onReview={onReview} onEnroll={onEnroll} nowMs={nowMs} />
       ))}
     </ul>
   );
 }
 
-function Row({ it, onReview, nowMs }: { it: Item; onReview: (id: string, r: Rating) => void; nowMs: number }) {
+function Row({ 
+  it, 
+  onReview, 
+  onEnroll, 
+  nowMs 
+}: { 
+  it: Item; 
+  onReview: (id: string, r: Rating) => void; 
+  onEnroll: (id: string) => void;
+  nowMs: number;
+}) {
   // Extract display tags (strip namespaces for cleaner display)
   const displayTags = it.tags.map(t => t.includes(':') ? t.split(':')[1] : t);
 
@@ -54,7 +68,14 @@ function Row({ it, onReview, nowMs }: { it: Item; onReview: (id: string, r: Rati
         )}
       </div>
 
-      {it.review && (
+      {!it.review ? (
+        <button 
+          className="mt-2 rounded border px-2 py-1 text-xs hover:bg-gray-50"
+          onClick={() => onEnroll(it.id)}
+        >
+          Add to reviews
+        </button>
+       ) : (
         <div className="flex gap-2 mt-2 text-xs">
           <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Again)}>Again</button>
           <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Hard)}>Hard</button>

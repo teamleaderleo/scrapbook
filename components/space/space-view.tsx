@@ -31,6 +31,39 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
     return searchItems(withMutations, q, nowMs);
   }, [allItems, mutations, q, nowMs]);
 
+  const onEnroll = useCallback(async (id: string) => {
+    const initialReview: ReviewState = {
+      state: 0,
+      due: Date.now(),
+      last_review: null,
+      stability: 0,
+      difficulty: 0,
+      scheduled_days: 0,
+      learning_steps: 0,
+      reps: 0,
+      lapses: 0,
+      suspended: false,
+    };
+
+    // Optimistic update
+    setMutations(prev => ({ ...prev, [id]: initialReview }));
+
+    // Persist to Supabase
+    const { error } = await supabase.from('reviews').insert({
+      item_id: id,
+      ...initialReview,
+    });
+
+    if (error) {
+      console.error('Failed to enroll:', error);
+      // Rollback on error
+      setMutations(prev => {
+        const { [id]: _, ...rest } = prev;
+        return rest;
+      });
+    }
+  }, []);
+
   const onReview = useCallback(async (id: string, rating: Rating) => {
     console.group(`Review: ${id} with Rating.${Rating[rating]}`);
     
@@ -77,7 +110,7 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
       <p className="text-sm text-muted-foreground mb-4">
         Query: {tagsParam ?? "(none)"} · {items.length} items
       </p>
-      <ResultsClient items={items} onReview={onReview} nowMs={nowMs} />
+      <ResultsClient items={items} onReview={onReview} onEnroll={onEnroll} nowMs={nowMs} />
     </main>
   );
 }
