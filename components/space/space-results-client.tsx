@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { Rating } from "ts-fsrs";
+import { Button } from "@/components/ui/button";
 import type { Item } from "@/app/lib/item-types";
 import { formatInterval, formatDueRelative } from "@/app/lib/interval-format";
 import { useState } from "react";
@@ -62,20 +63,23 @@ function Row({
             ) : (
               <span className="font-medium">{it.title}</span>
             )}
-            <Link
-              href={`/space/edit/${it.id}`}
-              className="text-xs text-blue-600 hover:underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              edit
-            </Link>
-            <Link
-              href={`/space/add?duplicate=${it.id}`}
-              className="text-xs text-blue-600 hover:underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              duplicate
-            </Link>
+            <Button asChild variant="outline" size="sm">
+              <Link
+                href={`/space/edit/${it.id}`}
+                onClick={(e) => e.stopPropagation()}
+                
+              >
+                edit
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link
+                href={`/space/add?duplicate=${it.id}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                duplicate
+              </Link>
+            </Button>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground capitalize">{it.category}</span>

@@ -37,6 +37,18 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <div className="h-px bg-gray-200" />
+      <SidebarGroup>
+        <SidebarGroupLabel className="px-4">Actions</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild className="justify-start gap-2 px-4 pl-6">
+                <Link href="/space/add">+ Add Item</Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
 
       <ScrollArea className="flex-1">
         <SidebarContent className="py-4">
