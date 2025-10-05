@@ -6,6 +6,8 @@ import type { Item } from "@/app/lib/item-types";
 import { formatInterval, formatDueRelative } from "@/app/lib/interval-format";
 import { useState } from "react";
 import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export function ResultsClient({
   items,
@@ -119,8 +121,15 @@ function Row({
             {it.code && (
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-semibold mb-2 text-black">Code</h3>
-                <div className="p-3 bg-gray-900 text-gray-100 rounded max-h-96 overflow-auto">
-                  <pre className="text-sm"><code>{it.code}</code></pre>
+                <div className="bg-gray-900 rounded max-h-96 overflow-auto">
+                  <SyntaxHighlighter 
+                    language="python"
+                    style={vscDarkPlus}
+                    customStyle={{ margin: 0, background: 'transparent', padding: '0.75rem' }}
+                    className="text-sm"
+                  >
+                    {it.code}
+                  </SyntaxHighlighter>
                 </div>
               </div>
             )}

@@ -10,6 +10,8 @@ import { Rating } from "ts-fsrs";
 import { reviewOnce } from "@/app/lib/fsrs-adapter";
 import { supabase } from "@/app/lib/db/supabase";
 import type { ReviewState } from "@/app/lib/review-types";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export function ReviewGallery({ serverNow }: { serverNow: number }) {
   const nowMs = useNow(serverNow, 30000);
@@ -117,9 +119,16 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
 
           {/* Code */}
           {current.code && (
-            <div className="flex-1 overflow-auto border rounded p-4 bg-gray-900 text-gray-100">
-              <h2 className="text-lg font-semibold mb-2">Code</h2>
-              <pre className="text-sm"><code>{current.code}</code></pre>
+            <div className="flex-1 overflow-auto border rounded bg-gray-900">
+              <h2 className="text-lg font-semibold mb-2 p-4 pb-0 text-gray-100">Code</h2>
+              <SyntaxHighlighter 
+                language="python" // or detect from item
+                style={vscDarkPlus}
+                customStyle={{ margin: 0, background: 'transparent' }}
+                className="text-sm"
+              >
+                {current.code}
+              </SyntaxHighlighter>
             </div>
           )}
         </div>
