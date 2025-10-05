@@ -8,6 +8,7 @@ export type Item = {
   
   content: string;
   contentType: 'markdown' | 'html' | 'plaintext';
+  code?: string;
   
   tags: string[];  // ['company:google', 'topic:dp', 'difficulty:hard', 'type:leetcode']
   category: string;  // 'leetcode' | 'article' | 'system-design' | etc

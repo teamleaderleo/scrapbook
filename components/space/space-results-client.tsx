@@ -4,7 +4,7 @@ import { Rating } from "ts-fsrs";
 import type { Item } from "@/app/lib/item-types";
 import { formatInterval, formatDueRelative } from "@/app/lib/interval-format";
 import { useState } from "react";
-import { supabase } from "@/app/lib/db/supabase";
+import ReactMarkdown from 'react-markdown';
 
 export function ResultsClient({
   items,
@@ -29,7 +29,7 @@ export function ResultsClient({
 function Row({ 
   it, 
   onReview, 
-  onEnroll, 
+  onEnroll,
   nowMs 
 }: { 
   it: Item; 
@@ -37,52 +37,95 @@ function Row({
   onEnroll: (id: string) => void;
   nowMs: number;
 }) {
-  // Extract display tags (strip namespaces for cleaner display)
+  const [expanded, setExpanded] = useState(false);
   const displayTags = it.tags.map(t => t.includes(':') ? t.split(':')[1] : t);
 
   return (
-    <li className="rounded border p-3">
-      <div className="flex items-center justify-between">
-        {it.url ? (
-          <Link href={it.url} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline">
-            {it.title}
-          </Link>
-        ) : (
-          <span className="font-medium">{it.title}</span>
-        )}
-        <span className="text-xs text-muted-foreground capitalize">{it.category}</span>
+    <li className="rounded border">
+      {/* Clickable header */}
+      <div 
+        className="p-3 cursor-pointer hover:bg-gray-50"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div className="flex items-center justify-between">
+          {it.url ? (
+            <Link 
+              href={it.url} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="font-medium hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {it.title}
+            </Link>
+          ) : (
+            <span className="font-medium">{it.title}</span>
+          )}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground capitalize">{it.category}</span>
+            <span className="text-sm">{expanded ? '▼' : '▶'}</span>
+          </div>
+        </div>
+
+        <div className="mt-1 text-xs text-muted-foreground">
+          tags: {displayTags.join(", ")}
+          {it.review && (
+            <>
+              {" · next: "}
+              {formatDueRelative(nowMs, new Date(it.review.due))}
+              {" · ivl: "}
+              {formatInterval(nowMs, new Date(it.review.due), it.review.scheduled_days)}
+              {it.review.due <= nowMs && (
+                <span className="ml-2 rounded bg-red-100 text-red-700 px-1 py-0.5">due</span>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
-      <div className="mt-1 text-xs text-muted-foreground">
-        tags: {displayTags.join(", ")}
-        {it.review && (
-          <>
-            {" · next: "}
-            {formatDueRelative(nowMs, new Date(it.review.due))}
-            {" · ivl: "}
-            {formatInterval(nowMs, new Date(it.review.due), it.review.scheduled_days)}
-            {it.review.due <= nowMs && (
-              <span className="ml-2 rounded bg-red-100 text-red-700 px-1 py-0.5">due</span>
+      {/* Expanded content */}
+      {expanded && (
+        <div className="border-t p-3">
+          <div className="flex gap-3">
+            {/* Writeup */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold mb-2 text-black">Writeup</h3>
+              <div className="p-3 bg-gray-50 rounded max-h-96 overflow-auto prose prose-sm max-w-none text-black">
+                <ReactMarkdown>{it.content || '*No writeup yet*'}</ReactMarkdown>
+              </div>
+            </div>
+
+            {/* Code */}
+            {it.code && (
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold mb-2 text-black">Code</h3>
+                <div className="p-3 bg-gray-900 text-gray-100 rounded max-h-96 overflow-auto">
+                  <pre className="text-sm"><code>{it.code}</code></pre>
+                </div>
+              </div>
             )}
-          </>
-        )}
-      </div>
-
-      {!it.review ? (
-        <button 
-          className="mt-2 rounded border px-2 py-1 text-xs hover:bg-gray-50"
-          onClick={() => onEnroll(it.id)}
-        >
-          Add to reviews
-        </button>
-       ) : (
-        <div className="flex gap-2 mt-2 text-xs">
-          <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Again)}>Again</button>
-          <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Hard)}>Hard</button>
-          <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Good)}>Good</button>
-          <button className="rounded border px-2 py-1" onClick={() => onReview(it.id, Rating.Easy)}>Easy</button>
+          </div>
         </div>
       )}
+
+      {/* Review controls - always visible */}
+      <div className="border-t p-3" onClick={(e) => e.stopPropagation()}>
+        {!it.review ? (
+          <button 
+            className="rounded border px-2 py-1 text-xs hover:bg-gray-100"
+            onClick={() => onEnroll(it.id)}
+          >
+            Add to reviews
+          </button>
+        ) : (
+          <div className="flex gap-2 text-xs">
+            <button className="rounded border px-2 py-1 hover:bg-gray-100" onClick={() => onReview(it.id, Rating.Again)}>Again</button>
+            <button className="rounded border px-2 py-1 hover:bg-gray-100" onClick={() => onReview(it.id, Rating.Hard)}>Hard</button>
+            <button className="rounded border px-2 py-1 hover:bg-gray-100" onClick={() => onReview(it.id, Rating.Good)}>Good</button>
+            <button className="rounded border px-2 py-1 hover:bg-gray-100" onClick={() => onReview(it.id, Rating.Easy)}>Easy</button>
+          </div>
+        )}
+      </div>
     </li>
   );
 }
