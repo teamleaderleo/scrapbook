@@ -1,10 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/app/lib/db/supabase";
 import { useItems } from "@/app/lib/contexts/item-context";
 
-export function AddItemForm() {
+export function AddItemFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { reload } = useItems();
@@ -132,5 +132,13 @@ export function AddItemForm() {
         </div>
       </div>
     </div>
+  );
+}
+
+export function AddItemForm() {
+  return (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <AddItemFormContent />
+    </Suspense>
   );
 }
