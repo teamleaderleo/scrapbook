@@ -3,13 +3,13 @@ import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { parseQuery } from "@/app/lib/searchlang";
 import { searchItems } from "@/app/lib/item-search";
+import { useItems } from "@/app/lib/contexts/item-context";
 import { useNow } from "@/app/lib/hooks/useNow";
 import ReactMarkdown from 'react-markdown';
 import { Rating } from "ts-fsrs";
 import { reviewOnce } from "@/app/lib/fsrs-adapter";
 import { supabase } from "@/app/lib/db/supabase";
 import type { ReviewState } from "@/app/lib/review-types";
-import { useItems } from "@/app/lib/contexts/item-context";
 
 export function ReviewGallery({ serverNow }: { serverNow: number }) {
   const nowMs = useNow(serverNow, 30000);
@@ -17,10 +17,10 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
   const router = useRouter();
   const tagsParam = sp.get("tags") ?? undefined;
 
-  const { items: allItems, loading } = useItems();
+  const { items: allItems, loading, reload } = useItems();
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [showCode, setShowCode] = useState(false);
+  const [showContent, setShowContent] = useState(true);
 
   const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
   
@@ -38,15 +38,15 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'j') {
         setCurrentIndex(i => Math.min(i + 1, items.length - 1));
-        setShowCode(false);
+        setShowContent(true);
       }
       if (e.key === 'ArrowLeft' || e.key === 'k') {
         setCurrentIndex(i => Math.max(i - 1, 0));
-        setShowCode(false);
+        setShowContent(true);
       }
       if (e.key === ' ') {
         e.preventDefault();
-        setShowCode(s => !s);
+        setShowContent(s => !s);
       }
       if (e.key === 'Escape') {
         router.push('/space' + (tagsParam ? `?tags=${tagsParam}` : ''));
@@ -79,7 +79,7 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
     // Auto-advance after review
     if (currentIndex < items.length - 1) {
       setCurrentIndex(i => i + 1);
-      setShowCode(false);
+      setShowContent(true);
     }
   };
 
@@ -105,28 +105,30 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
       <h1 className="text-2xl font-bold mb-4">{current.title}</h1>
 
       {/* Content */}
-      <div className="flex-1 flex gap-4 overflow-hidden">
-        {/* Writeup */}
-        <div className="flex-1 overflow-auto border rounded p-4 bg-white">
-          <h2 className="text-lg font-semibold mb-2">Writeup</h2>
-          <div className="prose prose-sm max-w-none">
-            <ReactMarkdown>{current.content || '*No writeup yet*'}</ReactMarkdown>
+      {showContent && (
+        <div className="flex-1 flex gap-4 overflow-hidden">
+          {/* Writeup */}
+          <div className="flex-1 overflow-auto border rounded p-4 bg-white">
+            <h2 className="text-lg font-semibold mb-2">Writeup</h2>
+            <div className="prose prose-sm max-w-none">
+              <ReactMarkdown>{current.content || '*No writeup yet*'}</ReactMarkdown>
+            </div>
           </div>
-        </div>
 
-        {/* Code */}
-        {showCode && current.code && (
-          <div className="flex-1 overflow-auto border rounded p-4 bg-gray-900 text-gray-100">
-            <h2 className="text-lg font-semibold mb-2">Code</h2>
-            <pre className="text-sm"><code>{current.code}</code></pre>
-          </div>
-        )}
-      </div>
+          {/* Code */}
+          {current.code && (
+            <div className="flex-1 overflow-auto border rounded p-4 bg-gray-900 text-gray-100">
+              <h2 className="text-lg font-semibold mb-2">Code</h2>
+              <pre className="text-sm"><code>{current.code}</code></pre>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Controls */}
       <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-gray-600">
-          ← → or j/k to navigate · Space to {showCode ? 'hide' : 'show'} code
+          ← → or j/k to navigate · Space to {showContent ? 'hide' : 'show'} content
         </div>
         
         {current.review && (
