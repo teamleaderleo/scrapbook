@@ -14,6 +14,9 @@ export function searchItems(items: Item[], q: ParsedQuery, nowMs: number): Item[
   // Namespaced operators
   for (const [key, vals] of Object.entries(q.ops)) {
     switch (key) {
+      case "diff":
+        res = res.filter(it => vals.every(v => it.tags.includes(`difficulty:${v}`)));
+        break;
       case "company":
       case "topic":
       case "difficulty":
