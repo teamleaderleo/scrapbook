@@ -8,6 +8,7 @@ import { useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useSearchParams } from "next/navigation";
 
 export function ResultsClient({
   items,
@@ -42,6 +43,8 @@ function Row({
 }) {
   const [expanded, setExpanded] = useState(false);
   const displayTags = it.tags.map(t => t.includes(':') ? t.split(':')[1] : t);
+  const sp = useSearchParams();
+  const tagsParam = sp.get("tags") ?? ""; 
 
   return (
     <li className="rounded border">
@@ -80,6 +83,14 @@ function Row({
                 onClick={(e) => e.stopPropagation()}
               >
                 duplicate
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link
+                href={`/space/review?tags=${tagsParam}&item=${it.id}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                review
               </Link>
             </Button>
           </div>

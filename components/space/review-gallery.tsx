@@ -20,6 +20,7 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
   const sp = useSearchParams();
   const router = useRouter();
   const tagsParam = sp.get("tags") ?? undefined;
+  const itemParam = sp.get("item");
 
   const { items: allItems, loading, reload } = useItems();
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
@@ -37,6 +38,16 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
   }, [allItems, mutations, q, nowMs]);
 
   const current = items[currentIndex];
+
+  // Jump to the specified item on load
+  useEffect(() => {
+    if (itemParam && items.length > 0) {
+      const index = items.findIndex(it => it.id === itemParam);
+      if (index !== -1) {
+        setCurrentIndex(index);
+      }
+    }
+  }, [itemParam, items]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
