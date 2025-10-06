@@ -48,6 +48,8 @@ export default function EditItemPage() {
 
   // Sync raw input changes to preview
   useEffect(() => {
+    if (!isEditingRaw) return;
+    
     try {
       const parsed = JSON.parse(rawInput);
       setPreview(parsed);
@@ -58,21 +60,21 @@ export default function EditItemPage() {
       setJsonError("Invalid JSON");
       setPreview(null);
     }
-  }, [rawInput]);
+  }, [rawInput, isEditingRaw]);
 
   // Sync content/code changes to raw input
   useEffect(() => {
-    if (item && !isEditingRaw) {
-      setRawInput(JSON.stringify({
-        id: item.id,
-        title: item.title,
-        url: item.url,
-        tags: item.tags,
-        category: item.category,
-        content: content,
-        code: code,
-      }, null, 2));
-    }
+    if (isEditingRaw || !item) return;
+    
+    setRawInput(JSON.stringify({
+      id: item.id,
+      title: item.title,
+      url: item.url,
+      tags: item.tags,
+      category: item.category,
+      content: content,
+      code: code,
+    }, null, 2));
   }, [content, code, item, isEditingRaw]);
 
   async function handleSave() {
