@@ -17,6 +17,7 @@ export default function EditItemPage() {
   const [rawInput, setRawInput] = useState("");
   const [jsonError, setJsonError] = useState("");
   const [isEditingRaw, setIsEditingRaw] = useState(false);
+  const [preview, setPreview] = useState<any>(null);
 
   useEffect(() => {
     loadItem();
@@ -45,19 +46,19 @@ export default function EditItemPage() {
     }
   }
 
-  // Sync raw input changes to content and code
+  // Sync raw input changes to preview
   useEffect(() => {
-    if (!isEditingRaw) return;
-    
     try {
       const parsed = JSON.parse(rawInput);
+      setPreview(parsed);
       setContent(parsed.content || '');
       setCode(parsed.code || '');
       setJsonError("");
     } catch (e) {
       setJsonError("Invalid JSON");
+      setPreview(null);
     }
-  }, [rawInput, isEditingRaw]);
+  }, [rawInput]);
 
   // Sync content/code changes to raw input
   useEffect(() => {
@@ -180,10 +181,10 @@ export default function EditItemPage() {
         <div>
           <h2 className="text-sm font-semibold mb-2">Preview</h2>
           <div className="border rounded p-4 space-y-2 h-96 overflow-auto">
-            <div><strong>Title:</strong> {item.title}</div>
-            <div><strong>Tags:</strong> {item.tags?.join(', ')}</div>
-            <div><strong>Category:</strong> {item.category}</div>
-            {item.url && <div><strong>URL:</strong> {item.url}</div>}
+            <div><strong>Title:</strong> {preview?.title || item.title}</div>
+            <div><strong>Tags:</strong> {preview?.tags?.join(', ') || item.tags?.join(', ')}</div>
+            <div><strong>Category:</strong> {preview?.category || item.category}</div>
+            {(preview?.url || item.url) && <div><strong>URL:</strong> {preview?.url || item.url}</div>}
             
             <div className="border-t pt-2 mt-2">
               <strong>Content:</strong>
