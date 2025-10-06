@@ -14,7 +14,7 @@ export function AddItemFormContent() {
   
   const [input, setInput] = useState(`{
   "id": "unique-slug",
-  "title": "Problem Title",
+  "title": "0. Problem Title",
   "url": "https://leetcode.com/problems/...",
   "tags": ["type:leetcode", "company:google", "topic:array", "difficulty:easy"],
   "category": "leetcode",
