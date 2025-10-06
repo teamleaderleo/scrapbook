@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { parseQuery } from "@/app/lib/searchlang";
@@ -92,8 +94,20 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
     <div className="h-screen flex flex-col p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <div className="text-sm text-gray-500">
-          {currentIndex + 1} / {items.length}
+        <div className="flex items-center gap-3">
+          <div className="text-sm text-gray-500">
+            {currentIndex + 1} / {items.length}
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/space/edit/${current.id}`}>
+              edit
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/space/add?duplicate=${current.id}`}>
+              duplicate
+            </Link>
+          </Button>
         </div>
         <button
           onClick={() => router.push('/space' + (tagsParam ? `?tags=${tagsParam}` : ''))}
