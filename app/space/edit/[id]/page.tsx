@@ -76,9 +76,23 @@ export default function EditItemPage() {
   }, [content, code, item, isEditingRaw]);
 
   async function handleSave() {
+    const updates = preview ? {
+      title: preview.title,
+      url: preview.url || null,
+      tags: preview.tags || [],
+      category: preview.category || 'general',
+      content: preview.content || '',
+      code: preview.code || null,
+      updated_at: new Date().toISOString()
+    } : {
+      content,
+      code,
+      updated_at: new Date().toISOString()
+    };
+
     const { error } = await supabase
       .from('items')
-      .update({ content, code, updated_at: new Date().toISOString() })
+      .update(updates)
       .eq('id', params.id);
     
     if (!error) {
