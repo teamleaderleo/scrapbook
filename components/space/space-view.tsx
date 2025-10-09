@@ -32,6 +32,9 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
   }, [allItems, mutations, q, nowMs]);
 
   const onEnroll = useCallback(async (id: string) => {
+
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const initialReview: ReviewState = {
       state: 0,
       due: Date.now(),
@@ -45,18 +48,16 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
       suspended: false,
     };
 
-    // Optimistic update
     setMutations(prev => ({ ...prev, [id]: initialReview }));
 
-    // Persist to Supabase
     const { error } = await supabase.from('reviews').insert({
       item_id: id,
+      user_id: user?.id || null,
       ...initialReview,
     });
 
     if (error) {
       console.error('Failed to enroll:', error);
-      // Rollback on error
       setMutations(prev => {
         const { [id]: _, ...rest } = prev;
         return rest;
@@ -65,6 +66,8 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
   }, []);
 
   const onReview = useCallback(async (id: string, rating: Rating) => {
+    const { data: { user } } = await supabase.auth.getUser();
+
     console.group(`Review: ${id} with Rating.${Rating[rating]}`);
     
     const current = mutations[id] ?? allItems.find(x => x.id === id)?.review;
@@ -79,6 +82,7 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
 
     const { error } = await supabase.from('reviews').upsert({
       item_id: id,
+      user_id: user?.id || null,
       state: next.state,
       due: next.due,
       last_review: next.last_review,

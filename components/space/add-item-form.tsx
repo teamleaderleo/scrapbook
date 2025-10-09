@@ -67,8 +67,11 @@ export function AddItemFormContent() {
   const handleSave = async () => {
     if (!preview) return;
     
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const { error } = await supabase.from('items').insert({
       id: preview.id,
+      user_id: user?.id || null,
       title: preview.title,
       slug: preview.id,
       url: preview.url || null,
