@@ -2,6 +2,7 @@ import type { ReviewState } from "./review-types";
 
 export type Item = {
   id: string;
+  userId?: string;
   title: string;
   slug: string | null;
   url: string | null;

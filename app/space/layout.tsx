@@ -3,6 +3,7 @@ import SiteNav from '@/components/site-nav';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/app-sidebar';
 import { ItemsProvider } from '../lib/contexts/item-context';
+import { SpaceHeader } from '@/components/space/space-header';
 
 export const metadata: Metadata = {
   title: 'Space',
@@ -21,6 +22,7 @@ export default function SpaceLayout({
           {/* <SpaceSidebar /> */}
           <AppSidebar/>
           <div className="flex flex-col flex-1">
+            {/* <SpaceHeader /> */}
             {/* <MinimalSiteNav /> */}
             {children}
           </div>

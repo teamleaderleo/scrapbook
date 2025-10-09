@@ -3,20 +3,36 @@ import { supabase, type DbItem, type DbReview } from '../db/supabase';
 import type { Item } from '../item-types';
 import type { ReviewState } from '@/app/lib/review-types';
 
-export function useAllItems() {
+export function useAllItems(userId?: string | null) {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadItems();
-  }, []);
+  }, [userId]);
 
   async function loadItems() {
     setLoading(true);
     
+    let itemsQuery = supabase
+      .from('items')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    // If userId provided, filter by user (for authenticated view)
+    // Otherwise show all items (public gallery view)
+    if (userId) {
+      itemsQuery = itemsQuery.eq('user_id', userId);
+    }
+
+    // Reviews query - only fetch for authenticated user
+    const reviewsPromise = userId 
+      ? supabase.from('reviews').select('*').eq('user_id', userId)
+      : Promise.resolve({ data: [], error: null });
+
     const [itemsResult, reviewsResult] = await Promise.all([
-      supabase.from('items').select('*').order('created_at', { ascending: false }),
-      supabase.from('reviews').select('*')
+      itemsQuery,
+      reviewsPromise
     ]);
 
     if (itemsResult.error) {
@@ -48,6 +64,7 @@ export function useAllItems() {
     // Map to Item format
     const mapped: Item[] = (itemsResult.data || []).map(item => ({
       id: item.id,
+      userId: item.user_id || undefined,
       title: item.title,
       slug: item.slug,
       url: item.url,

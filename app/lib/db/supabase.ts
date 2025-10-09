@@ -9,6 +9,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 // Database row types are slightly different due to the Review state thing
 export type DbItem = {
   id: string;
+  user_id: string | null;
   title: string;
   slug: string | null;
   url: string | null;
@@ -23,5 +24,6 @@ export type DbItem = {
 
 export type DbReview = ReviewState & {
   item_id: string;
+  user_id: string | null;
   updated_at: string;
 }
