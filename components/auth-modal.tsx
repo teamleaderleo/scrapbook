@@ -49,12 +49,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          // CHANGE THIS LINE:
-          redirectTo: window.location.origin, // No more '/auth/callback'
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
+          redirectTo: `${window.location.origin}/space`, // Dynamically use current origin/Goes back to wherever we started
         },
       });
   
@@ -88,7 +83,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </div>
           </div>
           <button
-            title='Button'
+            title='Close'
             onClick={onClose}
             className="p-2 bg-red-500 border-3 border-black text-white hover:bg-red-400 transition-all duration-100 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-0 active:translate-y-0 active:shadow-none"
           >
