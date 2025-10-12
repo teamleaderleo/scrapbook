@@ -9,6 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useSearchParams } from "next/navigation";
+import { useItems } from "@/app/lib/contexts/item-context";
 
 export function ResultsClient({
   items,
@@ -42,6 +43,7 @@ function Row({
   nowMs: number;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const { isAdmin } = useItems();
   const displayTags = it.tags.map(t => t.includes(':') ? t.split(':')[1] : t);
   const sp = useSearchParams();
   const tagsParam = sp.get("tags") ?? ""; 
@@ -68,23 +70,27 @@ function Row({
             ) : (
               <span className="font-medium">{it.title}</span>
             )}
-            <Button asChild variant="outline" size="sm">
-              <Link
-                href={`/space/edit/${it.id}`}
-                onClick={(e) => e.stopPropagation()}
-                
-              >
-                edit
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link
-                href={`/space/add?duplicate=${it.id}`}
-                onClick={(e) => e.stopPropagation()}
-              >
-                duplicate
-              </Link>
-            </Button>
+            {/* Only show edit/duplicate buttons if admin */}
+            {isAdmin && (
+              <>
+                <Button asChild variant="outline" size="sm">
+                  <Link
+                    href={`/space/edit/${it.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    edit
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm">
+                  <Link
+                    href={`/space/add?duplicate=${it.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    duplicate
+                  </Link>
+                </Button>
+              </>
+            )}
             <Button asChild variant="outline" size="sm">
               <Link
                 href={`/space/review?tags=${tagsParam}&item=${it.id}`}
@@ -148,7 +154,8 @@ function Row({
         </div>
       )}
 
-      {/* Review controls - always visible */}
+      {/* Review controls - only visible for admin */}
+      {isAdmin && (
       <div className="border-t p-3" onClick={(e) => e.stopPropagation()}>
         {!it.review ? (
           <button 
@@ -166,6 +173,7 @@ function Row({
           </div>
         )}
       </div>
+    )}
     </li>
   );
 }

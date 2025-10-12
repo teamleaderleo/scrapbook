@@ -16,6 +16,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export function ReviewGallery({ serverNow }: { serverNow: number }) {
+  const { isAdmin } = useItems();
   const nowMs = useNow(serverNow, 30000);
   const sp = useSearchParams();
   const router = useRouter();
@@ -109,16 +110,20 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
           <div className="text-sm text-gray-500">
             {currentIndex + 1} / {items.length}
           </div>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/space/edit/${current.id}`}>
-              edit
-            </Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/space/add?duplicate=${current.id}`}>
-              duplicate
-            </Link>
-          </Button>
+          {isAdmin && (
+            <>
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/space/edit/${current.id}`}>
+                  edit
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/space/add?duplicate=${current.id}`}>
+                  duplicate
+                </Link>
+              </Button>
+            </>
+          )}
         </div>
         <button
           onClick={() => router.push('/space' + (tagsParam ? `?tags=${tagsParam}` : ''))}
@@ -165,7 +170,7 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
           ← → or j/k to navigate · Space to {showContent ? 'hide' : 'show'} content
         </div>
         
-        {current.review && (
+        {isAdmin && current.review && (
           <div className="flex gap-2">
             <button 
               onClick={() => onReview(Rating.Again)}

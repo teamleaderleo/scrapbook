@@ -9,19 +9,32 @@ type ItemsContextType = {
   loading: boolean;
   reload: () => void;
   user: any;
+  isAdmin: boolean;
 };
 
 const ItemsContext = createContext<ItemsContextType | null>(null);
 
+const ADMIN_USER_IDS = [
+  '7f041d78-8d8d-4d77-934d-6e839c2c7e39', // Google
+  '9c838f77-83a9-416e-9bd0-ef18e77424e4', // GitHub
+];
+
 export function ItemsProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   
-  // For now, pass user.id to show only user's items when logged in
-  // Pass null to show all items (public gallery mode)
-  const { items, loading, reload } = useAllItems(user?.id || null);
+  // Always pass null to show ALL items (public gallery)
+  const { items, loading: itemsLoading, reload } = useAllItems(null);
+  
+  const isAdmin = user ? ADMIN_USER_IDS.includes(user.id) : false;
   
   return (
-    <ItemsContext.Provider value={{ items, loading, reload, user }}>
+    <ItemsContext.Provider value={{ 
+      items, 
+      loading: authLoading || itemsLoading, 
+      reload,
+      user,
+      isAdmin 
+    }}>
       {children}
     </ItemsContext.Provider>
   );

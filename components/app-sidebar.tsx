@@ -21,12 +21,14 @@ import { User, LogOut } from "lucide-react";
 import { shortcuts } from "@/app/lib/sidebar-data";
 import { useAuth } from "@/app/lib/hooks/useAuth";
 import { AuthModal } from "./auth-modal";
+import { useItems } from '@/app/lib/contexts/item-context';
 
 export function AppSidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentQuery = searchParams.get("tags") || "";
   const isReviewMode = pathname === "/space/review";
+  const { isAdmin } = useItems();
   
   const { user, signOut } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -47,18 +49,20 @@ export function AppSidebar() {
           </div>
         </SidebarHeader>
         <div className="h-px bg-gray-200" />
-        <SidebarGroup>
-          <SidebarGroupLabel className="px-4">Actions</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild className="justify-start gap-2 px-4 pl-6">
-                  <Link href="/space/add">+ Add Item</Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="px-4">Actions</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild className="justify-start gap-2 px-4 pl-6">
+                    <Link href="/space/add">+ Add Item</Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         <ScrollArea className="flex-1">
           <SidebarContent className="py-4">
