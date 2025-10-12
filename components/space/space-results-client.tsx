@@ -167,8 +167,8 @@ function Row({
                       margin: 0,
                       background: 'transparent',
                       padding: '0.75rem',
-                      fontSize: 14,          // <-- same size in BOTH modes
-                      lineHeight: 1.3,       // consistent line height
+                      fontSize: 14,
+                      lineHeight: 1.3,
                     }}
                     codeTagProps={{ style: { background: 'transparent', fontSize: 'inherit' } }}
                     PreTag="div"
