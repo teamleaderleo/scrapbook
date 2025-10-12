@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import {
   Sidebar,
   SidebarHeader,
@@ -17,7 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LogOut, Loader2 } from "lucide-react";
+import { LogOut, Loader2, Moon, Sun } from "lucide-react";
 import { shortcuts } from "@/app/lib/sidebar-data";
 import { useAuth } from "@/app/lib/hooks/useAuth";
 import { useItems } from "@/app/lib/contexts/item-context";
@@ -28,6 +29,7 @@ export function AppSidebar() {
   const searchParams = useSearchParams();
   const currentQuery = searchParams.get("tags") || "";
   const isReviewMode = pathname === "/space/review";
+  const { theme, setTheme } = useTheme();
   
   const { user, signOut } = useAuth();
   const { isAdmin } = useItems();
@@ -59,14 +61,13 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="flex flex-col h-screen">
-      <SidebarHeader className="h-[48px] p-0 m-0 bg-white text-black">
+      <SidebarHeader className="h-[48px] p-0 m-0 bg-background text-foreground border-b">
         <div className="flex h-full items-center px-4">
           <Link href="/" className="text-lg font-bold leading-none">
             teamleaderleo
           </Link>
         </div>
       </SidebarHeader>
-      <div className="h-px bg-gray-200" />
       
       {/* Only show Actions if admin */}
       {isAdmin && (
@@ -126,8 +127,20 @@ export function AppSidebar() {
         </SidebarContent>
       </ScrollArea>
 
-      {/* Auth Section */}
+      {/* Auth & Theme Section */}
       <SidebarFooter className="border-t p-4 space-y-2">
+        {/* Theme Toggle */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="w-full"
+        >
+          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <span className="ml-2">Toggle theme</span>
+        </Button>
+
         {user ? (
           <>
             <div className="text-sm text-muted-foreground truncate px-2" title={user.email}>

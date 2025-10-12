@@ -25,7 +25,7 @@ export function SpaceHeader({ leftContent, rightContent }: SpaceHeaderProps) {
 
   return (
     <>
-      <div className="bg-white px-6 h-12 relative">
+      <div className="bg-background px-6 h-12 relative border-b">
         <div className="flex items-center justify-between h-full">
           {/* Left: Query/Index info */}
           <div className="flex-1">

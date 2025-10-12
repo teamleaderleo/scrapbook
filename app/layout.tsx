@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import { ServiceWorkerRegistration } from '@/components/ui/service-worker-registration';
 import { ReactQueryProvider } from '@/components/query-client-provider';
 import { Toaster } from "@/components/ui/components/toaster";
+import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
   title: {
@@ -23,17 +24,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <ReactQueryProvider>
+    <html lang="en" suppressHydrationWarning>
       <body 
         className={`${inter.className} antialiased`}
-        suppressHydrationWarning
       >
-          {children}
-          <Toaster />
-        </body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ReactQueryProvider>
+            {children}
+            <Toaster />
+          </ReactQueryProvider>
+        </ThemeProvider>
         <ServiceWorkerRegistration />
-      </ReactQueryProvider>
+      </body>
     </html>
   );
 }
