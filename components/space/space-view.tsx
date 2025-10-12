@@ -11,6 +11,7 @@ import { useNow } from "@/app/lib/hooks/useNow";
 import { reviewOnce, debugCard } from "@/app/lib/fsrs-adapter";
 import { useItems } from "@/app/lib/contexts/item-context";
 import { supabase } from "@/app/lib/db/supabase";
+import { SpaceHeader } from "./space-header";
 
 export function SpaceView({ serverNow }: { serverNow: number }) {
   const nowMs = useNow(serverNow, 30000);
@@ -32,7 +33,6 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
   }, [allItems, mutations, q, nowMs]);
 
   const onEnroll = useCallback(async (id: string) => {
-
     const { data: { user } } = await supabase.auth.getUser();
     
     const initialReview: ReviewState = {
@@ -102,18 +102,25 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
 
   if (loading) {
     return (
-      <main className="p-4">
-        <div className="text-muted-foreground">Loading...</div>
-      </main>
+      <>
+        <SpaceHeader 
+          leftContent={<span>Loading...</span>}
+        />
+        <main className="p-4">
+          <div className="text-muted-foreground">Loading...</div>
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="p-4">
-      <p className="text-sm text-muted-foreground mb-4">
-        Query: {tagsParam ?? "(none)"} · {items.length} items
-      </p>
-      <ResultsClient items={items} onReview={onReview} onEnroll={onEnroll} nowMs={nowMs} />
-    </main>
+    <>
+      <SpaceHeader 
+        leftContent={`Query: ${tagsParam ?? "(none)"} · ${items.length} items`}
+      />
+      <main className="p-4">
+        <ResultsClient items={items} onReview={onReview} onEnroll={onEnroll} nowMs={nowMs} />
+      </main>
+    </>
   );
 }

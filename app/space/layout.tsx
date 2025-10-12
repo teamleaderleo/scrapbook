@@ -3,7 +3,6 @@ import SiteNav from '@/components/site-nav';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/app-sidebar';
 import { ItemsProvider } from '../lib/contexts/item-context';
-import { SpaceHeader } from '@/components/space/space-header';
 
 export const metadata: Metadata = {
   title: 'Space',

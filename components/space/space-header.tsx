@@ -1,51 +1,56 @@
 "use client";
-import { useState } from 'react';
-import { useAuth } from '@/app/lib/hooks/useAuth';
-import { SimpleAuthModal } from '../simple-auth-modal';
-import { Button } from '@/components/ui/button';
-import { User, LogOut } from 'lucide-react';
 
-export function SpaceHeader() {
-  const { user, signOut } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { useSearchParams, usePathname } from "next/navigation";
+
+interface SpaceHeaderProps {
+  // Left side info
+  leftContent: React.ReactNode;
+  
+  // Right side actions (optional)
+  rightContent?: React.ReactNode;
+}
+
+export function SpaceHeader({ leftContent, rightContent }: SpaceHeaderProps) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const tagsParam = searchParams.get("tags") || "";
+  const isReviewMode = pathname === "/space/review";
+
+  // Toggle between list and review view with same query
+  const toggleHref = isReviewMode 
+    ? `/space${tagsParam ? `?tags=${tagsParam}` : ''}`
+    : `/space/review${tagsParam ? `?tags=${tagsParam}` : ''}`;
 
   return (
     <>
-      <header className="border-b px-6 py-3 flex items-center justify-between bg-white">
-        <div>
-          <h1 className="text-xl font-bold">Scrapbook</h1>
+      <div className="bg-white px-6 h-12">
+        <div className="flex items-center justify-between h-full">
+        {/* Left: Query/Index info */}
+        <div className="flex-1">
+          <p className="text-sm text-muted-foreground">
+            {leftContent}
+          </p>
         </div>
-        
-        <div className="flex items-center gap-3">
-          {user ? (
-            <>
-              <span className="text-sm text-gray-600">{user.email}</span>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => signOut()}
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
-            </>
-          ) : (
-            <Button 
-              variant="default" 
-              size="sm"
-              onClick={() => setShowAuthModal(true)}
-            >
-              <User className="w-4 h-4 mr-2" />
-              Sign In
-            </Button>
-          )}
+
+        {/* Center: Toggle view mode */}
+        <div className="flex-1 flex justify-center">
+          <Link 
+            href={toggleHref}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {isReviewMode ? '← Back to List' : '→ Review Mode'}
+          </Link>
         </div>
-      </header>
-      
-      <SimpleAuthModal 
-        isOpen={showAuthModal} 
-        onClose={() => setShowAuthModal(false)} 
-      />
+
+        {/* Right: Additional actions */}
+        <div className="flex-1 flex justify-end gap-2">
+          {rightContent}
+        </div>
+      </div>
+    </div>
+    <div className="h-px bg-gray-200" />
     </>
   );
 }
