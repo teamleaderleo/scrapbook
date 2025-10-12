@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { User, LogOut } from "lucide-react";
 import { shortcuts } from "@/app/lib/sidebar-data";
 import { useAuth } from "@/app/lib/hooks/useAuth";
-import { AuthModal } from "./auth-modal";
+import { SimpleAuthModal } from "./simple-auth-modal";
 import { useItems } from '@/app/lib/contexts/item-context';
 
 export function AppSidebar() {
@@ -138,7 +138,7 @@ export function AppSidebar() {
         </SidebarFooter>
       </Sidebar>
       
-      <AuthModal 
+      <SimpleAuthModal 
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)} 
       />

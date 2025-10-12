@@ -1,7 +1,7 @@
 "use client";
 import { useState } from 'react';
 import { useAuth } from '@/app/lib/hooks/useAuth';
-import { AuthModal } from '../auth-modal';
+import { SimpleAuthModal } from '../simple-auth-modal';
 import { Button } from '@/components/ui/button';
 import { User, LogOut } from 'lucide-react';
 
@@ -42,7 +42,7 @@ export function SpaceHeader() {
         </div>
       </header>
       
-      <AuthModal 
+      <SimpleAuthModal 
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)} 
       />
