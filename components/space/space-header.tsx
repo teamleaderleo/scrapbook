@@ -25,32 +25,32 @@ export function SpaceHeader({ leftContent, rightContent }: SpaceHeaderProps) {
 
   return (
     <>
-      <div className="bg-white px-6 h-12">
+      <div className="bg-white px-6 h-12 relative">
         <div className="flex items-center justify-between h-full">
-        {/* Left: Query/Index info */}
-        <div className="flex-1">
-          <p className="text-sm text-muted-foreground">
-            {leftContent}
-          </p>
-        </div>
+          {/* Left: Query/Index info */}
+          <div className="flex-1">
+            <p className="text-sm text-muted-foreground">
+              {leftContent}
+            </p>
+          </div>
 
-        {/* Center: Toggle view mode */}
-        <div className="flex-1 flex justify-center">
-          <Link 
-            href={toggleHref}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {isReviewMode ? '← Back to List' : '→ Review Mode'}
-          </Link>
-        </div>
+          {/* Center: Toggle view mode - absolutely positioned to center on viewport */}
+          <div className="fixed left-1/2 -translate-x-1/2 z-10">
+            <Link 
+              href={toggleHref}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isReviewMode ? '← Back to List' : '→ Review Mode'}
+            </Link>
+          </div>
 
-        {/* Right: Additional actions */}
-        <div className="flex-1 flex justify-end gap-2">
-          {rightContent}
+          {/* Right: Additional actions */}
+          <div className="flex-1 flex justify-end gap-2">
+            {rightContent}
+          </div>
         </div>
       </div>
-    </div>
-    <div className="h-px bg-gray-200" />
+      <div className="h-px bg-gray-200" />
     </>
   );
 }
