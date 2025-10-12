@@ -22,10 +22,11 @@ const ADMIN_USER_IDS = [
 export function ItemsProvider({ children }: { children: ReactNode }) {
   const { user, loading: authLoading } = useAuth();
   
-  // Always pass null to show ALL items (public gallery)
-  const { items, loading: itemsLoading, reload } = useAllItems(null);
-  
+  // Check if current user is admin
   const isAdmin = user ? ADMIN_USER_IDS.includes(user.id) : false;
+  
+  // Always show ALL items, but fetch reviews only if admin
+  const { items, loading: itemsLoading, reload } = useAllItems({ isAdmin });
   
   return (
     <ItemsContext.Provider value={{ 

@@ -3,31 +3,26 @@ import { supabase, type DbItem, type DbReview } from '../db/supabase';
 import type { Item } from '../item-types';
 import type { ReviewState } from '@/app/lib/review-types';
 
-export function useAllItems(userId?: string | null) {
+export function useAllItems(options?: { isAdmin?: boolean }) {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadItems();
-  }, [userId]);
+  }, [options?.isAdmin]);
 
   async function loadItems() {
     setLoading(true);
     
-    let itemsQuery = supabase
+    // Always fetch all items (public gallery)
+    const itemsQuery = supabase
       .from('items')
       .select('*')
       .order('created_at', { ascending: false });
-    
-    // If userId provided, filter by user (for authenticated view)
-    // Otherwise show all items (public gallery view)
-    if (userId) {
-      itemsQuery = itemsQuery.eq('user_id', userId);
-    }
 
-    // Reviews query - only fetch for authenticated user
-    const reviewsPromise = userId 
-      ? supabase.from('reviews').select('*').eq('user_id', userId)
+    // Fetch ALL reviews if admin, otherwise no reviews
+    const reviewsPromise = options?.isAdmin
+      ? supabase.from('reviews').select('*')
       : Promise.resolve({ data: [], error: null });
 
     const [itemsResult, reviewsResult] = await Promise.all([
