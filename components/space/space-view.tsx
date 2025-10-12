@@ -102,25 +102,25 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
 
   if (loading) {
     return (
-      <>
+      <div className="min-h-screen bg-background">
         <SpaceHeader 
           leftContent={<span>Loading...</span>}
         />
         <main className="p-4">
           <div className="text-muted-foreground">Loading...</div>
         </main>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <SpaceHeader 
         leftContent={`Query: ${tagsParam ?? "(none)"} · ${items.length} items`}
       />
       <main className="p-4">
         <ResultsClient items={items} onReview={onReview} onEnroll={onEnroll} nowMs={nowMs} />
       </main>
-    </>
+    </div>
   );
 }

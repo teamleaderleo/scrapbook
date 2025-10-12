@@ -8,8 +8,10 @@ import { useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useSearchParams } from "next/navigation";
 import { useItems } from "@/app/lib/contexts/item-context";
+import { useTheme } from "next-themes";
 
 export function ResultsClient({
   items,
@@ -44,15 +46,16 @@ function Row({
 }) {
   const [expanded, setExpanded] = useState(false);
   const { isAdmin } = useItems();
+  const { theme } = useTheme();
   const displayTags = it.tags.map(t => t.includes(':') ? t.split(':')[1] : t);
   const sp = useSearchParams();
   const tagsParam = sp.get("tags") ?? ""; 
 
   return (
-    <li className="rounded border">
+    <li className="rounded border border-border bg-card">
       {/* Clickable header */}
       <div 
-        className="p-3 cursor-pointer hover:bg-gray-50"
+        className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center justify-between">
@@ -62,13 +65,13 @@ function Row({
                 href={it.url} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="font-medium hover:underline"
+                className="font-medium hover:underline text-foreground"
                 onClick={(e) => e.stopPropagation()}
               >
                 {it.title}
               </Link>
             ) : (
-              <span className="font-medium">{it.title}</span>
+              <span className="font-medium text-foreground">{it.title}</span>
             )}
             {/* Only show edit/duplicate buttons if admin */}
             {isAdmin && (
@@ -102,7 +105,7 @@ function Row({
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground capitalize">{it.category}</span>
-            <span className="text-sm">{expanded ? '▼' : '▶'}</span>
+            <span className="text-sm text-muted-foreground">{expanded ? '▼' : '▶'}</span>
           </div>
         </div>
 
@@ -115,7 +118,7 @@ function Row({
               {" · ivl: "}
               {formatInterval(nowMs, new Date(it.review.due), it.review.scheduled_days)}
               {it.review.due <= nowMs && (
-                <span className="ml-2 rounded bg-red-100 text-red-700 px-1 py-0.5">due</span>
+                <span className="ml-2 rounded bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-1 py-0.5">due</span>
               )}
             </>
           )}
@@ -124,12 +127,12 @@ function Row({
 
       {/* Expanded content */}
       {expanded && (
-        <div className="border-t p-3">
+        <div className="border-t border-border p-3">
           <div className="flex gap-3">
             {/* Writeup */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold mb-2 text-black">Writeup</h3>
-              <div className="p-3 bg-gray-50 rounded max-h-96 overflow-auto prose prose-sm max-w-none text-black">
+              <h3 className="text-sm font-semibold mb-2 text-foreground">Writeup</h3>
+              <div className="p-3 bg-muted rounded max-h-96 overflow-auto prose prose-sm dark:prose-invert max-w-none">
                 <ReactMarkdown>{it.content || '*No writeup yet*'}</ReactMarkdown>
               </div>
             </div>
@@ -137,12 +140,16 @@ function Row({
             {/* Code */}
             {it.code && (
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold mb-2 text-black">Code</h3>
-                <div className="bg-gray-900 rounded max-h-96 overflow-auto">
+                <h3 className="text-sm font-semibold mb-2 text-foreground">Code</h3>
+                <div className="bg-card border border-border rounded max-h-96 overflow-auto">
                   <SyntaxHighlighter 
                     language="python"
-                    style={vscDarkPlus}
-                    customStyle={{ margin: 0, background: 'transparent', padding: '0.75rem' }}
+                    style={theme === 'dark' ? vscDarkPlus : oneLight}
+                    customStyle={{ 
+                      margin: 0, 
+                      background: 'transparent', 
+                      padding: '0.75rem' 
+                    }}
                     className="text-sm"
                   >
                     {it.code}
@@ -156,20 +163,20 @@ function Row({
 
       {/* Review controls - only visible for admin */}
       {isAdmin && (
-      <div className="border-t p-3" onClick={(e) => e.stopPropagation()}>
+      <div className="border-t border-border p-3" onClick={(e) => e.stopPropagation()}>
         {!it.review ? (
           <button 
-            className="rounded border px-2 py-1 text-xs hover:bg-gray-100"
+            className="rounded border border-border px-2 py-1 text-xs hover:bg-muted transition-colors"
             onClick={() => onEnroll(it.id)}
           >
             Add to reviews
           </button>
         ) : (
           <div className="flex gap-2 text-xs">
-            <button className="rounded border px-2 py-1 hover:bg-gray-100" onClick={() => onReview(it.id, Rating.Again)}>Again</button>
-            <button className="rounded border px-2 py-1 hover:bg-gray-100" onClick={() => onReview(it.id, Rating.Hard)}>Hard</button>
-            <button className="rounded border px-2 py-1 hover:bg-gray-100" onClick={() => onReview(it.id, Rating.Good)}>Good</button>
-            <button className="rounded border px-2 py-1 hover:bg-gray-100" onClick={() => onReview(it.id, Rating.Easy)}>Easy</button>
+            <button className="rounded border border-border px-2 py-1 hover:bg-muted transition-colors" onClick={() => onReview(it.id, Rating.Again)}>Again</button>
+            <button className="rounded border border-border px-2 py-1 hover:bg-muted transition-colors" onClick={() => onReview(it.id, Rating.Hard)}>Hard</button>
+            <button className="rounded border border-border px-2 py-1 hover:bg-muted transition-colors" onClick={() => onReview(it.id, Rating.Good)}>Good</button>
+            <button className="rounded border border-border px-2 py-1 hover:bg-muted transition-colors" onClick={() => onReview(it.id, Rating.Easy)}>Easy</button>
           </div>
         )}
       </div>

@@ -14,10 +14,13 @@ import { supabase } from "@/app/lib/db/supabase";
 import type { ReviewState } from "@/app/lib/review-types";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { SpaceHeader } from "./space-header";
+import { useTheme } from "next-themes";
 
 export function ReviewGallery({ serverNow }: { serverNow: number }) {
   const { isAdmin } = useItems();
+  const { theme } = useTheme();
   const nowMs = useNow(serverNow, 30000);
   const sp = useSearchParams();
   const router = useRouter();
@@ -106,7 +109,7 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
         <SpaceHeader 
           leftContent="Loading..."
         />
-        <div className="p-4">Loading...</div>
+        <div className="p-4 text-muted-foreground">Loading...</div>
       </>
     );
   }
@@ -117,13 +120,13 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
         <SpaceHeader 
           leftContent="No items"
         />
-        <div className="p-4">No items to review</div>
+        <div className="p-4 text-muted-foreground">No items to review</div>
       </>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col bg-background">
       <SpaceHeader 
         leftContent={`${currentIndex + 1} / ${items.length}`}
         rightContent={
@@ -146,27 +149,31 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
 
       <div className="flex-1 flex flex-col p-6 overflow-hidden">
         {/* Title */}
-        <h1 className="text-2xl font-bold mb-4">{current.title}</h1>
+        <h1 className="text-2xl font-bold mb-4 text-foreground">{current.title}</h1>
 
         {/* Content */}
         {showContent && (
           <div className="flex-1 flex gap-4 overflow-hidden">
             {/* Writeup */}
-            <div className="flex-1 overflow-auto border rounded p-4 bg-white">
-              <h2 className="text-lg font-semibold mb-2">Writeup</h2>
-              <div className="prose prose-sm max-w-none">
+            <div className="flex-1 overflow-auto border border-border rounded p-4 bg-card">
+              <h2 className="text-lg font-semibold mb-2 text-foreground">Writeup</h2>
+              <div className="prose prose-sm dark:prose-invert max-w-none">
                 <ReactMarkdown>{current.content || '*No writeup yet*'}</ReactMarkdown>
               </div>
             </div>
 
             {/* Code */}
             {current.code && (
-              <div className="flex-1 overflow-auto border rounded bg-gray-900">
-                <h2 className="text-lg font-semibold mb-2 p-4 pb-0 text-gray-100">Code</h2>
+              <div className="flex-1 overflow-auto border border-border rounded bg-card">
+                <h2 className="text-lg font-semibold mb-2 p-4 pb-0 text-foreground">Code</h2>
                 <SyntaxHighlighter 
                   language="python"
-                  style={vscDarkPlus}
-                  customStyle={{ margin: 0, background: 'transparent' }}
+                  style={theme === 'dark' ? vscDarkPlus : oneLight}
+                  customStyle={{ 
+                    margin: 0, 
+                    background: 'transparent',
+                    padding: '1rem' 
+                  }}
                   className="text-sm"
                 >
                   {current.code}
@@ -178,7 +185,7 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
 
         {/* Controls */}
         <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-muted-foreground">
             ← → or j/k to navigate · Space to {showContent ? 'hide' : 'show'} content
           </div>
           
@@ -186,25 +193,25 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
             <div className="flex gap-2">
               <button 
                 onClick={() => onReview(Rating.Again)}
-                className="px-3 py-1 rounded border hover:bg-gray-100"
+                className="px-3 py-1 rounded border border-border hover:bg-muted transition-colors"
               >
                 Again (1)
               </button>
               <button 
                 onClick={() => onReview(Rating.Hard)}
-                className="px-3 py-1 rounded border hover:bg-gray-100"
+                className="px-3 py-1 rounded border border-border hover:bg-muted transition-colors"
               >
                 Hard (2)
               </button>
               <button 
                 onClick={() => onReview(Rating.Good)}
-                className="px-3 py-1 rounded border hover:bg-gray-100"
+                className="px-3 py-1 rounded border border-border hover:bg-muted transition-colors"
               >
                 Good (3)
               </button>
               <button 
                 onClick={() => onReview(Rating.Easy)}
-                className="px-3 py-1 rounded border hover:bg-gray-100"
+                className="px-3 py-1 rounded border border-border hover:bg-muted transition-colors"
               >
                 Easy (4)
               </button>
