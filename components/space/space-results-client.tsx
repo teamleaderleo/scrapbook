@@ -52,7 +52,11 @@ function Row({
   const tagsParam = sp.get("tags") ?? ""; 
 
   return (
-    <li className="rounded border border-border bg-card">
+    <li className="rounded border
+               bg-white dark:bg-sidebar
+               border-border dark:border-sidebar-border
+               text-foreground dark:text-sidebar-foreground
+               transition-colors">
       {/* Clickable header */}
       <div 
         className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"
@@ -132,7 +136,9 @@ function Row({
             {/* Writeup */}
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-semibold mb-2 text-foreground">Writeup</h3>
-              <div className="p-3 bg-muted rounded max-h-96 overflow-auto prose prose-sm dark:prose-invert max-w-none">
+              <div className="p-3 rounded max-h-96 overflow-auto prose prose-sm dark:prose-invert max-w-none
+                bg-white dark:bg-sidebar
+                border border-border dark:border-sidebar-border">
                 <ReactMarkdown>{it.content || '*No writeup yet*'}</ReactMarkdown>
               </div>
             </div>
