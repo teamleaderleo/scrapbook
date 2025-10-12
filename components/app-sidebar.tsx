@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import {
   Sidebar,
@@ -30,10 +30,15 @@ export function AppSidebar() {
   const currentQuery = searchParams.get("tags") || "";
   const isReviewMode = pathname === "/space/review";
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   
   const { user, signOut } = useAuth();
   const { isAdmin } = useItems();
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleViewHref = isReviewMode 
     ? `/space${currentQuery ? `?tags=${currentQuery}` : ''}`
@@ -62,10 +67,29 @@ export function AppSidebar() {
   return (
     <Sidebar className="flex flex-col h-screen">
       <SidebarHeader className="h-[48px] p-0 m-0 bg-background text-foreground border-b">
-        <div className="flex h-full items-center px-4">
+        <div className="flex h-full items-center justify-between px-4">
           <Link href="/" className="text-lg font-bold leading-none">
             teamleaderleo
           </Link>
+          {mounted && (
+            <button 
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")} 
+              className="relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700" 
+            > 
+              <span className="sr-only">Toggle theme</span> 
+              <span 
+                className={`${ 
+                  theme === "dark" ? "translate-x-5" : "translate-x-0" 
+                } inline-flex h-7 w-7 transform items-center justify-center rounded-full bg-white dark:bg-gray-900 border border-neutral-300 dark:border-neutral-800 shadow-sm transition-transform`} 
+              > 
+                {theme === "dark" ? ( 
+                  <Moon className="h-4 w-4 text-white" /> 
+                ) : ( 
+                  <Sun className="h-4 w-4 text-amber-500" /> 
+                )} 
+              </span> 
+            </button>
+          )}
         </div>
       </SidebarHeader>
       
@@ -127,20 +151,8 @@ export function AppSidebar() {
         </SidebarContent>
       </ScrollArea>
 
-      {/* Auth & Theme Section */}
+      {/* Auth Section */}
       <SidebarFooter className="border-t p-4 space-y-2">
-        {/* Theme Toggle */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="w-full"
-        >
-          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="ml-2">Toggle theme</span>
-        </Button>
-
         {user ? (
           <>
             <div className="text-sm text-muted-foreground truncate px-2" title={user.email}>
