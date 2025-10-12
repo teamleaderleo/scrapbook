@@ -11,10 +11,10 @@ export default function Page() {
           <div className="space-y-8">
             {/* Next.js */}
             <div>
-              <h2 className="text-xl font-semibold mb-3">Next.js (By Vercel) | Open Source Contributor (We are not affiliated with Vercel, we just think this is a nice way to learn!)</h2>
+              <h2 className="text-xl font-semibold mb-3 text-black">Next.js (By Vercel) | Open Source Contributor (We are not affiliated with Vercel, we just think this is a nice way to learn!)</h2>
               <p className="text-sm text-gray-600 mb-4">Remote | June 2025 - Present</p>
               
-              <ul className="space-y-3 text-sm">
+              <ul className="space-y-3 text-sm text-black">
                 <li>
                   <div>• Fixed dark mode styling in Next.js development tools, improving accessibility for 4.9M+ developers, merged in #80025.</div>
                   <div className="ml-4 mt-1 text-gray-700">The Process: While a simple CSS fix, the real work was navigating a massive, unfamiliar codebase, understanding its design system, and successfully justifying the change to the maintainers. It was a perfect first exercise in contributing to a major open-source project.</div>
@@ -44,10 +44,10 @@ export default function Page() {
 
             {/* Git Inline */}
             <div>
-              <h2 className="text-xl font-semibold mb-3">Git Inline (Front-End Visualization)</h2>
+              <h2 className="text-xl font-semibold mb-3 text-black">Git Inline (Front-End Visualization)</h2>
               <p className="text-sm text-gray-600 mb-4">npmjs.com/package/git-inline | Jan 2025 - Present</p>
               
-              <ul className="space-y-1 text-sm">
+              <ul className="space-y-1 text-sm text-black">
                 <li>
                   <div>• Published open-source NPM React component library to visualize Git history, adding lilconfig to resolve JavaScript bundler issues.</div>
                   <div className="ml-4 mt-1 text-gray-700">I think it&apos;s quite a nice idea, and I want to continue working on it, but we got derailed due to wondering how we&apos;d get user configs nice and ergonomic when they&apos;re setting up their GitHub urls and whatnot, and I just got kinda bored and didn&apos;t want to implement the API caching... which, IMO, is absolutely necessary. So it&apos;s at version 0.0.1 right now, because I also found other things that were more interesting. But this is still interesting! There&apos;re just a lot of competiting priorities.</div>
@@ -60,13 +60,13 @@ export default function Page() {
           <div className="space-y-8">
             {/* Glossless */}
             <div>
-              <h2 className="text-xl font-semibold mb-3">Glossless (AI Pose-Inference Tool)</h2>
+              <h2 className="text-xl font-semibold mb-3 text-black">Glossless (AI Pose-Inference Tool)</h2>
               <p className="text-sm text-gray-600 mb-4">glossless.app | June 2024 - Present</p>
               
-              <ul className="space-y-3 text-sm">
+              <ul className="space-y-3 text-sm text-black">
                 <li>
                   <div>• Engineered a pipeline allowing users to go from image upload to a lit, posed 3D mannequin in seconds vs workflows that take minutes in traditional software..</div>
-                  <div className="ml-4 mt-1 text-gray-700">Design Note: The core thesis is speed to value. Artists needing pose references shouldn&apos;t have to fight complex 3D software. This entire project is architected around collapsing the time it takes to get a useful, well-lit reference, making it an ergonomic, lightweight alternative to the status quo.</div>
+                  <div className="ml-4 mt-1 text-gray-700">Artists needing pose references shouldn&apos;t have to fight complex 3D software. This entire project is architected around collapsing the time it takes to get a useful, well-lit reference, making it an ergonomic, lightweight alternative to the status quo.</div>
                 </li>
                 <li>
                   <div>• Productionized ML research models (Bizarre Pose Estimator, VideoPose3D) to GPU-powered, auto-scaling API on
@@ -91,10 +91,10 @@ export default function Page() {
             </div>
             {/* Scrapbook */}
             <div>
-              <h2 className="text-xl font-semibold mb-3">Scrapbook (Full-Stack Blog)</h2>
+              <h2 className="text-xl font-semibold mb-3 text-black">Scrapbook (Full-Stack Blog)</h2>
               <p className="text-sm text-gray-600 mb-4">github.com/teamleaderleo/scrapbook | teamleaderleo.com | May 2024 - Present</p>
               
-              <ul className="space-y-3 text-sm">
+              <ul className="space-y-3 text-sm text-black">
                 <li>
                   <div>• Built CMS with Next.js and TypeScript for optimized CRUD operations and responsive design.</div>
                   <div className="ml-4 mt-1 text-gray-700">The blog part is it. We&apos;re still working on trying out different designs/libraries, but I personally just prefer dense information and non-functional art. So... everything and nothing.</div>
@@ -152,10 +152,10 @@ export default function Page() {
           <div className="space-y-8">
             {/* Potato Image Compressor */}
             <div>
-              <h2 className="text-xl font-semibold mb-3">Potato Image Compressor (Back-End).</h2>
+              <h2 className="text-xl font-semibold mb-3 text-black">Potato Image Compressor (Back-End).</h2>
               <p className="text-sm text-gray-600 mb-4">github.com/teamleaderleo/potato-quality-image-compressor | April 2025</p>
               
-              <ul className="space-y-2 text-sm">
+              <ul className="space-y-2 text-sm text-black">
                 <li>
                   <div>• Built a Dockerized image processing pipeline in Go using goroutines and sync primitives.</div>
                   <div className="ml-4 mt-1 text-gray-700">This was a fun project. I wanted to learn Go, and I thought it would be a good idea to build an image processing pipeline. It was simpler when I initially added it a few months into the Scrapbook project, and it was a couple months later that I really thought to dig deep and make this bigger and better and faster and flashier. I used goroutines with worker pools and sync primitives (both semaphores and mutexes) to make it concurrent and efficient. Oh, and I wanted to try out gRPC too. It&apos;s not the most complex thing, but it was a good exercise in Go.</div>
@@ -178,10 +178,10 @@ export default function Page() {
 
             {/* Fold Single-Line Comments */}
             <div>
-              <h2 className="text-xl font-semibold mb-3">Fold Single-Line Comments.</h2>
+              <h2 className="text-xl font-semibold mb-3 text-black">Fold Single-Line Comments.</h2>
               <p className="text-sm text-gray-600 mb-4">fold-single-line-comments | Feb 2025</p>
               
-              <ul className="space-y-1 text-sm">
+              <ul className="space-y-1 text-sm text-black">
                 <li>
                   <div>• Published VS Code extension solving 1000-day-old StackOverflow issue now used by 70+ developers.</div>
                   <div className="ml-4 mt-1 text-gray-700">This was a fun little project. I saw a StackOverflow question that had been open for 1000 days about how to fold single-line comments in VS Code. I thought it was a neat idea, so I built an extension that does just that. It&apos;s simple but effective, and it&apos;s nice to see other developers finding it useful.</div>
