@@ -147,16 +147,32 @@ function Row({
             {it.code && (
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-semibold mb-2 text-foreground">Code</h3>
-                <div className="bg-card border border-border rounded max-h-96 overflow-auto">
-                  <SyntaxHighlighter 
+                <div
+                  className={`border border-border rounded max-h-96 overflow-auto ${
+                    theme === 'dark' ? 'bg-card' : 'bg-white'
+                  }`}
+                >
+                  <SyntaxHighlighter
                     language="python"
-                    style={theme === 'dark' ? vscDarkPlus : oneLight}
-                    customStyle={{ 
-                      margin: 0, 
-                      background: 'transparent', 
-                      padding: '0.75rem' 
+                    // Use dark theme as-is; light theme with transparent bg
+                    style={
+                      theme === 'dark'
+                        ? vscDarkPlus
+                        : {
+                            ...oneLight,
+                            hljs: { ...(oneLight as any).hljs, background: 'transparent' },
+                          }
+                    }
+                    customStyle={{
+                      margin: 0,
+                      background: 'transparent',
+                      padding: '0.75rem',
+                      fontSize: 14,          // <-- same size in BOTH modes
+                      lineHeight: 1.3,       // consistent line height
                     }}
-                    className="text-sm"
+                    codeTagProps={{ style: { background: 'transparent', fontSize: 'inherit' } }}
+                    PreTag="div"
+                    className="leading-tight" // no theme-based size differences
                   >
                     {it.code}
                   </SyntaxHighlighter>
