@@ -110,7 +110,6 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
 
   return (
     <main className="p-4">
-      <h1 className="text-xl font-semibold mb-2">Second Brain</h1>
       <p className="text-sm text-muted-foreground mb-4">
         Query: {tagsParam ?? "(none)"} · {items.length} items
       </p>
