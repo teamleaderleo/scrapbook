@@ -38,6 +38,7 @@ export function AppSidebar() {
     ? `/space${currentQuery ? `?tags=${currentQuery}` : ''}`
     : `/space/review${currentQuery ? `?tags=${currentQuery}` : ''}`;
 
+  // TODO: add signInWithOAuth into the context later to centralize all auth flows
   const handleOAuthSignIn = async (provider: 'google' | 'github') => {
     setLoading(true)
     const supabase = createClient()
