@@ -10,7 +10,7 @@ import { useNow } from "@/app/lib/hooks/useNow";
 import ReactMarkdown from 'react-markdown';
 import { Rating } from "ts-fsrs";
 import { reviewOnce } from "@/app/lib/fsrs-adapter";
-import { supabase } from "@/app/lib/db/supabase";
+import { createClient } from "@/utils/supabase/client";
 import type { ReviewState } from "@/app/lib/review-types";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -20,6 +20,7 @@ import { useTheme } from "next-themes";
 import { CodeDisplay } from "./code-display";
 
 export function ReviewGallery({ serverNow }: { serverNow: number }) {
+  const supabase = createClient();
   const { isAdmin } = useItems();
   const { theme } = useTheme();
   const nowMs = useNow(serverNow, 30000);

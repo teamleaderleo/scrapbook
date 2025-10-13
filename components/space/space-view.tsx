@@ -10,10 +10,11 @@ import { Rating } from "ts-fsrs";
 import { useNow } from "@/app/lib/hooks/useNow";
 import { reviewOnce, debugCard } from "@/app/lib/fsrs-adapter";
 import { useItems } from "@/app/lib/contexts/item-context";
-import { supabase } from "@/app/lib/db/supabase";
+import { createClient } from "@/utils/supabase/client";
 import { SpaceHeader } from "./space-header";
 
 export function SpaceView({ serverNow }: { serverNow: number }) {
+  const supabase = createClient();
   const nowMs = useNow(serverNow, 30000);
   const sp = useSearchParams();
   const tagsParam = sp.get("tags") ?? undefined;

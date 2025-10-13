@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { supabase, type DbItem, type DbReview } from '../db/supabase';
+import { createClient } from "@/utils/supabase/client";
 import type { Item } from '../item-types';
 import type { ReviewState } from '@/app/lib/review-types';
 
 export function useAllItems(options?: { isAdmin?: boolean }) {
+  const supabase = createClient();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
 

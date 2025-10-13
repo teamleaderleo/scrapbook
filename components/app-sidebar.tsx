@@ -21,7 +21,7 @@ import { LogOut, Loader2 } from "lucide-react";
 import { shortcuts } from "@/app/lib/sidebar-data";
 import { useAuth } from "@/app/lib/hooks/useAuth";
 import { useItems } from "@/app/lib/contexts/item-context";
-import { supabase } from "@/app/lib/db/supabase";
+import { createClient } from "@/utils/supabase/client";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AppSidebar() {
@@ -39,24 +39,21 @@ export function AppSidebar() {
     : `/space/review${currentQuery ? `?tags=${currentQuery}` : ''}`;
 
   const handleOAuthSignIn = async (provider: 'google' | 'github') => {
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/space`,
-        },
-      });
+    setLoading(true)
+    const supabase = createClient()
+    
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
 
-      if (error) {
-        console.error('OAuth error:', error);
-        setLoading(false);
-      }
-    } catch (err) {
-      console.error('OAuth exception:', err);
-      setLoading(false);
+    if (error) {
+      console.error('OAuth error:', error)
+      setLoading(false)
     }
-  };
+}
 
   return (
     <Sidebar className="flex flex-col h-screen">

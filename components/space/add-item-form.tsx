@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { supabase } from "@/app/lib/db/supabase";
+import { createClient } from "@/utils/supabase/client";
 import { useItems } from "@/app/lib/contexts/item-context";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { CodeDisplay } from "./code-display";
 import { SpaceHeader } from "./space-header";
 
 export function AddItemFormContent() {
+  const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { reload } = useItems();

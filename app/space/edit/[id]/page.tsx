@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { supabase } from "@/app/lib/db/supabase";
+import { createClient } from "@/utils/supabase/client";
 import { useParams, useRouter } from "next/navigation";
 import { useItems } from "@/app/lib/contexts/item-context";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { ItemPreview } from "@/components/space/item-preview";
 import { SpaceHeader } from "@/components/space/space-header";
 
 export default function EditItemPage() {
+  const supabase = createClient();
   const params = useParams();
   const router = useRouter();
   const { reload } = useItems();
