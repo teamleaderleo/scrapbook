@@ -7,12 +7,12 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { CodeDisplay } from "./code-display";
 import { SpaceHeader } from "./space-header";
+import { addItemAction } from '@/app/space/actions';
 
 export function AddItemFormContent() {
   const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { reload } = useItems();
   const { theme } = useTheme();
   const duplicateId = searchParams.get('duplicate');
   
@@ -29,6 +29,7 @@ export function AddItemFormContent() {
   const [error, setError] = useState("");
 
   // Load duplicate item if requested
+  // TODO: maybe should move to server action
   useEffect(() => {
     if (duplicateId) {
       loadDuplicate(duplicateId);
@@ -70,28 +71,12 @@ export function AddItemFormContent() {
 
   const handleSave = async () => {
     if (!preview) return;
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    const { error } = await supabase.from('items').insert({
-      id: preview.id,
-      user_id: user?.id || null,
-      title: preview.title,
-      slug: preview.id,
-      url: preview.url || null,
-      tags: preview.tags || [],
-      category: preview.category || 'general',
-      content: preview.content || '',
-      code: preview.code || null,
-      content_type: 'markdown',
-      score: preview.score || null,
-    });
-
-    if (error) {
-      setError(error.message);
-    } else {
-      await reload();
-      router.push('/space');
+    try {
+      await addItemAction(preview);   // server does insert + revalidate
+      router.refresh();
+      router.push('/space');          
+    } catch (e: any) {
+      setError(e.message);
     }
   };
 

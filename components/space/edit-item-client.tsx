@@ -9,15 +9,14 @@ import { CodeEditor } from "@/components/space/code-editor";
 import { RawJsonEditor } from "@/components/space/raw-json-editor";
 import { ItemPreview } from "@/components/space/item-preview";
 import { SpaceHeader } from "@/components/space/space-header";
+import { updateItemAction } from '@/app/space/actions';
 
 interface EditItemClientProps {
   item: any; // Item from context or server
 }
 
 export function EditItemClient({ item }: EditItemClientProps) {
-  const supabase = createClient();
   const router = useRouter();
-  const { reload } = useItems();
   
   const [content, setContent] = useState(item.content || '');
   const [code, setCode] = useState(item.code || '');
@@ -68,28 +67,26 @@ export function EditItemClient({ item }: EditItemClientProps) {
   }, [content, code, item, isEditingRaw]);
 
   async function handleSave() {
-    const updates = preview ? {
-      title: preview.title,
-      url: preview.url || null,
-      tags: preview.tags || [],
-      category: preview.category || 'general',
-      content: preview.content || '',
-      code: preview.code || null,
-      updated_at: new Date().toISOString()
-    } : {
-      content,
-      code,
-      updated_at: new Date().toISOString()
-    };
+    const updates = preview
+      ? {
+          title: preview.title,
+          url: preview.url ?? null,
+          tags: preview.tags ?? [],
+          category: preview.category ?? 'general',
+          content: preview.content ?? '',
+          code: preview.code ?? null,
+        }
+      : {
+          content,
+          code,
+        };
 
-    const { error } = await supabase
-      .from('items')
-      .update(updates)
-      .eq('id', item.id);
-    
-    if (!error) {
-      await reload();
-      router.push('/space');
+    try {
+      await updateItemAction(item.id, updates); // server update + revalidate
+      router.refresh();
+      router.push('/space');                    // list is fresh now
+    } catch (e) {
+      // handle error (toast, etc.)
     }
   }
 

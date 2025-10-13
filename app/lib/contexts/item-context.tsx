@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, ReactNode, useState } from 'react';
+import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useAuth } from '@/app/lib/hooks/useAuth';
 import type { Item } from '@/app/lib/item-types';
 import { createClient } from '@/utils/supabase/client';
@@ -38,7 +38,11 @@ export function ItemsProvider({
 
   const [items, setItems] = useState<Item[]>(initialItems);
   const [loading, setLoading] = useState(initialItems.length === 0);
-
+  
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
+  
   const isAdmin =
     initialIsAdmin || (user ? ADMIN_USER_IDS.includes(user.id) : false);
 
