@@ -1,8 +1,6 @@
 import { Suspense } from "react";
 import { ReviewGallery } from "@/components/space/review-gallery";
 
-export const dynamic = 'force-dynamic';
-
 export default function ReviewPage() {
   const serverNow = Date.now();
   
