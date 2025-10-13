@@ -19,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { LogOut, Loader2 } from "lucide-react";
 import { shortcuts } from "@/app/lib/sidebar-data";
-import { useAuth } from "@/app/lib/hooks/useAuth";
 import { useItems } from "@/app/lib/contexts/item-context";
 import { createClient } from "@/utils/supabase/client";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -30,8 +29,15 @@ export function AppSidebar() {
   const currentQuery = searchParams.get("tags") || "";
   const isReviewMode = pathname === "/space/review";
   
-  const { user, signOut, loading: authLoading } = useAuth();
-  const { isAdmin } = useItems();
+  const { user, isAdmin } = useItems();
+  const supabase = createClient();
+  const signOut = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error("Sign out error:", e);
+    }
+  };
   const [loading, setLoading] = useState(false);
 
   const toggleViewHref = isReviewMode 
@@ -126,12 +132,7 @@ export function AppSidebar() {
 
       {/* Auth Section */}
       <SidebarFooter className="border-t p-4 space-y-2">
-        {authLoading ? (
-          // Show spinner while checking auth status - same size as logged in state
-          <div className="flex items-center justify-center" style={{ height: '56px' }}>
-            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-          </div>
-        ) : user ? (
+        {user ? (
           // User is logged in
           <>
             <div className="text-sm text-muted-foreground truncate px-2" title={user.email}>
