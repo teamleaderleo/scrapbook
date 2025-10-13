@@ -3,14 +3,14 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/app/lib/db/supabase";
 import { useItems } from "@/app/lib/contexts/item-context";
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useTheme } from "next-themes";
 import { CodeDisplay } from "./code-display";
 
 export function AddItemFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { reload } = useItems();
+  const { theme } = useTheme();
   const duplicateId = searchParams.get('duplicate');
   
   const [input, setInput] = useState(`{
@@ -93,38 +93,52 @@ export function AddItemFormContent() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Add Item</h1>
+    <div className="p-6 max-w-6xl mx-auto bg-background text-foreground">
+      <h1 className="text-2xl font-bold mb-4 text-foreground">Add Item</h1>
       
       <div className="grid grid-cols-2 gap-4">
         {/* Input */}
         <div>
-          <h2 className="text-sm font-semibold mb-2">JSON</h2>
+          <h2 className="text-sm font-semibold mb-2 text-foreground">JSON</h2>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="w-full h-96 p-3 border rounded font-mono text-sm"
+            className="w-full h-96 p-3 rounded font-mono text-sm
+              bg-white dark:bg-sidebar
+              border border-border dark:border-sidebar-border
+              text-foreground dark:text-sidebar-foreground
+              placeholder:text-muted-foreground
+              focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
 
         {/* Auto Preview */}
         <div>
-          <h2 className="text-sm font-semibold mb-2">Preview</h2>
-          {error && <div className="text-red-600 mb-2">{error}</div>}
+          <h2 className="text-sm font-semibold mb-2 text-foreground">Preview</h2>
+          {error && <div className="text-red-600 dark:text-red-400 mb-2">{error}</div>}
           {preview && (
-            <div className="border rounded p-4 space-y-2">
+            <div className="rounded p-4 space-y-2
+              bg-white dark:bg-sidebar
+              border border-border dark:border-sidebar-border
+              text-foreground dark:text-sidebar-foreground">
               <div><strong>Title:</strong> {preview.title}</div>
               <div><strong>Tags:</strong> {preview.tags?.join(', ')}</div>
               <div><strong>Category:</strong> {preview.category}</div>
               {preview.url && <div><strong>URL:</strong> {preview.url}</div>}
-              <div className="border-t pt-2 mt-2">
+              <div className="border-t border-border dark:border-sidebar-border pt-2 mt-2">
                 <strong>Content:</strong>
-                <pre className="text-xs mt-1 whitespace-pre-wrap">{preview.content}</pre>
+                <pre className="text-xs mt-1 whitespace-pre-wrap text-foreground dark:text-sidebar-foreground">
+                  {preview.content}
+                </pre>
               </div>
               {preview.code && <CodeDisplay code={preview.code} />}
               <button
                 onClick={handleSave}
-                className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                className="mt-4 px-4 py-2 rounded font-medium
+                  bg-green-600 dark:bg-green-700 
+                  text-white
+                  hover:bg-green-700 dark:hover:bg-green-800
+                  transition-colors"
               >
                 Save Item
               </button>
@@ -138,7 +152,7 @@ export function AddItemFormContent() {
 
 export function AddItemForm() {
   return (
-    <Suspense fallback={<div className="p-6">Loading...</div>}>
+    <Suspense fallback={<div className="p-6 text-foreground">Loading...</div>}>
       <AddItemFormContent />
     </Suspense>
   );

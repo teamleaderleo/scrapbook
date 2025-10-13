@@ -6,12 +6,15 @@ import { useItems } from "@/app/lib/contexts/item-context";
 import { Button } from "@/components/ui/button";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useTheme } from "next-themes";
 import { CodeDisplay } from "@/components/space/code-display";
 
 export default function EditItemPage() {
   const params = useParams();
   const router = useRouter();
   const { reload } = useItems();
+  const { theme } = useTheme();
   const [item, setItem] = useState<any>(null);
   const [content, setContent] = useState("");
   const [code, setCode] = useState("");
@@ -104,12 +107,12 @@ export default function EditItemPage() {
     }
   }
 
-  if (!item) return <div className="p-6">Loading...</div>;
+  if (!item) return <div className="p-6 text-foreground">Loading...</div>;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto bg-background text-foreground">
       <div className="flex items-center gap-4 mb-4">
-        <h1 className="text-2xl font-bold">Edit: {item.title}</h1>
+        <h1 className="text-2xl font-bold text-foreground">Edit: {item.title}</h1>
         <Button onClick={handleSave}>
           Save Changes
         </Button>
@@ -118,26 +121,33 @@ export default function EditItemPage() {
       {/* Top Row: Editors */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <h2 className="text-sm font-semibold mb-2">Content (Markdown)</h2>
+          <h2 className="text-sm font-semibold mb-2 text-foreground">Content (Markdown)</h2>
           <textarea
             value={content}
             onChange={(e) => {
               setIsEditingRaw(false);
               setContent(e.target.value);
             }}
-            className="w-full h-96 p-3 border rounded font-mono text-sm"
+            className="w-full h-96 p-3 rounded font-mono text-sm
+              bg-white dark:bg-sidebar
+              border border-border dark:border-sidebar-border
+              text-foreground dark:text-sidebar-foreground
+              placeholder:text-muted-foreground
+              focus:outline-none focus:ring-2 focus:ring-ring"
             placeholder="# Approach&#10;&#10;Your writeup here..."
           />
         </div>
 
         <div>
-          <h2 className="text-sm font-semibold mb-2">Code</h2>
-          <div className="relative h-96 border rounded overflow-hidden bg-gray-900">
+          <h2 className="text-sm font-semibold mb-2 text-foreground">Code</h2>
+          <div className="relative h-96 rounded overflow-hidden
+            border border-border dark:border-sidebar-border
+            bg-[#1e1e1e] dark:bg-[#1e1e1e]">
             {/* Syntax highlighted background */}
             <div className="absolute inset-0 overflow-auto pointer-events-none" id="code-highlight">
               <SyntaxHighlighter 
                 language="python"
-                style={vscDarkPlus}
+                style={theme === 'dark' ? vscDarkPlus : oneLight}
                 customStyle={{ 
                   margin: 0, 
                   background: 'transparent',
@@ -183,29 +193,36 @@ export default function EditItemPage() {
       {/* Bottom Row: Raw & Preview */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <h2 className="text-sm font-semibold mb-2">Raw (as stored)</h2>
-          {jsonError && <div className="text-red-600 text-sm mb-2">{jsonError}</div>}
+          <h2 className="text-sm font-semibold mb-2 text-foreground">Raw (as stored)</h2>
+          {jsonError && <div className="text-red-600 dark:text-red-400 text-sm mb-2">{jsonError}</div>}
           <textarea
             value={rawInput}
             onChange={(e) => {
               setIsEditingRaw(true);
               setRawInput(e.target.value);
             }}
-            className="w-full h-96 p-3 border rounded font-mono text-sm bg-gray-50"
+            className="w-full h-96 p-3 rounded font-mono text-sm
+              bg-muted/50 dark:bg-sidebar/50
+              border border-border dark:border-sidebar-border
+              text-foreground dark:text-sidebar-foreground
+              focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
 
         <div>
-          <h2 className="text-sm font-semibold mb-2">Preview</h2>
-          <div className="border rounded p-4 space-y-2 h-96 overflow-auto">
+          <h2 className="text-sm font-semibold mb-2 text-foreground">Preview</h2>
+          <div className="rounded p-4 space-y-2 h-96 overflow-auto
+            bg-white dark:bg-sidebar
+            border border-border dark:border-sidebar-border
+            text-foreground dark:text-sidebar-foreground">
             <div><strong>Title:</strong> {preview?.title || item.title}</div>
             <div><strong>Tags:</strong> {preview?.tags?.join(', ') || item.tags?.join(', ')}</div>
             <div><strong>Category:</strong> {preview?.category || item.category}</div>
             {(preview?.url || item.url) && <div><strong>URL:</strong> {preview?.url || item.url}</div>}
             
-            <div className="border-t pt-2 mt-2">
+            <div className="border-t border-border dark:border-sidebar-border pt-2 mt-2">
               <strong>Content:</strong>
-              <pre className="text-xs mt-1 whitespace-pre-wrap">{content || <span className="text-gray-400">No content</span>}</pre>
+              <pre className="text-xs mt-1 whitespace-pre-wrap">{content || <span className="text-muted-foreground">No content</span>}</pre>
             </div>
             
             {code && <CodeDisplay code={code} />}
