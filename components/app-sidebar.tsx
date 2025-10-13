@@ -30,7 +30,7 @@ export function AppSidebar() {
   const currentQuery = searchParams.get("tags") || "";
   const isReviewMode = pathname === "/space/review";
   
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const { isAdmin } = useItems();
   const [loading, setLoading] = useState(false);
 
@@ -53,7 +53,7 @@ export function AppSidebar() {
       console.error('OAuth error:', error)
       setLoading(false)
     }
-}
+  }
 
   return (
     <Sidebar className="flex flex-col h-screen">
@@ -126,7 +126,13 @@ export function AppSidebar() {
 
       {/* Auth Section */}
       <SidebarFooter className="border-t p-4 space-y-2">
-        {user ? (
+        {authLoading ? (
+          // Show spinner while checking auth status - same size as logged in state
+          <div className="flex items-center justify-center" style={{ height: '56px' }}>
+            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+          </div>
+        ) : user ? (
+          // User is logged in
           <>
             <div className="text-sm text-muted-foreground truncate px-2" title={user.email}>
               {user.email}
@@ -142,6 +148,7 @@ export function AppSidebar() {
             </Button>
           </>
         ) : (
+          // User is not logged in
           <>
             <Button
               variant="default"
