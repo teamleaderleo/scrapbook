@@ -5,6 +5,7 @@ import { supabase } from "@/app/lib/db/supabase";
 import { useItems } from "@/app/lib/contexts/item-context";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { CodeDisplay } from "./code-display";
 
 export function AddItemFormContent() {
   const router = useRouter();
@@ -120,21 +121,7 @@ export function AddItemFormContent() {
                 <strong>Content:</strong>
                 <pre className="text-xs mt-1 whitespace-pre-wrap">{preview.content}</pre>
               </div>
-              {preview.code && (
-                <div className="border-t pt-2 mt-2">
-                  <strong>Code:</strong>
-                  <div className="mt-1 bg-gray-900 rounded overflow-hidden">
-                    <SyntaxHighlighter 
-                      language="python"
-                      style={vscDarkPlus}
-                      customStyle={{ margin: 0, background: 'transparent', padding: '0.5rem' }}
-                      className="text-xs"
-                    >
-                      {preview.code}
-                    </SyntaxHighlighter>
-                  </div>
-                </div>
-              )}
+              {preview.code && <CodeDisplay code={preview.code} />}
               <button
                 onClick={handleSave}
                 className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"

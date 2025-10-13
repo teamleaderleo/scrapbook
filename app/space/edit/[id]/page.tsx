@@ -6,6 +6,7 @@ import { useItems } from "@/app/lib/contexts/item-context";
 import { Button } from "@/components/ui/button";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { CodeDisplay } from "@/components/space/code-display";
 
 export default function EditItemPage() {
   const params = useParams();
@@ -207,21 +208,7 @@ export default function EditItemPage() {
               <pre className="text-xs mt-1 whitespace-pre-wrap">{content || <span className="text-gray-400">No content</span>}</pre>
             </div>
             
-            {code && (
-              <div className="border-t pt-2 mt-2">
-                <strong>Code:</strong>
-                <div className="mt-1 bg-gray-900 rounded overflow-hidden">
-                  <SyntaxHighlighter 
-                    language="python"
-                    style={vscDarkPlus}
-                    customStyle={{ margin: 0, background: 'transparent', padding: '0.5rem' }}
-                    className="text-xs"
-                  >
-                    {code}
-                  </SyntaxHighlighter>
-                </div>
-              </div>
-            )}
+            {code && <CodeDisplay code={code} />}
           </div>
         </div>
       </div>

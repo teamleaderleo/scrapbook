@@ -12,6 +12,7 @@ import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useSearchParams } from "next/navigation";
 import { useItems } from "@/app/lib/contexts/item-context";
 import { useTheme } from "next-themes";
+import { CodeDisplay } from "./code-display";
 
 export function ResultsClient({
   items,
@@ -144,33 +145,7 @@ function Row({
             </div>
 
             {/* Code */}
-            {it.code && (
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold mb-2 text-foreground">Code</h3>
-                <div
-                  className={`border border-border rounded max-h-96 overflow-auto ${
-                    theme === 'dark' ? 'bg-card' : 'bg-white'
-                  }`}
-                >
-                  <SyntaxHighlighter
-                    language="python"
-                    style={theme === 'dark' ? vscDarkPlus : oneLight}
-                    customStyle={{
-                      margin: 0,
-                      background: 'transparent',
-                      padding: '0.75rem',
-                      fontSize: 14,
-                      lineHeight: 1.3,
-                    }}
-                    codeTagProps={{ style: { background: 'transparent', fontSize: 'inherit' } }}
-                    PreTag="div"
-                    className="leading-tight" // no theme-based size differences
-                  >
-                    {it.code}
-                  </SyntaxHighlighter>
-                </div>
-              </div>
-            )}
+            {it.code && <CodeDisplay code={it.code} />}
           </div>
         </div>
       )}

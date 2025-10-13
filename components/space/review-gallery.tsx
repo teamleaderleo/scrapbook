@@ -17,6 +17,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { SpaceHeader } from "./space-header";
 import { useTheme } from "next-themes";
+import { CodeDisplay } from "./code-display";
 
 export function ReviewGallery({ serverNow }: { serverNow: number }) {
   const { isAdmin } = useItems();
@@ -165,25 +166,7 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
             </div>
 
             {/* Code */}
-            {current.code && (
-              <div className="flex-1 overflow-auto rounded p-4
-                border border-border dark:border-sidebar-border
-                bg-white dark:bg-sidebar">
-                <h2 className="text-lg font-semibold mb-2 p-4 pb-0 text-foreground">Code</h2>
-                <SyntaxHighlighter 
-                  language="python"
-                  style={theme === 'dark' ? vscDarkPlus : oneLight}
-                  customStyle={{ 
-                    margin: 0, 
-                    background: 'transparent',
-                    padding: '1rem' 
-                  }}
-                  className="text-sm"
-                >
-                  {current.code}
-                </SyntaxHighlighter>
-              </div>
-            )}
+            {current.code && <CodeDisplay code={current.code} />}
           </div>
         )}
 
