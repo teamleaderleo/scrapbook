@@ -154,15 +154,7 @@ function Row({
                 >
                   <SyntaxHighlighter
                     language="python"
-                    // Use dark theme as-is; light theme with transparent bg
-                    style={
-                      theme === 'dark'
-                        ? vscDarkPlus
-                        : {
-                            ...oneLight,
-                            hljs: { ...(oneLight as any).hljs, background: 'transparent' },
-                          }
-                    }
+                    style={theme === 'dark' ? vscDarkPlus : oneLight}
                     customStyle={{
                       margin: 0,
                       background: 'transparent',
