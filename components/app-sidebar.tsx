@@ -29,7 +29,7 @@ export function AppSidebar() {
   const searchParams = useSearchParams();
   const currentQuery = searchParams.get("tags") || "";
   const isReviewMode = pathname === "/space/review";
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   
   const { user, signOut } = useAuth();
@@ -79,15 +79,15 @@ export function AppSidebar() {
               <span className="sr-only">Toggle theme</span> 
               <span 
                 className={`${ 
-                  theme === "dark" ? "translate-x-5" : "translate-x-0" 
+                  resolvedTheme === "dark" ? "translate-x-5" : "translate-x-0" 
                 } inline-flex h-7 w-7 transform items-center justify-center rounded-full bg-white dark:bg-gray-900 border border-neutral-300 dark:border-neutral-800 shadow-sm transition-transform`} 
               > 
-                {theme === "dark" ? ( 
+                {resolvedTheme === "dark" ? ( 
                   <Moon className="h-4 w-4 text-white" /> 
                 ) : ( 
                   <Sun className="h-4 w-4 text-amber-500" /> 
                 )} 
-              </span> 
+              </span>
             </button>
           )}
         </div>
