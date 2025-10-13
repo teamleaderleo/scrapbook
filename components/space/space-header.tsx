@@ -29,7 +29,7 @@ export function SpaceHeader({ leftContent, centerContent, rightContent }: SpaceH
   const defaultCenterContent = (
     <Link 
       href={toggleHref}
-      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+      className="text-sm text-primary-foreground hover:text-primary transition-colors font-medium"
     >
       {isReviewMode ? '← Back to List' : '→ Review Mode'}
     </Link>
