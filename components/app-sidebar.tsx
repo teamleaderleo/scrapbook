@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   Sidebar,
@@ -26,18 +26,12 @@ import { ThemeToggle } from "@/components/theme-toggle";
 export function AppSidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
+
   const currentQuery = searchParams.get("tags") || "";
   const isReviewMode = pathname === "/space/review";
-  
-  const { user, isAdmin } = useItems();
-  const supabase = createClient();
-  const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (e) {
-      console.error("Sign out error:", e);
-    }
-  };
+
+  const { user, isAdmin, signOut } = useItems();
   const [loading, setLoading] = useState(false);
 
   const toggleViewHref = isReviewMode 
@@ -53,13 +47,23 @@ export function AppSidebar() {
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
-    })
+    });
 
     if (error) {
-      console.error('OAuth error:', error)
-      setLoading(false)
+      console.error("OAuth error:", error);
+      setLoading(false);
     }
-  }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      // Optional: ensure server components (like layout) re-read cookies
+      router.refresh();
+    } catch (e) {
+      // Already logged inside signOut, but we can toast here if desired
+    }
+  };
 
   return (
     <Sidebar className="flex flex-col h-screen">
@@ -141,7 +145,7 @@ export function AppSidebar() {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => signOut()}
+              onClick={handleSignOut}   // use the context method
               className="w-full"
             >
               <LogOut className="w-4 h-4 mr-2" />

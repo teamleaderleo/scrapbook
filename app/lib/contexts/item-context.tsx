@@ -10,6 +10,7 @@ type ItemsContextType = {
   reload: () => Promise<void>;
   user: any;
   isAdmin: boolean;
+  signOut: () => Promise<void>;
 };
 
 const ItemsContext = createContext<ItemsContextType | null>(null);
@@ -32,22 +33,30 @@ export function ItemsProvider({
   initialIsAdmin = false,
   initialUser = null,
 }: ItemsProviderProps) {
-  // Pass initialUser to useAuth to avoid loading flash
+  // Hydrate auth with server user to avoid flash
   const { user, loading: authLoading } = useAuth(initialUser);
+
   const [items, setItems] = useState<Item[]>(initialItems);
   const [loading, setLoading] = useState(initialItems.length === 0);
-  
-  // Use server-provided isAdmin if available, otherwise compute from user
-  const ADMIN_USER_IDS = [
-    '7f041d78-8d8d-4d77-934d-6e839c2c7e39',
-    '9c838f77-83a9-416e-9bd0-ef18e77424e4',
-  ];
-  const isAdmin = initialIsAdmin || (user ? ADMIN_USER_IDS.includes(user.id) : false);
-  
+
+  const isAdmin =
+    initialIsAdmin || (user ? ADMIN_USER_IDS.includes(user.id) : false);
+
+  const supabase = createClient();
+  const signOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      // useAuth subscribes to auth state changes, so `user` will become null automatically.
+      // To force-refresh server components, we must do it from the caller with router.refresh().
+    } catch (e) {
+      console.error("Sign out error:", e);
+      throw e;
+    }
+  };
+
   const reload = async () => {
     setLoading(true);
-    const supabase = createClient();
-    
+
     // Fetch items
     const { data: itemsData, error: itemsError } = await supabase
       .from('items')
@@ -103,15 +112,18 @@ export function ItemsProvider({
     setItems(mapped);
     setLoading(false);
   };
-  
+
   return (
-    <ItemsContext.Provider value={{ 
-      items, 
-      loading: authLoading || loading, 
-      reload,
-      user,
-      isAdmin 
-    }}>
+    <ItemsContext.Provider
+      value={{
+        items,
+        loading: authLoading || loading,
+        reload,
+        user,
+        isAdmin,
+        signOut,
+      }}
+    >
       {children}
     </ItemsContext.Provider>
   );
