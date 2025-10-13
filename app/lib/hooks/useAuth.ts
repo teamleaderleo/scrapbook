@@ -1,33 +1,33 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { User, Session } from '@supabase/supabase-js'
-import { createClient } from '@/utils/supabase/client'
+import { useState, useEffect } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { createClient } from '@/utils/supabase/client';
 
 interface AuthState {
-  user: User | null
-  session: Session | null
-  loading: boolean
+  user: User | null;
+  session: Session | null;
+  loading: boolean;
 }
 
-export function useAuth() {
+export function useAuth(initialUser: User | null = null) {
+  const supabase = createClient();
+  
   const [authState, setAuthState] = useState<AuthState>({
-    user: null,
+    user: initialUser, // Start with server-provided user
     session: null,
-    loading: true,
-  })
-
-  const supabase = createClient()
+    loading: initialUser === null, // Only loading if no initial user
+  });
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setAuthState({
-        user: session?.user ?? null,
-        session,
-        loading: false,
-      })
-    })
+    // Only fetch if we don't have initial user
+    if (initialUser === null) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setAuthState({
+          user: session?.user ?? null,
+          session,
+          loading: false,
+        });
+      });
+    }
 
     // Listen for auth changes
     const {
@@ -37,19 +37,19 @@ export function useAuth() {
         user: session?.user ?? null,
         session,
         loading: false,
-      })
-    })
+      });
+    });
 
-    return () => subscription.unsubscribe()
-  }, [])
+    return () => subscription.unsubscribe();
+  }, [initialUser, supabase]);
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    return { error }
-  }
+    const { error } = await supabase.auth.signOut();
+    return { error };
+  };
 
   return {
     ...authState,
     signOut,
-  }
+  };
 }

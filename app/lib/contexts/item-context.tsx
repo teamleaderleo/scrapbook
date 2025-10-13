@@ -23,14 +23,17 @@ interface ItemsProviderProps {
   children: ReactNode;
   initialItems?: Item[];
   initialIsAdmin?: boolean;
+  initialUser?: any;
 }
 
 export function ItemsProvider({ 
   children, 
   initialItems = [],
   initialIsAdmin = false,
+  initialUser = null,
 }: ItemsProviderProps) {
-  const { user, loading: authLoading } = useAuth();
+  // Pass initialUser to useAuth to avoid loading flash
+  const { user, loading: authLoading } = useAuth(initialUser);
   const [items, setItems] = useState<Item[]>(initialItems);
   const [loading, setLoading] = useState(initialItems.length === 0);
   
