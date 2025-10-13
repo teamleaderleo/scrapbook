@@ -11,7 +11,7 @@ import { ItemPreview } from "@/components/space/item-preview";
 import { SpaceHeader } from "@/components/space/space-header";
 
 interface EditItemClientProps {
-  item: any; // Item from server
+  item: any; // Item from context or server
 }
 
 export function EditItemClient({ item }: EditItemClientProps) {
