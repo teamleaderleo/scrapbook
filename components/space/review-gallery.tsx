@@ -12,16 +12,14 @@ import { Rating } from "ts-fsrs";
 import { reviewOnce } from "@/app/lib/fsrs-adapter";
 import { createClient } from "@/utils/supabase/client";
 import type { ReviewState } from "@/app/lib/review-types";
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { SpaceHeader } from "./space-header";
 import { useTheme } from "next-themes";
 import { CodeDisplay } from "./code-display";
 
 export function ReviewGallery({ serverNow }: { serverNow: number }) {
   const supabase = createClient();
-  const { isAdmin } = useItems();
+  // Items are pre-loaded from layout!
+  const { items: allItems, isAdmin } = useItems();
   const { theme } = useTheme();
   const nowMs = useNow(serverNow, 30000);
   const sp = useSearchParams();
@@ -29,7 +27,6 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
   const tagsParam = sp.get("tags") ?? undefined;
   const itemParam = sp.get("item");
 
-  const { items: allItems, loading, reload } = useItems();
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showContent, setShowContent] = useState(true);
@@ -104,17 +101,6 @@ export function ReviewGallery({ serverNow }: { serverNow: number }) {
       setShowContent(true);
     }
   };
-
-  if (loading) {
-    return (
-      <>
-        <SpaceHeader 
-          leftContent="Loading..."
-        />
-        <div className="p-4 text-muted-foreground">Loading...</div>
-      </>
-    );
-  }
 
   if (!current) {
     return (

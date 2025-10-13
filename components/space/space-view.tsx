@@ -9,32 +9,30 @@ import { ResultsClient } from "./space-results-client";
 import { Rating } from "ts-fsrs";
 import { useNow } from "@/app/lib/hooks/useNow";
 import { reviewOnce, debugCard } from "@/app/lib/fsrs-adapter";
+import { useItems } from "@/app/lib/contexts/item-context";
 import { createClient } from "@/utils/supabase/client";
 import { SpaceHeader } from "./space-header";
 
-interface SpaceViewClientProps {
-  initialItems: Item[];
-  serverNow: number;
-  isAdmin: boolean;
-}
-
-export function SpaceViewClient({ initialItems, serverNow, isAdmin }: SpaceViewClientProps) {
+export function SpaceView({ serverNow }: { serverNow: number }) {
   const supabase = createClient();
   const nowMs = useNow(serverNow, 30000);
   const sp = useSearchParams();
   const tagsParam = sp.get("tags") ?? undefined;
+
+  // Items are pre-loaded from layout, no loading state needed!
+  const { items: allItems, isAdmin } = useItems();
 
   const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
   
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
 
   const items = useMemo<Item[]>(() => {
-    const withMutations = initialItems.map(it => {
+    const withMutations = allItems.map(it => {
       const mutation = mutations[it.id];
       return mutation ? { ...it, review: mutation } : it;
     });
     return searchItems(withMutations, q, nowMs);
-  }, [initialItems, mutations, q, nowMs]);
+  }, [allItems, mutations, q, nowMs]);
 
   const onEnroll = useCallback(async (id: string) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -74,7 +72,7 @@ export function SpaceViewClient({ initialItems, serverNow, isAdmin }: SpaceViewC
 
     console.group(`Review: ${id} with Rating.${Rating[rating]}`);
     
-    const current = mutations[id] ?? initialItems.find(x => x.id === id)?.review;
+    const current = mutations[id] ?? allItems.find(x => x.id === id)?.review;
     debugCard(current, "BEFORE");
     
     const next = reviewOnce(current, rating, Date.now());
@@ -102,9 +100,8 @@ export function SpaceViewClient({ initialItems, serverNow, isAdmin }: SpaceViewC
     if (error) {
       console.error('Failed to save review:', error);
     }
-  }, [initialItems, mutations, supabase]);
+  }, [allItems, mutations, supabase]);
 
-  // No loading state needed - data is already here from server!
   return (
     <div className="min-h-screen bg-background">
       <SpaceHeader 
