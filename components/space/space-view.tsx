@@ -9,29 +9,32 @@ import { ResultsClient } from "./space-results-client";
 import { Rating } from "ts-fsrs";
 import { useNow } from "@/app/lib/hooks/useNow";
 import { reviewOnce, debugCard } from "@/app/lib/fsrs-adapter";
-import { useItems } from "@/app/lib/contexts/item-context";
 import { createClient } from "@/utils/supabase/client";
 import { SpaceHeader } from "./space-header";
 
-export function SpaceView({ serverNow }: { serverNow: number }) {
+interface SpaceViewClientProps {
+  initialItems: Item[];
+  serverNow: number;
+  isAdmin: boolean;
+}
+
+export function SpaceViewClient({ initialItems, serverNow, isAdmin }: SpaceViewClientProps) {
   const supabase = createClient();
   const nowMs = useNow(serverNow, 30000);
   const sp = useSearchParams();
   const tagsParam = sp.get("tags") ?? undefined;
-
-  const { items: allItems, loading } = useItems();
 
   const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
   
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
 
   const items = useMemo<Item[]>(() => {
-    const withMutations = allItems.map(it => {
+    const withMutations = initialItems.map(it => {
       const mutation = mutations[it.id];
       return mutation ? { ...it, review: mutation } : it;
     });
     return searchItems(withMutations, q, nowMs);
-  }, [allItems, mutations, q, nowMs]);
+  }, [initialItems, mutations, q, nowMs]);
 
   const onEnroll = useCallback(async (id: string) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -64,14 +67,14 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
         return rest;
       });
     }
-  }, []);
+  }, [supabase]);
 
   const onReview = useCallback(async (id: string, rating: Rating) => {
     const { data: { user } } = await supabase.auth.getUser();
 
     console.group(`Review: ${id} with Rating.${Rating[rating]}`);
     
-    const current = mutations[id] ?? allItems.find(x => x.id === id)?.review;
+    const current = mutations[id] ?? initialItems.find(x => x.id === id)?.review;
     debugCard(current, "BEFORE");
     
     const next = reviewOnce(current, rating, Date.now());
@@ -99,28 +102,22 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
     if (error) {
       console.error('Failed to save review:', error);
     }
-  }, [allItems, mutations]);
+  }, [initialItems, mutations, supabase]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <SpaceHeader 
-          leftContent={<span>Loading...</span>}
-        />
-        <main className="p-4">
-          <div className="text-muted-foreground">Loading...</div>
-        </main>
-      </div>
-    );
-  }
-
+  // No loading state needed - data is already here from server!
   return (
     <div className="min-h-screen bg-background">
       <SpaceHeader 
         leftContent={`Query: ${tagsParam ?? "(none)"} · ${items.length} items`}
       />
       <main className="p-4">
-        <ResultsClient items={items} onReview={onReview} onEnroll={onEnroll} nowMs={nowMs} />
+        <ResultsClient 
+          items={items} 
+          onReview={onReview} 
+          onEnroll={onEnroll} 
+          nowMs={nowMs}
+          isAdmin={isAdmin}
+        />
       </main>
     </div>
   );

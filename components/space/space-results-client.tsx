@@ -6,11 +6,7 @@ import type { Item } from "@/app/lib/item-types";
 import { formatInterval, formatDueRelative } from "@/app/lib/interval-format";
 import { useState } from "react";
 import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useSearchParams } from "next/navigation";
-import { useItems } from "@/app/lib/contexts/item-context";
 import { useTheme } from "next-themes";
 import { CodeDisplay } from "./code-display";
 
@@ -19,16 +15,25 @@ export function ResultsClient({
   onReview,
   onEnroll,
   nowMs,
+  isAdmin,
 }: {
   items: Item[];
   onReview: (id: string, rating: Rating) => void;
   onEnroll: (id: string) => void;
   nowMs: number;
+  isAdmin: boolean;
 }) {
   return (
     <ul className="space-y-2">
       {items.map((it) => (
-        <Row key={it.id} it={it} onReview={onReview} onEnroll={onEnroll} nowMs={nowMs} />
+        <Row 
+          key={it.id} 
+          it={it} 
+          onReview={onReview} 
+          onEnroll={onEnroll} 
+          nowMs={nowMs}
+          isAdmin={isAdmin}
+        />
       ))}
     </ul>
   );
@@ -38,15 +43,16 @@ function Row({
   it, 
   onReview, 
   onEnroll,
-  nowMs 
+  nowMs,
+  isAdmin,
 }: { 
   it: Item; 
   onReview: (id: string, r: Rating) => void; 
   onEnroll: (id: string) => void;
   nowMs: number;
+  isAdmin: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const { isAdmin } = useItems();
   const { theme } = useTheme();
   const displayTags = it.tags.map(t => t.includes(':') ? t.split(':')[1] : t);
   const sp = useSearchParams();
