@@ -107,7 +107,7 @@ export default function EditItemPage() {
     }
   }
 
-  if (!item) return <div className="p-6 text-foreground">Loading...</div>;
+  if (!item) return <div className="min-h-screen bg-background p-6 text-foreground">Loading...</div>;
 
   return (
     <div className="p-6 max-w-7xl mx-auto bg-background text-foreground">

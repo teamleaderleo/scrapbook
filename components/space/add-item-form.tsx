@@ -152,7 +152,7 @@ export function AddItemFormContent() {
 
 export function AddItemForm() {
   return (
-    <Suspense fallback={<div className="p-6 text-foreground">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-background p-6 text-foreground">Loading...</div>}>
       <AddItemFormContent />
     </Suspense>
   );
