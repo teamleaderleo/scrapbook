@@ -4,14 +4,19 @@ import { useItems } from "@/app/lib/contexts/item-context";
 import { EditItemClient } from "@/components/space/edit-item-client";
 import { SpaceHeader } from "@/components/space/space-header";
 import { Button } from "@/components/ui/button";
+import { use } from "react";
 
-export default function EditItemPage() {
-  const params = useParams();
+export default function EditItemPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params); // Unwrapped Promise
   const router = useRouter();
   const { items } = useItems();
   
   // Find item from context - already loaded in layout!
-  const item = items.find(it => it.id === params.id);
+  const item = items.find(it => it.id === id);
 
   if (!item) {
     return (
