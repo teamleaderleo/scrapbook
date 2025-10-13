@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import { useTheme } from "next-themes";
+import { useState } from "react";
 import {
   Sidebar,
   SidebarHeader,
@@ -18,27 +17,22 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LogOut, Loader2, Moon, Sun } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react";
 import { shortcuts } from "@/app/lib/sidebar-data";
 import { useAuth } from "@/app/lib/hooks/useAuth";
 import { useItems } from "@/app/lib/contexts/item-context";
 import { supabase } from "@/app/lib/db/supabase";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AppSidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentQuery = searchParams.get("tags") || "";
   const isReviewMode = pathname === "/space/review";
-  const { theme, setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   
   const { user, signOut } = useAuth();
   const { isAdmin } = useItems();
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const toggleViewHref = isReviewMode 
     ? `/space${currentQuery ? `?tags=${currentQuery}` : ''}`
@@ -71,25 +65,7 @@ export function AppSidebar() {
           <Link href="/" className="text-lg font-bold leading-none">
             teamleaderleo
           </Link>
-          {mounted && (
-            <button 
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")} 
-              className="relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700" 
-            > 
-              <span className="sr-only">Toggle theme</span> 
-              <span 
-                className={`${ 
-                  resolvedTheme === "dark" ? "translate-x-5" : "translate-x-0" 
-                } inline-flex h-7 w-7 transform items-center justify-center rounded-full bg-white dark:bg-gray-900 border border-neutral-300 dark:border-neutral-800 shadow-sm transition-transform`} 
-              > 
-                {resolvedTheme === "dark" ? ( 
-                  <Moon className="h-4 w-4 text-white" /> 
-                ) : ( 
-                  <Sun className="h-4 w-4 text-amber-500" /> 
-                )} 
-              </span>
-            </button>
-          )}
+          <ThemeToggle />
         </div>
       </SidebarHeader>
       
