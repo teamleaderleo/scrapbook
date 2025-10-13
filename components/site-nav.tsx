@@ -3,21 +3,22 @@ import { Button } from "@/components/ui/button";
 import HardcodedStickyNote from '@/components/hardcoded-sticky-note';
 // import { HeaderConnectionStatus } from '@/components/connection-status';
 import { Book, Box, Twitter, Github, Sparkles, Brain } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function SiteNav() {
   return (
-    <nav className="bg-white text-black border-b border-gray-200">
+    <nav className="bg-white dark:bg-gray-900 text-black dark:text-white border-b border-gray-200 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-12 items-center">
           <div className="w-1/3">
             <Link href="/" className="text-lg font-bold">teamleaderleo</Link>
           </div>
           <div className="w-1/3 flex justify-center gap-4">
-            <Link href="/space" className="text-sm hover:text-gray-600 flex items-center gap-1">
+            <Link href="/space" className="text-sm hover:text-gray-600 dark:hover:text-gray-400 flex items-center gap-1">
               <Brain size={14} />
               <span>space</span>
             </Link>
-            <Link href="/blog" className="text-sm hover:text-gray-600 flex items-center gap-1">
+            <Link href="/blog" className="text-sm hover:text-gray-600 dark:hover:text-gray-400 flex items-center gap-1">
               <Book size={14} />
               <span>blog</span>
             </Link>
@@ -31,13 +32,13 @@ export default function SiteNav() {
               <span>glossless</span>
             </Link>
             {/* TODO: Add real gallery */}
-            <Link href="/gallery" className="text-sm hover:text-gray-600 flex items-center gap-1">
+            <Link href="/gallery" className="text-sm hover:text-gray-600 dark:hover:text-gray-400 flex items-center gap-1">
               <Box size={14} />
               <span>cube</span>
             </Link>
             
             {/* Social Links */}
-            <div className="flex items-center gap-4 ml-2 pl-2 border-l border-gray-300">
+            <div className="flex items-center gap-4 ml-2 pl-2 border-l border-gray-300 dark:border-gray-700">
               <Link 
                 href="https://twitter.com/teamleaderleo" 
                 target="_blank" 
@@ -66,7 +67,7 @@ export default function SiteNav() {
                 href="https://github.com/teamleaderleo/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-sm hover:text-gray-700 transition-colors flex items-center gap-1"
+                className="text-sm hover:text-gray-700 dark:hover:text-gray-300 transition-colors flex items-center gap-1"
                 title="GitHub - Code projects"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -79,7 +80,8 @@ export default function SiteNav() {
           </div>
           <div className="w-1/3 flex justify-end items-center relative">
             {/* <HeaderConnectionStatus /> */}
-            <Link href="/dashboard">
+            <ThemeToggle />
+            {/* <Link href="/dashboard">
               <Button variant="secondary" size="sm" className="bg-black text-white hover:bg-gray-800 text-xs py-1 px-2">
                 Open App
               </Button>
@@ -88,7 +90,7 @@ export default function SiteNav() {
               <div className="flex justify-end">
                 <HardcodedStickyNote />
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
