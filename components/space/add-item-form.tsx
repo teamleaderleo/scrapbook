@@ -99,7 +99,12 @@ export function AddItemFormContent() {
       <SpaceHeader 
         leftContent="Add Item"
         centerContent={
-          <Button onClick={handleSave} size="sm" disabled={!preview}>
+          <Button 
+            onClick={handleSave} 
+            size="sm" 
+            disabled={!preview}
+            className="bg-accent text-accent-foreground"
+          >
             Save Item
           </Button>
         }

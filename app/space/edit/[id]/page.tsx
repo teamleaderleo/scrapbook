@@ -120,7 +120,11 @@ export default function EditItemPage() {
       <SpaceHeader 
         leftContent={`Edit: ${item.title}`}
         centerContent={
-          <Button onClick={handleSave} size="sm">
+          <Button 
+            onClick={handleSave} 
+            size="sm"
+            className="bg-accent text-accent-foreground"
+          >
             Save Changes
           </Button>
         }
