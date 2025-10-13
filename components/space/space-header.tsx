@@ -8,11 +8,14 @@ interface SpaceHeaderProps {
   // Left side info
   leftContent: React.ReactNode;
   
+  // Center action (optional, defaults to toggle)
+  centerContent?: React.ReactNode;
+  
   // Right side actions (optional)
   rightContent?: React.ReactNode;
 }
 
-export function SpaceHeader({ leftContent, rightContent }: SpaceHeaderProps) {
+export function SpaceHeader({ leftContent, centerContent, rightContent }: SpaceHeaderProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const tagsParam = searchParams.get("tags") || "";
@@ -22,6 +25,15 @@ export function SpaceHeader({ leftContent, rightContent }: SpaceHeaderProps) {
   const toggleHref = isReviewMode 
     ? `/space${tagsParam ? `?tags=${tagsParam}` : ''}`
     : `/space/review${tagsParam ? `?tags=${tagsParam}` : ''}`;
+
+  const defaultCenterContent = (
+    <Link 
+      href={toggleHref}
+      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+    >
+      {isReviewMode ? '← Back to List' : '→ Review Mode'}
+    </Link>
+  );
 
   return (
     <div className="bg-background px-6 h-12 relative border-b border-border">
@@ -33,14 +45,9 @@ export function SpaceHeader({ leftContent, rightContent }: SpaceHeaderProps) {
           </p>
         </div>
 
-        {/* Center: Toggle view mode - absolutely positioned to center on viewport */}
+        {/* Center: Custom content or toggle view mode - absolutely positioned to center on viewport */}
         <div className="fixed left-1/2 -translate-x-1/2 z-10">
-          <Link 
-            href={toggleHref}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {isReviewMode ? '← Back to List' : '→ Review Mode'}
-          </Link>
+          {centerContent ?? defaultCenterContent}
         </div>
 
         {/* Right: Additional actions */}

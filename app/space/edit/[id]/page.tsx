@@ -8,6 +8,7 @@ import { MarkdownEditor } from "@/components/space/markdown-editor";
 import { CodeEditor } from "@/components/space/code-editor";
 import { RawJsonEditor } from "@/components/space/raw-json-editor";
 import { ItemPreview } from "@/components/space/item-preview";
+import { SpaceHeader } from "@/components/space/space-header";
 
 export default function EditItemPage() {
   const params = useParams();
@@ -105,52 +106,63 @@ export default function EditItemPage() {
     }
   }
 
-  if (!item) return <div className="min-h-screen bg-background p-6 text-foreground">Loading...</div>;
+  if (!item) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SpaceHeader leftContent="Loading..." />
+        <div className="p-6 text-foreground">Loading...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto bg-background text-foreground">
-      <div className="flex items-center gap-4 mb-4">
-        <h1 className="text-2xl font-bold text-foreground">Edit: {item.title}</h1>
-        <Button onClick={handleSave}>
-          Save Changes
-        </Button>
-      </div>
+    <div className="min-h-screen bg-background">
+      <SpaceHeader 
+        leftContent={`Edit: ${item.title}`}
+        centerContent={
+          <Button onClick={handleSave} size="sm">
+            Save Changes
+          </Button>
+        }
+      />
       
-      {/* Top Row: Editors */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <MarkdownEditor
-          value={content}
-          onChange={(val) => {
-            setIsEditingRaw(false);
-            setContent(val);
-          }}
-        />
+      <div className="p-6 max-w-7xl mx-auto">
+        {/* Top Row: Editors */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <MarkdownEditor
+            value={content}
+            onChange={(val) => {
+              setIsEditingRaw(false);
+              setContent(val);
+            }}
+          />
 
-        <CodeEditor
-          value={code}
-          onChange={(val) => {
-            setIsEditingRaw(false);
-            setCode(val);
-          }}
-        />
-      </div>
+          <CodeEditor
+            value={code}
+            onChange={(val) => {
+              setIsEditingRaw(false);
+              setCode(val);
+            }}
+          />
+        </div>
 
-      {/* Bottom Row: Raw & Preview */}
-      <div className="grid grid-cols-2 gap-4">
-        <RawJsonEditor
-          value={rawInput}
-          onChange={(val) => {
-            setIsEditingRaw(true);
-            setRawInput(val);
-          }}
-          error={jsonError}
-        />
+        {/* Bottom Row: Raw & Preview */}
+        <div className="grid grid-cols-2 gap-4">
+          <RawJsonEditor
+            value={rawInput}
+            onChange={(val) => {
+              setIsEditingRaw(true);
+              setRawInput(val);
+            }}
+            error={jsonError}
+          />
 
-        <ItemPreview
-          item={preview || item}
-          content={content}
-          code={code}
-        />
+          <ItemPreview
+            item={preview || item}
+            content={content}
+            code={code}
+          />
+        </div>
       </div>
     </div>
   );
