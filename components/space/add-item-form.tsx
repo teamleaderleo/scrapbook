@@ -143,14 +143,5 @@ export function AddItemFormContent() {
 }
 
 export function AddItemForm() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background">
-        <SpaceHeader leftContent="Loading..." />
-        <div className="p-6 text-foreground">Loading...</div>
-      </div>
-    }>
-      <AddItemFormContent />
-    </Suspense>
-  );
+  return <AddItemFormContent />;
 }
