@@ -13,9 +13,10 @@ import { useItems } from "@/app/lib/contexts/item-context";
 import { createClient } from "@/utils/supabase/client";
 import { SpaceHeader } from "./space-header";
 
-export function SpaceView({ serverNow }: { serverNow: number }) {
+export function SpaceView() {
   const supabase = createClient();
-  const nowMs = useNow(serverNow, 30000);
+  const baseNow = useMemo(() => Date.now(), []);       // stable for lifetime
+  const nowMs = useNow(baseNow, 30_000);
   const sp = useSearchParams();
   const tagsParam = sp.get("tags") ?? undefined;
 
@@ -39,7 +40,7 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
     
     const initialReview: ReviewState = {
       state: 0,
-      due: Date.now(),
+      due: nowMs,
       last_review: null,
       stability: 0,
       difficulty: 0,
@@ -65,7 +66,7 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
         return rest;
       });
     }
-  }, [supabase]);
+  }, [supabase, nowMs]);
 
   const onReview = useCallback(async (id: string, rating: Rating) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -75,7 +76,7 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
     const current = mutations[id] ?? allItems.find(x => x.id === id)?.review;
     debugCard(current, "BEFORE");
     
-    const next = reviewOnce(current, rating, Date.now());
+    const next = reviewOnce(current, rating, nowMs);
     debugCard(next, "AFTER");
     
     setMutations(prev => ({ ...prev, [id]: next }));
@@ -100,7 +101,7 @@ export function SpaceView({ serverNow }: { serverNow: number }) {
     if (error) {
       console.error('Failed to save review:', error);
     }
-  }, [allItems, mutations, supabase]);
+  }, [allItems, mutations, supabase, nowMs]);
 
   return (
     <div className="min-h-screen bg-background">

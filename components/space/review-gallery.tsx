@@ -16,12 +16,13 @@ import { SpaceHeader } from "./space-header";
 import { useTheme } from "next-themes";
 import { CodeDisplay } from "./code-display";
 
-export function ReviewGallery({ serverNow }: { serverNow: number }) {
+export function ReviewGallery() {
   const supabase = createClient();
   // Items are pre-loaded from layout!
   const { items: allItems, isAdmin } = useItems();
   const { theme } = useTheme();
-  const nowMs = useNow(serverNow, 30000);
+  const baseNow = useMemo(() => Date.now(), []);
+  const nowMs = useNow(baseNow, 30_000);
   const sp = useSearchParams();
   const router = useRouter();
   const tagsParam = sp.get("tags") ?? undefined;
