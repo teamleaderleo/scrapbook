@@ -12,7 +12,7 @@ export default function BlogLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-white flex flex-col w-full">
+    <div className="min-h-screen bg-background text-foreground flex flex-col w-full">
       <SiteNav />
       {children}
     </div>

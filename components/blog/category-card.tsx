@@ -15,7 +15,7 @@ interface CategoryCardProps {
 const CategoryCard = ({ categoryKey, categoryLabel, posts }: CategoryCardProps) => {
   return (
     <Link href={`/blog/category/${categoryKey}`}>
-      <Card className="h-36 hover:bg-gray-50 transition-colors">
+      <Card className="h-36 hover:bg-accent transition-colors">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">{categoryLabel}</CardTitle>
         </CardHeader>
@@ -25,7 +25,7 @@ const CategoryCard = ({ categoryKey, categoryLabel, posts }: CategoryCardProps) 
               {posts.slice(0, 3).map(post => (
                 <div key={post.id} className="text-sm">
                   <p className="font-medium truncate">{post.title}</p>
-                  <p className="text-xs text-gray-500">{post.date}</p>
+                  <p className="text-xs text-muted-foreground">{post.date}</p>
                 </div>
               ))}
             </div>

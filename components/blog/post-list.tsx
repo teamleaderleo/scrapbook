@@ -24,14 +24,14 @@ const PostList = ({ posts, title }: PostListProps) => {
               <div key={post.id} className="border-b pb-2">
                 <Link 
                   href={`/blog/${post.slug}`}
-                  className="block hover:text-blue-600"
+                  className="block hover:text-primary"
                 >
                   <h3 className="font-semibold text-sm">{post.title}</h3>
-                  <p className="text-xs text-gray-500">{post.date}</p>
+                  <p className="text-xs text-muted-foreground">{post.date}</p>
                 </Link>
                 <Link
                   href={`/blog/category/${post.category}`}
-                  className="inline-block text-xs bg-gray-100 rounded px-2 py-1 mt-1 hover:bg-gray-200"
+                  className="inline-block text-xs bg-secondary text-secondary-foreground rounded px-2 py-1 mt-1 hover:bg-secondary/80"
                 >
                   {categories[post.category]}
                 </Link>

@@ -23,7 +23,7 @@ const BlogLayout = ({ posts }: BlogLayoutProps) => {
   }, {} as Record<PostCategory, BlogPost[]>);
 
   return (
-    <main className="flex-1 w-full px-4 sm:px-6 lg:px-8">
+    <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 min-h-screen">
       <div className="h-[calc(100vh-3rem-1px)] py-6 flex flex-col w-full">
         <div className="grid grid-cols-12 gap-6 flex-1 min-h-0 w-full">
           <div className="col-span-3 min-w-0 max-h-[calc(100vh-16rem)]">
