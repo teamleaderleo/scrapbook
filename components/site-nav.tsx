@@ -7,18 +7,18 @@ import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function SiteNav() {
   return (
-    <nav className="bg-white dark:bg-gray-900 text-black dark:text-white border-b border-gray-200 dark:border-gray-800">
+    <nav className="bg-background text-foreground border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-12 items-center">
           <div className="w-1/3">
             <Link href="/" className="text-lg font-bold">teamleaderleo</Link>
           </div>
           <div className="w-1/3 flex justify-center gap-4">
-            <Link href="/space" className="text-sm hover:text-gray-600 dark:hover:text-gray-400 flex items-center gap-1">
+            <Link href="/space" className="text-sm hover:text-muted-foreground flex items-center gap-1">
               <Brain size={14} />
               <span>space</span>
             </Link>
-            <Link href="/blog" className="text-sm hover:text-gray-600 dark:hover:text-gray-400 flex items-center gap-1">
+            <Link href="/blog" className="text-sm hover:text-muted-foreground flex items-center gap-1">
               <Book size={14} />
               <span>blog</span>
             </Link>
@@ -32,13 +32,13 @@ export default function SiteNav() {
               <span>glossless</span>
             </Link>
             {/* TODO: Add real gallery */}
-            <Link href="/gallery" className="text-sm hover:text-gray-600 dark:hover:text-gray-400 flex items-center gap-1">
+            <Link href="/gallery" className="text-sm hover:text-muted-foreground flex items-center gap-1">
               <Box size={14} />
               <span>cube</span>
             </Link>
             
             {/* Social Links */}
-            <div className="flex items-center gap-4 ml-2 pl-2 border-l border-gray-300 dark:border-gray-700">
+            <div className="flex items-center gap-4 ml-2 pl-2 border-l">
               <Link 
                 href="https://twitter.com/teamleaderleo" 
                 target="_blank" 
@@ -67,7 +67,7 @@ export default function SiteNav() {
                 href="https://github.com/teamleaderleo/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-sm hover:text-gray-700 dark:hover:text-gray-300 transition-colors flex items-center gap-1 relative z-10"
+                className="text-sm hover:text-muted-foreground transition-colors flex items-center gap-1 relative z-10"
                 title="GitHub - Code projects"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="pointer-events-none">
