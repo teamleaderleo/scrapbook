@@ -43,8 +43,12 @@ export function CodeDisplay({
             {code}
           </SyntaxHighlighter>
         ) : (
-          // SSR-safe fallback that won’t mismatch
-          <pre className="m-0 p-3 text-xs whitespace-pre-wrap text-foreground">{code}</pre>
+          <pre 
+            className="m-0 p-3 whitespace-pre-wrap text-foreground font-mono" 
+            style={{ fontSize: 14, lineHeight: 1.3 }}
+          >
+            {code}
+          </pre>
         )}
       </div>
     </div>
