@@ -15,16 +15,16 @@ export function searchItems(items: Item[], q: ParsedQuery, nowMs: number): Item[
   for (const [key, vals] of Object.entries(q.ops)) {
     switch (key) {
       case "diff":
-        res = res.filter(it => vals.every(v => it.tags.includes(`difficulty:${v}`)));
+        res = res.filter(it => vals.every(v => hasTagCaseInsensitive(it, `difficulty:${v}`)));
         break;
       case "company":
       case "topic":
       case "difficulty":
       case "type":
-        res = res.filter(it => vals.every(v => it.tags.includes(`${key}:${v}`)));
+        res = res.filter(it => vals.every(v => hasTagCaseInsensitive(it, `${key}:${v}`)));
         break;
       case "category":
-        res = res.filter(it => vals.includes(it.category));
+        res = res.filter(it => vals.some(v => it.category.toLowerCase() === v));
         break;
       case "is":
         for (const flag of vals) {
@@ -68,8 +68,28 @@ export function searchItems(items: Item[], q: ParsedQuery, nowMs: number): Item[
 }
 
 function hasTag(it: Item, tag: string) {
-  return (
-    it.tags.includes(tag) ||  // exact match only
-    it.category === tag
-  );
+  // Check exact tag match
+  if (it.tags.includes(tag)) return true;
+  
+  // Check category match
+  if (it.category === tag) return true;
+  
+  // Check if tag appears in any tag value (after the colon)
+  // e.g., searching "easy" should match "difficulty:easy"
+  const tagValues = it.tags
+    .map(t => t.includes(':') ? t.split(':')[1] : t)
+    .join(' ')
+    .toLowerCase();
+  
+  if (tagValues.includes(tag)) return true;
+  
+  // Check if tag appears in title
+  if (it.title.toLowerCase().includes(tag)) return true;
+  
+  return false;
+}
+
+function hasTagCaseInsensitive(it: Item, tag: string) {
+  const tagLower = tag.toLowerCase();
+  return it.tags.some(t => t.toLowerCase() === tagLower);
 }
