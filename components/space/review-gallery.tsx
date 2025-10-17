@@ -56,6 +56,11 @@ export function ReviewGallery() {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
+      // Ignore if typing in an input/textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return;
+      }
       // Ignore if any modifier keys are pressed (Ctrl, Cmd, Alt, Shift)
       if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) {
         return;
