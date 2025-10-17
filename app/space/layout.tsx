@@ -5,6 +5,7 @@ import { ItemsProvider } from '../lib/contexts/item-context';
 import { createClient } from '@/utils/supabase/server';
 import type { Item } from '@/app/lib/item-types';
 import type { ReviewState } from '@/app/lib/review-types';
+import { SearchCommand } from '@/components/space/search-command';
 
 export const metadata: Metadata = {
   title: 'Space',
@@ -88,6 +89,7 @@ export default async function SpaceLayout({
   return (
     <SidebarProvider>
       <ItemsProvider initialItems={items} initialIsAdmin={isAdmin} initialUser={user}>
+        <SearchCommand /> 
         <div className="min-h-screen bg-white flex w-full">
           <AppSidebar/>
           <div className="flex flex-col flex-1">
