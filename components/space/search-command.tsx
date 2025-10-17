@@ -85,6 +85,30 @@ export function SearchCommand() {
       <CommandList>
         <CommandEmpty>No items found.</CommandEmpty>
         
+        <CommandGroup heading={`Items (${filteredItems.length})`}>
+          {filteredItems.map((item) => (
+            <CommandItem
+              key={item.id}
+              value={item.id}
+              onSelect={() => handleSelect(item)}
+            >
+              <div className="flex flex-col w-full">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{item.title}</span>
+                  <span className="text-xs text-muted-foreground capitalize">
+                    {item.category}
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {item.tags
+                    .map((t) => (t.includes(":") ? t.split(":")[1] : t))
+                    .join(", ")}
+                </div>
+              </div>
+            </CommandItem>
+          ))}
+        </CommandGroup>
+        
         {isAdmin && (
           <CommandGroup heading="Quick Actions">
             <CommandItem onSelect={() => {
@@ -109,30 +133,6 @@ export function SearchCommand() {
             </CommandItem>
           </CommandGroup>
         )}
-
-        <CommandGroup heading={`Items (${filteredItems.length})`}>
-          {filteredItems.map((item) => (
-            <CommandItem
-              key={item.id}
-              value={item.id}
-              onSelect={() => handleSelect(item)}
-            >
-              <div className="flex flex-col w-full">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{item.title}</span>
-                  <span className="text-xs text-muted-foreground capitalize">
-                    {item.category}
-                  </span>
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {item.tags
-                    .map((t) => (t.includes(":") ? t.split(":")[1] : t))
-                    .join(", ")}
-                </div>
-              </div>
-            </CommandItem>
-          ))}
-        </CommandGroup>
       </CommandList>
     </CommandDialog>
   );
