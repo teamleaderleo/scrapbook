@@ -56,6 +56,10 @@ export function ReviewGallery() {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
+      // Ignore if any modifier keys are pressed (Ctrl, Cmd, Alt, Shift)
+      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) {
+        return;
+      }
       if (e.key === 'ArrowRight' || e.key === 'j') {
         setCurrentIndex(i => Math.min(i + 1, items.length - 1));
         setShowContent(true);
