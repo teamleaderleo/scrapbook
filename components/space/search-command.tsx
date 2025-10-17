@@ -49,17 +49,36 @@ export function SearchCommand() {
       return results.slice(0, 50);
     }
     
-    // Otherwise, simple title search (Ctrl+F style)
-    const results = allItems.filter(item => 
-      item.title.toLowerCase().includes(searchLower)
-    );
+    // Otherwise, full-text search across title, category, and tag values
+    const results = allItems.filter(item => {
+      if (item.title.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+      
+      // Search in category
+      if (item.category.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+      
+      // Search in tag values (the part after the colon)
+      const tagValues = item.tags
+        .map(tag => tag.includes(':') ? tag.split(':')[1] : tag)
+        .join(' ')
+        .toLowerCase();
+      
+      if (tagValues.includes(searchLower)) {
+        return true;
+      }
+      
+      return false;
+    });
+    
     return results.slice(0, 50);
   }, [search, allItems, nowMs]);
 
   const handleSelect = (item: Item) => {
     setOpen(false);
     setSearch("");
-    // Navigate to review page for this specific item (clear tag filters)
     router.push(`/space/review?item=${item.id}`);
   };
 
@@ -72,7 +91,7 @@ export function SearchCommand() {
   };
 
   return (
-    <CommandDialog open={open} onOpenChange={setOpen}>
+    <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
       <VisuallyHidden>
         <DialogTitle>Search Command</DialogTitle>
       </VisuallyHidden>
@@ -88,10 +107,9 @@ export function SearchCommand() {
           {filteredItems.map((item) => (
             <CommandItem
               key={item.id}
-              value={item.id}
               onSelect={() => handleSelect(item)}
             >
-              <div className="flex flex-col w-full">
+                <div className="flex flex-col w-full">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">{item.title}</span>
                   <span className="text-xs text-muted-foreground capitalize">
