@@ -59,9 +59,8 @@ export function SearchCommand() {
   const handleSelect = (item: Item) => {
     setOpen(false);
     setSearch("");
-    // Navigate to review page for this specific item
-    const currentTags = sp.get("tags") ?? "";
-    router.push(`/space/review?tags=${currentTags}&item=${item.id}`);
+    // Navigate to review page for this specific item (clear tag filters)
+    router.push(`/space/review?item=${item.id}`);
   };
 
   const handleSearchWithQuery = () => {
