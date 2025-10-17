@@ -50,27 +50,38 @@ export function SearchCommand() {
     }
     
     // Otherwise, full-text search across title, category, and tag values
+    // Split by spaces for multi-term AND search
+    // 1. Split "leetcode easy" into ["leetcode", "easy"]
+    const terms = searchLower.split(/\s+/).filter(t => t.length > 0);
+    
+    // 2. For each item, check if ALL terms match
     const results = allItems.filter(item => {
-      if (item.title.toLowerCase().includes(searchLower)) {
-        return true;
-      }
-      
-      // Search in category
-      if (item.category.toLowerCase().includes(searchLower)) {
-        return true;
-      }
-      
-      // Search in tag values (the part after the colon)
-      const tagValues = item.tags
-        .map(tag => tag.includes(':') ? tag.split(':')[1] : tag)
-        .join(' ')
-        .toLowerCase();
-      
-      if (tagValues.includes(searchLower)) {
-        return true;
-      }
-      
-      return false;
+      // 3. For EACH term, does it appear ANYWHERE in this item?
+      return terms.every(term => {
+        // Search in title
+        if (item.title.toLowerCase().includes(term)) {
+          return true;
+        }
+        
+        // Search in category
+        if (item.category.toLowerCase().includes(term)) {
+          return true;
+        }
+        
+        // Search in tag values (the part after the colon)
+        const tagValues = item.tags
+          .map(tag => tag.includes(':') ? tag.split(':')[1] : tag)
+          .join(' ')
+          .toLowerCase();
+        
+        if (tagValues.includes(term)) {
+          return true;
+        }
+        // If found in ANY of those → return true for this term
+        // If not found in ANY → return false for this term
+        
+        return false;
+      });
     });
     
     return results.slice(0, 50);
