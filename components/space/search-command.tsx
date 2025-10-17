@@ -15,6 +15,7 @@ import { useItems } from "@/app/lib/contexts/item-context";
 import { parseQuery } from "@/app/lib/searchlang";
 import { searchItems } from "@/app/lib/item-search";
 import type { Item } from "@/app/lib/item-types";
+import { Plus, Search } from "lucide-react";
 
 export function SearchCommand() {
   const [open, setOpen] = useState(false);
@@ -51,12 +52,10 @@ export function SearchCommand() {
     
     // Otherwise, full-text search across title, category, and tag values
     // Split by spaces for multi-term AND search
-    // 1. Split "leetcode easy" into ["leetcode", "easy"]
     const terms = searchLower.split(/\s+/).filter(t => t.length > 0);
     
-    // 2. For each item, check if ALL terms match
     const results = allItems.filter(item => {
-      // 3. For EACH term, does it appear ANYWHERE in this item?
+      // Check if ALL terms match somewhere in the item
       return terms.every(term => {
         // Search in title
         if (item.title.toLowerCase().includes(term)) {
@@ -77,8 +76,6 @@ export function SearchCommand() {
         if (tagValues.includes(term)) {
           return true;
         }
-        // If found in ANY of those → return true for this term
-        // If not found in ANY → return false for this term
         
         return false;
       });
@@ -144,7 +141,7 @@ export function SearchCommand() {
               router.push('/space/add');
             }}>
               <span className="flex items-center gap-2">
-                <span className="text-muted-foreground">➕</span>
+                <Plus className="h-4 w-4" />
                 Add new item
               </span>
             </CommandItem>
@@ -155,7 +152,7 @@ export function SearchCommand() {
           <CommandGroup heading="Search">
             <CommandItem onSelect={handleSearchWithQuery}>
               <span className="flex items-center gap-2">
-                <span className="text-muted-foreground">🔍</span>
+                <Search className="h-4 w-4" />
                 Filter list: <span className="font-mono text-sm">{search}</span>
               </span>
             </CommandItem>
