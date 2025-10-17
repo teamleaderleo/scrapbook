@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LogOut, Loader2 } from "lucide-react";
+import { LogOut, Loader2, Search } from "lucide-react";
 import { shortcuts } from "@/app/lib/sidebar-data";
 import { useItems } from "@/app/lib/contexts/item-context";
 import { createClient } from "@/utils/supabase/client";
@@ -59,11 +59,21 @@ export function AppSidebar() {
   const handleSignOut = async () => {
     try {
       await signOut();
-      // Optional: ensure server components (like layout) re-read cookies
       router.refresh();
     } catch (e) {
       // Already logged inside signOut, but we can toast here if desired
     }
+  };
+
+  // Trigger search dialog (will be handled by Ctrl+K event)
+  const triggerSearch = () => {
+    const event = new KeyboardEvent('keydown', {
+      key: 'k',
+      metaKey: true,
+      ctrlKey: true,
+      bubbles: true
+    });
+    document.dispatchEvent(event);
   };
 
   return (
@@ -76,6 +86,25 @@ export function AppSidebar() {
           <ThemeToggle />
         </div>
       </SidebarHeader>
+
+      {/* Search Bar */}
+      <div className="p-4 border-b">
+        <button
+          onClick={triggerSearch}
+          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground bg-muted/50 hover:bg-muted rounded-md transition-colors"
+        >
+          <Search className="h-4 w-4" />
+          <span className="flex-1 text-left">Search...</span>
+          <div className="flex gap-1">
+            <kbd className="px-1.5 py-0.5 text-xs font-semibold border rounded bg-background">
+              {navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}
+            </kbd>
+            <kbd className="px-1.5 py-0.5 text-xs font-semibold border rounded bg-background">
+              K
+            </kbd>
+          </div>
+        </button>
+      </div>
       
       {/* Only show Actions if admin */}
       {isAdmin && (
@@ -146,7 +175,7 @@ export function AppSidebar() {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={handleSignOut}   // use the context method
+              onClick={handleSignOut}
               className="w-full"
             >
               <LogOut className="w-4 h-4 mr-2" />
