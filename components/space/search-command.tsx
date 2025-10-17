@@ -40,9 +40,20 @@ export function SearchCommand() {
   const filteredItems = useMemo(() => {
     if (!search) return allItems.slice(0, 50); // Show first 50 if empty
     
-    const query = parseQuery(search);
-    const results = searchItems(allItems, query, nowMs);
-    return results.slice(0, 50); // Limit to 50 results
+    const searchLower = search.toLowerCase();
+    
+    // If search contains structured operators (key:value), use query parser
+    if (search.includes(':')) {
+      const query = parseQuery(search);
+      const results = searchItems(allItems, query, nowMs);
+      return results.slice(0, 50);
+    }
+    
+    // Otherwise, simple title search (Ctrl+F style)
+    const results = allItems.filter(item => 
+      item.title.toLowerCase().includes(searchLower)
+    );
+    return results.slice(0, 50);
   }, [search, allItems, nowMs]);
 
   const handleSelect = (item: Item) => {
