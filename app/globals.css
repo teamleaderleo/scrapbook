@@ -2,10 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  overflow-x: hidden;
-  scrollbar-gutter: stable;
-}
+
 
 @layer base {
   :root {
