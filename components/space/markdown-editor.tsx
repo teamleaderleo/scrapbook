@@ -6,10 +6,13 @@ interface MarkdownEditorProps {
   placeholder?: string;
 }
 
-export function MarkdownEditor({ value, onChange, placeholder = "# Approach\n\nYour writeup here..." }: MarkdownEditorProps) {
+export function MarkdownEditor({
+  value,
+  onChange,
+  placeholder = "# Approach\n\nYour writeup here...",
+}: MarkdownEditorProps) {
   return (
     <div>
-      <h2 className="text-sm font-semibold mb-2 text-foreground">Content (Markdown)</h2>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}

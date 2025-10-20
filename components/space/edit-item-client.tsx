@@ -10,6 +10,7 @@ import { RawJsonEditor } from "@/components/space/raw-json-editor";
 import { ItemPreview } from "@/components/space/item-preview";
 import { SpaceHeader } from "@/components/space/space-header";
 import { updateItemAction } from '@/app/space/actions';
+import { Copy, Check } from "lucide-react";
 
 interface EditItemClientProps {
   item: any; // Item from context or server
@@ -34,6 +35,9 @@ export function EditItemClient({ item }: EditItemClientProps) {
   const [jsonError, setJsonError] = useState("");
   const [isEditingRaw, setIsEditingRaw] = useState(false);
   const [preview, setPreview] = useState<any>(null);
+
+  // small UX: feedback when copying em dash
+  const [copiedDash, setCopiedDash] = useState(false);
 
   // Sync raw input changes to preview
   useEffect(() => {
@@ -90,6 +94,12 @@ export function EditItemClient({ item }: EditItemClientProps) {
     }
   }
 
+  const copyEmDash = async () => {
+    await navigator.clipboard.writeText("—");
+    setCopiedDash(true);
+    setTimeout(() => setCopiedDash(false), 1500);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <SpaceHeader 
@@ -108,14 +118,34 @@ export function EditItemClient({ item }: EditItemClientProps) {
       <div className="p-6 max-w-7xl mx-auto">
         {/* Top Row: Editors */}
         <div className="grid grid-cols-2 gap-4 mb-4">
-          <MarkdownEditor
-            value={content}
-            onChange={(val) => {
-              setIsEditingRaw(false);
-              setContent(val);
-            }}
-          />
+          {/* Left: Content (Markdown) with copy em dash button */}
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold text-foreground">
+                Content (Markdown)
+              </h3>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2"
+                onClick={copyEmDash}
+                title="Copy em dash (—)"
+              >
+                {copiedDash ? <Check className="h-3 w-3" /> : <><Copy className="h-3 w-3 mr-1" /> —</>}
+              </Button>
+            </div>
 
+            <MarkdownEditor
+              value={content}
+              onChange={(val) => {
+                setIsEditingRaw(false);
+                setContent(val);
+              }}
+            />
+          </div>
+
+          {/* Right: Code editor */}
           <CodeEditor
             value={code}
             onChange={(val) => {
