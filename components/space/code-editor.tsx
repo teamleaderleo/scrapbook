@@ -22,6 +22,16 @@ export function CodeEditor({
   const highlightRef = useRef<HTMLDivElement>(null);
   const isDark = (resolvedTheme ?? theme) === "dark";
 
+  // Shared metrics to keep editor + highlighter perfectly aligned
+  const METRICS = {
+    padding: "0.75rem",
+    fontSize: 14,
+    lineHeight: 1.3,
+    tabSize: 4 as unknown as number,
+    fontFamily:
+      'Menlo, Monaco, Consolas, "Andale Mono", "Ubuntu Mono", "Courier New", monospace',
+  };
+
   return (
     <div>
       <h2 className="text-sm font-semibold mb-2 text-foreground">Code</h2>
@@ -38,12 +48,21 @@ export function CodeEditor({
               customStyle={{
                 margin: 0,
                 background: "transparent",
-                padding: "0.75rem",
-                fontSize: 14,
-                lineHeight: 1.3,
+                padding: METRICS.padding,
+                fontSize: METRICS.fontSize,
+                lineHeight: METRICS.lineHeight,
+                fontFamily: METRICS.fontFamily,
+                tabSize: METRICS.tabSize,
+                whiteSpace: "pre",
               }}
-              codeTagProps={{ style: { background: "transparent", fontSize: "inherit" } }}
-              PreTag="div"
+              codeTagProps={{
+                style: {
+                  background: "transparent",
+                  fontSize: "inherit",
+                  fontFamily: "inherit",
+                },
+              }}
+              PreTag="pre"
               className="leading-tight"
             >
               {value || " "}
@@ -66,12 +85,11 @@ export function CodeEditor({
                      caret-black dark:caret-white"  // no inline style; CSS-only
           style={{
             // Keep only invariants here; avoid theme-dependent inline styles on first render
-            fontSize: 14,
-            lineHeight: 1.3,
-            padding: "0.75rem",
-            tabSize: 4,
-            fontFamily:
-              'Menlo, Monaco, Consolas, "Andale Mono", "Ubuntu Mono", "Courier New", monospace',
+            fontSize: METRICS.fontSize,
+            lineHeight: METRICS.lineHeight,
+            padding: METRICS.padding,
+            tabSize: METRICS.tabSize,
+            fontFamily: METRICS.fontFamily,
           }}
           placeholder={placeholder}
           spellCheck={false}

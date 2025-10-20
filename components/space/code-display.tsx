@@ -24,6 +24,16 @@ export function CodeDisplay({
 
   const isDark = (resolvedTheme ?? theme) === "dark";
 
+  // Same metrics as the editor to ensure perfect visual parity
+  const METRICS = {
+    padding: "0.75rem",
+    fontSize: 14,
+    lineHeight: 1.3,
+    tabSize: 4 as unknown as number,
+    fontFamily:
+      'Menlo, Monaco, Consolas, "Andale Mono", "Ubuntu Mono", "Courier New", monospace',
+  };
+
   const copyCode = async () => {
     await navigator.clipboard.writeText(code);
     setCopied(true);
@@ -40,12 +50,9 @@ export function CodeDisplay({
           onClick={copyCode}
           className="absolute top-2 right-2 h-6 px-2 z-10"
         >
-          {copied ? (
-            <Check className="h-3 w-3" />
-          ) : (
-            <Copy className="h-3 w-3" />
-          )}
+          {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
         </Button>
+
         {mounted ? (
           <SyntaxHighlighter
             language={language}
@@ -53,20 +60,34 @@ export function CodeDisplay({
             customStyle={{
               margin: 0,
               background: "transparent",
-              padding: "0.75rem",
-              fontSize: 14,
-              lineHeight: 1.3,
+              padding: METRICS.padding,
+              fontSize: METRICS.fontSize,
+              lineHeight: METRICS.lineHeight,
+              fontFamily: METRICS.fontFamily,
+              tabSize: METRICS.tabSize,
+              whiteSpace: "pre",
             }}
-            codeTagProps={{ style: { background: "transparent", fontSize: "inherit" } }}
-            PreTag="div"
+            codeTagProps={{
+              style: {
+                background: "transparent",
+                fontSize: "inherit",
+                fontFamily: "inherit",
+              },
+            }}
+            PreTag="pre"
             className="leading-tight"
           >
             {code}
           </SyntaxHighlighter>
         ) : (
-          <pre 
-            className="m-0 p-3 whitespace-pre-wrap text-foreground font-mono" 
-            style={{ fontSize: 14, lineHeight: 1.3 }}
+          <pre
+            className="m-0 p-3 whitespace-pre-wrap text-foreground font-mono"
+            style={{
+              fontSize: METRICS.fontSize,
+              lineHeight: METRICS.lineHeight,
+              tabSize: METRICS.tabSize as number,
+              fontFamily: METRICS.fontFamily,
+            }}
           >
             {code}
           </pre>
