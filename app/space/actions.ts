@@ -6,9 +6,9 @@ import { createClient } from '@/utils/supabase/server';
 export async function addItemAction(payload: {
   id: string;
   title: string;
-  url?: string;
+  url?: string | null;
   tags?: string[];
-  category?: string;
+  category?: string | null;
   content?: string;
   code?: string | null;
   score?: number | null;
@@ -24,9 +24,9 @@ export async function addItemAction(payload: {
     slug: payload.id,
     user_id: user?.id ?? null,
     title: payload.title,
-    url: payload.url ?? null,
+    url: payload.url ?? null,                 // stores null if missing
     tags: payload.tags ?? [],
-    category: payload.category ?? 'general',
+    category: payload.category ?? 'general',  // default when null/undefined
     content: payload.content ?? '',
     code: payload.code ?? null,
     content_type: 'markdown',
