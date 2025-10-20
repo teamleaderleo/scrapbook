@@ -31,14 +31,18 @@ export function AppSidebar() {
   const router = useRouter();
 
   const currentQuery = searchParams.get("tags") || "";
-  const isReviewMode = pathname === "/space/review";
+
+  // Treat /space/review and /space/add as the same “review-like” context
+  const isReviewLike =
+    pathname === "/space/review" ||
+    pathname?.startsWith("/space/add");
 
   const { user, isAdmin, signOut } = useItems();
   const [loading, setLoading] = useState(false);
 
   const listHref = `/space${currentQuery ? `?tags=${currentQuery}` : ""}`;
   const reviewHref = `/space/review${currentQuery ? `?tags=${currentQuery}` : ""}`;
-  const toggleViewHref = isReviewMode ? listHref : reviewHref;
+  const toggleViewHref = isReviewLike ? listHref : reviewHref;
 
   // Hotkeys:
   // ⌘/Ctrl + Alt + A => /space/add
@@ -69,7 +73,7 @@ export function AppSidebar() {
       // Base Space (E)
       if (isMod && !e.altKey && !e.shiftKey && (e.key === "e" || e.code === "KeyE")) {
         e.preventDefault();
-        if (isReviewMode) {
+        if (isReviewLike) {
           router.push(listHref);
         } else {
           router.push(reviewHref); // toggle if already on base
@@ -80,8 +84,8 @@ export function AppSidebar() {
       // Review Mode (Shift+E)
       if (isMod && !e.altKey && e.shiftKey && (e.key === "e" || e.code === "KeyE")) {
         e.preventDefault();
-        if (isReviewMode) {
-          router.push(listHref); // toggle if already on review
+        if (isReviewLike) {
+          router.push(listHref); // toggle if already on review-like
         } else {
           router.push(reviewHref);
         }
@@ -91,7 +95,7 @@ export function AppSidebar() {
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [router, isReviewMode, listHref, reviewHref]);
+  }, [router, isReviewLike, listHref, reviewHref]);
 
   // TODO: add signInWithOAuth into the context later to centralize all auth flows
   const handleOAuthSignIn = async (provider: "google" | "github") => {
@@ -223,18 +227,18 @@ export function AppSidebar() {
                     <Link href={toggleViewHref}>
                       {/* Left: arrow icon + label */}
                       <span className="flex items-center gap-2 truncate whitespace-nowrap leading-none">
-                        {isReviewMode ? (
+                        {isReviewLike ? (
                           <ArrowLeft className="h-4 w-4 shrink-0" />
                         ) : (
                           <ArrowRight className="h-4 w-4 shrink-0" />
                         )}
                         <span className="truncate">
-                          {isReviewMode ? "Back to List" : "Review"}
+                          {isReviewLike ? "Back to List" : "Review"}
                         </span>
                       </span>
 
                       {/* Show ONLY the opposite view's hotkey and keep it on one line */}
-                      {isReviewMode ? (
+                      {isReviewLike ? (
                         <span className="flex gap-1 text-muted-foreground shrink-0 whitespace-nowrap">
                           <kbd className="px-1.5 py-0.5 text-[10px] font-semibold border rounded bg-background">
                             {isMac ? "⌘" : "Ctrl"}
@@ -269,10 +273,8 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {shortcuts.map((s) => {
-                  const href = isReviewMode
-                    ? s.href.replace("/space", "/space/review")
-                    : s.href;
-
+                  // When in review-like contexts (review OR add), mirror how you rewrite links
+                  const href = isReviewLike ? s.href.replace("/space", "/space/review") : s.href;
                   return (
                     <SidebarMenuItem key={s.label}>
                       <SidebarMenuButton asChild className="justify-start gap-2 px-4 pl-6">

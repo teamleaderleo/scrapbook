@@ -24,7 +24,11 @@ export function SpaceHeader({ leftContent, centerContent, rightContent }: SpaceH
   const { toggleSidebar } = useSidebar();
 
   const tagsParam = searchParams.get("tags") || "";
-  const isReviewMode = pathname === "/space/review";
+
+  // Treat /space/review and /space/add as the same “review-like” context
+  const isReviewLike =
+    pathname === "/space/review" ||
+    pathname?.startsWith("/space/add");
 
   // Safe platform check for SSR
   const isMac = useMemo(
@@ -33,7 +37,7 @@ export function SpaceHeader({ leftContent, centerContent, rightContent }: SpaceH
   );
 
   // Toggle between list and review view with same query
-  const toggleHref = isReviewMode
+  const toggleHref = isReviewLike
     ? `/space${tagsParam ? `?tags=${tagsParam}` : ""}`
     : `/space/review${tagsParam ? `?tags=${tagsParam}` : ""}`;
 
@@ -42,7 +46,7 @@ export function SpaceHeader({ leftContent, centerContent, rightContent }: SpaceH
       href={toggleHref}
       className="text-sm text-primary-foreground hover:text-primary-foreground/70 transition-colors font-medium inline-flex items-center gap-2"
     >
-      {isReviewMode ? (
+      {isReviewLike ? (
         <>
           <ArrowLeft className="h-4 w-4" />
           <span>Back to List</span>
