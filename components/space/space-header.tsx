@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useSearchParams, usePathname } from "next/navigation";
 import { useSidebar } from "@/components/ui/sidebar";
-import { PanelLeft } from "lucide-react";
+import { PanelLeft, ArrowLeft, ArrowRight } from "lucide-react";
 
 interface SpaceHeaderProps {
   // Left side info
@@ -40,9 +40,19 @@ export function SpaceHeader({ leftContent, centerContent, rightContent }: SpaceH
   const defaultCenterContent = (
     <Link
       href={toggleHref}
-      className="text-sm text-primary-foreground hover:text-primary-foreground/70 transition-colors font-medium"
+      className="text-sm text-primary-foreground hover:text-primary-foreground/70 transition-colors font-medium inline-flex items-center gap-2"
     >
-      {isReviewMode ? "← Back to List" : "→ Review Mode"}
+      {isReviewMode ? (
+        <>
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to List</span>
+        </>
+      ) : (
+        <>
+          <ArrowRight className="h-4 w-4" />
+          <span>Review Mode</span>
+        </>
+      )}
     </Link>
   );
 
