@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LogOut, Loader2, Search } from "lucide-react";
+import { LogOut, Loader2, Search, ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import { shortcuts } from "@/app/lib/sidebar-data";
 import { useItems } from "@/app/lib/contexts/item-context";
 import { createClient } from "@/utils/supabase/client";
@@ -182,9 +182,12 @@ export function AppSidebar() {
                   asChild
                 >
                   <Link href="/space/add">
-                    <span className="truncate whitespace-nowrap leading-none">
-                      + Add Item
+                    {/* Left: icon + label (no literal "+") */}
+                    <span className="flex items-center gap-2 truncate whitespace-nowrap leading-none">
+                      <Plus className="h-4 w-4 shrink-0" />
+                      <span className="truncate">Add Item</span>
                     </span>
+                    {/* Right: hotkeys */}
                     <span className="flex gap-1 text-muted-foreground shrink-0 whitespace-nowrap">
                       <kbd className="px-1.5 py-0.5 text-[10px] font-semibold border rounded bg-background">
                         {isMac ? "⌘" : "Ctrl"}
@@ -218,8 +221,16 @@ export function AppSidebar() {
                     asChild
                   >
                     <Link href={toggleViewHref}>
-                      <span className="truncate whitespace-nowrap leading-none">
-                        {isReviewMode ? "← Back to List" : "→ Review"}
+                      {/* Left: arrow icon + label */}
+                      <span className="flex items-center gap-2 truncate whitespace-nowrap leading-none">
+                        {isReviewMode ? (
+                          <ArrowLeft className="h-4 w-4 shrink-0" />
+                        ) : (
+                          <ArrowRight className="h-4 w-4 shrink-0" />
+                        )}
+                        <span className="truncate">
+                          {isReviewMode ? "Back to List" : "Review"}
+                        </span>
                       </span>
 
                       {/* Show ONLY the opposite view's hotkey and keep it on one line */}
