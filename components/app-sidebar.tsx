@@ -32,10 +32,11 @@ export function AppSidebar() {
 
   const currentQuery = searchParams.get("tags") || "";
 
-  // Treat /space/review and /space/add as the same “review-like” context
+  // Treat /space/review, /space/add, and /space/edit/* as the same "review-like" context
   const isReviewLike =
     pathname === "/space/review" ||
-    pathname?.startsWith("/space/add");
+    pathname?.startsWith("/space/add") ||
+    pathname?.startsWith("/space/edit");
 
   const { user, isAdmin, signOut } = useItems();
   const [loading, setLoading] = useState(false);
@@ -273,7 +274,7 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {shortcuts.map((s) => {
-                  // When in review-like contexts (review OR add), mirror how you rewrite links
+                  // When in review-like contexts (review/add/edit), mirror how you rewrite links
                   const href = isReviewLike ? s.href.replace("/space", "/space/review") : s.href;
                   return (
                     <SidebarMenuItem key={s.label}>

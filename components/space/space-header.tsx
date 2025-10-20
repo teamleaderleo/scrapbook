@@ -25,10 +25,11 @@ export function SpaceHeader({ leftContent, centerContent, rightContent }: SpaceH
 
   const tagsParam = searchParams.get("tags") || "";
 
-  // Treat /space/review and /space/add as the same “review-like” context
+  // Treat /space/review, /space/add, and /space/edit/* as the same "review-like" context
   const isReviewLike =
     pathname === "/space/review" ||
-    pathname?.startsWith("/space/add");
+    pathname?.startsWith("/space/add") ||
+    pathname?.startsWith("/space/edit");
 
   // Safe platform check for SSR
   const isMac = useMemo(
@@ -54,7 +55,7 @@ export function SpaceHeader({ leftContent, centerContent, rightContent }: SpaceH
       ) : (
         <>
           <ArrowRight className="h-4 w-4" />
-          <span>Review Mode</span>
+          <span>Review</span>
         </>
       )}
     </Link>
