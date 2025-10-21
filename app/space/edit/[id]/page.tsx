@@ -1,7 +1,7 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useItems } from "@/app/lib/contexts/item-context";
-import { EditItemClient } from "@/components/space/edit-item-client";
+import { ItemForm } from "@/components/space/item-form";
 import { SpaceHeader } from "@/components/space/space-header";
 import { Button } from "@/components/ui/button";
 import { use } from "react";
@@ -11,11 +11,10 @@ export default function EditItemPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params); // Unwrapped Promise
+  const { id } = use(params);
   const router = useRouter();
   const { items } = useItems();
   
-  // Find item from context - already loaded in layout!
   const item = items.find(it => it.id === id);
 
   if (!item) {
@@ -32,5 +31,5 @@ export default function EditItemPage({
     );
   }
 
-  return <EditItemClient item={item} />;
+  return <ItemForm mode="edit" item={item} />;
 }

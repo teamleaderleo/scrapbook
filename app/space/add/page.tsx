@@ -1,5 +1,5 @@
-import { AddItemForm } from "@/components/space/add-item-form";
+import { ItemForm } from "@/components/space/item-form";
 
 export default function AddItemPage() {
-  return <AddItemForm />;
+  return <ItemForm mode="add" />;
 }
