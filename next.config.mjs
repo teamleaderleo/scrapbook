@@ -15,6 +15,19 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
+    formats: ['image/avif', 'image/webp'], // Better image compression
+  },
+
+  // Remove console.log in production (keeps error/warn)
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+
+  // Optimizes lucide-react and react-markdown imports
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'react-markdown'],
   },
 };
 

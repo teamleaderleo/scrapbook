@@ -1,10 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter"; // Changed!
 import { vscDarkPlus, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
+
+// Prism python
+import python from "react-syntax-highlighter/dist/esm/languages/prism/python";
+
+SyntaxHighlighter.registerLanguage('python', python);
 
 export function CodeDisplay({
   code,
@@ -24,7 +29,6 @@ export function CodeDisplay({
 
   const isDark = (resolvedTheme ?? theme) === "dark";
 
-  // Same metrics as the editor to ensure perfect visual parity
   const METRICS = {
     padding: "0.75rem",
     fontSize: 14,

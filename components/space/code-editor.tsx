@@ -1,8 +1,13 @@
 "use client";
 import { useRef, useState, useEffect } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter"; // Changed!
 import { vscDarkPlus, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useTheme } from "next-themes";
+
+// Prism python
+import python from "react-syntax-highlighter/dist/esm/languages/prism/python";
+
+SyntaxHighlighter.registerLanguage('python', python);
 
 export function CodeEditor({
   value,
@@ -22,7 +27,6 @@ export function CodeEditor({
   const highlightRef = useRef<HTMLDivElement>(null);
   const isDark = (resolvedTheme ?? theme) === "dark";
 
-  // Shared metrics to keep editor + highlighter perfectly aligned
   const METRICS = {
     padding: "0.75rem",
     fontSize: 14,
@@ -36,10 +40,7 @@ export function CodeEditor({
     <div className="flex flex-col h-full">
       <h2 className="text-sm font-semibold mb-2 text-foreground">Code</h2>
 
-      <div
-        className="relative border border-border rounded flex-1 overflow-hidden bg-background max-w-full"
-      >
-        {/* Only mount the heavy highlighter after mount so we can pick theme safely */}
+      <div className="relative border border-border rounded flex-1 overflow-hidden bg-background max-w-full">
         {mounted && (
           <div ref={highlightRef} className="absolute inset-0 overflow-auto pointer-events-none max-w-full">
             <SyntaxHighlighter
@@ -75,7 +76,6 @@ export function CodeEditor({
           </div>
         )}
 
-        {/* Transparent textarea overlay â€" no JS-based styling */}
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
