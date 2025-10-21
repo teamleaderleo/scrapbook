@@ -37,6 +37,12 @@ export function SearchCommand() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
+  useEffect(() => {
+    const handleOpen = () => setOpen(true);
+    window.addEventListener('open-search', handleOpen);
+    return () => window.removeEventListener('open-search', handleOpen);
+  }, []);
+
   // Parse search and filter items
   const filteredItems = useMemo(() => {
     if (!search) return allItems.slice(0, 50); // Show first 50 if empty

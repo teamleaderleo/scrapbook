@@ -127,13 +127,7 @@ export function AppSidebar() {
 
   // Trigger search dialog (will be handled by Ctrl+K event)
   const triggerSearch = () => {
-    const event = new KeyboardEvent("keydown", {
-      key: "k",
-      metaKey: true,
-      ctrlKey: true,
-      bubbles: true,
-    });
-    document.dispatchEvent(event);
+    window.dispatchEvent(new Event('open-search'));
   };
 
   // Safe-ish platform check (client component)
