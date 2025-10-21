@@ -11,6 +11,7 @@ type ItemsContextType = {
   user: any;
   isAdmin: boolean;
   signOut: () => Promise<void>;
+  nowMs: number;
 };
 
 const ItemsContext = createContext<ItemsContextType | null>(null);
@@ -25,6 +26,7 @@ interface ItemsProviderProps {
   initialItems?: Item[];
   initialIsAdmin?: boolean;
   initialUser?: any;
+  initialNowMs?: number;
 }
 
 export function ItemsProvider({ 
@@ -32,12 +34,14 @@ export function ItemsProvider({
   initialItems = [],
   initialIsAdmin = false,
   initialUser = null,
+  initialNowMs = Date.now(), // Default for client-only usage
 }: ItemsProviderProps) {
   // Hydrate auth with server user to avoid flash
   const { user, loading: authLoading } = useAuth(initialUser);
 
   const [items, setItems] = useState<Item[]>(initialItems);
   const [loading, setLoading] = useState(initialItems.length === 0);
+  const [nowMs] = useState(initialNowMs);
   
   useEffect(() => {
     setItems(initialItems);
@@ -126,6 +130,7 @@ export function ItemsProvider({
         user,
         isAdmin,
         signOut,
+        nowMs,
       }}
     >
       {children}

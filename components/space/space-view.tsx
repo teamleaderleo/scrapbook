@@ -18,12 +18,11 @@ const ITEMS_PER_PAGE = 20;
 
 export function SpaceView() {
   const supabase = createClient();
-  const baseNow = useMemo(() => Date.now(), []);
-  const nowMs = useNow(baseNow, 30_000);
   const sp = useSearchParams();
   const tagsParam = sp.get("tags") ?? undefined;
 
-  const { items: allItems, isAdmin } = useItems();
+  const { items: allItems, isAdmin, nowMs: initialNowMs } = useItems();
+  const nowMs = useNow(initialNowMs, 30_000);
 
   const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
   

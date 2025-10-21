@@ -15,6 +15,8 @@ export const metadata: Metadata = {
 async function getInitialData() {
   const supabase = await createClient();
   
+  const nowMs = Date.now(); // Server timestamp
+  
   // Check if user is logged in
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -72,7 +74,7 @@ async function getInitialData() {
     review: reviewsMap.get(item.id),
   }));
 
-  return { items: mapped, isAdmin, user };
+  return { items: mapped, isAdmin, user, nowMs };
 }
 
 export default async function SpaceLayout({
@@ -80,11 +82,16 @@ export default async function SpaceLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { items, isAdmin, user } = await getInitialData();
+  const { items, isAdmin, user, nowMs } = await getInitialData();
   
   return (
     <SidebarProvider>
-      <ItemsProvider initialItems={items} initialIsAdmin={isAdmin} initialUser={user}>
+      <ItemsProvider 
+        initialItems={items} 
+        initialIsAdmin={isAdmin} 
+        initialUser={user}
+        initialNowMs={nowMs} // Pass it down
+      >
         <SearchCommand /> 
         <div className="min-h-screen bg-white flex w-full">
           <AppSidebar/>

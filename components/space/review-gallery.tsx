@@ -19,10 +19,9 @@ import { CodeDisplay } from "./code-display";
 export function ReviewGallery() {
   const supabase = createClient();
   // Items are pre-loaded from layout!
-  const { items: allItems, isAdmin } = useItems();
+  const { items: allItems, isAdmin, nowMs: initialNowMs } = useItems(); // Get server timestamp
   const { theme } = useTheme();
-  const baseNow = useMemo(() => Date.now(), []);
-  const nowMs = useNow(baseNow, 30_000);
+  const nowMs = useNow(initialNowMs, 30_000); // Use server timestamp as base
   const sp = useSearchParams();
   const router = useRouter();
   const tagsParam = sp.get("tags") ?? undefined;
