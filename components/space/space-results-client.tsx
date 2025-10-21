@@ -9,6 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import { useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
 import { CodeDisplay } from "./code-display";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 export function ResultsClient({
   items,
@@ -116,7 +117,11 @@ function Row({
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground capitalize">{it.category}</span>
-            <span className="text-sm text-muted-foreground">{expanded ? '▼' : '▶'}</span>
+            {expanded ? (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            )}
           </div>
         </div>
 
