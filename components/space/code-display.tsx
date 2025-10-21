@@ -1,12 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
-import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter"; // Changed!
+import { useState } from "react";
+import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
 
-// Prism python
 import python from "react-syntax-highlighter/dist/esm/languages/prism/python";
 
 SyntaxHighlighter.registerLanguage('python', python);
@@ -22,12 +21,11 @@ export function CodeDisplay({
   title?: string;
   className?: string;
 }) {
-  const { theme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
   const [copied, setCopied] = useState(false);
-  useEffect(() => setMounted(true), []);
 
-  const isDark = (resolvedTheme ?? theme) === "dark";
+  // Default to dark if theme not resolved yet (avoids flash)
+  const isDark = resolvedTheme !== "light";
 
   const METRICS = {
     padding: "0.75rem",
@@ -57,53 +55,36 @@ export function CodeDisplay({
           {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
         </Button>
 
-        {mounted ? (
-          <SyntaxHighlighter
-            language={language}
-            style={isDark ? vscDarkPlus : oneLight}
-            customStyle={{
-              margin: 0,
+        <SyntaxHighlighter
+          language={language}
+          style={isDark ? vscDarkPlus : oneLight}
+          customStyle={{
+            margin: 0,
+            background: "transparent",
+            padding: METRICS.padding,
+            fontSize: METRICS.fontSize,
+            lineHeight: METRICS.lineHeight,
+            fontFamily: METRICS.fontFamily,
+            tabSize: METRICS.tabSize,
+            whiteSpace: "pre-wrap",
+            wordWrap: "break-word",
+            overflowWrap: "break-word",
+            maxWidth: "100%",
+          }}
+          codeTagProps={{
+            style: {
               background: "transparent",
-              padding: METRICS.padding,
-              fontSize: METRICS.fontSize,
-              lineHeight: METRICS.lineHeight,
-              fontFamily: METRICS.fontFamily,
-              tabSize: METRICS.tabSize,
+              fontSize: "inherit",
+              fontFamily: "inherit",
               whiteSpace: "pre-wrap",
               wordWrap: "break-word",
-              overflowWrap: "break-word",
-              maxWidth: "100%",
-            }}
-            codeTagProps={{
-              style: {
-                background: "transparent",
-                fontSize: "inherit",
-                fontFamily: "inherit",
-                whiteSpace: "pre-wrap",
-                wordWrap: "break-word",
-              },
-            }}
-            PreTag="pre"
-            className="leading-tight max-w-full"
-          >
-            {code}
-          </SyntaxHighlighter>
-        ) : (
-          <pre
-            className="m-0 p-3 text-foreground font-mono max-w-full"
-            style={{
-              fontSize: METRICS.fontSize,
-              lineHeight: METRICS.lineHeight,
-              tabSize: METRICS.tabSize as number,
-              fontFamily: METRICS.fontFamily,
-              whiteSpace: "pre-wrap",
-              wordWrap: "break-word",
-              overflowWrap: "break-word",
-            }}
-          >
-            {code}
-          </pre>
-        )}
+            },
+          }}
+          PreTag="pre"
+          className="leading-tight max-w-full"
+        >
+          {code}
+        </SyntaxHighlighter>
       </div>
     </div>
   );
