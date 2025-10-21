@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { MarkdownEditor } from "@/components/space/markdown-editor";
 import { CodeEditor } from "@/components/space/code-editor";
 import { RawJsonEditor } from "@/components/space/raw-json-editor";
+import { MetadataJsonEditor } from "@/components/space/metadata-json-editor";
 import { ItemPreview } from "@/components/space/item-preview";
 import { SpaceHeader } from "@/components/space/space-header";
 import { addItemAction, updateItemAction } from "@/app/space/actions";
@@ -65,14 +66,25 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   const [rawInput, setRawInput] = useState(() => JSON.stringify(model, null, 2));
   const [jsonError, setJsonError] = useState<string>("");
 
+  // === Metadata JSON text (can diverge while typing in the metadata box) =====
+  const [metadataInput, setMetadataInput] = useState(() => {
+    const { content, code, ...metadata } = model;
+    return JSON.stringify(metadata, null, 2);
+  });
+  const [metadataError, setMetadataError] = useState<string>("");
+
   // Who changed last? avoids echo/feedback loops across editors
   const lastChangedBy = useRef<"json" | "markdown" | "code" | "meta" | null>(null);
 
   // Is the raw JSON textarea currently focused?
   const [isEditingRaw, setIsEditingRaw] = useState(false);
 
+  // Is the metadata JSON textarea currently focused?
+  const [isEditingMetadata, setIsEditingMetadata] = useState(false);
+
   // Only debounce the error visibility (NOT successful updates)
   const errorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const metadataErrorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // UX: em dash copy feedback
   const [copiedDash, setCopiedDash] = useState(false);
@@ -95,7 +107,10 @@ export function ItemForm({ item, mode }: ItemFormProps) {
         lastChangedBy.current = "meta";
         setModel(template);
         setRawInput(JSON.stringify(template, null, 2));
+        const { content, code, ...metadata } = template;
+        setMetadataInput(JSON.stringify(metadata, null, 2));
         setJsonError("");
+        setMetadataError("");
       }
     })();
   }, [mode, duplicateId, supabase]);
@@ -147,6 +162,40 @@ export function ItemForm({ item, mode }: ItemFormProps) {
     }
   };
 
+  // === Metadata onChange: instant-when-valid, debounce-only-when-invalid =====
+  const handleMetadataChange = (val: string) => {
+    setMetadataInput(val);
+
+    if (!isEditingMetadata) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(val);
+
+      if (metadataErrorTimer.current) {
+        clearTimeout(metadataErrorTimer.current);
+        metadataErrorTimer.current = null;
+      }
+      setMetadataError("");
+
+      lastChangedBy.current = "meta";
+      setModel((prev) => ({
+        ...prev,
+        id: parsed.id ?? prev.id,
+        title: parsed.title ?? prev.title,
+        url: parsed.url ?? prev.url ?? null,
+        tags: parsed.tags ?? prev.tags ?? [],
+        category: parsed.category ?? prev.category ?? null,
+      }));
+    } catch {
+      if (metadataErrorTimer.current) clearTimeout(metadataErrorTimer.current);
+      metadataErrorTimer.current = setTimeout(() => {
+        setMetadataError("Invalid JSON");
+      }, 300);
+    }
+  };
+
   // === Model -> Raw JSON mirror (only when NOT editing JSON) =================
   useEffect(() => {
     if (isEditingRaw) return;
@@ -155,6 +204,16 @@ export function ItemForm({ item, mode }: ItemFormProps) {
       setJsonError("");
     }
   }, [model, isEditingRaw]);
+
+  // === Model -> Metadata JSON mirror (only when NOT editing metadata) ========
+  useEffect(() => {
+    if (isEditingMetadata) return;
+    if (lastChangedBy.current !== "meta") {
+      const { content, code, ...metadata } = model;
+      setMetadataInput(JSON.stringify(metadata, null, 2));
+      setMetadataError("");
+    }
+  }, [model, isEditingMetadata]);
 
   // === Title input change =====================================================
   const onTitleChange = (val: string) => {
@@ -264,20 +323,20 @@ export function ItemForm({ item, mode }: ItemFormProps) {
           <CodeEditor value={model.code ?? ""} onChange={onCodeChange} />
         </div>
 
-        {/* Bottom Row: Raw & Preview */}
-        <div className="grid grid-cols-2 gap-4">
-          <RawJsonEditor
-            value={rawInput}
-            onChange={handleRawChange}
-            onFocus={() => setIsEditingRaw(true)}
+        {/* Middle Row: Metadata & Preview */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <MetadataJsonEditor
+            value={metadataInput}
+            onChange={handleMetadataChange}
+            onFocus={() => setIsEditingMetadata(true)}
             onBlur={() => {
-              setIsEditingRaw(false);
-              if (errorTimer.current) {
-                clearTimeout(errorTimer.current);
-                errorTimer.current = null;
+              setIsEditingMetadata(false);
+              if (metadataErrorTimer.current) {
+                clearTimeout(metadataErrorTimer.current);
+                metadataErrorTimer.current = null;
               }
             }}
-            error={jsonError}
+            error={metadataError}
           />
 
           <ItemPreview
@@ -290,6 +349,23 @@ export function ItemForm({ item, mode }: ItemFormProps) {
             }}
             content={model.content}
             code={model.code ?? ""}
+          />
+        </div>
+
+        {/* Bottom Row: Raw (full width) */}
+        <div>
+          <RawJsonEditor
+            value={rawInput}
+            onChange={handleRawChange}
+            onFocus={() => setIsEditingRaw(true)}
+            onBlur={() => {
+              setIsEditingRaw(false);
+              if (errorTimer.current) {
+                clearTimeout(errorTimer.current);
+                errorTimer.current = null;
+              }
+            }}
+            error={jsonError}
           />
         </div>
       </div>

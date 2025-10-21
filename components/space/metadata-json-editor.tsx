@@ -1,17 +1,17 @@
 "use client";
 
-interface RawJsonEditorProps {
+interface MetadataJsonEditorProps {
   value: string;
   onChange: (value: string) => void;
   error?: string;
-  onFocus?: () => void; // keep raw focused state in parent
+  onFocus?: () => void;
   onBlur?: () => void;
 }
 
-export function RawJsonEditor({ value, onChange, error, onFocus, onBlur }: RawJsonEditorProps) {
+export function MetadataJsonEditor({ value, onChange, error, onFocus, onBlur }: MetadataJsonEditorProps) {
   return (
     <div>
-      <h2 className="text-sm font-semibold mb-2 text-foreground">Raw</h2>
+      <h2 className="text-sm font-semibold mb-2 text-foreground">Metadata</h2>
       {error && <div className="text-red-600 dark:text-red-400 text-sm mb-2">{error}</div>}
       <textarea
         value={value}
