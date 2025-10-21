@@ -33,15 +33,15 @@ export function CodeEditor({
   };
 
   return (
-    <div>
+    <div className="flex flex-col h-full">
       <h2 className="text-sm font-semibold mb-2 text-foreground">Code</h2>
 
       <div
-        className="relative border border-border rounded h-96 overflow-hidden bg-background"  // CSS decides, not JS!!!
+        className="relative border border-border rounded flex-1 overflow-hidden bg-background max-w-full"
       >
         {/* Only mount the heavy highlighter after mount so we can pick theme safely */}
         {mounted && (
-          <div ref={highlightRef} className="absolute inset-0 overflow-auto pointer-events-none">
+          <div ref={highlightRef} className="absolute inset-0 overflow-auto pointer-events-none max-w-full">
             <SyntaxHighlighter
               language={language}
               style={isDark ? vscDarkPlus : oneLight}
@@ -53,24 +53,29 @@ export function CodeEditor({
                 lineHeight: METRICS.lineHeight,
                 fontFamily: METRICS.fontFamily,
                 tabSize: METRICS.tabSize,
-                whiteSpace: "pre",
+                whiteSpace: "pre-wrap",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                maxWidth: "100%",
               }}
               codeTagProps={{
                 style: {
                   background: "transparent",
                   fontSize: "inherit",
                   fontFamily: "inherit",
+                  whiteSpace: "pre-wrap",
+                  wordWrap: "break-word",
                 },
               }}
               PreTag="pre"
-              className="leading-tight"
+              className="leading-tight max-w-full"
             >
               {value || " "}
             </SyntaxHighlighter>
           </div>
         )}
 
-        {/* Transparent textarea overlay – no JS-based styling */}
+        {/* Transparent textarea overlay â€" no JS-based styling */}
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -82,14 +87,16 @@ export function CodeEditor({
           }}
           className="absolute inset-0 w-full h-full p-3 font-mono text-sm bg-transparent
                      text-transparent resize-none outline-none leading-tight
-                     caret-black dark:caret-white"  // no inline style; CSS-only
+                     caret-black dark:caret-white max-w-full"
           style={{
-            // Keep only invariants here; avoid theme-dependent inline styles on first render
             fontSize: METRICS.fontSize,
             lineHeight: METRICS.lineHeight,
             padding: METRICS.padding,
             tabSize: METRICS.tabSize,
             fontFamily: METRICS.fontFamily,
+            whiteSpace: "pre-wrap",
+            wordWrap: "break-word",
+            overflowWrap: "break-word",
           }}
           placeholder={placeholder}
           spellCheck={false}

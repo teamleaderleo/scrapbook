@@ -41,9 +41,9 @@ export function CodeDisplay({
   };
 
   return (
-    <div className={`flex-1 min-w-0 ${className}`}>
+    <div className={`flex-1 min-w-0 max-w-full ${className}`}>
       <h3 className="text-sm font-semibold mb-2 text-foreground">{title}</h3>
-      <div className="relative border border-border rounded max-h-96 overflow-auto bg-background">
+      <div className="relative border border-border rounded max-h-96 max-w-full overflow-auto bg-background">
         <Button
           variant="ghost"
           size="sm"
@@ -65,28 +65,36 @@ export function CodeDisplay({
               lineHeight: METRICS.lineHeight,
               fontFamily: METRICS.fontFamily,
               tabSize: METRICS.tabSize,
-              whiteSpace: "pre",
+              whiteSpace: "pre-wrap",
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
+              maxWidth: "100%",
             }}
             codeTagProps={{
               style: {
                 background: "transparent",
                 fontSize: "inherit",
                 fontFamily: "inherit",
+                whiteSpace: "pre-wrap",
+                wordWrap: "break-word",
               },
             }}
             PreTag="pre"
-            className="leading-tight"
+            className="leading-tight max-w-full"
           >
             {code}
           </SyntaxHighlighter>
         ) : (
           <pre
-            className="m-0 p-3 whitespace-pre-wrap text-foreground font-mono"
+            className="m-0 p-3 text-foreground font-mono max-w-full"
             style={{
               fontSize: METRICS.fontSize,
               lineHeight: METRICS.lineHeight,
               tabSize: METRICS.tabSize as number,
               fontFamily: METRICS.fontFamily,
+              whiteSpace: "pre-wrap",
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
             }}
           >
             {code}
