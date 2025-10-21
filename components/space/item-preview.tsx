@@ -33,7 +33,6 @@ export function ItemPreview({ item, content, code }: ItemPreviewProps) {
         {item.url ? <div><strong>URL:</strong> {item.url}</div> : null}
 
         <div className="border-t border-border dark:border-sidebar-border pt-2 mt-2">
-          <strong>Content:</strong>
           <pre className="text-xs mt-1 whitespace-pre-wrap">
             {content || <span className="text-muted-foreground">No content</span>}
           </pre>

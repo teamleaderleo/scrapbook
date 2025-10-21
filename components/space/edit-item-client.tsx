@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { MarkdownEditor } from "@/components/space/markdown-editor";
 import { CodeEditor } from "@/components/space/code-editor";
 import { RawJsonEditor } from "@/components/space/raw-json-editor";
@@ -44,7 +45,7 @@ export function EditItemClient({ item }: EditItemClientProps) {
   const [jsonError, setJsonError] = useState<string>("");
 
   // Who changed last? avoids echo/feedback loops across editors
-  const lastChangedBy = useRef<"json" | "markdown" | "code" | null>(null);
+  const lastChangedBy = useRef<"json" | "markdown" | "code" | "meta" | null>(null);
 
   // Is the raw JSON textarea currently focused?
   const [isEditingRaw, setIsEditingRaw] = useState(false);
@@ -115,6 +116,12 @@ export function EditItemClient({ item }: EditItemClientProps) {
     }
   }, [model, isEditingRaw]);
 
+  // === Title input change =====================================================
+  const onTitleChange = (val: string) => {
+    lastChangedBy.current = "meta";
+    setModel((m) => ({ ...m, title: val }));
+  };
+
   // === Markdown editor change ================================================
   const onMarkdownChange = (val: string) => {
     lastChangedBy.current = "markdown";
@@ -172,15 +179,21 @@ export function EditItemClient({ item }: EditItemClientProps) {
       <div className="p-6 max-w-7xl mx-auto">
         {/* Top Row: Editors */}
         <div className="grid grid-cols-2 gap-4 mb-4">
-          {/* Left: Content (Markdown) with copy em dash button */}
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-foreground">Content (Markdown)</h3>
+          {/* Left: Title + Content (Markdown) */}
+          <div className="flex flex-col space-y-4">
+            {/* Title Input + Em dash button */}
+            <div className="flex items-center gap-2">
+              <Input
+                value={model.title}
+                onChange={(e) => onTitleChange(e.target.value)}
+                placeholder="Enter title..."
+                className="font-medium flex-1 bg-white dark:bg-sidebar border-border dark:border-sidebar-border"
+              />
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-7 px-2"
+                className="h-10 px-2"
                 onClick={copyEmDash}
                 title="Copy em dash (—)"
               >
@@ -194,10 +207,13 @@ export function EditItemClient({ item }: EditItemClientProps) {
               </Button>
             </div>
 
-            <MarkdownEditor
-              value={model.content}
-              onChange={onMarkdownChange}
-            />
+            {/* Markdown Editor */}
+            <div className="flex-1 flex flex-col">
+              <MarkdownEditor
+                value={model.content}
+                onChange={onMarkdownChange}
+              />
+            </div>
           </div>
 
           {/* Right: Code editor */}

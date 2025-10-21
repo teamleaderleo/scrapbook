@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { MarkdownEditor } from "@/components/space/markdown-editor";
 import { CodeEditor } from "@/components/space/code-editor";
 import { RawJsonEditor } from "@/components/space/raw-json-editor";
@@ -12,7 +13,7 @@ import { SpaceHeader } from "@/components/space/space-header";
 import { addItemAction } from "@/app/space/actions";
 import { Copy, Check } from "lucide-react";
 
-// Canonical shape for the in-flight item we’re creating
+// Canonical shape for the in-flight item we're creating
 type Model = {
   id: string;
   title: string;
@@ -132,12 +133,18 @@ export function AddItemFormContent() {
 
   // === Model -> Raw JSON mirror (only when NOT editing JSON) =================
   useEffect(() => {
-    if (isEditingRaw) return; // don’t fight the user’s cursor
+    if (isEditingRaw) return; // don't fight the user's cursor
     if (lastChangedBy.current !== "json") {
       setRawInput(JSON.stringify(model, null, 2));
       setJsonError("");
     }
   }, [model, isEditingRaw]);
+
+  // === Title input change =====================================================
+  const onTitleChange = (val: string) => {
+    lastChangedBy.current = "meta";
+    setModel((m) => ({ ...m, title: val }));
+  };
 
   // === Markdown editor change ================================================
   const onMarkdownChange = (val: string) => {
@@ -192,15 +199,21 @@ export function AddItemFormContent() {
       <div className="p-6 max-w-7xl mx-auto">
         {/* Top Row: Editors */}
         <div className="grid grid-cols-2 gap-4 mb-4">
-          {/* Left: Content (Markdown) with copy em dash button */}
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-foreground">Content (Markdown)</h3>
+          {/* Left: Title + Content (Markdown) */}
+          <div className="flex flex-col space-y-4">
+            {/* Title Input + Em dash button */}
+            <div className="flex items-center gap-2">
+              <Input
+                value={model.title}
+                onChange={(e) => onTitleChange(e.target.value)}
+                placeholder="Enter title..."
+                className="font-medium flex-1 bg-white dark:bg-sidebar border-border dark:border-sidebar-border"
+              />
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-7 px-2"
+                className="h-10 px-2"
                 onClick={copyEmDash}
                 title="Copy em dash (—)"
               >
@@ -214,7 +227,10 @@ export function AddItemFormContent() {
               </Button>
             </div>
 
-            <MarkdownEditor value={model.content} onChange={onMarkdownChange} />
+            {/* Markdown Editor */}
+            <div className="flex-1 flex flex-col">
+              <MarkdownEditor value={model.content} onChange={onMarkdownChange} />
+            </div>
           </div>
 
           {/* Right: Code editor */}
