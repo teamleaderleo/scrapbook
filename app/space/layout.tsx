@@ -24,42 +24,38 @@ async function getInitialData() {
   ];
   const isAdmin = user ? ADMIN_USER_IDS.includes(user.id) : false;
 
-  // Fetch items
-  const { data: items, error: itemsError } = await supabase
-    .from('items')
-    .select('*')
-    .order('created_at', { ascending: false });
+  // Fetch items and reviews IN PARALLEL
+  const [itemsResult, reviewsResult] = await Promise.all([
+    supabase.from('items').select('*').order('created_at', { ascending: false }),
+    isAdmin ? supabase.from('reviews').select('*') : Promise.resolve({ data: null })
+  ]);
 
-  if (itemsError) {
-    console.error('Error loading items:', itemsError);
-    return { items: [], isAdmin };
+  if (itemsResult.error) {
+    console.error('Error loading items:', itemsResult.error);
+    return { items: [], isAdmin, user };
   }
 
-  // Fetch reviews if admin
+  // Map reviews
   let reviewsMap = new Map<string, ReviewState>();
-  if (isAdmin) {
-    const { data: reviews } = await supabase.from('reviews').select('*');
-    
-    if (reviews) {
-      reviewsMap = new Map(
-        reviews.map(r => [r.item_id, {
-          state: r.state,
-          due: r.due,
-          last_review: r.last_review,
-          stability: r.stability,
-          difficulty: r.difficulty,
-          scheduled_days: r.scheduled_days,
-          learning_steps: r.learning_steps,
-          reps: r.reps,
-          lapses: r.lapses,
-          suspended: r.suspended,
-        }])
-      );
-    }
+  if (reviewsResult.data) {
+    reviewsMap = new Map(
+      reviewsResult.data.map(r => [r.item_id, {
+        state: r.state,
+        due: r.due,
+        last_review: r.last_review,
+        stability: r.stability,
+        difficulty: r.difficulty,
+        scheduled_days: r.scheduled_days,
+        learning_steps: r.learning_steps,
+        reps: r.reps,
+        lapses: r.lapses,
+        suspended: r.suspended,
+      }])
+    );
   }
 
   // Map to Item format
-  const mapped: Item[] = (items || []).map(item => ({
+  const mapped: Item[] = (itemsResult.data || []).map(item => ({
     id: item.id,
     userId: item.user_id || undefined,
     title: item.title,
