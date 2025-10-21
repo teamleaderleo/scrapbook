@@ -60,11 +60,7 @@ function Row({
   const tagsParam = sp.get("tags") ?? ""; 
 
   return (
-    <li className="rounded border
-               bg-white dark:bg-sidebar
-               border-border dark:border-sidebar-border
-               text-foreground dark:text-sidebar-foreground
-               transition-colors">
+    <li className="rounded border bg-white dark:bg-sidebar border-border dark:border-sidebar-border text-foreground dark:text-sidebar-foreground transition-colors">
       {/* Clickable header */}
       <div 
         className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"

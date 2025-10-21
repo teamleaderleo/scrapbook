@@ -152,9 +152,7 @@ export function ReviewGallery() {
         {showContent && (
           <div className="flex-1 flex gap-4 overflow-hidden">
             {/* Writeup */}
-            <div className="flex-1 overflow-auto rounded p-4
-                border border-border dark:border-sidebar-border
-                bg-white dark:bg-sidebar">
+            <div className="flex-1 overflow-auto rounded p-4 border border-border dark:border-sidebar-border bg-white dark:bg-sidebar">
               <h2 className="text-lg font-semibold mb-2 text-foreground">Writeup</h2>
               <div className="prose prose-sm dark:prose-invert max-w-none">
                 <ReactMarkdown>{current.content || '*No writeup yet*'}</ReactMarkdown>

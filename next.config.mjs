@@ -25,7 +25,9 @@ const nextConfig = {
     } : false,
   },
 
-  // Optimizes lucide-react and react-markdown imports
+  // React Compiler is stable in Next.js 16!
+  reactCompiler: true,
+
   experimental: {
     optimizePackageImports: ['lucide-react', 'react-markdown'],
   },
