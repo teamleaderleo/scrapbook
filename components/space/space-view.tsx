@@ -12,20 +12,23 @@ import { reviewOnce, debugCard } from "@/app/lib/fsrs-adapter";
 import { useItems } from "@/app/lib/contexts/item-context";
 import { createClient } from "@/utils/supabase/client";
 import { SpaceHeader } from "./space-header";
+import { Button } from "@/components/ui/button";
+
+const ITEMS_PER_PAGE = 20;
 
 export function SpaceView() {
   const supabase = createClient();
-  const baseNow = useMemo(() => Date.now(), []);       // stable for lifetime
+  const baseNow = useMemo(() => Date.now(), []);
   const nowMs = useNow(baseNow, 30_000);
   const sp = useSearchParams();
   const tagsParam = sp.get("tags") ?? undefined;
 
-  // Items are pre-loaded from layout, no loading state needed!
   const { items: allItems, isAdmin } = useItems();
 
   const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
   
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
+  const [page, setPage] = useState(1);
 
   const items = useMemo<Item[]>(() => {
     const withMutations = allItems.map(it => {
@@ -34,6 +37,19 @@ export function SpaceView() {
     });
     return searchItems(withMutations, q, nowMs);
   }, [allItems, mutations, q, nowMs]);
+
+  // Paginate the filtered items
+  const paginatedItems = useMemo(() => {
+    const start = (page - 1) * ITEMS_PER_PAGE;
+    return items.slice(start, start + ITEMS_PER_PAGE);
+  }, [items, page]);
+
+  const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
+
+  // Reset to page 1 when filters change
+  useMemo(() => {
+    setPage(1);
+  }, [tagsParam]);
 
   const onEnroll = useCallback(async (id: string) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -106,16 +122,43 @@ export function SpaceView() {
   return (
     <div className="min-h-screen bg-background">
       <SpaceHeader 
-        leftContent={`Query: ${tagsParam ?? "(none)"} · ${items.length} items`}
+        leftContent={`Query: ${tagsParam ?? "(none)"} · ${items.length} items${totalPages > 1 ? ` · Page ${page}/${totalPages}` : ''}`}
       />
       <main className="p-4">
         <ResultsClient 
-          items={items} 
+          items={paginatedItems}
           onReview={onReview} 
           onEnroll={onEnroll} 
           nowMs={nowMs}
           isAdmin={isAdmin}
         />
+        
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-6">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage(p => p - 1)}
+            >
+              Previous
+            </Button>
+            
+            <span className="px-4 py-2 text-sm text-muted-foreground">
+              Page {page} of {totalPages}
+            </span>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages}
+              onClick={() => setPage(p => p + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </main>
     </div>
   );
