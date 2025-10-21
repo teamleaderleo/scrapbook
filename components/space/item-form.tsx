@@ -223,7 +223,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
         }
       />
 
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-6 w-full">
         {/* Top Row: Editors */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           {/* Left: Title + Content (Markdown) */}
