@@ -49,6 +49,7 @@
     "@tiptap/starter-kit": "^2.26.3",
     "@vercel/analytics": "^1.5.0",
     "@vercel/postgres": "^0.9.0",
+    "@vercel/speed-insights": "^1.2.0",
     "@virtuoso.dev/message-list": "^1.14.1",
     "autoprefixer": "10.4.15",
     "babel-plugin-react-compiler": "^1.0.0",

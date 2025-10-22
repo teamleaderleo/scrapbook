@@ -6,6 +6,7 @@ import { ReactQueryProvider } from '@/components/query-client-provider';
 import { Toaster } from "@/components/ui/components/toaster";
 import { ThemeProvider } from '@/components/theme-provider';
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   title: {
@@ -38,6 +39,7 @@ export default function RootLayout({
           <ReactQueryProvider>
             {children}
             <Analytics />
+            <SpeedInsights />
             <Toaster />
           </ReactQueryProvider>
         </ThemeProvider>
