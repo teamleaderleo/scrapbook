@@ -163,7 +163,7 @@ export function ReviewGallery() {
             </div>
 
             {/* Code */}
-            {current.code && <CodeDisplay code={current.code} />}
+            {current.code && <CodeDisplay code={current.code} codeHtml={current.codeHtml} />}
           </div>
         )}
 

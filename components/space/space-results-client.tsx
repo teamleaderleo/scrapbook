@@ -155,7 +155,7 @@ function Row({
             </div>
 
             {/* Code */}
-            {it.code && <CodeDisplay code={it.code} />}
+            {it.code && <CodeDisplay code={it.code} codeHtml={it.codeHtml} />}
           </div>
         </div>
       )}

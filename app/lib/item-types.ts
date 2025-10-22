@@ -11,6 +11,7 @@ export type Item = {
   contentHtml?: string;
   contentType: 'markdown' | 'html' | 'plaintext';
   code?: string | null;
+  codeHtml?: string;
   
   tags: string[];  // ['company:google', 'topic:dp', 'difficulty:hard', 'type:leetcode']
   category: string;  // 'leetcode' | 'article' | 'system-design' | etc
