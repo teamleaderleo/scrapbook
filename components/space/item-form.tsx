@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,7 @@ const DEFAULT_MODEL: Model = {
 
 export function ItemForm({ item, mode }: ItemFormProps) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const searchParams = useSearchParams();
   const duplicateId = searchParams.get("duplicate") || null;
   const supabase = createClient();
@@ -256,8 +257,12 @@ export function ItemForm({ item, mode }: ItemFormProps) {
           code: model.code,
         });
       }
-      router.refresh();
-      router.push("/space");
+
+      // NOTE: actions already call revalidatePath("/space").
+      // Avoid refresh+push race and navigate inside a transition.
+      startTransition(() => {
+        router.replace("/space");
+      });
     } catch (e: any) {
       setJsonError(e?.message || "Failed to save");
       console.error(e);
@@ -276,7 +281,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
       <SpaceHeader
         leftContent={`${mode === "add" ? "Add" : "Edit"}: ${model.title || "Untitled"}`}
         centerContent={
-          <Button onClick={handleSave} size="sm" className="bg-accent text-accent-foreground">
+          <Button onClick={handleSave} disabled={isPending} size="sm" className="bg-accent text-accent-foreground">
             {mode === "add" ? "Save Item" : "Save Changes"}
           </Button>
         }
