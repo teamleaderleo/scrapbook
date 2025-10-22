@@ -13,14 +13,12 @@ import { reviewOnce } from "@/app/lib/fsrs-adapter";
 import { createClient } from "@/utils/supabase/client";
 import type { ReviewState } from "@/app/lib/review-types";
 import { SpaceHeader } from "./space-header";
-import { useTheme } from "next-themes";
 import { CodeDisplay } from "./code-display";
 
 export function ReviewGallery() {
   const supabase = createClient();
   // Items are pre-loaded from layout!
   const { items: allItems, isAdmin, nowMs: initialNowMs } = useItems(); // Get server timestamp
-  const { theme } = useTheme();
   const nowMs = useNow(initialNowMs, 30_000); // Use server timestamp as base
   const sp = useSearchParams();
   const router = useRouter();
