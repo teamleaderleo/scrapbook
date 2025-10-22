@@ -156,7 +156,7 @@ export function ReviewGallery() {
               <h2 className="text-lg font-semibold mb-2 text-foreground">Writeup</h2>
               <div className="prose prose-sm dark:prose-invert max-w-none">
                 <MarkdownContent 
-                  content={current.content || '*No writeup yet*'} 
+                  html={current.contentHtml}
                   className="prose prose-sm dark:prose-invert max-w-none"
                 />
               </div>

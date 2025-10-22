@@ -148,7 +148,7 @@ function Row({
                 bg-white dark:bg-sidebar
                 border border-border dark:border-sidebar-border">
                 <MarkdownContent 
-                  content={it.content || '*No writeup yet*'} 
+                  html={it.contentHtml}
                   className="prose prose-sm dark:prose-invert max-w-none"
                 />
               </div>

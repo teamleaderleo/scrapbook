@@ -8,6 +8,7 @@ export type Item = {
   url: string | null;
   
   content: string;
+  contentHtml?: string;
   contentType: 'markdown' | 'html' | 'plaintext';
   code?: string | null;
   
