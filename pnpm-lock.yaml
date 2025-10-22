@@ -256,8 +256,8 @@ importers:
         version: 5.0.8(@types/react@19.1.4)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
     devDependencies:
       '@next/bundle-analyzer':
-        specifier: ^15.5.6
-        version: 15.5.6(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+        specifier: ^16.0.0
+        version: 16.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       '@playwright/test':
         specifier: ^1.56.1
         version: 1.56.1
@@ -1219,8 +1219,8 @@ packages:
     resolution: {integrity: sha512-XWmEeWpBXIoksZSDN74kftfTnXFEGZ3iX8jbANWBc+ag6dsiQuvuR4LgB0WdCOKMb5AQgjqgufc0TgAsZubUYw==}
     engines: {node: '>=19.0.0'}
 
-  '@next/bundle-analyzer@15.5.6':
-    resolution: {integrity: sha512-IHeyk2s9/fVDAGDLNbBkCSG8XBabhuMajiaJggjsg4GyFIswh78DzLo5Nl5th8QTs3U/teYeczvfeV9w1Tx3qA==}
+  '@next/bundle-analyzer@16.0.0':
+    resolution: {integrity: sha512-OYufQoNm/Im2fYQBdXu9fqUrXaP3lPuPnryW0XNGG7kJiGxH/VWS8zc2/x4aW2LQGn+opqIJYNRXy7k5qV/09g==}
 
   '@next/env@16.0.0-beta.0':
     resolution: {integrity: sha512-OWeEhUmIxA9zuQansxKXHWTszsPcvSvar8ym1BOElhU6Lgnb4yLXGshKSoPXoHOHRFcxuYmhI86OA+5Z9TvSSQ==}
@@ -6308,7 +6308,7 @@ snapshots:
       '@types/pg': 8.15.5
     optional: true
 
-  '@next/bundle-analyzer@15.5.6(bufferutil@4.0.9)(utf-8-validate@6.0.5)':
+  '@next/bundle-analyzer@16.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)':
     dependencies:
       webpack-bundle-analyzer: 4.10.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
     transitivePeerDependencies:
