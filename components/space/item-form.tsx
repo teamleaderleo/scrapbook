@@ -197,6 +197,37 @@ export function ItemForm({ item, mode }: ItemFormProps) {
     }
   };
 
+  const handleMetadataPasted = (text: string) => {
+    setMetadataInput(text);            // reflect UI
+    setIsEditingMetadata(true);        // temporarily mark as editing to allow parse/apply
+
+    try {
+      const parsed = JSON.parse(text);
+      if (metadataErrorTimer.current) {
+        clearTimeout(metadataErrorTimer.current);
+        metadataErrorTimer.current = null;
+      }
+      setMetadataError("");
+      lastChangedBy.current = "meta";  // prevent mirror effects from clobbering
+      setModel((prev) => ({
+        ...prev,
+        id: parsed.id ?? prev.id,
+        title: parsed.title ?? prev.title,
+        url: parsed.url ?? prev.url ?? null,
+        tags: parsed.tags ?? prev.tags ?? [],
+        category: parsed.category ?? prev.category ?? null,
+      }));
+    } catch {
+      if (metadataErrorTimer.current) clearTimeout(metadataErrorTimer.current);
+      metadataErrorTimer.current = setTimeout(() => {
+        setMetadataError("Invalid JSON");
+      }, 300);
+    } finally {
+      // allow normal focus behavior to resume
+      setIsEditingMetadata(false);
+    }
+  };
+
   // === Model -> Raw JSON mirror (only when NOT editing JSON) =================
   useEffect(() => {
     if (isEditingRaw) return;
@@ -333,6 +364,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
           <MetadataJsonEditor
             value={metadataInput}
             onChange={handleMetadataChange}
+            onPasted={handleMetadataPasted}
             onFocus={() => setIsEditingMetadata(true)}
             onBlur={() => {
               setIsEditingMetadata(false);
