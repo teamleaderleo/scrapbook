@@ -5,6 +5,7 @@ import { ServiceWorkerRegistration } from '@/components/ui/service-worker-regist
 import { ReactQueryProvider } from '@/components/query-client-provider';
 import { Toaster } from "@/components/ui/components/toaster";
 import { ThemeProvider } from '@/components/theme-provider';
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: {
@@ -36,6 +37,7 @@ export default function RootLayout({
         >
           <ReactQueryProvider>
             {children}
+            <Analytics />
             <Toaster />
           </ReactQueryProvider>
         </ThemeProvider>
