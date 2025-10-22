@@ -7,7 +7,7 @@ import { parseQuery } from "@/app/lib/searchlang";
 import { searchItems } from "@/app/lib/item-search";
 import { useItems } from "@/app/lib/contexts/item-context";
 import { useNow } from "@/app/lib/hooks/useNow";
-import ReactMarkdown from 'react-markdown';
+import { MarkdownContent } from "./markdown-content";
 import { Rating } from "ts-fsrs";
 import { reviewOnce } from "@/app/lib/fsrs-adapter";
 import { createClient } from "@/utils/supabase/client";
@@ -155,7 +155,10 @@ export function ReviewGallery() {
             <div className="flex-1 overflow-auto rounded p-4 border border-border dark:border-sidebar-border bg-white dark:bg-sidebar">
               <h2 className="text-lg font-semibold mb-2 text-foreground">Writeup</h2>
               <div className="prose prose-sm dark:prose-invert max-w-none">
-                <ReactMarkdown>{current.content || '*No writeup yet*'}</ReactMarkdown>
+                <MarkdownContent 
+                  content={current.content || '*No writeup yet*'} 
+                  className="prose prose-sm dark:prose-invert max-w-none"
+                />
               </div>
             </div>
 

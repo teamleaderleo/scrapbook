@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import type { Item } from "@/app/lib/item-types";
 import { formatInterval, formatDueRelative } from "@/app/lib/interval-format";
 import { useState } from "react";
-import ReactMarkdown from 'react-markdown';
+import { MarkdownContent } from "./markdown-content";
 import { useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
 import { CodeDisplay } from "./code-display";
@@ -147,7 +147,10 @@ function Row({
               <div className="p-3 rounded max-h-96 overflow-auto prose prose-sm dark:prose-invert max-w-none
                 bg-white dark:bg-sidebar
                 border border-border dark:border-sidebar-border">
-                <ReactMarkdown>{it.content || '*No writeup yet*'}</ReactMarkdown>
+                <MarkdownContent 
+                  content={it.content || '*No writeup yet*'} 
+                  className="prose prose-sm dark:prose-invert max-w-none"
+                />
               </div>
             </div>
 
