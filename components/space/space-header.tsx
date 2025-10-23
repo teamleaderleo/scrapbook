@@ -121,11 +121,11 @@ export function SpaceHeader({
           </p>
         </div>
 
-        {/* CENTER: exactly centered in viewport with editor button below (positioned absolutely) */}
-        <div className="fixed left-1/2 -translate-x-1/2 top-3 z-10 flex flex-col items-center gap-1">
+        {/* CENTER: exactly centered in viewport with editor button to the right (positioned absolutely) */}
+        <div className="fixed left-1/2 -translate-x-1/2 top-3 z-10 flex items-center gap-4">
           {centerContent ?? defaultCenterContent}
           
-          {/* Editor toggle below the center content - doesn't affect header height */}
+          {/* Editor toggle to the right of center content - doesn't affect header height */}
           {onEditorToggle && (
             <button
               onClick={onEditorToggle}
