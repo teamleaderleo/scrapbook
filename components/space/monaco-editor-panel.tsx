@@ -102,6 +102,14 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
 
       editorInstanceRef.current = editor;
 
+      // Add keybinding for Ctrl+I to close editor
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
+        onClose();
+      });
+
+      // Focus the editor immediately
+      editor.focus();
+
       // Adjust height based on content
       editor.onDidContentSizeChange(() => {
         const contentHeight = editor.getContentHeight();

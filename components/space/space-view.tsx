@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { parseQuery } from "@/app/lib/searchlang";
 import { searchItems } from "@/app/lib/item-search";
@@ -51,6 +51,35 @@ export function SpaceView() {
   useMemo(() => {
     setPage(1);
   }, [tagsParam]);
+
+  // Hotkey for toggling editor: Cmd/Ctrl + I
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const isMod = e.metaKey || e.ctrlKey;
+
+      // Toggle Editor (Cmd/Ctrl + I)
+      if (isMod && !e.altKey && !e.shiftKey && (e.key === "i" || e.code === "KeyI")) {
+        e.preventDefault();
+        setEditorOpen(prev => !prev);
+        return;
+      }
+
+      // For other keys, check if typing
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName?.toLowerCase();
+      const role = target?.getAttribute?.("role");
+      const isTyping =
+        tag === "input" ||
+        tag === "textarea" ||
+        target?.getAttribute("contenteditable") === "true" ||
+        role === "textbox";
+
+      if (isTyping) return;
+    };
+
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const onEnroll = useCallback(async (id: string) => {
     const { data: { user } } = await supabase.auth.getUser();

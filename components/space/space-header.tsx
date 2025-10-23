@@ -105,24 +105,25 @@ export function SpaceHeader({
           </p>
         </div>
 
-        {/* CENTER: exactly centered in viewport */}
-        <div className="fixed left-1/2 -translate-x-1/2 z-10">
+        {/* CENTER: exactly centered in viewport with editor button below (positioned absolutely) */}
+        <div className="fixed left-1/2 -translate-x-1/2 top-3 z-10 flex flex-col items-center gap-1">
           {centerContent ?? defaultCenterContent}
-        </div>
-
-        {/* RIGHT: editor button + hotkey hint (or custom rightContent) */}
-        <div className="flex-1 flex justify-end gap-2 items-center">
+          
+          {/* Editor toggle below the center content - doesn't affect header height */}
           {onEditorToggle && (
-            <Button
-              variant={isEditorOpen ? "default" : "outline"}
-              size="sm"
-              className="h-8 gap-2"
+            <button
               onClick={onEditorToggle}
+              className="text-sm text-primary-foreground hover:text-primary-foreground/70 transition-colors font-medium inline-flex items-center gap-2"
+              title={`Toggle editor (${isMac ? "⌘" : "Ctrl"} + I)`}
             >
               <Code className="h-4 w-4" />
-              <span className="hidden sm:inline">Editor</span>
-            </Button>
+              <span>Editor</span>
+            </button>
           )}
+        </div>
+
+        {/* RIGHT: hotkey hint (or custom rightContent) */}
+        <div className="flex-1 flex justify-end gap-2">
           {rightContent ?? defaultRightContent}
         </div>
       </div>
