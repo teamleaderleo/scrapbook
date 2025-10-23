@@ -61,9 +61,9 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
         import("monaco-editor"),
       ]);
 
-      // Create Shiki highlighter with your themes
+      // Create Shiki highlighter with BOTH themes loaded upfront
       const highlighter = await createHighlighter({
-        themes: [shikiTheme],
+        themes: ['one-light', 'catppuccin-macchiato'],
         langs: ["python"],
       });
 
