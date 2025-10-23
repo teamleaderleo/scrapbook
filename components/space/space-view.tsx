@@ -13,6 +13,7 @@ import { useItems } from "@/app/lib/contexts/item-context";
 import { createClient } from "@/utils/supabase/client";
 import { SpaceHeader } from "./space-header";
 import { Button } from "@/components/ui/button";
+import { MonacoEditorPanel } from "./monaco-editor-panel";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -28,6 +29,7 @@ export function SpaceView() {
   
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
   const [page, setPage] = useState(1);
+  const [editorOpen, setEditorOpen] = useState(false);
 
   const items = useMemo<Item[]>(() => {
     const withMutations = allItems.map(it => {
@@ -122,6 +124,8 @@ export function SpaceView() {
     <div className="min-h-screen bg-background">
       <SpaceHeader 
         leftContent={`Query: ${tagsParam ?? "(none)"} · ${items.length} items${totalPages > 1 ? ` · Page ${page}/${totalPages}` : ''}`}
+        onEditorToggle={() => setEditorOpen(!editorOpen)}
+        isEditorOpen={editorOpen}
       />
       <main className="p-4">
         <ResultsClient 
@@ -159,6 +163,11 @@ export function SpaceView() {
           </div>
         )}
       </main>
+
+      <MonacoEditorPanel
+        isOpen={editorOpen}
+        onClose={() => setEditorOpen(false)}
+      />
     </div>
   );
 }

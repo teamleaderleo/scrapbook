@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useSearchParams, usePathname } from "next/navigation";
 import { useSidebar } from "@/components/ui/sidebar";
-import { PanelLeft, ArrowLeft, ArrowRight } from "lucide-react";
+import { PanelLeft, ArrowLeft, ArrowRight, Code } from "lucide-react";
 
 interface SpaceHeaderProps {
   // Left side info
@@ -16,9 +16,19 @@ interface SpaceHeaderProps {
 
   // Right side actions (optional). If omitted, we show the hotkey hint.
   rightContent?: React.ReactNode;
+
+  // Monaco editor control
+  onEditorToggle?: () => void;
+  isEditorOpen?: boolean;
 }
 
-export function SpaceHeader({ leftContent, centerContent, rightContent }: SpaceHeaderProps) {
+export function SpaceHeader({ 
+  leftContent, 
+  centerContent, 
+  rightContent,
+  onEditorToggle,
+  isEditorOpen = false,
+}: SpaceHeaderProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { toggleSidebar } = useSidebar();
@@ -100,8 +110,19 @@ export function SpaceHeader({ leftContent, centerContent, rightContent }: SpaceH
           {centerContent ?? defaultCenterContent}
         </div>
 
-        {/* RIGHT: hotkey hint (or custom rightContent) */}
-        <div className="flex-1 flex justify-end gap-2">
+        {/* RIGHT: editor button + hotkey hint (or custom rightContent) */}
+        <div className="flex-1 flex justify-end gap-2 items-center">
+          {onEditorToggle && (
+            <Button
+              variant={isEditorOpen ? "default" : "outline"}
+              size="sm"
+              className="h-8 gap-2"
+              onClick={onEditorToggle}
+            >
+              <Code className="h-4 w-4" />
+              <span className="hidden sm:inline">Editor</span>
+            </Button>
+          )}
           {rightContent ?? defaultRightContent}
         </div>
       </div>
