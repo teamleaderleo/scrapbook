@@ -14,6 +14,7 @@ import { createClient } from "@/utils/supabase/client";
 import type { ReviewState } from "@/app/lib/review-types";
 import { SpaceHeader } from "./space-header";
 import { CodeDisplay } from "./code-display";
+import { MonacoEditorPanel } from "./monaco-editor-panel";
 
 export function ReviewGallery() {
   const supabase = createClient();
@@ -28,6 +29,7 @@ export function ReviewGallery() {
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showContent, setShowContent] = useState(true);
+  const [editorOpen, setEditorOpen] = useState(false);
 
   const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
   
@@ -53,11 +55,27 @@ export function ReviewGallery() {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      // Ignore if typing in an input/textarea
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      const isMod = e.metaKey || e.ctrlKey;
+
+      // Toggle Editor (Cmd/Ctrl + I) - always allow this
+      if (isMod && !e.altKey && !e.shiftKey && (e.key === "i" || e.code === "KeyI")) {
+        e.preventDefault();
+        setEditorOpen(prev => !prev);
         return;
       }
+
+      // Check if typing in input/textarea/editor
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName?.toLowerCase();
+      const role = target?.getAttribute?.("role");
+      const isTyping =
+        tag === "input" ||
+        tag === "textarea" ||
+        target?.getAttribute("contenteditable") === "true" ||
+        role === "textbox";
+
+      if (isTyping) return;
+
       // Ignore if any modifier keys are pressed (Ctrl, Cmd, Alt, Shift)
       if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) {
         return;
@@ -114,8 +132,14 @@ export function ReviewGallery() {
       <>
         <SpaceHeader 
           leftContent="No items"
+          onEditorToggle={() => setEditorOpen(!editorOpen)}
+          isEditorOpen={editorOpen}
         />
         <div className="p-4 text-muted-foreground">No items to review</div>
+        <MonacoEditorPanel
+          isOpen={editorOpen}
+          onClose={() => setEditorOpen(false)}
+        />
       </>
     );
   }
@@ -124,6 +148,8 @@ export function ReviewGallery() {
     <div className="h-screen flex flex-col bg-background">
       <SpaceHeader 
         leftContent={`${currentIndex + 1} / ${items.length}`}
+        onEditorToggle={() => setEditorOpen(!editorOpen)}
+        isEditorOpen={editorOpen}
         rightContent={
           isAdmin ? (
             <>
@@ -200,6 +226,11 @@ export function ReviewGallery() {
           )}
         </div>
       </div>
+
+      <MonacoEditorPanel
+        isOpen={editorOpen}
+        onClose={() => setEditorOpen(false)}
+      />
     </div>
   );
 }
