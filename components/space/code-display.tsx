@@ -28,8 +28,8 @@ export function CodeDisplay({
   if (!codeHtml) {
     return (
       <div className={`flex-1 min-w-0 max-w-full ${className}`}>
-        <div className="border border-border rounded overflow-auto">
-          <pre className="font-mono text-sm p-3 m-0">
+        <div className="border border-border rounded overflow-auto h-full">
+          <pre className="font-mono text-sm p-3 m-0 h-full">
             <code>{code || 'No code'}</code>
           </pre>
         </div>
@@ -51,7 +51,7 @@ export function CodeDisplay({
 
         {/* Shiki renders its own backgrounds */}
         <div 
-          className="[&_pre]:m-0 [&_pre]:p-3 [&_code]:text-sm [&_pre]:whitespace-pre-wrap [&_code]:whitespace-pre-wrap"
+          className="h-full [&_pre]:m-0 [&_pre]:p-3 [&_code]:text-sm [&_pre]:whitespace-pre-wrap [&_code]:whitespace-pre-wrap [&_pre]:h-full"
           dangerouslySetInnerHTML={{ __html: codeHtml }}
         />
       </div>
