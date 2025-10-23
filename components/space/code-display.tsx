@@ -28,7 +28,6 @@ export function CodeDisplay({
   if (!codeHtml) {
     return (
       <div className={`flex-1 min-w-0 max-w-full ${className}`}>
-        <h3 className="text-sm font-semibold mb-2 text-foreground">{title}</h3>
         <div className="border border-border rounded overflow-auto">
           <pre className="font-mono text-sm p-3 m-0">
             <code>{code || 'No code'}</code>
@@ -40,7 +39,6 @@ export function CodeDisplay({
 
   return (
     <div className={`flex-1 min-w-0 max-w-full ${className}`}>
-      <h3 className="text-sm font-semibold mb-2 text-foreground">{title}</h3>
       <div className="relative border border-border rounded overflow-auto h-full">
         <Button
           variant="ghost"

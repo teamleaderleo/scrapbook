@@ -143,7 +143,6 @@ function Row({
           <div className="flex gap-3">
             {/* Writeup */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold mb-2 text-foreground">Writeup</h3>
               <div className="p-3 rounded max-h-96 overflow-auto prose prose-sm dark:prose-invert max-w-none
                 bg-white dark:bg-sidebar
                 border border-border dark:border-sidebar-border">
