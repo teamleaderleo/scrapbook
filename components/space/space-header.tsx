@@ -74,6 +74,10 @@ export function SpaceHeader({
   const defaultRightContent = (
     <div className="hidden sm:flex items-center gap-3 text-muted-foreground text-xs">
       <div className="flex items-center gap-1.5">
+        <span>Expand on hover:</span>
+        <kbd className="px-1.5 py-0.5 font-semibold border rounded bg-background">Shift</kbd>
+      </div>
+      <div className="flex items-center gap-1.5">
         <span>Sidebar:</span>
         <div className="flex gap-1">
           <kbd className="px-1.5 py-0.5 font-semibold border rounded bg-background">
