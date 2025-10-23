@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
+import { useSidebar } from "@/components/ui/sidebar";
 
 interface MonacoEditorPanelProps {
   isOpen: boolean;
@@ -9,14 +10,33 @@ interface MonacoEditorPanelProps {
 
 export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
   const editorRef = useRef<HTMLDivElement>(null);
+  const editorInstanceRef = useRef<any>(null);
   const { resolvedTheme } = useTheme();
+  const { state } = useSidebar();
+  const [editorHeight, setEditorHeight] = useState(384); // Default h-96 = 384px
 
   // Determine theme based on resolved theme
   const isDark = resolvedTheme === "dark";
-  const shikiTheme = isDark ? "catppuccin-mocha" : "one-light";
+  const shikiTheme = isDark ? "catppuccin-macchiato" : "one-light";
+
+  // Calculate left position based on sidebar state
+  const sidebarWidth = state === "collapsed" ? "3rem" : "16rem"; // Approximate sidebar widths
 
   useEffect(() => {
     if (!isOpen || !editorRef.current) return;
+
+    // Inject CSS to disable italics
+    const styleId = 'monaco-no-italics';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        .monaco-editor .view-line span {
+          font-style: normal !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
 
     let cleanup: (() => void) | undefined;
 
@@ -55,12 +75,14 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
 
       // Create the editor
       const editor = monaco.editor.create(editorRef.current!, {
-        value: "# Write your Python code here\n\n",
+        value: "",
         language: "python",
         theme: shikiTheme,
         automaticLayout: true,
-        minimap: { enabled: false }, // Disabled
+        minimap: { enabled: false },
         fontSize: 14,
+        lineHeight: 24, // 1.7 line spacing (14px * 1.7 ≈ 24px)
+        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace',
         lineNumbers: "on",
         scrollBeyondLastLine: false,
         wordWrap: "on",
@@ -70,6 +92,23 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
           verticalScrollbarSize: 10,
           horizontalScrollbarSize: 10,
         },
+        padding: {
+          top: 16,
+          bottom: 16,
+        },
+        lineDecorationsWidth: 0,
+        lineNumbersMinChars: 3,
+      });
+
+      editorInstanceRef.current = editor;
+
+      // Adjust height based on content
+      editor.onDidContentSizeChange(() => {
+        const contentHeight = editor.getContentHeight();
+        // Calculate max height: viewport height - top position (96px) - bottom margin (16px)
+        const maxHeight = window.innerHeight - 96 - 16;
+        const newHeight = Math.max(384, Math.min(contentHeight + 32, maxHeight));
+        setEditorHeight(newHeight);
       });
 
       cleanup = () => {
@@ -87,8 +126,16 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed z-50 bg-background border border-border rounded-lg shadow-2xl transition-all left-1/2 -translate-x-1/2 top-20 w-[calc(100%-12rem)] max-w-4xl h-[600px]">
-      <div ref={editorRef} className="h-full w-full rounded-lg overflow-hidden" />
+    <div 
+      className="fixed z-50 border border-border rounded-lg shadow-2xl transition-all top-24 overflow-hidden"
+      style={{
+        left: `calc(${sidebarWidth} + 1rem)`,
+        width: 'calc((100vw - var(--sidebar-width) - 2rem) / 2 - 0.375rem)',
+        backgroundColor: isDark ? '#24273a' : '#fafafa',
+        height: `${editorHeight}px`,
+      }}
+    >
+      <div ref={editorRef} className="h-full w-full" />
     </div>
   );
 }
