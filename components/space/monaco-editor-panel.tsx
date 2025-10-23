@@ -14,7 +14,6 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
   const { resolvedTheme } = useTheme();
   const { state } = useSidebar();
   const [editorHeight, setEditorHeight] = useState(384); // Default h-96 = 384px
-  const [editorContent, setEditorContent] = useState(""); // Persist content across recreations
 
   // Determine theme based on resolved theme
   const isDark = resolvedTheme === "dark";
@@ -23,7 +22,6 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
   // Calculate left position based on sidebar state
   const sidebarWidth = state === "collapsed" ? "3rem" : "16rem"; // Approximate sidebar widths
 
-  // Initialize editor once when opened
   useEffect(() => {
     if (!isOpen || !editorRef.current) return;
 
@@ -63,9 +61,9 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
         import("monaco-editor"),
       ]);
 
-      // Create Shiki highlighter with BOTH themes loaded upfront
+      // Create Shiki highlighter with your themes
       const highlighter = await createHighlighter({
-        themes: ['one-light', 'catppuccin-macchiato'],
+        themes: [shikiTheme],
         langs: ["python"],
       });
 
@@ -77,7 +75,7 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
 
       // Create the editor
       const editor = monaco.editor.create(editorRef.current!, {
-        value: editorContent, // Restore previous content
+        value: "",
         language: "python",
         theme: shikiTheme,
         automaticLayout: true,
@@ -103,11 +101,6 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
       });
 
       editorInstanceRef.current = editor;
-
-      // Save content on change
-      editor.onDidChangeModelContent(() => {
-        setEditorContent(editor.getValue());
-      });
 
       // Add keybinding for Ctrl+I to close editor
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
@@ -136,14 +129,7 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
     return () => {
       cleanup?.();
     };
-  }, [isOpen]); // Only recreate when isOpen changes, not theme
-
-  // Update theme dynamically when it changes
-  useEffect(() => {
-    if (editorInstanceRef.current) {
-      editorInstanceRef.current.updateOptions({ theme: shikiTheme });
-    }
-  }, [shikiTheme]);
+  }, [isOpen, shikiTheme]);
 
   if (!isOpen) return null;
 
