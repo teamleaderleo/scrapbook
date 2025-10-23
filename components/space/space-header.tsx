@@ -72,15 +72,31 @@ export function SpaceHeader({
   );
 
   const defaultRightContent = (
-    <div className="hidden sm:flex items-center gap-1 text-muted-foreground">
-      <div className="flex gap-1">
-        <kbd className="px-1.5 py-0.5 text-xs font-semibold border rounded bg-background">
-          {isMac ? "⌘" : "Ctrl"}
-        </kbd>
-        <kbd className="px-1.5 py-0.5 text-xs font-semibold border rounded bg-background">
-          B
-        </kbd>
+    <div className="hidden sm:flex items-center gap-3 text-muted-foreground text-xs">
+      <div className="flex items-center gap-1.5">
+        <span>Sidebar:</span>
+        <div className="flex gap-1">
+          <kbd className="px-1.5 py-0.5 font-semibold border rounded bg-background">
+            {isMac ? "⌘" : "Ctrl"}
+          </kbd>
+          <kbd className="px-1.5 py-0.5 font-semibold border rounded bg-background">
+            B
+          </kbd>
+        </div>
       </div>
+      {onEditorToggle && (
+        <div className="flex items-center gap-1.5">
+          <span>Editor:</span>
+          <div className="flex gap-1">
+            <kbd className="px-1.5 py-0.5 font-semibold border rounded bg-background">
+              {isMac ? "⌘" : "Ctrl"}
+            </kbd>
+            <kbd className="px-1.5 py-0.5 font-semibold border rounded bg-background">
+              I
+            </kbd>
+          </div>
+        </div>
+      )}
     </div>
   );
 
