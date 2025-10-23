@@ -33,18 +33,12 @@ export function CodeEditor({
   const highlightRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [highlightedHtml, setHighlightedHtml] = useState("");
-  const [themeBg, setThemeBg] = useState<string>("");
   const isDark = resolvedTheme !== "light";
 
   useEffect(() => {
     const highlight = async () => {
       const highlighter = await getHighlighter();
-      // 1) Compute the theme background and store it
-      const themeName = isDark ? "catppuccin-macchiato" : "one-light";
-      const theme = highlighter.getTheme(themeName) as { bg?: string } | undefined;
-      setThemeBg(theme?.bg || (isDark ? "#24273a" : "#fafafa"));
-
-      // 2) Always render highlighted HTML (use a single space when empty)
+      // Always render highlighted HTML (use a single space when empty)
       const html = highlighter.codeToHtml(value || " ", {
         lang: language,
         themes: { light: "one-light", dark: "catppuccin-macchiato" },
@@ -70,12 +64,13 @@ export function CodeEditor({
         {/* Syntax-highlighted layer */}
         <div
           ref={highlightRef}
-          className="absolute inset-0 overflow-auto pointer-events-none
+          className={`absolute inset-0 overflow-auto pointer-events-none
                      [&_pre]:m-0 [&_pre]:p-3 [&_pre]:text-sm [&_pre]:leading-[1.7]
                      [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:font-mono
                      [&_code]:text-sm [&_code]:leading-[1.7] [&_code]:whitespace-pre-wrap
-                     [&_code]:break-words [&_code]:font-mono"
-          style={{ backgroundColor: themeBg }}
+                     [&_code]:break-words [&_code]:font-mono
+                     ${!isDark ? '[&_pre]:!bg-white [&_span]:!bg-transparent' : ''}`}
+          style={{ backgroundColor: isDark ? '#24273a' : '#ffffff' }}
           dangerouslySetInnerHTML={{ __html: highlightedHtml }}
         />
 
