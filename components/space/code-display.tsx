@@ -41,7 +41,7 @@ export function CodeDisplay({
   return (
     <div className={`flex-1 min-w-0 max-w-full ${className}`}>
       <h3 className="text-sm font-semibold mb-2 text-foreground">{title}</h3>
-      <div className="relative border border-border rounded max-h-96 overflow-auto">
+      <div className="relative border border-border rounded overflow-auto h-full">
         <Button
           variant="ghost"
           size="sm"
