@@ -11,29 +11,53 @@ interface MonacoEditorPanelProps {
 export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorInstanceRef = useRef<any>(null);
+  const highlighterRef = useRef<any>(null);
+  const monacoRef = useRef<any>(null);
   const { resolvedTheme } = useTheme();
   const { state } = useSidebar();
-  const [editorHeight, setEditorHeight] = useState(384); // Default h-96 = 384px
+  const [editorHeight, setEditorHeight] = useState(384);
 
   // Determine theme based on resolved theme
   const isDark = resolvedTheme === "dark";
   const shikiTheme = isDark ? "catppuccin-macchiato" : "one-light";
 
   // Calculate left position based on sidebar state
-  const sidebarWidth = state === "collapsed" ? "3rem" : "16rem"; // Approximate sidebar widths
+  const sidebarWidth = state === "collapsed" ? "3rem" : "16rem";
+
+  // --- Theme switching: switch Monaco theme only (no re-register) ---
+  useEffect(() => {
+    if (!editorInstanceRef.current || !monacoRef.current || !highlighterRef.current) return;
+
+    const monaco = monacoRef.current;
+    const highlighter = highlighterRef.current;
+
+    // Safety: ensure the theme is present in the highlighter, but DO NOT call shikiToMonaco again
+    try {
+      const loaded = highlighter.getLoadedThemes?.() || [];
+      if (!loaded.includes(shikiTheme)) {
+        // Load into Shiki for completeness; Monaco theme definitions were already created at init
+        highlighter.loadTheme?.(shikiTheme).catch(() => {});
+      }
+    } catch {}
+
+    // Switch the live editor theme
+    if (monaco.editor) {
+      monaco.editor.setTheme(shikiTheme);
+    } else {
+      editorInstanceRef.current.updateOptions({ theme: shikiTheme });
+    }
+  }, [shikiTheme]);
 
   useEffect(() => {
     if (!isOpen || !editorRef.current) return;
 
-    // Inject CSS to disable italics
-    const styleId = 'monaco-no-italics';
+    // Inject CSS to disable italics in tokens (cosmetic)
+    const styleId = "monaco-no-italics";
     if (!document.getElementById(styleId)) {
-      const style = document.createElement('style');
+      const style = document.createElement("style");
       style.id = styleId;
       style.textContent = `
-        .monaco-editor .view-line span {
-          font-style: normal !important;
-        }
+        .monaco-editor .view-line span { font-style: normal !important; }
       `;
       document.head.appendChild(style);
     }
@@ -41,7 +65,7 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
     let cleanup: (() => void) | undefined;
 
     const initEditor = async () => {
-      // Configure Monaco environment for web workers (minimal setup)
+      // Minimal worker wiring (prevents network fetches for workers in this embed)
       if (typeof window !== "undefined") {
         (window as any).MonacoEnvironment = {
           getWorker() {
@@ -54,23 +78,33 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
         };
       }
 
-      // Dynamically import Monaco and Shiki integration
-      const [{ createHighlighter }, { shikiToMonaco }, monaco] = await Promise.all([
+      // Load Monaco + Shiki integration
+      const [
+        { createHighlighter },
+        { shikiToMonaco },
+        // registers python tokens provider (tree-shaken if unnecessary)
+        _pythonContribution,
+        monaco,
+      ] = await Promise.all([
         import("shiki"),
         import("@shikijs/monaco"),
+        import("monaco-editor/esm/vs/basic-languages/python/python.contribution"),
         import("monaco-editor"),
       ]);
 
-      // Create Shiki highlighter with your themes
+      // Create a highlighter with BOTH themes up-front; register once
       const highlighter = await createHighlighter({
-        themes: [shikiTheme],
+        themes: ["one-light", "catppuccin-macchiato"],
         langs: ["python"],
       });
 
-      // Register Python language
-      monaco.languages.register({ id: "python" });
+      highlighterRef.current = highlighter;
+      monacoRef.current = monaco;
 
-      // Apply Shiki highlighting to Monaco
+      // Optional: ensure language is registered (harmless if already present)
+      monaco.languages.register?.({ id: "python" });
+
+      // Register Shiki themes with Monaco ONE TIME ONLY
       shikiToMonaco(highlighter, monaco);
 
       // Create the editor
@@ -81,21 +115,16 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
         automaticLayout: true,
         minimap: { enabled: false },
         fontSize: 14,
-        lineHeight: 24, // 1.7 line spacing (14px * 1.7 ≈ 24px)
-        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace',
+        lineHeight: 24,
+        fontFamily:
+          'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace',
         lineNumbers: "on",
         scrollBeyondLastLine: false,
         wordWrap: "on",
         tabSize: 4,
         insertSpaces: true,
-        scrollbar: {
-          verticalScrollbarSize: 10,
-          horizontalScrollbarSize: 10,
-        },
-        padding: {
-          top: 16,
-          bottom: 16,
-        },
+        scrollbar: { verticalScrollbarSize: 10, horizontalScrollbarSize: 10 },
+        padding: { top: 16, bottom: 16 },
         lineDecorationsWidth: 0,
         lineNumbersMinChars: 3,
       });
@@ -125,21 +154,17 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
     };
 
     initEditor().catch(console.error);
-
-    return () => {
-      cleanup?.();
-    };
-  }, [isOpen, shikiTheme]);
+    return () => cleanup?.();
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed z-50 border border-border rounded-lg shadow-2xl transition-all top-24 overflow-hidden"
       style={{
         left: `calc(${sidebarWidth} + 1rem)`,
         width: 'calc((100vw - var(--sidebar-width) - 2rem) / 2 - 0.375rem)',
-        backgroundColor: isDark ? '#24273a' : '#fafafa',
         height: `${editorHeight}px`,
       }}
     >
