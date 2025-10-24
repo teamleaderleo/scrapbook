@@ -19,12 +19,12 @@ export default function ResumePage() {
   };
 
   return (
-    <main className="flex flex-col min-h-screen bg-sidebar-background">
+    <main className="flex flex-col min-h-screen bg-sidebar-background" style={{ scrollbarGutter: 'stable' }}>
       <SiteNav />
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-4 mb-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="max-w-[1600px] mx-auto w-full px-6 sm:px-8 lg:px-12 mt-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {resumeColumns.map((sections, colIdx) => (
-            <div key={colIdx} className="space-y-4">
+            <div key={colIdx} className="space-y-6">
               {sections.map((section) => {
                 const sectionId = `${colIdx}-${section.title}`;
                 const isExpanded = expandedSections.has(sectionId);
@@ -36,38 +36,38 @@ export default function ResumePage() {
                   >
                     {/* Clickable header */}
                     <div
-                      className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                      className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
                       onClick={() => toggleSection(sectionId)}
                     >
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start justify-between gap-3">
                         <div className="flex-1">
-                          <h2 className="text-sm font-semibold text-foreground dark:text-sidebar-foreground">
+                          <h2 className="text-base font-semibold text-foreground dark:text-sidebar-foreground leading-snug">
                             {section.title}
                           </h2>
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-sm text-muted-foreground mt-1.5">
                             {section.meta}
                           </p>
                         </div>
                         {isExpanded ? (
-                          <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                          <ChevronDown className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                         ) : (
-                          <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                          <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                         )}
                       </div>
                     </div>
 
                     {/* Expanded content */}
                     {isExpanded && (
-                      <div className="border-t border-border dark:border-sidebar-border p-3">
-                        <ul className="space-y-3">
+                      <div className="border-t border-border dark:border-sidebar-border p-4">
+                        <ul className="space-y-4">
                           {section.items.map((item, i) => (
                             <li key={i} className="text-sm">
-                              <div className="flex items-start gap-2">
-                                <span className="text-foreground dark:text-sidebar-foreground mt-0.5">•</span>
+                              <div className="flex items-start gap-2.5">
+                                <span className="text-foreground dark:text-sidebar-foreground mt-1">•</span>
                                 <div className="flex-1">
-                                  <div className="text-foreground dark:text-sidebar-foreground">{item.bullet}</div>
+                                  <div className="text-foreground dark:text-sidebar-foreground leading-relaxed">{item.bullet}</div>
                                   {item.note && (
-                                    <div className="mt-2 pl-3 border-l-2 border-muted text-xs text-foreground dark:text-sidebar-foreground">
+                                    <div className="mt-2.5 pl-4 border-l-2 border-muted text-sm text-foreground dark:text-sidebar-foreground leading-relaxed">
                                       {item.note}
                                     </div>
                                   )}
