@@ -169,7 +169,7 @@ export function MonacoEditorPanel() {
 
   return (
     <div
-      className="fixed z-50 border border-border rounded-lg shadow-2xl transition-all top-24 overflow-hidden"
+      className="fixed z-50 border border-border rounded-lg shadow-2xl transition-[left,width] duration-200 ease-linear top-24 overflow-hidden"
       style={{
         left: `calc(${sidebarWidth} + 1rem)`,
         width: 'calc((100vw - var(--sidebar-width) - 2rem) / 2 - 0.375rem)',
