@@ -1,4 +1,4 @@
-import ProjectBlocksContainer from '@/components/projects/components/project-blocks-container';
+// import ProjectBlocksContainer from '@/components/projects/components/project-blocks-container';
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 
@@ -20,7 +20,7 @@ export default async function Page({
   
   return (
     <Suspense fallback={<div className="flex-grow flex items-center justify-center">Loading project...</div>}>
-      <ProjectBlocksContainer projectId={id} />
+      {/* <ProjectBlocksContainer projectId={id} /> */}
     </Suspense>
   );
 }
