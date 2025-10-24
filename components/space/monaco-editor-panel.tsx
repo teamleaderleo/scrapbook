@@ -15,6 +15,7 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
   const { resolvedTheme } = useTheme();
   const { state } = useSidebar();
   const [editorHeight, setEditorHeight] = useState(384);
+  const [isInitializing, setIsInitializing] = useState(false);
 
   // Determine theme based on resolved theme
   const isDark = resolvedTheme === "dark";
@@ -31,6 +32,8 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
 
   useEffect(() => {
     if (!isOpen || !editorRef.current) return;
+
+    setIsInitializing(true);
 
     // Inject CSS to disable italics in tokens (cosmetic)
     const styleId = "monaco-no-italics";
@@ -114,6 +117,9 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
       // so every syntax element gets the correct color from the theme.
       monaco.editor.setTheme(shikiTheme);
 
+      // Hide loading state once ready
+      setIsInitializing(false);
+
       // Add keybinding for Ctrl+I to close editor
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
         onClose();
@@ -151,6 +157,23 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
         height: `${editorHeight}px`,
       }}
     >
+      {isInitializing && (
+        <div 
+          className="absolute inset-0 flex items-center justify-center backdrop-blur-sm"
+          style={{
+            backgroundColor: isDark ? 'rgba(36, 39, 58, 0.7)' : 'rgba(250, 250, 250, 0.5)'
+          }}
+        >
+          <div 
+            className="text-sm animate-pulse"
+            style={{
+              color: isDark ? '#cad3f5' : '#383a42'
+            }}
+          >
+            Let's do some good work today :)
+          </div>
+        </div>
+      )}
       <div ref={editorRef} className="h-full w-full" />
     </div>
   );
