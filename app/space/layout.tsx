@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/server';
 import { SearchCommand } from '@/components/space/search-command';
 import { MonacoEditorPanel } from '@/components/space/monaco-editor-panel';
 import { mapDatabaseItemsToItems } from '@/app/lib/utils/database';
+import { SpaceSkeleton } from "@/components/space/space-skeleton";
 
 export const metadata: Metadata = {
   title: 'Space',
@@ -84,21 +85,7 @@ async function DynamicData({ children }: { children: React.ReactNode }) {
 export default async function SpaceLayout({ children }: { children: React.ReactNode }) {
   return (
     <StaticShell>
-      <Suspense
-        fallback={
-          <div className="min-h-[40vh] w-full bg-background">
-            <div className="mx-auto max-w-4xl p-6">
-              <div className="animate-pulse space-y-4">
-                <div className="h-6 w-2/5 rounded bg-muted" />
-                <div className="h-4 w-full rounded bg-muted/70" />
-                <div className="h-4 w-11/12 rounded bg-muted/70" />
-                <div className="h-4 w-10/12 rounded bg-muted/70" />
-                <div className="h-24 w-full rounded bg-muted/60" />
-              </div>
-            </div>
-          </div>
-        }
-      >
+      <Suspense fallback={<SpaceSkeleton />}>
         <DynamicData>{children}</DynamicData>
       </Suspense>
 
