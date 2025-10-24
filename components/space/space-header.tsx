@@ -127,7 +127,7 @@ export function SpaceHeader({
         </div>
 
         {/* CENTER: exactly centered in viewport with editor button to the right (positioned absolutely) */}
-        <div className="fixed left-1/2 -translate-x-1/2 top-3 z-10 flex items-center gap-4">
+        <div className="fixed left-1/2 -translate-x-1/2 top-3 z-10 flex items-center gap-4 bg-background/50 backdrop-blur-[0.5px] px-3 py-1.5 rounded-md">
           {centerContent ?? defaultCenterContent}
           
           {/* Editor toggle to the right of center content - doesn't affect header height */}
