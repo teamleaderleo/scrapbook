@@ -53,7 +53,7 @@ async function StaticShell({ children }: { children: React.ReactNode }) {
   
   return (
     <SidebarProvider>
-      <div className="min-h-screen bg-white flex w-full">
+      <div className="min-h-screen bg-background text-foreground flex w-full">
         {children}
       </div>
     </SidebarProvider>
@@ -84,9 +84,24 @@ async function DynamicData({ children }: { children: React.ReactNode }) {
 export default async function SpaceLayout({ children }: { children: React.ReactNode }) {
   return (
     <StaticShell>
-      <Suspense fallback={<div className="p-4">Loading...</div>}>
+      <Suspense
+        fallback={
+          <div className="min-h-[40vh] w-full bg-background">
+            <div className="mx-auto max-w-4xl p-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-6 w-2/5 rounded bg-muted" />
+                <div className="h-4 w-full rounded bg-muted/70" />
+                <div className="h-4 w-11/12 rounded bg-muted/70" />
+                <div className="h-4 w-10/12 rounded bg-muted/70" />
+                <div className="h-24 w-full rounded bg-muted/60" />
+              </div>
+            </div>
+          </div>
+        }
+      >
         <DynamicData>{children}</DynamicData>
       </Suspense>
+
     </StaticShell>
   );
 }
