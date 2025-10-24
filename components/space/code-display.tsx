@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
-import { useTheme } from "next-themes";
 
 export function CodeDisplay({
   code,
@@ -16,8 +15,6 @@ export function CodeDisplay({
   className?: string;
 }) {
   const [copied, setCopied] = useState(false);
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
 
   const copyCode = async () => {
     if (code) {
@@ -52,9 +49,9 @@ export function CodeDisplay({
           {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
         </Button>
 
-        {/* Override Shiki backgrounds for light mode to be white */}
+        {/* Override Shiki backgrounds - white for light mode, Catppuccin Macchiato base for dark mode */}
         <div 
-          className={`h-full [&_pre]:m-0 [&_pre]:p-3 [&_code]:text-sm [&_pre]:whitespace-pre-wrap [&_code]:whitespace-pre-wrap [&_pre]:h-full ${!isDark ? '[&_pre]:!bg-white [&_span]:!bg-transparent' : ''}`}
+          className="h-full [&_pre]:m-0 [&_pre]:p-3 [&_code]:text-sm [&_pre]:whitespace-pre-wrap [&_code]:whitespace-pre-wrap [&_pre]:h-full [&_pre]:!bg-white dark:[&_pre]:!bg-[#24273a] [&_span]:!bg-transparent"
           dangerouslySetInnerHTML={{ __html: codeHtml }}
         />
       </div>
