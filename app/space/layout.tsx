@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from '@/components/app-sidebar';
+import { AppSidebar } from '@/components/space/app-sidebar';
 import { ItemsProvider } from '../lib/contexts/item-context';
 import { createClient } from '@/utils/supabase/server';
 import { SearchCommand } from '@/components/space/search-command';
