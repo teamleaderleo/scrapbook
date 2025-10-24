@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { getBlogPost } from '@/app/lib/blog-utils';
 import { MDXRemote } from 'next-mdx-remote/rsc';
@@ -17,7 +18,6 @@ export async function generateMetadata({
   let slug = '';
   
   if (params) {
-    // If params is a Promise, await it
     const resolvedParams = params instanceof Promise ? await params : params;
     slug = resolvedParams.slug;
   }
@@ -45,19 +45,27 @@ export async function generateMetadata({
   };
 }
 
-export default async function BlogPost({ 
-  params 
-}: {
-  params: Promise<any> | undefined;
-}) {
-  let slug = '';
-  
-  if (params) {
-    // If params is a Promise, await it
-    const resolvedParams = params instanceof Promise ? await params : params;
-    slug = resolvedParams.slug;
-  }
-  
+// Loading component for Suspense fallback
+function BlogPostSkeleton() {
+  return (
+    <article className="max-w-4xl mx-auto py-8 px-4">
+      <div className="h-10 bg-gray-200 rounded w-3/4 mb-4 animate-pulse" />
+      <div className="flex items-center gap-2 mt-2 mb-8">
+        <div className="h-4 bg-gray-200 rounded w-24 animate-pulse" />
+        <span>•</span>
+        <div className="h-6 bg-gray-200 rounded w-20 animate-pulse" />
+      </div>
+      <div className="space-y-3">
+        <div className="h-4 bg-gray-200 rounded w-full animate-pulse" />
+        <div className="h-4 bg-gray-200 rounded w-full animate-pulse" />
+        <div className="h-4 bg-gray-200 rounded w-5/6 animate-pulse" />
+      </div>
+    </article>
+  );
+}
+
+// Separate component for the blog post content
+async function BlogPostContent({ slug }: { slug: string }) {
   const post = await getBlogPost(slug);
   
   if (!post) {
@@ -81,5 +89,24 @@ export default async function BlogPost({
         <MDXRemote source={post.content} />
       </div>
     </article>
+  );
+}
+
+export default async function BlogPost({ 
+  params 
+}: {
+  params: Promise<any> | undefined;
+}) {
+  let slug = '';
+  
+  if (params) {
+    const resolvedParams = params instanceof Promise ? await params : params;
+    slug = resolvedParams.slug;
+  }
+  
+  return (
+    <Suspense fallback={<BlogPostSkeleton />}>
+      <BlogPostContent slug={slug} />
+    </Suspense>
   );
 }

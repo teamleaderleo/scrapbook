@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import { unstable_cache } from 'next/cache';
 import { BlogPost, PostCategory } from '@/app/lib/definitions/blog';
 
 const POSTS_PATH = path.join(process.cwd(), 'content/posts');
@@ -32,27 +33,49 @@ function parsePost(fileName: string): BlogPost {
   };
 }
 
-export async function getBlogPosts(): Promise<BlogPost[]> {
-  const postFiles = fs
-    .readdirSync(POSTS_PATH)
-    .filter((file) => /\.mdx?$/.test(file));
+// Cache the blog posts list
+// Cache indefinitely in production (new posts = new deployment)
+// Short cache in development for quick iteration
+const cacheConfig: { revalidate: number | false; tags: string[] } = {
+  revalidate: process.env.NODE_ENV === 'development' ? 10 : false,
+  tags: ['blog-posts'],
+};
 
-  const posts = postFiles.map(parsePost);
+export const getBlogPosts = unstable_cache(
+  async (): Promise<BlogPost[]> => {
+    const postFiles = fs
+      .readdirSync(POSTS_PATH)
+      .filter((file) => /\.mdx?$/.test(file));
 
-  return posts.sort((a, b) => 
-    new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
-}
+    const posts = postFiles.map(parsePost);
 
-export async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  try {
-    return parsePost(`${slug}.mdx`);
-  } catch (e) {
-    return null;
-  }
-}
+    return posts.sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  },
+  ['blog-posts'],
+  cacheConfig
+);
 
-export async function getPostsByCategory(category: PostCategory): Promise<BlogPost[]> {
-  const allPosts = await getBlogPosts();
-  return allPosts.filter(post => post.category === category);
-}
+// Cache individual blog posts
+export const getBlogPost = unstable_cache(
+  async (slug: string): Promise<BlogPost | null> => {
+    try {
+      return parsePost(`${slug}.mdx`);
+    } catch (e) {
+      return null;
+    }
+  },
+  ['blog-post'],
+  cacheConfig
+);
+
+// Cache posts by category
+export const getPostsByCategory = unstable_cache(
+  async (category: PostCategory): Promise<BlogPost[]> => {
+    const allPosts = await getBlogPosts();
+    return allPosts.filter(post => post.category === category);
+  },
+  ['blog-posts-by-category'],
+  cacheConfig
+);
