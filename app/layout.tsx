@@ -1,7 +1,6 @@
 import '@/app/globals.css';
 import { inter } from '@/components/ui/assets/fonts';
 import { Metadata } from 'next';
-import { ReactQueryProvider } from '@/components/query-client-provider';
 import { Toaster } from "@/components/ui/components/toaster";
 import { ThemeProvider } from '@/components/theme-provider';
 import { Analytics } from "@vercel/analytics/next"
@@ -41,12 +40,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ReactQueryProvider>
             {children}
             <Analytics />
             <SpeedInsights />
             <Toaster />
-          </ReactQueryProvider>
         </ThemeProvider>
         <DeferredScripts />
       </body>
