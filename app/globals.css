@@ -2,7 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scrollbar-gutter: stable;
+}
 
+html body[data-scroll-locked] {
+  overflow: unset !important;
+  margin-right: unset !important;
+  --removed-body-scroll-bar-size: 0 !important;
+}
 
 @layer base {
   :root {
