@@ -11,7 +11,6 @@ interface MonacoEditorPanelProps {
 export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorInstanceRef = useRef<any>(null);
-  const highlighterRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
   const { resolvedTheme } = useTheme();
   const { state } = useSidebar();
@@ -24,28 +23,10 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
   // Calculate left position based on sidebar state
   const sidebarWidth = state === "collapsed" ? "3rem" : "16rem";
 
-  // --- Theme switching: switch Monaco theme only (no re-register) ---
+  // --- Theme switching: switch Monaco theme only ---
   useEffect(() => {
-    if (!editorInstanceRef.current || !monacoRef.current || !highlighterRef.current) return;
-
-    const monaco = monacoRef.current;
-    const highlighter = highlighterRef.current;
-
-    // Safety: ensure the theme is present in the highlighter, but DO NOT call shikiToMonaco again
-    try {
-      const loaded = highlighter.getLoadedThemes?.() || [];
-      if (!loaded.includes(shikiTheme)) {
-        // Load into Shiki for completeness; Monaco theme definitions were already created at init
-        highlighter.loadTheme?.(shikiTheme).catch(() => {});
-      }
-    } catch {}
-
-    // Switch the live editor theme
-    if (monaco.editor) {
-      monaco.editor.setTheme(shikiTheme);
-    } else {
-      editorInstanceRef.current.updateOptions({ theme: shikiTheme });
-    }
+    if (!monacoRef.current) return;
+    monacoRef.current.editor.setTheme(shikiTheme);
   }, [shikiTheme]);
 
   useEffect(() => {
@@ -98,7 +79,6 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
         langs: ["python"],
       });
 
-      highlighterRef.current = highlighter;
       monacoRef.current = monaco;
 
       // Optional: ensure language is registered (harmless if already present)
