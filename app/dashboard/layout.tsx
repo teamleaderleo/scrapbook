@@ -9,15 +9,15 @@ import Footer from '@/components/dashboard/footer';
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden bg-[#313338] text-[#B5BAC1]">
-      <SideNav />
+      {/* <SideNav /> */}
       {/* <ProjectList /> */}
-      <div className="flex flex-col flex-grow">
+      {/* <div className="flex flex-col flex-grow">
         <Header />
         <main className="flex-grow overflow-hidden">
           {children}
         </main>
         <Footer />
-      </div>
+      </div> */}
     </div>
   );
 }
