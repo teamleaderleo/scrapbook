@@ -4,10 +4,9 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/app-sidebar';
 import { ItemsProvider } from '../lib/contexts/item-context';
 import { createClient } from '@/utils/supabase/server';
-import type { Item } from '@/app/lib/item-types';
-import type { ReviewState } from '@/app/lib/review-types';
 import { SearchCommand } from '@/components/space/search-command';
 import { MonacoEditorPanel } from '@/components/space/monaco-editor-panel';
+import { mapDatabaseItemsToItems } from '@/app/lib/utils/database';
 
 export const metadata: Metadata = {
   title: 'Space',
@@ -17,7 +16,7 @@ export const metadata: Metadata = {
 async function getInitialData() {
   const supabase = await createClient();
   
-  const nowMs = Date.now(); // Server timestamp
+  const nowMs = Date.now();
   
   // Check if user is logged in
   const { data: { user } } = await supabase.auth.getUser();
@@ -36,48 +35,13 @@ async function getInitialData() {
 
   if (itemsResult.error) {
     console.error('Error loading items:', itemsResult.error);
-    return { items: [], isAdmin, user };
+    return { items: [], isAdmin, user, nowMs };
   }
 
-  // Map reviews
-  let reviewsMap = new Map<string, ReviewState>();
-  if (reviewsResult.data) {
-    reviewsMap = new Map(
-      reviewsResult.data.map(r => [r.item_id, {
-        state: r.state,
-        due: r.due,
-        last_review: r.last_review,
-        stability: r.stability,
-        difficulty: r.difficulty,
-        scheduled_days: r.scheduled_days,
-        learning_steps: r.learning_steps,
-        reps: r.reps,
-        lapses: r.lapses,
-        suspended: r.suspended,
-      }])
-    );
-  }
-
-  // Map to Item format and parse markdown on server
-  const mapped: Item[] = await Promise.all(
-    (itemsResult.data || []).map(async (item) => ({
-      id: item.id,
-      userId: item.user_id || undefined,
-      title: item.title,
-      slug: item.slug,
-      url: item.url,
-      content: item.content,
-      contentHtml: item.content_html,
-      contentType: item.content_type as 'markdown' | 'html' | 'plaintext',
-      code: item.code || null,
-      codeHtml: item.code_html,
-      tags: item.tags || [],
-      category: item.category,
-      createdAt: new Date(item.created_at).getTime(),
-      updatedAt: new Date(item.updated_at).getTime(),
-      score: item.score || undefined,
-      review: reviewsMap.get(item.id),
-    }))
+  // Use shared mapping function
+  const mapped = mapDatabaseItemsToItems(
+    itemsResult.data || [], 
+    reviewsResult.data || []
   );
 
   return { items: mapped, isAdmin, user, nowMs };

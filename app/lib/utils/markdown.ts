@@ -55,7 +55,7 @@ function getHighlighterPromise(): Promise<HighlighterType> {
 
 /**
  * Highlight code to HTML using Shiki
- * (Server-only recommended. Don’t import this module in client components.)
+ * (Server-only recommended. Don't import this module in client components.)
  */
 export async function highlightCode(
   code: string | null,
@@ -86,21 +86,3 @@ function escapeHtml(str: string) {
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;');
 }
-
-/**
- * Optional: manual cleanup if we ever truly need to reinit Shiki.
- * Normally we should NOT call this in Next dev/production.
- */
-// export async function disposeShiki() {
-//   const g = globalThis as unknown as Record<symbol, Promise<HighlighterType> | undefined>;
-//   const p = g[SHIKI_KEY];
-//   if (p) {
-//     try {
-//       const h = await p;
-//       // @ts-ignore - dispose() exists on Shiki highlighter
-//       h.dispose?.();
-//     } finally {
-//       delete g[SHIKI_KEY];
-//     }
-//   }
-// }

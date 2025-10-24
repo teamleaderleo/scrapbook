@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
-import { parseMarkdown, highlightCode } from '@/app/lib/markdown-utils';
+import { parseMarkdown, highlightCode } from '@/app/lib/utils/markdown';
 
 export async function addItemAction(payload: {
   id: string;
