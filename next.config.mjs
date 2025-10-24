@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  cacheComponents: true,
   images: {
     remotePatterns: [
       {
@@ -29,6 +30,7 @@ const nextConfig = {
   reactCompiler: true,
 
   experimental: {
+    turbopackFileSystemCacheForDev: true,
     optimizePackageImports: [
       'lucide-react',
       'react-markdown',

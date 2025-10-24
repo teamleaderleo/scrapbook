@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/app-sidebar';
 import { ItemsProvider } from '../lib/contexts/item-context';
@@ -81,29 +82,45 @@ async function getInitialData() {
   return { items: mapped, isAdmin, user, nowMs };
 }
 
-export default async function SpaceLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const { items, isAdmin, user, nowMs } = await getInitialData();
+// Cached static shell
+async function StaticShell({ children }: { children: React.ReactNode }) {
+  "use cache";
   
   return (
     <SidebarProvider>
-      <ItemsProvider 
-        initialItems={items} 
-        initialIsAdmin={isAdmin} 
-        initialUser={user}
-        initialNowMs={nowMs}
-      >
-        <SearchCommand /> 
-        <div className="min-h-screen bg-white flex w-full">
-          <AppSidebar/>
-          <div className="flex flex-col flex-1">
-            {children}
-          </div>
-        </div>
-      </ItemsProvider>
+      <div className="min-h-screen bg-white flex w-full">
+        {children}
+      </div>
     </SidebarProvider>
+  );
+}
+
+// Dynamic data fetching + sidebar (needs ItemsProvider)
+async function DynamicData({ children }: { children: React.ReactNode }) {
+  const { items, isAdmin, user, nowMs } = await getInitialData();
+  
+  return (
+    <ItemsProvider 
+      initialItems={items} 
+      initialIsAdmin={isAdmin} 
+      initialUser={user}
+      initialNowMs={nowMs}
+    >
+      <SearchCommand />
+      <AppSidebar />
+      <div className="flex flex-col flex-1">
+        {children}
+      </div>
+    </ItemsProvider>
+  );
+}
+
+export default async function SpaceLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <StaticShell>
+      <Suspense fallback={<div className="p-4">Loading...</div>}>
+        <DynamicData>{children}</DynamicData>
+      </Suspense>
+    </StaticShell>
   );
 }
