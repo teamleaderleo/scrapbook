@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { DeferredScripts } from './deferred-scripts';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: {
@@ -31,20 +32,20 @@ export default function RootLayout({
         <link rel="preconnect" href="https://vitals.vercel-insights.com" />
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
       </head>
-      <body 
-        className={`${inter.className} antialiased`}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+      <body className={`${inter.className} antialiased`}>
+        <Suspense fallback={null}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
             {children}
             <Analytics />
             <SpeedInsights />
             <Toaster />
-        </ThemeProvider>
+          </ThemeProvider>
+        </Suspense>
         <DeferredScripts />
       </body>
     </html>
