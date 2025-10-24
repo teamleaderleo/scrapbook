@@ -2,6 +2,7 @@ import { getPostsByCategory } from '@/app/lib/blog-utils';
 import { PostCategory, categories } from '@/app/lib/definitions/blog';
 import PostList from '@/components/blog/post-list';
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 
 export async function generateMetadata({ 
   params 
@@ -47,7 +48,9 @@ export default async function CategoryPage({
       <h1 className="text-3xl font-bold mb-6">
         Posts in {categories[category]}
       </h1>
-      <PostList posts={posts} title={`Posts in ${categories[category]}`} />
+      <Suspense fallback={<div>Loading dashboard...</div>}>
+        <PostList posts={posts} title={`Posts in ${categories[category]}`} />
+      </Suspense>
     </div>
   );
 }
