@@ -1,14 +1,10 @@
 import { Inter } from 'next/font/google';
-import { Lusitana } from 'next/font/google';
-import { Playfair_Display } from 'next/font/google';
-import { Josefin_Slab } from 'next/font/google';
-
-export const playfair_display = Playfair_Display({ subsets: ['latin'] });
-export const inter = Inter({ subsets: ['latin'] });
-export const lusitana = Lusitana({
-    weight: ['400', '700'],
-    subsets: ['latin'],
-  });
-export const josefin_slab = Josefin_Slab({ 
-  weight: ['500', '400'], 
-  subsets: ['latin'] });
+// display: 'swap' to prevent blocking text render
+// This shows fallback font immediately while Inter loads
+export const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap', // prevents font from blocking FCP
+  preload: true,   // Preload the font file
+  fallback: ['system-ui', 'arial'], // Specify fallback fonts
+  adjustFontFallback: true, // Minimize layout shift when font loads
+});
