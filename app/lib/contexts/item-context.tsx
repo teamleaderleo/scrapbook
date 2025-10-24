@@ -12,6 +12,8 @@ type ItemsContextType = {
   isAdmin: boolean;
   signOut: () => Promise<void>;
   nowMs: number;
+  editorOpen: boolean;
+  setEditorOpen: (open: boolean) => void;
 };
 
 const ItemsContext = createContext<ItemsContextType | null>(null);
@@ -42,6 +44,7 @@ export function ItemsProvider({
   const [items, setItems] = useState<Item[]>(initialItems);
   const [loading, setLoading] = useState(initialItems.length === 0);
   const [nowMs] = useState(initialNowMs);
+  const [editorOpen, setEditorOpen] = useState(false);
   
   useEffect(() => {
     setItems(initialItems);
@@ -133,6 +136,8 @@ export function ItemsProvider({
         isAdmin,
         signOut,
         nowMs,
+        editorOpen,
+        setEditorOpen,
       }}
     >
       {children}

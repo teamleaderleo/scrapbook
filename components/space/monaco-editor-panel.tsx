@@ -2,13 +2,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useItems } from "@/app/lib/contexts/item-context";
 
-interface MonacoEditorPanelProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
+export function MonacoEditorPanel() {
+  const { editorOpen, setEditorOpen } = useItems();
   const editorRef = useRef<HTMLDivElement>(null);
   const editorInstanceRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
@@ -24,6 +21,23 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
   // Calculate left position based on sidebar state
   const sidebarWidth = state === "collapsed" ? "3rem" : "16rem";
 
+  // Global keyboard shortcut for toggling editor
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      const isMod = e.metaKey || e.ctrlKey;
+
+      // Toggle Editor (Cmd/Ctrl + I) - always allow this
+      if (isMod && !e.altKey && !e.shiftKey && (e.key === "i" || e.code === "KeyI")) {
+        e.preventDefault();
+        setEditorOpen(!editorOpen);  // Changed from: setEditorOpen(prev => !prev)
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [setEditorOpen, editorOpen]); // Add editorOpen to dependencies
+
   // --- Theme switching: switch Monaco theme only ---
   useEffect(() => {
     if (!monacoRef.current) return;
@@ -31,7 +45,7 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
   }, [shikiTheme]);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!editorOpen) {
       setEditorHeight(384); // Reset to default when closed
       return;
     }
@@ -127,7 +141,7 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
 
       // Add keybinding for Ctrl+I to close editor
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
-        onClose();
+        setEditorOpen(false);
       });
 
       // Focus the editor immediately
@@ -149,9 +163,9 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
 
     initEditor().catch(console.error);
     return () => cleanup?.();
-  }, [isOpen]);
+  }, [editorOpen, shikiTheme, setEditorOpen]);
 
-  if (!isOpen) return null;
+  if (!editorOpen) return null;
 
   return (
     <div

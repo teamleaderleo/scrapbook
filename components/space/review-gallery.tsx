@@ -14,12 +14,11 @@ import { createClient } from "@/utils/supabase/client";
 import type { ReviewState } from "@/app/lib/review-types";
 import { SpaceHeader } from "./space-header";
 import { CodeDisplay } from "./code-display";
-import { MonacoEditorPanel } from "./monaco-editor-panel";
 
 export function ReviewGallery() {
   const supabase = createClient();
   // Items are pre-loaded from layout!
-  const { items: allItems, isAdmin, nowMs: initialNowMs } = useItems(); // Get server timestamp
+  const { items: allItems, isAdmin, nowMs: initialNowMs, editorOpen, setEditorOpen } = useItems();
   const nowMs = useNow(initialNowMs, 30_000); // Use server timestamp as base
   const sp = useSearchParams();
   const router = useRouter();
@@ -29,7 +28,6 @@ export function ReviewGallery() {
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showContent, setShowContent] = useState(true);
-  const [editorOpen, setEditorOpen] = useState(false);
 
   const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
   
@@ -56,13 +54,6 @@ export function ReviewGallery() {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       const isMod = e.metaKey || e.ctrlKey;
-
-      // Toggle Editor (Cmd/Ctrl + I) - always allow this
-      if (isMod && !e.altKey && !e.shiftKey && (e.key === "i" || e.code === "KeyI")) {
-        e.preventDefault();
-        setEditorOpen(prev => !prev);
-        return;
-      }
 
       // Check if typing in input/textarea/editor
       const target = e.target as HTMLElement | null;
@@ -136,10 +127,6 @@ export function ReviewGallery() {
           isEditorOpen={editorOpen}
         />
         <div className="p-4 text-muted-foreground">No items to review</div>
-        <MonacoEditorPanel
-          isOpen={editorOpen}
-          onClose={() => setEditorOpen(false)}
-        />
       </>
     );
   }
@@ -227,10 +214,6 @@ export function ReviewGallery() {
         </div>
       </div>
 
-      <MonacoEditorPanel
-        isOpen={editorOpen}
-        onClose={() => setEditorOpen(false)}
-      />
     </div>
   );
 }

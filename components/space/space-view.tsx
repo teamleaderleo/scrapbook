@@ -13,7 +13,6 @@ import { useItems } from "@/app/lib/contexts/item-context";
 import { createClient } from "@/utils/supabase/client";
 import { SpaceHeader } from "./space-header";
 import { Button } from "@/components/ui/button";
-import { MonacoEditorPanel } from "./monaco-editor-panel";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -22,14 +21,13 @@ export function SpaceView() {
   const sp = useSearchParams();
   const tagsParam = sp.get("tags") ?? undefined;
 
-  const { items: allItems, isAdmin, nowMs: initialNowMs } = useItems();
+  const { items: allItems, isAdmin, nowMs: initialNowMs, editorOpen, setEditorOpen } = useItems();
   const nowMs = useNow(initialNowMs, 30_000);
 
   const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
   
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
   const [page, setPage] = useState(1);
-  const [editorOpen, setEditorOpen] = useState(false);
 
   const items = useMemo<Item[]>(() => {
     const withMutations = allItems.map(it => {
@@ -56,13 +54,6 @@ export function SpaceView() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const isMod = e.metaKey || e.ctrlKey;
-
-      // Toggle Editor (Cmd/Ctrl + I)
-      if (isMod && !e.altKey && !e.shiftKey && (e.key === "i" || e.code === "KeyI")) {
-        e.preventDefault();
-        setEditorOpen(prev => !prev);
-        return;
-      }
 
       // For other keys, check if typing
       const target = e.target as HTMLElement | null;
@@ -193,10 +184,6 @@ export function SpaceView() {
         )}
       </main>
 
-      <MonacoEditorPanel
-        isOpen={editorOpen}
-        onClose={() => setEditorOpen(false)}
-      />
     </div>
   );
 }

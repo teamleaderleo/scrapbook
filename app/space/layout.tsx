@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/server';
 import type { Item } from '@/app/lib/item-types';
 import type { ReviewState } from '@/app/lib/review-types';
 import { SearchCommand } from '@/components/space/search-command';
+import { MonacoEditorPanel } from '@/components/space/monaco-editor-panel';
 
 export const metadata: Metadata = {
   title: 'Space',
@@ -111,6 +112,7 @@ async function DynamicData({ children }: { children: React.ReactNode }) {
       <div className="flex flex-col flex-1">
         {children}
       </div>
+      <MonacoEditorPanel />
     </ItemsProvider>
   );
 }
