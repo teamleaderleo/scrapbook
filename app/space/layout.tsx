@@ -6,7 +6,6 @@ import { createClient } from '@/utils/supabase/server';
 import type { Item } from '@/app/lib/item-types';
 import type { ReviewState } from '@/app/lib/review-types';
 import { SearchCommand } from '@/components/space/search-command';
-import { parseMarkdown, highlightCode } from '@/app/lib/markdown-utils';
 
 export const metadata: Metadata = {
   title: 'Space',
@@ -66,10 +65,10 @@ async function getInitialData() {
       slug: item.slug,
       url: item.url,
       content: item.content,
-      contentHtml: await parseMarkdown(item.content), // Parse markdown to HTML
+      contentHtml: item.content_html,
       contentType: item.content_type as 'markdown' | 'html' | 'plaintext',
       code: item.code || null,
-      codeHtml: await highlightCode(item.code, 'python'), // Highlight code to HTML
+      codeHtml: item.code_html,
       tags: item.tags || [],
       category: item.category,
       createdAt: new Date(item.created_at).getTime(),

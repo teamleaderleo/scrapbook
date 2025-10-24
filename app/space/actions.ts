@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
+import { parseMarkdown, highlightCode } from '@/app/lib/markdown-utils';
 
 export async function addItemAction(payload: {
   id: string;
@@ -19,16 +20,22 @@ export async function addItemAction(payload: {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Parse ONCE when saving
+  const contentHtml = await parseMarkdown(payload.content ?? '');
+  const codeHtml = await highlightCode(payload.code ?? null, 'python');
+
   const { error } = await supabase.from('items').insert({
     id: payload.id,
     slug: payload.id,
     user_id: user?.id ?? null,
     title: payload.title,
-    url: payload.url ?? null,                 // stores null if missing
+    url: payload.url ?? null,
     tags: payload.tags ?? [],
-    category: payload.category ?? 'general',  // default when null/undefined
+    category: payload.category ?? 'general',
     content: payload.content ?? '',
+    content_html: contentHtml,
     code: payload.code ?? null,
+    code_html: codeHtml,
     content_type: 'markdown',
     score: payload.score ?? null,
   });
@@ -42,9 +49,23 @@ export async function addItemAction(payload: {
 export async function updateItemAction(id: string, updates: any) {
   const supabase = await createClient();
 
+  // Parse whenever content/code changes
+  const contentHtml = updates.content !== undefined 
+    ? await parseMarkdown(updates.content ?? '')
+    : undefined;
+  
+  const codeHtml = updates.code !== undefined
+    ? await highlightCode(updates.code ?? null, 'python')
+    : undefined;
+
   const { error } = await supabase
     .from('items')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update({ 
+      ...updates, 
+      ...(contentHtml !== undefined && { content_html: contentHtml }),
+      ...(codeHtml !== undefined && { code_html: codeHtml }),
+      updated_at: new Date().toISOString() 
+    })
     .eq('id', id);
 
   if (error) throw new Error(error.message);
