@@ -31,7 +31,12 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
   }, [shikiTheme]);
 
   useEffect(() => {
-    if (!isOpen || !editorRef.current) return;
+    if (!isOpen) {
+      setEditorHeight(384); // Reset to default when closed
+      return;
+    }
+    
+    if (!editorRef.current) return;
 
     setIsInitializing(true);
 
