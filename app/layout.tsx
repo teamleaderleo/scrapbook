@@ -4,12 +4,9 @@ import { Metadata } from 'next';
 import { ReactQueryProvider } from '@/components/query-client-provider';
 import { Toaster } from "@/components/ui/components/toaster";
 import { ThemeProvider } from '@/components/theme-provider';
-import dynamic from 'next/dynamic';
-
-// Defer non-critical components to after initial paint
-const Analytics = dynamic(() => import("@vercel/analytics/next").then(mod => ({ default: mod.Analytics })), { ssr: false });
-const SpeedInsights = dynamic(() => import('@vercel/speed-insights/next').then(mod => ({ default: mod.SpeedInsights })), { ssr: false });
-const ServiceWorkerRegistration = dynamic(() => import('@/components/ui/service-worker-registration').then(mod => ({ default: mod.ServiceWorkerRegistration })), { ssr: false });
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { DeferredScripts } from './deferred-scripts';
 
 export const metadata: Metadata = {
   title: {
@@ -46,14 +43,12 @@ export default function RootLayout({
         >
           <ReactQueryProvider>
             {children}
+            <Analytics />
+            <SpeedInsights />
             <Toaster />
           </ReactQueryProvider>
         </ThemeProvider>
-        
-        {/* These load after the page paints */}
-        <Analytics />
-        <SpeedInsights />
-        <ServiceWorkerRegistration />
+        <DeferredScripts />
       </body>
     </html>
   );
