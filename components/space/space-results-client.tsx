@@ -7,7 +7,6 @@ import { formatInterval, formatDueRelative } from "@/app/lib/interval-format";
 import { useEffect, useState } from "react";
 import { MarkdownContent } from "./markdown-content";
 import { useSearchParams } from "next/navigation";
-import { useTheme } from "next-themes";
 import { CodeDisplay } from "./code-display";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
@@ -97,7 +96,6 @@ function Row({
   onToggle: () => void;
   onHoverChange: (hovering: boolean) => void;
 }) {
-  const { theme } = useTheme();
   const displayTags = it.tags.map((t) => (t.includes(":") ? t.split(":")[1] : t));
   const sp = useSearchParams();
   const tagsParam = sp.get("tags") ?? "";
