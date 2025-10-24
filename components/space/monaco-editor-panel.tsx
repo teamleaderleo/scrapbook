@@ -130,6 +130,7 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
       });
 
       editorInstanceRef.current = editor;
+      monaco.editor.setTheme(shikiTheme);
 
       // Add keybinding for Ctrl+I to close editor
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
