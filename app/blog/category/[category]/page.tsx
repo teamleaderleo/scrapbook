@@ -44,13 +44,13 @@ export default async function CategoryPage({
   const posts = await getPostsByCategory(category);
   
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">
-        Posts in {categories[category]}
-      </h1>
-      <Suspense fallback={<div>Loading dashboard...</div>}>
+    <Suspense fallback={<div>Loading dashboard...</div>}>
+      <div className="max-w-4xl mx-auto py-8">
+        <h1 className="text-3xl font-bold mb-6">
+          Posts in {categories[category]}
+        </h1>
         <PostList posts={posts} title={`Posts in ${categories[category]}`} />
-      </Suspense>
-    </div>
+      </div>
+    </Suspense>
   );
 }
