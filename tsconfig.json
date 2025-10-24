@@ -39,7 +39,8 @@
     "app/dashboard/scrapbook/page.tsx",
     "app/lib/websocket/socket-server.nts",
     "server/socket-server.cjs",
-    ".next\\dev/types/**/*.ts"
+    ".next\\dev/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
