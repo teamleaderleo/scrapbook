@@ -130,6 +130,8 @@ export function MonacoEditorPanel({ isOpen, onClose }: MonacoEditorPanelProps) {
       });
 
       editorInstanceRef.current = editor;
+      // Need to explicitly set theme after creation/after registering all the token rules
+      // so every syntax element gets the correct color from the theme.
       monaco.editor.setTheme(shikiTheme);
 
       // Add keybinding for Ctrl+I to close editor
