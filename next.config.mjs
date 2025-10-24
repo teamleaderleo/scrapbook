@@ -29,7 +29,13 @@ const nextConfig = {
   reactCompiler: true,
 
   experimental: {
-    optimizePackageImports: ['lucide-react', 'react-markdown'],
+    optimizePackageImports: [
+      'lucide-react',
+      'react-markdown',
+      '@/components',
+      '@/components/ui',
+      '@/components/space',
+    ],
   },
 };
 
