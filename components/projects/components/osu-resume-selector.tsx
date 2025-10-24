@@ -63,13 +63,13 @@ export default function OsuResumeSelector({ resumeColumns }: OsuResumeSelectorPr
   const currentSection = resumeSections[hoveredIndex];
 
   return (
-    <main className="flex flex-col min-h-screen bg-sidebar-background" style={{ scrollbarGutter: 'stable' }}>
+    <main className="flex flex-col h-screen bg-sidebar-background" style={{ scrollbarGutter: 'stable' }}>
       <SiteNav />
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden min-h-0">
         {/* Left side - List */}
         <div className="w-1/2 border-r border-sidebar-border flex flex-col overflow-y-auto">
-          <div className="pr-6 pt-8">
+          <div className="flex-1 pl-6 pr-6 pt-3">
             {resumeSections.map((section, index) => {
               const isHovered = hoveredIndex === index;
               
@@ -84,8 +84,7 @@ export default function OsuResumeSelector({ resumeColumns }: OsuResumeSelectorPr
                   <div
                     className={`
                       p-4 cursor-pointer transition-all duration-200
-                      border-b border-border dark:border-sidebar-border
-                      ${isHovered ? 'bg-accent dark:bg-sidebar-accent border-l-4 border-l-primary dark:border-l-sidebar-primary' : 'bg-white dark:bg-sidebar hover:bg-muted/50 dark:hover:bg-sidebar-accent/50 border-l-4 border-l-transparent'}
+                      ${isHovered ? 'bg-accent dark:bg-sidebar-accent rounded border-l-4 border-l-primary-foreground dark:border-l-sidebar-primary-foreground' : 'border-b border-border dark:border-sidebar-border hover:bg-muted/50 dark:hover:bg-sidebar-accent/50'}
                     `}
                   >
                     <div className="flex items-baseline justify-between gap-4">
@@ -106,8 +105,8 @@ export default function OsuResumeSelector({ resumeColumns }: OsuResumeSelectorPr
         </div>
 
         {/* Right side - Details */}
-        <div className="w-1/2 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-6 sm:p-8 lg:p-12">
+        <div className="w-1/2 p-6 overflow-y-auto">
+          <div>
             {/* Section header */}
             <div className="mb-6 pb-4 border-b-2 border-primary dark:border-sidebar-primary">
               <h2 className="text-xl font-bold text-foreground dark:text-sidebar-foreground mb-1.5">
