@@ -55,6 +55,7 @@ export function SpaceHeader({
   const defaultCenterContent = (
     <Link
       href={toggleHref}
+      prefetch={true}
       className="text-sm text-primary-foreground hover:text-primary-foreground/70 transition-colors font-medium inline-flex items-center gap-2"
     >
       {isReviewLike ? (

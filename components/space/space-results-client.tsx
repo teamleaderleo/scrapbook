@@ -118,6 +118,7 @@ function Row({
             {it.url ? (
               <Link
                 href={it.url}
+                // prefetch={true} Does nothing since it's an external url
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium hover:underline text-foreground"
@@ -134,6 +135,7 @@ function Row({
                 <Button asChild variant="outline" size="sm">
                   <Link
                     href={`/space/edit/${it.id}`}
+                    prefetch={true}
                     onClick={(e) => e.stopPropagation()}
                   >
                     edit
@@ -142,6 +144,7 @@ function Row({
                 <Button asChild variant="outline" size="sm">
                   <Link
                     href={`/space/add?duplicate=${it.id}`}
+                    prefetch={true}
                     onClick={(e) => e.stopPropagation()}
                   >
                     duplicate
@@ -152,6 +155,7 @@ function Row({
             <Button asChild variant="outline" size="sm">
               <Link
                 href={`/space/review?tags=${tagsParam}&item=${it.id}`}
+                prefetch={true}
                 onClick={(e) => e.stopPropagation()}
               >
                 review
