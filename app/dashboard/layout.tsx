@@ -2,7 +2,7 @@ import React from 'react';
 import SideNav from '@/components/dashboard/sidenav';
 // import ProjectList from '@/components/dashboard/project-list';
 import Header from '@/components/dashboard/header';
-import Footer from '@/components/dashboard/footer';
+// import Footer from '@/components/dashboard/footer';
 
 // export const experimental_ppr = true;
 
