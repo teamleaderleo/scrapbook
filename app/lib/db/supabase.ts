@@ -6,8 +6,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Database row types are slightly different due to the Review state thing
-// TODO: we aren't really using these but we need to add content html and code and code html
+// Database row types
 export type DbItem = {
   id: string;
   user_id: string | null;
@@ -15,7 +14,10 @@ export type DbItem = {
   slug: string | null;
   url: string | null;
   content: string;
+  content_html: string;
   content_type: string;
+  code: string | null;
+  code_html: string;
   tags: string[];
   category: string;
   score: number | null;
