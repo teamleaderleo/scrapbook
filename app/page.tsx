@@ -3,7 +3,7 @@ import { resumeColumns } from "./lib/resume-data";
 
 export default function Page() {
   return (
-    <main className="flex flex-col min-h-screen bg-background">
+    <main className="flex flex-col min-h-screen bg-sidebar-background">
       <SiteNav />
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-4 mb-6">
         <div className="grid grid-cols-3 gap-12">

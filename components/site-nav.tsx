@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import HardcodedStickyNote from '@/components/hardcoded-sticky-note';
 // import { HeaderConnectionStatus } from '@/components/connection-status';
-import { Book, Box, Twitter, Github, Sparkles, Brain } from 'lucide-react';
+import { Book, Box, Twitter, Github, Sparkles, Brain, FileText } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function SiteNav() {
@@ -14,6 +14,10 @@ export default function SiteNav() {
             <Link href="/" className="text-lg font-bold">teamleaderleo</Link>
           </div>
           <div className="w-1/3 flex justify-center gap-4">
+            <Link href="/resume" className="text-sm hover:text-muted-foreground flex items-center gap-1">
+              <FileText size={14} />
+              <span>resume</span>
+            </Link>
             <Link href="/space" className="text-sm hover:text-muted-foreground flex items-center gap-1">
               <Brain size={14} />
               <span>space</span>
