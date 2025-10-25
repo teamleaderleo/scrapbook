@@ -8,10 +8,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Database row types
 export type DbItem = {
-  id: string;
+  id: string;  // UUID
   user_id: string | null;
   title: string;
-  slug: string | null;
+  slug: string;  // User-defined text identifier
   url: string | null;
   content: string;
   content_html: string;

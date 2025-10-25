@@ -14,9 +14,9 @@ import { SpaceHeader } from "@/components/space/space-header";
 import { addItemAction, updateItemAction } from "@/app/space/actions";
 import { Copy, Check } from "lucide-react";
 
-// Canonical shape for the item
+// Singleton/Canonical shape for the item with only editable fields
 type Model = {
-  id: string;
+  slug: string;
   title: string;
   url: string | null;
   tags: string[];
@@ -31,7 +31,7 @@ interface ItemFormProps {
 }
 
 const DEFAULT_MODEL: Model = {
-  id: "unique-slug",
+  slug: "unique-slug",
   title: "0. Problem Title",
   url: "https://leetcode.com/problems/...",
   tags: ["type:leetcode", "company:google", "topic:array", "difficulty:easy"],
@@ -47,11 +47,14 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   const duplicateId = searchParams.get("duplicate") || null;
   const supabase = createClient();
 
+  // Store the database ID separately (only needed for updates)
+  const itemId = useRef<string | null>(mode === "edit" && item ? item.id : null);
+
   // === Canonical model (single source of truth) ==============================
   const [model, setModel] = useState<Model>(() => {
     if (mode === "edit" && item) {
       return {
-        id: item.id,
+        slug: item.slug ?? "untitled-slug",
         title: item.title ?? "",
         url: item.url ?? null,
         tags: item.tags ?? [],
@@ -63,11 +66,11 @@ export function ItemForm({ item, mode }: ItemFormProps) {
     return DEFAULT_MODEL;
   });
 
-  // === Raw JSON text (can diverge while typing in the JSON box) ==============
+  // === Raw JSON text (Holds all the stuff) =========================
   const [rawInput, setRawInput] = useState(() => JSON.stringify(model, null, 2));
   const [jsonError, setJsonError] = useState<string>("");
 
-  // === Metadata JSON text (can diverge while typing in the metadata box) =====
+  // === Metadata JSON text (excludes content and code) ========================
   const [metadataInput, setMetadataInput] = useState(() => {
     const { content, code, ...metadata } = model;
     return JSON.stringify(metadata, null, 2);
@@ -97,7 +100,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
       const { data } = await supabase.from("items").select("*").eq("id", duplicateId).single();
       if (data) {
         const template: Model = {
-          id: `${data.id}-copy`,
+          slug: `${data.slug ?? data.id}-copy`,
           title: `${data.title} (Copy)`,
           url: data.url ?? null,
           tags: data.tags ?? [],
@@ -128,7 +131,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
       const parsed = JSON.parse(val);
 
       const next: Model = {
-        id: parsed.id ?? model.id,
+        slug: parsed.slug ?? model.slug,
         title: parsed.title ?? model.title,
         url: parsed.url ?? model.url ?? null,
         tags: parsed.tags ?? model.tags ?? [],
@@ -146,7 +149,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
       lastChangedBy.current = "json";
       setModel((prev) => {
         const same =
-          prev.id === next.id &&
+          prev.slug === next.slug &&
           prev.title === next.title &&
           prev.url === next.url &&
           JSON.stringify(prev.tags) === JSON.stringify(next.tags) &&
@@ -183,7 +186,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
       lastChangedBy.current = "meta";
       setModel((prev) => ({
         ...prev,
-        id: parsed.id ?? prev.id,
+        slug: parsed.slug ?? prev.slug,
         title: parsed.title ?? prev.title,
         url: parsed.url ?? prev.url ?? null,
         tags: parsed.tags ?? prev.tags ?? [],
@@ -211,7 +214,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
       lastChangedBy.current = "meta";  // prevent mirror effects from clobbering
       setModel((prev) => ({
         ...prev,
-        id: parsed.id ?? prev.id,
+        slug: parsed.slug ?? prev.slug,
         title: parsed.title ?? prev.title,
         url: parsed.url ?? prev.url ?? null,
         tags: parsed.tags ?? prev.tags ?? [],
@@ -223,7 +226,6 @@ export function ItemForm({ item, mode }: ItemFormProps) {
         setMetadataError("Invalid JSON");
       }, 300);
     } finally {
-      // allow normal focus behavior to resume
       setIsEditingMetadata(false);
     }
   };
@@ -270,7 +272,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
     try {
       if (mode === "add") {
         await addItemAction({
-          id: model.id,
+          slug: model.slug,
           title: model.title,
           url: model.url,
           tags: model.tags,
@@ -279,7 +281,9 @@ export function ItemForm({ item, mode }: ItemFormProps) {
           code: model.code,
         });
       } else {
-        await updateItemAction(model.id, {
+        if (!itemId.current) throw new Error("No item ID for update");
+        await updateItemAction(itemId.current, {
+          slug: model.slug,
           title: model.title,
           url: model.url,
           tags: model.tags,
@@ -378,7 +382,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
 
           <ItemPreview
             item={{
-              id: model.id,
+              id: itemId.current || "preview",
               title: model.title,
               url: model.url,
               tags: model.tags,

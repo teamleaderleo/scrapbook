@@ -1,10 +1,10 @@
 import type { ReviewState } from "./review-types";
 
 export type Item = {
-  id: string;
+  id: string;  // UUID from database
   userId?: string;
   title: string;
-  slug: string | null;
+  slug: string;  // User-defined text identifier (not nullable)
   url: string | null;
   
   content: string;

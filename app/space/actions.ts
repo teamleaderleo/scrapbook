@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/server';
 import { parseMarkdown, highlightCode } from '@/app/lib/utils/markdown';
 
 export async function addItemAction(payload: {
-  id: string;
+  slug: string;
   title: string;
   url?: string | null;
   tags?: string[];
@@ -24,9 +24,9 @@ export async function addItemAction(payload: {
   const contentHtml = await parseMarkdown(payload.content ?? '');
   const codeHtml = await highlightCode(payload.code ?? null, 'python');
 
+  // Don't specify id; let Supabase generate it with gen_random_uuid()
   const { error } = await supabase.from('items').insert({
-    id: payload.id,
-    slug: payload.id,
+    slug: payload.slug,  // User-provided slug
     user_id: user?.id ?? null,
     title: payload.title,
     url: payload.url ?? null,
