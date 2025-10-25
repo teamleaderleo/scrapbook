@@ -306,11 +306,11 @@ export default function UTCTimeVisualizer() {
 
             {/* Time display */}
             <div>
-              <div className="flex items-baseline gap-4">
-                <div className="text-6xl font-bold tracking-tight">
+              <div className="flex items-baseline gap-3">
+                <div className="text-6xl font-bold tracking-tight min-w-[11rem]">
                   {formatTime(localHours, localMinutes)}
                 </div>
-                <div className="text-4xl font-medium text-muted-foreground">
+                <div className="text-4xl font-medium text-muted-foreground min-w-[1rem]">
                   {formatTime12Hour(localHours, localMinutes)}
                 </div>
               </div>
