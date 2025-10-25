@@ -5,7 +5,9 @@ import React, { useState, useEffect, useRef } from 'react';
 export default function UTCTimeVisualizer() {
   const [localTime, setLocalTime] = useState(0);
   const [userTimezone, setUserTimezone] = useState('');
+  const [utcOffset, setUtcOffset] = useState('');
   const [mounted, setMounted] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
   const sliderRef = useRef<HTMLInputElement>(null);
   const gradientPosRef = useRef({ value: 0 });
 
@@ -22,7 +24,18 @@ export default function UTCTimeVisualizer() {
     const now = new Date();
     const minutesSinceMidnight = now.getHours() * 60 + now.getMinutes();
     setLocalTime(minutesSinceMidnight);
+    setCurrentTime(minutesSinceMidnight);
     setUserTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    
+    // Calculate UTC offset
+    const offsetMinutes = -now.getTimezoneOffset();
+    const offsetHours = Math.floor(Math.abs(offsetMinutes) / 60);
+    const offsetMins = Math.abs(offsetMinutes) % 60;
+    const sign = offsetMinutes >= 0 ? '+' : '-';
+    const offsetStr = offsetMins === 0 
+      ? `UTC${sign}${offsetHours}` 
+      : `UTC${sign}${offsetHours}:${String(offsetMins).padStart(2, '0')}`;
+    setUtcOffset(offsetStr);
 
     // Set initial gradient position
     const initialPos = (minutesSinceMidnight / 1439) * 100;
@@ -124,6 +137,30 @@ export default function UTCTimeVisualizer() {
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
   };
 
+  const formatTime12Hour = (hours: number, minutes: number) => {
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const hours12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+    return `${hours12}:${String(minutes).padStart(2, '0')} ${period}`;
+  };
+
+  const jumpToCurrentTime = () => {
+    setLocalTime(currentTime);
+    const targetPos = (currentTime / 1439) * 100;
+    if ((window as any).anime && sliderRef.current) {
+      (window as any).anime({
+        targets: gradientPosRef.current,
+        value: targetPos,
+        duration: 500,
+        easing: 'easeOutCubic',
+        update: () => {
+          if (sliderRef.current) {
+            sliderRef.current.style.backgroundPosition = `${gradientPosRef.current.value}% 50%`;
+          }
+        }
+      });
+    }
+  };
+
   const getTimeOfDay = () => {
     if (localHours < 6) return 'Night';
     if (localHours < 12) return 'Morning';
@@ -223,8 +260,16 @@ export default function UTCTimeVisualizer() {
         <div className="space-y-8">
           {/* Header */}
           <div>
-            <h1 className="text-3xl font-bold mb-2">Time Zone Converter</h1>
-            <p className="text-sm text-muted-foreground">{userTimezone}</p>
+            <div className="mb-2">
+              <h1 className="text-3xl font-bold inline">Current time: </h1>
+              <button
+                onClick={jumpToCurrentTime}
+                className="text-3xl font-bold rounded-md bg-muted/50 hover:bg-muted transition-colors cursor-pointer align-baseline px-1.5"
+              >
+                {formatTime(Math.floor(currentTime / 60), currentTime % 60)}
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground">{userTimezone} ({utcOffset})</p>
           </div>
 
           {/* Slider */}
@@ -261,24 +306,61 @@ export default function UTCTimeVisualizer() {
 
             {/* Time display */}
             <div>
-              <div className="text-6xl font-bold mb-1 tracking-tight">
-                {formatTime(localHours, localMinutes)}
+              <div className="flex items-baseline gap-4">
+                <div className="text-6xl font-bold tracking-tight">
+                  {formatTime(localHours, localMinutes)}
+                </div>
+                <div className="text-4xl font-medium text-muted-foreground">
+                  {formatTime12Hour(localHours, localMinutes)}
+                </div>
               </div>
-              <div className="text-lg text-muted-foreground">
+              <div className="text-lg text-muted-foreground mt-1">
                 {getTimeOfDay()}
               </div>
             </div>
           </div>
 
           {/* UTC Display */}
-          <div>
-            <p className="text-sm text-muted-foreground mb-2">UTC Time</p>
-            <p className="text-4xl font-bold">
-              {formatTime(utcTime.hours, utcTime.minutes)}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Coordinated Universal Time
-            </p>
+          <div className="flex gap-8 overflow-x-auto">
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">UTC</p>
+              <p className="text-4xl font-bold">
+                {formatTime(utcTime.hours, utcTime.minutes)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Coordinated Universal Time
+              </p>
+            </div>
+            
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">UTC-5</p>
+              <p className="text-4xl font-bold">
+                {formatTime((utcTime.hours - 5 + 24) % 24, utcTime.minutes)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Eastern Time
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">UTC-8</p>
+              <p className="text-4xl font-bold">
+                {formatTime((utcTime.hours - 8 + 24) % 24, utcTime.minutes)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Pacific Time
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">UTC+1</p>
+              <p className="text-4xl font-bold">
+                {formatTime((utcTime.hours + 1) % 24, utcTime.minutes)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Central European
+              </p>
+            </div>
           </div>
         </div>
       </div>
