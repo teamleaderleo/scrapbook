@@ -2,6 +2,7 @@ import '@/app/globals.css';
 import { inter } from '@/components/ui/assets/fonts';
 import { Metadata } from 'next';
 import { ThemeProvider } from '@/components/theme-provider';
+import { Toaster } from "@/components/ui/sonner"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { DeferredScripts } from './deferred-scripts';
@@ -40,6 +41,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {children}
+            <Toaster />
             <Analytics />
             <SpeedInsights />
           </ThemeProvider>

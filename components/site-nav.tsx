@@ -1,11 +1,12 @@
+"use client";
+
 import Link from 'next/link';
-import { Button } from "@/components/ui/button";
-import HardcodedStickyNote from '@/components/hardcoded-sticky-note';
-// import { HeaderConnectionStatus } from '@/components/connection-status';
-import { Book, Box, Twitter, Github, Sparkles, Brain, FileText } from 'lucide-react';
+import { toast } from "sonner"
+import { Book, Box, Twitter, Sparkles, Brain, FileText } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { RedditIcon } from './icons/reddit-icon';
 import { GitHubIcon } from './icons/github-icon';
+import { DiscordIcon } from '@/components/icons/discord-icon';
 
 export default function SiteNav() {
   return (
@@ -76,6 +77,19 @@ export default function SiteNav() {
                 <GitHubIcon className="w-4 h-4" />
                 <span className="pointer-events-none">github</span>
               </Link>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText('teamleaderleo');
+                  toast.success('Discord username copied!', {
+                    description: 'teamleaderleo',
+                  });
+                }}
+                className="text-sm hover:text-indigo-500 transition-colors flex items-center gap-1 relative z-10 cursor-pointer"
+                title="Discord - Click to copy username"
+              >
+                <DiscordIcon className="w-4 h-4" />
+                <span>discord</span>
+              </button>
             </div>
           </div>
           <div className="w-1/3 flex justify-end items-center gap-3">
