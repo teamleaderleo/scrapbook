@@ -170,3 +170,77 @@ input[type='number']::-webkit-outer-spin-button {
   color: var(--shiki-dark);
   background-color: var(--shiki-dark-bg);
 }
+
+/* UTC Time Visualizer Slider Styles */
+.slider-daynight {
+  background: linear-gradient(90deg,
+    #1a1a3e 0%,
+    #1f1f4a 4.17%,
+    #2a2555 8.33%,
+    #3d2d66 12.5%,
+    #553a78 16.67%,
+    #6d4a82 20.83%,
+    #855e88 25%,
+    #a07384 29.17%,
+    #b8877d 33.33%,
+    #d09d76 37.5%,
+    #e8b56f 41.67%,
+    #f5c961 45.83%,
+    #ffd966 50%,
+    #f5c961 54.17%,
+    #e8b56f 58.33%,
+    #d09d76 62.5%,
+    #b8877d 66.67%,
+    #a07384 70.83%,
+    #855e88 75%,
+    #6d4a82 79.17%,
+    #553a78 83.33%,
+    #3d2d66 87.5%,
+    #2a2555 91.67%,
+    #1f1f4a 95.83%,
+    #1a1a3e 100%
+  ) !important;
+  background-size: 200% 100% !important;
+  background-position: 0% 50% !important;
+}
+
+.slider-daynight::-webkit-slider-thumb {
+  appearance: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.4);
+  transition: width 0.3s ease, height 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.slider-daynight:hover::-webkit-slider-thumb {
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+.slider-daynight::-moz-range-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.4);
+  transition: width 0.3s ease, height 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.slider-daynight:hover::-moz-range-thumb {
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+}
