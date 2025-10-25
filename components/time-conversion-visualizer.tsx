@@ -321,8 +321,8 @@ export default function UTCTimeVisualizer() {
           </div>
 
           {/* UTC Display */}
-          <div className="flex gap-8 overflow-x-auto">
-            <div>
+          <div className="flex gap-6 items-start">
+            <div className="min-w-[10.34rem]">
               <p className="text-sm text-muted-foreground mb-2">UTC</p>
               <p className="text-4xl font-bold">
                 {formatTime(utcTime.hours, utcTime.minutes)}
@@ -332,34 +332,36 @@ export default function UTCTimeVisualizer() {
               </p>
             </div>
             
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">UTC-5</p>
-              <p className="text-4xl font-bold">
-                {formatTime((utcTime.hours - 5 + 24) % 24, utcTime.minutes)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Eastern Time
-              </p>
-            </div>
+            <div className="flex gap-2">
+              <div className="min-w-[7.8rem]">
+                <p className="text-sm text-muted-foreground mb-2">UTC-5</p>
+                <p className="text-4xl font-bold">
+                  {formatTime((utcTime.hours - 5 + 24) % 24, utcTime.minutes)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Eastern Time
+                </p>
+              </div>
 
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">UTC-8</p>
-              <p className="text-4xl font-bold">
-                {formatTime((utcTime.hours - 8 + 24) % 24, utcTime.minutes)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Pacific Time
-              </p>
-            </div>
+              <div className="min-w-[7.8rem]">
+                <p className="text-sm text-muted-foreground mb-2">UTC-8</p>
+                <p className="text-4xl font-bold">
+                  {formatTime((utcTime.hours - 8 + 24) % 24, utcTime.minutes)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Pacific Time
+                </p>
+              </div>
 
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">UTC+1</p>
-              <p className="text-4xl font-bold">
-                {formatTime((utcTime.hours + 1) % 24, utcTime.minutes)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Central European
-              </p>
+              <div className="min-w-[7.7rem]">
+                <p className="text-sm text-muted-foreground mb-2">UTC+1</p>
+                <p className="text-4xl font-bold">
+                  {formatTime((utcTime.hours + 1) % 24, utcTime.minutes)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Central European
+                </p>
+              </div>
             </div>
           </div>
         </div>
