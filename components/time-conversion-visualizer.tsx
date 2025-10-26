@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import TimezoneSelector from './timezone-selector';
+import CurrentTimeDisplay from './current-time-display';
 
 export default function UTCTimeVisualizer() {
   const [localTime, setLocalTime] = useState(0);
@@ -263,18 +264,23 @@ export default function UTCTimeVisualizer() {
       <div className="w-full max-w-2xl px-4">
         <div className="space-y-8">
           {/* Header */}
-          <div>
-            <div className="mb-2">
-              <h1 className="text-3xl font-bold inline">Current time: </h1>
-              <button
-                onClick={jumpToCurrentTime}
-                className="text-3xl font-bold rounded-md bg-muted/50 hover:bg-muted transition-colors cursor-pointer align-baseline px-1.5"
-              >
-                {formatTime(Math.floor(currentTime / 60), currentTime % 60)}
-              </button>
-            </div>
-            <p className="text-sm text-muted-foreground">{userTimezone} ({utcOffset})</p>
-          </div>
+          <CurrentTimeDisplay onJumpToTime={(minutes) => {
+            setLocalTime(minutes);
+            const targetPos = (minutes / 1439) * 100;
+            if ((window as any).anime && sliderRef.current) {
+              (window as any).anime({
+                targets: gradientPosRef.current,
+                value: targetPos,
+                duration: 500,
+                easing: 'easeOutCubic',
+                update: () => {
+                  if (sliderRef.current) {
+                    sliderRef.current.style.backgroundPosition = `${gradientPosRef.current.value}% 50%`;
+                  }
+                }
+              });
+            }
+          }} />
 
           {/* Slider */}
           <div className="space-y-4">
