@@ -189,16 +189,16 @@ export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelec
                     onSelect={() => handleSelect(option.offset)}
                     className="flex justify-between items-center"
                   >
-                    <span>{option.label}</span>
                     <span className="flex items-center gap-1.5">
-                      <span className="text-xs text-muted-foreground">
-                        {formatOffset(adjustedOffset)}
-                      </span>
+                      <span>{option.label}</span>
                       {option.dst && (
                         <span className="text-[10px] px-1.5 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded font-semibold">
                           DST
                         </span>
                       )}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatOffset(adjustedOffset)}
                     </span>
                   </CommandItem>
                 );
