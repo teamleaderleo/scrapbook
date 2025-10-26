@@ -93,6 +93,19 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   // UX: em dash copy feedback
   const [copiedDash, setCopiedDash] = useState(false);
 
+  useEffect(() => {
+    // Reset to default when switching to add mode (and not duplicating)
+    if (mode === "add" && !duplicateId) {
+      lastChangedBy.current = "meta";
+      setModel(DEFAULT_MODEL);
+      setRawInput(JSON.stringify(DEFAULT_MODEL, null, 2));
+      const { content, code, ...metadata } = DEFAULT_MODEL;
+      setMetadataInput(JSON.stringify(metadata, null, 2));
+      setJsonError("");
+      setMetadataError("");
+    }
+  }, [mode, duplicateId]);
+
   // === Duplicate-from-item support (only in add mode) ========================
   useEffect(() => {
     if (mode !== "add" || !duplicateId) return;
