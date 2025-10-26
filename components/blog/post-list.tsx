@@ -4,14 +4,14 @@ import React from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { BlogPost, PostCategory, categories } from '@/app/lib/definitions/blog';
+import { BlogPost, categories } from '@/app/lib/definitions/blog';
 
 interface PostListProps {
   posts: BlogPost[];
   title: string;
 }
 
-const PostList = ({ posts, title }: PostListProps) => {
+export default function PostList({ posts, title }: PostListProps) {
   return (
     <Card className="h-full w-full">
       <CardHeader className="pb-3">
@@ -21,17 +21,19 @@ const PostList = ({ posts, title }: PostListProps) => {
         <ScrollArea className="h-full w-full">
           <div className="space-y-4 pr-4">
             {posts.map(post => (
-              <div key={post.id} className="border-b pb-2">
+              <div key={post.id} className="border-b border-border pb-2 last:border-0">
                 <Link 
                   href={`/blog/${post.slug}`}
-                  className="block hover:text-primary"
+                  className="block group"
                 >
-                  <h3 className="font-semibold text-sm">{post.title}</h3>
+                  <h3 className="font-semibold text-sm transition-colors group-hover:text-primary-foreground">
+                    {post.title}
+                  </h3>
                   <p className="text-xs text-muted-foreground">{post.date}</p>
                 </Link>
                 <Link
                   href={`/blog/category/${post.category}`}
-                  className="inline-block text-xs bg-secondary text-secondary-foreground rounded px-2 py-1 mt-1 hover:bg-secondary/80"
+                  className="inline-block text-xs bg-secondary text-secondary-foreground rounded px-2 py-1 mt-1 transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
                   {categories[post.category]}
                 </Link>
@@ -42,6 +44,4 @@ const PostList = ({ posts, title }: PostListProps) => {
       </CardContent>
     </Card>
   );
-};
-
-export default PostList;
+}
