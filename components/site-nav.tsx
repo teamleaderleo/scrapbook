@@ -21,11 +21,11 @@ export default function SiteNav() {
               <FileText size={14} />
               <span>resume</span>
             </Link>
-            <Link href="/space" className="text-sm hover:text-muted-foreground flex items-center gap-1">
+            <Link href="/space" className="text-sm hover:text-[hsl(238,45%,38%)] transition-colors flex items-center gap-1">
               <Brain size={14} />
               <span>space</span>
             </Link>
-            <Link href="/blog" className="text-sm hover:text-muted-foreground flex items-center gap-1">
+            <Link href="/blog" className="text-sm hover:text-[hsl(238,60%,85%)] transition-colors flex items-center gap-1">
               <Book size={14} />
               <span>blog</span>
             </Link>
