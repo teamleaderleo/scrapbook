@@ -40,10 +40,24 @@ export default function CurrentTimeDisplay({ onJumpToTime }: CurrentTimeDisplayP
     // Initial update
     updateTime();
 
-    // Update every minute
-    const interval = setInterval(updateTime, 60000);
+    // Calculate milliseconds until next minute
+    const now = new Date();
+    const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
 
-    return () => clearInterval(interval);
+    let interval: NodeJS.Timeout;
+
+    // Update at the start of the next minute
+    const initialTimeout = setTimeout(() => {
+      updateTime();
+      
+      // Then update every minute on the minute
+      interval = setInterval(updateTime, 60000);
+    }, msUntilNextMinute);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      if (interval) clearInterval(interval);
+    };
   }, [userTimezone]);
 
   const formatTime = (minutes: number) => {
