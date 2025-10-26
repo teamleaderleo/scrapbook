@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import { Suspense } from 'react';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from '@/components/space/app-sidebar';
 import { ItemsProvider } from '../lib/contexts/item-context';
@@ -7,7 +6,6 @@ import { createClient } from '@/utils/supabase/server';
 import { SearchCommand } from '@/components/space/search-command';
 import { MonacoEditorPanel } from '@/components/space/monaco-editor-panel';
 import { mapDatabaseItemsToItems } from '@/app/lib/utils/database';
-import { SpaceSkeleton } from "@/components/space/space-skeleton";
 
 export const metadata: Metadata = {
   title: 'Space',
@@ -48,47 +46,36 @@ async function getInitialData() {
   return { items: mapped, isAdmin, user, nowMs };
 }
 
-// Cached static shell
-async function StaticShell({ children }: { children: React.ReactNode }) {
-  "use cache";
-  
-  return (
-    <SidebarProvider>
-      <div className="min-h-screen bg-background text-foreground flex w-full">
-        {children}
-      </div>
-    </SidebarProvider>
-  );
-}
+// REMOVED: StaticShell with "use cache" - Next.js automatically caches layouts
+// REMOVED: DynamicData wrapper - inline the logic instead
+// REMOVED: Suspense boundary - causes skeleton flash on every navigation
 
-// Dynamic data fetching + sidebar (needs ItemsProvider)
-async function DynamicData({ children }: { children: React.ReactNode }) {
+// Now: Direct async layout that streams content
+// - First visit: Server renders with data, streams to client
+// - Return visits: Next.js serves cached HTML (instant, no skeleton)
+// - Stale data: ItemsProvider.reload() refreshes in background
+export default async function SpaceLayout({ children }: { children: React.ReactNode }) {
+  // Fetch data server-side (only on first render or cache miss)
   const { items, isAdmin, user, nowMs } = await getInitialData();
   
   return (
-    <ItemsProvider 
-      initialItems={items} 
-      initialIsAdmin={isAdmin} 
-      initialUser={user}
-      initialNowMs={nowMs}
-    >
-      <SearchCommand />
-      <AppSidebar />
-      <div className="flex flex-col flex-1">
-        {children}
-      </div>
-      <MonacoEditorPanel />
-    </ItemsProvider>
-  );
-}
-
-export default async function SpaceLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <StaticShell>
-      <Suspense fallback={<SpaceSkeleton />}>
-        <DynamicData>{children}</DynamicData>
-      </Suspense>
-
-    </StaticShell>
+    <SidebarProvider>
+      {/* ItemsProvider manages client-side state + refresh */}
+      <ItemsProvider 
+        initialItems={items} 
+        initialIsAdmin={isAdmin} 
+        initialUser={user}
+        initialNowMs={nowMs}
+      >
+        <div className="min-h-screen bg-background text-foreground flex w-full">
+          <SearchCommand />
+          <AppSidebar />
+          <div className="flex flex-col flex-1">
+            {children}
+          </div>
+          <MonacoEditorPanel />
+        </div>
+      </ItemsProvider>
+    </SidebarProvider>
   );
 }
