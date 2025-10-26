@@ -1,17 +1,16 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BlogPost, categories } from '@/app/lib/definitions/blog';
-import ReactMarkdown from 'react-markdown';
 
 interface FeaturedPostProps {
   post: BlogPost;
+  contentHtml: string; // Pre-rendered HTML instead of raw markdown
 }
 
-const FeaturedPost = ({ post }: FeaturedPostProps) => {
+export default function FeaturedPost({ post, contentHtml }: FeaturedPostProps) {
   return (
     <Card className="h-full w-full">
       <CardContent className="p-6 h-full">
@@ -29,16 +28,14 @@ const FeaturedPost = ({ post }: FeaturedPostProps) => {
                 {categories[post.category]}
               </Link>
             </div>
-            <div className="mdx-content w-full">
-              <ReactMarkdown className="prose prose-sm dark:prose-invert">
-                {post.content}
-              </ReactMarkdown>
-            </div>
+            {/* Render pre-built HTML instead of parsing markdown */}
+            <div 
+              className="prose prose-sm dark:prose-invert w-full"
+              dangerouslySetInnerHTML={{ __html: contentHtml }}
+            />
           </article>
         </ScrollArea>
       </CardContent>
     </Card>
   );
-};
-
-export default FeaturedPost;
+}

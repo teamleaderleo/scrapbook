@@ -1,9 +1,7 @@
-import React from 'react';
 import { getBlogPosts } from '../lib/blog-utils';
-import BlogLayout from '@/components/blog/blog-layout';
+import { BlogServerLayout } from '@/components/blog/blog-server-layout';
 
 export default async function Page() {
   const posts = await getBlogPosts();
-  
-  return <BlogLayout posts={posts} />;
+  return <BlogServerLayout posts={posts} />;
 }
