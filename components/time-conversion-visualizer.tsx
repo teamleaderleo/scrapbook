@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import TimezoneSelector from './timezone-selector';
 
 export default function UTCTimeVisualizer() {
   const [localTime, setLocalTime] = useState(0);
@@ -361,15 +362,10 @@ export default function UTCTimeVisualizer() {
                 </p>
               </div>
 
-              <div className="min-w-[7.7rem]">
-                <p className="text-sm text-muted-foreground mb-2">UTC+1</p>
-                <p className="text-4xl font-bold">
-                  {formatTime((utcTime.hours + 1) % 24, utcTime.minutes)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Central European
-                </p>
-              </div>
+              <TimezoneSelector 
+                utcHours={utcTime.hours} 
+                utcMinutes={utcTime.minutes} 
+              />
             </div>
           </div>
         </div>
