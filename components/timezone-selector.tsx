@@ -82,7 +82,7 @@ export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelec
             <p className="text-sm text-muted-foreground mb-2">
               {selectedOffset !== null ? formatOffset(selectedOffset) : 'UTC + ?'}
             </p>
-            <p className="text-4xl font-bold">
+            <p className="text-4xl font-med">
               {displayTime ? formatTime(displayTime.hours, displayTime.minutes) : '--:--'}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
