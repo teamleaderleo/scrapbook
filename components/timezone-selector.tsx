@@ -157,10 +157,10 @@ export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelec
           <button
             className="w-full text-left hover:bg-muted/50 rounded-md transition-colors p-2 -m-2"
           >
-            <p className="text-sm text-muted-foreground mb-2 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground mb-2 flex items-center justify-between relative">
               <span>{displayOffset !== null ? formatOffset(displayOffset) : 'UTC + ?'}</span>
               {selectedOption?.dst && (
-                <span className="text-[9px] px-1 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded font-semibold">
+                <span className="absolute right-0 text-[9px] px-1 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded font-semibold">
                   DST
                 </span>
               )}
