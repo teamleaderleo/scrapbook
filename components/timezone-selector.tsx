@@ -177,7 +177,7 @@ export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelec
       <PopoverContent className="w-64 p-0" align="start" side="top" sideOffset={8}>
         <Command>
           <CommandInput placeholder="Search timezone..." />
-          <CommandList className="max-h-80 overflow-y-auto scroll-smooth">
+          <CommandList className="max-h-40 overflow-y-auto scroll-smooth">
             <CommandEmpty>No timezone found.</CommandEmpty>
             <CommandGroup>
               {timezoneOptions.map((option) => {
