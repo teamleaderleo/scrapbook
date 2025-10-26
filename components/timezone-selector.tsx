@@ -91,13 +91,15 @@ export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelec
           <button
             className="w-full text-left hover:bg-muted/50 rounded-md transition-colors p-2 -m-2"
           >
-            <p className="text-sm text-muted-foreground mb-2 flex items-center justify-between relative">
-              <span>{displayOffset !== null ? formatOffset(displayOffset) : 'UTC + ?'}</span>
-              {selectedOption?.dst && (
-                <span className="absolute right-0 text-[9px] px-1 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded font-semibold">
-                  DST
-                </span>
-              )}
+            <p className="text-sm text-muted-foreground mb-2">
+              <span className="relative inline-block">
+                {displayOffset !== null ? formatOffset(displayOffset) : 'UTC + ?'}
+                {selectedOption?.dst && (
+                  <span className="absolute left-full ml-1.5 top-1/2 -translate-y-1/2 text-[9px] px-1 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded font-semibold whitespace-nowrap">
+                    DST
+                  </span>
+                )}
+              </span>
             </p>
             <p className="text-4xl font-bold">
               {displayTime ? formatTime(displayTime.hours, displayTime.minutes) : '--:--'}
