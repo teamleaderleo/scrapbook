@@ -138,9 +138,12 @@ export default function UTCTimeVisualizer() {
   };
 
   const formatTime12Hour = (hours: number, minutes: number) => {
-    const period = hours >= 12 ? 'PM' : 'AM';
     const hours12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-    return `${hours12}:${String(minutes).padStart(2, '0')} ${period}`;
+    return `${hours12}:${String(minutes).padStart(2, '0')}`;
+  };
+
+  const getPeriod = (hours: number) => {
+    return hours >= 12 ? 'PM' : 'AM';
   };
 
   const jumpToCurrentTime = () => {
@@ -314,8 +317,13 @@ export default function UTCTimeVisualizer() {
                   {formatTime12Hour(localHours, localMinutes)}
                 </div>
               </div>
-              <div className="text-lg text-muted-foreground mt-1">
-                {getTimeOfDay()}
+              <div className="flex items-baseline gap-3 mt-1">
+                <div className="text-lg text-muted-foreground min-w-[11rem]">
+                  {getTimeOfDay()}
+                </div>
+                <div className="text-lg text-muted-foreground min-w-[1rem]">
+                  {getPeriod(localHours)}
+                </div>
               </div>
             </div>
           </div>
