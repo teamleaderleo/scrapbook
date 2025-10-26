@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { isDSTActive } from '@/app/lib/dst-utils';
 
 interface TimezoneSelectorProps {
   utcHours: number;
@@ -10,73 +11,6 @@ interface TimezoneSelectorProps {
 export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelectorProps) {
   const [selectedOffset, setSelectedOffset] = useState<number | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-
-  // Calculate DST transition dates
-  const getDSTDates = (year: number, region: string) => {
-    const getNthWeekdayOfMonth = (year: number, month: number, weekday: number, n: number) => {
-      const firstDay = new Date(year, month, 1);
-      const firstWeekday = firstDay.getDay();
-      const offset = (weekday - firstWeekday + 7) % 7;
-      return new Date(year, month, 1 + offset + (n - 1) * 7);
-    };
-
-    const getLastWeekdayOfMonth = (year: number, month: number, weekday: number) => {
-      const lastDay = new Date(year, month + 1, 0);
-      const lastWeekday = lastDay.getDay();
-      const offset = (lastWeekday - weekday + 7) % 7;
-      return new Date(year, month, lastDay.getDate() - offset);
-    };
-
-    if (region === 'us') {
-      // 2nd Sunday in March, 1st Sunday in November
-      return {
-        start: getNthWeekdayOfMonth(year, 2, 0, 2),
-        end: getNthWeekdayOfMonth(year, 10, 0, 1)
-      };
-    } else if (region === 'eu') {
-      // Last Sunday in March, Last Sunday in October
-      return {
-        start: getLastWeekdayOfMonth(year, 2, 0),
-        end: getLastWeekdayOfMonth(year, 9, 0)
-      };
-    } else if (region === 'aus') {
-      // 1st Sunday in October, 1st Sunday in April (next year)
-      return {
-        start: getNthWeekdayOfMonth(year, 9, 0, 1),
-        end: getNthWeekdayOfMonth(year + 1, 3, 0, 1)
-      };
-    } else if (region === 'nz') {
-      // Last Sunday in September, 1st Sunday in April (next year)
-      return {
-        start: getLastWeekdayOfMonth(year, 8, 0),
-        end: getNthWeekdayOfMonth(year + 1, 3, 0, 1)
-      };
-    }
-    return null;
-  };
-
-  // Check if DST is currently active
-  const isDSTActive = (region: string) => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const dates = getDSTDates(year, region);
-    
-    if (!dates) return false;
-
-    // For southern hemisphere, handle year wrap
-    if (region === 'aus' || region === 'nz') {
-      // If we're before April, check against previous year's start date
-      if (now.getMonth() < 4) {
-        const prevYearDates = getDSTDates(year - 1, region);
-        return prevYearDates && now >= prevYearDates.start && now < dates.end;
-      }
-      // Otherwise check current year
-      return now >= dates.start || now < dates.end;
-    }
-
-    // Northern hemisphere: simple range check
-    return now >= dates.start && now < dates.end;
-  };
 
   // Common UTC offsets with DST information
   const timezoneOptions = [

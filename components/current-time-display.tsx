@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { detectCurrentTimezoneDST } from '@/app/lib/dst-utils';
 
 interface CurrentTimeDisplayProps {
   onJumpToTime: (minutes: number) => void;
@@ -30,20 +31,9 @@ export default function CurrentTimeDisplay({ onJumpToTime }: CurrentTimeDisplayP
           : `UTC${sign}${offsetHours}:${String(offsetMins).padStart(2, '0')}`;
         setUtcOffset(offsetStr);
         
-        // Detect DST
-        const jan = new Date(now.getFullYear(), 0, 1);
-        const jul = new Date(now.getFullYear(), 6, 1);
-        const janOffset = -jan.getTimezoneOffset();
-        const julOffset = -jul.getTimezoneOffset();
-        
-        // If offsets differ, DST is observed
-        const observesDST = janOffset !== julOffset;
-        if (observesDST) {
-          // DST is active if current offset matches the larger offset (summer time)
-          const currentOffset = offsetMinutes;
-          const dstOffset = Math.max(janOffset, julOffset);
-          setIsDST(currentOffset === dstOffset);
-        }
+        // Detect DST using shared utility
+        const dstInfo = detectCurrentTimezoneDST();
+        setIsDST(dstInfo.isDSTActive);
       }
     };
 
