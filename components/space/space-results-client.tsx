@@ -132,7 +132,7 @@ function Row({
               <>
                 <Button asChild variant="outline" size="sm">
                   <Link
-                    href={`/space/edit/${it.id}`}
+                    href={`/space/edit/${it.slug}`}
                     prefetch={true}
                     onClick={(e) => e.stopPropagation()}
                   >
@@ -141,7 +141,7 @@ function Row({
                 </Button>
                 <Button asChild variant="outline" size="sm">
                   <Link
-                    href={`/space/add?duplicate=${it.id}`}
+                    href={`/space/add?duplicate=${it.slug}`}
                     prefetch={true}
                     onClick={(e) => e.stopPropagation()}
                   >
@@ -152,7 +152,7 @@ function Row({
             )}
             <Button asChild variant="outline" size="sm">
               <Link
-                href={`/space/review?tags=${tagsParam}&item=${it.id}`}
+                href={`/space/review?tags=${tagsParam}&item=${it.slug}`}
                 prefetch={true}
                 onClick={(e) => e.stopPropagation()}
               >

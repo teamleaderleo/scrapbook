@@ -9,13 +9,13 @@ import { use } from "react";
 export default function EditItemPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { id } = use(params);
+  const { slug } = use(params);
   const router = useRouter();
   const { items } = useItems();
   
-  const item = items.find(it => it.id === id);
+  const item = items.find(it => it.slug === slug);
 
   if (!item) {
     return (
