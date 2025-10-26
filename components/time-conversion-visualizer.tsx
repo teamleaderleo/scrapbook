@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import TimezoneSelector from './timezone-selector';
 import CurrentTimeDisplay from './current-time-display';
+import { isDSTActive } from '@/app/lib/dst-utils';
 
 export default function UTCTimeVisualizer() {
   const [localTime, setLocalTime] = useState(0);
@@ -12,6 +13,9 @@ export default function UTCTimeVisualizer() {
   const [currentTime, setCurrentTime] = useState(0);
   const sliderRef = useRef<HTMLInputElement>(null);
   const gradientPosRef = useRef({ value: 0 });
+
+  // Check if DST is active for US timezones
+  const useDST = isDSTActive('us');
 
   useEffect(() => {
     setMounted(true);
@@ -66,6 +70,9 @@ export default function UTCTimeVisualizer() {
   const utcTime = calculateUTC();
   const localHours = Math.floor(localTime / 60);
   const localMinutes = localTime % 60;
+  // Calculate adjusted offsets for DST
+  const easternOffset = useDST ? -4 : -5;
+  const pacificOffset = useDST ? -7 : -8;
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = parseInt(e.target.value);
@@ -349,9 +356,18 @@ export default function UTCTimeVisualizer() {
             
             <div className="flex gap-2">
               <div className="min-w-[7.8rem]">
-                <p className="text-sm text-muted-foreground mb-2">UTC-5</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  <span className="relative inline-block">
+                    UTC{easternOffset >= 0 ? '+' : ''}{easternOffset}
+                    {useDST && (
+                      <span className="absolute left-full ml-1.5 top-1/2 -translate-y-1/2 text-[9px] px-1 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded font-semibold whitespace-nowrap">
+                        DST
+                      </span>
+                    )}
+                  </span>
+                </p>
                 <p className="text-4xl font-bold">
-                  {formatTime((utcTime.hours - 5 + 24) % 24, utcTime.minutes)}
+                  {formatTime((utcTime.hours + easternOffset + 24) % 24, utcTime.minutes)}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Eastern Time
@@ -359,9 +375,18 @@ export default function UTCTimeVisualizer() {
               </div>
 
               <div className="min-w-[7.8rem]">
-                <p className="text-sm text-muted-foreground mb-2">UTC-8</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  <span className="relative inline-block">
+                    UTC{pacificOffset >= 0 ? '+' : ''}{pacificOffset}
+                    {useDST && (
+                      <span className="absolute left-full ml-1.5 top-1/2 -translate-y-1/2 text-[9px] px-1 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded font-semibold whitespace-nowrap">
+                        DST
+                      </span>
+                    )}
+                  </span>
+                </p>
                 <p className="text-4xl font-bold">
-                  {formatTime((utcTime.hours - 8 + 24) % 24, utcTime.minutes)}
+                  {formatTime((utcTime.hours + pacificOffset + 24) % 24, utcTime.minutes)}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Pacific Time
