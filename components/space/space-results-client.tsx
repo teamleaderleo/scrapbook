@@ -139,7 +139,7 @@ function Row({
                     edit
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="sm">
+                {/* <Button asChild variant="outline" size="sm">
                   <Link
                     href={`/space/add?duplicate=${it.slug}`}
                     prefetch={true}
@@ -147,7 +147,7 @@ function Row({
                   >
                     duplicate
                   </Link>
-                </Button>
+                </Button> */}
               </>
             )}
             <Button asChild variant="outline" size="sm">
