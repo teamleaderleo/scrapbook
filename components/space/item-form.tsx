@@ -12,7 +12,7 @@ import { MetadataJsonEditor } from "@/components/space/metadata-json-editor";
 import { ItemPreview } from "@/components/space/item-preview";
 import { SpaceHeader } from "@/components/space/space-header";
 import { addItemAction, updateItemAction } from "@/app/space/actions";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Plus, Trash2 } from "lucide-react";
 
 // Singleton/Canonical shape for the item with only editable fields
 type Model = {
@@ -21,12 +21,16 @@ type Model = {
   url: string | null;
   tags: string[];
   category: string | null;
-  content: string;
-  code: string | null;
+  defaultIndex: number;
+  versions: Array<{
+    label: string;
+    content: string;
+    code: string | null;
+  }>;
 };
 
 interface ItemFormProps {
-  item?: any; // if provided, we're in edit mode; otherwise add mode
+  item?: any;
   mode: "add" | "edit";
 }
 
@@ -36,8 +40,14 @@ const DEFAULT_MODEL: Model = {
   url: "https://leetcode.com/problems/...",
   tags: ["type:leetcode", "company:google", "topic:array", "difficulty:easy"],
   category: "leetcode",
-  content: "# Approach\n\nYour writeup here",
-  code: "def solution():\n  # code\n",
+  defaultIndex: 0,
+  versions: [
+    {
+      label: "v1",
+      content: "# Approach\n\nYour writeup here",
+      code: "def solution():\n  # code\n",
+    },
+  ],
 };
 
 export function ItemForm({ item, mode }: ItemFormProps) {
@@ -50,7 +60,9 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   // Store the database ID separately (only needed for updates)
   const itemId = useRef<string | null>(mode === "edit" && item ? item.id : null);
 
-  // === Canonical model (single source of truth) ==============================
+  // Which version we're currently editing
+  const [activeVersionIdx, setActiveVersionIdx] = useState(0);
+
   const [model, setModel] = useState<Model>(() => {
     if (mode === "edit" && item) {
       return {
@@ -59,8 +71,8 @@ export function ItemForm({ item, mode }: ItemFormProps) {
         url: item.url ?? null,
         tags: item.tags ?? [],
         category: item.category ?? null,
-        content: item.content ?? "",
-        code: item.code ?? null,
+        defaultIndex: item.defaultIndex ?? 0,
+        versions: item.versions ?? [{ label: "v1", content: "", code: null }],
       };
     }
     return DEFAULT_MODEL;
@@ -72,7 +84,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
 
   // === Metadata JSON text (excludes content and code) ========================
   const [metadataInput, setMetadataInput] = useState(() => {
-    const { content, code, ...metadata } = model;
+    const { versions, ...metadata } = model;
     return JSON.stringify(metadata, null, 2);
   });
   const [metadataError, setMetadataError] = useState<string>("");
@@ -99,10 +111,11 @@ export function ItemForm({ item, mode }: ItemFormProps) {
       lastChangedBy.current = "meta";
       setModel(DEFAULT_MODEL);
       setRawInput(JSON.stringify(DEFAULT_MODEL, null, 2));
-      const { content, code, ...metadata } = DEFAULT_MODEL;
+      const { versions, ...metadata } = DEFAULT_MODEL;
       setMetadataInput(JSON.stringify(metadata, null, 2));
       setJsonError("");
       setMetadataError("");
+      setActiveVersionIdx(0);
     }
   }, [mode, duplicateId]);
 
@@ -118,16 +131,17 @@ export function ItemForm({ item, mode }: ItemFormProps) {
           url: data.url ?? null,
           tags: data.tags ?? [],
           category: data.category ?? null,
-          content: data.content ?? "",
-          code: data.code ?? null,
+          defaultIndex: data.default_index ?? 0,
+          versions: data.versions ?? [{ label: "v1", content: "", code: null }],
         };
         lastChangedBy.current = "meta";
         setModel(template);
         setRawInput(JSON.stringify(template, null, 2));
-        const { content, code, ...metadata } = template;
+        const { versions, ...metadata } = template;
         setMetadataInput(JSON.stringify(metadata, null, 2));
         setJsonError("");
         setMetadataError("");
+        setActiveVersionIdx(0);
       }
     })();
   }, [mode, duplicateId, supabase]);
@@ -135,22 +149,18 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   // === JSON onChange: instant-when-valid, debounce-only-when-invalid =========
   const handleRawChange = (val: string) => {
     setRawInput(val);
-
-    if (!isEditingRaw) {
-      return;
-    }
+    if (!isEditingRaw) return;
 
     try {
       const parsed = JSON.parse(val);
-
       const next: Model = {
         slug: parsed.slug ?? model.slug,
         title: parsed.title ?? model.title,
         url: parsed.url ?? model.url ?? null,
         tags: parsed.tags ?? model.tags ?? [],
         category: parsed.category ?? model.category ?? null,
-        content: parsed.content ?? model.content ?? "",
-        code: parsed.code ?? model.code ?? null,
+        defaultIndex: parsed.defaultIndex ?? model.defaultIndex ?? 0,
+        versions: parsed.versions ?? model.versions ?? [],
       };
 
       if (errorTimer.current) {
@@ -160,17 +170,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
       setJsonError("");
 
       lastChangedBy.current = "json";
-      setModel((prev) => {
-        const same =
-          prev.slug === next.slug &&
-          prev.title === next.title &&
-          prev.url === next.url &&
-          JSON.stringify(prev.tags) === JSON.stringify(next.tags) &&
-          prev.category === next.category &&
-          prev.content === next.content &&
-          prev.code === next.code;
-        return same ? prev : next;
-      });
+      setModel(next);
     } catch {
       if (errorTimer.current) clearTimeout(errorTimer.current);
       errorTimer.current = setTimeout(() => {
@@ -182,10 +182,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   // === Metadata onChange: instant-when-valid, debounce-only-when-invalid =====
   const handleMetadataChange = (val: string) => {
     setMetadataInput(val);
-
-    if (!isEditingMetadata) {
-      return;
-    }
+    if (!isEditingMetadata) return;
 
     try {
       const parsed = JSON.parse(val);
@@ -204,6 +201,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
         url: parsed.url ?? prev.url ?? null,
         tags: parsed.tags ?? prev.tags ?? [],
         category: parsed.category ?? prev.category ?? null,
+        defaultIndex: parsed.defaultIndex ?? prev.defaultIndex ?? 0,
       }));
     } catch {
       if (metadataErrorTimer.current) clearTimeout(metadataErrorTimer.current);
@@ -232,6 +230,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
         url: parsed.url ?? prev.url ?? null,
         tags: parsed.tags ?? prev.tags ?? [],
         category: parsed.category ?? prev.category ?? null,
+        defaultIndex: parsed.defaultIndex ?? prev.defaultIndex ?? 0,
       }));
     } catch {
       if (metadataErrorTimer.current) clearTimeout(metadataErrorTimer.current);
@@ -256,7 +255,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   useEffect(() => {
     if (isEditingMetadata) return;
     if (lastChangedBy.current !== "meta") {
-      const { content, code, ...metadata } = model;
+      const { versions, ...metadata } = model;
       setMetadataInput(JSON.stringify(metadata, null, 2));
       setMetadataError("");
     }
@@ -271,16 +270,58 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   // === Markdown editor change ================================================
   const onMarkdownChange = (val: string) => {
     lastChangedBy.current = "markdown";
-    setModel((m) => ({ ...m, content: val }));
+    setModel((m) => ({
+      ...m,
+      versions: m.versions.map((v, i) =>
+        i === activeVersionIdx ? { ...v, content: val } : v
+      ),
+    }));
   };
 
   // === Code editor change =====================================================
   const onCodeChange = (val: string) => {
     lastChangedBy.current = "code";
-    setModel((m) => ({ ...m, code: val }));
+    setModel((m) => ({
+      ...m,
+      versions: m.versions.map((v, i) =>
+        i === activeVersionIdx ? { ...v, code: val } : v
+      ),
+    }));
   };
 
   // === Save ==================================================================
+
+  const addVersion = () => {
+    setModel((m) => ({
+      ...m,
+      versions: [
+        ...m.versions,
+        {
+          label: `v${m.versions.length + 1}`,
+          content: "",
+          code: null,
+        },
+      ],
+    }));
+    setActiveVersionIdx(model.versions.length);
+  };
+
+  const deleteVersion = (idx: number) => {
+    if (model.versions.length === 1) return; // Don't delete last version
+    setModel((m) => ({
+      ...m,
+      versions: m.versions.filter((_, i) => i !== idx),
+      defaultIndex: m.defaultIndex >= idx && m.defaultIndex > 0 ? m.defaultIndex - 1 : m.defaultIndex,
+    }));
+    if (activeVersionIdx >= idx && activeVersionIdx > 0) {
+      setActiveVersionIdx(activeVersionIdx - 1);
+    }
+  };
+
+  const setAsDefault = (idx: number) => {
+    setModel((m) => ({ ...m, defaultIndex: idx }));
+  };
+
   async function handleSave() {
     try {
       if (mode === "add") {
@@ -290,8 +331,8 @@ export function ItemForm({ item, mode }: ItemFormProps) {
           url: model.url,
           tags: model.tags,
           category: model.category ?? "general",
-          content: model.content,
-          code: model.code,
+          defaultIndex: model.defaultIndex,
+          versions: model.versions,
         });
       } else {
         if (!itemId.current) throw new Error("No item ID for update");
@@ -301,8 +342,8 @@ export function ItemForm({ item, mode }: ItemFormProps) {
           url: model.url,
           tags: model.tags,
           category: model.category ?? "general",
-          content: model.content,
-          code: model.code,
+          defaultIndex: model.defaultIndex,
+          versions: model.versions,
         });
       }
 
@@ -324,6 +365,8 @@ export function ItemForm({ item, mode }: ItemFormProps) {
     setTimeout(() => setCopiedDash(false), 1500);
   };
 
+  const activeVersion = model.versions[activeVersionIdx];
+
   return (
     <div className="min-h-screen bg-background">
       <SpaceHeader
@@ -336,9 +379,51 @@ export function ItemForm({ item, mode }: ItemFormProps) {
       />
 
       <div className="p-6 w-full">
+        {/* Version tabs */}
+        <div className="flex items-center gap-2 mb-4">
+          {model.versions.map((v, i) => (
+            <div key={i} className="flex items-center gap-1">
+              <button
+                onClick={() => setActiveVersionIdx(i)}
+                className={`px-3 py-1.5 rounded border transition-colors ${
+                  i === activeVersionIdx
+                    ? 'bg-accent text-accent-foreground border-accent'
+                    : 'border-border hover:bg-muted'
+                }`}
+              >
+                {v.label}
+                {i === model.defaultIndex && <span className="ml-1 text-xs">★</span>}
+              </button>
+              {model.versions.length > 1 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0"
+                  onClick={() => deleteVersion(i)}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              )}
+              {i !== model.defaultIndex && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={() => setAsDefault(i)}
+                >
+                  Set default
+                </Button>
+              )}
+            </div>
+          ))}
+          <Button variant="outline" size="sm" onClick={addVersion}>
+            <Plus className="h-3 w-3 mr-1" /> Add version
+          </Button>
+        </div>
+
         {/* Top Row: Editors */}
         <div className="grid grid-cols-2 gap-4 mb-4">
-          {/* Left: Title + Content (Markdown) */}
+          {/* Left: Title + Content */}
           <div className="flex flex-col space-y-4">
             {/* Title Input + Em dash button */}
             <div className="flex items-center gap-2">
@@ -368,12 +453,12 @@ export function ItemForm({ item, mode }: ItemFormProps) {
 
             {/* Markdown Editor */}
             <div className="flex-1 flex flex-col">
-              <MarkdownEditor value={model.content} onChange={onMarkdownChange} />
+              <MarkdownEditor value={activeVersion.content} onChange={onMarkdownChange} />
             </div>
           </div>
 
           {/* Right: Code editor */}
-          <CodeEditor value={model.code ?? ""} onChange={onCodeChange} />
+          <CodeEditor value={activeVersion.code ?? ""} onChange={onCodeChange} />
         </div>
 
         {/* Middle Row: Metadata & Preview */}
@@ -401,12 +486,12 @@ export function ItemForm({ item, mode }: ItemFormProps) {
               tags: model.tags,
               category: model.category ?? "general",
             }}
-            content={model.content}
-            code={model.code ?? ""}
+            content={activeVersion.content}
+            code={activeVersion.code ?? ""}
           />
         </div>
 
-        {/* Bottom Row: Raw (full width) */}
+        {/* Bottom Row: Raw */}
         <div>
           <RawJsonEditor
             value={rawInput}

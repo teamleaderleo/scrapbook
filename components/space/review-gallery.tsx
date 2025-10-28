@@ -28,6 +28,7 @@ export function ReviewGallery() {
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showContent, setShowContent] = useState(true);
+  const [activeIdx, setActiveIdx] = useState(0);
 
   const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
   
@@ -40,6 +41,14 @@ export function ReviewGallery() {
   }, [allItems, mutations, q, nowMs]);
 
   const current = items[currentIndex];
+  const active = current?.versions[activeIdx];
+
+  // Reset active version when switching items
+  useEffect(() => {
+    if (current) {
+      setActiveIdx(current.defaultIndex);
+    }
+  }, [currentIndex, current?.id]);
 
   // Jump to the specified item on load
   useEffect(() => {
@@ -53,9 +62,6 @@ export function ReviewGallery() {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      const isMod = e.metaKey || e.ctrlKey;
-
-      // Check if typing in input/textarea/editor
       const target = e.target as HTMLElement | null;
       const tag = target?.tagName?.toLowerCase();
       const role = target?.getAttribute?.("role");
@@ -67,7 +73,7 @@ export function ReviewGallery() {
 
       if (isTyping) return;
 
-      // Ignore if any modifier keys are pressed (Ctrl, Cmd, Alt, Shift)
+      // Ignore if any modifier keys are pressed
       if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) {
         return;
       }
@@ -159,21 +165,40 @@ export function ReviewGallery() {
         {/* Title */}
         <h1 className="text-2xl font-bold mb-4 text-foreground">{current.title}</h1>
 
+        {/* Version tabs */}
+        {current.versions.length > 1 && (
+          <div className="flex gap-2 mb-4 text-sm">
+            {current.versions.map((v, i) => (
+              <button
+                key={i}
+                onMouseEnter={() => setActiveIdx(i)}
+                className={`px-3 py-1.5 rounded border transition-colors ${
+                  i === activeIdx
+                    ? 'bg-accent text-accent-foreground border-accent'
+                    : 'border-border hover:bg-muted'
+                }`}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Content */}
-        {showContent && (
+        {showContent && active && (
           <div className="flex-1 flex gap-4 overflow-hidden">
             {/* Writeup */}
             <div className="flex-1 overflow-auto rounded p-4 border border-border dark:border-sidebar-border bg-white dark:bg-sidebar">
               <div className="prose prose-sm dark:prose-invert max-w-none">
                 <MarkdownContent 
-                  html={current.contentHtml}
+                  html={active.contentHtml}
                   className="prose prose-sm dark:prose-invert max-w-none"
                 />
               </div>
             </div>
 
             {/* Code */}
-            {current.code && <CodeDisplay code={current.code} codeHtml={current.codeHtml} />}
+            {active.code && <CodeDisplay code={active.code} codeHtml={active.codeHtml} />}
           </div>
         )}
 

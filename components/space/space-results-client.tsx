@@ -96,6 +96,9 @@ function Row({
   onToggle: () => void;
   onHoverChange: (hovering: boolean) => void;
 }) {
+  const [activeIdx, setActiveIdx] = useState(it.defaultIndex);
+  const active = it.versions[activeIdx];
+  
   const displayTags = it.tags.map((t) => (t.includes(":") ? t.split(":")[1] : t));
   const sp = useSearchParams();
   const tagsParam = sp.get("tags") ?? "";
@@ -191,6 +194,25 @@ function Row({
       {/* Expanded content */}
       {expanded && (
         <div className="border-t border-border p-3">
+          {/* Version tabs */}
+          {it.versions.length > 1 && (
+            <div className="flex gap-2 mb-3 text-xs">
+              {it.versions.map((v, i) => (
+                <button
+                  key={i}
+                  onMouseEnter={() => setActiveIdx(i)}
+                  className={`px-2 py-1 rounded border transition-colors ${
+                    i === activeIdx
+                      ? 'bg-accent text-accent-foreground border-accent'
+                      : 'border-border hover:bg-muted'
+                  }`}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="flex gap-3">
             {/* Writeup */}
             <div className="flex-1 min-w-0">
@@ -200,14 +222,14 @@ function Row({
                 border border-border dark:border-sidebar-border"
               >
                 <MarkdownContent
-                  html={it.contentHtml}
+                  html={active.contentHtml}
                   className="prose prose-sm dark:prose-invert max-w-none"
                 />
               </div>
             </div>
 
             {/* Code */}
-            {it.code && <CodeDisplay code={it.code} codeHtml={it.codeHtml} />}
+            {active.code && <CodeDisplay code={active.code} codeHtml={active.codeHtml} />}
           </div>
         </div>
       )}

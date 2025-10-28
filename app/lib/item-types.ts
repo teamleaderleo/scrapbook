@@ -7,11 +7,14 @@ export type Item = {
   slug: string;  // User-defined text identifier (not nullable)
   url: string | null;
   
-  content: string;
-  contentHtml: string;
-  contentType: 'markdown' | 'html' | 'plaintext';
-  code?: string | null;
-  codeHtml: string;
+  defaultIndex: number;
+  versions: Array<{
+    label: string;
+    content: string;
+    contentHtml: string;
+    code: string | null;
+    codeHtml: string;
+  }>;
   
   tags: string[];  // ['company:google', 'topic:dp', 'difficulty:hard', 'type:leetcode']
   category: string;  // 'leetcode' | 'article' | 'system-design' | etc

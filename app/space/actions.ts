@@ -10,8 +10,12 @@ export async function addItemAction(payload: {
   url?: string | null;
   tags?: string[];
   category?: string | null;
-  content?: string;
-  code?: string | null;
+  defaultIndex?: number;
+  versions: Array<{
+    label: string;
+    content: string;
+    code: string | null;
+  }>;
   score?: number | null;
 }) {
   const supabase = await createClient();
@@ -20,23 +24,26 @@ export async function addItemAction(payload: {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Parse ONCE when saving
-  const contentHtml = await parseMarkdown(payload.content ?? '');
-  const codeHtml = await highlightCode(payload.code ?? null, 'python');
+  // Parse all versions
+  const parsedVersions = await Promise.all(
+    payload.versions.map(async (v) => ({
+      label: v.label,
+      content: v.content,
+      content_html: await parseMarkdown(v.content),
+      code: v.code,
+      code_html: await highlightCode(v.code ?? null, 'python'),
+    }))
+  );
 
-  // Don't specify id; let Supabase generate it with gen_random_uuid()
   const { error } = await supabase.from('items').insert({
-    slug: payload.slug,  // User-provided slug
+    slug: payload.slug,
     user_id: user?.id ?? null,
     title: payload.title,
     url: payload.url ?? null,
     tags: payload.tags ?? [],
     category: payload.category ?? 'general',
-    content: payload.content ?? '',
-    content_html: contentHtml,
-    code: payload.code ?? null,
-    code_html: codeHtml,
-    content_type: 'markdown',
+    default_index: payload.defaultIndex ?? 0,
+    versions: parsedVersions,
     score: payload.score ?? null,
   });
 
@@ -46,25 +53,47 @@ export async function addItemAction(payload: {
   revalidatePath('/space');
 }
 
-export async function updateItemAction(id: string, updates: any) {
+export async function updateItemAction(id: string, updates: {
+  slug?: string;
+  title?: string;
+  url?: string | null;
+  tags?: string[];
+  category?: string | null;
+  defaultIndex?: number;
+  versions?: Array<{
+    label: string;
+    content: string;
+    code: string | null;
+  }>;
+  score?: number | null;
+}) {
   const supabase = await createClient();
 
-  // Parse whenever content/code changes
-  const contentHtml = updates.content !== undefined 
-    ? await parseMarkdown(updates.content ?? '')
-    : undefined;
-  
-  const codeHtml = updates.code !== undefined
-    ? await highlightCode(updates.code ?? null, 'python')
+  // Parse versions if they're being updated
+  const parsedVersions = updates.versions
+    ? await Promise.all(
+        updates.versions.map(async (v) => ({
+          label: v.label,
+          content: v.content,
+          content_html: await parseMarkdown(v.content),
+          code: v.code,
+          code_html: await highlightCode(v.code ?? null, 'python'),
+        }))
+      )
     : undefined;
 
   const { error } = await supabase
     .from('items')
-    .update({ 
-      ...updates, 
-      ...(contentHtml !== undefined && { content_html: contentHtml }),
-      ...(codeHtml !== undefined && { code_html: codeHtml }),
-      updated_at: new Date().toISOString() 
+    .update({
+      ...(updates.slug !== undefined && { slug: updates.slug }),
+      ...(updates.title !== undefined && { title: updates.title }),
+      ...(updates.url !== undefined && { url: updates.url }),
+      ...(updates.tags !== undefined && { tags: updates.tags }),
+      ...(updates.category !== undefined && { category: updates.category }),
+      ...(updates.defaultIndex !== undefined && { default_index: updates.defaultIndex }),
+      ...(parsedVersions && { versions: parsedVersions }),
+      ...(updates.score !== undefined && { score: updates.score }),
+      updated_at: new Date().toISOString(),
     })
     .eq('id', id);
 

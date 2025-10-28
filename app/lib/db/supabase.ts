@@ -13,11 +13,14 @@ export type DbItem = {
   title: string;
   slug: string;  // User-defined text identifier
   url: string | null;
-  content: string;
-  content_html: string;
-  content_type: string;
-  code: string | null;
-  code_html: string;
+  default_index: number;
+  versions: Array<{
+    label: string;
+    content: string;
+    content_html: string;
+    code: string | null;
+    code_html: string;
+  }>;
   tags: string[];
   category: string;
   score: number | null;
