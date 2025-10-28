@@ -13,6 +13,7 @@ import { ItemPreview } from "@/components/space/item-preview";
 import { SpaceHeader } from "@/components/space/space-header";
 import { addItemAction, updateItemAction } from "@/app/space/actions";
 import { Copy, Check, Plus, Trash2 } from "lucide-react";
+import { VersionTabs } from "@/components/space/version-tabs";
 
 // Singleton/Canonical shape for the item with only editable fields
 type Model = {
@@ -401,48 +402,23 @@ export function ItemForm({ item, mode }: ItemFormProps) {
 
       <div className="p-6 w-full">
         {/* Version tabs */}
-        <div className="flex items-center gap-2 mb-4">
-          {model.versions.map((v, i) => (
-            <div key={i} className="flex items-center gap-1">
-              <div className="flex items-center">
-                <Input
-                  value={v.label}
-                  onChange={(e) => renameVersion(i, e.target.value)}
-                  className={`h-8 px-2 w-20 text-sm ${
-                    i === activeVersionIdx
-                      ? 'bg-accent text-accent-foreground border-accent'
-                      : 'border-border'
-                  }`}
-                  onClick={() => setActiveVersionIdx(i)}
-                />
-                {i === model.defaultIndex && <span className="ml-1 text-xs">★</span>}
-              </div>
-              {model.versions.length > 1 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0"
-                  onClick={() => deleteVersion(i)}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              )}
-              {i !== model.defaultIndex && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 text-xs"
-                  onClick={() => setAsDefault(i)}
-                >
-                  Set default
-                </Button>
-              )}
-            </div>
-          ))}
-          <Button variant="outline" size="sm" onClick={addVersion}>
-            <Plus className="h-3 w-3 mr-1" /> Add version
-          </Button>
-        </div>
+        <VersionTabs
+          versions={model.versions}
+          activeIdx={activeVersionIdx}
+          defaultIdx={model.defaultIndex}
+          onAdd={addVersion}
+          onDelete={deleteVersion}
+          onRename={(idx, label) => {
+            setModel((m) => ({
+              ...m,
+              versions: m.versions.map((v, i) =>
+                i === idx ? { ...v, label } : v
+              ),
+            }));
+          }}
+          onSetActive={setActiveVersionIdx}
+          onSetDefault={setAsDefault}
+        />
 
         {/* Top Row: Editors */}
         <div className="grid grid-cols-2 gap-4 mb-4">
