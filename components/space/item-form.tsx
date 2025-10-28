@@ -292,12 +292,24 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   // === Save ==================================================================
 
   const addVersion = () => {
+    // Find highest version number in existing labels
+    const versionNumbers = model.versions
+      .map(v => {
+        const match = v.label.match(/^v(\d+)$/);
+        return match ? parseInt(match[1], 10) : 0;
+      })
+      .filter(n => n > 0);
+    
+    const nextNum = versionNumbers.length > 0 
+      ? Math.max(...versionNumbers) + 1 
+      : 1;
+
     setModel((m) => ({
       ...m,
       versions: [
         ...m.versions,
         {
-          label: `v${m.versions.length + 1}`,
+          label: `v${nextNum}`,
           content: "",
           code: null,
         },
@@ -316,6 +328,15 @@ export function ItemForm({ item, mode }: ItemFormProps) {
     if (activeVersionIdx >= idx && activeVersionIdx > 0) {
       setActiveVersionIdx(activeVersionIdx - 1);
     }
+  };
+
+  const renameVersion = (idx: number, newLabel: string) => {
+    setModel((m) => ({
+      ...m,
+      versions: m.versions.map((v, i) =>
+        i === idx ? { ...v, label: newLabel } : v
+      ),
+    }));
   };
 
   const setAsDefault = (idx: number) => {
@@ -383,17 +404,19 @@ export function ItemForm({ item, mode }: ItemFormProps) {
         <div className="flex items-center gap-2 mb-4">
           {model.versions.map((v, i) => (
             <div key={i} className="flex items-center gap-1">
-              <button
-                onClick={() => setActiveVersionIdx(i)}
-                className={`px-3 py-1.5 rounded border transition-colors ${
-                  i === activeVersionIdx
-                    ? 'bg-accent text-accent-foreground border-accent'
-                    : 'border-border hover:bg-muted'
-                }`}
-              >
-                {v.label}
+              <div className="flex items-center">
+                <Input
+                  value={v.label}
+                  onChange={(e) => renameVersion(i, e.target.value)}
+                  className={`h-8 px-2 w-20 text-sm ${
+                    i === activeVersionIdx
+                      ? 'bg-accent text-accent-foreground border-accent'
+                      : 'border-border'
+                  }`}
+                  onClick={() => setActiveVersionIdx(i)}
+                />
                 {i === model.defaultIndex && <span className="ml-1 text-xs">★</span>}
-              </button>
+              </div>
               {model.versions.length > 1 && (
                 <Button
                   variant="ghost"
