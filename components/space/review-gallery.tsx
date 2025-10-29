@@ -147,12 +147,12 @@ export function ReviewGallery() {
           isAdmin ? (
             <>
               <Button asChild variant="outline" size="sm">
-                <Link href={`/space/edit/${current.id}`}>
+                <Link href={`/space/edit/${current.slug}`}>
                   edit
                 </Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href={`/space/add?duplicate=${current.id}`}>
+                <Link href={`/space/add?duplicate=${current.slug}`}>
                   duplicate
                 </Link>
               </Button>
