@@ -51,7 +51,7 @@ export function CodeDisplay({
 
         {/* Override Shiki backgrounds - white for light mode, Catppuccin Macchiato base for dark mode */}
         <div 
-          className="h-full [&_pre]:m-0 [&_pre]:p-3 [&_code]:text-sm [&_pre]:whitespace-pre-wrap [&_code]:whitespace-pre-wrap [&_pre]:h-full [&_pre]:!bg-white dark:[&_pre]:!bg-[#24273a] [&_span]:!bg-transparent"
+          className="h-full [&_pre]:m-0 [&_pre]:p-3 [&_code]:text-sm [&_pre]:whitespace-pre-wrap [&_code]:whitespace-pre-wrap [&_pre]:min-h-full [&_pre]:!bg-white dark:[&_pre]:!bg-[#24273a] [&_span]:!bg-transparent"
           dangerouslySetInnerHTML={{ __html: codeHtml }}
         />
       </div>
