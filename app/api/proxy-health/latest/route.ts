@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getLatestProxyHealth } from '@/app/lib/proxy-health-store';
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-
 function isAuthorized(request: NextRequest) {
   const expectedToken = process.env.PROXY_DASHBOARD_TOKEN;
   if (!expectedToken) return true;
