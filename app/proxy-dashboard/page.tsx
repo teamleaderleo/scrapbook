@@ -1,5 +1,10 @@
-import { UsageDashboard } from '@/components/proxy/usage-dashboard';
+import { UsageDashboardContainer } from '@/components/proxy/usage-dashboard-container';
 
 export default function Page() {
-  return <main>Usage</main>;
+  return (
+    <main>
+      <h1>Usage</h1>
+      <UsageDashboardContainer />
+    </main>
+  );
 }
