@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { toast } from "sonner"
-import { Book, Box, Twitter, Sparkles, Brain, FileText } from 'lucide-react';
+import { Book, Box, Twitter, Sparkles, Brain, FileText, Activity } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { RedditIcon } from './icons/reddit-icon';
 import { GitHubIcon } from './icons/github-icon';
@@ -42,6 +42,10 @@ export default function SiteNav() {
             <Link href="/gallery" className="text-sm hover:text-muted-foreground flex items-center gap-1">
               <Box size={14} />
               <span>cube</span>
+            </Link>
+            <Link href="/proxy-dashboard" className="text-sm hover:text-emerald-500 transition-colors flex items-center gap-1">
+              <Activity size={14} />
+              <span>proxy</span>
             </Link>
             
             {/* Social Links */}
