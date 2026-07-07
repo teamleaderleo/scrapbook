@@ -107,16 +107,19 @@ function buildUsage(samples: ProxyHealthSample[]) {
   };
 }
 
-function MiniStat({ label, value }: { label: string; value: string }) {
+function Card({ title, value, children }: { title: string; value?: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border bg-background/80 px-4 py-3 shadow-sm">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="mt-1 text-lg font-semibold tracking-tight">{value}</div>
-    </div>
+    <section className="rounded-2xl border bg-background/80 p-4 shadow-sm">
+      <div className="mb-3 flex items-center justify-between gap-4">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">{title}</h2>
+        {value ? <div className="text-sm font-medium text-muted-foreground">{value}</div> : null}
+      </div>
+      {children}
+    </section>
   );
 }
 
-function Bars({ buckets, height = 'h-20' }: { buckets: Bucket[]; height?: string }) {
+function Bars({ buckets, height = 'h-24' }: { buckets: Bucket[]; height?: string }) {
   const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
 
   return (
@@ -143,7 +146,7 @@ function Bars({ buckets, height = 'h-20' }: { buckets: Bucket[]; height?: string
 
 function Trend({ buckets }: { buckets: Bucket[] }) {
   const width = 900;
-  const height = 150;
+  const height = 175;
   const paddingX = 24;
   const paddingY = 18;
   const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
@@ -156,38 +159,32 @@ function Trend({ buckets }: { buckets: Bucket[] }) {
   const area = `${paddingX},${height - paddingY} ${points.join(' ')} ${width - paddingX},${height - paddingY}`;
 
   return (
-    <div className="rounded-2xl border bg-background/80 p-4 shadow-sm">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">30 days</h2>
-        <div className="text-right text-xs text-muted-foreground">latest {formatBytes(buckets.at(-1)?.bytes ?? 0)}</div>
-      </div>
-      <svg className="h-36 w-full overflow-visible" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="30 day usage trend">
-        <polygon points={area} className="fill-foreground/10" />
-        <polyline points={points.join(' ')} fill="none" className="stroke-foreground" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-        {buckets.map((bucket, index) => {
-          if (index % 5 !== 0 && index !== buckets.length - 1) return null;
-          const x = paddingX + index * step;
-          return (
-            <text key={`${bucket.label}-${index}`} x={x} y={height - 2} textAnchor="middle" className="fill-muted-foreground text-[10px]">
-              {bucket.label}
-            </text>
-          );
-        })}
-      </svg>
-    </div>
+    <svg className="h-44 w-full overflow-visible" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="30 day usage trend">
+      <polygon points={area} className="fill-foreground/10" />
+      <polyline points={points.join(' ')} fill="none" className="stroke-foreground" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      {buckets.map((bucket, index) => {
+        if (index % 5 !== 0 && index !== buckets.length - 1) return null;
+        const x = paddingX + index * step;
+        return (
+          <text key={`${bucket.label}-${index}`} x={x} y={height - 2} textAnchor="middle" className="fill-muted-foreground text-[10px]">
+            {bucket.label}
+          </text>
+        );
+      })}
+    </svg>
   );
 }
 
 function UsageRing({ used, limit }: { used: number; limit: number }) {
   const safeLimit = limit > 0 ? limit : DEFAULT_30_DAY_LIMIT_BYTES;
   const percent = Math.min(100, Math.max(0, (used / safeLimit) * 100));
+  const displayPercent = percent > 0 && percent < 1 ? '<1%' : `${Math.round(percent)}%`;
   const radius = 70;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - percent / 100);
 
   return (
-    <div className="rounded-2xl border bg-background/80 p-4 shadow-sm">
-      <div className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">30 days</div>
+    <Card title="30 days">
       <div className="flex items-center gap-5">
         <svg className="h-44 w-44 shrink-0 -rotate-90" viewBox="0 0 180 180" role="img" aria-label="30 day usage progress">
           <circle cx="90" cy="90" r={radius} fill="none" className="stroke-muted" strokeWidth="16" />
@@ -204,11 +201,11 @@ function UsageRing({ used, limit }: { used: number; limit: number }) {
           />
         </svg>
         <div>
-          <div className="text-4xl font-semibold tracking-tight">{Math.round(percent)}%</div>
+          <div className="text-4xl font-semibold tracking-tight">{displayPercent}</div>
           <div className="mt-2 text-sm text-muted-foreground">{formatBytes(used)} / {formatBytes(safeLimit)}</div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -222,35 +219,20 @@ export function UsageDashboard({
   const usage = buildUsage(samples);
 
   return (
-    <div className="space-y-3">
-      <div className="grid gap-3 lg:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.4fr)]">
-        <UsageRing used={usage.month} limit={limitBytes} />
-        <div className="grid content-start gap-3 sm:grid-cols-3">
-          <MiniStat label="24 hours" value={formatBytes(usage.day)} />
-          <MiniStat label="7 days" value={formatBytes(usage.week)} />
-          <MiniStat label="30 days" value={formatBytes(usage.month)} />
-        </div>
-      </div>
+    <div className="grid gap-3 lg:grid-cols-2">
+      <UsageRing used={usage.month} limit={limitBytes} />
 
-      <Trend buckets={usage.monthBuckets} />
+      <Card title="30 days" value={formatBytes(usage.month)}>
+        <Trend buckets={usage.monthBuckets} />
+      </Card>
 
-      <div className="grid gap-3 lg:grid-cols-2">
-        <div className="rounded-2xl border bg-background/80 p-4 shadow-sm">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">7 days</h2>
-            <span className="text-xs text-muted-foreground">{formatBytes(usage.week)}</span>
-          </div>
-          <Bars buckets={usage.weekBuckets} />
-        </div>
+      <Card title="7 days" value={formatBytes(usage.week)}>
+        <Bars buckets={usage.weekBuckets} />
+      </Card>
 
-        <div className="rounded-2xl border bg-background/80 p-4 shadow-sm">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">24 hours</h2>
-            <span className="text-xs text-muted-foreground">{formatBytes(usage.day)}</span>
-          </div>
-          <Bars buckets={usage.dayGroups} />
-        </div>
-      </div>
+      <Card title="24 hours" value={formatBytes(usage.day)}>
+        <Bars buckets={usage.dayGroups} />
+      </Card>
     </div>
   );
 }
