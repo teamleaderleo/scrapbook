@@ -322,7 +322,7 @@ function LatencyCard({
     <Card className="lg:col-span-2" title="Latency">
       <div className="grid gap-3 xl:grid-cols-[300px_230px_minmax(0,1fr)]">
         <div className="rounded-xl border bg-muted/30 p-4">
-          <div className="text-xs font-medium text-muted-foreground">China edge · Shanghai</div>
+          <div className="text-xs font-medium text-muted-foreground">China edge · City</div>
           <div className="mt-3 grid grid-cols-2 gap-2">
             <ChinaEdgeStat label="Bandwagon" value={shanghaiBandwagon} average={shanghaiBandwagon24h} />
             <ChinaEdgeStat label="Linode" value={shanghaiLinode} average={shanghaiLinode24h} />
