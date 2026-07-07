@@ -9,7 +9,7 @@ Optional:
   PROXY_HEALTH_HOST=bandwagon-la
   EXPECTED_EGRESS_IPV4=172.235.56.214
   EXPECTED_EGRESS_IPV6=2a01:7e03::2000:56ff:fe71:cbd
-  PROXY_LATENCY_TARGET=1.1.1.1
+  PROXY_LATENCY_URL=https://www.gstatic.com/generate_204
 """
 
 from __future__ import annotations
@@ -34,7 +34,8 @@ EXPECTED_IPV6 = os.environ.get("EXPECTED_EGRESS_IPV6", "2a01:7e03::2000:56ff:fe7
 XRAY_CONFIG = Path(os.environ.get("XRAY_CONFIG", "/usr/local/etc/xray/config.json"))
 SIDECAR_SOCKS = os.environ.get("SIDECAR_SOCKS", "10.200.0.2:18089")
 FALLBACK_SOCKS = os.environ.get("FALLBACK_SOCKS", "127.0.0.1:18088")
-LATENCY_TARGET = os.environ.get("PROXY_LATENCY_TARGET", "1.1.1.1")
+LATENCY_URL = os.environ.get("PROXY_LATENCY_URL", "https://www.gstatic.com/generate_204")
+WG_LATENCY_TARGET = os.environ.get("WG_LATENCY_TARGET", "10.77.0.1")
 
 
 def now_iso() -> str:
@@ -79,6 +80,31 @@ def curl_via_socks(url: str, socks: str, timeout: int = 12) -> tuple[bool, str]:
     )
 
 
+def http_total_ms_via_socks(url: str, socks: str, timeout: int = 10) -> float | None:
+    ok, output = run(
+        [
+            "curl",
+            "-fsS",
+            "-o",
+            "/dev/null",
+            "-w",
+            "%{time_total}",
+            "--max-time",
+            str(timeout),
+            "--socks5-hostname",
+            socks,
+            url,
+        ],
+        timeout=timeout + 3,
+    )
+    if not ok:
+        return None
+    try:
+        return round(float(output.strip()) * 1000, 2)
+    except ValueError:
+        return None
+
+
 def parse_ping_avg_ms(output: str) -> float | None:
     match = re.search(r"(?:rtt|round-trip).*?=\s*([0-9.]+)/([0-9.]+)/([0-9.]+)", output)
     if not match:
@@ -101,9 +127,9 @@ def ping_avg_ms(target: str, timeout: int = 8) -> float | None:
 
 def read_latency() -> dict[str, Any]:
     return {
-        "wg_ms": ping_avg_ms("10.77.0.1"),
-        "public_ms": ping_avg_ms(LATENCY_TARGET),
-        "target": LATENCY_TARGET,
+        "wg_ms": ping_avg_ms(WG_LATENCY_TARGET),
+        "public_ms": http_total_ms_via_socks(LATENCY_URL, SIDECAR_SOCKS),
+        "target": LATENCY_URL,
     }
 
 
