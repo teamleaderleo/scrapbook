@@ -68,8 +68,9 @@ function redacted(text: string) {
 }
 
 function safeErrors(payload: ProxyHealthPayload | undefined) {
-  if (!Array.isArray(payload?.errors)) return [];
-  return payload.errors.filter((error): error is string => typeof error === 'string').map((error) => redacted(error));
+  const errors = payload?.errors;
+  if (!Array.isArray(errors)) return [];
+  return errors.filter((error): error is string => typeof error === 'string').map((error) => redacted(error));
 }
 
 function sumMs(...values: Array<number | null | undefined>) {
