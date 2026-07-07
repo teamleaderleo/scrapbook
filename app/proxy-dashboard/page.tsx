@@ -114,12 +114,12 @@ export default async function ProxyDashboardPage({ searchParams }: PageProps) {
   }
 
   const status = await getLatestProxyHealth('bandwagon-la');
-  const payload: ProxyHealthPayload | undefined = status?.payload;
-  const services = payload?.services ?? {};
-  const errors = Array.isArray(payload?.errors) ? payload.errors : [];
-  const mode = typeof payload?.mode === 'string' ? payload.mode : 'unknown';
-  const sidecarOk = payload?.egress?.sidecar_ok === true;
-  const fallbackOk = payload?.egress?.fallback_ok === true;
+  const payload: ProxyHealthPayload = status?.payload ?? {};
+  const services: Record<string, string> = payload.services ?? {};
+  const errors = Array.isArray(payload.errors) ? payload.errors : [];
+  const mode = typeof payload.mode === 'string' ? payload.mode : 'unknown';
+  const sidecarOk = payload.egress?.sidecar_ok === true;
+  const fallbackOk = payload.egress?.fallback_ok === true;
   const latestJsonHref = token ? `/api/proxy-health/latest?token=${encodeURIComponent(token)}` : '/api/proxy-health/latest';
 
   return (
@@ -146,14 +146,14 @@ export default async function ProxyDashboardPage({ searchParams }: PageProps) {
               <Row label="Mode" value={<Pill className={modeTone(mode)}>{mode}</Pill>} />
               <Row label="Host" value={status.host} />
               <Row label="Checked" value={formatRelative(status.checkedAt)} />
-              <Row label="Xray outbound" value={`${payload?.xray?.outbound_address ?? 'unknown'}:${payload?.xray?.outbound_port ?? 'unknown'}`} />
+              <Row label="Xray outbound" value={`${payload.xray?.outbound_address ?? 'unknown'}:${payload.xray?.outbound_port ?? 'unknown'}`} />
             </Card>
 
             <Card title="Egress">
-              <Row label="IPv4" value={payload?.egress?.ipv4 ?? 'unknown'} />
-              <Row label="Expected IPv4" value={payload?.expected?.ipv4 ?? 'unknown'} />
-              <Row label="IPv6" value={payload?.egress?.ipv6 ?? 'unknown'} />
-              <Row label="Expected IPv6" value={payload?.expected?.ipv6 ?? 'unknown'} />
+              <Row label="IPv4" value={payload.egress?.ipv4 ?? 'unknown'} />
+              <Row label="Expected IPv4" value={payload.expected?.ipv4 ?? 'unknown'} />
+              <Row label="IPv6" value={payload.egress?.ipv6 ?? 'unknown'} />
+              <Row label="Expected IPv6" value={payload.expected?.ipv6 ?? 'unknown'} />
             </Card>
 
             <Card title="Readiness">
@@ -169,9 +169,9 @@ export default async function ProxyDashboardPage({ searchParams }: PageProps) {
             </Card>
 
             <Card title="WireGuard">
-              <Row label="Handshake age" value={typeof payload?.wireguard?.latest_handshake_seconds_ago === 'number' ? `${payload.wireguard.latest_handshake_seconds_ago}s` : 'unknown'} />
-              <Row label="Received" value={formatBytes(payload?.wireguard?.rx_bytes)} />
-              <Row label="Sent" value={formatBytes(payload?.wireguard?.tx_bytes)} />
+              <Row label="Handshake age" value={typeof payload.wireguard?.latest_handshake_seconds_ago === 'number' ? `${payload.wireguard.latest_handshake_seconds_ago}s` : 'unknown'} />
+              <Row label="Received" value={formatBytes(payload.wireguard?.rx_bytes)} />
+              <Row label="Sent" value={formatBytes(payload.wireguard?.tx_bytes)} />
             </Card>
 
             <Card title="Links">
