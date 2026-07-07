@@ -1,9 +1,13 @@
-import type { ProxyHealthSample } from '@/app/lib/proxy-health-store';
+"use client";
+
+import type { ProxyHealthPayload, ProxyHealthSample, StoredProxyHealth } from '@/app/lib/proxy-health-store';
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 
 type Bucket = { label: string; bytes: number };
 type MetricBucket = { label: string; value: number | null };
 type LatencyPoint = { date: Date; value: number };
+type EventBucket = { label: string; state: 'ok' | 'issue' | 'missing'; count: number };
 
 const DEFAULT_30_DAY_LIMIT_BYTES = 1024 ** 4;
 const HOUR_MS = 60 * 60 * 1000;
@@ -27,6 +31,45 @@ function formatMs(value: number | null | undefined) {
   if (typeof value !== 'number' || !Number.isFinite(value)) return '—';
   if (value > 0 && value < 10) return `${value.toFixed(1)} ms`;
   return `${Math.round(value)} ms`;
+}
+
+function formatRelativeTime(value: string | null | undefined) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  const diffMs = Date.now() - date.getTime();
+  const absMs = Math.abs(diffMs);
+  const suffix = diffMs >= 0 ? 'ago' : 'from now';
+
+  if (absMs < 60 * 1000) return 'just now';
+  if (absMs < HOUR_MS) return `${Math.round(absMs / (60 * 1000))}m ${suffix}`;
+  if (absMs < DAY_MS) return `${Math.round(absMs / HOUR_MS)}h ${suffix}`;
+  return `${Math.round(absMs / DAY_MS)}d ${suffix}`;
+}
+
+function formatUtcTime(value: string | null | undefined) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'UTC',
+    timeZoneName: 'short',
+  });
+}
+
+function redacted(text: string) {
+  return text
+    .replace(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g, '[ip]')
+    .replace(/\b(?:[0-9a-f]{0,4}:){2,}[0-9a-f]{0,4}\b/gi, '[ip]');
+}
+
+function safeErrors(payload: ProxyHealthPayload | undefined) {
+  if (!Array.isArray(payload?.errors)) return [];
+  return payload.errors.filter((error): error is string => typeof error === 'string').map((error) => redacted(error));
 }
 
 function sumMs(...values: Array<number | null | undefined>) {
@@ -101,10 +144,37 @@ function estimatedPathLatency(sample: ProxyHealthSample) {
   return sumMs(sample.shanghaiBandwagonMs, sample.wgLatencyMs);
 }
 
+function isIssueMode(mode: string | null | undefined) {
+  if (!mode) return false;
+  return mode !== 'normal';
+}
+
+function buildEventBuckets(samples: ProxyHealthSample[], hourStart: Date) {
+  const buckets = Array.from({ length: 24 }, (_, index) => {
+    const date = new Date(hourStart.getTime() + index * HOUR_MS);
+    return { label: hourLabel(date), state: 'missing' as EventBucket['state'], count: 0, issueCount: 0 };
+  });
+
+  for (const sample of samples) {
+    const date = new Date(sample.checkedAt);
+    if (Number.isNaN(date.getTime()) || date < hourStart) continue;
+    const index = Math.floor((floorUtcHour(date).getTime() - hourStart.getTime()) / HOUR_MS);
+    if (index < 0 || index >= buckets.length) continue;
+    buckets[index].count += 1;
+    if (isIssueMode(sample.mode)) buckets[index].issueCount += 1;
+  }
+
+  return buckets.map((bucket) => ({
+    label: bucket.label,
+    count: bucket.count,
+    state: bucket.count === 0 ? 'missing' : bucket.issueCount > 0 ? 'issue' : 'ok',
+  }));
+}
+
 function buildUsage(samples: ProxyHealthSample[]) {
   const usable = samples
-    .map((sample) => ({ date: new Date(sample.checkedAt), bytes: sampleTotal(sample) }))
-    .filter((sample): sample is { date: Date; bytes: number } => typeof sample.bytes === 'number' && !Number.isNaN(sample.date.getTime()))
+    .map((sample) => ({ date: new Date(sample.checkedAt), bytes: sampleTotal(sample), mode: sample.mode }))
+    .filter((sample): sample is { date: Date; bytes: number; mode: string | null } => typeof sample.bytes === 'number' && !Number.isNaN(sample.date.getTime()))
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
   const externalSamples = buildLatencyPoints(samples, usableExternalLatency);
@@ -140,11 +210,13 @@ function buildUsage(samples: ProxyHealthSample[]) {
     return { label: hourLabel(date), total: 0, count: 0 };
   });
 
+  let lastDelta = 0;
   for (let index = 1; index < usable.length; index += 1) {
     const previous = usable[index - 1];
     const current = usable[index];
     const delta = current.bytes - previous.bytes;
     if (delta <= 0) continue;
+    lastDelta = delta;
 
     const currentDayKey = dayKey(current.date);
     const monthBucket = month.get(currentDayKey);
@@ -192,6 +264,13 @@ function buildUsage(samples: ProxyHealthSample[]) {
     monthBuckets,
     weekBuckets,
     dayGroups,
+    eventBuckets: buildEventBuckets(samples, hourStart),
+    latestMode: latest?.mode ?? null,
+    latestCheckedAt: latest?.date.toISOString() ?? null,
+    sampleCount: samples.length,
+    currentRx: samples.at(-1)?.rxBytes ?? null,
+    currentTx: samples.at(-1)?.txBytes ?? null,
+    lastDelta,
   };
 }
 
@@ -232,11 +311,20 @@ function BarFill({ hasValue, isLatest, height, wide = false }: { hasValue: boole
   return <span className={`block w-full ${widthClass} rounded-t transition-all duration-150 ${activeClass}`} style={{ height }} />;
 }
 
+function PinnedValue({ value }: { value: string | null }) {
+  if (!value) return null;
+  return <div className="absolute left-2 top-2 z-10 rounded-full border bg-background/95 px-2 py-1 text-[11px] shadow-sm backdrop-blur">{value}</div>;
+}
+
 function Bars({ buckets, height = 'h-20', labelEvery = 1, wideBars = false }: { buckets: Bucket[]; height?: string; labelEvery?: number; wideBars?: boolean }) {
+  const [selected, setSelected] = useState<string | null>(null);
   const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
 
   return (
-    <div className={`grid ${height} grid-rows-[minmax(0,1fr)_auto] gap-1 overflow-visible rounded-lg border bg-muted/30 p-2`}>
+    <div className={`relative grid ${height} grid-rows-[minmax(0,1fr)_auto] gap-1 overflow-visible rounded-lg border bg-muted/30 p-2`} onPointerDown={(event) => {
+      if (event.target === event.currentTarget) setSelected(null);
+    }}>
+      <PinnedValue value={selected} />
       <div className="flex min-h-0 items-end gap-1 overflow-visible">
         {buckets.map((bucket, index) => {
           const isLatest = index === buckets.length - 1;
@@ -247,6 +335,7 @@ function Bars({ buckets, height = 'h-20', labelEvery = 1, wideBars = false }: { 
             <button
               key={`${bucket.label}-${index}`}
               type="button"
+              onClick={() => setSelected((current) => current === tooltip ? null : tooltip)}
               className="group relative flex h-full min-w-0 flex-1 cursor-help items-end justify-center rounded-md px-0.5 transition-colors hover:bg-[#b8b5ff]/10 focus:bg-[#b8b5ff]/10 focus:outline-none focus:ring-1 focus:ring-[#cbc8ff]"
               title={tooltip}
               aria-label={tooltip}
@@ -268,6 +357,7 @@ function Bars({ buckets, height = 'h-20', labelEvery = 1, wideBars = false }: { 
 }
 
 function MetricBars({ buckets, labelEvery = 4 }: { buckets: MetricBucket[]; labelEvery?: number }) {
+  const [selected, setSelected] = useState<string | null>(null);
   const validValues = buckets.map((bucket) => bucket.value).filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
 
   if (validValues.length === 0) {
@@ -283,7 +373,10 @@ function MetricBars({ buckets, labelEvery = 4 }: { buckets: MetricBucket[]; labe
   const range = Math.max(0.1, upper - lower);
 
   return (
-    <div className="grid h-20 grid-cols-[minmax(0,1fr)_2.25rem] grid-rows-[minmax(0,1fr)_auto] gap-x-1 gap-y-1 overflow-visible rounded-lg border bg-muted/30 p-2">
+    <div className="relative grid h-20 grid-cols-[minmax(0,1fr)_2.25rem] grid-rows-[minmax(0,1fr)_auto] gap-x-1 gap-y-1 overflow-visible rounded-lg border bg-muted/30 p-2" onPointerDown={(event) => {
+      if (event.target === event.currentTarget) setSelected(null);
+    }}>
+      <PinnedValue value={selected} />
       <div className="flex min-h-0 items-end gap-1 overflow-visible">
         {buckets.map((bucket, index) => {
           const isLatest = index === buckets.length - 1;
@@ -296,6 +389,7 @@ function MetricBars({ buckets, labelEvery = 4 }: { buckets: MetricBucket[]; labe
             <button
               key={`${bucket.label}-${index}`}
               type="button"
+              onClick={() => setSelected((current) => current === tooltip ? null : tooltip)}
               className="group relative flex h-full min-w-0 flex-1 cursor-help items-end justify-center rounded-md px-0.5 transition-colors hover:bg-[#b8b5ff]/10 focus:bg-[#b8b5ff]/10 focus:outline-none focus:ring-1 focus:ring-[#cbc8ff]"
               title={tooltip}
               aria-label={tooltip}
@@ -327,6 +421,161 @@ function MiniStat({ label, value, note }: { label: string; value: number | null;
       <div className="mt-0.5 text-lg font-semibold tracking-tight">{formatMs(value)}</div>
       {note ? <div className="mt-0.5 text-[11px] text-muted-foreground">{note}</div> : null}
     </div>
+  );
+}
+
+function statusTone(mode: string | null, errors: string[]) {
+  if (errors.length > 0 || mode === 'degraded' || mode === 'unknown') return 'issue';
+  if (mode === 'fallback') return 'backup';
+  return 'ok';
+}
+
+function statusLabel(mode: string | null, errors: string[]) {
+  if (errors.length > 0) return 'Needs attention';
+  if (mode === 'fallback') return 'Backup path';
+  if (mode === 'degraded') return 'Degraded';
+  if (mode === 'unknown') return 'Unknown';
+  return 'Normal';
+}
+
+function proxyMood(mode: string | null, errors: string[], usageBytes: number, latencyMs: number | null) {
+  if (errors.length > 0 || mode === 'degraded' || mode === 'unknown') return 'fussy';
+  if (mode === 'fallback') return 'backup';
+  if (latencyMs !== null && latencyMs > 220) return 'slow';
+  if (usageBytes < 1024 * 1024) return 'sleepy';
+  return 'calm';
+}
+
+function StatusPill({ mode, errors }: { mode: string | null; errors: string[] }) {
+  const tone = statusTone(mode, errors);
+  const className = tone === 'ok'
+    ? 'border-[#b8b5ff]/50 bg-[#b8b5ff]/15 text-foreground'
+    : tone === 'backup'
+      ? 'border-amber-400/50 bg-amber-400/15 text-foreground'
+      : 'border-red-400/50 bg-red-400/15 text-foreground';
+
+  return <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${className}`}>{statusLabel(mode, errors)}</span>;
+}
+
+function MobileSummary({ status, usage }: { status?: StoredProxyHealth | null; usage: ReturnType<typeof buildUsage> }) {
+  const payload = status?.payload;
+  const errors = safeErrors(payload);
+  const mode = payload?.mode ?? usage.latestMode;
+  const latency = usage.primaryPlusEgress;
+  const mood = proxyMood(mode ?? null, errors, usage.day, latency);
+
+  return (
+    <section className="rounded-2xl border bg-background/90 p-3 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <StatusPill mode={mode ?? null} errors={errors} />
+          <span className="text-xs text-muted-foreground">mood: <span className="font-medium text-foreground">{mood}</span></span>
+        </div>
+        <div className="text-xs text-muted-foreground">checked <span className="font-medium text-foreground">{formatRelativeTime(status?.updatedAt ?? usage.latestCheckedAt)}</span></div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        <div className="rounded-xl border bg-muted/30 px-3 py-2">
+          <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">24h</div>
+          <div className="mt-0.5 text-base font-semibold tracking-tight">{formatBytes(usage.day)}</div>
+        </div>
+        <div className="rounded-xl border bg-muted/30 px-3 py-2">
+          <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Latency</div>
+          <div className="mt-0.5 text-base font-semibold tracking-tight">{formatMs(latency)}</div>
+        </div>
+        <div className="rounded-xl border bg-muted/30 px-3 py-2">
+          <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Last delta</div>
+          <div className="mt-0.5 text-base font-semibold tracking-tight">{formatBytes(usage.lastDelta)}</div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function EventTimeline({ buckets }: { buckets: EventBucket[] }) {
+  return (
+    <Card title="24h status">
+      <div className="flex items-center gap-1 rounded-lg border bg-muted/30 p-2">
+        {buckets.map((bucket, index) => {
+          const showLabel = index % 4 === 0 || index === buckets.length - 1;
+          const className = bucket.state === 'ok'
+            ? 'bg-[#b8b5ff] shadow-[0_0_10px_rgba(184,181,255,0.24)]'
+            : bucket.state === 'issue'
+              ? 'bg-red-400'
+              : 'bg-muted-foreground/20';
+          return (
+            <div key={`${bucket.label}-${index}`} className="flex min-w-0 flex-1 flex-col items-center gap-1" title={`${bucket.label}: ${bucket.state}`}>
+              <div className={`h-2 w-full rounded-full ${className}`} />
+              <div className="h-3 text-[9px] text-muted-foreground">{showLabel ? bucket.label : ''}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+        <span>lavender = normal</span>
+        <span>red = issue</span>
+        <span>dim = no sample</span>
+      </div>
+    </Card>
+  );
+}
+
+function DebugDetails({ status, usage }: { status?: StoredProxyHealth | null; usage: ReturnType<typeof buildUsage> }) {
+  const payload = status?.payload;
+  const errors = safeErrors(payload);
+  const services = payload?.services ?? {};
+  const serviceEntries = Object.entries(services).filter((entry): entry is [string, string] => typeof entry[1] === 'string');
+
+  return (
+    <details className="rounded-xl border bg-background/80 p-3 shadow-sm">
+      <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground [&::-webkit-details-marker]:hidden">
+        Details
+      </summary>
+      <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-lg border bg-muted/30 p-2">
+          <div className="uppercase tracking-[0.15em]">Samples</div>
+          <div className="mt-1 font-medium text-foreground">{usage.sampleCount}</div>
+        </div>
+        <div className="rounded-lg border bg-muted/30 p-2">
+          <div className="uppercase tracking-[0.15em]">Latest</div>
+          <div className="mt-1 font-medium text-foreground">{formatUtcTime(status?.checkedAt ?? usage.latestCheckedAt)}</div>
+        </div>
+        <div className="rounded-lg border bg-muted/30 p-2">
+          <div className="uppercase tracking-[0.15em]">Counters</div>
+          <div className="mt-1 font-medium text-foreground">Rx {formatBytes(usage.currentRx ?? 0)} · Tx {formatBytes(usage.currentTx ?? 0)}</div>
+        </div>
+        <div className="rounded-lg border bg-muted/30 p-2">
+          <div className="uppercase tracking-[0.15em]">Checks</div>
+          <div className="mt-1 font-medium text-foreground">
+            primary {payload?.egress?.sidecar_ok ? 'ok' : '—'} · backup {payload?.egress?.fallback_ok ? 'ok' : '—'}
+          </div>
+        </div>
+      </div>
+
+      {serviceEntries.length > 0 ? (
+        <div className="mt-3 rounded-lg border bg-muted/30 p-2 text-xs">
+          <div className="mb-1 uppercase tracking-[0.15em] text-muted-foreground">Services</div>
+          <div className="flex flex-wrap gap-2">
+            {serviceEntries.map(([name, value]) => (
+              <span key={name} className="rounded-full border bg-background/60 px-2 py-1 text-muted-foreground">
+                {name}: <span className="font-medium text-foreground">{value}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      <div className="mt-3 rounded-lg border bg-muted/30 p-2 text-xs">
+        <div className="mb-1 uppercase tracking-[0.15em] text-muted-foreground">Latest errors</div>
+        {errors.length > 0 ? (
+          <ul className="space-y-1 text-muted-foreground">
+            {errors.map((error, index) => <li key={`${error}-${index}`}>{error}</li>)}
+          </ul>
+        ) : (
+          <div className="text-foreground">none</div>
+        )}
+      </div>
+    </details>
   );
 }
 
@@ -401,15 +650,21 @@ function UsageRing({ used, limit }: { used: number; limit: number }) {
 
 export function UsageDashboard({
   samples,
+  status,
   limitBytes = DEFAULT_30_DAY_LIMIT_BYTES,
 }: {
   samples: ProxyHealthSample[];
+  status?: StoredProxyHealth | null;
   limitBytes?: number;
 }) {
   const usage = buildUsage(samples);
 
   return (
     <div className="grid gap-2 lg:grid-cols-2">
+      <div className="lg:col-span-2">
+        <MobileSummary status={status} usage={usage} />
+      </div>
+
       <UsageRing used={usage.month} limit={limitBytes} />
 
       <Card title="30 days" value={formatBytes(usage.month)}>
@@ -432,6 +687,12 @@ export function UsageDashboard({
         estimated24h={usage.estimated24h}
         buckets={usage.estimatedBuckets}
       />
+
+      <EventTimeline buckets={usage.eventBuckets} />
+
+      <div className="lg:col-span-2">
+        <DebugDetails status={status} usage={usage} />
+      </div>
     </div>
   );
 }
