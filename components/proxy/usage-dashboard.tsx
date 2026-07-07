@@ -80,7 +80,7 @@ function shortDayLabel(date: Date) {
 }
 
 function hourLabel(date: Date) {
-  return date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: false, timeZone: 'UTC' });
+  return String(date.getUTCHours()).padStart(2, '0');
 }
 
 function buildLatencyPoints(samples: ProxyHealthSample[], valueForSample: (sample: ProxyHealthSample) => number | null) {
@@ -183,9 +183,6 @@ function buildUsage(samples: ProxyHealthSample[]) {
     day: dayGroups.reduce((sum, bucket) => sum + bucket.bytes, 0),
     week: weekBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
     month: monthBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
-    external: latestLatency(externalSamples),
-    external24h: averageLatency(externalSamples, latestDate, DAY_MS),
-    external7d: averageLatency(externalSamples, latestDate, 7 * DAY_MS),
     primary,
     relay,
     primaryPlusEgress,
@@ -211,7 +208,11 @@ function Card({ title, value, children, className = '' }: { title: string; value
 }
 
 function BucketLabel({ label, show }: { label: string; show: boolean }) {
-  return <div className="min-w-0 flex-1 truncate text-center text-[9px] text-muted-foreground">{show ? label : ''}</div>;
+  return (
+    <div className="min-w-0 flex-1 overflow-visible text-center text-[10px] leading-none text-muted-foreground">
+      <span className="inline-block whitespace-nowrap">{show ? label : ''}</span>
+    </div>
+  );
 }
 
 function Tooltip({ text }: { text: string }) {
@@ -222,12 +223,21 @@ function Tooltip({ text }: { text: string }) {
   );
 }
 
-function Bars({ buckets, height = 'h-20', labelEvery = 1 }: { buckets: Bucket[]; height?: string; labelEvery?: number }) {
+function BarFill({ hasValue, isLatest, height, wide = false }: { hasValue: boolean; isLatest: boolean; height: string; wide?: boolean }) {
+  const widthClass = wide ? 'max-w-10' : 'max-w-8';
+  const activeClass = hasValue || isLatest
+    ? 'bg-[#b8b5ff] shadow-[0_0_14px_rgba(184,181,255,0.26)] group-hover:bg-[#cbc8ff] group-hover:shadow-[0_0_20px_rgba(203,200,255,0.48)] group-focus:bg-[#cbc8ff] group-focus:shadow-[0_0_20px_rgba(203,200,255,0.48)]'
+    : 'bg-[#b8b5ff]/25 group-hover:bg-[#b8b5ff]/40 group-focus:bg-[#b8b5ff]/40';
+
+  return <span className={`block w-full ${widthClass} rounded-t transition-all duration-150 ${activeClass}`} style={{ height }} />;
+}
+
+function Bars({ buckets, height = 'h-20', labelEvery = 1, wideBars = false }: { buckets: Bucket[]; height?: string; labelEvery?: number; wideBars?: boolean }) {
   const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
 
   return (
-    <div className={`grid ${height} grid-rows-[minmax(0,1fr)_auto] gap-1 rounded-lg border bg-muted/30 p-2`}>
-      <div className="flex min-h-0 items-end gap-1">
+    <div className={`grid ${height} grid-rows-[minmax(0,1fr)_auto] gap-1 overflow-visible rounded-lg border bg-muted/30 p-2`}>
+      <div className="flex min-h-0 items-end gap-1 overflow-visible">
         {buckets.map((bucket, index) => {
           const isLatest = index === buckets.length - 1;
           const hasValue = bucket.bytes > 0;
@@ -237,20 +247,17 @@ function Bars({ buckets, height = 'h-20', labelEvery = 1 }: { buckets: Bucket[];
             <button
               key={`${bucket.label}-${index}`}
               type="button"
-              className="group relative flex h-full min-w-0 flex-1 cursor-help items-end justify-center rounded-sm px-0.5 focus:outline-none focus:ring-1 focus:ring-ring"
+              className="group relative flex h-full min-w-0 flex-1 cursor-help items-end justify-center rounded-md px-0.5 transition-colors hover:bg-[#b8b5ff]/10 focus:bg-[#b8b5ff]/10 focus:outline-none focus:ring-1 focus:ring-[#cbc8ff]"
               title={tooltip}
               aria-label={tooltip}
             >
               <Tooltip text={tooltip} />
-              <span
-                className={`block w-full max-w-7 rounded-t ${hasValue || isLatest ? 'bg-foreground' : 'bg-foreground/25'}`}
-                style={{ height: barHeight }}
-              />
+              <BarFill hasValue={hasValue} isLatest={isLatest} height={barHeight} wide={wideBars} />
             </button>
           );
         })}
       </div>
-      <div className="flex gap-1">
+      <div className="flex gap-1 overflow-visible">
         {buckets.map((bucket, index) => {
           const isLatest = index === buckets.length - 1;
           return <BucketLabel key={`${bucket.label}-${index}`} label={bucket.label} show={index % labelEvery === 0 || isLatest} />;
@@ -276,8 +283,8 @@ function MetricBars({ buckets, labelEvery = 4 }: { buckets: MetricBucket[]; labe
   const range = Math.max(0.1, upper - lower);
 
   return (
-    <div className="grid h-20 grid-cols-[minmax(0,1fr)_2rem] grid-rows-[minmax(0,1fr)_auto] gap-x-1 gap-y-1 rounded-lg border bg-muted/30 p-2">
-      <div className="flex min-h-0 items-end gap-1">
+    <div className="grid h-20 grid-cols-[minmax(0,1fr)_2.25rem] grid-rows-[minmax(0,1fr)_auto] gap-x-1 gap-y-1 overflow-visible rounded-lg border bg-muted/30 p-2">
+      <div className="flex min-h-0 items-end gap-1 overflow-visible">
         {buckets.map((bucket, index) => {
           const isLatest = index === buckets.length - 1;
           const value = bucket.value;
@@ -289,15 +296,12 @@ function MetricBars({ buckets, labelEvery = 4 }: { buckets: MetricBucket[]; labe
             <button
               key={`${bucket.label}-${index}`}
               type="button"
-              className="group relative flex h-full min-w-0 flex-1 cursor-help items-end justify-center rounded-sm px-0.5 focus:outline-none focus:ring-1 focus:ring-ring"
+              className="group relative flex h-full min-w-0 flex-1 cursor-help items-end justify-center rounded-md px-0.5 transition-colors hover:bg-[#b8b5ff]/10 focus:bg-[#b8b5ff]/10 focus:outline-none focus:ring-1 focus:ring-[#cbc8ff]"
               title={tooltip}
               aria-label={tooltip}
             >
               <Tooltip text={tooltip} />
-              <span
-                className={`block w-full max-w-7 rounded-t ${hasValue || isLatest ? 'bg-foreground' : 'bg-foreground/25'}`}
-                style={{ height: barHeight }}
-              />
+              <BarFill hasValue={hasValue} isLatest={isLatest} height={barHeight} wide />
             </button>
           );
         })}
@@ -306,7 +310,7 @@ function MetricBars({ buckets, labelEvery = 4 }: { buckets: MetricBucket[]; labe
         <span>{formatMs(upper)}</span>
         <span>{formatMs(lower)}</span>
       </div>
-      <div className="flex gap-1">
+      <div className="flex gap-1 overflow-visible">
         {buckets.map((bucket, index) => {
           const isLatest = index === buckets.length - 1;
           return <BucketLabel key={`${bucket.label}-${index}`} label={bucket.label} show={index % labelEvery === 0 || isLatest} />;
@@ -327,9 +331,6 @@ function MiniStat({ label, value, note }: { label: string; value: number | null;
 }
 
 function LatencyCard({
-  external,
-  external24h,
-  external7d,
   primary,
   relay,
   primaryPlusEgress,
@@ -337,9 +338,6 @@ function LatencyCard({
   estimated24h,
   buckets,
 }: {
-  external: number | null;
-  external24h: number | null;
-  external7d: number | null;
   primary: number | null;
   relay: number | null;
   primaryPlusEgress: number | null;
@@ -349,28 +347,12 @@ function LatencyCard({
 }) {
   return (
     <Card className="lg:col-span-2" title="Latency">
-      <div className="grid gap-2 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)_minmax(0,1fr)]">
+      <div className="grid gap-2 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <div className="rounded-lg border bg-muted/30 p-3">
-          <div className="text-xs font-medium text-muted-foreground">Edge · City</div>
-          <div className="mt-2 grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <MiniStat label="Primary" value={primary} note={`24h ${formatMs(primary24h)}`} />
             <MiniStat label="Egress" value={relay} note="relay" />
             <MiniStat label="Primary + Egress" value={primaryPlusEgress} note={`24h ${formatMs(estimated24h)}`} />
-          </div>
-        </div>
-
-        <div className="rounded-lg border bg-muted/30 p-3">
-          <div className="text-xs font-medium text-muted-foreground">External check</div>
-          <div className="mt-1 text-2xl font-semibold tracking-tight">{formatMs(external)}</div>
-          <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">24h</div>
-              <div className="font-medium">{formatMs(external24h)}</div>
-            </div>
-            <div>
-              <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">7d</div>
-              <div className="font-medium">{formatMs(external7d)}</div>
-            </div>
           </div>
         </div>
 
@@ -401,7 +383,7 @@ function UsageRing({ used, limit }: { used: number; limit: number }) {
             cy="70"
             r={radius}
             fill="none"
-            className="stroke-foreground"
+            className="stroke-[#b8b5ff]"
             strokeWidth="14"
             strokeLinecap="round"
             strokeDasharray={circumference}
@@ -439,13 +421,10 @@ export function UsageDashboard({
       </Card>
 
       <Card title="24 hours" value={formatBytes(usage.day)}>
-        <Bars buckets={usage.dayGroups} labelEvery={4} />
+        <Bars buckets={usage.dayGroups} labelEvery={4} wideBars />
       </Card>
 
       <LatencyCard
-        external={usage.external}
-        external24h={usage.external24h}
-        external7d={usage.external7d}
         primary={usage.primary}
         relay={usage.relay}
         primaryPlusEgress={usage.primaryPlusEgress}
