@@ -95,8 +95,7 @@ function Locked() {
 function EmptyState() {
   return (
     <div className="rounded-2xl border bg-background p-6 shadow-sm">
-      <h1 className="text-2xl font-bold">No proxy health report yet</h1>
-      <p className="mt-3 text-muted-foreground">Install the Bandwagon reporter and let it POST to the ingest API. Once the first payload arrives, this page will show the current route, services, egress IPs, and WireGuard stats.</p>
+      <h1 className="text-2xl font-bold">No report yet</h1>
       <pre className="mt-5 overflow-x-auto rounded-xl bg-zinc-950 p-4 text-xs text-zinc-100"><code>{`PROXY_HEALTH_INGEST_URL=https://teamleaderleo.com/api/proxy-health/ingest
 PROXY_HEALTH_TOKEN=your-secret-token
 /usr/local/sbin/proxy-health-report`}</code></pre>
@@ -130,7 +129,6 @@ export default async function ProxyDashboardPage({ searchParams }: PageProps) {
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Proxy Dashboard</p>
             <h1 className="mt-2 text-4xl font-bold tracking-tight">Bandwagon → Linode</h1>
-            <p className="mt-3 max-w-2xl text-muted-foreground">Read-only health view for Xray, WireGuard egress, Linode IPs, and fallback readiness.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <Pill className={modeTone(mode)}>{mode}</Pill>
@@ -177,7 +175,7 @@ export default async function ProxyDashboardPage({ searchParams }: PageProps) {
             <Card title="Links">
               <div className="space-y-3 text-sm">
                 <Link className="block rounded-xl border p-3 hover:bg-accent" href={latestJsonHref}>Latest JSON</Link>
-                <p className="text-muted-foreground">The ingest endpoint is <code className="rounded bg-muted px-1 py-0.5">/api/proxy-health/ingest</code>.</p>
+                <p className="text-muted-foreground">Ingest: <code className="rounded bg-muted px-1 py-0.5">/api/proxy-health/ingest</code></p>
               </div>
             </Card>
 
