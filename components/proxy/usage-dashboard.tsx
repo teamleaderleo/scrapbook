@@ -27,8 +27,12 @@ function formatMs(value: number | null | undefined) {
 }
 
 function sumMs(...values: Array<number | null | undefined>) {
-  if (values.some((value) => typeof value !== 'number' || !Number.isFinite(value))) return null;
-  return values.reduce((sum, value) => sum + Number(value), 0);
+  let total = 0;
+  for (const value of values) {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+    total += value;
+  }
+  return total;
 }
 
 function sampleTotal(sample: ProxyHealthSample) {
