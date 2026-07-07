@@ -1,4 +1,4 @@
-import type { ProxyHealthPayload, ProxyHealthSample } from '@/app/lib/proxy-health-store';
+import type { ProxyHealthSample } from '@/app/lib/proxy-health-store';
 
 type Bucket = { label: string; bytes: number };
 
@@ -56,7 +56,6 @@ function buildUsage(samples: ProxyHealthSample[]) {
   const latestDate = latest?.date ?? new Date();
   const monthStart = floorUtcDay(new Date(latestDate.getTime() - 29 * 24 * 60 * 60 * 1000));
   const weekStart = floorUtcDay(new Date(latestDate.getTime() - 6 * 24 * 60 * 60 * 1000));
-  const dayStart = floorUtcDay(latestDate);
   const hourStart = floorUtcHour(new Date(latestDate.getTime() - 23 * 60 * 60 * 1000));
 
   const month = new Map<string, Bucket>();
@@ -97,17 +96,14 @@ function buildUsage(samples: ProxyHealthSample[]) {
 
   const monthBuckets = Array.from(month.values());
   const weekBuckets = Array.from(week.values());
-  const today = month.get(dayKey(dayStart))?.bytes ?? 0;
 
   return {
-    total: latest?.bytes ?? 0,
-    today,
+    day: dayGroups.reduce((sum, bucket) => sum + bucket.bytes, 0),
     week: weekBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
     month: monthBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
     monthBuckets,
     weekBuckets,
     dayGroups,
-    samples: usable.length,
   };
 }
 
@@ -210,7 +206,6 @@ function UsageRing({ used, limit }: { used: number; limit: number }) {
         <div>
           <div className="text-4xl font-semibold tracking-tight">{Math.round(percent)}%</div>
           <div className="mt-2 text-sm text-muted-foreground">{formatBytes(used)} / {formatBytes(safeLimit)}</div>
-          <div className="mt-4 text-xs text-muted-foreground">rolling window</div>
         </div>
       </div>
     </div>
@@ -218,34 +213,22 @@ function UsageRing({ used, limit }: { used: number; limit: number }) {
 }
 
 export function UsageDashboard({
-  payload,
   samples,
-  updatedAt,
   limitBytes = DEFAULT_30_DAY_LIMIT_BYTES,
 }: {
-  payload: ProxyHealthPayload;
   samples: ProxyHealthSample[];
-  updatedAt?: string;
   limitBytes?: number;
 }) {
   const usage = buildUsage(samples);
-  const errors = Array.isArray(payload.errors) ? payload.errors.length : 0;
 
   return (
     <div className="space-y-3">
       <div className="grid gap-3 lg:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.4fr)]">
         <UsageRing used={usage.month} limit={limitBytes} />
-        <div className="grid content-start gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <MiniStat label="Today" value={formatBytes(usage.today)} />
+        <div className="grid content-start gap-3 sm:grid-cols-3">
+          <MiniStat label="24 hours" value={formatBytes(usage.day)} />
           <MiniStat label="7 days" value={formatBytes(usage.week)} />
           <MiniStat label="30 days" value={formatBytes(usage.month)} />
-          <MiniStat label="Total" value={formatBytes(usage.total)} />
-          <div className="rounded-xl border bg-background/80 px-4 py-3 shadow-sm sm:col-span-2 xl:col-span-4">
-            <div className="text-xs text-muted-foreground">Updated</div>
-            <div className="mt-1 text-sm">
-              {updatedAt ? new Date(updatedAt).toLocaleString() : 'unknown'} · {usage.samples} samples · {errors ? `${errors} errors` : 'ok'}
-            </div>
-          </div>
         </div>
       </div>
 
@@ -263,7 +246,7 @@ export function UsageDashboard({
         <div className="rounded-2xl border bg-background/80 p-4 shadow-sm">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">24 hours</h2>
-            <span className="text-xs text-muted-foreground">{formatBytes(usage.dayGroups.reduce((sum, bucket) => sum + bucket.bytes, 0))}</span>
+            <span className="text-xs text-muted-foreground">{formatBytes(usage.day)}</span>
           </div>
           <Bars buckets={usage.dayGroups} />
         </div>
