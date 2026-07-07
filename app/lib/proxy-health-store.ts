@@ -17,6 +17,16 @@ export type ProxyHealthPayload = {
     public_ms?: number | null;
     target?: string;
   };
+  globalping?: {
+    location?: string;
+    bandwagon_ms?: number | null;
+    linode_ms?: number | null;
+    bandwagon_target?: string;
+    linode_target?: string;
+    source?: string;
+    checked_at?: string;
+    error?: string;
+  };
   wireguard?: {
     latest_handshake_seconds_ago?: number | null;
     rx_bytes?: number | null;
@@ -48,6 +58,8 @@ export type ProxyHealthSample = {
   txBytes: number | null;
   publicLatencyMs: number | null;
   wgLatencyMs: number | null;
+  shanghaiBandwagonMs: number | null;
+  shanghaiLinodeMs: number | null;
   mode: string | null;
 };
 
@@ -101,6 +113,8 @@ async function ensureProxyHealthTable() {
       tx_bytes bigint,
       public_latency_ms double precision,
       wg_latency_ms double precision,
+      shanghai_bandwagon_ms double precision,
+      shanghai_linode_ms double precision,
       payload jsonb NOT NULL,
       created_at timestamptz NOT NULL DEFAULT now()
     )
@@ -114,6 +128,16 @@ async function ensureProxyHealthTable() {
   await client`
     ALTER TABLE proxy_health_samples
     ADD COLUMN IF NOT EXISTS wg_latency_ms double precision
+  `;
+
+  await client`
+    ALTER TABLE proxy_health_samples
+    ADD COLUMN IF NOT EXISTS shanghai_bandwagon_ms double precision
+  `;
+
+  await client`
+    ALTER TABLE proxy_health_samples
+    ADD COLUMN IF NOT EXISTS shanghai_linode_ms double precision
   `;
 
   await client`
@@ -133,6 +157,8 @@ export async function saveProxyHealth(payload: ProxyHealthPayload) {
   const txBytes = toInteger(payload.wireguard?.tx_bytes);
   const publicLatencyMs = toNumber(payload.latency?.public_ms);
   const wgLatencyMs = toNumber(payload.latency?.wg_ms);
+  const shanghaiBandwagonMs = toNumber(payload.globalping?.bandwagon_ms);
+  const shanghaiLinodeMs = toNumber(payload.globalping?.linode_ms);
   const mode = typeof payload.mode === 'string' ? payload.mode.slice(0, 64) : null;
   const normalizedPayload: ProxyHealthPayload = {
     ...payload,
@@ -151,8 +177,30 @@ export async function saveProxyHealth(payload: ProxyHealthPayload) {
   `;
 
   await client`
-    INSERT INTO proxy_health_samples (host, checked_at, mode, rx_bytes, tx_bytes, public_latency_ms, wg_latency_ms, payload)
-    VALUES (${host}, ${checkedAt}, ${mode}, ${rxBytes}, ${txBytes}, ${publicLatencyMs}, ${wgLatencyMs}, ${JSON.stringify(normalizedPayload)}::jsonb)
+    INSERT INTO proxy_health_samples (
+      host,
+      checked_at,
+      mode,
+      rx_bytes,
+      tx_bytes,
+      public_latency_ms,
+      wg_latency_ms,
+      shanghai_bandwagon_ms,
+      shanghai_linode_ms,
+      payload
+    )
+    VALUES (
+      ${host},
+      ${checkedAt},
+      ${mode},
+      ${rxBytes},
+      ${txBytes},
+      ${publicLatencyMs},
+      ${wgLatencyMs},
+      ${shanghaiBandwagonMs},
+      ${shanghaiLinodeMs},
+      ${JSON.stringify(normalizedPayload)}::jsonb
+    )
   `;
 
   return { host, checkedAt };
@@ -193,9 +241,19 @@ export async function getProxyHealthSamples(host = 'bandwagon-la', days = 8): Pr
     tx_bytes: number | string | bigint | null;
     public_latency_ms: number | string | bigint | null;
     wg_latency_ms: number | string | bigint | null;
+    shanghai_bandwagon_ms: number | string | bigint | null;
+    shanghai_linode_ms: number | string | bigint | null;
     mode: string | null;
   }[]>`
-    SELECT checked_at, rx_bytes, tx_bytes, public_latency_ms, wg_latency_ms, mode
+    SELECT
+      checked_at,
+      rx_bytes,
+      tx_bytes,
+      public_latency_ms,
+      wg_latency_ms,
+      shanghai_bandwagon_ms,
+      shanghai_linode_ms,
+      mode
     FROM proxy_health_samples
     WHERE host = ${normalizeHost(host)}
       AND checked_at >= now() - (${days}::int * interval '1 day')
@@ -208,6 +266,8 @@ export async function getProxyHealthSamples(host = 'bandwagon-la', days = 8): Pr
     txBytes: toInteger(row.tx_bytes),
     publicLatencyMs: toNumber(row.public_latency_ms),
     wgLatencyMs: toNumber(row.wg_latency_ms),
+    shanghaiBandwagonMs: toNumber(row.shanghai_bandwagon_ms),
+    shanghaiLinodeMs: toNumber(row.shanghai_linode_ms),
     mode: row.mode,
   }));
 }
