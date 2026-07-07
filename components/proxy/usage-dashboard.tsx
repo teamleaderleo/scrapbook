@@ -210,38 +210,52 @@ function Card({ title, value, children, className = '' }: { title: string; value
   );
 }
 
+function BucketLabel({ label, show }: { label: string; show: boolean }) {
+  return <div className="min-w-0 flex-1 truncate text-center text-[9px] text-muted-foreground">{show ? label : ''}</div>;
+}
+
+function Tooltip({ text }: { text: string }) {
+  return (
+    <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded-md border bg-background px-2 py-1 text-[11px] shadow-sm group-hover:block group-focus:block">
+      {text}
+    </div>
+  );
+}
+
 function Bars({ buckets, height = 'h-20', labelEvery = 1 }: { buckets: Bucket[]; height?: string; labelEvery?: number }) {
   const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
 
   return (
-    <div className={`flex ${height} items-end gap-1 rounded-lg border bg-muted/30 p-2`}>
-      {buckets.map((bucket, index) => {
-        const isLatest = index === buckets.length - 1;
-        const showLabel = index % labelEvery === 0 || isLatest;
-        const hasValue = bucket.bytes > 0;
-        const barHeight = hasValue ? `${Math.max(12, (bucket.bytes / max) * 100)}%` : '2px';
-        const tooltip = `${bucket.label}: ${formatBytes(bucket.bytes)}`;
-        return (
-          <div
-            key={`${bucket.label}-${index}`}
-            className="group relative flex min-w-0 flex-1 cursor-help flex-col items-center justify-end gap-1 rounded-sm"
-            title={tooltip}
-            aria-label={tooltip}
-            tabIndex={0}
-          >
-            <div className="pointer-events-none absolute bottom-6 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-md border bg-background px-2 py-1 text-[11px] shadow-sm group-hover:block group-focus:block">
-              {tooltip}
-            </div>
-            <div className="flex h-full w-full items-end justify-center">
-              <div
-                className={`w-full max-w-7 rounded-t ${hasValue || isLatest ? 'bg-foreground' : 'bg-foreground/25'}`}
+    <div className={`grid ${height} grid-rows-[minmax(0,1fr)_auto] gap-1 rounded-lg border bg-muted/30 p-2`}>
+      <div className="flex min-h-0 items-end gap-1">
+        {buckets.map((bucket, index) => {
+          const isLatest = index === buckets.length - 1;
+          const hasValue = bucket.bytes > 0;
+          const barHeight = hasValue ? `${Math.max(14, (bucket.bytes / max) * 100)}%` : '2px';
+          const tooltip = `${bucket.label}: ${formatBytes(bucket.bytes)}`;
+          return (
+            <button
+              key={`${bucket.label}-${index}`}
+              type="button"
+              className="group relative flex h-full min-w-0 flex-1 cursor-help items-end justify-center rounded-sm px-0.5 focus:outline-none focus:ring-1 focus:ring-ring"
+              title={tooltip}
+              aria-label={tooltip}
+            >
+              <Tooltip text={tooltip} />
+              <span
+                className={`block w-full max-w-7 rounded-t ${hasValue || isLatest ? 'bg-foreground' : 'bg-foreground/25'}`}
                 style={{ height: barHeight }}
               />
-            </div>
-            <div className="h-3 truncate text-center text-[9px] text-muted-foreground">{showLabel ? bucket.label : ''}</div>
-          </div>
-        );
-      })}
+            </button>
+          );
+        })}
+      </div>
+      <div className="flex gap-1">
+        {buckets.map((bucket, index) => {
+          const isLatest = index === buckets.length - 1;
+          return <BucketLabel key={`${bucket.label}-${index}`} label={bucket.label} show={index % labelEvery === 0 || isLatest} />;
+        })}
+      </div>
     </div>
   );
 }
@@ -262,38 +276,42 @@ function MetricBars({ buckets, labelEvery = 4 }: { buckets: MetricBucket[]; labe
   const range = Math.max(0.1, upper - lower);
 
   return (
-    <div className="relative flex h-20 items-end gap-1 rounded-lg border bg-muted/30 p-2 pr-8">
-      <div className="pointer-events-none absolute right-1 top-1 text-[9px] text-muted-foreground">{formatMs(upper)}</div>
-      <div className="pointer-events-none absolute bottom-5 right-1 text-[9px] text-muted-foreground">{formatMs(lower)}</div>
-      {buckets.map((bucket, index) => {
-        const isLatest = index === buckets.length - 1;
-        const showLabel = index % labelEvery === 0 || isLatest;
-        const value = bucket.value;
-        const hasValue = typeof value === 'number' && Number.isFinite(value);
-        const normalized = hasValue ? Math.min(1, Math.max(0, (value - lower) / range)) : 0;
-        const barHeight = hasValue ? `${Math.max(14, normalized * 100)}%` : '2px';
-        const tooltip = `${bucket.label}: ${formatMs(value)}`;
-        return (
-          <div
-            key={`${bucket.label}-${index}`}
-            className="group relative flex min-w-0 flex-1 cursor-help flex-col items-center justify-end gap-1 rounded-sm"
-            title={tooltip}
-            aria-label={tooltip}
-            tabIndex={0}
-          >
-            <div className="pointer-events-none absolute bottom-6 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-md border bg-background px-2 py-1 text-[11px] shadow-sm group-hover:block group-focus:block">
-              {tooltip}
-            </div>
-            <div className="flex h-full w-full items-end justify-center">
-              <div
-                className={`w-full max-w-7 rounded-t ${hasValue || isLatest ? 'bg-foreground' : 'bg-foreground/25'}`}
+    <div className="grid h-20 grid-cols-[minmax(0,1fr)_2rem] grid-rows-[minmax(0,1fr)_auto] gap-x-1 gap-y-1 rounded-lg border bg-muted/30 p-2">
+      <div className="flex min-h-0 items-end gap-1">
+        {buckets.map((bucket, index) => {
+          const isLatest = index === buckets.length - 1;
+          const value = bucket.value;
+          const hasValue = typeof value === 'number' && Number.isFinite(value);
+          const normalized = hasValue ? Math.min(1, Math.max(0, (value - lower) / range)) : 0;
+          const barHeight = hasValue ? `${Math.max(14, normalized * 100)}%` : '2px';
+          const tooltip = `${bucket.label}: ${formatMs(value)}`;
+          return (
+            <button
+              key={`${bucket.label}-${index}`}
+              type="button"
+              className="group relative flex h-full min-w-0 flex-1 cursor-help items-end justify-center rounded-sm px-0.5 focus:outline-none focus:ring-1 focus:ring-ring"
+              title={tooltip}
+              aria-label={tooltip}
+            >
+              <Tooltip text={tooltip} />
+              <span
+                className={`block w-full max-w-7 rounded-t ${hasValue || isLatest ? 'bg-foreground' : 'bg-foreground/25'}`}
                 style={{ height: barHeight }}
               />
-            </div>
-            <div className="h-3 truncate text-center text-[9px] text-muted-foreground">{showLabel ? bucket.label : ''}</div>
-          </div>
-        );
-      })}
+            </button>
+          );
+        })}
+      </div>
+      <div className="row-span-2 flex flex-col justify-between text-right text-[9px] leading-none text-muted-foreground">
+        <span>{formatMs(upper)}</span>
+        <span>{formatMs(lower)}</span>
+      </div>
+      <div className="flex gap-1">
+        {buckets.map((bucket, index) => {
+          const isLatest = index === buckets.length - 1;
+          return <BucketLabel key={`${bucket.label}-${index}`} label={bucket.label} show={index % labelEvery === 0 || isLatest} />;
+        })}
+      </div>
     </div>
   );
 }
