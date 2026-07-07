@@ -1,3 +1,6 @@
+import { connection } from 'next/server';
+
+import type { ProxyHealthPayload, ProxyHealthSample } from '@/app/lib/proxy-health-store';
 import { getLatestProxyHealth, getProxyHealthSamples } from '@/app/lib/proxy-health-store';
 import { UsageDashboard } from './usage-dashboard';
 
@@ -7,7 +10,29 @@ function usageLimitBytes() {
   return safeGb * 1024 ** 3;
 }
 
+function numberOrNull(value: unknown) {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function latestStatusSample(payload: ProxyHealthPayload): ProxyHealthSample | null {
+  const checkedAt = payload.checked_at;
+  if (typeof checkedAt !== 'string') return null;
+
+  return {
+    checkedAt,
+    rxBytes: numberOrNull(payload.wireguard?.rx_bytes),
+    txBytes: numberOrNull(payload.wireguard?.tx_bytes),
+    publicLatencyMs: numberOrNull(payload.latency?.public_ms),
+    wgLatencyMs: numberOrNull(payload.latency?.wg_ms),
+    shanghaiBandwagonMs: numberOrNull(payload.globalping?.bandwagon_ms),
+    shanghaiLinodeMs: numberOrNull(payload.globalping?.linode_ms),
+    mode: typeof payload.mode === 'string' ? payload.mode : null,
+  };
+}
+
 export async function UsageDashboardContainer() {
+  await connection();
+
   const [status, samples] = await Promise.all([
     getLatestProxyHealth('bandwagon-la'),
     getProxyHealthSamples('bandwagon-la', 35),
@@ -21,5 +46,8 @@ export async function UsageDashboardContainer() {
     );
   }
 
-  return <UsageDashboard samples={samples} limitBytes={usageLimitBytes()} />;
+  const fallbackSample = latestStatusSample(status.payload);
+  const visibleSamples = samples.length > 0 || !fallbackSample ? samples : [fallbackSample];
+
+  return <UsageDashboard samples={visibleSamples} limitBytes={usageLimitBytes()} />;
 }
