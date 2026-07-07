@@ -1,6 +1,12 @@
 import { getLatestProxyHealth, getProxyHealthSamples } from '@/app/lib/proxy-health-store';
 import { UsageDashboard } from './usage-dashboard';
 
+function usageLimitBytes() {
+  const gb = Number(process.env.PROXY_USAGE_30D_LIMIT_GB ?? '1024');
+  const safeGb = Number.isFinite(gb) && gb > 0 ? gb : 1024;
+  return safeGb * 1024 ** 3;
+}
+
 export async function UsageDashboardContainer() {
   const [status, samples] = await Promise.all([
     getLatestProxyHealth('bandwagon-la'),
@@ -15,5 +21,5 @@ export async function UsageDashboardContainer() {
     );
   }
 
-  return <UsageDashboard payload={status.payload} samples={samples} updatedAt={status.updatedAt} />;
+  return <UsageDashboard payload={status.payload} samples={samples} updatedAt={status.updatedAt} limitBytes={usageLimitBytes()} />;
 }
