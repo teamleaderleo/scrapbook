@@ -49,5 +49,5 @@ export async function UsageDashboardContainer() {
   const fallbackSample = latestStatusSample(status.payload);
   const visibleSamples = samples.length > 0 || !fallbackSample ? samples : [fallbackSample];
 
-  return <UsageDashboard samples={visibleSamples} limitBytes={usageLimitBytes()} />;
+  return <UsageDashboard samples={visibleSamples} status={status} limitBytes={usageLimitBytes()} />;
 }
