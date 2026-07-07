@@ -52,10 +52,10 @@ function MenuLink({ item }: { item: NavLinkItem }) {
       href={item.href}
       target={item.external ? '_blank' : undefined}
       rel={item.external ? 'noopener noreferrer' : undefined}
-      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:outline-none"
+      className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:outline-none"
     >
-      {item.icon}
-      <span>{item.label}</span>
+      <span className="shrink-0">{item.icon}</span>
+      <span className="whitespace-nowrap">{item.label}</span>
     </Link>
   );
 }
@@ -63,11 +63,11 @@ function MenuLink({ item }: { item: NavLinkItem }) {
 function NavMenu({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <details className="group relative">
-      <summary className="flex cursor-pointer list-none items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center gap-1 rounded-full px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
         <span>{label}</span>
         <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
       </summary>
-      <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-xl border bg-background/95 p-1.5 shadow-xl backdrop-blur">
+      <div className="absolute right-0 top-full z-50 mt-2 w-max min-w-[8.5rem] rounded-xl border bg-background/95 p-1 shadow-xl backdrop-blur">
         {children}
       </div>
     </details>
@@ -83,12 +83,12 @@ function DiscordMenuButton() {
           description: 'teamleaderleo',
         });
       }}
-      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:outline-none"
+      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:outline-none"
       title="Discord - Click to copy username"
       type="button"
     >
-      <DiscordIcon className="h-4 w-4" />
-      <span>discord</span>
+      <DiscordIcon className="h-4 w-4 shrink-0" />
+      <span className="whitespace-nowrap">discord</span>
     </button>
   );
 }
@@ -102,7 +102,7 @@ export default function SiteNav() {
             teamleaderleo
           </Link>
 
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <NavMenu label="site">
               {siteLinks.map((item) => (
                 <MenuLink key={item.label} item={item} />
@@ -116,7 +116,7 @@ export default function SiteNav() {
               <DiscordMenuButton />
             </NavMenu>
 
-            <div className="ml-1 border-l pl-1 sm:ml-2 sm:pl-2">
+            <div className="ml-0.5 border-l pl-1 sm:ml-2 sm:pl-2">
               <ThemeToggle />
             </div>
           </div>
