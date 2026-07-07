@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 type Bucket = { label: string; bytes: number };
 type MetricBucket = { label: string; value: number | null };
+type LatencyPoint = { date: Date; value: number };
 
 const DEFAULT_30_DAY_LIMIT_BYTES = 1024 ** 4;
 
@@ -24,16 +25,27 @@ function formatMs(value: number | null | undefined) {
   return `${Math.round(value)} ms`;
 }
 
+function formatAdvantage(bandwagon: number | null, linode: number | null) {
+  if (typeof bandwagon !== 'number' || typeof linode !== 'number') return '—';
+  const delta = Math.round(linode - bandwagon);
+  if (delta === 0) return 'even';
+  return delta > 0 ? `${delta} ms better` : `${Math.abs(delta)} ms worse`;
+}
+
 function sampleTotal(sample: ProxyHealthSample) {
   if (typeof sample.rxBytes !== 'number' || typeof sample.txBytes !== 'number') return null;
   return sample.rxBytes + sample.txBytes;
 }
 
-function averageLatency(samples: { date: Date; value: number }[], latestDate: Date, windowMs: number) {
+function averageLatency(samples: LatencyPoint[], latestDate: Date, windowMs: number) {
   const start = latestDate.getTime() - windowMs;
   const values = samples.filter((sample) => sample.date.getTime() >= start).map((sample) => sample.value);
   if (values.length === 0) return null;
   return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function latestLatency(samples: LatencyPoint[]) {
+  return samples.at(-1)?.value ?? null;
 }
 
 function floorUtcHour(date: Date) {
@@ -60,19 +72,25 @@ function hourLabel(date: Date) {
   return date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: false, timeZone: 'UTC' });
 }
 
+function buildLatencyPoints(samples: ProxyHealthSample[], valueForSample: (sample: ProxyHealthSample) => number | null) {
+  return samples
+    .map((sample) => ({ date: new Date(sample.checkedAt), value: valueForSample(sample) }))
+    .filter((sample): sample is LatencyPoint => typeof sample.value === 'number' && Number.isFinite(sample.value) && !Number.isNaN(sample.date.getTime()))
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+}
+
 function buildUsage(samples: ProxyHealthSample[]) {
   const usable = samples
     .map((sample) => ({ date: new Date(sample.checkedAt), bytes: sampleTotal(sample) }))
     .filter((sample): sample is { date: Date; bytes: number } => typeof sample.bytes === 'number' && !Number.isNaN(sample.date.getTime()))
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-  const latencySamples = samples
-    .map((sample) => ({ date: new Date(sample.checkedAt), value: sample.publicLatencyMs ?? sample.wgLatencyMs }))
-    .filter((sample): sample is { date: Date; value: number } => typeof sample.value === 'number' && Number.isFinite(sample.value) && !Number.isNaN(sample.date.getTime()))
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+  const latencySamples = buildLatencyPoints(samples, (sample) => sample.publicLatencyMs ?? sample.wgLatencyMs);
+  const shanghaiBandwagonSamples = buildLatencyPoints(samples, (sample) => sample.shanghaiBandwagonMs);
+  const shanghaiLinodeSamples = buildLatencyPoints(samples, (sample) => sample.shanghaiLinodeMs);
 
   const latest = usable.at(-1);
-  const latestDate = latest?.date ?? latencySamples.at(-1)?.date ?? new Date();
+  const latestDate = latest?.date ?? latencySamples.at(-1)?.date ?? shanghaiBandwagonSamples.at(-1)?.date ?? new Date();
   const monthStart = floorUtcDay(new Date(latestDate.getTime() - 29 * 24 * 60 * 60 * 1000));
   const weekStart = floorUtcDay(new Date(latestDate.getTime() - 6 * 24 * 60 * 60 * 1000));
   const hourStart = floorUtcHour(new Date(latestDate.getTime() - 23 * 60 * 60 * 1000));
@@ -138,10 +156,14 @@ function buildUsage(samples: ProxyHealthSample[]) {
     day: dayGroups.reduce((sum, bucket) => sum + bucket.bytes, 0),
     week: weekBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
     month: monthBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
-    latency: latencySamples.at(-1)?.value ?? null,
+    latency: latestLatency(latencySamples),
     latency1h: averageLatency(latencySamples, latestDate, 60 * 60 * 1000),
     latency24h: averageLatency(latencySamples, latestDate, 24 * 60 * 60 * 1000),
     latency7d: averageLatency(latencySamples, latestDate, 7 * 24 * 60 * 60 * 1000),
+    shanghaiBandwagon: latestLatency(shanghaiBandwagonSamples),
+    shanghaiLinode: latestLatency(shanghaiLinodeSamples),
+    shanghaiBandwagon24h: averageLatency(shanghaiBandwagonSamples, latestDate, 24 * 60 * 60 * 1000),
+    shanghaiLinode24h: averageLatency(shanghaiLinodeSamples, latestDate, 24 * 60 * 60 * 1000),
     monthBuckets,
     weekBuckets,
     dayGroups,
@@ -265,31 +287,59 @@ function LatencyStat({ label, value }: { label: string; value: number | null }) 
   );
 }
 
+function ChinaEdgeStat({ label, value, average }: { label: string; value: number | null; average: number | null }) {
+  return (
+    <div className="rounded-lg border bg-background/50 px-3 py-2">
+      <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{label}</div>
+      <div className="mt-1 text-lg font-semibold tracking-tight">{formatMs(value)}</div>
+      <div className="mt-0.5 text-[11px] text-muted-foreground">24h {formatMs(average)}</div>
+    </div>
+  );
+}
+
 function LatencyCard({
   latency,
   latency1h,
   latency24h,
   latency7d,
+  shanghaiBandwagon,
+  shanghaiLinode,
+  shanghaiBandwagon24h,
+  shanghaiLinode24h,
   buckets,
 }: {
   latency: number | null;
   latency1h: number | null;
   latency24h: number | null;
   latency7d: number | null;
+  shanghaiBandwagon: number | null;
+  shanghaiLinode: number | null;
+  shanghaiBandwagon24h: number | null;
+  shanghaiLinode24h: number | null;
   buckets: MetricBucket[];
 }) {
   return (
     <Card className="lg:col-span-2" title="Latency">
-      <div className="grid gap-3 lg:grid-cols-[240px_minmax(0,1fr)]">
+      <div className="grid gap-3 xl:grid-cols-[300px_230px_minmax(0,1fr)]">
+        <div className="rounded-xl border bg-muted/30 p-4">
+          <div className="text-xs font-medium text-muted-foreground">China edge · Shanghai</div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <ChinaEdgeStat label="Bandwagon" value={shanghaiBandwagon} average={shanghaiBandwagon24h} />
+            <ChinaEdgeStat label="Linode" value={shanghaiLinode} average={shanghaiLinode24h} />
+          </div>
+          <div className="mt-3 text-xs text-muted-foreground">Bandwagon {formatAdvantage(shanghaiBandwagon, shanghaiLinode)}</div>
+        </div>
+
         <div className="flex min-h-28 flex-col justify-center rounded-xl border bg-muted/30 px-4">
           <div className="text-3xl font-semibold tracking-tight">{formatMs(latency)}</div>
-          <div className="mt-1 text-xs text-muted-foreground">latest</div>
+          <div className="mt-1 text-xs text-muted-foreground">server path latest</div>
           <div className="mt-4 grid grid-cols-3 gap-3">
             <LatencyStat label="1h" value={latency1h} />
             <LatencyStat label="24h" value={latency24h} />
             <LatencyStat label="7d" value={latency7d} />
           </div>
         </div>
+
         <MetricLine buckets={buckets} />
       </div>
     </Card>
@@ -360,6 +410,10 @@ export function UsageDashboard({
         latency1h={usage.latency1h}
         latency24h={usage.latency24h}
         latency7d={usage.latency7d}
+        shanghaiBandwagon={usage.shanghaiBandwagon}
+        shanghaiLinode={usage.shanghaiLinode}
+        shanghaiBandwagon24h={usage.shanghaiBandwagon24h}
+        shanghaiLinode24h={usage.shanghaiLinode24h}
         buckets={usage.latencyBuckets}
       />
     </div>
