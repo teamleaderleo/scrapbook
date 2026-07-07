@@ -6,6 +6,9 @@ type MetricBucket = { label: string; value: number | null };
 type LatencyPoint = { date: Date; value: number };
 
 const DEFAULT_30_DAY_LIMIT_BYTES = 1024 ** 4;
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
+const LEGACY_EXTERNAL_LATENCY_FLOOR_MS = 10;
 
 function formatBytes(value: number) {
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -87,41 +90,48 @@ function buildLatencyPoints(samples: ProxyHealthSample[], valueForSample: (sampl
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
+function usableExternalLatency(sample: ProxyHealthSample) {
+  if (typeof sample.publicLatencyMs !== 'number') return null;
+  if (!Number.isFinite(sample.publicLatencyMs)) return null;
+  if (sample.publicLatencyMs < LEGACY_EXTERNAL_LATENCY_FLOOR_MS) return null;
+  return sample.publicLatencyMs;
+}
+
 function buildUsage(samples: ProxyHealthSample[]) {
   const usable = samples
     .map((sample) => ({ date: new Date(sample.checkedAt), bytes: sampleTotal(sample) }))
     .filter((sample): sample is { date: Date; bytes: number } => typeof sample.bytes === 'number' && !Number.isNaN(sample.date.getTime()))
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-  const externalSamples = buildLatencyPoints(samples, (sample) => sample.publicLatencyMs);
+  const externalSamples = buildLatencyPoints(samples, usableExternalLatency);
   const relaySamples = buildLatencyPoints(samples, (sample) => sample.wgLatencyMs);
   const primarySamples = buildLatencyPoints(samples, (sample) => sample.shanghaiBandwagonMs);
 
   const latest = usable.at(-1);
   const latestDate = latest?.date ?? latestDateFrom(externalSamples, relaySamples, primarySamples) ?? new Date();
-  const monthStart = floorUtcDay(new Date(latestDate.getTime() - 29 * 24 * 60 * 60 * 1000));
-  const weekStart = floorUtcDay(new Date(latestDate.getTime() - 6 * 24 * 60 * 60 * 1000));
-  const hourStart = floorUtcHour(new Date(latestDate.getTime() - 23 * 60 * 60 * 1000));
+  const monthStart = floorUtcDay(new Date(latestDate.getTime() - 29 * DAY_MS));
+  const weekStart = floorUtcDay(new Date(latestDate.getTime() - 6 * DAY_MS));
+  const hourStart = floorUtcHour(new Date(latestDate.getTime() - 23 * HOUR_MS));
 
   const month = new Map<string, Bucket>();
   for (let index = 0; index < 30; index += 1) {
-    const date = new Date(monthStart.getTime() + index * 24 * 60 * 60 * 1000);
+    const date = new Date(monthStart.getTime() + index * DAY_MS);
     month.set(dayKey(date), { label: shortDayLabel(date), bytes: 0 });
   }
 
   const week = new Map<string, Bucket>();
   for (let index = 0; index < 7; index += 1) {
-    const date = new Date(weekStart.getTime() + index * 24 * 60 * 60 * 1000);
+    const date = new Date(weekStart.getTime() + index * DAY_MS);
     week.set(dayKey(date), { label: dayLabel(date), bytes: 0 });
   }
 
-  const dayGroups: Bucket[] = Array.from({ length: 6 }, (_, index) => {
-    const date = new Date(hourStart.getTime() + index * 4 * 60 * 60 * 1000);
+  const dayGroups: Bucket[] = Array.from({ length: 24 }, (_, index) => {
+    const date = new Date(hourStart.getTime() + index * HOUR_MS);
     return { label: hourLabel(date), bytes: 0 };
   });
 
-  const externalRaw = Array.from({ length: 6 }, (_, index) => {
-    const date = new Date(hourStart.getTime() + index * 4 * 60 * 60 * 1000);
+  const externalRaw = Array.from({ length: 24 }, (_, index) => {
+    const date = new Date(hourStart.getTime() + index * HOUR_MS);
     return { label: hourLabel(date), total: 0, count: 0 };
   });
 
@@ -139,14 +149,14 @@ function buildUsage(samples: ProxyHealthSample[]) {
     if (weekBucket) weekBucket.bytes += delta;
 
     if (current.date >= hourStart) {
-      const hourIndex = Math.floor((floorUtcHour(current.date).getTime() - hourStart.getTime()) / (4 * 60 * 60 * 1000));
+      const hourIndex = Math.floor((floorUtcHour(current.date).getTime() - hourStart.getTime()) / HOUR_MS);
       if (hourIndex >= 0 && hourIndex < dayGroups.length) dayGroups[hourIndex].bytes += delta;
     }
   }
 
   for (const sample of externalSamples) {
     if (sample.date < hourStart) continue;
-    const hourIndex = Math.floor((floorUtcHour(sample.date).getTime() - hourStart.getTime()) / (4 * 60 * 60 * 1000));
+    const hourIndex = Math.floor((floorUtcHour(sample.date).getTime() - hourStart.getTime()) / HOUR_MS);
     if (hourIndex >= 0 && hourIndex < externalRaw.length) {
       externalRaw[hourIndex].total += sample.value;
       externalRaw[hourIndex].count += 1;
@@ -169,13 +179,13 @@ function buildUsage(samples: ProxyHealthSample[]) {
     week: weekBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
     month: monthBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
     external: latestLatency(externalSamples),
-    external24h: averageLatency(externalSamples, latestDate, 24 * 60 * 60 * 1000),
-    external7d: averageLatency(externalSamples, latestDate, 7 * 24 * 60 * 60 * 1000),
+    external24h: averageLatency(externalSamples, latestDate, DAY_MS),
+    external7d: averageLatency(externalSamples, latestDate, 7 * DAY_MS),
     primary,
     relay,
     primaryPlusEgress,
-    primary24h: averageLatency(primarySamples, latestDate, 24 * 60 * 60 * 1000),
-    relay24h: averageLatency(relaySamples, latestDate, 24 * 60 * 60 * 1000),
+    primary24h: averageLatency(primarySamples, latestDate, DAY_MS),
+    relay24h: averageLatency(relaySamples, latestDate, DAY_MS),
     monthBuckets,
     weekBuckets,
     dayGroups,
@@ -195,13 +205,14 @@ function Card({ title, value, children, className = '' }: { title: string; value
   );
 }
 
-function Bars({ buckets, height = 'h-20' }: { buckets: Bucket[]; height?: string }) {
+function Bars({ buckets, height = 'h-20', labelEvery = 1 }: { buckets: Bucket[]; height?: string; labelEvery?: number }) {
   const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
 
   return (
     <div className={`flex ${height} items-end gap-1 rounded-lg border bg-muted/30 p-2`}>
       {buckets.map((bucket, index) => {
         const isLatest = index === buckets.length - 1;
+        const showLabel = index % labelEvery === 0 || isLatest;
         const barHeight = `${Math.max(bucket.bytes === 0 ? 2 : 8, (bucket.bytes / max) * 100)}%`;
         return (
           <div key={`${bucket.label}-${index}`} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1">
@@ -212,7 +223,7 @@ function Bars({ buckets, height = 'h-20' }: { buckets: Bucket[]; height?: string
                 title={`${bucket.label}: ${formatBytes(bucket.bytes)}`}
               />
             </div>
-            <div className="truncate text-center text-[9px] text-muted-foreground">{bucket.label}</div>
+            <div className="h-3 truncate text-center text-[9px] text-muted-foreground">{showLabel ? bucket.label : ''}</div>
           </div>
         );
       })}
@@ -220,73 +231,36 @@ function Bars({ buckets, height = 'h-20' }: { buckets: Bucket[]; height?: string
   );
 }
 
-function Trend({ buckets }: { buckets: Bucket[] }) {
-  const width = 900;
-  const height = 120;
-  const paddingX = 20;
-  const paddingY = 14;
-  const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
-  const step = buckets.length > 1 ? (width - paddingX * 2) / (buckets.length - 1) : 0;
-  const points = buckets.map((bucket, index) => {
-    const x = paddingX + index * step;
-    const y = height - paddingY - (bucket.bytes / max) * (height - paddingY * 2);
-    return `${x},${y}`;
-  });
-  const area = `${paddingX},${height - paddingY} ${points.join(' ')} ${width - paddingX},${height - paddingY}`;
+function MetricBars({ buckets, labelEvery = 4 }: { buckets: MetricBucket[]; labelEvery?: number }) {
+  const validValues = buckets.map((bucket) => bucket.value).filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
 
-  return (
-    <svg className="h-28 w-full overflow-visible" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="30 day usage trend">
-      <polygon points={area} className="fill-foreground/10" />
-      <polyline points={points.join(' ')} fill="none" className="stroke-foreground" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      {buckets.map((bucket, index) => {
-        if (index % 6 !== 0 && index !== buckets.length - 1) return null;
-        const x = paddingX + index * step;
-        return (
-          <text key={`${bucket.label}-${index}`} x={x} y={height - 1} textAnchor="middle" className="fill-muted-foreground text-[9px]">
-            {bucket.label}
-          </text>
-        );
-      })}
-    </svg>
-  );
-}
-
-function MetricLine({ buckets }: { buckets: MetricBucket[] }) {
-  const width = 900;
-  const height = 82;
-  const paddingX = 20;
-  const paddingY = 12;
-  const valid = buckets
-    .map((bucket, index) => ({ ...bucket, index }))
-    .filter((bucket): bucket is MetricBucket & { value: number; index: number } => typeof bucket.value === 'number' && Number.isFinite(bucket.value));
-
-  if (valid.length === 0) {
+  if (validValues.length === 0) {
     return <div className="flex h-20 items-center justify-center rounded-lg border bg-muted/30 text-xs text-muted-foreground">no data</div>;
   }
 
-  const max = Math.max(1, ...valid.map((bucket) => bucket.value));
-  const min = Math.min(...valid.map((bucket) => bucket.value));
-  const range = Math.max(1, max - min);
-  const step = buckets.length > 1 ? (width - paddingX * 2) / (buckets.length - 1) : 0;
-  const points = valid.map((bucket) => {
-    const x = paddingX + bucket.index * step;
-    const y = height - paddingY - ((bucket.value - min) / range) * (height - paddingY * 2);
-    return `${x},${y}`;
-  });
+  const max = Math.max(1, ...validValues);
 
   return (
-    <svg className="h-20 w-full overflow-visible rounded-lg border bg-muted/30" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="External latency trend">
-      <polyline points={points.join(' ')} fill="none" className="stroke-foreground" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    <div className="flex h-20 items-end gap-1 rounded-lg border bg-muted/30 p-2">
       {buckets.map((bucket, index) => {
-        if (index % 2 !== 0 && index !== buckets.length - 1) return null;
-        const x = paddingX + index * step;
+        const isLatest = index === buckets.length - 1;
+        const showLabel = index % labelEvery === 0 || isLatest;
+        const value = bucket.value;
+        const barHeight = typeof value === 'number' && Number.isFinite(value) ? `${Math.max(8, (value / max) * 100)}%` : '2px';
         return (
-          <text key={`${bucket.label}-${index}`} x={x} y={height - 1} textAnchor="middle" className="fill-muted-foreground text-[9px]">
-            {bucket.label}
-          </text>
+          <div key={`${bucket.label}-${index}`} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1">
+            <div className="flex h-full w-full items-end justify-center">
+              <div
+                className={`w-full max-w-7 rounded-t ${isLatest ? 'bg-foreground' : 'bg-foreground/55'}`}
+                style={{ height: barHeight }}
+                title={`${bucket.label}: ${formatMs(value)}`}
+              />
+            </div>
+            <div className="h-3 truncate text-center text-[9px] text-muted-foreground">{showLabel ? bucket.label : ''}</div>
+          </div>
         );
       })}
-    </svg>
+    </div>
   );
 }
 
@@ -308,7 +282,6 @@ function LatencyCard({
   relay,
   primaryPlusEgress,
   primary24h,
-  relay24h,
   buckets,
 }: {
   external: number | null;
@@ -318,7 +291,6 @@ function LatencyCard({
   relay: number | null;
   primaryPlusEgress: number | null;
   primary24h: number | null;
-  relay24h: number | null;
   buckets: MetricBucket[];
 }) {
   return (
@@ -348,7 +320,7 @@ function LatencyCard({
           </div>
         </div>
 
-        <MetricLine buckets={buckets} />
+        <MetricBars buckets={buckets} labelEvery={4} />
       </div>
     </Card>
   );
@@ -402,7 +374,7 @@ export function UsageDashboard({
       <UsageRing used={usage.month} limit={limitBytes} />
 
       <Card title="30 days" value={formatBytes(usage.month)}>
-        <Trend buckets={usage.monthBuckets} />
+        <Bars buckets={usage.monthBuckets} height="h-28" labelEvery={6} />
       </Card>
 
       <Card title="7 days" value={formatBytes(usage.week)}>
@@ -410,7 +382,7 @@ export function UsageDashboard({
       </Card>
 
       <Card title="24 hours" value={formatBytes(usage.day)}>
-        <Bars buckets={usage.dayGroups} />
+        <Bars buckets={usage.dayGroups} labelEvery={4} />
       </Card>
 
       <LatencyCard
@@ -421,7 +393,6 @@ export function UsageDashboard({
         relay={usage.relay}
         primaryPlusEgress={usage.primaryPlusEgress}
         primary24h={usage.primary24h}
-        relay24h={usage.relay24h}
         buckets={usage.externalBuckets}
       />
     </div>
