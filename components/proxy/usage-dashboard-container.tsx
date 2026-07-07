@@ -21,5 +21,5 @@ export async function UsageDashboardContainer() {
     );
   }
 
-  return <UsageDashboard payload={status.payload} samples={samples} updatedAt={status.updatedAt} limitBytes={usageLimitBytes()} />;
+  return <UsageDashboard samples={samples} limitBytes={usageLimitBytes()} />;
 }
