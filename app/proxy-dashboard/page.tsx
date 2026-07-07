@@ -2,6 +2,7 @@ import SiteNav from '@/components/site-nav';
 import { getLatestProxyHealth, type ProxyHealthPayload } from '@/app/lib/proxy-health-store';
 import { Metadata } from 'next';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,11 +57,11 @@ function modeTone(mode: string | undefined) {
   return 'border-zinc-500/30 bg-zinc-500/10 text-zinc-700 dark:text-zinc-300';
 }
 
-function Pill({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+function Pill({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${className}`}>{children}</span>;
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="rounded-2xl border bg-background/80 p-5 shadow-sm backdrop-blur">
       <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">{title}</h2>
@@ -69,7 +70,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
+function Row({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b py-3 last:border-b-0">
       <span className="text-sm text-muted-foreground">{label}</span>
@@ -121,6 +122,7 @@ export default async function ProxyDashboardPage({ searchParams }: PageProps) {
   const mode = typeof payload?.mode === 'string' ? payload.mode : 'unknown';
   const sidecarOk = payload?.egress?.sidecar_ok === true;
   const fallbackOk = payload?.egress?.fallback_ok === true;
+  const latestJsonHref = token ? `/api/proxy-health/latest?token=${encodeURIComponent(token)}` : '/api/proxy-health/latest';
 
   return (
     <main className="min-h-screen bg-sidebar-background">
@@ -176,7 +178,7 @@ export default async function ProxyDashboardPage({ searchParams }: PageProps) {
 
             <Card title="Links">
               <div className="space-y-3 text-sm">
-                <Link className="block rounded-xl border p-3 hover:bg-accent" href="/api/proxy-health/latest">Latest JSON</Link>
+                <Link className="block rounded-xl border p-3 hover:bg-accent" href={latestJsonHref}>Latest JSON</Link>
                 <p className="text-muted-foreground">The ingest endpoint is <code className="rounded bg-muted px-1 py-0.5">/api/proxy-health/ingest</code>.</p>
               </div>
             </Card>
