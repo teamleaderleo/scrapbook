@@ -220,13 +220,22 @@ function Bars({ buckets, height = 'h-20', labelEvery = 1 }: { buckets: Bucket[];
         const showLabel = index % labelEvery === 0 || isLatest;
         const hasValue = bucket.bytes > 0;
         const barHeight = hasValue ? `${Math.max(12, (bucket.bytes / max) * 100)}%` : '2px';
+        const tooltip = `${bucket.label}: ${formatBytes(bucket.bytes)}`;
         return (
-          <div key={`${bucket.label}-${index}`} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1">
+          <div
+            key={`${bucket.label}-${index}`}
+            className="group relative flex min-w-0 flex-1 cursor-help flex-col items-center justify-end gap-1 rounded-sm"
+            title={tooltip}
+            aria-label={tooltip}
+            tabIndex={0}
+          >
+            <div className="pointer-events-none absolute bottom-6 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-md border bg-background px-2 py-1 text-[11px] shadow-sm group-hover:block group-focus:block">
+              {tooltip}
+            </div>
             <div className="flex h-full w-full items-end justify-center">
               <div
                 className={`w-full max-w-7 rounded-t ${hasValue || isLatest ? 'bg-foreground' : 'bg-foreground/25'}`}
                 style={{ height: barHeight }}
-                title={`${bucket.label}: ${formatBytes(bucket.bytes)}`}
               />
             </div>
             <div className="h-3 truncate text-center text-[9px] text-muted-foreground">{showLabel ? bucket.label : ''}</div>
@@ -244,23 +253,41 @@ function MetricBars({ buckets, labelEvery = 4 }: { buckets: MetricBucket[]; labe
     return <div className="flex h-20 items-center justify-center rounded-lg border bg-muted/30 text-xs text-muted-foreground">no data</div>;
   }
 
-  const max = Math.max(1, ...validValues);
+  const min = Math.min(...validValues);
+  const max = Math.max(...validValues);
+  const spread = max - min;
+  const padding = spread > 0 ? Math.max(spread * 0.15, 0.2) : Math.max(max * 0.002, 0.5);
+  const lower = min - padding;
+  const upper = max + padding;
+  const range = Math.max(0.1, upper - lower);
 
   return (
-    <div className="flex h-20 items-end gap-1 rounded-lg border bg-muted/30 p-2">
+    <div className="relative flex h-20 items-end gap-1 rounded-lg border bg-muted/30 p-2 pr-8">
+      <div className="pointer-events-none absolute right-1 top-1 text-[9px] text-muted-foreground">{formatMs(upper)}</div>
+      <div className="pointer-events-none absolute bottom-5 right-1 text-[9px] text-muted-foreground">{formatMs(lower)}</div>
       {buckets.map((bucket, index) => {
         const isLatest = index === buckets.length - 1;
         const showLabel = index % labelEvery === 0 || isLatest;
         const value = bucket.value;
         const hasValue = typeof value === 'number' && Number.isFinite(value);
-        const barHeight = hasValue ? `${Math.max(12, (value / max) * 100)}%` : '2px';
+        const normalized = hasValue ? Math.min(1, Math.max(0, (value - lower) / range)) : 0;
+        const barHeight = hasValue ? `${Math.max(14, normalized * 100)}%` : '2px';
+        const tooltip = `${bucket.label}: ${formatMs(value)}`;
         return (
-          <div key={`${bucket.label}-${index}`} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1">
+          <div
+            key={`${bucket.label}-${index}`}
+            className="group relative flex min-w-0 flex-1 cursor-help flex-col items-center justify-end gap-1 rounded-sm"
+            title={tooltip}
+            aria-label={tooltip}
+            tabIndex={0}
+          >
+            <div className="pointer-events-none absolute bottom-6 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-md border bg-background px-2 py-1 text-[11px] shadow-sm group-hover:block group-focus:block">
+              {tooltip}
+            </div>
             <div className="flex h-full w-full items-end justify-center">
               <div
                 className={`w-full max-w-7 rounded-t ${hasValue || isLatest ? 'bg-foreground' : 'bg-foreground/25'}`}
                 style={{ height: barHeight }}
-                title={`${bucket.label}: ${formatMs(value)}`}
               />
             </div>
             <div className="h-3 truncate text-center text-[9px] text-muted-foreground">{showLabel ? bucket.label : ''}</div>
@@ -330,7 +357,7 @@ function LatencyCard({
         </div>
 
         <div>
-          <div className="mb-2 text-xs font-medium text-muted-foreground">Primary + Egress · 24h</div>
+          <div className="mb-2 text-xs font-medium text-muted-foreground">Primary + Egress · 24h · adaptive</div>
           <MetricBars buckets={buckets} labelEvery={4} />
         </div>
       </div>
