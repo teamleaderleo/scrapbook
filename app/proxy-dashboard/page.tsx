@@ -4,8 +4,6 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-export const dynamic = 'force-dynamic';
-
 export const metadata: Metadata = {
   title: 'Proxy Dashboard',
   description: 'Bandwagon and Linode proxy health dashboard.',
