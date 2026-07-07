@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { Activity, Book, Box, Brain, ChevronDown, FileText, Sparkles, Twitter } from 'lucide-react';
+import { Activity, Box, Brain, ChevronDown, Sparkles, Twitter } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { RedditIcon } from './icons/reddit-icon';
 import { GitHubIcon } from './icons/github-icon';
@@ -18,12 +18,10 @@ type NavLinkItem = {
 };
 
 const siteLinks: NavLinkItem[] = [
-  { href: '/resume', label: 'resume', icon: <FileText size={15} /> },
-  { href: '/space', label: 'space', icon: <Brain size={15} /> },
-  { href: '/blog', label: 'blog', icon: <Book size={15} /> },
-  { href: 'https://glossless.app/', label: 'glossless', icon: <Sparkles size={15} />, external: true },
-  { href: '/gallery', label: 'cube', icon: <Box size={15} /> },
   { href: '/proxy-dashboard', label: 'proxy', icon: <Activity size={15} /> },
+  { href: '/space', label: 'space', icon: <Brain size={15} /> },
+  { href: '/gallery', label: 'cube', icon: <Box size={15} /> },
+  { href: 'https://glossless.app/', label: 'glossless', icon: <Sparkles size={15} />, external: true },
 ];
 
 const socialLinks: NavLinkItem[] = [
