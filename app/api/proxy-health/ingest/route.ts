@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { saveProxyHealth, type ProxyHealthPayload } from '@/app/lib/proxy-health-store';
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-
 function getBearerToken(request: NextRequest) {
   const authorization = request.headers.get('authorization');
   if (authorization?.startsWith('Bearer ')) {
