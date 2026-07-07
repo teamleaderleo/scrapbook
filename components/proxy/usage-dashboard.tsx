@@ -139,9 +139,9 @@ function buildUsage(samples: ProxyHealthSample[]) {
   };
 }
 
-function Card({ title, value, children }: { title: string; value?: string; children: ReactNode }) {
+function Card({ title, value, children, className = '' }: { title: string; value?: string; children: ReactNode; className?: string }) {
   return (
-    <section className="rounded-2xl border bg-background/80 p-4 shadow-sm">
+    <section className={`rounded-2xl border bg-background/80 p-4 shadow-sm ${className}`}>
       <div className="mb-3 flex items-center justify-between gap-4">
         <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">{title}</h2>
         {value ? <div className="text-sm font-medium text-muted-foreground">{value}</div> : null}
@@ -208,16 +208,16 @@ function Trend({ buckets }: { buckets: Bucket[] }) {
 }
 
 function MetricLine({ buckets }: { buckets: MetricBucket[] }) {
-  const width = 600;
-  const height = 110;
-  const paddingX = 18;
-  const paddingY = 14;
+  const width = 900;
+  const height = 120;
+  const paddingX = 24;
+  const paddingY = 16;
   const valid = buckets
     .map((bucket, index) => ({ ...bucket, index }))
     .filter((bucket): bucket is MetricBucket & { value: number; index: number } => typeof bucket.value === 'number' && Number.isFinite(bucket.value));
 
   if (valid.length === 0) {
-    return <div className="flex h-24 items-center justify-center rounded-xl border bg-muted/30 text-xs text-muted-foreground">no data</div>;
+    return <div className="flex h-28 items-center justify-center rounded-xl border bg-muted/30 text-xs text-muted-foreground">no data</div>;
   }
 
   const max = Math.max(1, ...valid.map((bucket) => bucket.value));
@@ -231,7 +231,7 @@ function MetricLine({ buckets }: { buckets: MetricBucket[] }) {
   });
 
   return (
-    <svg className="h-24 w-full overflow-visible rounded-xl border bg-muted/30 p-2" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="Latency trend">
+    <svg className="h-28 w-full overflow-visible rounded-xl border bg-muted/30 p-2" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="Latency trend">
       <polyline points={points.join(' ')} fill="none" className="stroke-foreground" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
       {buckets.map((bucket, index) => {
         if (index % 2 !== 0 && index !== buckets.length - 1) return null;
@@ -305,7 +305,7 @@ export function UsageDashboard({
         <Bars buckets={usage.dayGroups} />
       </Card>
 
-      <Card title="Latency" value={formatMs(usage.latency)}>
+      <Card className="lg:col-span-2" title="Latency" value={formatMs(usage.latency)}>
         <MetricLine buckets={usage.latencyBuckets} />
       </Card>
     </div>
