@@ -25,9 +25,9 @@ function formatMs(value: number | null | undefined) {
   return `${Math.round(value)} ms`;
 }
 
-function formatAdvantage(bandwagon: number | null, linode: number | null) {
-  if (typeof bandwagon !== 'number' || typeof linode !== 'number') return '—';
-  const delta = Math.round(linode - bandwagon);
+function formatAdvantage(primary: number | null, egress: number | null) {
+  if (typeof primary !== 'number' || typeof egress !== 'number') return '—';
+  const delta = Math.round(egress - primary);
   if (delta === 0) return 'even';
   return delta > 0 ? `${delta} ms better` : `${Math.abs(delta)} ms worse`;
 }
@@ -324,10 +324,10 @@ function LatencyCard({
         <div className="rounded-xl border bg-muted/30 p-4">
           <div className="text-xs font-medium text-muted-foreground">Edge · City</div>
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <EdgeStat label="Bandwagon" value={shanghaiBandwagon} average={shanghaiBandwagon24h} />
-            <EdgeStat label="Linode" value={shanghaiLinode} average={shanghaiLinode24h} />
+            <EdgeStat label="Primary" value={shanghaiBandwagon} average={shanghaiBandwagon24h} />
+            <EdgeStat label="Egress" value={shanghaiLinode} average={shanghaiLinode24h} />
           </div>
-          <div className="mt-3 text-xs text-muted-foreground">Bandwagon {formatAdvantage(shanghaiBandwagon, shanghaiLinode)}</div>
+          <div className="mt-3 text-xs text-muted-foreground">Primary {formatAdvantage(shanghaiBandwagon, shanghaiLinode)}</div>
         </div>
 
         <div className="flex min-h-28 flex-col justify-center rounded-xl border bg-muted/30 px-4">
