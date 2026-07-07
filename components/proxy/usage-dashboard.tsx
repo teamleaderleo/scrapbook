@@ -7,10 +7,12 @@ function formatBytes(value: number) {
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
   let size = Number.isFinite(value) ? value : 0;
   let unit = 0;
+
   while (size >= 1024 && unit < units.length - 1) {
     size /= 1024;
     unit += 1;
   }
+
   return `${size.toFixed(unit === 0 ? 0 : 2)} ${units[unit]}`;
 }
 
@@ -46,23 +48,23 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 
 function Row({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b py-3 last:border-b-0">
+    <div className="flex items-center justify-between gap-4 border-b py-2.5 last:border-b-0">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <span className="break-all text-right text-sm font-medium">{value}</span>
+      <span className="text-right text-sm font-medium">{value}</span>
     </div>
   );
 }
 
-function total(sample: ProxyHealthSample) {
+function sampleTotal(sample: ProxyHealthSample) {
   if (typeof sample.rxBytes !== 'number' || typeof sample.txBytes !== 'number') return null;
   return sample.rxBytes + sample.txBytes;
 }
 
-function floorHour(date: Date) {
+function floorUtcHour(date: Date) {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours()));
 }
 
-function floorDay(date: Date) {
+function floorUtcDay(date: Date) {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
@@ -80,18 +82,18 @@ function hourLabel(date: Date) {
 
 function buildUsage(samples: ProxyHealthSample[]) {
   const usable = samples
-    .map((sample) => ({ date: new Date(sample.checkedAt), bytes: total(sample) }))
+    .map((sample) => ({ date: new Date(sample.checkedAt), bytes: sampleTotal(sample) }))
     .filter((sample): sample is { date: Date; bytes: number } => typeof sample.bytes === 'number' && !Number.isNaN(sample.date.getTime()))
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
   const latest = usable.at(-1);
   const latestDate = latest?.date ?? new Date();
-  const dayStart = floorDay(new Date(latestDate.getTime() - 6 * 24 * 60 * 60 * 1000));
-  const hourStart = floorHour(new Date(latestDate.getTime() - 23 * 60 * 60 * 1000));
+  const dayStart = floorUtcDay(new Date(latestDate.getTime() - 6 * 24 * 60 * 60 * 1000));
+  const hourStart = floorUtcHour(new Date(latestDate.getTime() - 23 * 60 * 60 * 1000));
 
   const daily = new Map<string, Bucket>();
-  for (let i = 0; i < 7; i += 1) {
-    const date = new Date(dayStart.getTime() + i * 24 * 60 * 60 * 1000);
+  for (let index = 0; index < 7; index += 1) {
+    const date = new Date(dayStart.getTime() + index * 24 * 60 * 60 * 1000);
     daily.set(dayKey(date), { label: dayLabel(date), bytes: 0 });
   }
 
@@ -100,22 +102,23 @@ function buildUsage(samples: ProxyHealthSample[]) {
     return { label: hourLabel(date), bytes: 0 };
   });
 
-  for (let i = 1; i < usable.length; i += 1) {
-    const previous = usable[i - 1];
-    const current = usable[i];
+  for (let index = 1; index < usable.length; index += 1) {
+    const previous = usable[index - 1];
+    const current = usable[index];
     const delta = current.bytes - previous.bytes;
     if (delta <= 0) continue;
 
-    const bucket = daily.get(dayKey(current.date));
-    if (bucket) bucket.bytes += delta;
+    const dayBucket = daily.get(dayKey(current.date));
+    if (dayBucket) dayBucket.bytes += delta;
 
     if (current.date >= hourStart) {
-      const hourIndex = Math.floor((floorHour(current.date).getTime() - hourStart.getTime()) / 3600000);
+      const hourIndex = Math.floor((floorUtcHour(current.date).getTime() - hourStart.getTime()) / 3600000);
       if (hourIndex >= 0 && hourIndex < hourly.length) hourly[hourIndex].bytes += delta;
     }
   }
 
   const days = Array.from(daily.values());
+
   return {
     total: latest?.bytes ?? 0,
     today: days.at(-1)?.bytes ?? 0,
@@ -126,20 +129,36 @@ function buildUsage(samples: ProxyHealthSample[]) {
   };
 }
 
-function BarChart({ buckets }: { buckets: Bucket[] }) {
+function CompactBars({ buckets, dense = false }: { buckets: Bucket[]; dense?: boolean }) {
   const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
+  const latest = buckets.at(-1);
 
   return (
-    <div className="space-y-3">
-      {buckets.map((bucket) => (
-        <div key={bucket.label} className="grid grid-cols-[4rem_1fr_5.5rem] items-center gap-3 text-sm">
-          <div className="text-xs text-muted-foreground">{bucket.label}</div>
-          <div className="h-3 overflow-hidden rounded-full bg-muted">
-            <div className="h-full rounded-full bg-foreground/70" style={{ width: `${Math.max(3, (bucket.bytes / max) * 100)}%` }} />
-          </div>
-          <div className="text-right text-xs tabular-nums text-muted-foreground">{formatBytes(bucket.bytes)}</div>
-        </div>
-      ))}
+    <div>
+      <div className="flex h-40 items-end gap-1.5 rounded-xl border bg-muted/30 p-3">
+        {buckets.map((bucket, index) => {
+          const height = `${Math.max(bucket.bytes === 0 ? 2 : 8, (bucket.bytes / max) * 100)}%`;
+          const isLatest = index === buckets.length - 1;
+          return (
+            <div key={`${bucket.label}-${index}`} className="group flex min-w-0 flex-1 flex-col items-center justify-end gap-2">
+              <div className="relative flex h-full w-full items-end justify-center">
+                <div
+                  className={`w-full max-w-8 rounded-t-md ${isLatest ? 'bg-foreground' : 'bg-foreground/55'}`}
+                  style={{ height }}
+                  title={`${bucket.label}: ${formatBytes(bucket.bytes)}`}
+                />
+              </div>
+              <div className={`truncate text-center text-[10px] text-muted-foreground ${dense && index % 3 !== 0 && !isLatest ? 'opacity-0' : ''}`}>
+                {bucket.label}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+        <span>older → newer</span>
+        <span>latest: {latest ? formatBytes(latest.bytes) : 'unknown'}</span>
+      </div>
     </div>
   );
 }
@@ -162,9 +181,13 @@ export function UsageDashboard({ payload, samples, updatedAt }: { payload: Proxy
         <Stat label="Total" value={formatBytes(usage.total)} sub="current counter" />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card title="Last 24 hours"><BarChart buckets={usage.hours} /></Card>
-        <Card title="Last 7 days"><BarChart buckets={usage.days} /></Card>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
+        <Card title="Last 24 hours">
+          <CompactBars buckets={usage.hours} dense />
+        </Card>
+        <Card title="Last 7 days">
+          <CompactBars buckets={usage.days} />
+        </Card>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
