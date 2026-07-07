@@ -1,6 +1,8 @@
 import type { ProxyHealthSample } from '@/app/lib/proxy-health-store';
+import type { ReactNode } from 'react';
 
 type Bucket = { label: string; bytes: number };
+type MetricBucket = { label: string; value: number | null };
 
 const DEFAULT_30_DAY_LIMIT_BYTES = 1024 ** 4;
 
@@ -15,6 +17,11 @@ function formatBytes(value: number) {
   }
 
   return `${size.toFixed(unit === 0 ? 0 : 2)} ${units[unit]}`;
+}
+
+function formatMs(value: number | null | undefined) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return '—';
+  return `${Math.round(value)} ms`;
 }
 
 function sampleTotal(sample: ProxyHealthSample) {
@@ -52,8 +59,13 @@ function buildUsage(samples: ProxyHealthSample[]) {
     .filter((sample): sample is { date: Date; bytes: number } => typeof sample.bytes === 'number' && !Number.isNaN(sample.date.getTime()))
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
+  const latencySamples = samples
+    .map((sample) => ({ date: new Date(sample.checkedAt), value: sample.publicLatencyMs ?? sample.wgLatencyMs }))
+    .filter((sample): sample is { date: Date; value: number } => typeof sample.value === 'number' && Number.isFinite(sample.value) && !Number.isNaN(sample.date.getTime()))
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+
   const latest = usable.at(-1);
-  const latestDate = latest?.date ?? new Date();
+  const latestDate = latest?.date ?? latencySamples.at(-1)?.date ?? new Date();
   const monthStart = floorUtcDay(new Date(latestDate.getTime() - 29 * 24 * 60 * 60 * 1000));
   const weekStart = floorUtcDay(new Date(latestDate.getTime() - 6 * 24 * 60 * 60 * 1000));
   const hourStart = floorUtcHour(new Date(latestDate.getTime() - 23 * 60 * 60 * 1000));
@@ -75,6 +87,11 @@ function buildUsage(samples: ProxyHealthSample[]) {
     return { label: hourLabel(date), bytes: 0 };
   });
 
+  const latencyRaw = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date(hourStart.getTime() + index * 4 * 60 * 60 * 1000);
+    return { label: hourLabel(date), total: 0, count: 0 };
+  });
+
   for (let index = 1; index < usable.length; index += 1) {
     const previous = usable[index - 1];
     const current = usable[index];
@@ -94,20 +111,35 @@ function buildUsage(samples: ProxyHealthSample[]) {
     }
   }
 
+  for (const sample of latencySamples) {
+    if (sample.date < hourStart) continue;
+    const hourIndex = Math.floor((floorUtcHour(sample.date).getTime() - hourStart.getTime()) / (4 * 60 * 60 * 1000));
+    if (hourIndex >= 0 && hourIndex < latencyRaw.length) {
+      latencyRaw[hourIndex].total += sample.value;
+      latencyRaw[hourIndex].count += 1;
+    }
+  }
+
   const monthBuckets = Array.from(month.values());
   const weekBuckets = Array.from(week.values());
+  const latencyBuckets: MetricBucket[] = latencyRaw.map((bucket) => ({
+    label: bucket.label,
+    value: bucket.count > 0 ? bucket.total / bucket.count : null,
+  }));
 
   return {
     day: dayGroups.reduce((sum, bucket) => sum + bucket.bytes, 0),
     week: weekBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
     month: monthBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
+    latency: latencySamples.at(-1)?.value ?? null,
     monthBuckets,
     weekBuckets,
     dayGroups,
+    latencyBuckets,
   };
 }
 
-function Card({ title, value, children }: { title: string; value?: string; children: React.ReactNode }) {
+function Card({ title, value, children }: { title: string; value?: string; children: ReactNode }) {
   return (
     <section className="rounded-2xl border bg-background/80 p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between gap-4">
@@ -164,6 +196,45 @@ function Trend({ buckets }: { buckets: Bucket[] }) {
       <polyline points={points.join(' ')} fill="none" className="stroke-foreground" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
       {buckets.map((bucket, index) => {
         if (index % 5 !== 0 && index !== buckets.length - 1) return null;
+        const x = paddingX + index * step;
+        return (
+          <text key={`${bucket.label}-${index}`} x={x} y={height - 2} textAnchor="middle" className="fill-muted-foreground text-[10px]">
+            {bucket.label}
+          </text>
+        );
+      })}
+    </svg>
+  );
+}
+
+function MetricLine({ buckets }: { buckets: MetricBucket[] }) {
+  const width = 600;
+  const height = 110;
+  const paddingX = 18;
+  const paddingY = 14;
+  const valid = buckets
+    .map((bucket, index) => ({ ...bucket, index }))
+    .filter((bucket): bucket is MetricBucket & { value: number; index: number } => typeof bucket.value === 'number' && Number.isFinite(bucket.value));
+
+  if (valid.length === 0) {
+    return <div className="flex h-24 items-center justify-center rounded-xl border bg-muted/30 text-xs text-muted-foreground">no data</div>;
+  }
+
+  const max = Math.max(1, ...valid.map((bucket) => bucket.value));
+  const min = Math.min(...valid.map((bucket) => bucket.value));
+  const range = Math.max(1, max - min);
+  const step = buckets.length > 1 ? (width - paddingX * 2) / (buckets.length - 1) : 0;
+  const points = valid.map((bucket) => {
+    const x = paddingX + bucket.index * step;
+    const y = height - paddingY - ((bucket.value - min) / range) * (height - paddingY * 2);
+    return `${x},${y}`;
+  });
+
+  return (
+    <svg className="h-24 w-full overflow-visible rounded-xl border bg-muted/30 p-2" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="Latency trend">
+      <polyline points={points.join(' ')} fill="none" className="stroke-foreground" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      {buckets.map((bucket, index) => {
+        if (index % 2 !== 0 && index !== buckets.length - 1) return null;
         const x = paddingX + index * step;
         return (
           <text key={`${bucket.label}-${index}`} x={x} y={height - 2} textAnchor="middle" className="fill-muted-foreground text-[10px]">
@@ -232,6 +303,10 @@ export function UsageDashboard({
 
       <Card title="24 hours" value={formatBytes(usage.day)}>
         <Bars buckets={usage.dayGroups} />
+      </Card>
+
+      <Card title="Latency" value={formatMs(usage.latency)}>
+        <MetricLine buckets={usage.latencyBuckets} />
       </Card>
     </div>
   );
