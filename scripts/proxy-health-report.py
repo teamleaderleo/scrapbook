@@ -10,6 +10,10 @@ Optional:
   EXPECTED_EGRESS_IPV4=172.235.56.214
   EXPECTED_EGRESS_IPV6=2a01:7e03::2000:56ff:fe71:cbd
   PROXY_LATENCY_URL=https://www.gstatic.com/generate_204
+  GLOBALPING_LOCATION=Shanghai
+  GLOBALPING_BANDWAGON_TARGET=67.230.173.112
+  GLOBALPING_LINODE_TARGET=172.235.56.214
+  GLOBALPING_INTERVAL_SECONDS=1800
 """
 
 from __future__ import annotations
@@ -36,6 +40,13 @@ SIDECAR_SOCKS = os.environ.get("SIDECAR_SOCKS", "10.200.0.2:18089")
 FALLBACK_SOCKS = os.environ.get("FALLBACK_SOCKS", "127.0.0.1:18088")
 LATENCY_URL = os.environ.get("PROXY_LATENCY_URL", "https://www.gstatic.com/generate_204")
 WG_LATENCY_TARGET = os.environ.get("WG_LATENCY_TARGET", "10.77.0.1")
+GLOBALPING_ENABLED = os.environ.get("GLOBALPING_ENABLED", "1") != "0"
+GLOBALPING_API_URL = os.environ.get("GLOBALPING_API_URL", "https://api.globalping.io/v1/measurements")
+GLOBALPING_LOCATION = os.environ.get("GLOBALPING_LOCATION", "Shanghai")
+GLOBALPING_BANDWAGON_TARGET = os.environ.get("GLOBALPING_BANDWAGON_TARGET", "67.230.173.112")
+GLOBALPING_LINODE_TARGET = os.environ.get("GLOBALPING_LINODE_TARGET", EXPECTED_IPV4)
+GLOBALPING_INTERVAL_SECONDS = int(os.environ.get("GLOBALPING_INTERVAL_SECONDS", "1800"))
+GLOBALPING_CACHE = Path(os.environ.get("GLOBALPING_CACHE", "/var/lib/proxy-health/globalping-cache.json"))
 
 
 def now_iso() -> str:
@@ -103,6 +114,111 @@ def http_total_ms_via_socks(url: str, socks: str, timeout: int = 10) -> float | 
         return round(float(output.strip()) * 1000, 2)
     except ValueError:
         return None
+
+
+def request_json(url: str, data: dict[str, Any] | None = None, timeout: int = 20) -> dict[str, Any]:
+    body = json.dumps(data).encode("utf-8") if data is not None else None
+    request = urllib.request.Request(
+        url,
+        data=body,
+        method="POST" if data is not None else "GET",
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "bandwagon-proxy-health/1.0",
+        },
+    )
+
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def extract_globalping_avg_ms(measurement: dict[str, Any]) -> float | None:
+    for item in measurement.get("results", []) or []:
+      result = item.get("result") or {}
+      stats = result.get("stats") or {}
+      for key in ("avg", "average", "mean"):
+          value = stats.get(key)
+          if isinstance(value, (int, float)) and value >= 0:
+              return round(float(value), 2)
+      raw = result.get("rawOutput") or result.get("raw_output") or ""
+      parsed = parse_ping_avg_ms(str(raw))
+      if parsed is not None:
+          return parsed
+    return None
+
+
+def globalping_ping_avg_ms(target: str) -> float | None:
+    payload = {
+        "type": "ping",
+        "target": target,
+        "locations": [{"magic": GLOBALPING_LOCATION}],
+        "limit": 1,
+        "measurementOptions": {"packets": 3},
+    }
+
+    created = request_json(GLOBALPING_API_URL, payload, timeout=20)
+    measurement_id = created.get("id")
+    if not isinstance(measurement_id, str) or not measurement_id:
+        return None
+
+    url = f"{GLOBALPING_API_URL.rstrip('/')}/{measurement_id}"
+    for _ in range(12):
+        time.sleep(2)
+        measurement = request_json(url, timeout=20)
+        value = extract_globalping_avg_ms(measurement)
+        if value is not None:
+            return value
+        if measurement.get("status") in {"failed", "finished"}:
+            break
+    return None
+
+
+def read_globalping_cache() -> dict[str, Any] | None:
+    try:
+        payload = json.loads(GLOBALPING_CACHE.read_text())
+        checked_at = payload.get("checked_at")
+        checked_ts = datetime.fromisoformat(str(checked_at).replace("Z", "+00:00")).timestamp()
+        if time.time() - checked_ts <= GLOBALPING_INTERVAL_SECONDS:
+            return {**payload, "source": "cache"}
+    except Exception:
+        return None
+    return None
+
+
+def write_globalping_cache(payload: dict[str, Any]) -> None:
+    try:
+        GLOBALPING_CACHE.parent.mkdir(parents=True, exist_ok=True)
+        GLOBALPING_CACHE.write_text(json.dumps(payload))
+    except Exception:
+        pass
+
+
+def read_globalping() -> dict[str, Any]:
+    base = {
+        "location": GLOBALPING_LOCATION,
+        "bandwagon_target": GLOBALPING_BANDWAGON_TARGET,
+        "linode_target": GLOBALPING_LINODE_TARGET,
+    }
+
+    if not GLOBALPING_ENABLED:
+        return {**base, "bandwagon_ms": None, "linode_ms": None, "source": "disabled"}
+
+    cached = read_globalping_cache()
+    if cached is not None:
+        return {**base, **cached}
+
+    try:
+        result = {
+            **base,
+            "bandwagon_ms": globalping_ping_avg_ms(GLOBALPING_BANDWAGON_TARGET),
+            "linode_ms": globalping_ping_avg_ms(GLOBALPING_LINODE_TARGET),
+            "source": "globalping",
+            "checked_at": now_iso(),
+        }
+        write_globalping_cache(result)
+        return result
+    except Exception as exc:  # noqa: BLE001 - keep main health report alive
+        return {**base, "bandwagon_ms": None, "linode_ms": None, "source": "globalping", "error": str(exc)}
 
 
 def parse_ping_avg_ms(output: str) -> float | None:
@@ -228,6 +344,9 @@ def build_payload() -> dict[str, Any]:
 
     sidecar_ok = sidecar_ipv4_ok and sidecar_ipv4.strip() == EXPECTED_IPV4
     fallback_ok = fallback_ipv4_ok and fallback_ipv4.strip() == EXPECTED_IPV4
+    globalping = read_globalping()
+    if globalping.get("error"):
+        errors.append(f"globalping check failed: {globalping['error']}")
 
     return {
         "host": HOST,
@@ -242,6 +361,7 @@ def build_payload() -> dict[str, Any]:
             "fallback_ok": fallback_ok,
         },
         "latency": read_latency(),
+        "globalping": globalping,
         "wireguard": read_wireguard(),
         "xray": xray,
         "expected": {
