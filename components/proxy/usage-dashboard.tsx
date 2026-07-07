@@ -2,6 +2,8 @@ import type { ProxyHealthPayload, ProxyHealthSample } from '@/app/lib/proxy-heal
 
 type Bucket = { label: string; bytes: number };
 
+const DEFAULT_30_DAY_LIMIT_BYTES = 1024 ** 4;
+
 function formatBytes(value: number) {
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
   let size = Number.isFinite(value) ? value : 0;
@@ -113,12 +115,12 @@ function MiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border bg-background/80 px-4 py-3 shadow-sm">
       <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="mt-1 text-xl font-semibold tracking-tight">{value}</div>
+      <div className="mt-1 text-lg font-semibold tracking-tight">{value}</div>
     </div>
   );
 }
 
-function Bars({ buckets, height = 'h-24' }: { buckets: Bucket[]; height?: string }) {
+function Bars({ buckets, height = 'h-20' }: { buckets: Bucket[]; height?: string }) {
   const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
 
   return (
@@ -145,7 +147,7 @@ function Bars({ buckets, height = 'h-24' }: { buckets: Bucket[]; height?: string
 
 function Trend({ buckets }: { buckets: Bucket[] }) {
   const width = 900;
-  const height = 190;
+  const height = 150;
   const paddingX = 24;
   const paddingY = 18;
   const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
@@ -160,13 +162,10 @@ function Trend({ buckets }: { buckets: Bucket[] }) {
   return (
     <div className="rounded-2xl border bg-background/80 p-4 shadow-sm">
       <div className="mb-2 flex items-center justify-between">
-        <div>
-          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">Monthly trend</h2>
-          <p className="mt-1 text-xs text-muted-foreground">30 daily buckets</p>
-        </div>
+        <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">30 days</h2>
         <div className="text-right text-xs text-muted-foreground">latest {formatBytes(buckets.at(-1)?.bytes ?? 0)}</div>
       </div>
-      <svg className="h-48 w-full overflow-visible" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="Monthly usage trend">
+      <svg className="h-36 w-full overflow-visible" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="30 day usage trend">
         <polygon points={area} className="fill-foreground/10" />
         <polyline points={points.join(' ')} fill="none" className="stroke-foreground" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
         {buckets.map((bucket, index) => {
@@ -183,23 +182,69 @@ function Trend({ buckets }: { buckets: Bucket[] }) {
   );
 }
 
-export function UsageDashboard({ payload, samples, updatedAt }: { payload: ProxyHealthPayload; samples: ProxyHealthSample[]; updatedAt?: string }) {
+function UsageRing({ used, limit }: { used: number; limit: number }) {
+  const safeLimit = limit > 0 ? limit : DEFAULT_30_DAY_LIMIT_BYTES;
+  const percent = Math.min(100, Math.max(0, (used / safeLimit) * 100));
+  const radius = 70;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference * (1 - percent / 100);
+
+  return (
+    <div className="rounded-2xl border bg-background/80 p-4 shadow-sm">
+      <div className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">30 days</div>
+      <div className="flex items-center gap-5">
+        <svg className="h-44 w-44 shrink-0 -rotate-90" viewBox="0 0 180 180" role="img" aria-label="30 day usage progress">
+          <circle cx="90" cy="90" r={radius} fill="none" className="stroke-muted" strokeWidth="16" />
+          <circle
+            cx="90"
+            cy="90"
+            r={radius}
+            fill="none"
+            className="stroke-foreground"
+            strokeWidth="16"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={dashOffset}
+          />
+        </svg>
+        <div>
+          <div className="text-4xl font-semibold tracking-tight">{Math.round(percent)}%</div>
+          <div className="mt-2 text-sm text-muted-foreground">{formatBytes(used)} / {formatBytes(safeLimit)}</div>
+          <div className="mt-4 text-xs text-muted-foreground">rolling window</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function UsageDashboard({
+  payload,
+  samples,
+  updatedAt,
+  limitBytes = DEFAULT_30_DAY_LIMIT_BYTES,
+}: {
+  payload: ProxyHealthPayload;
+  samples: ProxyHealthSample[];
+  updatedAt?: string;
+  limitBytes?: number;
+}) {
   const usage = buildUsage(samples);
-  const mode = typeof payload.mode === 'string' ? payload.mode : 'unknown';
   const errors = Array.isArray(payload.errors) ? payload.errors.length : 0;
 
   return (
     <div className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <MiniStat label="Today" value={formatBytes(usage.today)} />
-        <MiniStat label="7 days" value={formatBytes(usage.week)} />
-        <MiniStat label="30 days" value={formatBytes(usage.month)} />
-        <MiniStat label="Total" value={formatBytes(usage.total)} />
-        <div className="rounded-xl border bg-background/80 px-4 py-3 shadow-sm">
-          <div className="text-xs text-muted-foreground">State</div>
-          <div className="mt-2 flex items-center gap-2 text-sm">
-            <span>{mode}</span>
-            <span className="text-muted-foreground">{errors ? `${errors} errors` : 'ok'}</span>
+      <div className="grid gap-3 lg:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.4fr)]">
+        <UsageRing used={usage.month} limit={limitBytes} />
+        <div className="grid content-start gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <MiniStat label="Today" value={formatBytes(usage.today)} />
+          <MiniStat label="7 days" value={formatBytes(usage.week)} />
+          <MiniStat label="30 days" value={formatBytes(usage.month)} />
+          <MiniStat label="Total" value={formatBytes(usage.total)} />
+          <div className="rounded-xl border bg-background/80 px-4 py-3 shadow-sm sm:col-span-2 xl:col-span-4">
+            <div className="text-xs text-muted-foreground">Updated</div>
+            <div className="mt-1 text-sm">
+              {updatedAt ? new Date(updatedAt).toLocaleString() : 'unknown'} · {usage.samples} samples · {errors ? `${errors} errors` : 'ok'}
+            </div>
           </div>
         </div>
       </div>
@@ -212,20 +257,16 @@ export function UsageDashboard({ payload, samples, updatedAt }: { payload: Proxy
             <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">7 days</h2>
             <span className="text-xs text-muted-foreground">{formatBytes(usage.week)}</span>
           </div>
-          <Bars buckets={usage.weekBuckets} height="h-24" />
+          <Bars buckets={usage.weekBuckets} />
         </div>
 
         <div className="rounded-2xl border bg-background/80 p-4 shadow-sm">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">24 hours</h2>
-            <span className="text-xs text-muted-foreground">4-hour buckets</span>
+            <span className="text-xs text-muted-foreground">{formatBytes(usage.dayGroups.reduce((sum, bucket) => sum + bucket.bytes, 0))}</span>
           </div>
-          <Bars buckets={usage.dayGroups} height="h-24" />
+          <Bars buckets={usage.dayGroups} />
         </div>
-      </div>
-
-      <div className="text-right text-xs text-muted-foreground">
-        {usage.samples} samples{updatedAt ? ` · updated ${new Date(updatedAt).toLocaleString()}` : ''}
       </div>
     </div>
   );
