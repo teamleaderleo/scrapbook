@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { Activity, Book, Box, Brain, ChevronDown, FileText, Sparkles, Twitter } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -61,8 +62,33 @@ function MenuLink({ item }: { item: NavLinkItem }) {
 }
 
 function NavMenu({ label, children }: { label: string; children: React.ReactNode }) {
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+
+  useEffect(() => {
+    function closeOnOutsideTap(event: PointerEvent) {
+      const details = detailsRef.current;
+      if (!details?.open) return;
+      if (event.target instanceof Node && details.contains(event.target)) return;
+      details.open = false;
+    }
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape' && detailsRef.current?.open) {
+        detailsRef.current.open = false;
+      }
+    }
+
+    document.addEventListener('pointerdown', closeOnOutsideTap);
+    document.addEventListener('keydown', closeOnEscape);
+
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideTap);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, []);
+
   return (
-    <details className="group relative">
+    <details ref={detailsRef} className="group relative">
       <summary className="flex cursor-pointer list-none items-center gap-1 rounded-full px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
         <span>{label}</span>
         <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
