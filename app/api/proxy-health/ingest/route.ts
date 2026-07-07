@@ -10,8 +10,14 @@ function getBearerToken(request: NextRequest) {
   return request.headers.get('x-proxy-health-token')?.trim() ?? '';
 }
 
+function expectedHealthToken() {
+  if (process.env.PROXY_HEALTH_TOKEN) return process.env.PROXY_HEALTH_TOKEN;
+  if (process.env.NODE_ENV !== 'production') return 'local-test';
+  return null;
+}
+
 export async function POST(request: NextRequest) {
-  const expectedToken = process.env.PROXY_HEALTH_TOKEN;
+  const expectedToken = expectedHealthToken();
 
   if (!expectedToken) {
     return NextResponse.json(
