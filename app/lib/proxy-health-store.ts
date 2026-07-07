@@ -12,6 +12,11 @@ export type ProxyHealthPayload = {
     sidecar_ok?: boolean;
     fallback_ok?: boolean;
   };
+  latency?: {
+    wg_ms?: number | null;
+    public_ms?: number | null;
+    target?: string;
+  };
   wireguard?: {
     latest_handshake_seconds_ago?: number | null;
     rx_bytes?: number | null;
@@ -41,6 +46,8 @@ export type ProxyHealthSample = {
   checkedAt: string;
   rxBytes: number | null;
   txBytes: number | null;
+  publicLatencyMs: number | null;
+  wgLatencyMs: number | null;
   mode: string | null;
 };
 
@@ -65,6 +72,13 @@ function toInteger(value: unknown) {
   return null;
 }
 
+function toNumber(value: unknown) {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'bigint') return Number(value);
+  if (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value))) return Number(value);
+  return null;
+}
+
 async function ensureProxyHealthTable() {
   if (tableReady) return;
 
@@ -85,9 +99,21 @@ async function ensureProxyHealthTable() {
       mode text,
       rx_bytes bigint,
       tx_bytes bigint,
+      public_latency_ms double precision,
+      wg_latency_ms double precision,
       payload jsonb NOT NULL,
       created_at timestamptz NOT NULL DEFAULT now()
     )
+  `;
+
+  await client`
+    ALTER TABLE proxy_health_samples
+    ADD COLUMN IF NOT EXISTS public_latency_ms double precision
+  `;
+
+  await client`
+    ALTER TABLE proxy_health_samples
+    ADD COLUMN IF NOT EXISTS wg_latency_ms double precision
   `;
 
   await client`
@@ -105,6 +131,8 @@ export async function saveProxyHealth(payload: ProxyHealthPayload) {
   const checkedAt = normalizeCheckedAt(payload.checked_at);
   const rxBytes = toInteger(payload.wireguard?.rx_bytes);
   const txBytes = toInteger(payload.wireguard?.tx_bytes);
+  const publicLatencyMs = toNumber(payload.latency?.public_ms);
+  const wgLatencyMs = toNumber(payload.latency?.wg_ms);
   const mode = typeof payload.mode === 'string' ? payload.mode.slice(0, 64) : null;
   const normalizedPayload: ProxyHealthPayload = {
     ...payload,
@@ -123,8 +151,8 @@ export async function saveProxyHealth(payload: ProxyHealthPayload) {
   `;
 
   await client`
-    INSERT INTO proxy_health_samples (host, checked_at, mode, rx_bytes, tx_bytes, payload)
-    VALUES (${host}, ${checkedAt}, ${mode}, ${rxBytes}, ${txBytes}, ${JSON.stringify(normalizedPayload)}::jsonb)
+    INSERT INTO proxy_health_samples (host, checked_at, mode, rx_bytes, tx_bytes, public_latency_ms, wg_latency_ms, payload)
+    VALUES (${host}, ${checkedAt}, ${mode}, ${rxBytes}, ${txBytes}, ${publicLatencyMs}, ${wgLatencyMs}, ${JSON.stringify(normalizedPayload)}::jsonb)
   `;
 
   return { host, checkedAt };
@@ -163,9 +191,11 @@ export async function getProxyHealthSamples(host = 'bandwagon-la', days = 8): Pr
     checked_at: Date | string;
     rx_bytes: number | string | bigint | null;
     tx_bytes: number | string | bigint | null;
+    public_latency_ms: number | string | bigint | null;
+    wg_latency_ms: number | string | bigint | null;
     mode: string | null;
   }[]>`
-    SELECT checked_at, rx_bytes, tx_bytes, mode
+    SELECT checked_at, rx_bytes, tx_bytes, public_latency_ms, wg_latency_ms, mode
     FROM proxy_health_samples
     WHERE host = ${normalizeHost(host)}
       AND checked_at >= now() - (${days}::int * interval '1 day')
@@ -176,6 +206,8 @@ export async function getProxyHealthSamples(host = 'bandwagon-la', days = 8): Pr
     checkedAt: new Date(row.checked_at).toISOString(),
     rxBytes: toInteger(row.rx_bytes),
     txBytes: toInteger(row.tx_bytes),
+    publicLatencyMs: toNumber(row.public_latency_ms),
+    wgLatencyMs: toNumber(row.wg_latency_ms),
     mode: row.mode,
   }));
 }
