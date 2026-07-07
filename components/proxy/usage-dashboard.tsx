@@ -97,6 +97,10 @@ function usableExternalLatency(sample: ProxyHealthSample) {
   return sample.publicLatencyMs;
 }
 
+function estimatedPathLatency(sample: ProxyHealthSample) {
+  return sumMs(sample.shanghaiBandwagonMs, sample.wgLatencyMs);
+}
+
 function buildUsage(samples: ProxyHealthSample[]) {
   const usable = samples
     .map((sample) => ({ date: new Date(sample.checkedAt), bytes: sampleTotal(sample) }))
@@ -106,9 +110,10 @@ function buildUsage(samples: ProxyHealthSample[]) {
   const externalSamples = buildLatencyPoints(samples, usableExternalLatency);
   const relaySamples = buildLatencyPoints(samples, (sample) => sample.wgLatencyMs);
   const primarySamples = buildLatencyPoints(samples, (sample) => sample.shanghaiBandwagonMs);
+  const estimatedSamples = buildLatencyPoints(samples, estimatedPathLatency);
 
   const latest = usable.at(-1);
-  const latestDate = latest?.date ?? latestDateFrom(externalSamples, relaySamples, primarySamples) ?? new Date();
+  const latestDate = latest?.date ?? latestDateFrom(externalSamples, relaySamples, primarySamples, estimatedSamples) ?? new Date();
   const monthStart = floorUtcDay(new Date(latestDate.getTime() - 29 * DAY_MS));
   const weekStart = floorUtcDay(new Date(latestDate.getTime() - 6 * DAY_MS));
   const hourStart = floorUtcHour(new Date(latestDate.getTime() - 23 * HOUR_MS));
@@ -130,7 +135,7 @@ function buildUsage(samples: ProxyHealthSample[]) {
     return { label: hourLabel(date), bytes: 0 };
   });
 
-  const externalRaw = Array.from({ length: 24 }, (_, index) => {
+  const estimatedRaw = Array.from({ length: 24 }, (_, index) => {
     const date = new Date(hourStart.getTime() + index * HOUR_MS);
     return { label: hourLabel(date), total: 0, count: 0 };
   });
@@ -154,18 +159,18 @@ function buildUsage(samples: ProxyHealthSample[]) {
     }
   }
 
-  for (const sample of externalSamples) {
+  for (const sample of estimatedSamples) {
     if (sample.date < hourStart) continue;
     const hourIndex = Math.floor((floorUtcHour(sample.date).getTime() - hourStart.getTime()) / HOUR_MS);
-    if (hourIndex >= 0 && hourIndex < externalRaw.length) {
-      externalRaw[hourIndex].total += sample.value;
-      externalRaw[hourIndex].count += 1;
+    if (hourIndex >= 0 && hourIndex < estimatedRaw.length) {
+      estimatedRaw[hourIndex].total += sample.value;
+      estimatedRaw[hourIndex].count += 1;
     }
   }
 
   const monthBuckets = Array.from(month.values());
   const weekBuckets = Array.from(week.values());
-  const externalBuckets: MetricBucket[] = externalRaw.map((bucket) => ({
+  const estimatedBuckets: MetricBucket[] = estimatedRaw.map((bucket) => ({
     label: bucket.label,
     value: bucket.count > 0 ? bucket.total / bucket.count : null,
   }));
@@ -185,11 +190,11 @@ function buildUsage(samples: ProxyHealthSample[]) {
     relay,
     primaryPlusEgress,
     primary24h: averageLatency(primarySamples, latestDate, DAY_MS),
-    relay24h: averageLatency(relaySamples, latestDate, DAY_MS),
+    estimated24h: averageLatency(estimatedSamples, latestDate, DAY_MS),
+    estimatedBuckets,
     monthBuckets,
     weekBuckets,
     dayGroups,
-    externalBuckets,
   };
 }
 
@@ -213,12 +218,13 @@ function Bars({ buckets, height = 'h-20', labelEvery = 1 }: { buckets: Bucket[];
       {buckets.map((bucket, index) => {
         const isLatest = index === buckets.length - 1;
         const showLabel = index % labelEvery === 0 || isLatest;
-        const barHeight = `${Math.max(bucket.bytes === 0 ? 2 : 8, (bucket.bytes / max) * 100)}%`;
+        const hasValue = bucket.bytes > 0;
+        const barHeight = hasValue ? `${Math.max(12, (bucket.bytes / max) * 100)}%` : '2px';
         return (
           <div key={`${bucket.label}-${index}`} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1">
             <div className="flex h-full w-full items-end justify-center">
               <div
-                className={`w-full max-w-7 rounded-t ${isLatest ? 'bg-foreground' : 'bg-foreground/55'}`}
+                className={`w-full max-w-7 rounded-t ${hasValue || isLatest ? 'bg-foreground' : 'bg-foreground/25'}`}
                 style={{ height: barHeight }}
                 title={`${bucket.label}: ${formatBytes(bucket.bytes)}`}
               />
@@ -246,12 +252,13 @@ function MetricBars({ buckets, labelEvery = 4 }: { buckets: MetricBucket[]; labe
         const isLatest = index === buckets.length - 1;
         const showLabel = index % labelEvery === 0 || isLatest;
         const value = bucket.value;
-        const barHeight = typeof value === 'number' && Number.isFinite(value) ? `${Math.max(8, (value / max) * 100)}%` : '2px';
+        const hasValue = typeof value === 'number' && Number.isFinite(value);
+        const barHeight = hasValue ? `${Math.max(12, (value / max) * 100)}%` : '2px';
         return (
           <div key={`${bucket.label}-${index}`} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1">
             <div className="flex h-full w-full items-end justify-center">
               <div
-                className={`w-full max-w-7 rounded-t ${isLatest ? 'bg-foreground' : 'bg-foreground/55'}`}
+                className={`w-full max-w-7 rounded-t ${hasValue || isLatest ? 'bg-foreground' : 'bg-foreground/25'}`}
                 style={{ height: barHeight }}
                 title={`${bucket.label}: ${formatMs(value)}`}
               />
@@ -282,6 +289,7 @@ function LatencyCard({
   relay,
   primaryPlusEgress,
   primary24h,
+  estimated24h,
   buckets,
 }: {
   external: number | null;
@@ -291,6 +299,7 @@ function LatencyCard({
   relay: number | null;
   primaryPlusEgress: number | null;
   primary24h: number | null;
+  estimated24h: number | null;
   buckets: MetricBucket[];
 }) {
   return (
@@ -301,7 +310,7 @@ function LatencyCard({
           <div className="mt-2 grid grid-cols-3 gap-2">
             <MiniStat label="Primary" value={primary} note={`24h ${formatMs(primary24h)}`} />
             <MiniStat label="Egress" value={relay} note="relay" />
-            <MiniStat label="Primary + Egress" value={primaryPlusEgress} note="estimated" />
+            <MiniStat label="Primary + Egress" value={primaryPlusEgress} note={`24h ${formatMs(estimated24h)}`} />
           </div>
         </div>
 
@@ -320,7 +329,10 @@ function LatencyCard({
           </div>
         </div>
 
-        <MetricBars buckets={buckets} labelEvery={4} />
+        <div>
+          <div className="mb-2 text-xs font-medium text-muted-foreground">Primary + Egress · 24h</div>
+          <MetricBars buckets={buckets} labelEvery={4} />
+        </div>
       </div>
     </Card>
   );
@@ -393,7 +405,8 @@ export function UsageDashboard({
         relay={usage.relay}
         primaryPlusEgress={usage.primaryPlusEgress}
         primary24h={usage.primary24h}
-        buckets={usage.externalBuckets}
+        estimated24h={usage.estimated24h}
+        buckets={usage.estimatedBuckets}
       />
     </div>
   );
