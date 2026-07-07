@@ -22,14 +22,13 @@ function formatBytes(value: number) {
 
 function formatMs(value: number | null | undefined) {
   if (typeof value !== 'number' || !Number.isFinite(value)) return '—';
+  if (value > 0 && value < 10) return `${value.toFixed(1)} ms`;
   return `${Math.round(value)} ms`;
 }
 
-function formatAdvantage(primary: number | null, egress: number | null) {
-  if (typeof primary !== 'number' || typeof egress !== 'number') return '—';
-  const delta = Math.round(egress - primary);
-  if (delta === 0) return 'even';
-  return delta > 0 ? `${delta} ms better` : `${Math.abs(delta)} ms worse`;
+function sumMs(...values: Array<number | null | undefined>) {
+  if (values.some((value) => typeof value !== 'number' || !Number.isFinite(value))) return null;
+  return values.reduce((sum, value) => sum + Number(value), 0);
 }
 
 function sampleTotal(sample: ProxyHealthSample) {
@@ -46,6 +45,11 @@ function averageLatency(samples: LatencyPoint[], latestDate: Date, windowMs: num
 
 function latestLatency(samples: LatencyPoint[]) {
   return samples.at(-1)?.value ?? null;
+}
+
+function latestDateFrom(...groups: LatencyPoint[][]) {
+  const dates = groups.flatMap((group) => group.map((sample) => sample.date.getTime())).filter((value) => Number.isFinite(value));
+  return dates.length > 0 ? new Date(Math.max(...dates)) : null;
 }
 
 function floorUtcHour(date: Date) {
@@ -85,12 +89,12 @@ function buildUsage(samples: ProxyHealthSample[]) {
     .filter((sample): sample is { date: Date; bytes: number } => typeof sample.bytes === 'number' && !Number.isNaN(sample.date.getTime()))
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-  const latencySamples = buildLatencyPoints(samples, (sample) => sample.publicLatencyMs ?? sample.wgLatencyMs);
-  const shanghaiBandwagonSamples = buildLatencyPoints(samples, (sample) => sample.shanghaiBandwagonMs);
-  const shanghaiLinodeSamples = buildLatencyPoints(samples, (sample) => sample.shanghaiLinodeMs);
+  const externalSamples = buildLatencyPoints(samples, (sample) => sample.publicLatencyMs);
+  const relaySamples = buildLatencyPoints(samples, (sample) => sample.wgLatencyMs);
+  const primarySamples = buildLatencyPoints(samples, (sample) => sample.shanghaiBandwagonMs);
 
   const latest = usable.at(-1);
-  const latestDate = latest?.date ?? latencySamples.at(-1)?.date ?? shanghaiBandwagonSamples.at(-1)?.date ?? new Date();
+  const latestDate = latest?.date ?? latestDateFrom(externalSamples, relaySamples, primarySamples) ?? new Date();
   const monthStart = floorUtcDay(new Date(latestDate.getTime() - 29 * 24 * 60 * 60 * 1000));
   const weekStart = floorUtcDay(new Date(latestDate.getTime() - 6 * 24 * 60 * 60 * 1000));
   const hourStart = floorUtcHour(new Date(latestDate.getTime() - 23 * 60 * 60 * 1000));
@@ -112,7 +116,7 @@ function buildUsage(samples: ProxyHealthSample[]) {
     return { label: hourLabel(date), bytes: 0 };
   });
 
-  const latencyRaw = Array.from({ length: 6 }, (_, index) => {
+  const externalRaw = Array.from({ length: 6 }, (_, index) => {
     const date = new Date(hourStart.getTime() + index * 4 * 60 * 60 * 1000);
     return { label: hourLabel(date), total: 0, count: 0 };
   });
@@ -136,71 +140,75 @@ function buildUsage(samples: ProxyHealthSample[]) {
     }
   }
 
-  for (const sample of latencySamples) {
+  for (const sample of externalSamples) {
     if (sample.date < hourStart) continue;
     const hourIndex = Math.floor((floorUtcHour(sample.date).getTime() - hourStart.getTime()) / (4 * 60 * 60 * 1000));
-    if (hourIndex >= 0 && hourIndex < latencyRaw.length) {
-      latencyRaw[hourIndex].total += sample.value;
-      latencyRaw[hourIndex].count += 1;
+    if (hourIndex >= 0 && hourIndex < externalRaw.length) {
+      externalRaw[hourIndex].total += sample.value;
+      externalRaw[hourIndex].count += 1;
     }
   }
 
   const monthBuckets = Array.from(month.values());
   const weekBuckets = Array.from(week.values());
-  const latencyBuckets: MetricBucket[] = latencyRaw.map((bucket) => ({
+  const externalBuckets: MetricBucket[] = externalRaw.map((bucket) => ({
     label: bucket.label,
     value: bucket.count > 0 ? bucket.total / bucket.count : null,
   }));
+
+  const primary = latestLatency(primarySamples);
+  const relay = latestLatency(relaySamples);
+  const primaryPlusEgress = sumMs(primary, relay);
 
   return {
     day: dayGroups.reduce((sum, bucket) => sum + bucket.bytes, 0),
     week: weekBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
     month: monthBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
-    latency: latestLatency(latencySamples),
-    latency1h: averageLatency(latencySamples, latestDate, 60 * 60 * 1000),
-    latency24h: averageLatency(latencySamples, latestDate, 24 * 60 * 60 * 1000),
-    latency7d: averageLatency(latencySamples, latestDate, 7 * 24 * 60 * 60 * 1000),
-    shanghaiBandwagon: latestLatency(shanghaiBandwagonSamples),
-    shanghaiLinode: latestLatency(shanghaiLinodeSamples),
-    shanghaiBandwagon24h: averageLatency(shanghaiBandwagonSamples, latestDate, 24 * 60 * 60 * 1000),
-    shanghaiLinode24h: averageLatency(shanghaiLinodeSamples, latestDate, 24 * 60 * 60 * 1000),
+    external: latestLatency(externalSamples),
+    external24h: averageLatency(externalSamples, latestDate, 24 * 60 * 60 * 1000),
+    external7d: averageLatency(externalSamples, latestDate, 7 * 24 * 60 * 60 * 1000),
+    primary,
+    relay,
+    primaryPlusEgress,
+    primary24h: averageLatency(primarySamples, latestDate, 24 * 60 * 60 * 1000),
+    relay24h: averageLatency(relaySamples, latestDate, 24 * 60 * 60 * 1000),
     monthBuckets,
     weekBuckets,
     dayGroups,
-    latencyBuckets,
+    externalBuckets,
   };
 }
 
 function Card({ title, value, children, className = '' }: { title: string; value?: string; children: ReactNode; className?: string }) {
   return (
-    <section className={`rounded-2xl border bg-background/80 p-4 shadow-sm ${className}`}>
-      <div className="mb-3 flex items-center justify-between gap-4">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">{title}</h2>
-        {value ? <div className="text-sm font-medium text-muted-foreground">{value}</div> : null}
+    <section className={`rounded-xl border bg-background/80 p-3 shadow-sm ${className}`}>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{title}</h2>
+        {value ? <div className="text-xs font-medium text-muted-foreground">{value}</div> : null}
       </div>
       {children}
     </section>
   );
 }
 
-function Bars({ buckets, height = 'h-24' }: { buckets: Bucket[]; height?: string }) {
+function Bars({ buckets, height = 'h-20' }: { buckets: Bucket[]; height?: string }) {
   const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
 
   return (
-    <div className={`flex ${height} items-end gap-1 rounded-xl border bg-muted/30 p-3`}>
+    <div className={`flex ${height} items-end gap-1 rounded-lg border bg-muted/30 p-2`}>
       {buckets.map((bucket, index) => {
         const isLatest = index === buckets.length - 1;
         const barHeight = `${Math.max(bucket.bytes === 0 ? 2 : 8, (bucket.bytes / max) * 100)}%`;
         return (
-          <div key={`${bucket.label}-${index}`} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1.5">
+          <div key={`${bucket.label}-${index}`} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1">
             <div className="flex h-full w-full items-end justify-center">
               <div
-                className={`w-full max-w-8 rounded-t-md ${isLatest ? 'bg-foreground' : 'bg-foreground/55'}`}
+                className={`w-full max-w-7 rounded-t ${isLatest ? 'bg-foreground' : 'bg-foreground/55'}`}
                 style={{ height: barHeight }}
                 title={`${bucket.label}: ${formatBytes(bucket.bytes)}`}
               />
             </div>
-            <div className="truncate text-center text-[10px] text-muted-foreground">{bucket.label}</div>
+            <div className="truncate text-center text-[9px] text-muted-foreground">{bucket.label}</div>
           </div>
         );
       })}
@@ -210,9 +218,9 @@ function Bars({ buckets, height = 'h-24' }: { buckets: Bucket[]; height?: string
 
 function Trend({ buckets }: { buckets: Bucket[] }) {
   const width = 900;
-  const height = 175;
-  const paddingX = 24;
-  const paddingY = 18;
+  const height = 120;
+  const paddingX = 20;
+  const paddingY = 14;
   const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
   const step = buckets.length > 1 ? (width - paddingX * 2) / (buckets.length - 1) : 0;
   const points = buckets.map((bucket, index) => {
@@ -223,14 +231,14 @@ function Trend({ buckets }: { buckets: Bucket[] }) {
   const area = `${paddingX},${height - paddingY} ${points.join(' ')} ${width - paddingX},${height - paddingY}`;
 
   return (
-    <svg className="h-44 w-full overflow-visible" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="30 day usage trend">
+    <svg className="h-28 w-full overflow-visible" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="30 day usage trend">
       <polygon points={area} className="fill-foreground/10" />
       <polyline points={points.join(' ')} fill="none" className="stroke-foreground" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
       {buckets.map((bucket, index) => {
-        if (index % 5 !== 0 && index !== buckets.length - 1) return null;
+        if (index % 6 !== 0 && index !== buckets.length - 1) return null;
         const x = paddingX + index * step;
         return (
-          <text key={`${bucket.label}-${index}`} x={x} y={height - 2} textAnchor="middle" className="fill-muted-foreground text-[10px]">
+          <text key={`${bucket.label}-${index}`} x={x} y={height - 1} textAnchor="middle" className="fill-muted-foreground text-[9px]">
             {bucket.label}
           </text>
         );
@@ -241,15 +249,15 @@ function Trend({ buckets }: { buckets: Bucket[] }) {
 
 function MetricLine({ buckets }: { buckets: MetricBucket[] }) {
   const width = 900;
-  const height = 120;
-  const paddingX = 24;
-  const paddingY = 16;
+  const height = 82;
+  const paddingX = 20;
+  const paddingY = 12;
   const valid = buckets
     .map((bucket, index) => ({ ...bucket, index }))
     .filter((bucket): bucket is MetricBucket & { value: number; index: number } => typeof bucket.value === 'number' && Number.isFinite(bucket.value));
 
   if (valid.length === 0) {
-    return <div className="flex h-28 items-center justify-center rounded-xl border bg-muted/30 text-xs text-muted-foreground">no data</div>;
+    return <div className="flex h-20 items-center justify-center rounded-lg border bg-muted/30 text-xs text-muted-foreground">no data</div>;
   }
 
   const max = Math.max(1, ...valid.map((bucket) => bucket.value));
@@ -263,13 +271,13 @@ function MetricLine({ buckets }: { buckets: MetricBucket[] }) {
   });
 
   return (
-    <svg className="h-28 w-full overflow-visible rounded-xl border bg-muted/30 p-2" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="Latency trend">
+    <svg className="h-20 w-full overflow-visible rounded-lg border bg-muted/30" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label="External latency trend">
       <polyline points={points.join(' ')} fill="none" className="stroke-foreground" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
       {buckets.map((bucket, index) => {
         if (index % 2 !== 0 && index !== buckets.length - 1) return null;
         const x = paddingX + index * step;
         return (
-          <text key={`${bucket.label}-${index}`} x={x} y={height - 2} textAnchor="middle" className="fill-muted-foreground text-[10px]">
+          <text key={`${bucket.label}-${index}`} x={x} y={height - 1} textAnchor="middle" className="fill-muted-foreground text-[9px]">
             {bucket.label}
           </text>
         );
@@ -278,65 +286,61 @@ function MetricLine({ buckets }: { buckets: MetricBucket[] }) {
   );
 }
 
-function LatencyStat({ label, value }: { label: string; value: number | null }) {
-  return (
-    <div>
-      <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{label}</div>
-      <div className="mt-0.5 text-sm font-medium text-foreground">{formatMs(value)}</div>
-    </div>
-  );
-}
-
-function EdgeStat({ label, value, average }: { label: string; value: number | null; average: number | null }) {
+function MiniStat({ label, value, note }: { label: string; value: number | null; note?: string }) {
   return (
     <div className="rounded-lg border bg-background/50 px-3 py-2">
-      <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{label}</div>
-      <div className="mt-1 text-lg font-semibold tracking-tight">{formatMs(value)}</div>
-      <div className="mt-0.5 text-[11px] text-muted-foreground">24h {formatMs(average)}</div>
+      <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{label}</div>
+      <div className="mt-0.5 text-lg font-semibold tracking-tight">{formatMs(value)}</div>
+      {note ? <div className="mt-0.5 text-[11px] text-muted-foreground">{note}</div> : null}
     </div>
   );
 }
 
 function LatencyCard({
-  latency,
-  latency1h,
-  latency24h,
-  latency7d,
-  shanghaiBandwagon,
-  shanghaiLinode,
-  shanghaiBandwagon24h,
-  shanghaiLinode24h,
+  external,
+  external24h,
+  external7d,
+  primary,
+  relay,
+  primaryPlusEgress,
+  primary24h,
+  relay24h,
   buckets,
 }: {
-  latency: number | null;
-  latency1h: number | null;
-  latency24h: number | null;
-  latency7d: number | null;
-  shanghaiBandwagon: number | null;
-  shanghaiLinode: number | null;
-  shanghaiBandwagon24h: number | null;
-  shanghaiLinode24h: number | null;
+  external: number | null;
+  external24h: number | null;
+  external7d: number | null;
+  primary: number | null;
+  relay: number | null;
+  primaryPlusEgress: number | null;
+  primary24h: number | null;
+  relay24h: number | null;
   buckets: MetricBucket[];
 }) {
   return (
     <Card className="lg:col-span-2" title="Latency">
-      <div className="grid gap-3 xl:grid-cols-[300px_230px_minmax(0,1fr)]">
-        <div className="rounded-xl border bg-muted/30 p-4">
+      <div className="grid gap-2 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)_minmax(0,1fr)]">
+        <div className="rounded-lg border bg-muted/30 p-3">
           <div className="text-xs font-medium text-muted-foreground">Edge · City</div>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <EdgeStat label="Primary" value={shanghaiBandwagon} average={shanghaiBandwagon24h} />
-            <EdgeStat label="Egress" value={shanghaiLinode} average={shanghaiLinode24h} />
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            <MiniStat label="Primary" value={primary} note={`24h ${formatMs(primary24h)}`} />
+            <MiniStat label="Egress" value={relay} note="relay" />
+            <MiniStat label="Primary + Egress" value={primaryPlusEgress} note="estimated" />
           </div>
-          <div className="mt-3 text-xs text-muted-foreground">Primary {formatAdvantage(shanghaiBandwagon, shanghaiLinode)}</div>
         </div>
 
-        <div className="flex min-h-28 flex-col justify-center rounded-xl border bg-muted/30 px-4">
-          <div className="text-3xl font-semibold tracking-tight">{formatMs(latency)}</div>
-          <div className="mt-1 text-xs text-muted-foreground">server path latest</div>
-          <div className="mt-4 grid grid-cols-3 gap-3">
-            <LatencyStat label="1h" value={latency1h} />
-            <LatencyStat label="24h" value={latency24h} />
-            <LatencyStat label="7d" value={latency7d} />
+        <div className="rounded-lg border bg-muted/30 p-3">
+          <div className="text-xs font-medium text-muted-foreground">External check</div>
+          <div className="mt-1 text-2xl font-semibold tracking-tight">{formatMs(external)}</div>
+          <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">24h</div>
+              <div className="font-medium">{formatMs(external24h)}</div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">7d</div>
+              <div className="font-medium">{formatMs(external7d)}</div>
+            </div>
           </div>
         </div>
 
@@ -350,30 +354,30 @@ function UsageRing({ used, limit }: { used: number; limit: number }) {
   const safeLimit = limit > 0 ? limit : DEFAULT_30_DAY_LIMIT_BYTES;
   const percent = Math.min(100, Math.max(0, (used / safeLimit) * 100));
   const displayPercent = percent > 0 && percent < 1 ? '<1%' : `${Math.round(percent)}%`;
-  const radius = 70;
+  const radius = 50;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - percent / 100);
 
   return (
     <Card title="30 days">
-      <div className="flex items-center gap-5">
-        <svg className="h-44 w-44 shrink-0 -rotate-90" viewBox="0 0 180 180" role="img" aria-label="30 day usage progress">
-          <circle cx="90" cy="90" r={radius} fill="none" className="stroke-muted" strokeWidth="16" />
+      <div className="flex items-center gap-4">
+        <svg className="h-32 w-32 shrink-0 -rotate-90" viewBox="0 0 140 140" role="img" aria-label="30 day usage progress">
+          <circle cx="70" cy="70" r={radius} fill="none" className="stroke-muted" strokeWidth="14" />
           <circle
-            cx="90"
-            cy="90"
+            cx="70"
+            cy="70"
             r={radius}
             fill="none"
             className="stroke-foreground"
-            strokeWidth="16"
+            strokeWidth="14"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={dashOffset}
           />
         </svg>
         <div>
-          <div className="text-4xl font-semibold tracking-tight">{displayPercent}</div>
-          <div className="mt-2 text-sm text-muted-foreground">{formatBytes(used)} / {formatBytes(safeLimit)}</div>
+          <div className="text-3xl font-semibold tracking-tight">{displayPercent}</div>
+          <div className="mt-1 text-xs text-muted-foreground">{formatBytes(used)} / {formatBytes(safeLimit)}</div>
         </div>
       </div>
     </Card>
@@ -390,7 +394,7 @@ export function UsageDashboard({
   const usage = buildUsage(samples);
 
   return (
-    <div className="grid gap-3 lg:grid-cols-2">
+    <div className="grid gap-2 lg:grid-cols-2">
       <UsageRing used={usage.month} limit={limitBytes} />
 
       <Card title="30 days" value={formatBytes(usage.month)}>
@@ -406,15 +410,15 @@ export function UsageDashboard({
       </Card>
 
       <LatencyCard
-        latency={usage.latency}
-        latency1h={usage.latency1h}
-        latency24h={usage.latency24h}
-        latency7d={usage.latency7d}
-        shanghaiBandwagon={usage.shanghaiBandwagon}
-        shanghaiLinode={usage.shanghaiLinode}
-        shanghaiBandwagon24h={usage.shanghaiBandwagon24h}
-        shanghaiLinode24h={usage.shanghaiLinode24h}
-        buckets={usage.latencyBuckets}
+        external={usage.external}
+        external24h={usage.external24h}
+        external7d={usage.external7d}
+        primary={usage.primary}
+        relay={usage.relay}
+        primaryPlusEgress={usage.primaryPlusEgress}
+        primary24h={usage.primary24h}
+        relay24h={usage.relay24h}
+        buckets={usage.externalBuckets}
       />
     </div>
   );
