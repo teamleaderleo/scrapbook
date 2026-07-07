@@ -5,7 +5,6 @@ type Bucket = { label: string; bytes: number };
 type MetricBucket = { label: string; value: number | null };
 
 const DEFAULT_30_DAY_LIMIT_BYTES = 1024 ** 4;
-const CHECK_INTERVAL_MINUTES = 5;
 
 function formatBytes(value: number) {
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -25,29 +24,16 @@ function formatMs(value: number | null | undefined) {
   return `${Math.round(value)} ms`;
 }
 
-function formatRunTime(value: string | null | undefined) {
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
-
-  return date.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZone: 'UTC',
-    timeZoneName: 'short',
-  });
-}
-
-function formatNextRun(value: string | null | undefined) {
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
-  return formatRunTime(new Date(date.getTime() + CHECK_INTERVAL_MINUTES * 60 * 1000).toISOString());
-}
-
 function sampleTotal(sample: ProxyHealthSample) {
   if (typeof sample.rxBytes !== 'number' || typeof sample.txBytes !== 'number') return null;
   return sample.rxBytes + sample.txBytes;
+}
+
+function averageLatency(samples: { date: Date; value: number }[], latestDate: Date, windowMs: number) {
+  const start = latestDate.getTime() - windowMs;
+  const values = samples.filter((sample) => sample.date.getTime() >= start).map((sample) => sample.value);
+  if (values.length === 0) return null;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
 function floorUtcHour(date: Date) {
@@ -153,6 +139,9 @@ function buildUsage(samples: ProxyHealthSample[]) {
     week: weekBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
     month: monthBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
     latency: latencySamples.at(-1)?.value ?? null,
+    latency1h: averageLatency(latencySamples, latestDate, 60 * 60 * 1000),
+    latency24h: averageLatency(latencySamples, latestDate, 24 * 60 * 60 * 1000),
+    latency7d: averageLatency(latencySamples, latestDate, 7 * 24 * 60 * 60 * 1000),
     monthBuckets,
     weekBuckets,
     dayGroups,
@@ -169,16 +158,6 @@ function Card({ title, value, children, className = '' }: { title: string; value
       </div>
       {children}
     </section>
-  );
-}
-
-function CheckInStrip({ updatedAt }: { updatedAt?: string | null }) {
-  return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl border bg-background/80 px-4 py-3 text-xs text-muted-foreground shadow-sm">
-      <span>Last check-in <span className="font-medium text-foreground">{formatRunTime(updatedAt)}</span></span>
-      <span>Next around <span className="font-medium text-foreground">{formatNextRun(updatedAt)}</span></span>
-      <span>Every {CHECK_INTERVAL_MINUTES} min</span>
-    </div>
   );
 }
 
@@ -277,13 +256,39 @@ function MetricLine({ buckets }: { buckets: MetricBucket[] }) {
   );
 }
 
-function LatencyCard({ latency, buckets }: { latency: number | null; buckets: MetricBucket[] }) {
+function LatencyStat({ label, value }: { label: string; value: number | null }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{label}</div>
+      <div className="mt-0.5 text-sm font-medium text-foreground">{formatMs(value)}</div>
+    </div>
+  );
+}
+
+function LatencyCard({
+  latency,
+  latency1h,
+  latency24h,
+  latency7d,
+  buckets,
+}: {
+  latency: number | null;
+  latency1h: number | null;
+  latency24h: number | null;
+  latency7d: number | null;
+  buckets: MetricBucket[];
+}) {
   return (
     <Card className="lg:col-span-2" title="Latency">
-      <div className="grid gap-3 lg:grid-cols-[180px_minmax(0,1fr)]">
+      <div className="grid gap-3 lg:grid-cols-[240px_minmax(0,1fr)]">
         <div className="flex min-h-28 flex-col justify-center rounded-xl border bg-muted/30 px-4">
           <div className="text-3xl font-semibold tracking-tight">{formatMs(latency)}</div>
           <div className="mt-1 text-xs text-muted-foreground">latest</div>
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            <LatencyStat label="1h" value={latency1h} />
+            <LatencyStat label="24h" value={latency24h} />
+            <LatencyStat label="7d" value={latency7d} />
+          </div>
         </div>
         <MetricLine buckets={buckets} />
       </div>
@@ -327,36 +332,36 @@ function UsageRing({ used, limit }: { used: number; limit: number }) {
 
 export function UsageDashboard({
   samples,
-  updatedAt,
   limitBytes = DEFAULT_30_DAY_LIMIT_BYTES,
 }: {
   samples: ProxyHealthSample[];
-  updatedAt?: string | null;
   limitBytes?: number;
 }) {
   const usage = buildUsage(samples);
 
   return (
-    <div className="space-y-3">
-      <CheckInStrip updatedAt={updatedAt} />
+    <div className="grid gap-3 lg:grid-cols-2">
+      <UsageRing used={usage.month} limit={limitBytes} />
 
-      <div className="grid gap-3 lg:grid-cols-2">
-        <UsageRing used={usage.month} limit={limitBytes} />
+      <Card title="30 days" value={formatBytes(usage.month)}>
+        <Trend buckets={usage.monthBuckets} />
+      </Card>
 
-        <Card title="30 days" value={formatBytes(usage.month)}>
-          <Trend buckets={usage.monthBuckets} />
-        </Card>
+      <Card title="7 days" value={formatBytes(usage.week)}>
+        <Bars buckets={usage.weekBuckets} />
+      </Card>
 
-        <Card title="7 days" value={formatBytes(usage.week)}>
-          <Bars buckets={usage.weekBuckets} />
-        </Card>
+      <Card title="24 hours" value={formatBytes(usage.day)}>
+        <Bars buckets={usage.dayGroups} />
+      </Card>
 
-        <Card title="24 hours" value={formatBytes(usage.day)}>
-          <Bars buckets={usage.dayGroups} />
-        </Card>
-
-        <LatencyCard latency={usage.latency} buckets={usage.latencyBuckets} />
-      </div>
+      <LatencyCard
+        latency={usage.latency}
+        latency1h={usage.latency1h}
+        latency24h={usage.latency24h}
+        latency7d={usage.latency7d}
+        buckets={usage.latencyBuckets}
+      />
     </div>
   );
 }
