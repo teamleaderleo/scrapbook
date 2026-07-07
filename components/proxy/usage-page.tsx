@@ -6,11 +6,11 @@ export function UsagePage() {
   return (
     <main className="min-h-screen bg-sidebar-background">
       <SiteNav />
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        <div className="mb-3 flex items-end justify-between gap-4">
+      <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mb-2 flex items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Proxy Dashboard</p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight">Usage</h1>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Proxy Dashboard</p>
+            <h1 className="mt-0.5 text-xl font-bold tracking-tight">Usage</h1>
           </div>
           <CheckInStatus />
         </div>
