@@ -5,6 +5,7 @@ type Bucket = { label: string; bytes: number };
 type MetricBucket = { label: string; value: number | null };
 
 const DEFAULT_30_DAY_LIMIT_BYTES = 1024 ** 4;
+const CHECK_INTERVAL_MINUTES = 5;
 
 function formatBytes(value: number) {
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -22,6 +23,26 @@ function formatBytes(value: number) {
 function formatMs(value: number | null | undefined) {
   if (typeof value !== 'number' || !Number.isFinite(value)) return '—';
   return `${Math.round(value)} ms`;
+}
+
+function formatRunTime(value: string | null | undefined) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'UTC',
+    timeZoneName: 'short',
+  });
+}
+
+function formatNextRun(value: string | null | undefined) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return formatRunTime(new Date(date.getTime() + CHECK_INTERVAL_MINUTES * 60 * 1000).toISOString());
 }
 
 function sampleTotal(sample: ProxyHealthSample) {
@@ -151,6 +172,16 @@ function Card({ title, value, children, className = '' }: { title: string; value
   );
 }
 
+function CheckInStrip({ updatedAt }: { updatedAt?: string | null }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl border bg-background/80 px-4 py-3 text-xs text-muted-foreground shadow-sm">
+      <span>Last check-in <span className="font-medium text-foreground">{formatRunTime(updatedAt)}</span></span>
+      <span>Next around <span className="font-medium text-foreground">{formatNextRun(updatedAt)}</span></span>
+      <span>Every {CHECK_INTERVAL_MINUTES} min</span>
+    </div>
+  );
+}
+
 function Bars({ buckets, height = 'h-24' }: { buckets: Bucket[]; height?: string }) {
   const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
 
@@ -246,6 +277,20 @@ function MetricLine({ buckets }: { buckets: MetricBucket[] }) {
   );
 }
 
+function LatencyCard({ latency, buckets }: { latency: number | null; buckets: MetricBucket[] }) {
+  return (
+    <Card className="lg:col-span-2" title="Latency">
+      <div className="grid gap-3 lg:grid-cols-[180px_minmax(0,1fr)]">
+        <div className="flex min-h-28 flex-col justify-center rounded-xl border bg-muted/30 px-4">
+          <div className="text-3xl font-semibold tracking-tight">{formatMs(latency)}</div>
+          <div className="mt-1 text-xs text-muted-foreground">latest</div>
+        </div>
+        <MetricLine buckets={buckets} />
+      </div>
+    </Card>
+  );
+}
+
 function UsageRing({ used, limit }: { used: number; limit: number }) {
   const safeLimit = limit > 0 ? limit : DEFAULT_30_DAY_LIMIT_BYTES;
   const percent = Math.min(100, Math.max(0, (used / safeLimit) * 100));
@@ -282,32 +327,36 @@ function UsageRing({ used, limit }: { used: number; limit: number }) {
 
 export function UsageDashboard({
   samples,
+  updatedAt,
   limitBytes = DEFAULT_30_DAY_LIMIT_BYTES,
 }: {
   samples: ProxyHealthSample[];
+  updatedAt?: string | null;
   limitBytes?: number;
 }) {
   const usage = buildUsage(samples);
 
   return (
-    <div className="grid gap-3 lg:grid-cols-2">
-      <UsageRing used={usage.month} limit={limitBytes} />
+    <div className="space-y-3">
+      <CheckInStrip updatedAt={updatedAt} />
 
-      <Card title="30 days" value={formatBytes(usage.month)}>
-        <Trend buckets={usage.monthBuckets} />
-      </Card>
+      <div className="grid gap-3 lg:grid-cols-2">
+        <UsageRing used={usage.month} limit={limitBytes} />
 
-      <Card title="7 days" value={formatBytes(usage.week)}>
-        <Bars buckets={usage.weekBuckets} />
-      </Card>
+        <Card title="30 days" value={formatBytes(usage.month)}>
+          <Trend buckets={usage.monthBuckets} />
+        </Card>
 
-      <Card title="24 hours" value={formatBytes(usage.day)}>
-        <Bars buckets={usage.dayGroups} />
-      </Card>
+        <Card title="7 days" value={formatBytes(usage.week)}>
+          <Bars buckets={usage.weekBuckets} />
+        </Card>
 
-      <Card className="lg:col-span-2" title="Latency" value={formatMs(usage.latency)}>
-        <MetricLine buckets={usage.latencyBuckets} />
-      </Card>
+        <Card title="24 hours" value={formatBytes(usage.day)}>
+          <Bars buckets={usage.dayGroups} />
+        </Card>
+
+        <LatencyCard latency={usage.latency} buckets={usage.latencyBuckets} />
+      </div>
     </div>
   );
 }
