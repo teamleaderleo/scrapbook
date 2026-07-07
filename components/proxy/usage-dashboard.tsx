@@ -287,7 +287,7 @@ function LatencyStat({ label, value }: { label: string; value: number | null }) 
   );
 }
 
-function ChinaEdgeStat({ label, value, average }: { label: string; value: number | null; average: number | null }) {
+function EdgeStat({ label, value, average }: { label: string; value: number | null; average: number | null }) {
   return (
     <div className="rounded-lg border bg-background/50 px-3 py-2">
       <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{label}</div>
@@ -322,10 +322,10 @@ function LatencyCard({
     <Card className="lg:col-span-2" title="Latency">
       <div className="grid gap-3 xl:grid-cols-[300px_230px_minmax(0,1fr)]">
         <div className="rounded-xl border bg-muted/30 p-4">
-          <div className="text-xs font-medium text-muted-foreground">China edge · City</div>
+          <div className="text-xs font-medium text-muted-foreground">Edge · City</div>
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <ChinaEdgeStat label="Bandwagon" value={shanghaiBandwagon} average={shanghaiBandwagon24h} />
-            <ChinaEdgeStat label="Linode" value={shanghaiLinode} average={shanghaiLinode24h} />
+            <EdgeStat label="Bandwagon" value={shanghaiBandwagon} average={shanghaiBandwagon24h} />
+            <EdgeStat label="Linode" value={shanghaiLinode} average={shanghaiLinode24h} />
           </div>
           <div className="mt-3 text-xs text-muted-foreground">Bandwagon {formatAdvantage(shanghaiBandwagon, shanghaiLinode)}</div>
         </div>
