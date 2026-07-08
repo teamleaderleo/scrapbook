@@ -6,8 +6,9 @@ import { useState } from 'react';
 
 type Bucket = { label: string; bytes: number };
 type MetricBucket = { label: string; value: number | null };
+type EventBucket = { label: string; state: 'ok' | 'issue' | 'missing' };
+type CounterPoint = { date: Date; total: number; mode: string | null };
 type LatencyPoint = { date: Date; value: number };
-type EventBucket = { label: string; state: 'ok' | 'issue' | 'missing'; count: number };
 type ProviderUsage = {
   usedBytes: number | null;
   limitBytes: number | null;
@@ -16,14 +17,44 @@ type ProviderUsage = {
   policyViolation: boolean | null;
 };
 
+type UsageModel = {
+  day: number;
+  week: number;
+  month: number;
+  lastDelta: number;
+  sampleCount: number;
+  latestCheckedAt: string | null;
+  latestMode: string | null;
+  currentRx: number | null;
+  currentTx: number | null;
+  primary: number | null;
+  relay: number | null;
+  primaryPlusEgress: number | null;
+  primary24h: number | null;
+  estimated24h: number | null;
+  monthBuckets: Bucket[];
+  weekBuckets: Bucket[];
+  dayBuckets: Bucket[];
+  estimatedBuckets: MetricBucket[];
+  eventBuckets: EventBucket[];
+};
+
 const DEFAULT_30_DAY_LIMIT_BYTES = 1024 ** 4;
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
-const LEGACY_EXTERNAL_LATENCY_FLOOR_MS = 10;
 
-function formatBytes(value: number) {
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function last<T>(items: T[]) {
+  return items.length > 0 ? items[items.length - 1] : undefined;
+}
+
+function formatBytes(value: number | null | undefined) {
+  if (!isFiniteNumber(value)) return '—';
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let size = Number.isFinite(value) ? value : 0;
+  let size = value;
   let unit = 0;
 
   while (size >= 1024 && unit < units.length - 1) {
@@ -35,15 +66,22 @@ function formatBytes(value: number) {
 }
 
 function formatMs(value: number | null | undefined) {
-  if (typeof value !== 'number' || !Number.isFinite(value)) return '—';
+  if (!isFiniteNumber(value)) return '—';
   if (value > 0 && value < 10) return `${value.toFixed(1)} ms`;
   return `${Math.round(value)} ms`;
+}
+
+function formatPercent(value: number | null | undefined) {
+  if (!isFiniteNumber(value)) return '—';
+  if (value > 0 && value < 1) return '<1%';
+  return `${Math.round(value)}%`;
 }
 
 function formatRelativeTime(value: string | null | undefined) {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
+
   const diffMs = Date.now() - date.getTime();
   const absMs = Math.abs(diffMs);
   const suffix = diffMs >= 0 ? 'ago' : 'from now';
@@ -68,7 +106,7 @@ function formatUtcTime(value: string | null | undefined) {
   });
 }
 
-function formatDate(value: string | null | undefined) {
+function formatUtcDate(value: string | null | undefined) {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
@@ -84,7 +122,7 @@ function redacted(text: string) {
 function safeErrors(payload: ProxyHealthPayload | undefined) {
   const errors = payload?.errors;
   if (!Array.isArray(errors)) return [];
-  return errors.filter((error): error is string => typeof error === 'string').map((error) => redacted(error));
+  return errors.filter((error): error is string => typeof error === 'string').map(redacted);
 }
 
 function providerUsage(payload: ProxyHealthPayload | undefined): ProviderUsage | null {
@@ -92,53 +130,44 @@ function providerUsage(payload: ProxyHealthPayload | undefined): ProviderUsage |
   if (!usage || usage.source === 'disabled') return null;
 
   return {
-    usedBytes: typeof usage.used_bytes === 'number' && Number.isFinite(usage.used_bytes) ? usage.used_bytes : null,
-    limitBytes: typeof usage.limit_bytes === 'number' && Number.isFinite(usage.limit_bytes) ? usage.limit_bytes : null,
+    usedBytes: isFiniteNumber(usage.used_bytes) ? usage.used_bytes : null,
+    limitBytes: isFiniteNumber(usage.limit_bytes) ? usage.limit_bytes : null,
     resetAt: typeof usage.reset_at === 'string' ? usage.reset_at : null,
     suspended: typeof usage.suspended === 'boolean' ? usage.suspended : null,
     policyViolation: typeof usage.policy_violation === 'boolean' ? usage.policy_violation : null,
   };
 }
 
-function usagePercent(used: number | null, limit: number | null) {
-  if (typeof used !== 'number' || typeof limit !== 'number' || limit <= 0) return null;
-  return Math.min(100, Math.max(0, (used / limit) * 100));
+function providerPercent(provider: ProviderUsage | null) {
+  if (!provider) return null;
+  const { usedBytes, limitBytes } = provider;
+  if (!isFiniteNumber(usedBytes) || !isFiniteNumber(limitBytes) || limitBytes <= 0) return null;
+  return Math.min(100, Math.max(0, (usedBytes / limitBytes) * 100));
 }
 
-function formatPercent(value: number | null) {
-  if (value === null) return '—';
-  if (value > 0 && value < 1) return '<1%';
-  return `${Math.round(value)}%`;
+function providerSummary(provider: ProviderUsage | null) {
+  if (!provider) return '—';
+  const { usedBytes, limitBytes } = provider;
+  if (!isFiniteNumber(usedBytes) || !isFiniteNumber(limitBytes)) return '—';
+  return `${formatBytes(usedBytes)} / ${formatBytes(limitBytes)}`;
+}
+
+function providerNeedsAttention(provider: ProviderUsage | null) {
+  return Boolean(provider?.suspended || provider?.policyViolation);
 }
 
 function sumMs(...values: Array<number | null | undefined>) {
   let total = 0;
   for (const value of values) {
-    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+    if (!isFiniteNumber(value)) return null;
     total += value;
   }
   return total;
 }
 
 function sampleTotal(sample: ProxyHealthSample) {
-  if (typeof sample.rxBytes !== 'number' || typeof sample.txBytes !== 'number') return null;
+  if (!isFiniteNumber(sample.rxBytes) || !isFiniteNumber(sample.txBytes)) return null;
   return sample.rxBytes + sample.txBytes;
-}
-
-function averageLatency(samples: LatencyPoint[], latestDate: Date, windowMs: number) {
-  const start = latestDate.getTime() - windowMs;
-  const values = samples.filter((sample) => sample.date.getTime() >= start).map((sample) => sample.value);
-  if (values.length === 0) return null;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
-
-function latestLatency(samples: LatencyPoint[]) {
-  return samples.at(-1)?.value ?? null;
-}
-
-function latestDateFrom(...groups: LatencyPoint[][]) {
-  const dates = groups.flatMap((group) => group.map((sample) => sample.date.getTime())).filter((value) => Number.isFinite(value));
-  return dates.length > 0 ? new Date(Math.max(...dates)) : null;
 }
 
 function floorUtcHour(date: Date) {
@@ -165,151 +194,142 @@ function hourLabel(date: Date) {
   return String(date.getUTCHours()).padStart(2, '0');
 }
 
+function average(points: LatencyPoint[], latestDate: Date, windowMs: number) {
+  const start = latestDate.getTime() - windowMs;
+  const values = points.filter((point) => point.date.getTime() >= start).map((point) => point.value);
+  if (values.length === 0) return null;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
 function buildLatencyPoints(samples: ProxyHealthSample[], valueForSample: (sample: ProxyHealthSample) => number | null) {
   return samples
     .map((sample) => ({ date: new Date(sample.checkedAt), value: valueForSample(sample) }))
-    .filter((sample): sample is LatencyPoint => typeof sample.value === 'number' && Number.isFinite(sample.value) && !Number.isNaN(sample.date.getTime()))
+    .filter((point): point is LatencyPoint => isFiniteNumber(point.value) && !Number.isNaN(point.date.getTime()))
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
-function usableExternalLatency(sample: ProxyHealthSample) {
-  if (typeof sample.publicLatencyMs !== 'number') return null;
-  if (!Number.isFinite(sample.publicLatencyMs)) return null;
-  if (sample.publicLatencyMs < LEGACY_EXTERNAL_LATENCY_FLOOR_MS) return null;
-  return sample.publicLatencyMs;
-}
-
-function estimatedPathLatency(sample: ProxyHealthSample) {
-  return sumMs(sample.shanghaiBandwagonMs, sample.wgLatencyMs);
-}
-
-function isIssueMode(mode: string | null | undefined) {
-  if (!mode) return false;
-  return mode !== 'normal';
-}
-
 function buildEventBuckets(samples: ProxyHealthSample[], hourStart: Date) {
-  const buckets = Array.from({ length: 24 }, (_, index) => {
+  const raw = Array.from({ length: 24 }, (_, index) => {
     const date = new Date(hourStart.getTime() + index * HOUR_MS);
-    return { label: hourLabel(date), state: 'missing' as EventBucket['state'], count: 0, issueCount: 0 };
+    return { label: hourLabel(date), count: 0, issueCount: 0 };
   });
 
   for (const sample of samples) {
     const date = new Date(sample.checkedAt);
     if (Number.isNaN(date.getTime()) || date < hourStart) continue;
     const index = Math.floor((floorUtcHour(date).getTime() - hourStart.getTime()) / HOUR_MS);
-    if (index < 0 || index >= buckets.length) continue;
-    buckets[index].count += 1;
-    if (isIssueMode(sample.mode)) buckets[index].issueCount += 1;
+    if (index < 0 || index >= raw.length) continue;
+    raw[index].count += 1;
+    if (sample.mode && sample.mode !== 'normal') raw[index].issueCount += 1;
   }
 
-  return buckets.map((bucket) => ({
+  return raw.map((bucket) => ({
     label: bucket.label,
-    count: bucket.count,
     state: bucket.count === 0 ? 'missing' : bucket.issueCount > 0 ? 'issue' : 'ok',
-  }));
+  }) satisfies EventBucket);
 }
 
-function buildUsage(samples: ProxyHealthSample[]) {
-  const usable = samples
-    .map((sample) => ({ date: new Date(sample.checkedAt), bytes: sampleTotal(sample), mode: sample.mode }))
-    .filter((sample): sample is { date: Date; bytes: number; mode: string | null } => typeof sample.bytes === 'number' && !Number.isNaN(sample.date.getTime()))
+function latestDate(counterPoints: CounterPoint[], latencyGroups: LatencyPoint[][]) {
+  const values = [
+    ...counterPoints.map((point) => point.date.getTime()),
+    ...latencyGroups.flatMap((group) => group.map((point) => point.date.getTime())),
+  ].filter(Number.isFinite);
+  return values.length > 0 ? new Date(Math.max(...values)) : new Date();
+}
+
+function buildUsage(samples: ProxyHealthSample[]): UsageModel {
+  const counterPoints = samples
+    .map((sample) => ({ date: new Date(sample.checkedAt), total: sampleTotal(sample), mode: sample.mode }))
+    .filter((point): point is CounterPoint => isFiniteNumber(point.total) && !Number.isNaN(point.date.getTime()))
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-  const externalSamples = buildLatencyPoints(samples, usableExternalLatency);
-  const relaySamples = buildLatencyPoints(samples, (sample) => sample.wgLatencyMs);
-  const primarySamples = buildLatencyPoints(samples, (sample) => sample.shanghaiBandwagonMs);
-  const estimatedSamples = buildLatencyPoints(samples, estimatedPathLatency);
+  const primaryPoints = buildLatencyPoints(samples, (sample) => sample.shanghaiBandwagonMs);
+  const relayPoints = buildLatencyPoints(samples, (sample) => sample.wgLatencyMs);
+  const estimatedPoints = buildLatencyPoints(samples, (sample) => sumMs(sample.shanghaiBandwagonMs, sample.wgLatencyMs));
+  const latest = latestDate(counterPoints, [primaryPoints, relayPoints, estimatedPoints]);
 
-  const latest = usable.at(-1);
-  const latestDate = latest?.date ?? latestDateFrom(externalSamples, relaySamples, primarySamples, estimatedSamples) ?? new Date();
-  const monthStart = floorUtcDay(new Date(latestDate.getTime() - 29 * DAY_MS));
-  const weekStart = floorUtcDay(new Date(latestDate.getTime() - 6 * DAY_MS));
-  const hourStart = floorUtcHour(new Date(latestDate.getTime() - 23 * HOUR_MS));
+  const monthStart = floorUtcDay(new Date(latest.getTime() - 29 * DAY_MS));
+  const weekStart = floorUtcDay(new Date(latest.getTime() - 6 * DAY_MS));
+  const hourStart = floorUtcHour(new Date(latest.getTime() - 23 * HOUR_MS));
 
   const month = new Map<string, Bucket>();
-  for (let index = 0; index < 30; index += 1) {
-    const date = new Date(monthStart.getTime() + index * DAY_MS);
-    month.set(dayKey(date), { label: shortDayLabel(date), bytes: 0 });
-  }
-
   const week = new Map<string, Bucket>();
-  for (let index = 0; index < 7; index += 1) {
-    const date = new Date(weekStart.getTime() + index * DAY_MS);
-    week.set(dayKey(date), { label: dayLabel(date), bytes: 0 });
-  }
-
-  const dayGroups: Bucket[] = Array.from({ length: 24 }, (_, index) => {
+  const dayBuckets = Array.from({ length: 24 }, (_, index) => {
     const date = new Date(hourStart.getTime() + index * HOUR_MS);
     return { label: hourLabel(date), bytes: 0 };
   });
-
   const estimatedRaw = Array.from({ length: 24 }, (_, index) => {
     const date = new Date(hourStart.getTime() + index * HOUR_MS);
     return { label: hourLabel(date), total: 0, count: 0 };
   });
 
+  for (let index = 0; index < 30; index += 1) {
+    const date = new Date(monthStart.getTime() + index * DAY_MS);
+    month.set(dayKey(date), { label: shortDayLabel(date), bytes: 0 });
+  }
+
+  for (let index = 0; index < 7; index += 1) {
+    const date = new Date(weekStart.getTime() + index * DAY_MS);
+    week.set(dayKey(date), { label: dayLabel(date), bytes: 0 });
+  }
+
   let lastDelta = 0;
-  for (let index = 1; index < usable.length; index += 1) {
-    const previous = usable[index - 1];
-    const current = usable[index];
-    const delta = current.bytes - previous.bytes;
+  for (let index = 1; index < counterPoints.length; index += 1) {
+    const previous = counterPoints[index - 1];
+    const current = counterPoints[index];
+    const delta = current.total - previous.total;
     if (delta <= 0) continue;
     lastDelta = delta;
 
-    const currentDayKey = dayKey(current.date);
-    const monthBucket = month.get(currentDayKey);
+    const key = dayKey(current.date);
+    const monthBucket = month.get(key);
+    const weekBucket = week.get(key);
     if (monthBucket) monthBucket.bytes += delta;
-
-    const weekBucket = week.get(currentDayKey);
     if (weekBucket) weekBucket.bytes += delta;
 
-    if (current.date >= hourStart) {
-      const hourIndex = Math.floor((floorUtcHour(current.date).getTime() - hourStart.getTime()) / HOUR_MS);
-      if (hourIndex >= 0 && hourIndex < dayGroups.length) dayGroups[hourIndex].bytes += delta;
-    }
+    const hourIndex = Math.floor((floorUtcHour(current.date).getTime() - hourStart.getTime()) / HOUR_MS);
+    if (hourIndex >= 0 && hourIndex < dayBuckets.length) dayBuckets[hourIndex].bytes += delta;
   }
 
-  for (const sample of estimatedSamples) {
-    if (sample.date < hourStart) continue;
-    const hourIndex = Math.floor((floorUtcHour(sample.date).getTime() - hourStart.getTime()) / HOUR_MS);
-    if (hourIndex >= 0 && hourIndex < estimatedRaw.length) {
-      estimatedRaw[hourIndex].total += sample.value;
-      estimatedRaw[hourIndex].count += 1;
-    }
+  for (const point of estimatedPoints) {
+    const hourIndex = Math.floor((floorUtcHour(point.date).getTime() - hourStart.getTime()) / HOUR_MS);
+    if (hourIndex < 0 || hourIndex >= estimatedRaw.length) continue;
+    estimatedRaw[hourIndex].total += point.value;
+    estimatedRaw[hourIndex].count += 1;
   }
 
   const monthBuckets = Array.from(month.values());
   const weekBuckets = Array.from(week.values());
-  const estimatedBuckets: MetricBucket[] = estimatedRaw.map((bucket) => ({
+  const estimatedBuckets = estimatedRaw.map((bucket) => ({
     label: bucket.label,
     value: bucket.count > 0 ? bucket.total / bucket.count : null,
   }));
 
-  const primary = latestLatency(primarySamples);
-  const relay = latestLatency(relaySamples);
-  const primaryPlusEgress = sumMs(primary, relay);
+  const latestPrimary = last(primaryPoints)?.value ?? null;
+  const latestRelay = last(relayPoints)?.value ?? null;
+  const latestCounter = last(counterPoints);
+  const latestSample = last(samples);
 
   return {
-    day: dayGroups.reduce((sum, bucket) => sum + bucket.bytes, 0),
+    day: dayBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
     week: weekBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
     month: monthBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
-    primary,
-    relay,
-    primaryPlusEgress,
-    primary24h: averageLatency(primarySamples, latestDate, DAY_MS),
-    estimated24h: averageLatency(estimatedSamples, latestDate, DAY_MS),
-    estimatedBuckets,
+    lastDelta,
+    sampleCount: samples.length,
+    latestCheckedAt: latestCounter?.date.toISOString() ?? null,
+    latestMode: latestCounter?.mode ?? null,
+    currentRx: latestSample?.rxBytes ?? null,
+    currentTx: latestSample?.txBytes ?? null,
+    primary: latestPrimary,
+    relay: latestRelay,
+    primaryPlusEgress: sumMs(latestPrimary, latestRelay),
+    primary24h: average(primaryPoints, latest, DAY_MS),
+    estimated24h: average(estimatedPoints, latest, DAY_MS),
     monthBuckets,
     weekBuckets,
-    dayGroups,
+    dayBuckets,
+    estimatedBuckets,
     eventBuckets: buildEventBuckets(samples, hourStart),
-    latestMode: latest?.mode ?? null,
-    latestCheckedAt: latest?.date.toISOString() ?? null,
-    sampleCount: samples.length,
-    currentRx: samples.at(-1)?.rxBytes ?? null,
-    currentTx: samples.at(-1)?.txBytes ?? null,
-    lastDelta,
   };
 }
 
@@ -325,12 +345,9 @@ function Card({ title, value, children, className = '' }: { title: string; value
   );
 }
 
-function BucketLabel({ label, show }: { label: string; show: boolean }) {
-  return (
-    <div className="min-w-0 flex-1 overflow-visible text-center text-[10px] leading-none text-muted-foreground">
-      <span className="inline-block whitespace-nowrap">{show ? label : ''}</span>
-    </div>
-  );
+function PinnedValue({ value }: { value: string | null }) {
+  if (!value) return null;
+  return <div className="absolute left-2 top-2 z-10 rounded-full border bg-background/95 px-2 py-1 text-[11px] shadow-sm backdrop-blur">{value}</div>;
 }
 
 function Tooltip({ text }: { text: string }) {
@@ -350,9 +367,12 @@ function BarFill({ hasValue, isLatest, height, wide = false }: { hasValue: boole
   return <span className={`block w-full ${widthClass} rounded-t transition-all duration-150 ${activeClass}`} style={{ height }} />;
 }
 
-function PinnedValue({ value }: { value: string | null }) {
-  if (!value) return null;
-  return <div className="absolute left-2 top-2 z-10 rounded-full border bg-background/95 px-2 py-1 text-[11px] shadow-sm backdrop-blur">{value}</div>;
+function BucketLabel({ label, show }: { label: string; show: boolean }) {
+  return (
+    <div className="min-w-0 flex-1 overflow-visible text-center text-[10px] leading-none text-muted-foreground">
+      <span className="inline-block whitespace-nowrap">{show ? label : ''}</span>
+    </div>
+  );
 }
 
 function Bars({ buckets, height = 'h-20', labelEvery = 1, wideBars = false }: { buckets: Bucket[]; height?: string; labelEvery?: number; wideBars?: boolean }) {
@@ -360,9 +380,7 @@ function Bars({ buckets, height = 'h-20', labelEvery = 1, wideBars = false }: { 
   const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
 
   return (
-    <div className={`relative grid ${height} grid-rows-[minmax(0,1fr)_auto] gap-1 overflow-visible rounded-lg border bg-muted/30 p-2`} onPointerDown={(event) => {
-      if (event.target === event.currentTarget) setSelected(null);
-    }}>
+    <div className={`relative grid ${height} grid-rows-[minmax(0,1fr)_auto] gap-1 overflow-visible rounded-lg border bg-muted/30 p-2`}>
       <PinnedValue value={selected} />
       <div className="flex min-h-0 items-end gap-1 overflow-visible">
         {buckets.map((bucket, index) => {
@@ -397,14 +415,14 @@ function Bars({ buckets, height = 'h-20', labelEvery = 1, wideBars = false }: { 
 
 function MetricBars({ buckets, labelEvery = 4 }: { buckets: MetricBucket[]; labelEvery?: number }) {
   const [selected, setSelected] = useState<string | null>(null);
-  const validValues = buckets.map((bucket) => bucket.value).filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
+  const values = buckets.map((bucket) => bucket.value).filter(isFiniteNumber);
 
-  if (validValues.length === 0) {
+  if (values.length === 0) {
     return <div className="flex h-20 items-center justify-center rounded-lg border bg-muted/30 text-xs text-muted-foreground">no data</div>;
   }
 
-  const min = Math.min(...validValues);
-  const max = Math.max(...validValues);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
   const spread = max - min;
   const padding = spread > 0 ? Math.max(spread * 0.15, 0.2) : Math.max(max * 0.002, 0.5);
   const lower = min - padding;
@@ -412,15 +430,13 @@ function MetricBars({ buckets, labelEvery = 4 }: { buckets: MetricBucket[]; labe
   const range = Math.max(0.1, upper - lower);
 
   return (
-    <div className="relative grid h-20 grid-cols-[minmax(0,1fr)_2.25rem] grid-rows-[minmax(0,1fr)_auto] gap-x-1 gap-y-1 overflow-visible rounded-lg border bg-muted/30 p-2" onPointerDown={(event) => {
-      if (event.target === event.currentTarget) setSelected(null);
-    }}>
+    <div className="relative grid h-20 grid-cols-[minmax(0,1fr)_2.25rem] grid-rows-[minmax(0,1fr)_auto] gap-x-1 gap-y-1 overflow-visible rounded-lg border bg-muted/30 p-2">
       <PinnedValue value={selected} />
       <div className="flex min-h-0 items-end gap-1 overflow-visible">
         {buckets.map((bucket, index) => {
           const isLatest = index === buckets.length - 1;
           const value = bucket.value;
-          const hasValue = typeof value === 'number' && Number.isFinite(value);
+          const hasValue = isFiniteNumber(value);
           const normalized = hasValue ? Math.min(1, Math.max(0, (value - lower) / range)) : 0;
           const barHeight = hasValue ? `${Math.max(14, normalized * 100)}%` : '2px';
           const tooltip = `${bucket.label}: ${formatMs(value)}`;
@@ -480,7 +496,7 @@ function statusLabel(mode: string | null, errors: string[]) {
 function proxyMood(mode: string | null, errors: string[], usageBytes: number, latencyMs: number | null) {
   if (errors.length > 0 || mode === 'degraded' || mode === 'unknown') return 'fussy';
   if (mode === 'fallback') return 'backup';
-  if (latencyMs !== null && latencyMs > 220) return 'slow';
+  if (isFiniteNumber(latencyMs) && latencyMs > 220) return 'slow';
   if (usageBytes < 1024 * 1024) return 'sleepy';
   return 'calm';
 }
@@ -496,13 +512,12 @@ function StatusPill({ mode, errors }: { mode: string | null; errors: string[] })
   return <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${className}`}>{statusLabel(mode, errors)}</span>;
 }
 
-function MobileSummary({ status, usage, provider }: { status?: StoredProxyHealth | null; usage: ReturnType<typeof buildUsage>; provider: ProviderUsage | null }) {
+function MobileSummary({ status, usage, provider }: { status?: StoredProxyHealth | null; usage: UsageModel; provider: ProviderUsage | null }) {
   const payload = status?.payload;
   const errors = safeErrors(payload);
   const mode = payload?.mode ?? usage.latestMode;
   const latency = usage.primaryPlusEgress;
   const mood = proxyMood(mode ?? null, errors, usage.day, latency);
-  const providerPercent = provider ? usagePercent(provider.usedBytes, provider.limitBytes) : null;
 
   return (
     <section className="rounded-2xl border bg-background/90 p-3 shadow-sm">
@@ -525,7 +540,7 @@ function MobileSummary({ status, usage, provider }: { status?: StoredProxyHealth
         </div>
         <div className="rounded-xl border bg-muted/30 px-3 py-2">
           <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Provider</div>
-          <div className="mt-0.5 text-base font-semibold tracking-tight">{formatPercent(providerPercent)}</div>
+          <div className="mt-0.5 text-base font-semibold tracking-tight">{formatPercent(providerPercent(provider))}</div>
         </div>
       </div>
     </section>
@@ -533,19 +548,18 @@ function MobileSummary({ status, usage, provider }: { status?: StoredProxyHealth
 }
 
 function ProviderUsageCard({ provider }: { provider: ProviderUsage | null }) {
-  if (!provider || provider.usedBytes === null || provider.limitBytes === null) return null;
+  if (!provider || !isFiniteNumber(provider.usedBytes) || !isFiniteNumber(provider.limitBytes)) return null;
 
-  const percent = usagePercent(provider.usedBytes, provider.limitBytes) ?? 0;
-  const reset = formatDate(provider.resetAt);
-  const attention = provider.suspended || provider.policyViolation;
+  const percent = providerPercent(provider) ?? 0;
+  const attention = providerNeedsAttention(provider);
 
   return (
     <Card className="lg:col-span-2" title="Provider cycle" value={formatPercent(percent)}>
       <div className="rounded-lg border bg-muted/30 p-3">
         <div className="flex items-end justify-between gap-3">
           <div>
-            <div className="text-2xl font-semibold tracking-tight">{formatBytes(provider.usedBytes)} / {formatBytes(provider.limitBytes)}</div>
-            <div className="mt-1 text-xs text-muted-foreground">resets {reset}</div>
+            <div className="text-2xl font-semibold tracking-tight">{providerSummary(provider)}</div>
+            <div className="mt-1 text-xs text-muted-foreground">resets {formatUtcDate(provider.resetAt)}</div>
           </div>
           <div className={`rounded-full border px-2.5 py-1 text-xs ${attention ? 'border-red-400/50 bg-red-400/15' : 'border-[#b8b5ff]/50 bg-[#b8b5ff]/15'}`}>
             {attention ? 'attention' : 'clear'}
@@ -587,7 +601,7 @@ function EventTimeline({ buckets }: { buckets: EventBucket[] }) {
   );
 }
 
-function DebugDetails({ status, usage, provider }: { status?: StoredProxyHealth | null; usage: ReturnType<typeof buildUsage>; provider: ProviderUsage | null }) {
+function DebugDetails({ status, usage, provider }: { status?: StoredProxyHealth | null; usage: UsageModel; provider: ProviderUsage | null }) {
   const payload = status?.payload;
   const errors = safeErrors(payload);
   const services = payload?.services ?? {};
@@ -609,11 +623,11 @@ function DebugDetails({ status, usage, provider }: { status?: StoredProxyHealth 
         </div>
         <div className="rounded-lg border bg-muted/30 p-2">
           <div className="uppercase tracking-[0.15em]">Counters</div>
-          <div className="mt-1 font-medium text-foreground">Rx {formatBytes(usage.currentRx ?? 0)} · Tx {formatBytes(usage.currentTx ?? 0)}</div>
+          <div className="mt-1 font-medium text-foreground">Rx {formatBytes(usage.currentRx)} · Tx {formatBytes(usage.currentTx)}</div>
         </div>
         <div className="rounded-lg border bg-muted/30 p-2">
           <div className="uppercase tracking-[0.15em]">Provider</div>
-          <div className="mt-1 font-medium text-foreground">{provider?.usedBytes !== null && provider?.limitBytes !== null ? `${formatBytes(provider.usedBytes)} / ${formatBytes(provider.limitBytes)}` : '—'}</div>
+          <div className="mt-1 font-medium text-foreground">{providerSummary(provider)}</div>
         </div>
       </div>
 
@@ -657,35 +671,21 @@ function DebugDetails({ status, usage, provider }: { status?: StoredProxyHealth 
   );
 }
 
-function LatencyCard({
-  primary,
-  relay,
-  primaryPlusEgress,
-  primary24h,
-  estimated24h,
-  buckets,
-}: {
-  primary: number | null;
-  relay: number | null;
-  primaryPlusEgress: number | null;
-  primary24h: number | null;
-  estimated24h: number | null;
-  buckets: MetricBucket[];
-}) {
+function LatencyCard({ usage }: { usage: UsageModel }) {
   return (
     <Card className="lg:col-span-2" title="Latency">
       <div className="grid gap-2 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <div className="rounded-lg border bg-muted/30 p-3">
           <div className="grid grid-cols-3 gap-2">
-            <MiniStat label="Primary" value={primary} note={`24h ${formatMs(primary24h)}`} />
-            <MiniStat label="Egress" value={relay} note="relay" />
-            <MiniStat label="Primary + Egress" value={primaryPlusEgress} note={`24h ${formatMs(estimated24h)}`} />
+            <MiniStat label="Primary" value={usage.primary} note={`24h ${formatMs(usage.primary24h)}`} />
+            <MiniStat label="Egress" value={usage.relay} note="relay" />
+            <MiniStat label="Primary + Egress" value={usage.primaryPlusEgress} note={`24h ${formatMs(usage.estimated24h)}`} />
           </div>
         </div>
 
         <div>
           <div className="mb-2 text-xs font-medium text-muted-foreground">Primary + Egress · 24h · adaptive</div>
-          <MetricBars buckets={buckets} labelEvery={4} />
+          <MetricBars buckets={usage.estimatedBuckets} labelEvery={4} />
         </div>
       </div>
     </Card>
@@ -695,7 +695,6 @@ function LatencyCard({
 function UsageRing({ used, limit }: { used: number; limit: number }) {
   const safeLimit = limit > 0 ? limit : DEFAULT_30_DAY_LIMIT_BYTES;
   const percent = Math.min(100, Math.max(0, (used / safeLimit) * 100));
-  const displayPercent = formatPercent(percent);
   const radius = 50;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - percent / 100);
@@ -718,7 +717,7 @@ function UsageRing({ used, limit }: { used: number; limit: number }) {
           />
         </svg>
         <div>
-          <div className="text-3xl font-semibold tracking-tight">{displayPercent}</div>
+          <div className="text-3xl font-semibold tracking-tight">{formatPercent(percent)}</div>
           <div className="mt-1 text-xs text-muted-foreground">{formatBytes(used)} / {formatBytes(safeLimit)}</div>
         </div>
       </div>
@@ -757,17 +756,10 @@ export function UsageDashboard({
       </Card>
 
       <Card title="24 hours" value={formatBytes(usage.day)}>
-        <Bars buckets={usage.dayGroups} labelEvery={4} wideBars />
+        <Bars buckets={usage.dayBuckets} labelEvery={4} wideBars />
       </Card>
 
-      <LatencyCard
-        primary={usage.primary}
-        relay={usage.relay}
-        primaryPlusEgress={usage.primaryPlusEgress}
-        primary24h={usage.primary24h}
-        estimated24h={usage.estimated24h}
-        buckets={usage.estimatedBuckets}
-      />
+      <LatencyCard usage={usage} />
 
       <EventTimeline buckets={usage.eventBuckets} />
 
