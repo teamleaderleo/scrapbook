@@ -25,8 +25,6 @@ type UsageModel = {
   sampleCount: number;
   latestCheckedAt: string | null;
   latestMode: string | null;
-  currentRx: number | null;
-  currentTx: number | null;
   primary: number | null;
   relay: number | null;
   primaryPlusEgress: number | null;
@@ -42,6 +40,7 @@ type UsageModel = {
 const DEFAULT_30_DAY_LIMIT_BYTES = 1024 ** 4;
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
+const LAVENDER = '#b8b5ff';
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);
@@ -90,20 +89,6 @@ function formatRelativeTime(value: string | null | undefined) {
   if (absMs < HOUR_MS) return `${Math.round(absMs / (60 * 1000))}m ${suffix}`;
   if (absMs < DAY_MS) return `${Math.round(absMs / HOUR_MS)}h ${suffix}`;
   return `${Math.round(absMs / DAY_MS)}d ${suffix}`;
-}
-
-function formatUtcTime(value: string | null | undefined) {
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZone: 'UTC',
-    timeZoneName: 'short',
-  });
 }
 
 function formatUtcDate(value: string | null | undefined) {
@@ -223,10 +208,12 @@ function buildEventBuckets(samples: ProxyHealthSample[], hourStart: Date) {
     if (sample.mode && sample.mode !== 'normal') raw[index].issueCount += 1;
   }
 
-  return raw.map((bucket) => ({
-    label: bucket.label,
-    state: bucket.count === 0 ? 'missing' : bucket.issueCount > 0 ? 'issue' : 'ok',
-  }) satisfies EventBucket);
+  return raw.map((bucket) => {
+    let state: EventBucket['state'] = 'ok';
+    if (bucket.count === 0) state = 'missing';
+    if (bucket.issueCount > 0) state = 'issue';
+    return { label: bucket.label, state };
+  });
 }
 
 function latestDate(counterPoints: CounterPoint[], latencyGroups: LatencyPoint[][]) {
@@ -308,7 +295,6 @@ function buildUsage(samples: ProxyHealthSample[]): UsageModel {
   const latestPrimary = last(primaryPoints)?.value ?? null;
   const latestRelay = last(relayPoints)?.value ?? null;
   const latestCounter = last(counterPoints);
-  const latestSample = last(samples);
 
   return {
     day: dayBuckets.reduce((sum, bucket) => sum + bucket.bytes, 0),
@@ -318,8 +304,6 @@ function buildUsage(samples: ProxyHealthSample[]): UsageModel {
     sampleCount: samples.length,
     latestCheckedAt: latestCounter?.date.toISOString() ?? null,
     latestMode: latestCounter?.mode ?? null,
-    currentRx: latestSample?.rxBytes ?? null,
-    currentTx: latestSample?.txBytes ?? null,
     primary: latestPrimary,
     relay: latestRelay,
     primaryPlusEgress: sumMs(latestPrimary, latestRelay),
@@ -512,64 +496,59 @@ function StatusPill({ mode, errors }: { mode: string | null; errors: string[] })
   return <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${className}`}>{statusLabel(mode, errors)}</span>;
 }
 
-function MobileSummary({ status, usage, provider }: { status?: StoredProxyHealth | null; usage: UsageModel; provider: ProviderUsage | null }) {
+function ProviderSummary({ status, usage, provider }: { status?: StoredProxyHealth | null; usage: UsageModel; provider: ProviderUsage | null }) {
   const payload = status?.payload;
   const errors = safeErrors(payload);
   const mode = payload?.mode ?? usage.latestMode;
-  const latency = usage.primaryPlusEgress;
-  const mood = proxyMood(mode ?? null, errors, usage.day, latency);
+  const percent = providerPercent(provider);
+  const attention = providerNeedsAttention(provider);
 
   return (
     <section className="rounded-2xl border bg-background/90 p-3 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <StatusPill mode={mode ?? null} errors={errors} />
-          <span className="text-xs text-muted-foreground">mood: <span className="font-medium text-foreground">{mood}</span></span>
+          <span className="text-xs font-medium text-muted-foreground">{proxyMood(mode ?? null, errors, usage.day, usage.primaryPlusEgress)}</span>
         </div>
         <div className="text-xs text-muted-foreground">checked <span className="font-medium text-foreground">{formatRelativeTime(status?.updatedAt ?? usage.latestCheckedAt)}</span></div>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2">
+      <div className="mt-3 grid gap-3 lg:grid-cols-[1.4fr_0.8fr_0.8fr_0.8fr]">
+        <div className="rounded-xl border bg-muted/30 px-3 py-2">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Provider cycle</div>
+              <div className="mt-1 text-2xl font-semibold tracking-tight">{providerSummary(provider)}</div>
+              <div className="mt-0.5 text-xs text-muted-foreground">resets {formatUtcDate(provider?.resetAt)}</div>
+            </div>
+            <div className={`rounded-full border px-2.5 py-1 text-xs ${attention ? 'border-red-400/50 bg-red-400/15' : 'border-[#b8b5ff]/50 bg-[#b8b5ff]/15'}`}>
+              {formatPercent(percent)}
+            </div>
+          </div>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+            <div className="h-full rounded-full bg-[#b8b5ff] shadow-[0_0_14px_rgba(184,181,255,0.28)]" style={{ width: `${Math.min(100, Math.max(0, percent ?? 0))}%` }} />
+          </div>
+        </div>
+
         <div className="rounded-xl border bg-muted/30 px-3 py-2">
           <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">24h</div>
-          <div className="mt-0.5 text-base font-semibold tracking-tight">{formatBytes(usage.day)}</div>
+          <div className="mt-1 text-xl font-semibold tracking-tight">{formatBytes(usage.day)}</div>
+          <div className="mt-0.5 text-xs text-muted-foreground">last {formatBytes(usage.lastDelta)}</div>
         </div>
+
         <div className="rounded-xl border bg-muted/30 px-3 py-2">
           <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Latency</div>
-          <div className="mt-0.5 text-base font-semibold tracking-tight">{formatMs(latency)}</div>
+          <div className="mt-1 text-xl font-semibold tracking-tight">{formatMs(usage.primaryPlusEgress)}</div>
+          <div className="mt-0.5 text-xs text-muted-foreground">24h {formatMs(usage.estimated24h)}</div>
         </div>
+
         <div className="rounded-xl border bg-muted/30 px-3 py-2">
-          <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Provider</div>
-          <div className="mt-0.5 text-base font-semibold tracking-tight">{formatPercent(providerPercent(provider))}</div>
+          <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Samples</div>
+          <div className="mt-1 text-xl font-semibold tracking-tight">{usage.sampleCount}</div>
+          <div className="mt-0.5 text-xs text-muted-foreground">24h status below</div>
         </div>
       </div>
     </section>
-  );
-}
-
-function ProviderUsageCard({ provider }: { provider: ProviderUsage | null }) {
-  if (!provider || !isFiniteNumber(provider.usedBytes) || !isFiniteNumber(provider.limitBytes)) return null;
-
-  const percent = providerPercent(provider) ?? 0;
-  const attention = providerNeedsAttention(provider);
-
-  return (
-    <Card className="lg:col-span-2" title="Provider cycle" value={formatPercent(percent)}>
-      <div className="rounded-lg border bg-muted/30 p-3">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <div className="text-2xl font-semibold tracking-tight">{providerSummary(provider)}</div>
-            <div className="mt-1 text-xs text-muted-foreground">resets {formatUtcDate(provider.resetAt)}</div>
-          </div>
-          <div className={`rounded-full border px-2.5 py-1 text-xs ${attention ? 'border-red-400/50 bg-red-400/15' : 'border-[#b8b5ff]/50 bg-[#b8b5ff]/15'}`}>
-            {attention ? 'attention' : 'clear'}
-          </div>
-        </div>
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
-          <div className="h-full rounded-full bg-[#b8b5ff] shadow-[0_0_14px_rgba(184,181,255,0.28)]" style={{ width: `${Math.min(100, Math.max(0, percent))}%` }} />
-        </div>
-      </div>
-    </Card>
   );
 }
 
@@ -601,86 +580,14 @@ function EventTimeline({ buckets }: { buckets: EventBucket[] }) {
   );
 }
 
-function DebugDetails({ status, usage, provider }: { status?: StoredProxyHealth | null; usage: UsageModel; provider: ProviderUsage | null }) {
-  const payload = status?.payload;
-  const errors = safeErrors(payload);
-  const services = payload?.services ?? {};
-  const serviceEntries = Object.entries(services).filter((entry): entry is [string, string] => typeof entry[1] === 'string');
-
-  return (
-    <details className="rounded-xl border bg-background/80 p-3 shadow-sm">
-      <summary className="cursor-pointer list-none text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground [&::-webkit-details-marker]:hidden">
-        Details
-      </summary>
-      <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-lg border bg-muted/30 p-2">
-          <div className="uppercase tracking-[0.15em]">Samples</div>
-          <div className="mt-1 font-medium text-foreground">{usage.sampleCount}</div>
-        </div>
-        <div className="rounded-lg border bg-muted/30 p-2">
-          <div className="uppercase tracking-[0.15em]">Latest</div>
-          <div className="mt-1 font-medium text-foreground">{formatUtcTime(status?.checkedAt ?? usage.latestCheckedAt)}</div>
-        </div>
-        <div className="rounded-lg border bg-muted/30 p-2">
-          <div className="uppercase tracking-[0.15em]">Counters</div>
-          <div className="mt-1 font-medium text-foreground">Rx {formatBytes(usage.currentRx)} · Tx {formatBytes(usage.currentTx)}</div>
-        </div>
-        <div className="rounded-lg border bg-muted/30 p-2">
-          <div className="uppercase tracking-[0.15em]">Provider</div>
-          <div className="mt-1 font-medium text-foreground">{providerSummary(provider)}</div>
-        </div>
-      </div>
-
-      <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
-        <div className="rounded-lg border bg-muted/30 p-2">
-          <div className="uppercase tracking-[0.15em]">Checks</div>
-          <div className="mt-1 font-medium text-foreground">
-            primary {payload?.egress?.sidecar_ok ? 'ok' : '—'} · backup {payload?.egress?.fallback_ok ? 'ok' : '—'}
-          </div>
-        </div>
-        <div className="rounded-lg border bg-muted/30 p-2">
-          <div className="uppercase tracking-[0.15em]">Provider reset</div>
-          <div className="mt-1 font-medium text-foreground">{provider ? formatUtcTime(provider.resetAt) : '—'}</div>
-        </div>
-      </div>
-
-      {serviceEntries.length > 0 ? (
-        <div className="mt-3 rounded-lg border bg-muted/30 p-2 text-xs">
-          <div className="mb-1 uppercase tracking-[0.15em] text-muted-foreground">Services</div>
-          <div className="flex flex-wrap gap-2">
-            {serviceEntries.map(([name, value]) => (
-              <span key={name} className="rounded-full border bg-background/60 px-2 py-1 text-muted-foreground">
-                {name}: <span className="font-medium text-foreground">{value}</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      <div className="mt-3 rounded-lg border bg-muted/30 p-2 text-xs">
-        <div className="mb-1 uppercase tracking-[0.15em] text-muted-foreground">Latest errors</div>
-        {errors.length > 0 ? (
-          <ul className="space-y-1 text-muted-foreground">
-            {errors.map((error, index) => <li key={`${error}-${index}`}>{error}</li>)}
-          </ul>
-        ) : (
-          <div className="text-foreground">none</div>
-        )}
-      </div>
-    </details>
-  );
-}
-
 function LatencyCard({ usage }: { usage: UsageModel }) {
   return (
     <Card className="lg:col-span-2" title="Latency">
-      <div className="grid gap-2 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-        <div className="rounded-lg border bg-muted/30 p-3">
-          <div className="grid grid-cols-3 gap-2">
-            <MiniStat label="Primary" value={usage.primary} note={`24h ${formatMs(usage.primary24h)}`} />
-            <MiniStat label="Egress" value={usage.relay} note="relay" />
-            <MiniStat label="Primary + Egress" value={usage.primaryPlusEgress} note={`24h ${formatMs(usage.estimated24h)}`} />
-          </div>
+      <div className="grid gap-2 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="grid grid-cols-3 gap-2 rounded-lg border bg-muted/30 p-2">
+          <MiniStat label="Primary" value={usage.primary} note={`24h ${formatMs(usage.primary24h)}`} />
+          <MiniStat label="Egress" value={usage.relay} note="relay" />
+          <MiniStat label="Total" value={usage.primaryPlusEgress} note={`24h ${formatMs(usage.estimated24h)}`} />
         </div>
 
         <div>
@@ -692,43 +599,9 @@ function LatencyCard({ usage }: { usage: UsageModel }) {
   );
 }
 
-function UsageRing({ used, limit }: { used: number; limit: number }) {
-  const safeLimit = limit > 0 ? limit : DEFAULT_30_DAY_LIMIT_BYTES;
-  const percent = Math.min(100, Math.max(0, (used / safeLimit) * 100));
-  const radius = 50;
-  const circumference = 2 * Math.PI * radius;
-  const dashOffset = circumference * (1 - percent / 100);
-
-  return (
-    <Card title="30 days">
-      <div className="flex items-center gap-4">
-        <svg className="h-32 w-32 shrink-0 -rotate-90" viewBox="0 0 140 140" role="img" aria-label="30 day usage progress">
-          <circle cx="70" cy="70" r={radius} fill="none" className="stroke-muted" strokeWidth="14" />
-          <circle
-            cx="70"
-            cy="70"
-            r={radius}
-            fill="none"
-            className="stroke-[#b8b5ff]"
-            strokeWidth="14"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={dashOffset}
-          />
-        </svg>
-        <div>
-          <div className="text-3xl font-semibold tracking-tight">{formatPercent(percent)}</div>
-          <div className="mt-1 text-xs text-muted-foreground">{formatBytes(used)} / {formatBytes(safeLimit)}</div>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
 export function UsageDashboard({
   samples,
   status,
-  limitBytes = DEFAULT_30_DAY_LIMIT_BYTES,
 }: {
   samples: ProxyHealthSample[];
   status?: StoredProxyHealth | null;
@@ -738,34 +611,26 @@ export function UsageDashboard({
   const provider = providerUsage(status?.payload);
 
   return (
-    <div className="grid gap-2 lg:grid-cols-2">
-      <div className="lg:col-span-2">
-        <MobileSummary status={status} usage={usage} provider={provider} />
+    <div className="grid gap-2 lg:grid-cols-3">
+      <div className="lg:col-span-3">
+        <ProviderSummary status={status} usage={usage} provider={provider} />
       </div>
 
-      <ProviderUsageCard provider={provider} />
-
-      <UsageRing used={usage.month} limit={limitBytes} />
-
       <Card title="30 days" value={formatBytes(usage.month)}>
-        <Bars buckets={usage.monthBuckets} height="h-28" labelEvery={6} />
+        <Bars buckets={usage.monthBuckets} height="h-24" labelEvery={6} />
       </Card>
 
       <Card title="7 days" value={formatBytes(usage.week)}>
-        <Bars buckets={usage.weekBuckets} />
+        <Bars buckets={usage.weekBuckets} height="h-24" />
       </Card>
 
       <Card title="24 hours" value={formatBytes(usage.day)}>
-        <Bars buckets={usage.dayBuckets} labelEvery={4} wideBars />
+        <Bars buckets={usage.dayBuckets} height="h-24" labelEvery={4} wideBars />
       </Card>
 
       <LatencyCard usage={usage} />
 
       <EventTimeline buckets={usage.eventBuckets} />
-
-      <div className="lg:col-span-2">
-        <DebugDetails status={status} usage={usage} provider={provider} />
-      </div>
     </div>
   );
 }
