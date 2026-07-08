@@ -486,12 +486,9 @@ function Hero({ status, local, activity, provider }: { status?: StoredProxyHealt
         <div className="flex min-h-36 items-center gap-4 rounded-xl border bg-muted/30 p-3">
           <ProviderRing provider={provider} />
           <div className="min-w-0 flex-1">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Provider cycle</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Cycle</div>
             <div className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">{providerSummary(provider)}</div>
-            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-              <span>resets {formatDate(provider?.resetAt)}</span>
-              <span>{activity.source === 'provider' ? 'provider buckets' : 'local fallback'}</span>
-            </div>
+            <div className="mt-1 text-xs text-muted-foreground">resets {formatDate(provider?.resetAt)}</div>
           </div>
         </div>
 
