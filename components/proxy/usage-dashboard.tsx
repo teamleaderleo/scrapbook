@@ -6,7 +6,6 @@ import { useState } from 'react';
 
 type Bucket = { label: string; bytes: number };
 type MetricBucket = { label: string; value: number | null };
-type EventBucket = { label: string; state: 'ok' | 'issue' | 'missing' };
 type CounterPoint = { date: Date; total: number; mode: string | null };
 type LatencyPoint = { date: Date; value: number };
 type ProviderUsage = {
@@ -34,7 +33,6 @@ type UsageModel = {
   weekBuckets: Bucket[];
   dayBuckets: Bucket[];
   estimatedBuckets: MetricBucket[];
-  eventBuckets: EventBucket[];
 };
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -191,29 +189,6 @@ function buildLatencyPoints(samples: ProxyHealthSample[], valueForSample: (sampl
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
-function buildEventBuckets(samples: ProxyHealthSample[], hourStart: Date) {
-  const raw = Array.from({ length: 24 }, (_, index) => {
-    const date = new Date(hourStart.getTime() + index * HOUR_MS);
-    return { label: hourLabel(date), count: 0, issueCount: 0 };
-  });
-
-  for (const sample of samples) {
-    const date = new Date(sample.checkedAt);
-    if (Number.isNaN(date.getTime()) || date < hourStart) continue;
-    const index = Math.floor((floorUtcHour(date).getTime() - hourStart.getTime()) / HOUR_MS);
-    if (index < 0 || index >= raw.length) continue;
-    raw[index].count += 1;
-    if (sample.mode && sample.mode !== 'normal') raw[index].issueCount += 1;
-  }
-
-  return raw.map((bucket) => {
-    let state: EventBucket['state'] = 'ok';
-    if (bucket.count === 0) state = 'missing';
-    if (bucket.issueCount > 0) state = 'issue';
-    return { label: bucket.label, state };
-  });
-}
-
 function latestDate(counterPoints: CounterPoint[], latencyGroups: LatencyPoint[][]) {
   const values = [
     ...counterPoints.map((point) => point.date.getTime()),
@@ -311,7 +286,6 @@ function buildUsage(samples: ProxyHealthSample[]): UsageModel {
     weekBuckets,
     dayBuckets,
     estimatedBuckets,
-    eventBuckets: buildEventBuckets(samples, hourStart),
   };
 }
 
@@ -357,7 +331,7 @@ function BucketLabel({ label, show }: { label: string; show: boolean }) {
   );
 }
 
-function Bars({ buckets, height = 'h-20', labelEvery = 1, wideBars = false }: { buckets: Bucket[]; height?: string; labelEvery?: number; wideBars?: boolean }) {
+function Bars({ buckets, height = 'h-20', labelEvery = 1, wideBars = false, minBarPercent = 14 }: { buckets: Bucket[]; height?: string; labelEvery?: number; wideBars?: boolean; minBarPercent?: number }) {
   const [selected, setSelected] = useState<string | null>(null);
   const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
 
@@ -368,7 +342,7 @@ function Bars({ buckets, height = 'h-20', labelEvery = 1, wideBars = false }: { 
         {buckets.map((bucket, index) => {
           const isLatest = index === buckets.length - 1;
           const hasValue = bucket.bytes > 0;
-          const barHeight = hasValue ? `${Math.max(14, (bucket.bytes / max) * 100)}%` : '2px';
+          const barHeight = hasValue ? `${Math.max(minBarPercent, (bucket.bytes / max) * 100)}%` : '2px';
           const tooltip = `${bucket.label}: ${formatBytes(bucket.bytes)}`;
           return (
             <button
@@ -412,7 +386,7 @@ function MetricBars({ buckets, labelEvery = 4 }: { buckets: MetricBucket[]; labe
   const range = Math.max(0.1, upper - lower);
 
   return (
-    <div className="relative grid h-20 grid-cols-[minmax(0,1fr)_2.25rem] grid-rows-[minmax(0,1fr)_auto] gap-x-1 gap-y-1 overflow-visible rounded-lg border bg-muted/30 p-2">
+    <div className="relative grid h-24 grid-cols-[minmax(0,1fr)_2.25rem] grid-rows-[minmax(0,1fr)_auto] gap-x-1 gap-y-1 overflow-visible rounded-lg border bg-muted/30 p-2">
       <PinnedValue value={selected} />
       <div className="flex min-h-0 items-end gap-1 overflow-visible">
         {buckets.map((bucket, index) => {
@@ -538,7 +512,7 @@ function ProviderSummary({ status, usage, provider }: { status?: StoredProxyHeal
         <div className="text-xs text-muted-foreground">checked <span className="font-medium text-foreground">{formatRelativeTime(status?.updatedAt ?? usage.latestCheckedAt)}</span></div>
       </div>
 
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)]">
         <div className="flex min-h-36 items-center gap-4 rounded-xl border bg-muted/30 p-3">
           <ProviderRing provider={provider} />
           <div className="min-w-0 flex-1">
@@ -548,7 +522,7 @@ function ProviderSummary({ status, usage, provider }: { status?: StoredProxyHeal
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
           <div className="rounded-xl border bg-muted/30 px-3 py-3">
             <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">24h</div>
             <div className="mt-1 text-2xl font-semibold tracking-tight">{formatBytes(usage.day)}</div>
@@ -560,50 +534,16 @@ function ProviderSummary({ status, usage, provider }: { status?: StoredProxyHeal
             <div className="mt-1 text-2xl font-semibold tracking-tight">{formatMs(usage.primaryPlusEgress)}</div>
             <div className="mt-0.5 text-xs text-muted-foreground">24h {formatMs(usage.estimated24h)}</div>
           </div>
-
-          <div className="rounded-xl border bg-muted/30 px-3 py-3">
-            <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Samples</div>
-            <div className="mt-1 text-2xl font-semibold tracking-tight">{usage.sampleCount}</div>
-            <div className="mt-0.5 text-xs text-muted-foreground">5 min cadence</div>
-          </div>
         </div>
       </div>
     </section>
   );
 }
 
-function EventTimeline({ buckets }: { buckets: EventBucket[] }) {
-  return (
-    <Card title="24h status">
-      <div className="flex items-center gap-1 rounded-lg border bg-muted/30 p-2">
-        {buckets.map((bucket, index) => {
-          const showLabel = index % 4 === 0 || index === buckets.length - 1;
-          const className = bucket.state === 'ok'
-            ? 'bg-[#b8b5ff] shadow-[0_0_10px_rgba(184,181,255,0.24)]'
-            : bucket.state === 'issue'
-              ? 'bg-red-400'
-              : 'bg-muted-foreground/20';
-          return (
-            <div key={`${bucket.label}-${index}`} className="flex min-w-0 flex-1 flex-col items-center gap-1" title={`${bucket.label}: ${bucket.state}`}>
-              <div className={`h-2 w-full rounded-full ${className}`} />
-              <div className="h-3 text-[9px] text-muted-foreground">{showLabel ? bucket.label : ''}</div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-        <span>lavender = normal</span>
-        <span>red = issue</span>
-        <span>dim = no sample</span>
-      </div>
-    </Card>
-  );
-}
-
 function LatencyCard({ usage }: { usage: UsageModel }) {
   return (
-    <Card className="lg:col-span-2" title="Latency">
-      <div className="grid gap-2 lg:grid-cols-[0.9fr_1.1fr]">
+    <Card className="xl:col-span-4" title="Latency">
+      <div className="grid gap-2 lg:grid-cols-[0.85fr_1.15fr]">
         <div className="grid grid-cols-3 gap-2 rounded-lg border bg-muted/30 p-2">
           <MiniStat label="Primary" value={usage.primary} note={`24h ${formatMs(usage.primary24h)}`} />
           <MiniStat label="Egress" value={usage.relay} note="relay" />
@@ -611,7 +551,7 @@ function LatencyCard({ usage }: { usage: UsageModel }) {
         </div>
 
         <div>
-          <div className="mb-2 text-xs font-medium text-muted-foreground">Primary + Egress · 24h · adaptive</div>
+          <div className="mb-2 text-xs font-medium text-muted-foreground">Primary + Egress · 24h</div>
           <MetricBars buckets={usage.estimatedBuckets} labelEvery={4} />
         </div>
       </div>
@@ -631,26 +571,24 @@ export function UsageDashboard({
   const provider = providerUsage(status?.payload);
 
   return (
-    <div className="grid gap-3 xl:grid-cols-3">
-      <div className="xl:col-span-3">
+    <div className="grid gap-3 xl:grid-cols-4">
+      <div className="xl:col-span-4">
         <ProviderSummary status={status} usage={usage} provider={provider} />
       </div>
 
-      <Card title="30 days" value={formatBytes(usage.month)}>
-        <Bars buckets={usage.monthBuckets} height="h-28" labelEvery={6} />
+      <Card className="xl:col-span-2" title="30 days" value={formatBytes(usage.month)}>
+        <Bars buckets={usage.monthBuckets} height="h-32" labelEvery={5} minBarPercent={18} />
       </Card>
 
       <Card title="7 days" value={formatBytes(usage.week)}>
-        <Bars buckets={usage.weekBuckets} height="h-28" />
+        <Bars buckets={usage.weekBuckets} height="h-32" />
       </Card>
 
       <Card title="24 hours" value={formatBytes(usage.day)}>
-        <Bars buckets={usage.dayBuckets} height="h-28" labelEvery={4} wideBars />
+        <Bars buckets={usage.dayBuckets} height="h-32" labelEvery={4} wideBars minBarPercent={18} />
       </Card>
 
       <LatencyCard usage={usage} />
-
-      <EventTimeline buckets={usage.eventBuckets} />
     </div>
   );
 }
