@@ -1,6 +1,7 @@
 "use client";
 
 import type { ProxyHealthPayload, ProxyHealthSample, StoredProxyHealth } from '@/app/lib/proxy-health-store';
+import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 
 type RangeKey = '24h' | '7d' | '30d';
@@ -323,7 +324,7 @@ function paceLabel(room: number | null, weeklyAverage: number) {
   return 'pace safe';
 }
 
-function Card({ title, value, children, className = '' }: { title: string; value?: string; children: React.ReactNode; className?: string }) {
+function Card({ title, value, children, className = '' }: { title: string; value?: string; children: ReactNode; className?: string }) {
   return (
     <section className={`rounded-xl border bg-background/80 p-3 shadow-sm ${className}`}>
       <div className="mb-2 flex items-center justify-between gap-3">
