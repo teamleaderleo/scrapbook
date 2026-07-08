@@ -14,14 +14,15 @@ type NavLinkItem = {
   href: string;
   label: string;
   icon: ReactNode;
+  hoverClass: string;
   external?: boolean;
 };
 
 const siteLinks: NavLinkItem[] = [
-  { href: '/proxy-dashboard', label: 'proxy', icon: <Activity size={15} /> },
-  { href: '/space', label: 'space', icon: <Brain size={15} /> },
-  { href: '/gallery', label: 'cube', icon: <Box size={15} /> },
-  { href: 'https://glossless.app/', label: 'glossless', icon: <Sparkles size={15} />, external: true },
+  { href: '/proxy-dashboard', label: 'proxy', icon: <Activity size={15} />, hoverClass: 'hover:text-emerald-500 focus:text-emerald-500' },
+  { href: '/space', label: 'space', icon: <Brain size={15} />, hoverClass: 'hover:text-[hsl(238,45%,58%)] focus:text-[hsl(238,45%,58%)]' },
+  { href: '/gallery', label: 'cube', icon: <Box size={15} />, hoverClass: 'hover:text-foreground focus:text-foreground' },
+  { href: 'https://glossless.app/', label: 'glossless', icon: <Sparkles size={15} />, hoverClass: 'hover:text-purple-500 focus:text-purple-500', external: true },
 ];
 
 const socialLinks: NavLinkItem[] = [
@@ -29,18 +30,21 @@ const socialLinks: NavLinkItem[] = [
     href: 'https://twitter.com/teamleaderleo',
     label: 'twitter',
     icon: <Twitter size={16} />,
+    hoverClass: 'hover:text-blue-500 focus:text-blue-500',
     external: true,
   },
   {
     href: 'https://www.reddit.com/user/TeamLeaderLeo/',
     label: 'reddit',
     icon: <RedditIcon className="h-4 w-4" />,
+    hoverClass: 'hover:text-orange-500 focus:text-orange-500',
     external: true,
   },
   {
     href: 'https://github.com/teamleaderleo/',
     label: 'github',
     icon: <GitHubIcon className="h-4 w-4" />,
+    hoverClass: 'hover:text-foreground focus:text-foreground',
     external: true,
   },
 ];
@@ -57,7 +61,7 @@ function MenuLink({ item }: { item: NavLinkItem }) {
   return (
     <Link
       {...navLinkProps(item)}
-      className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:outline-none"
+      className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted focus:bg-muted focus:outline-none ${item.hoverClass}`}
     >
       <span className="shrink-0">{item.icon}</span>
       <span className="whitespace-nowrap">{item.label}</span>
@@ -69,9 +73,9 @@ function InlineLink({ item }: { item: NavLinkItem }) {
   return (
     <Link
       {...navLinkProps(item)}
-      className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:text-foreground"
+      className={`flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors focus:outline-none ${item.hoverClass}`}
     >
-      <span className="shrink-0 opacity-80">{item.icon}</span>
+      <span className="shrink-0">{item.icon}</span>
       <span>{item.label}</span>
     </Link>
   );
@@ -127,7 +131,7 @@ function DiscordMenuButton() {
   return (
     <button
       onClick={copyDiscord}
-      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:outline-none"
+      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-indigo-500 focus:bg-muted focus:text-indigo-500 focus:outline-none"
       title="Discord - Click to copy username"
       type="button"
     >
@@ -141,10 +145,10 @@ function DiscordInlineButton() {
   return (
     <button
       onClick={copyDiscord}
-      className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:text-foreground"
+      className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-500 focus:text-indigo-500 focus:outline-none"
       type="button"
     >
-      <DiscordIcon className="h-4 w-4 shrink-0 opacity-80" />
+      <DiscordIcon className="h-4 w-4 shrink-0" />
       <span>discord</span>
     </button>
   );
