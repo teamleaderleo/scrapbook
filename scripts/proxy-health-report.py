@@ -31,7 +31,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -62,6 +62,10 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def iso(dt: datetime) -> str:
+    return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
 def unix_to_iso(value: Any) -> str | None:
     try:
         timestamp = int(value)
@@ -69,7 +73,17 @@ def unix_to_iso(value: Any) -> str | None:
         return None
     if timestamp <= 0:
         return None
-    return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat().replace("+00:00", "Z")
+    return iso(datetime.fromtimestamp(timestamp, tz=timezone.utc))
+
+
+def floor_hour(dt: datetime) -> datetime:
+    dt = dt.astimezone(timezone.utc)
+    return datetime(dt.year, dt.month, dt.day, dt.hour, tzinfo=timezone.utc)
+
+
+def floor_day(dt: datetime) -> datetime:
+    dt = dt.astimezone(timezone.utc)
+    return datetime(dt.year, dt.month, dt.day, tzinfo=timezone.utc)
 
 
 def as_int(value: Any) -> int | None:
@@ -278,18 +292,73 @@ def read_globalping() -> dict[str, Any]:
         return {**base, "bandwagon_ms": None, "linode_ms": None, "source": "globalping", "error": str(exc)}
 
 
+def summarize_raw_usage(raw_stats: dict[str, Any], multiplier: int) -> dict[str, Any]:
+    rows = raw_stats.get("data")
+    if not isinstance(rows, list):
+        return {"raw_sample_count": 0, "daily": [], "hourly": []}
+
+    points: list[tuple[datetime, int, int, int]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        timestamp = as_int(row.get("timestamp"))
+        if timestamp is None:
+            continue
+        in_bytes = as_int(row.get("network_in_bytes")) or 0
+        out_bytes = as_int(row.get("network_out_bytes")) or 0
+        dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+        points.append((dt, in_bytes * multiplier, out_bytes * multiplier, (in_bytes + out_bytes) * multiplier))
+
+    if not points:
+        return {"raw_sample_count": 0, "daily": [], "hourly": []}
+
+    latest = max(point[0] for point in points)
+    day_start = floor_day(latest) - timedelta(days=29)
+    hour_start = floor_hour(latest) - timedelta(hours=23)
+
+    daily: dict[str, dict[str, Any]] = {}
+    for index in range(30):
+        dt = day_start + timedelta(days=index)
+        daily[iso(dt)] = {"checked_at": iso(dt), "bytes": 0, "in_bytes": 0, "out_bytes": 0}
+
+    hourly: dict[str, dict[str, Any]] = {}
+    for index in range(24):
+        dt = hour_start + timedelta(hours=index)
+        hourly[iso(dt)] = {"checked_at": iso(dt), "bytes": 0, "in_bytes": 0, "out_bytes": 0}
+
+    for dt, in_bytes, out_bytes, total_bytes in points:
+        day = floor_day(dt)
+        day_key = iso(day)
+        if day_key in daily:
+            daily[day_key]["bytes"] += total_bytes
+            daily[day_key]["in_bytes"] += in_bytes
+            daily[day_key]["out_bytes"] += out_bytes
+
+        hour = floor_hour(dt)
+        hour_key = iso(hour)
+        if hour_key in hourly:
+            hourly[hour_key]["bytes"] += total_bytes
+            hourly[hour_key]["in_bytes"] += in_bytes
+            hourly[hour_key]["out_bytes"] += out_bytes
+
+    return {
+        "raw_sample_count": len(points),
+        "last_raw_at": iso(latest),
+        "daily": list(daily.values()),
+        "hourly": list(hourly.values()),
+    }
+
+
 def read_provider_usage() -> dict[str, Any]:
     if not KIWI_VM_ENABLED:
         return {"source": "disabled"}
     if not KIWI_VM_VEID or not KIWI_VM_API_KEY:
         return {"source": "kiwivm", "error": "missing KiwiVM credentials"}
 
+    credentials = {"veid": KIWI_VM_VEID, "api_key": KIWI_VM_API_KEY}
+
     try:
-        data = request_form_json(
-            "getServiceInfo",
-            {"veid": KIWI_VM_VEID, "api_key": KIWI_VM_API_KEY},
-            timeout=20,
-        )
+        data = request_form_json("getServiceInfo", credentials, timeout=20)
     except urllib.error.HTTPError as exc:
         return {"source": "kiwivm", "error": f"HTTP {exc.code}"}
     except Exception as exc:  # noqa: BLE001 - keep main health report alive
@@ -314,6 +383,18 @@ def read_provider_usage() -> dict[str, Any]:
         "error": error,
         "message": message,
     }
+
+    try:
+        raw_stats = request_form_json("getRawUsageStats", credentials, timeout=30)
+        raw_error = raw_stats.get("error")
+        if raw_error not in (None, 0, "0"):
+            result["raw_error"] = str(raw_error)
+        else:
+            result.update(summarize_raw_usage(raw_stats, multiplier))
+    except urllib.error.HTTPError as exc:
+        result["raw_error"] = f"HTTP {exc.code}"
+    except Exception as exc:  # noqa: BLE001
+        result["raw_error"] = str(exc)
 
     # Do not include provider IPs, hostname, email, node location, rDNS, SSH port, screenshots, or keys.
     return result
@@ -449,6 +530,8 @@ def build_payload() -> dict[str, Any]:
     provider_usage = read_provider_usage()
     if provider_usage.get("error") not in (None, 0, "0"):
         errors.append(f"provider usage check failed: {provider_usage['error']}")
+    if provider_usage.get("raw_error"):
+        errors.append(f"provider raw usage check failed: {provider_usage['raw_error']}")
 
     return {
         "host": HOST,
