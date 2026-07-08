@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { Activity, Box, Brain, ChevronDown, Sparkles, Twitter } from 'lucide-react';
@@ -12,9 +13,8 @@ import { DiscordIcon } from '@/components/icons/discord-icon';
 type NavLinkItem = {
   href: string;
   label: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   external?: boolean;
-  className?: string;
 };
 
 const siteLinks: NavLinkItem[] = [
@@ -45,12 +45,18 @@ const socialLinks: NavLinkItem[] = [
   },
 ];
 
+function navLinkProps(item: NavLinkItem) {
+  return {
+    href: item.href,
+    target: item.external ? '_blank' : undefined,
+    rel: item.external ? 'noopener noreferrer' : undefined,
+  };
+}
+
 function MenuLink({ item }: { item: NavLinkItem }) {
   return (
     <Link
-      href={item.href}
-      target={item.external ? '_blank' : undefined}
-      rel={item.external ? 'noopener noreferrer' : undefined}
+      {...navLinkProps(item)}
       className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:outline-none"
     >
       <span className="shrink-0">{item.icon}</span>
@@ -59,7 +65,18 @@ function MenuLink({ item }: { item: NavLinkItem }) {
   );
 }
 
-function NavMenu({ label, children }: { label: string; children: React.ReactNode }) {
+function InlineLink({ item }: { item: NavLinkItem }) {
+  return (
+    <Link
+      {...navLinkProps(item)}
+      className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:text-foreground"
+    >
+      {item.label}
+    </Link>
+  );
+}
+
+function NavMenu({ label, children }: { label: string; children: ReactNode }) {
   const detailsRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
@@ -98,15 +115,17 @@ function NavMenu({ label, children }: { label: string; children: React.ReactNode
   );
 }
 
+function copyDiscord() {
+  navigator.clipboard.writeText('teamleaderleo');
+  toast.success('Discord username copied!', {
+    description: 'teamleaderleo',
+  });
+}
+
 function DiscordMenuButton() {
   return (
     <button
-      onClick={() => {
-        navigator.clipboard.writeText('teamleaderleo');
-        toast.success('Discord username copied!', {
-          description: 'teamleaderleo',
-        });
-      }}
+      onClick={copyDiscord}
       className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:outline-none"
       title="Discord - Click to copy username"
       type="button"
@@ -117,16 +136,48 @@ function DiscordMenuButton() {
   );
 }
 
+function DiscordInlineButton() {
+  return (
+    <button
+      onClick={copyDiscord}
+      className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:text-foreground"
+      type="button"
+    >
+      discord
+    </button>
+  );
+}
+
 export default function SiteNav() {
   return (
     <nav className="border-b bg-background text-foreground">
       <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-        <div className="flex h-12 min-w-0 items-center justify-between gap-2">
+        <div className="flex h-12 min-w-0 items-center justify-between gap-3">
           <Link href="/" className="min-w-0 shrink truncate text-base font-bold sm:text-lg">
             teamleaderleo
           </Link>
 
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          <div className="hidden min-w-0 items-center gap-5 lg:flex">
+            <div className="flex items-center gap-4">
+              {siteLinks.map((item) => (
+                <InlineLink key={item.label} item={item} />
+              ))}
+            </div>
+
+            <div className="h-5 border-l" />
+
+            <div className="flex items-center gap-4">
+              {socialLinks.map((item) => (
+                <InlineLink key={item.label} item={item} />
+              ))}
+              <DiscordInlineButton />
+            </div>
+
+            <div className="h-5 border-l" />
+            <ThemeToggle />
+          </div>
+
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2 lg:hidden">
             <NavMenu label="site">
               {siteLinks.map((item) => (
                 <MenuLink key={item.label} item={item} />
