@@ -8,6 +8,13 @@ type Bucket = { label: string; bytes: number };
 type MetricBucket = { label: string; value: number | null };
 type LatencyPoint = { date: Date; value: number };
 type EventBucket = { label: string; state: 'ok' | 'issue' | 'missing'; count: number };
+type ProviderUsage = {
+  usedBytes: number | null;
+  limitBytes: number | null;
+  resetAt: string | null;
+  suspended: boolean | null;
+  policyViolation: boolean | null;
+};
 
 const DEFAULT_30_DAY_LIMIT_BYTES = 1024 ** 4;
 const HOUR_MS = 60 * 60 * 1000;
@@ -61,6 +68,13 @@ function formatUtcTime(value: string | null | undefined) {
   });
 }
 
+function formatDate(value: string | null | undefined) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+}
+
 function redacted(text: string) {
   return text
     .replace(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g, '[ip]')
@@ -71,6 +85,30 @@ function safeErrors(payload: ProxyHealthPayload | undefined) {
   const errors = payload?.errors;
   if (!Array.isArray(errors)) return [];
   return errors.filter((error): error is string => typeof error === 'string').map((error) => redacted(error));
+}
+
+function providerUsage(payload: ProxyHealthPayload | undefined): ProviderUsage | null {
+  const usage = payload?.provider?.usage;
+  if (!usage || usage.source === 'disabled') return null;
+
+  return {
+    usedBytes: typeof usage.used_bytes === 'number' && Number.isFinite(usage.used_bytes) ? usage.used_bytes : null,
+    limitBytes: typeof usage.limit_bytes === 'number' && Number.isFinite(usage.limit_bytes) ? usage.limit_bytes : null,
+    resetAt: typeof usage.reset_at === 'string' ? usage.reset_at : null,
+    suspended: typeof usage.suspended === 'boolean' ? usage.suspended : null,
+    policyViolation: typeof usage.policy_violation === 'boolean' ? usage.policy_violation : null,
+  };
+}
+
+function usagePercent(used: number | null, limit: number | null) {
+  if (typeof used !== 'number' || typeof limit !== 'number' || limit <= 0) return null;
+  return Math.min(100, Math.max(0, (used / limit) * 100));
+}
+
+function formatPercent(value: number | null) {
+  if (value === null) return '—';
+  if (value > 0 && value < 1) return '<1%';
+  return `${Math.round(value)}%`;
 }
 
 function sumMs(...values: Array<number | null | undefined>) {
@@ -458,12 +496,13 @@ function StatusPill({ mode, errors }: { mode: string | null; errors: string[] })
   return <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${className}`}>{statusLabel(mode, errors)}</span>;
 }
 
-function MobileSummary({ status, usage }: { status?: StoredProxyHealth | null; usage: ReturnType<typeof buildUsage> }) {
+function MobileSummary({ status, usage, provider }: { status?: StoredProxyHealth | null; usage: ReturnType<typeof buildUsage>; provider: ProviderUsage | null }) {
   const payload = status?.payload;
   const errors = safeErrors(payload);
   const mode = payload?.mode ?? usage.latestMode;
   const latency = usage.primaryPlusEgress;
   const mood = proxyMood(mode ?? null, errors, usage.day, latency);
+  const providerPercent = provider ? usagePercent(provider.usedBytes, provider.limitBytes) : null;
 
   return (
     <section className="rounded-2xl border bg-background/90 p-3 shadow-sm">
@@ -485,11 +524,38 @@ function MobileSummary({ status, usage }: { status?: StoredProxyHealth | null; u
           <div className="mt-0.5 text-base font-semibold tracking-tight">{formatMs(latency)}</div>
         </div>
         <div className="rounded-xl border bg-muted/30 px-3 py-2">
-          <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Last delta</div>
-          <div className="mt-0.5 text-base font-semibold tracking-tight">{formatBytes(usage.lastDelta)}</div>
+          <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Provider</div>
+          <div className="mt-0.5 text-base font-semibold tracking-tight">{formatPercent(providerPercent)}</div>
         </div>
       </div>
     </section>
+  );
+}
+
+function ProviderUsageCard({ provider }: { provider: ProviderUsage | null }) {
+  if (!provider || provider.usedBytes === null || provider.limitBytes === null) return null;
+
+  const percent = usagePercent(provider.usedBytes, provider.limitBytes) ?? 0;
+  const reset = formatDate(provider.resetAt);
+  const attention = provider.suspended || provider.policyViolation;
+
+  return (
+    <Card className="lg:col-span-2" title="Provider cycle" value={formatPercent(percent)}>
+      <div className="rounded-lg border bg-muted/30 p-3">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <div className="text-2xl font-semibold tracking-tight">{formatBytes(provider.usedBytes)} / {formatBytes(provider.limitBytes)}</div>
+            <div className="mt-1 text-xs text-muted-foreground">resets {reset}</div>
+          </div>
+          <div className={`rounded-full border px-2.5 py-1 text-xs ${attention ? 'border-red-400/50 bg-red-400/15' : 'border-[#b8b5ff]/50 bg-[#b8b5ff]/15'}`}>
+            {attention ? 'attention' : 'clear'}
+          </div>
+        </div>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full bg-[#b8b5ff] shadow-[0_0_14px_rgba(184,181,255,0.28)]" style={{ width: `${Math.min(100, Math.max(0, percent))}%` }} />
+        </div>
+      </div>
+    </Card>
   );
 }
 
@@ -521,7 +587,7 @@ function EventTimeline({ buckets }: { buckets: EventBucket[] }) {
   );
 }
 
-function DebugDetails({ status, usage }: { status?: StoredProxyHealth | null; usage: ReturnType<typeof buildUsage> }) {
+function DebugDetails({ status, usage, provider }: { status?: StoredProxyHealth | null; usage: ReturnType<typeof buildUsage>; provider: ProviderUsage | null }) {
   const payload = status?.payload;
   const errors = safeErrors(payload);
   const services = payload?.services ?? {};
@@ -546,10 +612,21 @@ function DebugDetails({ status, usage }: { status?: StoredProxyHealth | null; us
           <div className="mt-1 font-medium text-foreground">Rx {formatBytes(usage.currentRx ?? 0)} · Tx {formatBytes(usage.currentTx ?? 0)}</div>
         </div>
         <div className="rounded-lg border bg-muted/30 p-2">
+          <div className="uppercase tracking-[0.15em]">Provider</div>
+          <div className="mt-1 font-medium text-foreground">{provider?.usedBytes !== null && provider?.limitBytes !== null ? `${formatBytes(provider.usedBytes)} / ${formatBytes(provider.limitBytes)}` : '—'}</div>
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
+        <div className="rounded-lg border bg-muted/30 p-2">
           <div className="uppercase tracking-[0.15em]">Checks</div>
           <div className="mt-1 font-medium text-foreground">
             primary {payload?.egress?.sidecar_ok ? 'ok' : '—'} · backup {payload?.egress?.fallback_ok ? 'ok' : '—'}
           </div>
+        </div>
+        <div className="rounded-lg border bg-muted/30 p-2">
+          <div className="uppercase tracking-[0.15em]">Provider reset</div>
+          <div className="mt-1 font-medium text-foreground">{provider ? formatUtcTime(provider.resetAt) : '—'}</div>
         </div>
       </div>
 
@@ -618,7 +695,7 @@ function LatencyCard({
 function UsageRing({ used, limit }: { used: number; limit: number }) {
   const safeLimit = limit > 0 ? limit : DEFAULT_30_DAY_LIMIT_BYTES;
   const percent = Math.min(100, Math.max(0, (used / safeLimit) * 100));
-  const displayPercent = percent > 0 && percent < 1 ? '<1%' : `${Math.round(percent)}%`;
+  const displayPercent = formatPercent(percent);
   const radius = 50;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - percent / 100);
@@ -659,12 +736,15 @@ export function UsageDashboard({
   limitBytes?: number;
 }) {
   const usage = buildUsage(samples);
+  const provider = providerUsage(status?.payload);
 
   return (
     <div className="grid gap-2 lg:grid-cols-2">
       <div className="lg:col-span-2">
-        <MobileSummary status={status} usage={usage} />
+        <MobileSummary status={status} usage={usage} provider={provider} />
       </div>
+
+      <ProviderUsageCard provider={provider} />
 
       <UsageRing used={usage.month} limit={limitBytes} />
 
@@ -692,7 +772,7 @@ export function UsageDashboard({
       <EventTimeline buckets={usage.eventBuckets} />
 
       <div className="lg:col-span-2">
-        <DebugDetails status={status} usage={usage} />
+        <DebugDetails status={status} usage={usage} provider={provider} />
       </div>
     </div>
   );
