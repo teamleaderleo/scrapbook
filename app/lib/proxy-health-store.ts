@@ -37,6 +37,21 @@ export type ProxyHealthPayload = {
       policy_violation?: boolean | null;
       error?: string | number | null;
       message?: string | null;
+      raw_error?: string | null;
+      raw_sample_count?: number | null;
+      last_raw_at?: string | null;
+      daily?: Array<{
+        checked_at?: string;
+        bytes?: number | null;
+        in_bytes?: number | null;
+        out_bytes?: number | null;
+      }>;
+      hourly?: Array<{
+        checked_at?: string;
+        bytes?: number | null;
+        in_bytes?: number | null;
+        out_bytes?: number | null;
+      }>;
     };
   };
   wireguard?: {
