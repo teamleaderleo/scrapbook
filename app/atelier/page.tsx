@@ -6,7 +6,6 @@ const wheelLinks = [
   { href: '/space', label: 'Space', detail: 'notes and thoughts', angle: -38 },
   { href: '/gallery', label: 'Cube', detail: 'visual objects', angle: 18 },
   { href: 'https://glossless.app/', label: 'Glossless', detail: 'writing tool', angle: 72, external: true },
-  { href: '/lab', label: 'Lab', detail: 'experiment shelf', angle: 142 },
 ];
 
 const futureNodes = [
@@ -20,17 +19,9 @@ export default function AtelierPage() {
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(184,181,255,0.18),_transparent_34rem)] text-foreground">
       <SiteNav />
       <section className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">Atelier</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-5xl">Experimental interface room</h1>
-          </div>
-          <Link
-            href="/lab"
-            className="rounded-full border border-[#b8b5ff]/35 bg-[#b8b5ff]/10 px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-[#b8b5ff]/20 hover:text-foreground"
-          >
-            back to lab
-          </Link>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">Atelier</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-5xl">Experimental interface room</h1>
         </div>
 
         <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
@@ -38,17 +29,17 @@ export default function AtelierPage() {
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">lavender build</p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-4xl">Weapon wheel sketch</h2>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-4xl">Weapon wheel</h2>
               </div>
               <div className="rounded-full border bg-[#b8b5ff]/15 px-3 py-1 text-xs font-medium text-foreground">CSS cube</div>
             </div>
 
             <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-              A quiet place to test personal-site ideas before they touch the main pages: radial navigation, soft game UI, reference-vault sketches, reader surfaces, and small dashboard objects.
+              A quiet place to test radial navigation, soft game UI, reference-vault sketches, reader surfaces, and small dashboard objects.
             </p>
 
-            <div className="mt-8 grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(18rem,0.85fr)] md:items-center">
-              <div className="relative mx-auto aspect-square w-full max-w-[28rem] rounded-[2rem] border bg-[radial-gradient(circle_at_center,rgba(184,181,255,0.18),transparent_58%)] p-6 shadow-inner">
+            <div className="mt-8">
+              <div className="relative mx-auto aspect-square w-full max-w-[34rem] rounded-[2rem] border bg-[radial-gradient(circle_at_center,rgba(184,181,255,0.18),transparent_58%)] p-6 shadow-inner">
                 <div className="absolute inset-6 rounded-full border border-[#b8b5ff]/20" />
                 <div className="absolute inset-12 rounded-full border border-dashed border-[#b8b5ff]/20" />
 
@@ -78,21 +69,6 @@ export default function AtelierPage() {
                     <span className="mt-0.5 text-[11px] leading-tight text-muted-foreground group-hover:text-foreground">{item.detail}</span>
                   </Link>
                 ))}
-              </div>
-
-              <div className="space-y-3">
-                <div className="rounded-2xl border bg-muted/30 p-4">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Weapon wheel sketch</div>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    The cube is the center object. The outer wheel is the navigation layer. This can become click, hold, keyboard, or command-palette driven later.
-                  </p>
-                </div>
-                <div className="rounded-2xl border bg-muted/30 p-4">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">Rule</div>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    Experimental first. Useful second. Nothing here needs to be normal until it earns a permanent page.
-                  </p>
-                </div>
               </div>
             </div>
           </div>
