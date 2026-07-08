@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Report Bandwagon → Linode proxy health to the Next.js dashboard.
+"""Report proxy health to the Next.js dashboard.
 
 Required environment variables:
-  PROXY_HEALTH_INGEST_URL=https://teamleaderleo.com/api/proxy-health/ingest
+  PROXY_HEALTH_INGEST_URL=https://www.teamleaderleo.com/api/proxy-health/ingest
   PROXY_HEALTH_TOKEN=...
 
 Optional:
@@ -14,6 +14,10 @@ Optional:
   GLOBALPING_BANDWAGON_TARGET=67.230.173.112
   GLOBALPING_LINODE_TARGET=172.235.56.214
   GLOBALPING_INTERVAL_SECONDS=1800
+  KIWI_VM_ENABLED=1
+  KIWI_VM_VEID=2154886
+  KIWI_VM_API_KEY=...
+  KIWI_VM_API_URL=https://api.64clouds.com/v1
 """
 
 from __future__ import annotations
@@ -25,6 +29,7 @@ import subprocess
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -47,10 +52,46 @@ GLOBALPING_BANDWAGON_TARGET = os.environ.get("GLOBALPING_BANDWAGON_TARGET", "67.
 GLOBALPING_LINODE_TARGET = os.environ.get("GLOBALPING_LINODE_TARGET", EXPECTED_IPV4)
 GLOBALPING_INTERVAL_SECONDS = int(os.environ.get("GLOBALPING_INTERVAL_SECONDS", "1800"))
 GLOBALPING_CACHE = Path(os.environ.get("GLOBALPING_CACHE", "/var/lib/proxy-health/globalping-cache.json"))
+KIWI_VM_ENABLED = os.environ.get("KIWI_VM_ENABLED", "0") == "1"
+KIWI_VM_API_URL = os.environ.get("KIWI_VM_API_URL", "https://api.64clouds.com/v1")
+KIWI_VM_VEID = os.environ.get("KIWI_VM_VEID")
+KIWI_VM_API_KEY = os.environ.get("KIWI_VM_API_KEY")
 
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def unix_to_iso(value: Any) -> str | None:
+    try:
+        timestamp = int(value)
+    except (TypeError, ValueError):
+        return None
+    if timestamp <= 0:
+        return None
+    return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def as_int(value: Any) -> int | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return max(0, value)
+    if isinstance(value, float) and value >= 0:
+        return int(value)
+    if isinstance(value, str) and value.isdigit():
+        return int(value)
+    return None
+
+
+def as_bool(value: Any) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    if value in (0, 1):
+        return bool(value)
+    if isinstance(value, str) and value.lower() in {"0", "1", "false", "true"}:
+        return value.lower() in {"1", "true"}
+    return None
 
 
 def run(command: list[str], timeout: int = 10) -> tuple[bool, str]:
@@ -132,18 +173,34 @@ def request_json(url: str, data: dict[str, Any] | None = None, timeout: int = 20
         return json.loads(response.read().decode("utf-8"))
 
 
+def request_form_json(endpoint: str, data: dict[str, Any], timeout: int = 20) -> dict[str, Any]:
+    url = f"{KIWI_VM_API_URL.rstrip('/')}/{endpoint.lstrip('/')}"
+    body = urllib.parse.urlencode(data).encode("utf-8")
+    request = urllib.request.Request(
+        url,
+        data=body,
+        method="POST",
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "bandwagon-proxy-health/1.0",
+        },
+    )
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
 def extract_globalping_avg_ms(measurement: dict[str, Any]) -> float | None:
     for item in measurement.get("results", []) or []:
-      result = item.get("result") or {}
-      stats = result.get("stats") or {}
-      for key in ("avg", "average", "mean"):
-          value = stats.get(key)
-          if isinstance(value, (int, float)) and value >= 0:
-              return round(float(value), 2)
-      raw = result.get("rawOutput") or result.get("raw_output") or ""
-      parsed = parse_ping_avg_ms(str(raw))
-      if parsed is not None:
-          return parsed
+        result = item.get("result") or {}
+        stats = result.get("stats") or {}
+        for key in ("avg", "average", "mean"):
+            value = stats.get(key)
+            if isinstance(value, (int, float)) and value >= 0:
+                return round(float(value), 2)
+        raw = result.get("rawOutput") or result.get("raw_output") or ""
+        parsed = parse_ping_avg_ms(str(raw))
+        if parsed is not None:
+            return parsed
     return None
 
 
@@ -219,6 +276,47 @@ def read_globalping() -> dict[str, Any]:
         return result
     except Exception as exc:  # noqa: BLE001 - keep main health report alive
         return {**base, "bandwagon_ms": None, "linode_ms": None, "source": "globalping", "error": str(exc)}
+
+
+def read_provider_usage() -> dict[str, Any]:
+    if not KIWI_VM_ENABLED:
+        return {"source": "disabled"}
+    if not KIWI_VM_VEID or not KIWI_VM_API_KEY:
+        return {"source": "kiwivm", "error": "missing KiwiVM credentials"}
+
+    try:
+        data = request_form_json(
+            "getServiceInfo",
+            {"veid": KIWI_VM_VEID, "api_key": KIWI_VM_API_KEY},
+            timeout=20,
+        )
+    except urllib.error.HTTPError as exc:
+        return {"source": "kiwivm", "error": f"HTTP {exc.code}"}
+    except Exception as exc:  # noqa: BLE001 - keep main health report alive
+        return {"source": "kiwivm", "error": str(exc)}
+
+    error = data.get("error")
+    message = data.get("message") if isinstance(data.get("message"), str) else None
+    plan_monthly_data = as_int(data.get("plan_monthly_data"))
+    data_counter = as_int(data.get("data_counter"))
+    multiplier = as_int(data.get("monthly_data_multiplier")) or 1
+
+    limit_bytes = plan_monthly_data * multiplier if plan_monthly_data is not None else None
+    used_bytes = data_counter * multiplier if data_counter is not None else None
+
+    result: dict[str, Any] = {
+        "source": "kiwivm",
+        "used_bytes": used_bytes,
+        "limit_bytes": limit_bytes,
+        "reset_at": unix_to_iso(data.get("data_next_reset")),
+        "suspended": as_bool(data.get("suspended")),
+        "policy_violation": as_bool(data.get("policy_violation")),
+        "error": error,
+        "message": message,
+    }
+
+    # Do not include provider IPs, hostname, email, node location, rDNS, SSH port, screenshots, or keys.
+    return result
 
 
 def parse_ping_avg_ms(output: str) -> float | None:
@@ -348,6 +446,10 @@ def build_payload() -> dict[str, Any]:
     if globalping.get("error"):
         errors.append(f"globalping check failed: {globalping['error']}")
 
+    provider_usage = read_provider_usage()
+    if provider_usage.get("error") not in (None, 0, "0"):
+        errors.append(f"provider usage check failed: {provider_usage['error']}")
+
     return {
         "host": HOST,
         "checked_at": now_iso(),
@@ -362,6 +464,7 @@ def build_payload() -> dict[str, Any]:
         },
         "latency": read_latency(),
         "globalping": globalping,
+        "provider": {"usage": provider_usage},
         "wireguard": read_wireguard(),
         "xray": xray,
         "expected": {
