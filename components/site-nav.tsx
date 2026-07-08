@@ -69,9 +69,10 @@ function InlineLink({ item }: { item: NavLinkItem }) {
   return (
     <Link
       {...navLinkProps(item)}
-      className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:text-foreground"
+      className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:text-foreground"
     >
-      {item.label}
+      <span className="shrink-0 opacity-80">{item.icon}</span>
+      <span>{item.label}</span>
     </Link>
   );
 }
@@ -140,10 +141,11 @@ function DiscordInlineButton() {
   return (
     <button
       onClick={copyDiscord}
-      className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:text-foreground"
+      className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:text-foreground"
       type="button"
     >
-      discord
+      <DiscordIcon className="h-4 w-4 shrink-0 opacity-80" />
+      <span>discord</span>
     </button>
   );
 }
