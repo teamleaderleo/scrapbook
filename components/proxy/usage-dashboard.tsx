@@ -8,12 +8,17 @@ type Bucket = { label: string; bytes: number };
 type MetricBucket = { label: string; value: number | null };
 type CounterPoint = { date: Date; total: number; mode: string | null };
 type LatencyPoint = { date: Date; value: number };
+type ProviderBucket = { checkedAt: string; bytes: number };
 type ProviderUsage = {
   usedBytes: number | null;
   limitBytes: number | null;
   resetAt: string | null;
   suspended: boolean | null;
   policyViolation: boolean | null;
+  rawSampleCount: number | null;
+  lastRawAt: string | null;
+  daily: ProviderBucket[];
+  hourly: ProviderBucket[];
 };
 
 type UsageModel = {
@@ -33,6 +38,16 @@ type UsageModel = {
   weekBuckets: Bucket[];
   dayBuckets: Bucket[];
   estimatedBuckets: MetricBucket[];
+};
+
+type ActivityModel = {
+  day: number;
+  week: number;
+  month: number;
+  lastDelta: number;
+  monthBuckets: Bucket[];
+  weekBuckets: Bucket[];
+  dayBuckets: Bucket[];
 };
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -106,6 +121,22 @@ function safeErrors(payload: ProxyHealthPayload | undefined) {
   return errors.filter((error): error is string => typeof error === 'string').map(redacted);
 }
 
+function providerBucketRows(value: unknown): ProviderBucket[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null;
+      const row = item as { checked_at?: unknown; bytes?: unknown };
+      if (typeof row.checked_at !== 'string' || !isFiniteNumber(row.bytes)) return null;
+      const date = new Date(row.checked_at);
+      if (Number.isNaN(date.getTime())) return null;
+      return { checkedAt: date.toISOString(), bytes: row.bytes };
+    })
+    .filter((item): item is ProviderBucket => item !== null)
+    .sort((a, b) => new Date(a.checkedAt).getTime() - new Date(b.checkedAt).getTime());
+}
+
 function providerUsage(payload: ProxyHealthPayload | undefined): ProviderUsage | null {
   const usage = payload?.provider?.usage;
   if (!usage || usage.source === 'disabled') return null;
@@ -116,6 +147,10 @@ function providerUsage(payload: ProxyHealthPayload | undefined): ProviderUsage |
     resetAt: typeof usage.reset_at === 'string' ? usage.reset_at : null,
     suspended: typeof usage.suspended === 'boolean' ? usage.suspended : null,
     policyViolation: typeof usage.policy_violation === 'boolean' ? usage.policy_violation : null,
+    rawSampleCount: isFiniteNumber(usage.raw_sample_count) ? usage.raw_sample_count : null,
+    lastRawAt: typeof usage.last_raw_at === 'string' ? usage.last_raw_at : null,
+    daily: providerBucketRows(usage.daily),
+    hourly: providerBucketRows(usage.hourly),
   };
 }
 
@@ -286,6 +321,49 @@ function buildUsage(samples: ProxyHealthSample[]): UsageModel {
     weekBuckets,
     dayBuckets,
     estimatedBuckets,
+  };
+}
+
+function providerDailyBuckets(provider: ProviderUsage | null, count: number, longLabels: boolean) {
+  if (!provider || provider.daily.length === 0) return [];
+  return provider.daily.slice(-count).map((bucket) => {
+    const date = new Date(bucket.checkedAt);
+    return {
+      label: longLabels ? dayLabel(date) : shortDayLabel(date),
+      bytes: bucket.bytes,
+    };
+  });
+}
+
+function providerHourlyBuckets(provider: ProviderUsage | null) {
+  if (!provider || provider.hourly.length === 0) return [];
+  return provider.hourly.slice(-24).map((bucket) => ({
+    label: hourLabel(new Date(bucket.checkedAt)),
+    bytes: bucket.bytes,
+  }));
+}
+
+function sumBuckets(buckets: Bucket[]) {
+  return buckets.reduce((sum, bucket) => sum + bucket.bytes, 0);
+}
+
+function buildActivity(usage: UsageModel, provider: ProviderUsage | null): ActivityModel {
+  const providerMonth = providerDailyBuckets(provider, 30, false);
+  const providerWeek = providerDailyBuckets(provider, 7, true);
+  const providerDay = providerHourlyBuckets(provider);
+
+  const monthBuckets = providerMonth.length > 0 ? providerMonth : usage.monthBuckets;
+  const weekBuckets = providerWeek.length > 0 ? providerWeek : usage.weekBuckets;
+  const dayBuckets = providerDay.length > 0 ? providerDay : usage.dayBuckets;
+
+  return {
+    day: sumBuckets(dayBuckets),
+    week: sumBuckets(weekBuckets),
+    month: sumBuckets(monthBuckets),
+    lastDelta: last(dayBuckets)?.bytes ?? usage.lastDelta,
+    monthBuckets,
+    weekBuckets,
+    dayBuckets,
   };
 }
 
@@ -495,21 +573,22 @@ function ProviderRing({ provider }: { provider: ProviderUsage | null }) {
   );
 }
 
-function ProviderSummary({ status, usage, provider }: { status?: StoredProxyHealth | null; usage: UsageModel; provider: ProviderUsage | null }) {
+function ProviderSummary({ status, usage, activity, provider }: { status?: StoredProxyHealth | null; usage: UsageModel; activity: ActivityModel; provider: ProviderUsage | null }) {
   const payload = status?.payload;
   const errors = safeErrors(payload);
   const mode = payload?.mode ?? usage.latestMode;
   const attention = providerNeedsAttention(provider);
+  const checkedAt = provider?.lastRawAt ?? status?.updatedAt ?? usage.latestCheckedAt;
 
   return (
     <section className="rounded-2xl border bg-background/90 p-3 shadow-sm">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <StatusPill mode={mode ?? null} errors={errors} />
-          <span className="text-xs font-medium text-muted-foreground">{proxyMood(mode ?? null, errors, usage.day, usage.primaryPlusEgress)}</span>
+          <span className="text-xs font-medium text-muted-foreground">{proxyMood(mode ?? null, errors, activity.day, usage.primaryPlusEgress)}</span>
           {attention ? <span className="rounded-full border border-red-400/50 bg-red-400/15 px-2 py-0.5 text-xs text-foreground">attention</span> : null}
         </div>
-        <div className="text-xs text-muted-foreground">checked <span className="font-medium text-foreground">{formatRelativeTime(status?.updatedAt ?? usage.latestCheckedAt)}</span></div>
+        <div className="text-xs text-muted-foreground">checked <span className="font-medium text-foreground">{formatRelativeTime(checkedAt)}</span></div>
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)]">
@@ -525,8 +604,8 @@ function ProviderSummary({ status, usage, provider }: { status?: StoredProxyHeal
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
           <div className="rounded-xl border bg-muted/30 px-3 py-3">
             <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">24h</div>
-            <div className="mt-1 text-2xl font-semibold tracking-tight">{formatBytes(usage.day)}</div>
-            <div className="mt-0.5 text-xs text-muted-foreground">last {formatBytes(usage.lastDelta)}</div>
+            <div className="mt-1 text-2xl font-semibold tracking-tight">{formatBytes(activity.day)}</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">latest hour {formatBytes(activity.lastDelta)}</div>
           </div>
 
           <div className="rounded-xl border bg-muted/30 px-3 py-3">
@@ -569,23 +648,24 @@ export function UsageDashboard({
 }) {
   const usage = buildUsage(samples);
   const provider = providerUsage(status?.payload);
+  const activity = buildActivity(usage, provider);
 
   return (
     <div className="grid gap-3 xl:grid-cols-4">
       <div className="xl:col-span-4">
-        <ProviderSummary status={status} usage={usage} provider={provider} />
+        <ProviderSummary status={status} usage={usage} activity={activity} provider={provider} />
       </div>
 
-      <Card className="xl:col-span-2" title="30 days" value={formatBytes(usage.month)}>
-        <Bars buckets={usage.monthBuckets} height="h-32" labelEvery={5} minBarPercent={18} />
+      <Card className="xl:col-span-2" title="30 days" value={formatBytes(activity.month)}>
+        <Bars buckets={activity.monthBuckets} height="h-32" labelEvery={5} minBarPercent={18} />
       </Card>
 
-      <Card title="7 days" value={formatBytes(usage.week)}>
-        <Bars buckets={usage.weekBuckets} height="h-32" />
+      <Card title="7 days" value={formatBytes(activity.week)}>
+        <Bars buckets={activity.weekBuckets} height="h-32" />
       </Card>
 
-      <Card title="24 hours" value={formatBytes(usage.day)}>
-        <Bars buckets={usage.dayBuckets} height="h-32" labelEvery={4} wideBars minBarPercent={18} />
+      <Card title="24 hours" value={formatBytes(activity.day)}>
+        <Bars buckets={activity.dayBuckets} height="h-32" labelEvery={4} wideBars minBarPercent={18} />
       </Card>
 
       <LatencyCard usage={usage} />
