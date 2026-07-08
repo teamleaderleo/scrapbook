@@ -496,27 +496,27 @@ function StatusPill({ mode, errors }: { mode: string | null; errors: string[] })
 
 function ProviderRing({ provider }: { provider: ProviderUsage | null }) {
   const percent = providerPercent(provider) ?? 0;
-  const radius = 48;
+  const radius = 44;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - percent / 100);
 
   return (
-    <div className="relative h-32 w-32 shrink-0">
-      <svg className="h-full w-full -rotate-90" viewBox="0 0 128 128" role="img" aria-label="provider usage progress">
-        <circle cx="64" cy="64" r={radius} fill="none" className="stroke-muted" strokeWidth="12" />
+    <div className="relative h-28 w-28 shrink-0">
+      <svg className="h-full w-full -rotate-90" viewBox="0 0 120 120" role="img" aria-label="provider usage progress">
+        <circle cx="60" cy="60" r={radius} fill="none" className="stroke-muted" strokeWidth="11" />
         <circle
-          cx="64"
-          cy="64"
+          cx="60"
+          cy="60"
           r={radius}
           fill="none"
           className="stroke-[#b8b5ff]"
-          strokeWidth="12"
+          strokeWidth="11"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
         />
       </svg>
-      <div className="absolute inset-0 flex items-center justify-center text-2xl font-semibold tracking-tight">{formatPercent(percent)}</div>
+      <div className="absolute inset-0 flex items-center justify-center text-xl font-semibold tracking-tight">{formatPercent(percent)}</div>
     </div>
   );
 }
@@ -528,27 +528,23 @@ function ProviderSummary({ status, usage, provider }: { status?: StoredProxyHeal
   const attention = providerNeedsAttention(provider);
 
   return (
-    <section className="rounded-2xl border bg-background/90 p-4 shadow-sm">
+    <section className="rounded-2xl border bg-background/90 p-3 shadow-sm">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <StatusPill mode={mode ?? null} errors={errors} />
           <span className="text-xs font-medium text-muted-foreground">{proxyMood(mode ?? null, errors, usage.day, usage.primaryPlusEgress)}</span>
+          {attention ? <span className="rounded-full border border-red-400/50 bg-red-400/15 px-2 py-0.5 text-xs text-foreground">attention</span> : null}
         </div>
         <div className="text-xs text-muted-foreground">checked <span className="font-medium text-foreground">{formatRelativeTime(status?.updatedAt ?? usage.latestCheckedAt)}</span></div>
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
-        <div className="flex items-center gap-5 rounded-xl border bg-muted/30 p-4">
+        <div className="flex min-h-36 items-center gap-4 rounded-xl border bg-muted/30 p-3">
           <ProviderRing provider={provider} />
           <div className="min-w-0 flex-1">
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Provider cycle</div>
-            <div className="mt-1 text-3xl font-semibold tracking-tight">{providerSummary(provider)}</div>
-            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <span>resets {formatUtcDate(provider?.resetAt)}</span>
-              <span className={`rounded-full border px-2 py-0.5 ${attention ? 'border-red-400/50 bg-red-400/15 text-foreground' : 'border-[#b8b5ff]/50 bg-[#b8b5ff]/15 text-foreground'}`}>
-                {attention ? 'attention' : 'clear'}
-              </span>
-            </div>
+            <div className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">{providerSummary(provider)}</div>
+            <div className="mt-1 text-xs text-muted-foreground">resets {formatUtcDate(provider?.resetAt)}</div>
           </div>
         </div>
 
