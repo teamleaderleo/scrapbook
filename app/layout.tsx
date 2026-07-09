@@ -20,6 +20,20 @@ export const metadata: Metadata = {
   }
 };
 
+const themeInitScript = `
+(() => {
+  try {
+    const storedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const shouldUseDark = storedTheme === 'dark' || ((!storedTheme || storedTheme === 'system') && systemPrefersDark);
+    const root = document.documentElement;
+    root.classList.toggle('dark', shouldUseDark);
+    root.classList.toggle('light', !shouldUseDark);
+    root.style.colorScheme = shouldUseDark ? 'dark' : 'light';
+  } catch {}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: {
@@ -28,6 +42,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {/* Preconnect to external domains to speed up third-party resources */}
         <link rel="preconnect" href="https://vitals.vercel-insights.com" />
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
