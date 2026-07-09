@@ -46,7 +46,7 @@ export function SpaceView() {
   const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
 
   // Reset to page 1 when filters change
-  useMemo(() => {
+  useEffect(() => {
     setPage(1);
   }, [tagsParam]);
 
@@ -54,8 +54,8 @@ export function SpaceView() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const isMod = e.metaKey || e.ctrlKey;
+      if (!isMod || e.key.toLowerCase() !== "i") return;
 
-      // For other keys, check if typing
       const target = e.target as HTMLElement | null;
       const tag = target?.tagName?.toLowerCase();
       const role = target?.getAttribute?.("role");
@@ -66,11 +66,14 @@ export function SpaceView() {
         role === "textbox";
 
       if (isTyping) return;
+
+      e.preventDefault();
+      setEditorOpen(!editorOpen);
     };
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [editorOpen, setEditorOpen]);
 
   const onEnroll = useCallback(async (id: string) => {
     const { data: { user } } = await supabase.auth.getUser();

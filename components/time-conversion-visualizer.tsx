@@ -12,19 +12,20 @@ export default function UTCTimeVisualizer() {
   const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const sliderRef = useRef<HTMLInputElement>(null);
-  const gradientPosRef = useRef({ value: 0 });
+
+  // Move the day/night gradient under the thumb. The smoothing is a CSS
+  // transition on the element (see .slider-daynight), so no JS tween is needed.
+  const setSliderGradient = (minutes: number) => {
+    if (!sliderRef.current) return;
+    const targetPos = (minutes / 1439) * 100;
+    sliderRef.current.style.backgroundPosition = `${targetPos}% 50%`;
+  };
 
   // Check if DST is active for US timezones
   const useDST = isDSTActive('us');
 
   useEffect(() => {
     setMounted(true);
-    
-    // Load anime.js
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js';
-    script.async = true;
-    document.head.appendChild(script);
 
     // Detect user's timezone and set current time
     const now = new Date();
@@ -44,17 +45,7 @@ export default function UTCTimeVisualizer() {
     setUtcOffset(offsetStr);
 
     // Set initial gradient position
-    const initialPos = (minutesSinceMidnight / 1439) * 100;
-    gradientPosRef.current.value = initialPos;
-    if (sliderRef.current) {
-      sliderRef.current.style.backgroundPosition = `${initialPos}% 50%`;
-    }
-
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
-    };
+    setSliderGradient(minutesSinceMidnight);
   }, []);
 
   const calculateUTC = () => {
@@ -75,46 +66,9 @@ export default function UTCTimeVisualizer() {
   const pacificOffset = useDST ? -7 : -8;
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTime = parseInt(e.target.value);
+    const newTime = parseInt(e.target.value, 10);
     setLocalTime(newTime);
-
-    const targetPos = (newTime / 1439) * 100;
-    if ((window as any).anime && sliderRef.current) {
-      (window as any).anime({
-        targets: gradientPosRef.current,
-        value: targetPos,
-        duration: 300,
-        easing: 'easeOutCubic',
-        update: () => {
-          if (sliderRef.current) {
-            sliderRef.current.style.backgroundPosition = `${gradientPosRef.current.value}% 50%`;
-          }
-        }
-      });
-    }
-  };
-
-  const handleSliderHover = (e: React.MouseEvent<HTMLInputElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = Math.max(0, Math.min(1, x / rect.width));
-    const newTime = Math.round(percentage * 1439);
-    setLocalTime(newTime);
-
-    const targetPos = (newTime / 1439) * 100;
-    if ((window as any).anime && sliderRef.current) {
-      (window as any).anime({
-        targets: gradientPosRef.current,
-        value: targetPos,
-        duration: 150,
-        easing: 'easeOutQuad',
-        update: () => {
-          if (sliderRef.current) {
-            sliderRef.current.style.backgroundPosition = `${gradientPosRef.current.value}% 50%`;
-          }
-        }
-      });
-    }
+    setSliderGradient(newTime);
   };
 
   const handleWrapperHover = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -125,21 +79,7 @@ export default function UTCTimeVisualizer() {
     const cappedPercentage = Math.max(0, Math.min(1, percentage));
     const newTime = Math.round(cappedPercentage * 1439);
     setLocalTime(newTime);
-
-    const targetPos = (newTime / 1439) * 100;
-    if ((window as any).anime && sliderRef.current) {
-      (window as any).anime({
-        targets: gradientPosRef.current,
-        value: targetPos,
-        duration: 150,
-        easing: 'easeOutQuad',
-        update: () => {
-          if (sliderRef.current) {
-            sliderRef.current.style.backgroundPosition = `${gradientPosRef.current.value}% 50%`;
-          }
-        }
-      });
-    }
+    setSliderGradient(newTime);
   };
 
   const formatTime = (hours: number, minutes: number) => {
@@ -157,20 +97,7 @@ export default function UTCTimeVisualizer() {
 
   const jumpToCurrentTime = () => {
     setLocalTime(currentTime);
-    const targetPos = (currentTime / 1439) * 100;
-    if ((window as any).anime && sliderRef.current) {
-      (window as any).anime({
-        targets: gradientPosRef.current,
-        value: targetPos,
-        duration: 500,
-        easing: 'easeOutCubic',
-        update: () => {
-          if (sliderRef.current) {
-            sliderRef.current.style.backgroundPosition = `${gradientPosRef.current.value}% 50%`;
-          }
-        }
-      });
-    }
+    setSliderGradient(currentTime);
   };
 
   const getTimeOfDay = () => {
@@ -230,6 +157,12 @@ export default function UTCTimeVisualizer() {
           );
           background-size: 200% 100%;
           background-position: 0% 50%;
+          transition: background-position 0.2s ease-out;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .slider-daynight {
+            transition: none;
+          }
         }
         .slider-daynight::-webkit-slider-thumb {
           appearance: none;
@@ -273,20 +206,7 @@ export default function UTCTimeVisualizer() {
           {/* Header */}
           <CurrentTimeDisplay onJumpToTime={(minutes) => {
             setLocalTime(minutes);
-            const targetPos = (minutes / 1439) * 100;
-            if ((window as any).anime && sliderRef.current) {
-              (window as any).anime({
-                targets: gradientPosRef.current,
-                value: targetPos,
-                duration: 500,
-                easing: 'easeOutCubic',
-                update: () => {
-                  if (sliderRef.current) {
-                    sliderRef.current.style.backgroundPosition = `${gradientPosRef.current.value}% 50%`;
-                  }
-                }
-              });
-            }
+            setSliderGradient(minutes);
           }} />
 
           {/* Slider */}
@@ -308,7 +228,8 @@ export default function UTCTimeVisualizer() {
                   step="1"
                   value={localTime}
                   onChange={handleSliderChange}
-                  onMouseMove={handleSliderHover}
+                  aria-label="Local time of day"
+                  aria-valuetext={`${formatTime(localHours, localMinutes)} ${getTimeOfDay()}`}
                   className="w-full h-16 rounded-full appearance-none cursor-pointer slider-daynight"
                 />
               </div>
