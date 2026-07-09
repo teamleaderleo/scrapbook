@@ -212,9 +212,12 @@ export default function UTCTimeVisualizer() {
           {/* Slider */}
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-3 block">
+              <label className="text-sm font-medium block">
                 Local Time
               </label>
+              <p className="mb-3 text-xs text-muted-foreground">
+                Hover or drag to explore the day.
+              </p>
               <div 
                 className="relative" 
                 style={{ paddingLeft: '4px', paddingRight: '4px', marginLeft: '-4px', marginRight: '-4px' }}
