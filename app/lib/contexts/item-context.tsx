@@ -37,13 +37,13 @@ export function ItemsProvider({
   initialItems = [],
   initialIsAdmin = false,
   initialUser = null,
-  initialNowMs = Date.now(),
+  initialNowMs,
 }: ItemsProviderProps) {
   // Hydrate auth with server user to avoid flash
   const { user, loading: authLoading } = useAuth(initialUser);
   const [items, setItems] = useState<Item[]>(initialItems);
   const [loading, setLoading] = useState(initialItems.length === 0);
-  const [nowMs] = useState(initialNowMs);
+  const [nowMs] = useState(() => initialNowMs ?? Date.now());
   const [editorOpen, setEditorOpen] = useState(false);
   
   useEffect(() => {
