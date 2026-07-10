@@ -7,10 +7,7 @@ import { isDSTActive } from '@/app/lib/dst-utils';
 
 export default function UTCTimeVisualizer() {
   const [localTime, setLocalTime] = useState(0);
-  const [userTimezone, setUserTimezone] = useState('');
-  const [utcOffset, setUtcOffset] = useState('');
   const [mounted, setMounted] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
   const sliderRef = useRef<HTMLInputElement>(null);
 
   // Move the day/night gradient under the thumb. The smoothing is a CSS
@@ -27,24 +24,10 @@ export default function UTCTimeVisualizer() {
   useEffect(() => {
     setMounted(true);
 
-    // Detect user's timezone and set current time
+    // Start at the current local time
     const now = new Date();
     const minutesSinceMidnight = now.getHours() * 60 + now.getMinutes();
     setLocalTime(minutesSinceMidnight);
-    setCurrentTime(minutesSinceMidnight);
-    setUserTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
-    
-    // Calculate UTC offset
-    const offsetMinutes = -now.getTimezoneOffset();
-    const offsetHours = Math.floor(Math.abs(offsetMinutes) / 60);
-    const offsetMins = Math.abs(offsetMinutes) % 60;
-    const sign = offsetMinutes >= 0 ? '+' : '-';
-    const offsetStr = offsetMins === 0 
-      ? `UTC${sign}${offsetHours}` 
-      : `UTC${sign}${offsetHours}:${String(offsetMins).padStart(2, '0')}`;
-    setUtcOffset(offsetStr);
-
-    // Set initial gradient position
     setSliderGradient(minutesSinceMidnight);
   }, []);
 
@@ -71,17 +54,6 @@ export default function UTCTimeVisualizer() {
     setSliderGradient(newTime);
   };
 
-  const handleWrapperHover = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!sliderRef.current) return;
-    const sliderRect = sliderRef.current.getBoundingClientRect();
-    const x = e.clientX - sliderRect.left;
-    const percentage = x / sliderRect.width;
-    const cappedPercentage = Math.max(0, Math.min(1, percentage));
-    const newTime = Math.round(cappedPercentage * 1439);
-    setLocalTime(newTime);
-    setSliderGradient(newTime);
-  };
-
   const formatTime = (hours: number, minutes: number) => {
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
   };
@@ -93,11 +65,6 @@ export default function UTCTimeVisualizer() {
 
   const getPeriod = (hours: number) => {
     return hours >= 12 ? 'PM' : 'AM';
-  };
-
-  const jumpToCurrentTime = () => {
-    setLocalTime(currentTime);
-    setSliderGradient(currentTime);
   };
 
   const getTimeOfDay = () => {
@@ -215,11 +182,7 @@ export default function UTCTimeVisualizer() {
               <label className="text-sm font-medium mb-3 block">
                 Local Time
               </label>
-              <div 
-                className="relative" 
-                style={{ paddingLeft: '4px', paddingRight: '4px', marginLeft: '-4px', marginRight: '-4px' }}
-                onMouseMove={handleWrapperHover}
-              >
+              <div className="relative">
                 <input
                   ref={sliderRef}
                   type="range"
@@ -264,7 +227,7 @@ export default function UTCTimeVisualizer() {
           </div>
 
           {/* UTC Display */}
-          <div className="flex gap-6 items-start">
+          <div className="flex flex-wrap gap-x-6 gap-y-6 items-start">
             <div className="min-w-[10.34rem]">
               <p className="text-sm text-muted-foreground mb-2">UTC</p>
               <p className="text-4xl font-bold">
@@ -274,51 +237,49 @@ export default function UTCTimeVisualizer() {
                 Coordinated Universal Time
               </p>
             </div>
-            
-            <div className="flex gap-2">
-              <div className="min-w-[7.8rem]">
-                <p className="text-sm text-muted-foreground mb-2">
-                  <span className="relative inline-block">
-                    UTC{easternOffset >= 0 ? '+' : ''}{easternOffset}
-                    {useDST && (
-                      <span className="absolute left-full ml-1.5 top-1/2 -translate-y-1/2 text-[9px] px-1 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded font-semibold whitespace-nowrap">
-                        DST
-                      </span>
-                    )}
-                  </span>
-                </p>
-                <p className="text-4xl font-bold">
-                  {formatTime((utcTime.hours + easternOffset + 24) % 24, utcTime.minutes)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Eastern Time
-                </p>
-              </div>
 
-              <div className="min-w-[7.8rem]">
-                <p className="text-sm text-muted-foreground mb-2">
-                  <span className="relative inline-block">
-                    UTC{pacificOffset >= 0 ? '+' : ''}{pacificOffset}
-                    {useDST && (
-                      <span className="absolute left-full ml-1.5 top-1/2 -translate-y-1/2 text-[9px] px-1 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded font-semibold whitespace-nowrap">
-                        DST
-                      </span>
-                    )}
-                  </span>
-                </p>
-                <p className="text-4xl font-bold">
-                  {formatTime((utcTime.hours + pacificOffset + 24) % 24, utcTime.minutes)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Pacific Time
-                </p>
-              </div>
-
-              <TimezoneSelector 
-                utcHours={utcTime.hours} 
-                utcMinutes={utcTime.minutes} 
-              />
+            <div className="min-w-[7.8rem]">
+              <p className="text-sm text-muted-foreground mb-2">
+                <span className="relative inline-block">
+                  UTC{easternOffset >= 0 ? '+' : ''}{easternOffset}
+                  {useDST && (
+                    <span className="absolute left-full ml-1.5 top-1/2 -translate-y-1/2 text-[9px] px-1 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded font-semibold whitespace-nowrap">
+                      DST
+                    </span>
+                  )}
+                </span>
+              </p>
+              <p className="text-4xl font-bold">
+                {formatTime((utcTime.hours + easternOffset + 24) % 24, utcTime.minutes)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Eastern Time
+              </p>
             </div>
+
+            <div className="min-w-[7.8rem]">
+              <p className="text-sm text-muted-foreground mb-2">
+                <span className="relative inline-block">
+                  UTC{pacificOffset >= 0 ? '+' : ''}{pacificOffset}
+                  {useDST && (
+                    <span className="absolute left-full ml-1.5 top-1/2 -translate-y-1/2 text-[9px] px-1 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded font-semibold whitespace-nowrap">
+                      DST
+                    </span>
+                  )}
+                </span>
+              </p>
+              <p className="text-4xl font-bold">
+                {formatTime((utcTime.hours + pacificOffset + 24) % 24, utcTime.minutes)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Pacific Time
+              </p>
+            </div>
+
+            <TimezoneSelector
+              utcHours={utcTime.hours}
+              utcMinutes={utcTime.minutes}
+            />
           </div>
         </div>
       </div>

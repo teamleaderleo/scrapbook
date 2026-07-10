@@ -189,7 +189,7 @@ export function MonacoEditorPanel() {
               color: isDark ? '#cad3f5' : '#383a42'
             }}
           >
-            Let's do some good work today :)
+            Let&apos;s do some good work today :)
           </div>
         </div>
       )}

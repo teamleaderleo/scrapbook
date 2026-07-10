@@ -58,8 +58,8 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   const duplicateId = searchParams.get("duplicate") || null;
   const supabase = createClient();
 
-  // Store the database ID separately (only needed for updates)
-  const itemId = useRef<string | null>(mode === "edit" && item ? item.id : null);
+  // The database ID (only present for updates)
+  const itemId = mode === "edit" && item ? item.id : null;
 
   // Which version we're currently editing
   const [activeVersionIdx, setActiveVersionIdx] = useState(0);
@@ -357,8 +357,8 @@ export function ItemForm({ item, mode }: ItemFormProps) {
           versions: model.versions,
         });
       } else {
-        if (!itemId.current) throw new Error("No item ID for update");
-        await updateItemAction(itemId.current, {
+        if (!itemId) throw new Error("No item ID for update");
+        await updateItemAction(itemId, {
           slug: model.slug,
           title: model.title,
           url: model.url,
@@ -479,7 +479,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
 
           <ItemPreview
             item={{
-              id: itemId.current || "preview",
+              id: itemId || "preview",
               title: model.title,
               url: model.url,
               tags: model.tags,

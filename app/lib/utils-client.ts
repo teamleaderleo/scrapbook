@@ -1,9 +1,3 @@
-import { Block } from "./definitions/definitions";
-import { StaticImageData } from 'next/image';
-const defaultPlaceholder = require('../../public/placeholder-default.png');
-const textPlaceholder = require('../../public/placeholder-text.png');
-const filePlaceholder = require('../../public/placeholder-file.png');
-
 export const formatDateToLocal = (
   dateStr: string,
   locale: string = 'en-US',
@@ -73,6 +67,8 @@ export const toBase64 = (str: string) =>
 export const getBlurDataUrl = (w: number, h: number) => 
   `data:image/svg+xml;base64,${toBase64(shimmer(w, h))}`;
 
+// Needs Block from ./definitions/definitions, StaticImageData from next/image,
+// and the placeholder-*.png imports from ../../public if revived:
 // export const getBlockThumbnail = (block: Block, index: number = 0): StaticImageData => {
 //   if (!block || !block.contents || block.contents.length === 0) {
 //     return defaultPlaceholder;

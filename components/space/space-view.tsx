@@ -29,6 +29,14 @@ export function SpaceView() {
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
   const [page, setPage] = useState(1);
 
+  // Reset to page 1 when filters change (render-time adjustment, see
+  // react.dev "adjusting state when a prop changes")
+  const [prevTagsParam, setPrevTagsParam] = useState(tagsParam);
+  if (prevTagsParam !== tagsParam) {
+    setPrevTagsParam(tagsParam);
+    setPage(1);
+  }
+
   const items = useMemo<Item[]>(() => {
     const withMutations = allItems.map(it => {
       const mutation = mutations[it.id];
@@ -44,11 +52,6 @@ export function SpaceView() {
   }, [items, page]);
 
   const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setPage(1);
-  }, [tagsParam]);
 
   // Hotkey for toggling editor: Cmd/Ctrl + I
   useEffect(() => {

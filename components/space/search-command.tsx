@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   CommandDialog,
@@ -17,13 +17,61 @@ import { searchItems } from "@/app/lib/item-search";
 import type { Item } from "@/app/lib/item-types";
 import { Plus, Search } from "lucide-react";
 
+// Parse search and filter items. Plain function so the React Compiler can
+// memoize the call site itself (manual useMemo here blocked compilation).
+function filterItems(allItems: Item[], search: string, nowMs: number): Item[] {
+  if (!search) return allItems.slice(0, 50); // Show first 50 if empty
+
+  const searchLower = search.toLowerCase();
+
+  // If search contains structured operators (key:value), use query parser
+  if (search.includes(':')) {
+    const query = parseQuery(search);
+    const results = searchItems(allItems, query, nowMs);
+    return results.slice(0, 50);
+  }
+
+  // Otherwise, full-text search across title, category, and tag values
+  // Split by spaces for multi-term AND search
+  const terms = searchLower.split(/\s+/).filter(t => t.length > 0);
+
+  const results = allItems.filter(item => {
+    // Check if ALL terms match somewhere in the item
+    return terms.every(term => {
+      // Search in title
+      if (item.title.toLowerCase().includes(term)) {
+        return true;
+      }
+
+      // Search in category
+      if (item.category.toLowerCase().includes(term)) {
+        return true;
+      }
+
+      // Search in tag values (the part after the colon)
+      const tagValues = item.tags
+        .map(tag => tag.includes(':') ? tag.split(':')[1] : tag)
+        .join(' ')
+        .toLowerCase();
+
+      if (tagValues.includes(term)) {
+        return true;
+      }
+
+      return false;
+    });
+  });
+
+  return results.slice(0, 50);
+}
+
 export function SearchCommand() {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const router = useRouter();
   const sp = useSearchParams();
   const { items: allItems, isAdmin } = useItems();
-  const nowMs = useMemo(() => Date.now(), []);
+  const [nowMs] = useState(() => Date.now());
 
   // Ctrl+K to open
   useEffect(() => {
@@ -43,52 +91,7 @@ export function SearchCommand() {
     return () => window.removeEventListener('open-search', handleOpen);
   }, []);
 
-  // Parse search and filter items
-  const filteredItems = useMemo(() => {
-    if (!search) return allItems.slice(0, 50); // Show first 50 if empty
-    
-    const searchLower = search.toLowerCase();
-    
-    // If search contains structured operators (key:value), use query parser
-    if (search.includes(':')) {
-      const query = parseQuery(search);
-      const results = searchItems(allItems, query, nowMs);
-      return results.slice(0, 50);
-    }
-    
-    // Otherwise, full-text search across title, category, and tag values
-    // Split by spaces for multi-term AND search
-    const terms = searchLower.split(/\s+/).filter(t => t.length > 0);
-    
-    const results = allItems.filter(item => {
-      // Check if ALL terms match somewhere in the item
-      return terms.every(term => {
-        // Search in title
-        if (item.title.toLowerCase().includes(term)) {
-          return true;
-        }
-        
-        // Search in category
-        if (item.category.toLowerCase().includes(term)) {
-          return true;
-        }
-        
-        // Search in tag values (the part after the colon)
-        const tagValues = item.tags
-          .map(tag => tag.includes(':') ? tag.split(':')[1] : tag)
-          .join(' ')
-          .toLowerCase();
-        
-        if (tagValues.includes(term)) {
-          return true;
-        }
-        
-        return false;
-      });
-    });
-    
-    return results.slice(0, 50);
-  }, [search, allItems, nowMs]);
+  const filteredItems = filterItems(allItems, search, nowMs);
 
   const handleSelect = (item: Item) => {
     setOpen(false);

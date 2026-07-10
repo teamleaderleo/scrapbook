@@ -6,9 +6,19 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  // Without Supabase config (e.g. a preview deployment missing env vars),
+  // skip the session refresh rather than 500ing every page
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('Supabase env vars missing; skipping session refresh')
+    return supabaseResponse
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
@@ -27,10 +37,8 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Refresh session if expired
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Refresh session if expired (called for the cookie side effect)
+  await supabase.auth.getUser()
 
   return supabaseResponse
 }
