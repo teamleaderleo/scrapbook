@@ -22,7 +22,6 @@ const siteLinks: NavLinkItem[] = [
   { href: '/proxy-dashboard', label: 'proxy', icon: <Activity size={15} />, hoverClass: 'hover:text-emerald-500 focus:text-emerald-500' },
   { href: '/space', label: 'space', icon: <Brain size={15} />, hoverClass: 'hover:text-[hsl(238,45%,58%)] focus:text-[hsl(238,45%,58%)]' },
   { href: '/gallery', label: 'cube', icon: <Box size={15} />, hoverClass: 'hover:text-foreground focus:text-foreground' },
-  { href: '/atelier', label: 'atelier', icon: <Sparkles size={15} />, hoverClass: 'hover:text-[#b8b5ff] focus:text-[#b8b5ff]' },
   { href: 'https://glossless.app/', label: 'glossless', icon: <Sparkles size={15} />, hoverClass: 'hover:text-purple-500 focus:text-purple-500', external: true },
 ];
 
