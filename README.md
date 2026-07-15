@@ -110,3 +110,5 @@ I will read your feedback, but I'm planning on moving development to a private r
 ## The artwork source?
 
 I drew the picture(s).
+
+<!-- deploy trigger: 2026-07-15 -->
