@@ -1,114 +1,93 @@
-# Scrapbook-Style Project Management App (MVP Stage)
+# teamleaderleo.com / scrapbook
 
-## Overview
+This repository powers [teamleaderleo.com](https://teamleaderleo.com/): an evolving personal site, web lab, and home for the scrapbook project.
 
-This project is a scrapbook-style project management app. It aims to provide an intuitive and visually appealing way to manage projects. The backend is nice, but I'm working on the UI right now. 
+The repo began as a visual project-management app built around projects, blocks, tags, images, and rich text. It has since grown into a collection of useful tools and experiments, with the personal knowledge workspace at its center.
 
-## Live Demo
+## What is live now
 
-Check out the deployed application: [https://teamleaderleo.com/](https://teamleaderleo.com/)
+### Home — time-zone visualizer
 
-## Schema
-<img src="https://github.com/user-attachments/assets/51b2ccab-2821-46e0-aec1-93152fecd4b1" width="60%">
+The homepage is an interactive time converter for comparing UTC, Eastern, Pacific, local time, and a selectable time zone across a full day.
 
-This is an ongoing effort.
+### Space — personal reference and learning workspace
 
-## What It Currently Looks Like
+`/space` is the current evolution of the scrapbook idea: a searchable library for notes, links, code, references, and things worth revisiting.
 
-### Revamping schema; restarted UI situation (top is most recent):
+It currently includes:
 
-![image](https://github.com/user-attachments/assets/724013e9-515f-4a34-9405-19c9d8a97d99)
+- tag-based queries and filtering
+- multiple text and code versions per item
+- inline editing for admin users
+- pagination and command-style search
+- Supabase-backed persistence and authentication
+- FSRS-based spaced-repetition reviews
 
-![image](https://github.com/user-attachments/assets/cb225cc6-910e-4b15-b506-51161db6bde2)
+### Cube — 3D gallery
 
+`/gallery` is a React Three Fiber gallery experiment with a scroll-driven 3D scene.
 
-### Dashboard:
-![image](https://github.com/user-attachments/assets/f5e1507f-541c-4485-9dd7-8d6d87a25ad8)
+### Proxy dashboard
 
+`/proxy-dashboard` is a read-only operations dashboard for the Bandwagon-to-Linode proxy path. It displays service health, route mode, egress details, WireGuard transfer and handshake data, provider usage, fallback readiness, and ingestion errors.
 
-### Blocks:
+Setup details live in [`docs/proxy-health-dashboard.md`](docs/proxy-health-dashboard.md).
 
-![image](https://github.com/user-attachments/assets/b41927cd-af3d-489b-9745-72b10a18d35e)
+### Other areas
 
+The repo also contains:
 
-### Projects:
-![image](https://github.com/user-attachments/assets/42789cb7-d1c4-478d-a7d9-3971131251da)
+- the earlier authenticated scrapbook/project dashboard
+- blog and resume pages
+- lab and atelier experiments
+- image processing, storage, AI-assisted tagging, and other ongoing prototypes
 
-### Login Page:
-![image](https://github.com/MikelBai/scrapbook/assets/13091533/ca45a1e3-66db-4989-9ed7-850ffe2bd770)
+Some routes are polished public surfaces. Others are active experiments or older iterations kept because they still contain useful ideas and code.
 
-### Login Page (Mobile):
-<img src="https://github.com/MikelBai/scrapbook/assets/13091533/7920ec02-4a31-4609-a7ab-3d9fa005620f" width="30%" alt="IMG_6309">
+## Current direction
 
+The main goal is a personal, searchable place for collecting references, writing notes, saving code, and reviewing ideas without an algorithmic feed deciding what appears next.
 
+The original inspiration came from using a private Discord server as an archive: quick capture, channels as categories, rich previews, and easy access from desktop or phone. Scrapbook is the attempt to keep those strengths while adding ownership, offline-friendly possibilities, stronger search, richer editing, and deliberate review.
 
+## Stack
 
+- Next.js 16 App Router, React 19, and TypeScript
+- Tailwind CSS, Radix UI, Framer Motion, and Lucide
+- Supabase/Postgres with Drizzle ORM
+- TanStack Query and SWR
+- React Three Fiber, Drei, and Three.js
+- Tiptap, Monaco, Shiki, and Markdown/MDX tooling
+- Anthropic API integrations
+- AWS S3 and CloudFront integrations
+- Vitest, Playwright, ESLint, and Prettier
 
+## Local development
 
-## Vision
+Requirements:
 
-The goal of this project is to make a project management app that isn't as wack as the existing options. Current key features include:
+- Node.js 22
+- pnpm
 
-- **Visual and Textual Integration:** Incorporates images, sketches, and rich text to create detailed project descriptions and progress updates.
-- **Dynamic Views:** Can toggle between different views, such as a calendar view and a scrapbook view, to visualize project timelines and progress.
-- **Basic Functionality:** Has features like tagging, search, pagination, and authentication to provide a starting level of usability and user experience.
+```bash
+pnpm install
+pnpm dev
+```
 
-## Features Implemented (just a rehash of what's on my resume)
+Then open [http://localhost:3000](http://localhost:3000).
 
-- **Development:** 
-  - Developed a scalable, high-performance project management application leveraging cutting-edge technologies such as React Server Components, Next.js, and serverless architecture for optimal performance and SEO.
-  - Implemented a robust, future-proof schema design connecting accounts, projects, blocks, tags, and multiple content types, focusing on extensible application architecture.
-- **Microservices:** 
-  - Created and integrated a Go microservice for image compression, containerized with Docker and deployed on AWS (ECR, Lambda, API Gateway) with a documented REST API.
-- **AI Integration:** 
-  - Implemented AI-powered features using Claude’s LLM API for intelligent tag suggestions and content organization to enhance user productivity.
-- **Authentication & Storage:** 
-  - Integrated NextAuth.js for secure authentication (email, GitHub, Google) and AWS S3 for isolated user file storage.
-- **Optimization:** 
-  - Optimized database queries and implemented caching strategies using React Query, significantly reducing database fetches and achieving near-instant load times and perfect PageSpeed Insights scores.
-  - Developed custom hooks for efficient state management, replacing Zustand with React Query for server logic.
-- **Database Migration:** 
-  - Migrated the database from Vercel Postgres to Supabase, using pg_dump for 100% data preservation, and refactored the ORM layer to use Drizzle ORM for easier database management.
-- **Search & Filtering:** 
-  - Integrated Fuse.js for comprehensive fuzzy search and filtering across all data points.
-- **UI/UX Design:** 
-  - Designed and implemented a responsive UI with Tailwind CSS and shadcn/ui, featuring instant pagination, dynamic rendering, and optimized image loading.
-- **Code Quality:** 
-  - Conducted regular self-directed code reviews and refactoring sessions, maintaining a clean, modular code structure through pragmatic, delivery-first architectural decisions while preventing premature optimization/abstraction.
-- **Design Tools:** 
-  - Utilized Figma for UI/UX planning and future feature conceptualization, engaging in iterative design cycles.
+Useful checks:
 
-## Features in Progress
+```bash
+pnpm lint
+pnpm prettier:check
+pnpm build
+```
 
-- **Views & Interfaces:** 
-  - Developing portfolio view, blog view, calendar view, and chat view to enhance user interaction and content management.
-- **Content Previews:** 
-  - Implementing rich previews for all content types to provide a more engaging and informative user experience.
-- **Authentication:** 
-  - Completing authentication rules to ensure secure and reliable access control.
-- **Testing:** 
-  - Conducting comprehensive integration tests to verify the functionality and interoperability of all components.
-  - Performing authentication tests to ensure robust security measures are in place.
+The public homepage can render without database credentials. Authentication, saved content, proxy reporting, AI features, and storage integrations require their corresponding environment variables and services.
 
-## Future Plans
+## Status
 
-- **Embeds from Various Websites:** Integrate embeds from platforms like Pinterest, Twitter/X, and Pixiv.
-- **Chatbox Command Interface:** Develop a chatbox-like way to add content, possibly using a CLI-type format for commands.
-- **Account Setup:** Expand account setup options for a more personalized user experience.
-- **Mobile integration:** I want to be able to pull this up on my phone and send links here.
+This is an active personal project. The public utilities and `/space` receive the most attention right now, while the older dashboard remains part of the repo's history and may continue to feed ideas into the newer workspace.
 
-## Personal Note (Deeper vision?)
-
-I store everything in a personal Discord server because I appreciate being able to access stuff from both PC and mobile, and the infinite storage (despite image compression). I like using channels and channel categories, the chat UI, and the automatic embeds for Twitter and other websites, which makes it easy to save references and pictures for inspiration. I want an app with similar functionality to Pinterest but with the ability to go offline, or at the very least browse without being bogged down by recommendation algorithms and layouts that seem to cater more to advertisers than to the end user.
-
-This project will be deemed to have surpassed an MVP when I finalize a draft version of the scrapbook UI as well as complete the CRUD operations of images (blocks), and sort out the data relationships between images and projects. AKA, when I can loosely start considering actually using it for personal use.
-
-## Contributing
-
-I will read your feedback, but I'm planning on moving development to a private repo at some point.
-
-## The artwork source?
-
-I drew the picture(s).
-
-<!-- deploy trigger: 2026-07-15 -->
+The repo name stuck. The project outgrew it.
