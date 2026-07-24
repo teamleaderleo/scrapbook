@@ -32,10 +32,13 @@ function formatDate(value: string | null): string {
   }).format(new Date(value));
 }
 
-function formatRelativeDate(value: string): string {
+function formatRelativeDate(value: string, referenceValue: string): string {
   const elapsedDays = Math.max(
     0,
-    Math.floor((Date.now() - new Date(value).getTime()) / 86_400_000),
+    Math.floor(
+      (new Date(referenceValue).getTime() - new Date(value).getTime()) /
+        86_400_000,
+    ),
   );
 
   if (elapsedDays === 0) return 'today';
@@ -251,7 +254,13 @@ export default async function Page() {
                   <span className="inline-flex items-center gap-1">
                     <GitFork size={13} /> {formatNumber(repository.forks)}
                   </span>
-                  <span>updated {formatRelativeDate(repository.updatedAt ?? activity.generatedAt)}</span>
+                  <span>
+                    updated{' '}
+                    {formatRelativeDate(
+                      repository.updatedAt ?? activity.generatedAt,
+                      activity.generatedAt,
+                    )}
+                  </span>
                 </div>
               </Link>
             ))}
@@ -295,7 +304,13 @@ export default async function Page() {
                           {pullRequest.repository}
                         </Link>
                         <span>#{pullRequest.number}</span>
-                        <span>merged {formatRelativeDate(pullRequest.mergedAt)}</span>
+                        <span>
+                          merged{' '}
+                          {formatRelativeDate(
+                            pullRequest.mergedAt,
+                            activity.generatedAt,
+                          )}
+                        </span>
                       </div>
 
                       <Link
