@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { Activity, Box, Brain, ChevronDown, Sparkles, Twitter } from 'lucide-react';
+import { Activity, Box, Brain, ChevronDown, Clock3, Sparkles, Twitter } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { RedditIcon } from './icons/reddit-icon';
 import { GitHubIcon } from './icons/github-icon';
@@ -77,6 +77,44 @@ function InlineLink({ item }: { item: NavLinkItem }) {
     >
       <span className="shrink-0">{item.icon}</span>
       <span>{item.label}</span>
+    </Link>
+  );
+}
+
+function TimeLink() {
+  const [time, setTime] = useState({ compact: '--:--', full: '--:--:--' });
+
+  useEffect(() => {
+    function updateTime() {
+      const now = new Date();
+      setTime({
+        compact: new Intl.DateTimeFormat(undefined, {
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(now),
+        full: new Intl.DateTimeFormat(undefined, {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        }).format(now),
+      });
+    }
+
+    updateTime();
+    const interval = window.setInterval(updateTime, 1000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  return (
+    <Link
+      href="/time"
+      className="group flex shrink-0 items-center gap-1.5 rounded-full border bg-muted/40 px-2 py-1 text-xs font-semibold text-muted-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      title="Open the time machine"
+      aria-label={`Open the time machine. Local time ${time.full}`}
+    >
+      <Clock3 size={13} className="hidden transition-transform group-hover:-rotate-12 sm:block" />
+      <span className="font-mono tabular-nums lg:hidden">{time.compact}</span>
+      <span className="hidden font-mono tabular-nums lg:inline">{time.full}</span>
     </Link>
   );
 }
@@ -164,6 +202,10 @@ export default function SiteNav() {
           </Link>
 
           <div className="hidden min-w-0 items-center gap-5 lg:flex">
+            <TimeLink />
+
+            <div className="h-5 border-l" />
+
             <div className="flex items-center gap-4">
               {siteLinks.map((item) => (
                 <InlineLink key={item.label} item={item} />
@@ -184,6 +226,8 @@ export default function SiteNav() {
           </div>
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-2 lg:hidden">
+            <TimeLink />
+
             <NavMenu label="site">
               {siteLinks.map((item) => (
                 <MenuLink key={item.label} item={item} />
