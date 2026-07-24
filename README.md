@@ -6,9 +6,15 @@ The repo began as a visual project-management app built around projects, blocks,
 
 ## What is live now
 
-### Home — time-zone visualizer
+### Home — GitHub activity
 
-The homepage is an interactive time converter for comparing UTC, Eastern, Pacific, local time, and a selectable time zone across a full day.
+The homepage answers “what has Leo been up to?” with a cached view of recent GitHub contributions, featured public repositories, and merged pull requests.
+
+When `GITHUB_TOKEN` or `GITHUB_ACCESS_TOKEN` is available, the page uses GitHub GraphQL for the contribution calendar and exact totals. The token-free path falls back to public REST activity and public repository data. Both paths are cached for about ten minutes, so the page needs no webhook, cron job, or per-visit API storm.
+
+### Time machine — time-zone visualizer
+
+`/time` is an interactive time converter for comparing UTC, Eastern, Pacific, local time, and a selectable time zone across a full day. The current local time also appears as a ticking link in the site navigation.
 
 ### Space — personal reference and learning workspace
 
@@ -84,7 +90,7 @@ pnpm prettier:check
 pnpm build
 ```
 
-The public homepage can render without database credentials. Authentication, saved content, proxy reporting, AI features, and storage integrations require their corresponding environment variables and services.
+The public homepage can render without database credentials or a GitHub token. Authentication, saved content, exact contribution totals, proxy reporting, AI features, and storage integrations require their corresponding environment variables and services.
 
 ## Status
 
