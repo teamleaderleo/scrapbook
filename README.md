@@ -96,4 +96,4 @@ The public homepage can render without database credentials or a GitHub token. A
 
 This is an active personal project. The public utilities and `/space` receive the most attention right now, while the older dashboard remains part of the repo's history and may continue to feed ideas into the newer workspace.
 
-<!-- production deployment retry: 2026-07-25 16:27 UTC -->
+<!-- production deployment retry: 2026-07-25 17:33 UTC -->
