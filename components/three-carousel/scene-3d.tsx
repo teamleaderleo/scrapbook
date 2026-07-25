@@ -15,27 +15,22 @@ const satellites: Array<[number, number, number, number]> = [
 
 type RotationTarget = { x: number; y: number };
 
-function AgentRoom({
-  target,
-  dragging,
-}: {
-  target: React.MutableRefObject<RotationTarget>;
-  dragging: React.MutableRefObject<boolean>;
-}) {
+function AgentRoom({ target, dragging }: { target: RotationTarget; dragging: boolean }) {
   const group = useRef<THREE.Group>(null);
+  const idleRotation = useRef(0);
 
   useFrame((state, delta) => {
     if (!group.current) return;
-    if (!dragging.current) target.current.y += delta * 0.12;
+    if (!dragging) idleRotation.current += delta * 0.12;
 
     group.current.rotation.x = THREE.MathUtils.lerp(
       group.current.rotation.x,
-      target.current.x + state.pointer.y * 0.06,
+      target.x + state.pointer.y * 0.06,
       0.08,
     );
     group.current.rotation.y = THREE.MathUtils.lerp(
       group.current.rotation.y,
-      target.current.y + state.pointer.x * 0.05,
+      target.y + idleRotation.current + state.pointer.x * 0.05,
       0.08,
     );
     group.current.rotation.z = THREE.MathUtils.lerp(
@@ -82,16 +77,12 @@ function AgentRoom({
 export default function Scene3D() {
   const [mounted, setMounted] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const rotationTarget = useRef<RotationTarget>({ x: 0, y: 0 });
-  const dragging = useRef(false);
+  const [rotationTarget, setRotationTarget] = useState<RotationTarget>({ x: 0, y: 0 });
   const lastPointer = useRef({ x: 0, y: 0 });
 
   useEffect(() => setMounted(true), []);
 
-  const stopDragging = () => {
-    dragging.current = false;
-    setIsDragging(false);
-  };
+  const stopDragging = () => setIsDragging(false);
 
   if (!mounted) {
     return <div className="h-full min-w-0 w-full bg-[#15161a]" aria-hidden="true" />;
@@ -104,22 +95,19 @@ export default function Scene3D() {
       aria-label="Draggable three-dimensional agent room"
       tabIndex={0}
       onPointerDown={(event) => {
-        dragging.current = true;
         setIsDragging(true);
         lastPointer.current = { x: event.clientX, y: event.clientY };
         event.currentTarget.setPointerCapture(event.pointerId);
       }}
       onPointerMove={(event) => {
-        if (!dragging.current) return;
+        if (!isDragging) return;
         const dx = event.clientX - lastPointer.current.x;
         const dy = event.clientY - lastPointer.current.y;
         lastPointer.current = { x: event.clientX, y: event.clientY };
-        rotationTarget.current.y += dx * 0.008;
-        rotationTarget.current.x = THREE.MathUtils.clamp(
-          rotationTarget.current.x + dy * 0.006,
-          -0.72,
-          0.72,
-        );
+        setRotationTarget((current) => ({
+          y: current.y + dx * 0.008,
+          x: THREE.MathUtils.clamp(current.x + dy * 0.006, -0.72, 0.72),
+        }));
       }}
       onPointerUp={(event) => {
         if (event.currentTarget.hasPointerCapture(event.pointerId)) {
@@ -129,10 +117,18 @@ export default function Scene3D() {
       }}
       onPointerCancel={stopDragging}
       onKeyDown={(event) => {
-        if (event.key === 'ArrowLeft') rotationTarget.current.y -= 0.18;
-        if (event.key === 'ArrowRight') rotationTarget.current.y += 0.18;
-        if (event.key === 'ArrowUp') rotationTarget.current.x = Math.max(-0.72, rotationTarget.current.x - 0.14);
-        if (event.key === 'ArrowDown') rotationTarget.current.x = Math.min(0.72, rotationTarget.current.x + 0.14);
+        if (event.key === 'ArrowLeft') {
+          setRotationTarget((current) => ({ ...current, y: current.y - 0.18 }));
+        }
+        if (event.key === 'ArrowRight') {
+          setRotationTarget((current) => ({ ...current, y: current.y + 0.18 }));
+        }
+        if (event.key === 'ArrowUp') {
+          setRotationTarget((current) => ({ ...current, x: Math.max(-0.72, current.x - 0.14) }));
+        }
+        if (event.key === 'ArrowDown') {
+          setRotationTarget((current) => ({ ...current, x: Math.min(0.72, current.x + 0.14) }));
+        }
       }}
     >
       <Canvas
@@ -147,7 +143,7 @@ export default function Scene3D() {
         <ambientLight intensity={1.25} />
         <directionalLight position={[4, 6, 5]} intensity={2.4} color="#f1eaf5" />
         <pointLight position={[-4, -2, 3]} intensity={22} distance={9} color="#756b83" />
-        <AgentRoom target={rotationTarget} dragging={dragging} />
+        <AgentRoom target={rotationTarget} dragging={isDragging} />
       </Canvas>
     </div>
   );
