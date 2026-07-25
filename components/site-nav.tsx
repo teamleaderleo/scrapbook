@@ -1,14 +1,10 @@
-"use client";
-
+import { DiscordButton, NavMenu, NavThemeToggle, TimeLink } from '@/components/site-nav-interactive';
+import { DiscordIcon } from '@/components/icons/discord-icon';
+import { GitHubIcon } from '@/components/icons/github-icon';
+import { RedditIcon } from '@/components/icons/reddit-icon';
+import { Activity, Box, Brain, Sparkles, Twitter } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
-import { Activity, Box, Brain, ChevronDown, Clock3, Sparkles, Twitter } from 'lucide-react';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { RedditIcon } from './icons/reddit-icon';
-import { GitHubIcon } from './icons/github-icon';
-import { DiscordIcon } from '@/components/icons/discord-icon';
 
 type NavLinkItem = {
   href: string;
@@ -19,10 +15,31 @@ type NavLinkItem = {
 };
 
 const siteLinks: NavLinkItem[] = [
-  { href: '/proxy-dashboard', label: 'proxy', icon: <Activity size={15} />, hoverClass: 'hover:text-emerald-500 focus:text-emerald-500' },
-  { href: '/space', label: 'space', icon: <Brain size={15} />, hoverClass: 'hover:text-[hsl(238,45%,58%)] focus:text-[hsl(238,45%,58%)]' },
-  { href: '/gallery', label: 'cube', icon: <Box size={15} />, hoverClass: 'hover:text-foreground focus:text-foreground' },
-  { href: 'https://glossless.app/', label: 'glossless', icon: <Sparkles size={15} />, hoverClass: 'hover:text-purple-500 focus:text-purple-500', external: true },
+  {
+    href: '/proxy-dashboard',
+    label: 'proxy',
+    icon: <Activity size={15} />,
+    hoverClass: 'hover:text-emerald-500 focus:text-emerald-500',
+  },
+  {
+    href: '/space',
+    label: 'space',
+    icon: <Brain size={15} />,
+    hoverClass: 'hover:text-[hsl(238,45%,58%)] focus:text-[hsl(238,45%,58%)]',
+  },
+  {
+    href: '/gallery',
+    label: 'cube',
+    icon: <Box size={15} />,
+    hoverClass: 'hover:text-foreground focus:text-foreground',
+  },
+  {
+    href: 'https://glossless.app/',
+    label: 'glossless',
+    icon: <Sparkles size={15} />,
+    hoverClass: 'hover:text-purple-500 focus:text-purple-500',
+    external: true,
+  },
 ];
 
 const socialLinks: NavLinkItem[] = [
@@ -81,117 +98,6 @@ function InlineLink({ item }: { item: NavLinkItem }) {
   );
 }
 
-function TimeLink() {
-  const [time, setTime] = useState({ compact: '--:--', full: '--:--:--' });
-
-  useEffect(() => {
-    function updateTime() {
-      const now = new Date();
-      setTime({
-        compact: new Intl.DateTimeFormat(undefined, {
-          hour: '2-digit',
-          minute: '2-digit',
-        }).format(now),
-        full: new Intl.DateTimeFormat(undefined, {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        }).format(now),
-      });
-    }
-
-    updateTime();
-    const interval = window.setInterval(updateTime, 1000);
-    return () => window.clearInterval(interval);
-  }, []);
-
-  return (
-    <Link
-      href="/time"
-      className="group flex shrink-0 items-center gap-1.5 rounded-full border bg-muted/40 px-2 py-1 text-xs font-semibold text-muted-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-      title="Open the time machine"
-      aria-label={`Open the time machine. Local time ${time.full}`}
-    >
-      <Clock3 size={13} className="hidden transition-transform group-hover:-rotate-12 sm:block" />
-      <span className="font-mono tabular-nums lg:hidden">{time.compact}</span>
-      <span className="hidden font-mono tabular-nums lg:inline">{time.full}</span>
-    </Link>
-  );
-}
-
-function NavMenu({ label, children }: { label: string; children: ReactNode }) {
-  const detailsRef = useRef<HTMLDetailsElement>(null);
-
-  useEffect(() => {
-    function closeOnOutsideTap(event: PointerEvent) {
-      const details = detailsRef.current;
-      if (!details?.open) return;
-      if (event.target instanceof Node && details.contains(event.target)) return;
-      details.open = false;
-    }
-
-    function closeOnEscape(event: KeyboardEvent) {
-      if (event.key === 'Escape' && detailsRef.current?.open) {
-        detailsRef.current.open = false;
-      }
-    }
-
-    document.addEventListener('pointerdown', closeOnOutsideTap);
-    document.addEventListener('keydown', closeOnEscape);
-
-    return () => {
-      document.removeEventListener('pointerdown', closeOnOutsideTap);
-      document.removeEventListener('keydown', closeOnEscape);
-    };
-  }, []);
-
-  return (
-    <details ref={detailsRef} className="group relative">
-      <summary className="flex cursor-pointer list-none items-center gap-1 rounded-full px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
-        <span>{label}</span>
-        <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
-      </summary>
-      <div className="absolute right-0 top-full z-50 mt-2 w-max min-w-[8.5rem] rounded-xl border bg-background/95 p-1 shadow-xl backdrop-blur">
-        {children}
-      </div>
-    </details>
-  );
-}
-
-function copyDiscord() {
-  navigator.clipboard.writeText('teamleaderleo');
-  toast.success('Discord username copied!', {
-    description: 'teamleaderleo',
-  });
-}
-
-function DiscordMenuButton() {
-  return (
-    <button
-      onClick={copyDiscord}
-      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-indigo-500 focus:bg-muted focus:text-indigo-500 focus:outline-none"
-      title="Discord - Click to copy username"
-      type="button"
-    >
-      <DiscordIcon className="h-4 w-4 shrink-0" />
-      <span className="whitespace-nowrap">discord</span>
-    </button>
-  );
-}
-
-function DiscordInlineButton() {
-  return (
-    <button
-      onClick={copyDiscord}
-      className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-500 focus:text-indigo-500 focus:outline-none"
-      type="button"
-    >
-      <DiscordIcon className="h-4 w-4 shrink-0" />
-      <span>discord</span>
-    </button>
-  );
-}
-
 export default function SiteNav() {
   return (
     <nav className="border-b bg-background text-foreground">
@@ -203,26 +109,21 @@ export default function SiteNav() {
 
           <div className="hidden min-w-0 items-center gap-5 lg:flex">
             <TimeLink />
-
             <div className="h-5 border-l" />
-
             <div className="flex items-center gap-4">
               {siteLinks.map((item) => (
                 <InlineLink key={item.label} item={item} />
               ))}
             </div>
-
             <div className="h-5 border-l" />
-
             <div className="flex items-center gap-4">
               {socialLinks.map((item) => (
                 <InlineLink key={item.label} item={item} />
               ))}
-              <DiscordInlineButton />
+              <DiscordButton />
             </div>
-
             <div className="h-5 border-l" />
-            <ThemeToggle />
+            <NavThemeToggle />
           </div>
 
           <div className="flex shrink-0 items-center gap-1 sm:gap-2 lg:hidden">
@@ -238,11 +139,11 @@ export default function SiteNav() {
               {socialLinks.map((item) => (
                 <MenuLink key={item.label} item={item} />
               ))}
-              <DiscordMenuButton />
+              <DiscordButton menu />
             </NavMenu>
 
             <div className="ml-0.5 border-l pl-1 sm:ml-2 sm:pl-2">
-              <ThemeToggle />
+              <NavThemeToggle />
             </div>
           </div>
         </div>
