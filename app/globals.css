@@ -6,12 +6,6 @@ html {
   scrollbar-gutter: stable;
 }
 
-html body[data-scroll-locked] {
-  overflow: unset !important;
-  margin-right: unset !important;
-  --removed-body-scroll-bar-size: 0 !important;
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -45,29 +39,18 @@ html body[data-scroll-locked] {
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 238 40% 97%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 238 30% 96%;
-
     --sidebar-accent-foreground: 238 70% 40%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 238 40% 97%;
 
     --chart-1: 12 76% 61%;
-
     --chart-2: 173 58% 39%;
-
     --chart-3: 197 37% 24%;
-
     --chart-4: 43 74% 66%;
-
     --chart-5: 27 87% 67%;
   }
 
@@ -119,6 +102,7 @@ html body[data-scroll-locked] {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -144,7 +128,7 @@ input[type='number']::-webkit-outer-spin-button {
 
 @layer components {
   .tiptap-editor {
-    @apply min-h-[32px] p-2 rounded bg-[#40444b] text-white text-sm outline-none;
+    @apply min-h-[32px] rounded bg-[#40444b] p-2 text-sm text-white outline-none;
   }
 
   .tiptap-editor:focus {
@@ -152,95 +136,19 @@ input[type='number']::-webkit-outer-spin-button {
   }
 
   .tiptap-editor p.is-editor-empty:first-child::before {
-    @apply text-gray-400 float-left h-0 pointer-events-none;
+    @apply pointer-events-none float-left h-0 text-gray-400;
     content: attr(data-placeholder);
   }
 }
 
-/* Light theme (default) */
 .shiki,
 .shiki span {
   color: var(--shiki-light);
   background-color: var(--shiki-light-bg);
 }
 
-/* Dark theme */
 .dark .shiki,
 .dark .shiki span {
   color: var(--shiki-dark);
   background-color: var(--shiki-dark-bg);
-}
-
-/* UTC Time Visualizer Slider Styles */
-.slider-daynight {
-  background: linear-gradient(90deg,
-    #1a1a3e 0%,
-    #1f1f4a 4.17%,
-    #2a2555 8.33%,
-    #3d2d66 12.5%,
-    #553a78 16.67%,
-    #6d4a82 20.83%,
-    #855e88 25%,
-    #a07384 29.17%,
-    #b8877d 33.33%,
-    #d09d76 37.5%,
-    #e8b56f 41.67%,
-    #f5c961 45.83%,
-    #ffd966 50%,
-    #f5c961 54.17%,
-    #e8b56f 58.33%,
-    #d09d76 62.5%,
-    #b8877d 66.67%,
-    #a07384 70.83%,
-    #855e88 75%,
-    #6d4a82 79.17%,
-    #553a78 83.33%,
-    #3d2d66 87.5%,
-    #2a2555 91.67%,
-    #1f1f4a 95.83%,
-    #1a1a3e 100%
-  ) !important;
-  background-size: 200% 100% !important;
-  background-position: 0% 50% !important;
-}
-
-.slider-daynight::-webkit-slider-thumb {
-  appearance: none;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.4);
-  transition: width 0.3s ease, height 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-}
-
-.slider-daynight:hover::-webkit-slider-thumb {
-  width: 120px;
-  height: 120px;
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
-}
-
-.slider-daynight::-moz-range-thumb {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.4);
-  transition: width 0.3s ease, height 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-}
-
-.slider-daynight:hover::-moz-range-thumb {
-  width: 120px;
-  height: 120px;
-  background: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
 }
