@@ -7,6 +7,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Leo · GitHub activity',
   description: 'Recent public GitHub activity from teamleaderleo.',
+  alternates: { canonical: '/' },
 };
 
 function activityClass(day: ContributionDay, maximum: number): string {
@@ -33,6 +34,7 @@ export default async function Page() {
 
   return (
     <ViewportPageShell
+      scroll="locked"
       className="bg-sidebar-background text-foreground"
       contentClassName="text-foreground"
     >
