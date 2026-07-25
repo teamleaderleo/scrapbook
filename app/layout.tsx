@@ -1,6 +1,6 @@
 import '@/app/globals.css';
 import { inter } from '@/components/ui/assets/fonts';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { Analytics } from '@vercel/analytics/next';
@@ -16,6 +16,14 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://teamleaderleo.com'),
 };
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ecebe6' },
+    { media: '(prefers-color-scheme: dark)', color: '#101115' },
+  ],
+  colorScheme: 'light dark',
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -26,12 +34,12 @@ export default function RootLayout({
       <head>
         <style>{`
           html {
-            background-color: #ffffff;
+            background-color: #ecebe6;
             color-scheme: light;
           }
 
           html.dark {
-            background-color: #0e0e16;
+            background-color: #101115;
             color-scheme: dark;
           }
         `}</style>
