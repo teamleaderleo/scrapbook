@@ -1,18 +1,22 @@
-import SiteNav from '@/components/site-nav';
+import ViewportPageShell from '@/components/viewport-page-shell';
 import UTCTimeVisualizer from '@/components/time-conversion-visualizer';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Time machine',
   description:
     'Slide through the day and compare local time, UTC, Eastern, Pacific, and other time zones.',
+  alternates: { canonical: '/time' },
 };
 
 export default function TimePage() {
   return (
-    <main className="flex min-h-screen flex-col bg-sidebar-background">
-      <SiteNav />
+    <ViewportPageShell
+      scroll="locked"
+      className="bg-sidebar-background"
+      contentClassName="flex min-h-0"
+    >
       <UTCTimeVisualizer />
-    </main>
+    </ViewportPageShell>
   );
 }
