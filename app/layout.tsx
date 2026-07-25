@@ -6,6 +6,8 @@ import { Toaster } from '@/components/ui/sonner';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { ServiceWorkerCleanup } from './service-worker-cleanup';
+import { NavigationFeedback } from '@/components/navigation-feedback';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: {
@@ -53,6 +55,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Suspense fallback={null}>
+            <NavigationFeedback />
+          </Suspense>
           {children}
           <Toaster />
           <Analytics />
