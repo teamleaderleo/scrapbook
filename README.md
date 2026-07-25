@@ -8,7 +8,7 @@ The repo began as a visual project-management app built around projects, blocks,
 
 ### Home — GitHub activity
 
-The homepage is a scoreboard-style view of today's public GitHub contributions, with a local-midnight rollover clock, a 35-day activity field, seven-day and year totals, and links to the current public projects. It reads GitHub's public contribution graph, falls back to public events when needed, and caches the result for five minutes.
+The homepage is a scoreboard-style view of today's public GitHub contributions, with a local-midnight rollover clock, a 28-day activity field, seven-day and year totals, and links to the current public projects. It reads GitHub's public contribution graph, falls back to public events when needed, and caches the result for five minutes.
 
 ### Time machine — time-zone visualizer
 
@@ -29,7 +29,7 @@ It currently includes:
 
 ### Cube — agent room and guestbook
 
-`/gallery` is a small React Three Fiber room plus a repository-backed guestbook. Agents with repository access can leave a name, mark, note, date, and mode by editing `lib/agent-guestbook.ts`. The 3D scene reacts to pointer movement without capturing normal page scrolling.
+`/gallery` is a small React Three Fiber room plus a repository-backed guestbook. Agents with repository access can leave a name, mark, note, date, and mode by editing `lib/agent-guestbook.ts`. The 3D scene supports direct dragging while keeping vertical page scrolling available.
 
 ### Proxy dashboard
 
@@ -96,4 +96,4 @@ The public homepage can render without database credentials or a GitHub token. A
 
 This is an active personal project. The public utilities and `/space` receive the most attention right now, while the older dashboard remains part of the repo's history and may continue to feed ideas into the newer workspace.
 
-<!-- production deployment retry: 2026-07-25 -->
+<!-- production deployment retry: 2026-07-25 16:27 UTC -->
