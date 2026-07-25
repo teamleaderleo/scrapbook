@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const wheelLinks = [
   { href: '/proxy-dashboard', label: 'Signal', detail: 'proxy cockpit', angle: -90 },
   { href: '/space', label: 'Space', detail: 'notes and thoughts', angle: -38 },
-  { href: '/gallery', label: 'Cube', detail: 'visual objects', angle: 18 },
+  { href: '/gallery', label: 'Gallery', detail: 'visual objects', angle: 18 },
   {
     href: 'https://glossless.app/',
     label: 'Glossless',
@@ -29,10 +29,10 @@ const futureNodes = [
 
 export default function AtelierPage() {
   return (
-    <ViewportPageShell className="bg-[radial-gradient(circle_at_top,_rgba(184,181,255,0.18),_transparent_34rem)] text-foreground">
+    <ViewportPageShell className="bg-[#ecebe6] text-[#17181b] dark:bg-[#101115] dark:text-[#eeeae3]">
       <section className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-black/55 dark:text-white/55">
             Atelier
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-5xl">
@@ -41,30 +41,30 @@ export default function AtelierPage() {
         </div>
 
         <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
-          <div className="rounded-3xl border bg-background/80 p-5 shadow-sm backdrop-blur sm:p-7">
+          <div className="rounded-3xl border border-black/14 bg-[#f2f0ea] p-5 shadow-sm dark:border-white/12 dark:bg-[#18191d] sm:p-7">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
-                  lavender build
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-black/55 dark:text-white/55">
+                  interface study
                 </p>
                 <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-4xl">
-                  Weapon wheel
+                  Navigation wheel
                 </h2>
               </div>
-              <div className="rounded-full border bg-[#b8b5ff]/15 px-3 py-1 text-xs font-medium text-foreground">
-                CSS cube
+              <div className="rounded-full border border-black/12 bg-[#dedad2] px-3 py-1 text-xs font-medium text-[#242328] dark:border-white/12 dark:bg-[#25262c] dark:text-[#eeeae3]">
+                CSS object
               </div>
             </div>
 
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-              A quiet place to test radial navigation, soft game UI, reference-vault sketches,
+            <p className="max-w-2xl text-sm leading-6 text-black/68 dark:text-white/68 sm:text-base">
+              A quiet place to test radial navigation, game UI, reference-vault sketches,
               reader surfaces, and small dashboard objects.
             </p>
 
             <div className="mt-8">
-              <div className="relative mx-auto aspect-square w-full max-w-[34rem] rounded-[2rem] border bg-[radial-gradient(circle_at_center,rgba(184,181,255,0.18),transparent_58%)] p-6 shadow-inner">
-                <div className="absolute inset-6 rounded-full border border-[#b8b5ff]/20" />
-                <div className="absolute inset-12 rounded-full border border-dashed border-[#b8b5ff]/20" />
+              <div className="relative mx-auto aspect-square w-full max-w-[34rem] overflow-hidden rounded-[2rem] border border-black/14 bg-[#dedbd4] p-6 shadow-inner dark:border-white/12 dark:bg-[#202126]">
+                <div className="absolute inset-6 rounded-full border border-black/12 dark:border-white/12" />
+                <div className="absolute inset-12 rounded-full border border-dashed border-black/12 dark:border-white/12" />
 
                 <div className="absolute left-1/2 top-1/2 z-10 h-28 w-28 -translate-x-1/2 -translate-y-1/2 sm:h-32 sm:w-32">
                   <div className="atelier-cube-scene h-full w-full">
@@ -83,17 +83,18 @@ export default function AtelierPage() {
                   <Link
                     key={item.label}
                     href={item.href}
+                    prefetch={item.external ? false : true}
                     target={item.external ? '_blank' : undefined}
                     rel={item.external ? 'noopener noreferrer' : undefined}
-                    className="group absolute left-1/2 top-1/2 z-20 flex w-28 -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-2xl border bg-background/85 px-3 py-2 text-center shadow-sm backdrop-blur transition hover:-translate-y-[calc(50%+2px)] hover:border-[#b8b5ff]/70 hover:bg-[#b8b5ff]/15 focus:border-[#b8b5ff]/70 focus:outline-none focus:ring-2 focus:ring-[#b8b5ff]/30 sm:w-32"
+                    className="group absolute left-1/2 top-1/2 z-20 flex w-28 -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-2xl border border-black/16 bg-[#f7f4ed] px-3 py-2 text-center text-[#242328] shadow-sm transition hover:-translate-y-[calc(50%+2px)] hover:border-black/32 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:border-white/14 dark:bg-[#18191d] dark:text-[#eeeae3] dark:hover:border-white/30 dark:hover:bg-[#222329] sm:w-32"
                     style={{
                       transform: `translate(-50%, -50%) rotate(${item.angle}deg) translateY(-11rem) rotate(${-item.angle}deg)`,
                     }}
                   >
-                    <span className="text-sm font-semibold tracking-tight text-foreground">
+                    <span className="text-sm font-semibold tracking-tight">
                       {item.label}
                     </span>
-                    <span className="mt-0.5 text-[11px] leading-tight text-muted-foreground group-hover:text-foreground">
+                    <span className="mt-0.5 text-[11px] leading-tight text-black/58 group-hover:text-black/78 dark:text-white/58 dark:group-hover:text-white/80">
                       {item.detail}
                     </span>
                   </Link>
@@ -102,20 +103,20 @@ export default function AtelierPage() {
             </div>
           </div>
 
-          <aside className="rounded-3xl border bg-background/80 p-5 shadow-sm backdrop-blur">
-            <div className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+          <aside className="rounded-3xl border border-black/14 bg-[#f2f0ea] p-5 shadow-sm dark:border-white/12 dark:bg-[#18191d]">
+            <div className="text-xs font-semibold uppercase tracking-[0.24em] text-black/55 dark:text-white/55">
               Future shelves
             </div>
             <div className="mt-4 space-y-3">
               {futureNodes.map((node) => (
-                <div key={node.label} className="rounded-2xl border bg-muted/30 p-4">
+                <div key={node.label} className="rounded-2xl border border-black/12 bg-[#e8e5de] p-4 dark:border-white/10 dark:bg-[#222329]">
                   <div className="flex items-center justify-between gap-3">
                     <h2 className="font-semibold tracking-tight">{node.label}</h2>
-                    <span className="rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground">
+                    <span className="rounded-full border border-black/12 px-2 py-0.5 text-[11px] text-black/58 dark:border-white/12 dark:text-white/58">
                       sketch
                     </span>
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">{node.detail}</p>
+                  <p className="mt-1 text-sm text-black/65 dark:text-white/65">{node.detail}</p>
                 </div>
               ))}
             </div>
@@ -134,10 +135,13 @@ export default function AtelierPage() {
           .atelier-cube-face {
             position: absolute;
             inset: 0;
-            border: 1px solid rgba(184, 181, 255, 0.65);
-            background: linear-gradient(135deg, rgba(184, 181, 255, 0.2), rgba(184, 181, 255, 0.04));
-            box-shadow: inset 0 0 28px rgba(184, 181, 255, 0.18), 0 0 22px rgba(184, 181, 255, 0.12);
-            backdrop-filter: blur(10px);
+            border: 1px solid rgba(80, 76, 88, 0.48);
+            background: linear-gradient(135deg, rgba(130, 124, 140, 0.42), rgba(90, 86, 98, 0.18));
+            box-shadow: inset 0 0 22px rgba(45, 43, 50, 0.12);
+          }
+          .dark .atelier-cube-face {
+            border-color: rgba(222, 215, 228, 0.42);
+            background: linear-gradient(135deg, rgba(155, 148, 166, 0.32), rgba(75, 71, 82, 0.24));
           }
           .atelier-cube-front { transform: translateZ(3.5rem); }
           .atelier-cube-back { transform: rotateY(180deg) translateZ(3.5rem); }
