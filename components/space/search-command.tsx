@@ -17,6 +17,7 @@ import { parseQuery } from '@/app/lib/searchlang';
 import { searchItems } from '@/app/lib/item-search';
 import type { Item } from '@/app/lib/item-types';
 import { Download, Plus, Search } from 'lucide-react';
+import { startNavigationFeedback } from '@/components/navigation-feedback';
 
 function filterItems(allItems: Item[], search: string, nowMs: number): Item[] {
   if (!search) return allItems.slice(0, 50);
@@ -71,15 +72,19 @@ export function SearchCommand() {
   const filteredItems = filterItems(items, search, nowMs);
 
   const handleSelect = (item: Item) => {
+    const href = `/space/review?item=${item.id}`;
     setOpen(false);
     setSearch('');
-    router.push(`/space/review?item=${item.id}`);
+    startNavigationFeedback(href, 'review');
+    router.push(href);
   };
 
   const handleSearchWithQuery = () => {
     if (!search) return;
+    const href = `/space?tags=${encodeURIComponent(search)}`;
     setOpen(false);
-    router.push(`/space?tags=${encodeURIComponent(search)}`);
+    startNavigationFeedback(href, 'filtered list');
+    router.push(href);
     setSearch('');
   };
 
@@ -130,6 +135,7 @@ export function SearchCommand() {
             <CommandItem
               onSelect={() => {
                 setOpen(false);
+                startNavigationFeedback('/space/add', 'new item');
                 router.push('/space/add');
               }}
             >
