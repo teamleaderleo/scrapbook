@@ -6,7 +6,23 @@ import {
 } from './github-activity-utils';
 
 const GITHUB_USERNAME = 'teamleaderleo';
-const FEATURED_REPOSITORIES = ['smolrunner', 'stensibly'] as const;
+const FEATURED_REPOSITORIES = [
+  {
+    name: 'smolrunner',
+    url: 'https://github.com/teamleaderleo/smolrunner',
+    note: 'Plans host work before mutation and treats unknown state as a reason to inspect, not guess.',
+  },
+  {
+    name: 'stensibly',
+    url: 'https://github.com/teamleaderleo/stensibly',
+    note: 'Keeps responsibility, authority, evidence, and next actions in one shared ledger.',
+  },
+  {
+    name: 'proofwake',
+    url: 'https://github.com/teamleaderleo/proofwake',
+    note: 'Builds a privacy-minded evidence trail around revisions, failures, recovery, and missing signals.',
+  },
+] as const;
 const CACHE_SECONDS = 300;
 const HOME_WINDOW_DAYS = 35;
 
@@ -29,7 +45,7 @@ export type GitHubHomeData = {
   repositories: Array<{
     name: string;
     url: string;
-    description: string | null;
+    note: string;
   }>;
 };
 
@@ -41,12 +57,6 @@ type RestEvent = {
     size?: number;
     distinct_size?: number;
   };
-};
-
-type RestRepository = {
-  name: string;
-  html_url: string;
-  description: string | null;
 };
 
 type ActivitySource = GitHubHomeData['source'];
@@ -159,32 +169,11 @@ async function fetchPublicEventCounts(): Promise<Map<string, number>> {
   return counts;
 }
 
-async function fetchRepositories() {
-  try {
-    const repositories = await githubJson<RestRepository[]>(
-      `https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100&type=owner`,
-    );
-
-    return FEATURED_REPOSITORIES.map((name) => {
-      const repository = repositories.find((candidate) => candidate.name === name);
-      return {
-        name,
-        url: repository?.html_url ?? `https://github.com/${GITHUB_USERNAME}/${name}`,
-        description: repository?.description ?? null,
-      };
-    });
-  } catch {
-    return FEATURED_REPOSITORIES.map((name) => ({
-      name,
-      url: `https://github.com/${GITHUB_USERNAME}/${name}`,
-      description: null,
-    }));
-  }
+function featuredRepositories(): GitHubHomeData['repositories'] {
+  return FEATURED_REPOSITORIES.map((repository) => ({ ...repository }));
 }
 
 async function loadGitHubHomeData(): Promise<GitHubHomeData> {
-  const repositoriesPromise = fetchRepositories();
-
   try {
     const summary = summarizeCounts(await fetchPublicProfileCounts(), 'public-profile');
     return {
@@ -192,7 +181,7 @@ async function loadGitHubHomeData(): Promise<GitHubHomeData> {
       source: 'public-profile',
       generatedAt: new Date().toISOString(),
       ...summary,
-      repositories: await repositoriesPromise,
+      repositories: featuredRepositories(),
     };
   } catch (profileError) {
     console.error('GitHub public contribution fetch failed', profileError);
@@ -205,7 +194,7 @@ async function loadGitHubHomeData(): Promise<GitHubHomeData> {
       source: 'public-events',
       generatedAt: new Date().toISOString(),
       ...summary,
-      repositories: await repositoriesPromise,
+      repositories: featuredRepositories(),
     };
   } catch (eventError) {
     console.error('GitHub public event fetch failed', eventError);
@@ -216,14 +205,14 @@ async function loadGitHubHomeData(): Promise<GitHubHomeData> {
       generatedAt: new Date().toISOString(),
       ...summary,
       total: null,
-      repositories: await repositoriesPromise,
+      repositories: featuredRepositories(),
     };
   }
 }
 
 const getCachedGitHubHomeData = unstable_cache(
   loadGitHubHomeData,
-  ['github-homepage-v4'],
+  ['github-homepage-v5'],
   { revalidate: CACHE_SECONDS },
 );
 

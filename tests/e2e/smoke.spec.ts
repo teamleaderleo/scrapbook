@@ -12,6 +12,13 @@ async function expectNoHorizontalOverflow(page: Page) {
   expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport);
 }
 
+async function waitForClientHydration(page: Page) {
+  const timeLink = page.getByRole('link', { name: /Open the time converter/i });
+  await expect
+    .poll(() => timeLink.getAttribute('aria-label'))
+    .not.toContain('Local time --:--');
+}
+
 async function expectWheelScrollsDocument(page: Page, route: string, selector: string) {
   await page.setViewportSize({ width: 900, height: 420 });
   const response = await page.goto(route);
@@ -41,19 +48,19 @@ async function expectWheelScrollsDocument(page: Page, route: string, selector: s
 }
 
 async function moveActivityDigits(page: Page) {
+  await waitForClientHydration(page);
+
   const digits = page.locator('[data-activity-digit]');
   await expect(digits).toHaveCount(4);
   const container = digits.first().locator('..');
   const box = await container.boundingBox();
   expect(box).toBeTruthy();
 
-  await container.dispatchEvent('pointermove', {
-    bubbles: true,
-    clientX: box!.x + box!.width * 0.14,
-    clientY: box!.y + box!.height * 0.22,
-    pointerId: 1,
-    pointerType: 'mouse',
-  });
+  await page.mouse.move(
+    box!.x + box!.width * 0.14,
+    box!.y + box!.height * 0.22,
+    { steps: 3 },
+  );
 
   return digits;
 }
@@ -71,7 +78,35 @@ for (const route of publicRoutes) {
   });
 }
 
+test('homepage highlights three recent systems', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(
+    page.getByRole('heading', { name: 'Tools that remember their boundaries' }),
+  ).toBeVisible();
+  await expect(page.getByRole('link', { name: /smolrunner/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /stensibly/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /proofwake/i })).toBeVisible();
+});
+
+test('gallery credits the agents who worked here', async ({ page }) => {
+  await page.goto('/gallery');
+
+  await expect(page.getByRole('heading', { name: 'Codex' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Claude Fable' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Mothbit' })).toBeVisible();
+});
+
 test('slow navigation keeps the current page visible with immediate feedback', async ({ page }) => {
+  await page.addInitScript(() => {
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: () => void) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    idleWindow.requestIdleCallback = () => 1;
+    idleWindow.cancelIdleCallback = () => {};
+  });
+
   let releaseNavigation!: () => void;
   const navigationGate = new Promise<void>((resolve) => {
     releaseNavigation = resolve;
@@ -86,6 +121,8 @@ test('slow navigation keeps the current page visible with immediate feedback', a
   );
 
   await page.goto('/');
+  await waitForClientHydration(page);
+
   const activity = page.locator('[aria-label="Four weeks of GitHub activity"]');
   await expect(activity).toBeVisible();
 
