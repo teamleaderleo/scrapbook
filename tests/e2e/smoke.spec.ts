@@ -70,7 +70,7 @@ test('slow navigation keeps the current page visible with immediate feedback', a
   const activity = page.locator('[aria-label="Four weeks of GitHub activity"]');
   await expect(activity).toBeVisible();
 
-  await page.getByRole('link', { name: /Open the time converter/i }).click();
+  await page.getByRole('link', { name: /Open the time converter/i }).click({ noWaitAfter: true });
   await expect(page.getByText('Opening time')).toBeVisible();
   await expect(activity).toBeVisible();
 
