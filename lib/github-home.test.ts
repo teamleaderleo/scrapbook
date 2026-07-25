@@ -39,4 +39,11 @@ describe('getRecentDateKeys', () => {
     const days = getRecentDateKeys(new Date('2026-07-25T07:30:00Z'));
     expect(days.at(-1)).toBe('2026-07-25');
   });
+
+  it('supports the 35-day homepage window', () => {
+    const days = getRecentDateKeys(new Date('2026-07-25T07:30:00Z'), 35);
+    expect(days).toHaveLength(35);
+    expect(days[0]).toBe('2026-06-21');
+    expect(days.at(-1)).toBe('2026-07-25');
+  });
 });
