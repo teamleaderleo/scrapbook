@@ -1,17 +1,26 @@
-import 'dotenv/config'
+import 'dotenv/config';
 
-import { drizzle } from 'drizzle-orm/postgres-js'
-import postgres from 'postgres'
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import * as schema from './schema';
 
-const databaseUrl = process.env.DATABASE_URL;
+let clientInstance: ReturnType<typeof postgres> | null = null;
+let databaseInstance: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
-if (!databaseUrl) {
-  throw new Error('DATABASE_URL is not set in the environment variables');
+export function getDatabaseClient() {
+  if (clientInstance) return clientInstance;
+
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL is not set in the environment variables');
+  }
+
+  clientInstance = postgres(databaseUrl, { prepare: false });
+  return clientInstance;
 }
 
-console.log('Using database URL:', databaseUrl.replace(/:[^:@]+@/, ':***@')); // Mask the password
-
-// Disable prefetch as it is not supported for "Transaction" pool mode
-export const client = postgres(databaseUrl, { prepare: false });
-export const db = drizzle(client, { schema });
+export function getDatabase() {
+  if (databaseInstance) return databaseInstance;
+  databaseInstance = drizzle(getDatabaseClient(), { schema });
+  return databaseInstance;
+}
