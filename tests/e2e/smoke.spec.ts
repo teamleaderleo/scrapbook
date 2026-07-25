@@ -52,6 +52,33 @@ for (const route of publicRoutes) {
   });
 }
 
+test('slow navigation keeps the current page visible with immediate feedback', async ({ page }) => {
+  let releaseNavigation!: () => void;
+  const navigationGate = new Promise<void>((resolve) => {
+    releaseNavigation = resolve;
+  });
+
+  await page.route(
+    (url) => url.pathname === '/time',
+    async (route) => {
+      await navigationGate;
+      await route.continue();
+    },
+  );
+
+  await page.goto('/');
+  const activity = page.locator('[aria-label="Four weeks of GitHub activity"]');
+  await expect(activity).toBeVisible();
+
+  await page.getByRole('link', { name: /Open the time converter/i }).click();
+  await expect(page.getByText('Opening time')).toBeVisible();
+  await expect(activity).toBeVisible();
+
+  releaseNavigation();
+  await expect(page.locator('input[type="range"]')).toBeVisible();
+  await expect(page.getByText('Opening time')).toBeHidden();
+});
+
 test('homepage wheel scrolls over the activity grid', async ({ page }) => {
   await expectWheelScrollsDocument(page, '/', '[aria-label="Four weeks of GitHub activity"]');
 });
