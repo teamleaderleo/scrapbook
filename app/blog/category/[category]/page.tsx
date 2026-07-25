@@ -5,8 +5,6 @@ import type { Metadata } from 'next';
 
 type CategoryParams = Promise<{ category: string }>;
 
-export const dynamicParams = false;
-
 export function generateStaticParams() {
   return Object.keys(categories).map((category) => ({ category }));
 }
