@@ -7,11 +7,15 @@ This adds a read-only dashboard for the Bandwagon → Linode proxy path.
 Set these on the Next.js host:
 
 ```bash
-PROXY_HEALTH_TOKEN="a-long-random-secret"
+DATABASE_URL="postgresql://..."
+PROXY_HEALTH_INGEST_SECRET="a-long-random-secret"
+PROXY_HEALTH_DIAGNOSTIC_SECRET="another-long-random-secret"
 PROXY_DASHBOARD_TOKEN="optional-read-token"
 ```
 
-`PROXY_HEALTH_TOKEN` is required. Bandwagon uses it to POST health reports.
+`PROXY_HEALTH_INGEST_SECRET` is the preferred credential for Bandwagon health reports. The older `PROXY_HEALTH_TOKEN` name remains supported for compatibility.
+
+`PROXY_HEALTH_DIAGNOSTIC_SECRET` protects the database diagnostic endpoint. When omitted, the diagnostic endpoint falls back to the ingest credential.
 
 `PROXY_DASHBOARD_TOKEN` is optional. If set, open the dashboard with:
 
@@ -25,13 +29,19 @@ PROXY_DASHBOARD_TOKEN="optional-read-token"
 GET  /proxy-dashboard
 POST /api/proxy-health/ingest
 GET  /api/proxy-health/latest
+GET  /api/proxy-health/diagnostic
 ```
 
-The ingest API stores the latest health payload in Postgres. The table is created automatically on first read/write:
+The ingest API stores the latest health payload and historical samples in Postgres:
 
 ```sql
 proxy_health_status(host primary key, payload jsonb, checked_at timestamptz, updated_at timestamptz)
+proxy_health_samples(id bigserial primary key, host text, checked_at timestamptz, ...)
 ```
+
+The schema is created by `drizzle/0008_proxy_health.sql`. Apply migrations before deploying a new environment; dashboard reads and ingest requests do not run DDL.
+
+The diagnostic endpoint requires a bearer token or `x-proxy-health-token` header. It reports whether the database is reachable, whether both tables exist, the newest report timestamp, and the number of samples received in the previous 24 hours.
 
 ## Install reporter on Bandwagon
 
@@ -110,7 +120,7 @@ set +a
 A good response looks like:
 
 ```json
-{"ok":true,"host":"bandwagon-la","checked_at":"..."}
+{"ok":true,"host":"bandwagon-la","checked_at":"...","request_id":"..."}
 ```
 
 Then open:
