@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   CommandDialog,
   CommandEmpty,
@@ -48,7 +48,6 @@ export function SearchCommand() {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { items, isAdmin, hasMore, loadMore, loadingMore } = useItems();
   const [nowMs] = useState(() => Date.now());
 
