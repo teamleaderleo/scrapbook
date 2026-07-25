@@ -50,6 +50,10 @@ type RestRepository = {
 };
 
 type ActivitySource = GitHubHomeData['source'];
+type ActivitySummary = Pick<
+  GitHubHomeData,
+  'total' | 'periodLabel' | 'today' | 'weekTotal' | 'activeDays' | 'currentStreak' | 'days'
+>;
 
 function daysFromCounts(counts: Map<string, number>, now: Date, length = HOME_WINDOW_DAYS) {
   return getRecentDateKeys(now, length).map((date) => ({ date, count: counts.get(date) ?? 0 }));
@@ -70,10 +74,15 @@ function countCurrentStreak(days: ContributionDay[]): number {
   return streak;
 }
 
-function summarizeCounts(counts: Map<string, number>, source: ActivitySource, now = new Date()) {
+function summarizeCounts(
+  counts: Map<string, number>,
+  source: ActivitySource,
+  now = new Date(),
+): ActivitySummary {
   const days = daysFromCounts(counts, now);
   const today = dateKeyInTimeZone(now);
-  const periodLabel = source === 'public-profile' ? 'this year' : 'last 35 days';
+  const periodLabel: GitHubHomeData['periodLabel'] =
+    source === 'public-profile' ? 'this year' : 'last 35 days';
   const periodEntries =
     source === 'public-profile'
       ? [...counts.entries()].filter(([date]) => date.startsWith(today.slice(0, 4)) && date <= today)
