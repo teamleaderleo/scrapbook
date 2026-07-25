@@ -5,9 +5,10 @@ import postgres from 'postgres';
 import * as schema from './schema';
 
 type PostgresClient = ReturnType<typeof postgres>;
+type Database = ReturnType<typeof drizzle<typeof schema>>;
 
 let clientInstance: PostgresClient | null = null;
-let databaseInstance: ReturnType<typeof drizzle<typeof schema>> | null = null;
+let databaseInstance: Database | null = null;
 
 export function getDatabaseClient(): PostgresClient {
   if (clientInstance) return clientInstance;
@@ -35,8 +36,16 @@ export const client = new Proxy(lazyClientTarget, {
   },
 });
 
-export function getDatabase() {
+export function getDatabase(): Database {
   if (databaseInstance) return databaseInstance;
   databaseInstance = drizzle(getDatabaseClient(), { schema });
   return databaseInstance;
 }
+
+export const db = new Proxy({} as Database, {
+  get(_target, property) {
+    const activeDatabase = getDatabase();
+    const value = Reflect.get(activeDatabase, property, activeDatabase);
+    return typeof value === 'function' ? value.bind(activeDatabase) : value;
+  },
+});
