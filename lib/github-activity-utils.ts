@@ -11,13 +11,14 @@ export function dateKeyInTimeZone(date: Date, timeZone = DISPLAY_TIME_ZONE): str
   return `${values.year}-${values.month}-${values.day}`;
 }
 
-export function getRecentDateKeys(now = new Date()): string[] {
+export function getRecentDateKeys(now = new Date(), length = 7): string[] {
+  const safeLength = Number.isFinite(length) ? Math.max(1, Math.floor(length)) : 7;
   const [year, month, day] = dateKeyInTimeZone(now)
     .split('-')
     .map(Number);
 
-  return Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(Date.UTC(year, month - 1, day - (6 - index)));
+  return Array.from({ length: safeLength }, (_, index) => {
+    const date = new Date(Date.UTC(year, month - 1, day - (safeLength - 1 - index)));
     return date.toISOString().slice(0, 10);
   });
 }
