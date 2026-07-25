@@ -1,9 +1,10 @@
-import { Metadata } from 'next';
-import SiteNav from '@/components/site-nav';
+import type { Metadata } from 'next';
+import ViewportPageShell from '@/components/viewport-page-shell';
 
 export const metadata: Metadata = {
   title: 'Blog',
-  description: 'teamleaderleo\'s blog - thoughts on... life',
+  description: "teamleaderleo's blog",
+  alternates: { canonical: '/blog' },
 };
 
 export default function BlogLayout({
@@ -12,9 +13,11 @@ export default function BlogLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col w-full">
-      <SiteNav />
+    <ViewportPageShell
+      className="bg-background text-foreground"
+      contentClassName="flex flex-col"
+    >
       {children}
-    </div>
+    </ViewportPageShell>
   );
 }
