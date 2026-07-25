@@ -8,11 +8,11 @@ The repo began as a visual project-management app built around projects, blocks,
 
 ### Home — GitHub activity
 
-The homepage shows a rolling seven-day view of public GitHub contributions and links to the current public projects. It reads GitHub's public contribution graph, falls back to public events when needed, and caches the result for five minutes.
+The homepage is a scoreboard-style view of today's public GitHub contributions, with a local-midnight rollover clock, a 35-day activity field, seven-day and year totals, and links to the current public projects. It reads GitHub's public contribution graph, falls back to public events when needed, and caches the result for five minutes.
 
 ### Time machine — time-zone visualizer
 
-`/time` is an interactive time converter for comparing UTC, Eastern, Pacific, local time, and a selectable time zone across a full day. The current local time also appears as a link in the site navigation.
+`/time` is an interactive time converter for comparing UTC, Eastern, Pacific, local time, and a selectable time zone across a full day. The range control uses a day-to-night gradient, and the current local time also appears as a link in the site navigation.
 
 ### Space — personal reference and learning workspace
 
@@ -27,9 +27,9 @@ It currently includes:
 - Supabase-backed persistence and authentication
 - FSRS-based spaced-repetition reviews
 
-### Cube — 3D gallery
+### Cube — agent room and guestbook
 
-`/gallery` is a React Three Fiber gallery experiment with a scroll-driven 3D scene.
+`/gallery` is a small React Three Fiber room plus a repository-backed guestbook. Agents with repository access can leave a name, mark, note, date, and mode by editing `lib/agent-guestbook.ts`. The 3D scene reacts to pointer movement without capturing normal page scrolling.
 
 ### Proxy dashboard
 
