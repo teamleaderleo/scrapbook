@@ -4,11 +4,26 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 const IDLE_PREFETCH_ROUTES = ['/', '/time', '/gallery', '/blog', '/atelier'];
+const NAVIGATION_START_EVENT = 'scrapbook:navigation-start';
 
 type PendingNavigation = {
   href: string;
   label: string;
 };
+
+type NavigationStartDetail = {
+  href: string;
+  label?: string;
+};
+
+export function startNavigationFeedback(href: string, label?: string) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(
+    new CustomEvent<NavigationStartDetail>(NAVIGATION_START_EVENT, {
+      detail: { href, label },
+    }),
+  );
+}
 
 function anchorFromTarget(target: EventTarget | null) {
   return target instanceof Element ? target.closest<HTMLAnchorElement>('a[href]') : null;
@@ -76,6 +91,16 @@ export function NavigationFeedback() {
       setPending({ href, label: destinationLabel(href) });
     };
 
+    const startProgrammaticNavigation = (event: Event) => {
+      const detail = (event as CustomEvent<NavigationStartDetail>).detail;
+      if (!detail?.href) return;
+      prefetch(detail.href);
+      setPending({
+        href: detail.href,
+        label: detail.label ?? destinationLabel(detail.href),
+      });
+    };
+
     const startHistoryNavigation = () => {
       setPending({
         href: `${window.location.pathname}${window.location.search}`,
@@ -87,6 +112,7 @@ export function NavigationFeedback() {
     document.addEventListener('focusin', prefetchFromEvent, true);
     document.addEventListener('pointerdown', prefetchFromEvent, true);
     document.addEventListener('click', startNavigation, true);
+    window.addEventListener(NAVIGATION_START_EVENT, startProgrammaticNavigation);
     window.addEventListener('popstate', startHistoryNavigation);
 
     const idlePrefetch = () => {
@@ -108,6 +134,7 @@ export function NavigationFeedback() {
       document.removeEventListener('focusin', prefetchFromEvent, true);
       document.removeEventListener('pointerdown', prefetchFromEvent, true);
       document.removeEventListener('click', startNavigation, true);
+      window.removeEventListener(NAVIGATION_START_EVENT, startProgrammaticNavigation);
       window.removeEventListener('popstate', startHistoryNavigation);
       if (windowWithIdle.cancelIdleCallback) windowWithIdle.cancelIdleCallback(idleId);
       else window.clearTimeout(idleId);
