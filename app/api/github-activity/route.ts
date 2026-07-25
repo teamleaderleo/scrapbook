@@ -3,8 +3,6 @@ import { getRecentDateKeys, parsePublicContributionHtml } from '@/lib/github-act
 
 const GITHUB_USERNAME = 'teamleaderleo';
 
-export const runtime = 'nodejs';
-
 export async function GET() {
   const requestId = crypto.randomUUID();
 
