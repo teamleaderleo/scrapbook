@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/space/app-sidebar';
+import { SpaceShellSkeleton } from '@/components/space/space-shell-skeleton';
 import { ItemsProvider } from '../lib/contexts/item-context';
 import { createClient } from '@/utils/supabase/server';
 import { SearchCommand } from '@/components/space/search-command';
@@ -103,5 +105,9 @@ async function SpaceDataShell({ children }: { children: React.ReactNode }) {
 }
 
 export default function SpaceLayout({ children }: { children: React.ReactNode }) {
-  return <SpaceDataShell>{children}</SpaceDataShell>;
+  return (
+    <Suspense fallback={<SpaceShellSkeleton />}>
+      <SpaceDataShell>{children}</SpaceDataShell>
+    </Suspense>
+  );
 }
