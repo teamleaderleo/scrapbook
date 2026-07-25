@@ -1,5 +1,7 @@
 import ViewportPageShell from '@/components/viewport-page-shell';
+import { Suspense } from 'react';
 import { UsageDashboardContainer } from './usage-dashboard-container';
+import { UsageDashboardSkeleton } from './usage-dashboard-skeleton';
 
 export function UsagePage() {
   return (
@@ -16,7 +18,9 @@ export function UsagePage() {
             <h1 className="mt-0.5 text-xl font-bold tracking-tight">Usage</h1>
           </div>
         </div>
-        <UsageDashboardContainer />
+        <Suspense fallback={<UsageDashboardSkeleton />}>
+          <UsageDashboardContainer />
+        </Suspense>
       </div>
     </ViewportPageShell>
   );
