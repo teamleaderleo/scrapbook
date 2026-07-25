@@ -31,7 +31,7 @@ const siteLinks: NavLinkItem[] = [
   },
   {
     href: '/gallery',
-    label: 'cube',
+    label: 'gallery',
     icon: <Box size={15} />,
     hoverClass: 'hover:text-foreground focus:text-foreground',
   },
@@ -80,7 +80,8 @@ function MenuLink({ item }: { item: NavLinkItem }) {
   return (
     <Link
       {...navLinkProps(item)}
-      className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted focus:bg-muted focus:outline-none ${item.hoverClass}`}
+      prefetch={item.external ? false : true}
+      className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted focus:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${item.hoverClass}`}
     >
       <span className="shrink-0">{item.icon}</span>
       <span className="whitespace-nowrap">{item.label}</span>
@@ -92,7 +93,8 @@ function InlineLink({ item }: { item: NavLinkItem }) {
   return (
     <Link
       {...navLinkProps(item)}
-      className={`flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors focus:outline-none ${item.hoverClass}`}
+      prefetch={item.external ? false : true}
+      className={`flex items-center gap-1.5 rounded-sm text-sm font-medium text-muted-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${item.hoverClass}`}
     >
       <span className="shrink-0">{item.icon}</span>
       <span>{item.label}</span>
@@ -113,7 +115,7 @@ export default function SiteNav() {
     <nav className="min-w-0 border-b bg-background text-foreground">
       <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         <div className="flex h-12 min-w-0 items-center justify-between gap-2 sm:gap-3">
-          <Link href="/" className="min-w-0 shrink truncate text-base font-bold sm:text-lg">
+          <Link href="/" prefetch className="min-w-0 shrink truncate rounded-sm text-base font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-lg">
             teamleaderleo
           </Link>
 
