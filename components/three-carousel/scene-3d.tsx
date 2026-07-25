@@ -13,21 +13,35 @@ const satellites: Array<[number, number, number, number]> = [
   [0.6, -2.45, 0.65, 0.26],
 ];
 
-function AgentRoom() {
+type RotationTarget = { x: number; y: number };
+
+function AgentRoom({
+  target,
+  dragging,
+}: {
+  target: React.MutableRefObject<RotationTarget>;
+  dragging: React.MutableRefObject<boolean>;
+}) {
   const group = useRef<THREE.Group>(null);
 
   useFrame((state, delta) => {
     if (!group.current) return;
-    group.current.rotation.y += delta * 0.16;
+    if (!dragging.current) target.current.y += delta * 0.12;
+
     group.current.rotation.x = THREE.MathUtils.lerp(
       group.current.rotation.x,
-      state.pointer.y * 0.18,
-      0.035,
+      target.current.x + state.pointer.y * 0.06,
+      0.08,
+    );
+    group.current.rotation.y = THREE.MathUtils.lerp(
+      group.current.rotation.y,
+      target.current.y + state.pointer.x * 0.05,
+      0.08,
     );
     group.current.rotation.z = THREE.MathUtils.lerp(
       group.current.rotation.z,
-      -state.pointer.x * 0.08,
-      0.035,
+      -state.pointer.x * 0.035,
+      0.05,
     );
   });
 
@@ -67,26 +81,74 @@ function AgentRoom() {
 
 export default function Scene3D() {
   const [mounted, setMounted] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const rotationTarget = useRef<RotationTarget>({ x: 0, y: 0 });
+  const dragging = useRef(false);
+  const lastPointer = useRef({ x: 0, y: 0 });
 
   useEffect(() => setMounted(true), []);
 
+  const stopDragging = () => {
+    dragging.current = false;
+    setIsDragging(false);
+  };
+
   if (!mounted) {
-    return <div className="h-full w-full bg-[#15161a]" aria-hidden="true" />;
+    return <div className="h-full min-w-0 w-full bg-[#15161a]" aria-hidden="true" />;
   }
 
   return (
-    <Canvas
-      className="h-full w-full"
-      camera={{ position: [4.8, 3.4, 5.4], fov: 42 }}
-      dpr={[1, 1.5]}
-      gl={{ antialias: true, powerPreference: 'high-performance' }}
+    <div
+      className={`h-full min-w-0 w-full touch-pan-y select-none overflow-hidden outline-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      role="img"
+      aria-label="Draggable three-dimensional agent room"
+      tabIndex={0}
+      onPointerDown={(event) => {
+        dragging.current = true;
+        setIsDragging(true);
+        lastPointer.current = { x: event.clientX, y: event.clientY };
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }}
+      onPointerMove={(event) => {
+        if (!dragging.current) return;
+        const dx = event.clientX - lastPointer.current.x;
+        const dy = event.clientY - lastPointer.current.y;
+        lastPointer.current = { x: event.clientX, y: event.clientY };
+        rotationTarget.current.y += dx * 0.008;
+        rotationTarget.current.x = THREE.MathUtils.clamp(
+          rotationTarget.current.x + dy * 0.006,
+          -0.72,
+          0.72,
+        );
+      }}
+      onPointerUp={(event) => {
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+        stopDragging();
+      }}
+      onPointerCancel={stopDragging}
+      onKeyDown={(event) => {
+        if (event.key === 'ArrowLeft') rotationTarget.current.y -= 0.18;
+        if (event.key === 'ArrowRight') rotationTarget.current.y += 0.18;
+        if (event.key === 'ArrowUp') rotationTarget.current.x = Math.max(-0.72, rotationTarget.current.x - 0.14);
+        if (event.key === 'ArrowDown') rotationTarget.current.x = Math.min(0.72, rotationTarget.current.x + 0.14);
+      }}
     >
-      <color attach="background" args={['#15161a']} />
-      <fog attach="fog" args={['#15161a', 7, 12]} />
-      <ambientLight intensity={1.25} />
-      <directionalLight position={[4, 6, 5]} intensity={2.4} color="#f1eaf5" />
-      <pointLight position={[-4, -2, 3]} intensity={22} distance={9} color="#756b83" />
-      <AgentRoom />
-    </Canvas>
+      <Canvas
+        className="block h-full min-w-0 w-full"
+        camera={{ position: [4.8, 3.4, 5.4], fov: 42 }}
+        dpr={[1, 1.5]}
+        gl={{ antialias: true, powerPreference: 'high-performance' }}
+        style={{ width: '100%', height: '100%', display: 'block', touchAction: 'pan-y' }}
+      >
+        <color attach="background" args={['#15161a']} />
+        <fog attach="fog" args={['#15161a', 7, 12]} />
+        <ambientLight intensity={1.25} />
+        <directionalLight position={[4, 6, 5]} intensity={2.4} color="#f1eaf5" />
+        <pointLight position={[-4, -2, 3]} intensity={22} distance={9} color="#756b83" />
+        <AgentRoom target={rotationTarget} dragging={dragging} />
+      </Canvas>
+    </div>
   );
 }
