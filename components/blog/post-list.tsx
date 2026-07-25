@@ -20,20 +20,22 @@ export default function PostList({ posts, title }: PostListProps) {
       <CardContent className="h-[calc(100%-4rem)] overflow-hidden">
         <ScrollArea className="h-full w-full">
           <div className="space-y-4 pr-4">
-            {posts.map(post => (
+            {posts.map((post) => (
               <div key={post.id} className="border-b border-border pb-2 last:border-0">
-                <Link 
+                <Link
                   href={`/blog/${post.slug}`}
-                  className="block group"
+                  prefetch
+                  className="group block rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
-                  <h3 className="font-semibold text-sm transition-colors group-hover:text-primary-foreground">
+                  <h3 className="text-sm font-semibold transition-colors group-hover:text-primary-foreground">
                     {post.title}
                   </h3>
                   <p className="text-xs text-muted-foreground">{post.date}</p>
                 </Link>
                 <Link
                   href={`/blog/category/${post.category}`}
-                  className="inline-block text-xs bg-secondary text-secondary-foreground rounded px-2 py-1 mt-1 transition-colors hover:bg-accent hover:text-accent-foreground"
+                  prefetch
+                  className="mt-1 inline-block rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {categories[post.category]}
                 </Link>
