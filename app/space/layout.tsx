@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/space/app-sidebar';
 import { ItemsProvider } from '../lib/contexts/item-context';
 import { createClient } from '@/utils/supabase/server';
 import { SearchCommand } from '@/components/space/search-command';
 import { MonacoEditorPanel } from '@/components/space/monaco-editor-panel';
+import { SpaceSkeleton } from '@/components/space/space-skeleton';
 import { mapDatabaseItemsToItems } from '@/app/lib/utils/database';
 import { isAdminUser } from '@/app/lib/auth/admin';
 import { SPACE_ITEM_SELECT, SPACE_PAGE_SIZE } from '@/app/lib/space-data';
@@ -79,7 +81,7 @@ async function getInitialData() {
   };
 }
 
-export default async function SpaceLayout({ children }: { children: React.ReactNode }) {
+async function SpaceDataShell({ children }: { children: React.ReactNode }) {
   const { items, isAdmin, user, nowMs, hasMore } = await getInitialData();
 
   return (
@@ -99,5 +101,13 @@ export default async function SpaceLayout({ children }: { children: React.ReactN
         </div>
       </ItemsProvider>
     </SidebarProvider>
+  );
+}
+
+export default function SpaceLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<SpaceSkeleton />}>
+      <SpaceDataShell>{children}</SpaceDataShell>
+    </Suspense>
   );
 }
