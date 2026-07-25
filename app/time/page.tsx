@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import UTCTimeVisualizer from '@/components/time-conversion-visualizer';
 import type { Metadata } from 'next';
@@ -10,27 +9,13 @@ export const metadata: Metadata = {
   alternates: { canonical: '/time' },
 };
 
-function TimeFallback() {
-  return (
-    <div className="flex flex-1 items-center justify-center">
-      <div className="w-full max-w-2xl px-4">
-        <h1 className="text-3xl font-bold">Time Zone Converter</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Loading…</p>
-      </div>
-    </div>
-  );
-}
-
 export default function TimePage() {
   return (
     <ViewportPageShell
-      scroll="locked"
-      className="bg-sidebar-background"
-      contentClassName="flex min-h-0"
+      className="bg-[#ecebe6] text-[#17181b] dark:bg-[#101115] dark:text-[#eeeae3]"
+      contentClassName="min-h-0"
     >
-      <Suspense fallback={<TimeFallback />}>
-        <UTCTimeVisualizer />
-      </Suspense>
+      <UTCTimeVisualizer />
     </ViewportPageShell>
   );
 }
