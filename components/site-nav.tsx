@@ -1,5 +1,4 @@
 import { DiscordButton, NavMenu, NavThemeToggle, TimeLink } from '@/components/site-nav-interactive';
-import { DiscordIcon } from '@/components/icons/discord-icon';
 import { GitHubIcon } from '@/components/icons/github-icon';
 import { RedditIcon } from '@/components/icons/reddit-icon';
 import { Activity, Box, Brain, Sparkles, Twitter } from 'lucide-react';
@@ -14,6 +13,9 @@ type NavLinkItem = {
   external?: boolean;
 };
 
+const lavenderHover =
+  'hover:text-[#91889b] focus:text-[#91889b] dark:hover:text-[#cbc4d2] dark:focus:text-[#cbc4d2]';
+
 const siteLinks: NavLinkItem[] = [
   {
     href: '/proxy-dashboard',
@@ -25,7 +27,7 @@ const siteLinks: NavLinkItem[] = [
     href: '/space',
     label: 'space',
     icon: <Brain size={15} />,
-    hoverClass: 'hover:text-[hsl(238,45%,58%)] focus:text-[hsl(238,45%,58%)]',
+    hoverClass: lavenderHover,
   },
   {
     href: '/gallery',
@@ -37,7 +39,7 @@ const siteLinks: NavLinkItem[] = [
     href: 'https://glossless.app/',
     label: 'glossless',
     icon: <Sparkles size={15} />,
-    hoverClass: 'hover:text-purple-500 focus:text-purple-500',
+    hoverClass: lavenderHover,
     external: true,
   },
 ];
