@@ -3,7 +3,7 @@ import { unstable_cache } from 'next/cache';
 const GITHUB_USERNAME = 'teamleaderleo';
 const FEATURED_REPOSITORIES = ['smolrunner', 'stensibly'] as const;
 const CACHE_SECONDS = 300;
-const DAY_MS = 86_400_000;
+const DISPLAY_TIME_ZONE = 'America/Los_Angeles';
 
 export type ContributionDay = {
   date: string;
@@ -39,15 +39,26 @@ type RestRepository = {
   description: string | null;
 };
 
-function dateKey(date: Date): string {
-  return date.toISOString().slice(0, 10);
+function dateKeyInTimeZone(date: Date, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
 }
 
-function recentDateKeys(): string[] {
-  const now = new Date();
-  return Array.from({ length: 7 }, (_, index) =>
-    dateKey(new Date(now.getTime() - (6 - index) * DAY_MS)),
-  );
+export function getRecentDateKeys(now = new Date()): string[] {
+  const [year, month, day] = dateKeyInTimeZone(now, DISPLAY_TIME_ZONE)
+    .split('-')
+    .map(Number);
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(Date.UTC(year, month - 1, day - (6 - index)));
+    return date.toISOString().slice(0, 10);
+  });
 }
 
 function parseContributionCount(label: string): number | null {
@@ -56,7 +67,7 @@ function parseContributionCount(label: string): number | null {
   return match ? Number(match[1].replaceAll(',', '')) : null;
 }
 
-function parsePublicContributionHtml(html: string): Map<string, number> {
+export function parsePublicContributionHtml(html: string): Map<string, number> {
   const tooltipById = new Map<string, number>();
   const tooltipPattern = /<tool-tip\b[^>]*for="([^"]+)"[^>]*>([\s\S]*?)<\/tool-tip>/gi;
 
@@ -86,24 +97,20 @@ function parsePublicContributionHtml(html: string): Map<string, number> {
 }
 
 async function fetchPublicProfileDays(): Promise<ContributionDay[]> {
-  const response = await fetch(
-    `https://github.com/users/${GITHUB_USERNAME}/contributions`,
-    {
-      cache: 'no-store',
-      headers: {
-        Accept: 'text/html',
-        'User-Agent': 'teamleaderleo-scrapbook',
-      },
+  const response = await fetch(`https://github.com/users/${GITHUB_USERNAME}/contributions`, {
+    cache: 'no-store',
+    headers: {
+      Accept: 'text/html',
+      'User-Agent': 'teamleaderleo-scrapbook',
     },
-  );
+  });
 
   if (!response.ok) throw new Error(`GitHub contribution page returned ${response.status}`);
 
   const counts = parsePublicContributionHtml(await response.text());
-  const days = recentDateKeys().map((date) => ({ date, count: counts.get(date) ?? 0 }));
-
   if (counts.size === 0) throw new Error('GitHub contribution page could not be parsed');
-  return days;
+
+  return getRecentDateKeys().map((date) => ({ date, count: counts.get(date) ?? 0 }));
 }
 
 function eventWeight(event: RestEvent): number {
@@ -140,11 +147,11 @@ async function fetchPublicEventDays(): Promise<ContributionDay[]> {
     if (!event.created_at) continue;
     const weight = eventWeight(event);
     if (weight === 0) continue;
-    const key = dateKey(new Date(event.created_at));
+    const key = dateKeyInTimeZone(new Date(event.created_at), DISPLAY_TIME_ZONE);
     counts.set(key, (counts.get(key) ?? 0) + weight);
   }
 
-  return recentDateKeys().map((date) => ({ date, count: counts.get(date) ?? 0 }));
+  return getRecentDateKeys().map((date) => ({ date, count: counts.get(date) ?? 0 }));
 }
 
 async function fetchRepositories() {
@@ -199,7 +206,7 @@ async function loadGitHubHomeData(): Promise<GitHubHomeData> {
     };
   } catch (eventError) {
     console.error('GitHub public event fetch failed', eventError);
-    const days = recentDateKeys().map((date) => ({ date, count: 0 }));
+    const days = getRecentDateKeys().map((date) => ({ date, count: 0 }));
     return {
       username: GITHUB_USERNAME,
       source: 'unavailable',
@@ -213,7 +220,7 @@ async function loadGitHubHomeData(): Promise<GitHubHomeData> {
 
 const getCachedGitHubHomeData = unstable_cache(
   loadGitHubHomeData,
-  ['github-homepage-v2'],
+  ['github-homepage-v3'],
   { revalidate: CACHE_SECONDS },
 );
 
