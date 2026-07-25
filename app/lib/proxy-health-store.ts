@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+
 import { client } from '@/app/lib/db/db';
 
 export type ProxyHealthPayload = {
@@ -90,8 +92,11 @@ export type ProxyHealthSample = {
   mode: string | null;
 };
 
-let tableReady = false;
-let tableSetup: Promise<void> | null = null;
+export type ProxyHealthReadResult =
+  | { status: 'ok'; report: StoredProxyHealth; samples: ProxyHealthSample[] }
+  | { status: 'empty' }
+  | { status: 'configuration-error'; message: string; requestId: string }
+  | { status: 'error'; message: string; requestId: string };
 
 function normalizeHost(host: unknown) {
   if (typeof host !== 'string') return 'bandwagon-la';
@@ -119,52 +124,7 @@ function toNumber(value: unknown) {
   return null;
 }
 
-async function createProxyHealthTables() {
-  await client`
-    CREATE TABLE IF NOT EXISTS proxy_health_status (
-      host text PRIMARY KEY,
-      payload jsonb NOT NULL,
-      checked_at timestamptz,
-      updated_at timestamptz NOT NULL DEFAULT now()
-    )
-  `;
-
-  await client`
-    CREATE TABLE IF NOT EXISTS proxy_health_samples (
-      id bigserial PRIMARY KEY,
-      host text NOT NULL,
-      checked_at timestamptz NOT NULL,
-      mode text,
-      rx_bytes bigint,
-      tx_bytes bigint,
-      public_latency_ms double precision,
-      wg_latency_ms double precision,
-      shanghai_bandwagon_ms double precision,
-      shanghai_linode_ms double precision,
-      payload jsonb NOT NULL,
-      created_at timestamptz NOT NULL DEFAULT now()
-    )
-  `;
-
-  await client`
-    CREATE INDEX IF NOT EXISTS proxy_health_samples_host_checked_idx
-    ON proxy_health_samples (host, checked_at DESC)
-  `;
-}
-
-async function ensureProxyHealthTable() {
-  if (tableReady) return;
-  if (!tableSetup) {
-    tableSetup = createProxyHealthTables().then(() => {
-      tableReady = true;
-    });
-  }
-  await tableSetup;
-}
-
 export async function saveProxyHealth(payload: ProxyHealthPayload) {
-  await ensureProxyHealthTable();
-
   const host = normalizeHost(payload.host);
   const checkedAt = normalizeCheckedAt(payload.checked_at);
   const rxBytes = toInteger(payload.wireguard?.rx_bytes);
@@ -217,73 +177,92 @@ export async function saveProxyHealth(payload: ProxyHealthPayload) {
 }
 
 export async function getLatestProxyHealth(host = 'bandwagon-la'): Promise<StoredProxyHealth | null> {
-  try {
-    const rows = await client<{
-      host: string;
-      payload: ProxyHealthPayload;
-      checked_at: Date | string | null;
-      updated_at: Date | string;
-    }[]>`
-      SELECT host, payload, checked_at, updated_at
-      FROM proxy_health_status
-      WHERE host = ${normalizeHost(host)}
-      LIMIT 1
-    `;
+  const rows = await client<{
+    host: string;
+    payload: ProxyHealthPayload;
+    checked_at: Date | string | null;
+    updated_at: Date | string;
+  }[]>`
+    SELECT host, payload, checked_at, updated_at
+    FROM proxy_health_status
+    WHERE host = ${normalizeHost(host)}
+    LIMIT 1
+  `;
 
-    const row = rows[0];
-    if (!row) return null;
+  const row = rows[0];
+  if (!row) return null;
 
-    return {
-      host: row.host,
-      payload: row.payload,
-      checkedAt: row.checked_at ? new Date(row.checked_at).toISOString() : null,
-      updatedAt: new Date(row.updated_at).toISOString(),
-    };
-  } catch (error) {
-    console.error('Unable to read proxy status:', error);
-    return null;
-  }
+  return {
+    host: row.host,
+    payload: row.payload,
+    checkedAt: row.checked_at ? new Date(row.checked_at).toISOString() : null,
+    updatedAt: new Date(row.updated_at).toISOString(),
+  };
 }
 
 export async function getProxyHealthSamples(host = 'bandwagon-la', days = 8): Promise<ProxyHealthSample[]> {
-  try {
-    const rows = await client<{
-      checked_at: Date | string;
-      rx_bytes: number | string | bigint | null;
-      tx_bytes: number | string | bigint | null;
-      public_latency_ms: number | string | bigint | null;
-      wg_latency_ms: number | string | bigint | null;
-      shanghai_bandwagon_ms: number | string | bigint | null;
-      shanghai_linode_ms: number | string | bigint | null;
-      mode: string | null;
-    }[]>`
-      SELECT
-        checked_at,
-        rx_bytes,
-        tx_bytes,
-        public_latency_ms,
-        wg_latency_ms,
-        shanghai_bandwagon_ms,
-        shanghai_linode_ms,
-        mode
-      FROM proxy_health_samples
-      WHERE host = ${normalizeHost(host)}
-        AND checked_at >= now() - (${days}::int * interval '1 day')
-      ORDER BY checked_at ASC
-    `;
+  const rows = await client<{
+    checked_at: Date | string;
+    rx_bytes: number | string | bigint | null;
+    tx_bytes: number | string | bigint | null;
+    public_latency_ms: number | string | bigint | null;
+    wg_latency_ms: number | string | bigint | null;
+    shanghai_bandwagon_ms: number | string | bigint | null;
+    shanghai_linode_ms: number | string | bigint | null;
+    mode: string | null;
+  }[]>`
+    SELECT
+      checked_at,
+      rx_bytes,
+      tx_bytes,
+      public_latency_ms,
+      wg_latency_ms,
+      shanghai_bandwagon_ms,
+      shanghai_linode_ms,
+      mode
+    FROM proxy_health_samples
+    WHERE host = ${normalizeHost(host)}
+      AND checked_at >= now() - (${days}::int * interval '1 day')
+    ORDER BY checked_at ASC
+  `;
 
-    return rows.map((row) => ({
-      checkedAt: new Date(row.checked_at).toISOString(),
-      rxBytes: toInteger(row.rx_bytes),
-      txBytes: toInteger(row.tx_bytes),
-      publicLatencyMs: toNumber(row.public_latency_ms),
-      wgLatencyMs: toNumber(row.wg_latency_ms),
-      shanghaiBandwagonMs: toNumber(row.shanghai_bandwagon_ms),
-      shanghaiLinodeMs: toNumber(row.shanghai_linode_ms),
-      mode: row.mode,
-    }));
+  return rows.map((row) => ({
+    checkedAt: new Date(row.checked_at).toISOString(),
+    rxBytes: toInteger(row.rx_bytes),
+    txBytes: toInteger(row.tx_bytes),
+    publicLatencyMs: toNumber(row.public_latency_ms),
+    wgLatencyMs: toNumber(row.wg_latency_ms),
+    shanghaiBandwagonMs: toNumber(row.shanghai_bandwagon_ms),
+    shanghaiLinodeMs: toNumber(row.shanghai_linode_ms),
+    mode: row.mode,
+  }));
+}
+
+export async function readProxyHealth(host = 'bandwagon-la', days = 8): Promise<ProxyHealthReadResult> {
+  const requestId = randomUUID();
+
+  if (!process.env.DATABASE_URL) {
+    return {
+      status: 'configuration-error',
+      message: 'Proxy database configuration is missing.',
+      requestId,
+    };
+  }
+
+  try {
+    const [report, samples] = await Promise.all([
+      getLatestProxyHealth(host),
+      getProxyHealthSamples(host, days),
+    ]);
+
+    if (!report) return { status: 'empty' };
+    return { status: 'ok', report, samples };
   } catch (error) {
-    console.error('Unable to read proxy samples:', error);
-    return [];
+    console.error('Unable to read proxy health data', { requestId, error });
+    return {
+      status: 'error',
+      message: 'The proxy report could not be read.',
+      requestId,
+    };
   }
 }
