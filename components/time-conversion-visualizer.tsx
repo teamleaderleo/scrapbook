@@ -10,11 +10,13 @@ const DAY_GRADIENT =
 
 export default function UTCTimeVisualizer() {
   const [localTime, setLocalTime] = useState(0);
+  const [localOffsetMinutes, setLocalOffsetMinutes] = useState(0);
   const [useDST, setUseDST] = useState(false);
 
   useEffect(() => {
     const now = new Date();
     setLocalTime(now.getHours() * 60 + now.getMinutes());
+    setLocalOffsetMinutes(-now.getTimezoneOffset());
     setUseDST(isDSTActive('us'));
   }, []);
 
@@ -22,17 +24,9 @@ export default function UTCTimeVisualizer() {
   const localMinutes = localTime % 60;
   const easternOffset = useDST ? -4 : -5;
   const pacificOffset = useDST ? -7 : -8;
-
-  const now = new Date();
-  const localDate = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    localHours,
-    localMinutes,
-  );
-  const utcHours = localDate.getUTCHours();
-  const utcMinutes = localDate.getUTCMinutes();
+  const utcTotalMinutes = (localTime - localOffsetMinutes + 1440) % 1440;
+  const utcHours = Math.floor(utcTotalMinutes / 60);
+  const utcMinutes = utcTotalMinutes % 60;
 
   const formatTime = (hours: number, minutes: number) =>
     `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
@@ -67,11 +61,7 @@ export default function UTCTimeVisualizer() {
       />
 
       <div className="relative w-full rounded-[1.5rem] border border-black/12 bg-[#dedcd6]/82 p-5 shadow-[0_22px_60px_rgba(24,24,26,0.11)] dark:border-white/10 dark:bg-[#18191d]/92 dark:shadow-[0_24px_70px_rgba(0,0,0,0.34)] sm:p-7">
-        <CurrentTimeDisplay
-          onJumpToTime={(minutes) => {
-            setLocalTime(minutes);
-          }}
-        />
+        <CurrentTimeDisplay onJumpToTime={setLocalTime} />
 
         <div className="mt-7">
           <div className="mb-3 flex items-center justify-between gap-3">
