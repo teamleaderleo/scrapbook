@@ -24,7 +24,7 @@ function ScoreDigits({ value }: { value: number }) {
           className="relative flex aspect-[0.72] min-w-0 flex-1 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-[#17181b] px-1 font-mono text-[clamp(2.6rem,9vw,6.9rem)] font-semibold leading-none text-[#f1efe9] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-18px_32px_rgba(0,0,0,0.3),0_8px_20px_rgba(0,0,0,0.15)]"
         >
           <span aria-hidden="true" className="absolute inset-x-0 top-1/2 h-px bg-black/70" />
-          <span aria-hidden="true" className="absolute inset-x-0 top-[calc(50%-1px)] h-px bg-white/[0.045]" />
+          <span aria-hidden="true" className="absolute inset-x-0 top-1/2 h-px -translate-y-px bg-white/[0.045]" />
           <span className="relative -translate-y-[0.02em] tabular-nums">{digit}</span>
         </span>
       ))}
