@@ -1,3 +1,4 @@
+import { ActivityScoreboard } from '@/components/home/activity-scoreboard';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { getGitHubHomeData, type ContributionDay } from '@/lib/github-home';
 import { ArrowUpRight } from 'lucide-react';
@@ -11,15 +12,15 @@ export const metadata: Metadata = {
 };
 
 function activityClass(day: ContributionDay, maximum: number): string {
-  const base = 'ring-1 ring-inset ring-black/[0.035] dark:ring-white/[0.07]';
-  if (day.count === 0) return `${base} bg-[#d7d2dc]/60 dark:bg-[#332f38]`;
+  const base = 'ring-1 ring-inset ring-black/[0.05] dark:ring-white/[0.07]';
+  if (day.count === 0) return `${base} bg-[#c9c7c1] dark:bg-[#292a2f]`;
 
   const ratio = maximum === 0 ? 0 : day.count / maximum;
-  if (ratio > 0.8) return `${base} bg-white dark:bg-[#f5f2f8]`;
-  if (ratio > 0.55) return `${base} bg-[#eeeaf2] dark:bg-[#c9c2d0]`;
-  if (ratio > 0.3) return `${base} bg-[#ddd7e3] dark:bg-[#92899d]`;
-  if (ratio > 0.12) return `${base} bg-[#cec7d6] dark:bg-[#686071]`;
-  return `${base} bg-[#beb6c8] dark:bg-[#504957]`;
+  if (ratio > 0.8) return `${base} bg-[#faf8f2] dark:bg-[#eeeaf2]`;
+  if (ratio > 0.55) return `${base} bg-[#e8e2ec] dark:bg-[#c9c2d0]`;
+  if (ratio > 0.3) return `${base} bg-[#d4cddb] dark:bg-[#8e8798]`;
+  if (ratio > 0.12) return `${base} bg-[#bfb8c7] dark:bg-[#66606d]`;
+  return `${base} bg-[#a9a3af] dark:bg-[#4b4750]`;
 }
 
 function formatDay(date: string): string {
@@ -31,115 +32,95 @@ function formatDay(date: string): string {
   }).format(new Date(`${date}T00:00:00Z`));
 }
 
-function Metric({ label, value, suffix }: { label: string; value: number; suffix?: string }) {
-  return (
-    <div className="rounded-xl border border-[#ddd8e4]/80 bg-white/45 px-3 py-2.5 dark:border-[#3b3542] dark:bg-white/[0.035]">
-      <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
-      <p className="mt-1 text-xl font-semibold tabular-nums tracking-tight">
-        {value}
-        {suffix ? <span className="ml-1 text-xs font-normal text-muted-foreground">{suffix}</span> : null}
-      </p>
-    </div>
-  );
-}
-
 export default async function Page() {
   const activity = await getGitHubHomeData();
   const maximum = Math.max(...activity.days.map((day) => day.count), 0);
+  const unit = activity.source === 'public-events' ? 'public actions' : 'contributions';
 
   return (
     <ViewportPageShell
-      className="relative bg-[#f7f6f9] text-foreground dark:bg-[#17151b]"
-      contentClassName="relative text-foreground"
+      className="relative bg-[#ecebe6] text-[#17181b] dark:bg-[#101115] dark:text-[#eeeae3]"
+      contentClassName="relative text-inherit"
     >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-55 dark:opacity-20"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(30,30,34,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(30,30,34,0.035) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+        }}
+      />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-[#ddd7e7]/65 blur-3xl dark:bg-[#403948]/35" />
-        <div className="absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-[#eeeaf3]/90 blur-3xl dark:bg-[#2d2933]/60" />
+        <div className="absolute -left-32 top-20 h-72 w-72 rounded-full bg-[#d7d1df]/50 blur-3xl dark:bg-[#29262f]/45" />
+        <div className="absolute -right-28 bottom-10 h-80 w-80 rounded-full bg-[#d9d6cf]/75 blur-3xl dark:bg-[#1b1c20]/70" />
       </div>
 
-      <div
-        className="relative mx-auto flex min-h-full w-full max-w-5xl flex-col justify-center px-4 py-5 sm:px-6 sm:py-7"
-        style={{
-          fontFamily:
-            'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        }}
-      >
-        <div className="flex w-full flex-col gap-4 sm:gap-5">
-          <header className="flex items-end justify-between gap-4">
+      <div className="relative mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="flex flex-col gap-4 sm:gap-5">
+          <header className="flex items-end justify-between gap-4 border-b border-black/12 pb-3 dark:border-white/12">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">GitHub activity</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Year-to-date totals and the last 35 days.
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-black/48 dark:text-white/45">
+                Digital scrapbook / live counter
               </p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">GitHub activity</h1>
             </div>
             <Link
               href={`https://github.com/${activity.username}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center gap-1 text-sm text-muted-foreground transition hover:text-foreground"
+              className="inline-flex shrink-0 items-center gap-1 text-sm text-black/52 transition hover:text-black dark:text-white/52 dark:hover:text-white"
             >
               @{activity.username}
               <ArrowUpRight size={14} />
             </Link>
           </header>
 
-          <section className="overflow-hidden rounded-[1.75rem] border border-[#ddd8e4] bg-white/55 shadow-[0_20px_60px_rgba(70,60,82,0.08)] backdrop-blur-sm dark:border-[#39333f] dark:bg-[#211e26]/85 dark:shadow-none">
-            <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
-              <div className="p-5 sm:p-6">
-                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                  {activity.periodLabel}
-                </p>
-                <div className="mt-2 flex items-end gap-3">
-                  <span className="text-5xl font-semibold tabular-nums tracking-[-0.055em] sm:text-6xl">
-                    {activity.total ?? '—'}
-                  </span>
-                  <span className="pb-1.5 text-sm text-muted-foreground">
-                    {activity.source === 'public-events' ? 'public actions' : 'contributions'}
-                  </span>
-                </div>
+          <ActivityScoreboard
+            today={activity.today}
+            weekTotal={activity.weekTotal}
+            yearTotal={activity.total}
+            unit={unit}
+          />
 
-                <div className="mt-5 grid grid-cols-2 gap-2.5">
-                  <Metric label="Today" value={activity.today} />
-                  <Metric label="Last 7 days" value={activity.weekTotal} />
-                  <Metric label="Active days" value={activity.activeDays} />
-                  <Metric
-                    label="Current streak"
-                    value={activity.currentStreak}
-                    suffix={activity.currentStreak === 1 ? 'day' : 'days'}
-                  />
-                </div>
+          <section className="rounded-[1.25rem] border border-black/12 bg-[#dedcd6]/78 p-4 shadow-[0_14px_35px_rgba(24,24,26,0.07)] dark:border-white/10 dark:bg-[#18191d]/90 dark:shadow-none sm:p-5">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-black/48 dark:text-white/45">Recent activity</p>
+                <p className="mt-0.5 text-sm text-black/58 dark:text-white/55">Last 35 days</p>
               </div>
+              <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.12em] text-black/45 dark:text-white/45">
+                <span>less</span>
+                <span className="h-2.5 w-2.5 rounded-[3px] bg-[#a9a3af]" />
+                <span className="h-2.5 w-2.5 rounded-[3px] bg-[#d4cddb]" />
+                <span className="h-2.5 w-2.5 rounded-[3px] bg-[#faf8f2] ring-1 ring-inset ring-black/[0.05]" />
+                <span>more</span>
+              </div>
+            </div>
 
-              <div className="border-t border-[#ddd8e4] bg-[#efecf3]/55 p-5 sm:p-6 lg:border-l lg:border-t-0 dark:border-[#39333f] dark:bg-[#1c1920]/65">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                    Last 35 days
-                  </p>
-                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                    <span>less</span>
-                    <span className="h-2.5 w-2.5 rounded-[3px] bg-[#beb6c8] dark:bg-[#504957]" />
-                    <span className="h-2.5 w-2.5 rounded-[3px] bg-[#ddd7e3] dark:bg-[#92899d]" />
-                    <span className="h-2.5 w-2.5 rounded-[3px] bg-white ring-1 ring-inset ring-black/[0.04] dark:bg-[#f5f2f8]" />
-                    <span>more</span>
-                  </div>
-                </div>
-
-                <div className="mt-4 grid grid-cols-7 gap-2 sm:gap-2.5" aria-label="35 days of GitHub activity">
-                  {activity.days.map((day) => (
+            <div className="mt-4 grid grid-cols-7 gap-2 sm:gap-2.5" aria-label="35 days of GitHub activity">
+              {activity.days.map((day, index) => {
+                const label = `${formatDay(day.date)} · ${day.count.toLocaleString('en-US')} ${unit}`;
+                const isLatest = index === activity.days.length - 1;
+                return (
+                  <div key={day.date} className="group relative">
                     <div
-                      key={day.date}
-                      className={`aspect-square rounded-[0.55rem] transition-transform duration-150 hover:-translate-y-0.5 ${activityClass(day, maximum)}`}
-                      title={`${formatDay(day.date)}: ${day.count}`}
-                      aria-label={`${formatDay(day.date)}: ${day.count}`}
+                      tabIndex={0}
+                      role="img"
+                      className={`aspect-square rounded-[0.5rem] transition duration-150 hover:-translate-y-0.5 hover:scale-[1.04] focus:-translate-y-0.5 focus:scale-[1.04] focus:outline-none focus:ring-2 focus:ring-black/35 dark:focus:ring-white/45 ${activityClass(day, maximum)} ${isLatest ? 'outline outline-2 outline-offset-2 outline-black/20 dark:outline-white/25' : ''}`}
+                      aria-label={label}
                     />
-                  ))}
-                </div>
+                    <div className="pointer-events-none absolute bottom-[calc(100%+0.45rem)] left-1/2 z-20 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-black/15 bg-[#17181b] px-2 py-1 font-mono text-[10px] text-[#f2eee7] shadow-lg group-hover:block group-focus-within:block dark:border-white/15">
+                      {label}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
-                <div className="mt-3 flex justify-between text-[11px] text-muted-foreground">
-                  <span>{formatDay(activity.days[0]?.date ?? '')}</span>
-                  <span>{formatDay(activity.days.at(-1)?.date ?? '')}</span>
-                </div>
-              </div>
+            <div className="mt-3 flex justify-between font-mono text-[10px] text-black/45 dark:text-white/42">
+              <span>{formatDay(activity.days[0]?.date ?? '')}</span>
+              <span>{formatDay(activity.days.at(-1)?.date ?? '')}</span>
             </div>
           </section>
 
@@ -150,29 +131,26 @@ export default async function Page() {
                 href={repository.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex min-w-0 items-center justify-between gap-4 rounded-2xl border border-[#ddd8e4] bg-white/45 px-4 py-3.5 transition hover:border-[#c9c1d2] hover:bg-white/70 dark:border-[#39333f] dark:bg-[#211e26]/65 dark:hover:border-[#5b5363] dark:hover:bg-[#25212a]"
+                className="group flex min-w-0 items-center justify-between gap-4 rounded-xl border border-black/12 bg-[#f2f0ea]/68 px-4 py-3.5 transition hover:-translate-y-0.5 hover:border-black/25 hover:bg-[#f7f4ed] dark:border-white/10 dark:bg-[#18191d]/85 dark:hover:border-white/22 dark:hover:bg-[#1d1e23]"
               >
                 <span className="min-w-0">
                   <span className="block truncate font-medium">{repository.name}</span>
-                  <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                  <span className="mt-0.5 block truncate text-xs text-black/48 dark:text-white/45">
                     {repository.description ?? `github.com/${activity.username}/${repository.name}`}
                   </span>
                 </span>
-                <ArrowUpRight
-                  size={15}
-                  className="shrink-0 text-[#958c9f] transition group-hover:text-[#6f6678] dark:text-[#aaa2b2] dark:group-hover:text-[#d8d2df]"
-                />
+                <ArrowUpRight size={15} className="shrink-0 text-black/35 transition group-hover:text-black/70 dark:text-white/35 dark:group-hover:text-white/75" />
               </Link>
             ))}
           </section>
 
-          <p className="text-xs text-muted-foreground">
+          <p className="font-mono text-[10px] uppercase tracking-[0.13em] text-black/42 dark:text-white/38">
             {activity.source === 'public-profile'
               ? 'Public GitHub contribution graph'
               : activity.source === 'public-events'
                 ? 'Public GitHub events fallback'
                 : 'GitHub data unavailable'}
-            {' · '}updated every five minutes
+            {' · '}refreshes every five minutes
           </p>
         </div>
       </div>

@@ -6,7 +6,6 @@ import { ItemsProvider } from '../lib/contexts/item-context';
 import { createClient } from '@/utils/supabase/server';
 import { SearchCommand } from '@/components/space/search-command';
 import { MonacoEditorPanel } from '@/components/space/monaco-editor-panel';
-import { SpaceSkeleton } from '@/components/space/space-skeleton';
 import { mapDatabaseItemsToItems } from '@/app/lib/utils/database';
 import { isAdminUser } from '@/app/lib/auth/admin';
 import { SPACE_ITEM_SELECT, SPACE_PAGE_SIZE } from '@/app/lib/space-data';
@@ -93,10 +92,10 @@ async function SpaceDataShell({ children }: { children: React.ReactNode }) {
         initialNowMs={nowMs}
         initialHasMore={hasMore}
       >
-        <div className="flex h-dvh w-full overflow-hidden bg-background text-foreground">
+        <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-background text-foreground">
           <SearchCommand />
           <AppSidebar />
-          <div className="min-w-0 flex-1 overflow-hidden">{children}</div>
+          <div className="h-full min-h-0 min-w-0 flex-1 overflow-hidden">{children}</div>
           <MonacoEditorPanel />
         </div>
       </ItemsProvider>
@@ -106,7 +105,7 @@ async function SpaceDataShell({ children }: { children: React.ReactNode }) {
 
 export default function SpaceLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense fallback={<SpaceSkeleton />}>
+    <Suspense fallback={<div className="h-dvh bg-background" aria-hidden="true" />}>
       <SpaceDataShell>{children}</SpaceDataShell>
     </Suspense>
   );
