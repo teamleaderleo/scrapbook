@@ -1,6 +1,11 @@
+import { Suspense } from 'react';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { CheckInStatus } from './check-in-status';
 import { UsageDashboardContainer } from './usage-dashboard-container';
+
+function DashboardFallback() {
+  return <div className="rounded-2xl border bg-background p-5">Loading proxy data…</div>;
+}
 
 export function UsagePage() {
   return (
@@ -13,9 +18,13 @@ export function UsagePage() {
             </p>
             <h1 className="mt-0.5 text-xl font-bold tracking-tight">Usage</h1>
           </div>
-          <CheckInStatus />
+          <Suspense fallback={null}>
+            <CheckInStatus />
+          </Suspense>
         </div>
-        <UsageDashboardContainer />
+        <Suspense fallback={<DashboardFallback />}>
+          <UsageDashboardContainer />
+        </Suspense>
       </div>
     </ViewportPageShell>
   );
