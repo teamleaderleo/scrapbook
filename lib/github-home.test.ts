@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getRecentDateKeys, parsePublicContributionHtml } from './github-home';
+import { getRecentDateKeys, parsePublicContributionHtml } from './github-activity-utils';
 
 describe('parsePublicContributionHtml', () => {
   it('reads direct data-count attributes', () => {
