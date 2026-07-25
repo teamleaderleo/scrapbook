@@ -1,40 +1,19 @@
 import '@/app/globals.css';
 import { inter } from '@/components/ui/assets/fonts';
-import { Metadata } from 'next';
-import { Suspense } from 'react';
+import type { Metadata } from 'next';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { DeferredScripts } from './deferred-scripts';
-
-const themeInitScript = `
-  (() => {
-    try {
-      const savedTheme = localStorage.getItem('theme');
-      const theme =
-        savedTheme === 'light' || savedTheme === 'dark'
-          ? savedTheme
-          : window.matchMedia('(prefers-color-scheme: dark)').matches
-            ? 'dark'
-            : 'light';
-
-      document.documentElement.classList.toggle('dark', theme === 'dark');
-      document.documentElement.style.colorScheme = theme;
-    } catch {}
-  })();
-`;
+import { ServiceWorkerCleanup } from './service-worker-cleanup';
 
 export const metadata: Metadata = {
   title: {
     template: '%s | teamleaderleo',
     default: 'teamleaderleo',
   },
-  description: 'teamleaderleo.',
+  description: 'Personal tools, notes, experiments, and public development activity from Leo Li.',
   metadataBase: new URL('https://teamleaderleo.com'),
-  alternates: {
-    canonical: 'https://teamleaderleo.com',
-  },
 };
 
 export default function RootLayout({
@@ -56,26 +35,22 @@ export default function RootLayout({
             color-scheme: dark;
           }
         `}</style>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        {/* Preconnect to external domains to speed up third-party resources */}
         <link rel="preconnect" href="https://vitals.vercel-insights.com" />
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
       </head>
       <body className={`${inter.className} antialiased`}>
-        <Suspense fallback={null}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-            <Toaster />
-            <Analytics />
-            <SpeedInsights />
-          </ThemeProvider>
-        </Suspense>
-        <DeferredScripts />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+          <Analytics />
+          <SpeedInsights />
+          <ServiceWorkerCleanup />
+        </ThemeProvider>
       </body>
     </html>
   );
