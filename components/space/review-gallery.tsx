@@ -1,29 +1,38 @@
-"use client";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect, useMemo } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { parseQuery } from "@/app/lib/searchlang";
-import { searchItems } from "@/app/lib/item-search";
-import { useItems } from "@/app/lib/contexts/item-context";
-import { useNow } from "@/app/lib/hooks/useNow";
-import { MarkdownContent } from "./markdown-content";
-import { Rating } from "ts-fsrs";
-import { reviewOnce } from "@/app/lib/fsrs-adapter";
-import { createClient } from "@/utils/supabase/client";
-import type { ReviewState } from "@/app/lib/review-types";
-import { SpaceHeader } from "./space-header";
-import { CodeDisplay } from "./code-display";
+'use client';
+
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { parseQuery } from '@/app/lib/searchlang';
+import { searchItems } from '@/app/lib/item-search';
+import { useItems } from '@/app/lib/contexts/item-context';
+import { useNow } from '@/app/lib/hooks/useNow';
+import { MarkdownContent } from './markdown-content';
+import { Rating } from 'ts-fsrs';
+import { reviewOnce } from '@/app/lib/fsrs-adapter';
+import { createClient } from '@/utils/supabase/client';
+import type { ReviewState } from '@/app/lib/review-types';
+import { SpaceHeader } from './space-header';
+import { CodeDisplay } from './code-display';
 
 export function ReviewGallery() {
   const supabase = createClient();
-  // Items are pre-loaded from layout!
-  const { items: allItems, isAdmin, nowMs: initialNowMs, editorOpen, setEditorOpen } = useItems();
-  const nowMs = useNow(initialNowMs, 30_000); // Use server timestamp as base
+  const {
+    items: allItems,
+    isAdmin,
+    nowMs: initialNowMs,
+    editorOpen,
+    setEditorOpen,
+    hasMore,
+    loadMore,
+    loadingMore,
+  } = useItems();
+  const nowMs = useNow(initialNowMs, 30_000);
   const sp = useSearchParams();
   const router = useRouter();
-  const tagsParam = sp.get("tags") ?? undefined;
-  const itemParam = sp.get("item");
+  const tagsParam = sp.get('tags') ?? undefined;
+  const itemParam = sp.get('item');
 
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -31,11 +40,11 @@ export function ReviewGallery() {
   const [activeIdx, setActiveIdx] = useState(0);
 
   const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
-  
+
   const items = useMemo(() => {
-    const withMutations = allItems.map(it => {
-      const mutation = mutations[it.id];
-      return mutation ? { ...it, review: mutation } : it;
+    const withMutations = allItems.map((item) => {
+      const mutation = mutations[item.id];
+      return mutation ? { ...item, review: mutation } : item;
     });
     return searchItems(withMutations, q, nowMs);
   }, [allItems, mutations, q, nowMs]);
@@ -43,66 +52,61 @@ export function ReviewGallery() {
   const current = items[currentIndex];
   const active = current?.versions[activeIdx];
 
-  // Reset active version when switching items
   useEffect(() => {
-    if (current) {
-      setActiveIdx(current.defaultIndex);
-    }
-  }, [currentIndex, current?.id]);
+    if (hasMore && !loadingMore) void loadMore();
+  }, [hasMore, loadMore, loadingMore]);
 
-  // Jump to the specified item on load
+  useEffect(() => {
+    if (current) setActiveIdx(current.defaultIndex);
+  }, [current, currentIndex]);
+
   useEffect(() => {
     if (itemParam && items.length > 0) {
-      const index = items.findIndex(it => it.id === itemParam);
-      if (index !== -1) {
-        setCurrentIndex(index);
-      }
+      const index = items.findIndex((item) => item.id === itemParam);
+      if (index !== -1) setCurrentIndex(index);
     }
   }, [itemParam, items]);
 
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
+    const handleKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
       const tag = target?.tagName?.toLowerCase();
-      const role = target?.getAttribute?.("role");
+      const role = target?.getAttribute?.('role');
       const isTyping =
-        tag === "input" ||
-        tag === "textarea" ||
-        target?.getAttribute("contenteditable") === "true" ||
-        role === "textbox";
+        tag === 'input' ||
+        tag === 'textarea' ||
+        target?.getAttribute('contenteditable') === 'true' ||
+        role === 'textbox';
 
-      if (isTyping) return;
+      if (isTyping || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
 
-      // Ignore if any modifier keys are pressed
-      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) {
-        return;
-      }
-      if (e.key === 'ArrowRight' || e.key === 'j') {
-        setCurrentIndex(i => Math.min(i + 1, items.length - 1));
+      if (event.key === 'ArrowRight' || event.key === 'j') {
+        setCurrentIndex((index) => Math.min(index + 1, items.length - 1));
         setShowContent(true);
       }
-      if (e.key === 'ArrowLeft' || e.key === 'k') {
-        setCurrentIndex(i => Math.max(i - 1, 0));
+      if (event.key === 'ArrowLeft' || event.key === 'k') {
+        setCurrentIndex((index) => Math.max(index - 1, 0));
         setShowContent(true);
       }
-      if (e.key === ' ') {
-        e.preventDefault();
-        setShowContent(s => !s);
+      if (event.key === ' ') {
+        event.preventDefault();
+        setShowContent((visible) => !visible);
       }
-      if (e.key === 'Escape') {
-        router.push('/space' + (tagsParam ? `?tags=${tagsParam}` : ''));
+      if (event.key === 'Escape') {
+        router.push(`/space${tagsParam ? `?tags=${tagsParam}` : ''}`);
       }
     };
+
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [items.length, tagsParam, router]);
+  }, [items.length, router, tagsParam]);
 
   const onReview = async (rating: Rating) => {
     if (!current) return;
-    
+
     const next = reviewOnce(current.review, rating, Date.now());
-    setMutations(prev => ({ ...prev, [current.id]: next }));
-    
+    setMutations((previous) => ({ ...previous, [current.id]: next }));
+
     await supabase.from('reviews').upsert({
       item_id: current.id,
       state: next.state,
@@ -117,120 +121,110 @@ export function ReviewGallery() {
       suspended: next.suspended || false,
     });
 
-    // Auto-advance after review
     if (currentIndex < items.length - 1) {
-      setCurrentIndex(i => i + 1);
+      setCurrentIndex((index) => index + 1);
       setShowContent(true);
     }
   };
 
   if (!current) {
     return (
-      <>
-        <SpaceHeader 
-          leftContent="No items"
+      <div className="flex h-full min-h-0 flex-col">
+        <SpaceHeader
+          leftContent={loadingMore ? 'Loading items…' : 'No items'}
           onEditorToggle={() => setEditorOpen(!editorOpen)}
           isEditorOpen={editorOpen}
         />
-        <div className="p-4 text-muted-foreground">No items to review</div>
-      </>
+        <div className="p-4 text-muted-foreground">
+          {loadingMore ? 'Loading items…' : 'No items to review'}
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col bg-background">
-      <SpaceHeader 
-        leftContent={`${currentIndex + 1} / ${items.length}`}
+    <div className="flex h-full min-h-0 flex-col bg-background">
+      <SpaceHeader
+        leftContent={`${currentIndex + 1} / ${items.length}${hasMore ? '+' : ''}`}
         onEditorToggle={() => setEditorOpen(!editorOpen)}
         isEditorOpen={editorOpen}
         rightContent={
           isAdmin ? (
             <>
               <Button asChild variant="outline" size="sm">
-                <Link href={`/space/edit/${current.slug}`}>
-                  edit
-                </Link>
+                <Link href={`/space/edit/${current.slug}`}>edit</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href={`/space/add?duplicate=${current.slug}`}>
-                  duplicate
-                </Link>
+                <Link href={`/space/add?duplicate=${current.slug}`}>duplicate</Link>
               </Button>
             </>
           ) : undefined
         }
       />
 
-      <div className="flex-1 flex flex-col p-6 overflow-hidden">
-        {/* Title */}
-        <h1 className="text-2xl font-bold mb-4 text-foreground">{current.title}</h1>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-6">
+        <h1 className="mb-4 text-2xl font-bold text-foreground">{current.title}</h1>
 
-        {/* Version tabs */}
         {current.versions.length > 1 && (
-          <div className="flex gap-2 mb-4 text-sm">
-            {current.versions.map((v, i) => (
+          <div className="mb-4 flex gap-2 text-sm">
+            {current.versions.map((version, index) => (
               <button
-                key={i}
-                onMouseEnter={() => setActiveIdx(i)}
-                className={`px-3 py-1.5 rounded border transition-colors ${
-                  i === activeIdx
-                    ? 'bg-accent text-accent-foreground border-accent'
+                key={index}
+                onMouseEnter={() => setActiveIdx(index)}
+                className={`rounded border px-3 py-1.5 transition-colors ${
+                  index === activeIdx
+                    ? 'border-accent bg-accent text-accent-foreground'
                     : 'border-border hover:bg-muted'
                 }`}
               >
-                {v.label}
+                {version.label}
               </button>
             ))}
           </div>
         )}
 
-        {/* Content */}
         {showContent && active && (
-          <div className="flex-1 flex gap-4 overflow-hidden">
-            {/* Writeup */}
-            <div className="flex-1 overflow-auto rounded p-4 border border-border dark:border-sidebar-border bg-white dark:bg-sidebar">
-              <div className="prose prose-sm dark:prose-invert max-w-none">
-                <MarkdownContent 
+          <div className="flex min-h-0 flex-1 gap-4 overflow-hidden">
+            <div className="flex-1 overflow-auto rounded border border-border bg-white p-4 dark:border-sidebar-border dark:bg-sidebar">
+              <div className="prose prose-sm max-w-none dark:prose-invert">
+                <MarkdownContent
                   html={active.contentHtml}
-                  className="prose prose-sm dark:prose-invert max-w-none"
+                  className="prose prose-sm max-w-none dark:prose-invert"
                 />
               </div>
             </div>
-
-            {/* Code */}
             {active.code && <CodeDisplay code={active.code} codeHtml={active.codeHtml} />}
           </div>
         )}
 
-        {/* Controls */}
         <div className="mt-4 flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
             ← → or j/k to navigate · Space to {showContent ? 'hide' : 'show'} content
           </div>
-          
+
           {isAdmin && current.review && (
             <div className="flex gap-2">
-              <button 
-                onClick={() => onReview(Rating.Again)}
-                className="px-3 py-1 rounded border border-border hover:bg-muted transition-colors"
+              <button
+                onClick={() => void onReview(Rating.Again)}
+                className="rounded border border-border px-3 py-1 transition-colors hover:bg-muted"
               >
                 Again (1)
               </button>
-              <button 
-                onClick={() => onReview(Rating.Hard)}
-                className="px-3 py-1 rounded border border-border hover:bg-muted transition-colors"
+              <button
+                onClick={() => void onReview(Rating.Hard)}
+                className="rounded border border-border px-3 py-1 transition-colors hover:bg-muted"
               >
                 Hard (2)
               </button>
-              <button 
-                onClick={() => onReview(Rating.Good)}
-                className="px-3 py-1 rounded border border-border hover:bg-muted transition-colors"
+              <button
+                onClick={() => void onReview(Rating.Good)}
+                className="rounded border border-border px-3 py-1 transition-colors hover:bg-muted"
               >
                 Good (3)
               </button>
-              <button 
-                onClick={() => onReview(Rating.Easy)}
-                className="px-3 py-1 rounded border border-border hover:bg-muted transition-colors"
+              <button
+                onClick={() => void onReview(Rating.Easy)}
+                className="rounded border border-border px-3 py-1 transition-colors hover:bg-muted"
               >
                 Easy (4)
               </button>
@@ -238,7 +232,6 @@ export function ReviewGallery() {
           )}
         </div>
       </div>
-
     </div>
   );
 }
