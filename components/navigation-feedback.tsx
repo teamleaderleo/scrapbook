@@ -62,9 +62,7 @@ export function NavigationFeedback() {
     const prefetch = (href: string) => {
       if (prefetched.current.has(href)) return;
       prefetched.current.add(href);
-      router.prefetch(href, {
-        onInvalidate: () => prefetched.current.delete(href),
-      });
+      router.prefetch(href);
     };
 
     const prefetchFromEvent = (event: Event) => {
