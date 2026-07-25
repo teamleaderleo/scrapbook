@@ -1,31 +1,29 @@
 # teamleaderleo.com / scrapbook
 
-This repository powers [teamleaderleo.com](https://teamleaderleo.com/): an evolving personal site, web lab, and home for the scrapbook project.
+This repository powers [teamleaderleo.com](https://teamleaderleo.com/): a personal site, web lab, and home for the scrapbook project.
 
-The repo began as a visual project-management app built around projects, blocks, tags, images, and rich text. It has since grown into a collection of useful tools and experiments, with the personal knowledge workspace at its center.
+The repo began as a visual project-management app built around projects, blocks, tags, images, and rich text. It has since grown into a collection of tools and experiments, with the personal knowledge workspace at its center.
 
 ## What is live now
 
 ### Home — GitHub activity
 
-The homepage answers “what has Leo been up to?” with a cached view of recent GitHub contributions, featured public repositories, and merged pull requests.
-
-When `GITHUB_TOKEN` or `GITHUB_ACCESS_TOKEN` is available, the page uses GitHub GraphQL for the contribution calendar and exact totals. The token-free path falls back to public REST activity and public repository data. Both paths are cached for about ten minutes, so the page needs no webhook, cron job, or per-visit API storm.
+The homepage shows a rolling seven-day view of public GitHub contributions and links to the current public projects. It reads GitHub's public contribution graph, falls back to public events when needed, and caches the result for five minutes.
 
 ### Time machine — time-zone visualizer
 
-`/time` is an interactive time converter for comparing UTC, Eastern, Pacific, local time, and a selectable time zone across a full day. The current local time also appears as a ticking link in the site navigation.
+`/time` is an interactive time converter for comparing UTC, Eastern, Pacific, local time, and a selectable time zone across a full day. The current local time also appears as a link in the site navigation.
 
 ### Space — personal reference and learning workspace
 
-`/space` is the current evolution of the scrapbook idea: a searchable library for notes, links, code, references, and things worth revisiting.
+`/space` is a searchable library for notes, links, code, references, and things worth revisiting.
 
 It currently includes:
 
 - tag-based queries and filtering
 - multiple text and code versions per item
 - inline editing for admin users
-- pagination and command-style search
+- paginated and incremental item loading
 - Supabase-backed persistence and authentication
 - FSRS-based spaced-repetition reviews
 
@@ -54,7 +52,7 @@ Some routes are polished public surfaces. Others are active experiments or older
 
 The main goal is a personal, searchable place for collecting references, writing notes, saving code, and reviewing ideas without an algorithmic feed deciding what appears next.
 
-The original inspiration came from using a private Discord server as an archive: quick capture, channels as categories, rich previews, and easy access from desktop or phone. Scrapbook is the attempt to keep those strengths while adding ownership, offline-friendly possibilities, stronger search, richer editing, and deliberate review.
+The original inspiration came from using a private Discord server as an archive: quick capture, channels as categories, rich previews, and easy access from desktop or phone. Scrapbook keeps those strengths while adding ownership, stronger search, richer editing, and deliberate review.
 
 ## Stack
 
@@ -86,16 +84,14 @@ Useful checks:
 
 ```bash
 pnpm lint
+pnpm typecheck
+pnpm test
 pnpm prettier:check
 pnpm build
 ```
 
-The public homepage can render without database credentials or a GitHub token. Authentication, saved content, exact contribution totals, proxy reporting, AI features, and storage integrations require their corresponding environment variables and services.
+The public homepage can render without database credentials or a GitHub token. Authentication, saved content, proxy reporting, AI features, and storage integrations require their corresponding environment variables and services.
 
 ## Status
 
 This is an active personal project. The public utilities and `/space` receive the most attention right now, while the older dashboard remains part of the repo's history and may continue to feed ideas into the newer workspace.
-
-The repo name stuck. The project outgrew it.
-
-<!-- deploy trigger: 2026-07-25 -->
