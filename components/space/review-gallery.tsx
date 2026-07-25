@@ -27,6 +27,9 @@ export function ReviewGallery() {
     hasMore,
     loadMore,
     loadingMore,
+    refreshing,
+    error,
+    reload,
   } = useItems();
   const nowMs = useNow(initialNowMs, 30_000);
   const sp = useSearchParams();
@@ -81,10 +84,12 @@ export function ReviewGallery() {
       if (isTyping || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
 
       if (event.key === 'ArrowRight' || event.key === 'j') {
+        event.preventDefault();
         setCurrentIndex((index) => Math.min(index + 1, items.length - 1));
         setShowContent(true);
       }
       if (event.key === 'ArrowLeft' || event.key === 'k') {
+        event.preventDefault();
         setCurrentIndex((index) => Math.max(index - 1, 0));
         setShowContent(true);
       }
@@ -107,7 +112,7 @@ export function ReviewGallery() {
     const next = reviewOnce(current.review, rating, Date.now());
     setMutations((previous) => ({ ...previous, [current.id]: next }));
 
-    await supabase.from('reviews').upsert({
+    const { error: reviewError } = await supabase.from('reviews').upsert({
       item_id: current.id,
       state: next.state,
       due: next.due,
@@ -121,6 +126,11 @@ export function ReviewGallery() {
       suspended: next.suspended || false,
     });
 
+    if (reviewError) {
+      console.error('Failed to save review:', reviewError);
+      return;
+    }
+
     if (currentIndex < items.length - 1) {
       setCurrentIndex((index) => index + 1);
       setShowContent(true);
@@ -131,47 +141,72 @@ export function ReviewGallery() {
     return (
       <div className="flex h-full min-h-0 flex-col">
         <SpaceHeader
-          leftContent={loadingMore ? 'Loading items…' : 'No items'}
+          leftContent={refreshing || loadingMore ? 'Updating items…' : 'No items'}
           onEditorToggle={() => setEditorOpen(!editorOpen)}
           isEditorOpen={editorOpen}
         />
         <div className="p-4 text-muted-foreground">
-          {loadingMore ? 'Loading items…' : 'No items to review'}
+          {error ? (
+            <div className="flex max-w-xl items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm text-foreground" role="alert">
+              <span>{error}</span>
+              <Button variant="outline" size="sm" onClick={() => void reload()}>
+                Retry
+              </Button>
+            </div>
+          ) : refreshing || loadingMore ? (
+            'Updating items…'
+          ) : (
+            'No items to review'
+          )}
         </div>
       </div>
     );
   }
 
+  const progress = `${currentIndex + 1} / ${items.length}${hasMore ? '+' : ''}${refreshing ? ' · Updating' : ''}`;
+
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
       <SpaceHeader
-        leftContent={`${currentIndex + 1} / ${items.length}${hasMore ? '+' : ''}`}
+        leftContent={progress}
         onEditorToggle={() => setEditorOpen(!editorOpen)}
         isEditorOpen={editorOpen}
         rightContent={
           isAdmin ? (
             <>
               <Button asChild variant="outline" size="sm">
-                <Link href={`/space/edit/${current.slug}`}>edit</Link>
+                <Link href={`/space/edit/${current.slug}`} prefetch>edit</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href={`/space/add?duplicate=${current.slug}`}>duplicate</Link>
+                <Link href={`/space/add?duplicate=${current.slug}`} prefetch>duplicate</Link>
               </Button>
             </>
           ) : undefined
         }
       />
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-6">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-3 sm:p-6">
+        {error ? (
+          <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm" role="alert">
+            <span className="min-w-0">{error}</span>
+            <Button variant="outline" size="sm" className="shrink-0" onClick={() => void reload()}>
+              Retry
+            </Button>
+          </div>
+        ) : null}
+
         <h1 className="mb-4 text-2xl font-bold text-foreground">{current.title}</h1>
 
         {current.versions.length > 1 && (
-          <div className="mb-4 flex gap-2 text-sm">
+          <div className="mb-4 flex flex-wrap gap-2 text-sm">
             {current.versions.map((version, index) => (
               <button
                 key={index}
+                type="button"
                 onMouseEnter={() => setActiveIdx(index)}
-                className={`rounded border px-3 py-1.5 transition-colors ${
+                onFocus={() => setActiveIdx(index)}
+                onClick={() => setActiveIdx(index)}
+                className={`rounded border px-3 py-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                   index === activeIdx
                     ? 'border-accent bg-accent text-accent-foreground'
                     : 'border-border hover:bg-muted'
@@ -184,8 +219,8 @@ export function ReviewGallery() {
         )}
 
         {showContent && active && (
-          <div className="flex min-h-0 flex-1 gap-4 overflow-hidden">
-            <div className="flex-1 overflow-auto rounded border border-border bg-white p-4 dark:border-sidebar-border dark:bg-sidebar">
+          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto lg:flex-row lg:overflow-hidden">
+            <div className="min-h-48 min-w-0 flex-1 overflow-auto rounded border border-border bg-white p-4 dark:border-sidebar-border dark:bg-sidebar">
               <div className="prose prose-sm max-w-none dark:prose-invert">
                 <MarkdownContent
                   html={active.contentHtml}
@@ -197,13 +232,13 @@ export function ReviewGallery() {
           </div>
         )}
 
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm text-muted-foreground">
             ← → or j/k to navigate · Space to {showContent ? 'hide' : 'show'} content
           </div>
 
           {isAdmin && current.review && (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => void onReview(Rating.Again)}
                 className="rounded border border-border px-3 py-1 transition-colors hover:bg-muted"

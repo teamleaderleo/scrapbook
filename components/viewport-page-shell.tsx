@@ -14,17 +14,23 @@ export default function ViewportPageShell({
   contentClassName = '',
   scroll = 'page',
 }: ViewportPageShellProps) {
-  const overflowClass =
-    scroll === 'locked'
-      ? 'overflow-hidden'
-      : 'overflow-x-hidden overflow-y-auto overscroll-contain';
+  if (scroll === 'locked') {
+    return (
+      <div
+        className={`grid h-dvh min-w-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden ${className}`}
+      >
+        <SiteNav />
+        <main className={`min-h-0 min-w-0 overflow-hidden ${contentClassName}`}>
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
-    <main
-      className={`grid h-dvh min-w-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden ${className}`}
-    >
+    <div className={`min-h-dvh min-w-0 overflow-x-clip ${className}`}>
       <SiteNav />
-      <div className={`min-h-0 min-w-0 ${overflowClass} ${contentClassName}`}>{children}</div>
-    </main>
+      <main className={`min-w-0 ${contentClassName}`}>{children}</main>
+    </div>
   );
 }

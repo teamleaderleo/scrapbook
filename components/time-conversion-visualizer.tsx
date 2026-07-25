@@ -6,7 +6,7 @@ import CurrentTimeDisplay from './current-time-display';
 import { isDSTActive } from '@/app/lib/dst-utils';
 
 const DAY_GRADIENT =
-  'linear-gradient(90deg, #151720 0%, #252438 9%, #4d3c59 18%, #806073 28%, #bc8476 38%, #e0b982 46%, #eee2b8 50%, #dfba82 56%, #bd8577 64%, #806073 73%, #4d3c59 82%, #252438 91%, #151720 100%)';
+  'linear-gradient(90deg, #151720 0%, #252938 9%, #493f55 18%, #715767 28%, #9f6f68 38%, #bd916c 46%, #c9a574 50%, #bd916c 56%, #9f6f68 64%, #715767 73%, #493f55 82%, #252938 91%, #151720 100%)';
 
 export default function UTCTimeVisualizer() {
   const [localTime, setLocalTime] = useState(0);
@@ -49,23 +49,16 @@ export default function UTCTimeVisualizer() {
             : 'Night';
 
   return (
-    <div className="relative mx-auto flex min-h-full w-full max-w-5xl items-center px-4 py-8 sm:px-6">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-45 dark:opacity-20"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(30,30,34,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(30,30,34,0.035) 1px, transparent 1px)',
-          backgroundSize: '28px 28px',
-        }}
-      />
-
-      <div className="relative w-full rounded-[1.5rem] border border-black/12 bg-[#dedcd6]/82 p-5 shadow-[0_22px_60px_rgba(24,24,26,0.11)] dark:border-white/10 dark:bg-[#18191d]/92 dark:shadow-[0_24px_70px_rgba(0,0,0,0.34)] sm:p-7">
+    <div className="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-5xl items-center px-4 py-8 sm:px-6">
+      <div className="w-full rounded-[1.5rem] border border-black/12 bg-[#dedcd6] p-5 shadow-[0_18px_46px_rgba(24,24,26,0.1)] dark:border-white/10 dark:bg-[#18191d] dark:shadow-[0_20px_48px_rgba(0,0,0,0.3)] sm:p-7">
         <CurrentTimeDisplay onJumpToTime={setLocalTime} />
 
         <div className="mt-7">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <label htmlFor="time-of-day" className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-black/50 dark:text-white/48">
+            <label
+              htmlFor="time-of-day"
+              className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-black/50 dark:text-white/48"
+            >
               Local time of day
             </label>
             <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/45 dark:text-white/42">
@@ -82,7 +75,7 @@ export default function UTCTimeVisualizer() {
             onChange={(event) => setLocalTime(Number.parseInt(event.target.value, 10))}
             aria-label="Local time of day"
             aria-valuetext={`${formatTime(localHours, localMinutes)} ${timeOfDay}`}
-            className="time-day-slider h-16 w-full cursor-pointer rounded-full"
+            className="time-day-slider h-14 w-full cursor-pointer rounded-full"
             style={{ background: DAY_GRADIENT }}
           />
           <div className="mt-2 flex justify-between font-mono text-[10px] text-black/45 dark:text-white/42">
@@ -95,7 +88,7 @@ export default function UTCTimeVisualizer() {
         </div>
 
         <div className="mt-7 grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
-          <div className="rounded-xl border border-black/10 bg-[#f1eee7]/64 p-4 dark:border-white/10 dark:bg-white/[0.035]">
+          <div className="rounded-xl border border-black/10 bg-[#ebe8e1] p-4 dark:border-white/10 dark:bg-[#202126]">
             <div className="flex items-end gap-3">
               <p className="font-mono text-5xl font-semibold tabular-nums tracking-[-0.05em] sm:text-6xl">
                 {formatTime(localHours, localMinutes)}
@@ -108,17 +101,17 @@ export default function UTCTimeVisualizer() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-black/10 bg-[#f1eee7]/64 p-3 dark:border-white/10 dark:bg-white/[0.035]">
+            <div className="rounded-xl border border-black/10 bg-[#ebe8e1] p-3 dark:border-white/10 dark:bg-[#202126]">
               <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-black/46 dark:text-white/44">UTC</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums">{formatTime(utcHours, utcMinutes)}</p>
             </div>
-            <div className="rounded-xl border border-black/10 bg-[#f1eee7]/64 p-3 dark:border-white/10 dark:bg-white/[0.035]">
+            <div className="rounded-xl border border-black/10 bg-[#ebe8e1] p-3 dark:border-white/10 dark:bg-[#202126]">
               <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-black/46 dark:text-white/44">Eastern</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums">
                 {formatTime((utcHours + easternOffset + 24) % 24, utcMinutes)}
               </p>
             </div>
-            <div className="rounded-xl border border-black/10 bg-[#f1eee7]/64 p-3 dark:border-white/10 dark:bg-white/[0.035]">
+            <div className="rounded-xl border border-black/10 bg-[#ebe8e1] p-3 dark:border-white/10 dark:bg-[#202126]">
               <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-black/46 dark:text-white/44">Pacific</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums">
                 {formatTime((utcHours + pacificOffset + 24) % 24, utcMinutes)}

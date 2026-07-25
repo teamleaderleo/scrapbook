@@ -1,4 +1,4 @@
-const DISPLAY_TIME_ZONE = 'America/Los_Angeles';
+const DISPLAY_TIME_ZONE = 'UTC';
 
 export function dateKeyInTimeZone(date: Date, timeZone = DISPLAY_TIME_ZONE): string {
   const parts = new Intl.DateTimeFormat('en-CA', {

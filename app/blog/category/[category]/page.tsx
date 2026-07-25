@@ -2,9 +2,12 @@ import { getPostsByCategory } from '@/app/lib/blog-utils';
 import { type PostCategory, categories } from '@/app/lib/definitions/blog';
 import PostList from '@/components/blog/post-list';
 import type { Metadata } from 'next';
-import { Suspense } from 'react';
 
 type CategoryParams = Promise<{ category: string }>;
+
+export function generateStaticParams() {
+  return Object.keys(categories).map((category) => ({ category }));
+}
 
 function toCategory(value: string): PostCategory {
   return value in categories ? (value as PostCategory) : 'fragments';
@@ -39,10 +42,6 @@ async function CategoryContent({ params }: { params: CategoryParams }) {
   );
 }
 
-export default function CategoryPage({ params }: { params: CategoryParams }) {
-  return (
-    <Suspense fallback={<div className="mx-auto max-w-4xl py-8">Loading posts…</div>}>
-      <CategoryContent params={params} />
-    </Suspense>
-  );
+export default async function CategoryPage({ params }: { params: CategoryParams }) {
+  return <CategoryContent params={params} />;
 }

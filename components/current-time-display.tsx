@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { detectCurrentTimezoneDST } from '@/app/lib/dst-utils';
 
 interface CurrentTimeDisplayProps {
@@ -16,41 +16,33 @@ export default function CurrentTimeDisplay({ onJumpToTime }: CurrentTimeDisplayP
       const now = new Date();
       const minutesSinceMidnight = now.getHours() * 60 + now.getMinutes();
       setCurrentTime(minutesSinceMidnight);
-      
-      // Only set timezone info once
+
       if (!userTimezone) {
         setUserTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
-        
-        // Calculate UTC offset
+
         const offsetMinutes = -now.getTimezoneOffset();
         const offsetHours = Math.floor(Math.abs(offsetMinutes) / 60);
         const offsetMins = Math.abs(offsetMinutes) % 60;
         const sign = offsetMinutes >= 0 ? '+' : '-';
-        const offsetStr = offsetMins === 0 
-          ? `UTC${sign}${offsetHours}` 
-          : `UTC${sign}${offsetHours}:${String(offsetMins).padStart(2, '0')}`;
+        const offsetStr =
+          offsetMins === 0
+            ? `UTC${sign}${offsetHours}`
+            : `UTC${sign}${offsetHours}:${String(offsetMins).padStart(2, '0')}`;
         setUtcOffset(offsetStr);
-        
-        // Detect DST using shared utility
+
         const dstInfo = detectCurrentTimezoneDST();
         setIsDST(dstInfo.isDSTActive);
       }
     };
 
-    // Initial update
     updateTime();
 
-    // Calculate milliseconds until next minute
     const now = new Date();
     const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
 
     let interval: NodeJS.Timeout;
-
-    // Update at the start of the next minute
     const initialTimeout = setTimeout(() => {
       updateTime();
-      
-      // Then update every minute on the minute
       interval = setInterval(updateTime, 60000);
     }, msUntilNextMinute);
 
@@ -68,11 +60,12 @@ export default function CurrentTimeDisplay({ onJumpToTime }: CurrentTimeDisplayP
 
   return (
     <div>
-      <div className="mb-2">
-        <h1 className="text-3xl font-bold inline">Current time: </h1>
+      <div className="mb-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        <h1 className="text-3xl font-bold">Current time:</h1>
         <button
+          type="button"
           onClick={() => onJumpToTime(currentTime)}
-          className="text-3xl font-bold rounded-md bg-muted/50 hover:bg-muted transition-colors cursor-pointer align-baseline px-1.5"
+          className="cursor-pointer rounded-md border border-black/15 bg-black/[0.035] px-1.5 text-3xl font-bold transition-colors hover:bg-black/[0.07] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/60 dark:border-white/15 dark:bg-white/[0.045] dark:hover:bg-white/[0.08] dark:focus-visible:outline-white/70"
         >
           {formatTime(currentTime)}
         </button>
@@ -81,7 +74,7 @@ export default function CurrentTimeDisplay({ onJumpToTime }: CurrentTimeDisplayP
         <span className="relative inline-block">
           {userTimezone} ({utcOffset})
           {isDST && (
-            <span className="absolute left-full ml-1.5 top-1/2 -translate-y-1/2 text-[9px] px-1 py-0.5 bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded font-semibold whitespace-nowrap">
+            <span className="absolute left-full top-1/2 ml-1.5 -translate-y-1/2 whitespace-nowrap rounded bg-amber-500/20 px-1 py-0.5 text-[9px] font-semibold text-amber-700 dark:text-amber-400">
               DST
             </span>
           )}

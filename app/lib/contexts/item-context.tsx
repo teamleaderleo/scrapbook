@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { useAuth } from '@/app/lib/hooks/useAuth';
 import type { Item } from '@/app/lib/item-types';
@@ -29,7 +29,9 @@ const REVIEW_SELECT = [
 type ItemsContextType = {
   items: Item[];
   loading: boolean;
+  refreshing: boolean;
   loadingMore: boolean;
+  error: string | null;
   hasMore: boolean;
   reload: () => Promise<void>;
   loadMore: () => Promise<void>;
@@ -64,89 +66,154 @@ export function ItemsProvider({
   const [supabase] = useState(() => createClient());
   const [items, setItems] = useState<Item[]>(initialItems);
   const [loading, setLoading] = useState(initialItems.length === 0);
+  const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [nowMs] = useState(() => initialNowMs ?? Date.now());
   const [editorOpen, setEditorOpen] = useState(false);
+  const activeReload = useRef<AbortController | null>(null);
+  const activeLoadMore = useRef<AbortController | null>(null);
+  const lastRefreshAt = useRef(initialNowMs ?? 0);
   const isAdmin = initialIsAdmin;
 
   useEffect(() => {
     setItems(initialItems);
     setHasMore(initialHasMore);
     setLoading(false);
+    setRefreshing(false);
+    setError(null);
+    lastRefreshAt.current = Date.now();
   }, [initialHasMore, initialItems]);
 
-  const fetchPage = async (offset: number) => {
-    const itemsResult = await supabase
-      .from('items')
-      .select(SPACE_ITEM_SELECT)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + SPACE_PAGE_SIZE - 1);
+  const fetchPage = useCallback(
+    async (offset: number, signal: AbortSignal) => {
+      const itemsResult = await supabase
+        .from('items')
+        .select(SPACE_ITEM_SELECT)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + SPACE_PAGE_SIZE - 1)
+        .abortSignal(signal);
 
-    if (itemsResult.error) throw itemsResult.error;
+      if (itemsResult.error) throw itemsResult.error;
 
-    const databaseItems = (itemsResult.data ?? []) as unknown as DbItem[];
-    const itemIds = databaseItems.map((item) => item.id);
-    let databaseReviews: DbReview[] = [];
+      const databaseItems = (itemsResult.data ?? []) as unknown as DbItem[];
+      const itemIds = databaseItems.map((item) => item.id);
+      let databaseReviews: DbReview[] = [];
 
-    if (isAdmin && itemIds.length > 0) {
-      const reviewsResult = await supabase
-        .from('reviews')
-        .select(REVIEW_SELECT)
-        .in('item_id', itemIds);
+      if (isAdmin && itemIds.length > 0) {
+        const reviewsResult = await supabase
+          .from('reviews')
+          .select(REVIEW_SELECT)
+          .in('item_id', itemIds)
+          .abortSignal(signal);
 
-      if (reviewsResult.error) throw reviewsResult.error;
-      databaseReviews = (reviewsResult.data ?? []) as unknown as DbReview[];
-    }
+        if (reviewsResult.error) throw reviewsResult.error;
+        databaseReviews = (reviewsResult.data ?? []) as unknown as DbReview[];
+      }
 
-    return {
-      items: mapDatabaseItemsToItems(databaseItems, databaseReviews),
-      hasMore: databaseItems.length === SPACE_PAGE_SIZE,
-    };
-  };
+      return {
+        items: mapDatabaseItemsToItems(databaseItems, databaseReviews),
+        hasMore: databaseItems.length === SPACE_PAGE_SIZE,
+      };
+    },
+    [isAdmin, supabase],
+  );
 
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  };
+  const signOut = useCallback(async () => {
+    const { error: signOutError } = await supabase.auth.signOut();
+    if (signOutError) throw signOutError;
+  }, [supabase]);
 
-  const reload = async () => {
-    setLoading(true);
+  const reload = useCallback(async () => {
+    activeReload.current?.abort();
+    const controller = new AbortController();
+    activeReload.current = controller;
+    setError(null);
+
+    if (items.length > 0) setRefreshing(true);
+    else setLoading(true);
+
     try {
-      const page = await fetchPage(0);
+      const page = await fetchPage(0, controller.signal);
+      if (controller.signal.aborted) return;
       setItems(page.items);
       setHasMore(page.hasMore);
-    } catch (error) {
-      console.error('Error reloading items:', error);
+      lastRefreshAt.current = Date.now();
+    } catch (reloadError) {
+      if (controller.signal.aborted) return;
+      console.error('Error reloading items:', reloadError);
+      setError(
+        items.length > 0
+          ? 'Could not refresh items. Showing the last loaded version.'
+          : 'Could not load items.',
+      );
     } finally {
-      setLoading(false);
+      if (activeReload.current === controller) activeReload.current = null;
+      if (!controller.signal.aborted) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
-  };
+  }, [fetchPage, items.length]);
 
-  const loadMore = async () => {
+  const loadMore = useCallback(async () => {
     if (!hasMore || loadingMore) return;
 
+    activeLoadMore.current?.abort();
+    const controller = new AbortController();
+    activeLoadMore.current = controller;
     setLoadingMore(true);
+    setError(null);
+
     try {
-      const page = await fetchPage(items.length);
+      const page = await fetchPage(items.length, controller.signal);
+      if (controller.signal.aborted) return;
       setItems((current) => {
         const existingIds = new Set(current.map((item) => item.id));
         return [...current, ...page.items.filter((item) => !existingIds.has(item.id))];
       });
       setHasMore(page.hasMore);
-    } catch (error) {
-      console.error('Error loading more items:', error);
+    } catch (loadError) {
+      if (controller.signal.aborted) return;
+      console.error('Error loading more items:', loadError);
+      setError('Could not load more items. The current list is unchanged.');
     } finally {
-      setLoadingMore(false);
+      if (activeLoadMore.current === controller) activeLoadMore.current = null;
+      if (!controller.signal.aborted) setLoadingMore(false);
     }
-  };
+  }, [fetchPage, hasMore, items.length, loadingMore]);
+
+  useEffect(() => {
+    const refreshIfStale = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (Date.now() - lastRefreshAt.current < 60_000) return;
+      void reload();
+    };
+
+    window.addEventListener('focus', refreshIfStale);
+    document.addEventListener('visibilitychange', refreshIfStale);
+    return () => {
+      window.removeEventListener('focus', refreshIfStale);
+      document.removeEventListener('visibilitychange', refreshIfStale);
+    };
+  }, [reload]);
+
+  useEffect(() => {
+    return () => {
+      activeReload.current?.abort();
+      activeLoadMore.current?.abort();
+    };
+  }, []);
 
   return (
     <ItemsContext.Provider
       value={{
         items,
         loading: authLoading || loading,
+        refreshing,
         loadingMore,
+        error,
         hasMore,
         reload,
         loadMore,
