@@ -1,6 +1,43 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 const publicRoutes = ['/', '/time', '/blog', '/gallery', '/atelier'];
+
+async function expectNoHorizontalOverflow(page: Page) {
+  const dimensions = await page.evaluate(() => ({
+    viewport: document.documentElement.clientWidth,
+    document: document.documentElement.scrollWidth,
+  }));
+
+  expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport);
+}
+
+async function expectWheelScrollsDocument(page: Page, route: string, selector: string) {
+  await page.setViewportSize({ width: 900, height: 420 });
+  const response = await page.goto(route);
+  expect(response?.ok()).toBe(true);
+
+  const target = page.locator(selector).first();
+  await expect(target).toBeVisible();
+  await target.scrollIntoViewIfNeeded();
+
+  const scrollState = await page.evaluate(() => {
+    const element = document.scrollingElement;
+    if (!element) throw new Error('Missing document scrolling element');
+    const max = element.scrollHeight - element.clientHeight;
+    if (element.scrollTop >= max - 8) element.scrollTop = Math.max(0, max - 120);
+    return { top: element.scrollTop, max };
+  });
+
+  expect(scrollState.max).toBeGreaterThan(0);
+  const box = await target.boundingBox();
+  expect(box).toBeTruthy();
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  await page.mouse.wheel(0, 280);
+
+  await expect
+    .poll(() => page.evaluate(() => document.scrollingElement?.scrollTop ?? 0))
+    .toBeGreaterThan(scrollState.top);
+}
 
 for (const route of publicRoutes) {
   test(`${route} renders`, async ({ page }) => {
@@ -8,52 +45,84 @@ for (const route of publicRoutes) {
     expect(response?.ok()).toBe(true);
     await expect(page.locator('body')).toBeVisible();
   });
+
+  test(`${route} has no horizontal overflow`, async ({ page }) => {
+    await page.goto(route);
+    await expectNoHorizontalOverflow(page);
+  });
 }
 
-test('homepage fits within the viewport', async ({ page }) => {
+test('homepage wheel scrolls over the activity grid', async ({ page }) => {
+  await expectWheelScrollsDocument(page, '/', '[aria-label="Four weeks of GitHub activity"]');
+});
+
+test('time page wheel scrolls over the slider', async ({ page }) => {
+  await expectWheelScrollsDocument(page, '/time', 'input[type="range"]');
+});
+
+test('gallery wheel scrolls over the canvas', async ({ page }) => {
+  await expectWheelScrollsDocument(page, '/gallery', 'canvas');
+});
+
+test('homepage counter uses four independently reactive digits', async ({ page }) => {
   await page.goto('/');
+  const digits = page.locator('[data-activity-digit]');
+  await expect(digits).toHaveCount(4);
 
-  const dimensions = await page.evaluate(() => ({
-    viewport: window.innerHeight,
-    document: document.documentElement.scrollHeight,
-  }));
+  const firstBox = await digits.first().boundingBox();
+  expect(firstBox).toBeTruthy();
+  await page.mouse.move(firstBox!.x + firstBox!.width * 0.82, firstBox!.y + firstBox!.height * 0.28);
+  await page.waitForTimeout(200);
 
-  expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport + 1);
+  const transforms = await digits.evaluateAll((elements) =>
+    elements.map((element) => (element as HTMLElement).style.transform),
+  );
+  expect(transforms[0]).not.toEqual(transforms[3]);
+});
+
+test('homepage counter respects reduced motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const digits = page.locator('[data-activity-digit]');
+  const firstBox = await digits.first().boundingBox();
+  expect(firstBox).toBeTruthy();
+  await page.mouse.move(firstBox!.x + firstBox!.width * 0.82, firstBox!.y + firstBox!.height * 0.28);
+  await page.waitForTimeout(100);
+
+  const transforms = await digits.evaluateAll((elements) =>
+    elements.map((element) => (element as HTMLElement).style.transform),
+  );
+  expect(new Set(transforms)).toEqual(new Set(['translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg)']));
 });
 
 test('homepage activity stays inside a mobile viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await page.locator('[aria-label="Four weeks of GitHub activity"] button').last().click();
-
-  const dimensions = await page.evaluate(() => ({
-    viewport: window.innerWidth,
-    document: document.documentElement.scrollWidth,
-  }));
-
-  expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport + 1);
+  await expectNoHorizontalOverflow(page);
 });
 
-test('cube stays inside a mobile viewport', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/gallery');
-
-  const dimensions = await page.evaluate(() => ({
-    viewport: window.innerWidth,
-    document: document.documentElement.scrollWidth,
-  }));
-
-  expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport + 1);
-});
+for (const width of [320, 375, 390, 430]) {
+  test(`gallery stays inside a ${width}px viewport`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/gallery');
+    await expectNoHorizontalOverflow(page);
+  });
+}
 
 test.describe('connected-data routes', () => {
   test.skip(!process.env.PLAYWRIGHT_FULL_APP, 'Requires connected app environment variables');
 
   for (const route of ['/space', '/proxy-dashboard']) {
-    test(`${route} renders`, async ({ page }) => {
+    test(`${route} renders without horizontal overflow`, async ({ page }) => {
       const response = await page.goto(route);
       expect(response?.ok()).toBe(true);
       await expect(page.locator('body')).toBeVisible();
+      await expectNoHorizontalOverflow(page);
     });
   }
+
+  test('proxy dashboard wheel scrolls over its main content', async ({ page }) => {
+    await expectWheelScrollsDocument(page, '/proxy-dashboard', 'main');
+  });
 });
