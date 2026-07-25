@@ -53,7 +53,7 @@ async function getInitialData() {
     return { items: [], isAdmin, user, nowMs, hasMore: false };
   }
 
-  const databaseItems = (itemsResult.data ?? []) as DbItem[];
+  const databaseItems = (itemsResult.data ?? []) as unknown as DbItem[];
   const itemIds = databaseItems.map((item) => item.id);
 
   let databaseReviews: DbReview[] = [];
@@ -66,7 +66,7 @@ async function getInitialData() {
     if (reviewsResult.error) {
       console.error('Error loading reviews:', reviewsResult.error);
     } else {
-      databaseReviews = (reviewsResult.data ?? []) as DbReview[];
+      databaseReviews = (reviewsResult.data ?? []) as unknown as DbReview[];
     }
   }
 
