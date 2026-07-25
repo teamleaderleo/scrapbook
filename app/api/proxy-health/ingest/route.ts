@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { saveProxyHealth, type ProxyHealthPayload } from '@/app/lib/proxy-health-store';
 
@@ -11,6 +13,7 @@ function getBearerToken(request: NextRequest) {
 }
 
 function expectedHealthToken() {
+  if (process.env.PROXY_HEALTH_INGEST_SECRET) return process.env.PROXY_HEALTH_INGEST_SECRET;
   if (process.env.PROXY_HEALTH_TOKEN) return process.env.PROXY_HEALTH_TOKEN;
   if (process.env.NODE_ENV !== 'production') return 'local-test';
   return null;
@@ -21,7 +24,7 @@ export async function POST(request: NextRequest) {
 
   if (!expectedToken) {
     return NextResponse.json(
-      { ok: false, error: 'PROXY_HEALTH_TOKEN is not configured' },
+      { ok: false, error: 'Proxy ingestion credentials are not configured' },
       { status: 500 },
     );
   }
@@ -42,11 +45,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: 'payload must be an object' }, { status: 400 });
   }
 
-  const result = await saveProxyHealth(payload);
+  const requestId = randomUUID();
 
-  return NextResponse.json({
-    ok: true,
-    host: result.host,
-    checked_at: result.checkedAt,
-  });
+  try {
+    const result = await saveProxyHealth(payload);
+    return NextResponse.json({
+      ok: true,
+      host: result.host,
+      checked_at: result.checkedAt,
+      request_id: requestId,
+    });
+  } catch (error) {
+    console.error('Unable to ingest proxy health payload', { requestId, error });
+    return NextResponse.json(
+      { ok: false, error: 'Proxy report could not be stored', request_id: requestId },
+      { status: 500 },
+    );
+  }
 }
