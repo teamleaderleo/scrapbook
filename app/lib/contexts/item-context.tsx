@@ -85,7 +85,7 @@ export function ItemsProvider({
 
     if (itemsResult.error) throw itemsResult.error;
 
-    const databaseItems = (itemsResult.data ?? []) as DbItem[];
+    const databaseItems = (itemsResult.data ?? []) as unknown as DbItem[];
     const itemIds = databaseItems.map((item) => item.id);
     let databaseReviews: DbReview[] = [];
 
@@ -96,7 +96,7 @@ export function ItemsProvider({
         .in('item_id', itemIds);
 
       if (reviewsResult.error) throw reviewsResult.error;
-      databaseReviews = (reviewsResult.data ?? []) as DbReview[];
+      databaseReviews = (reviewsResult.data ?? []) as unknown as DbReview[];
     }
 
     return {
