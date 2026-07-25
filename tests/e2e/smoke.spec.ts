@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const publicRoutes = ['/', '/time', '/blog', '/gallery', '/atelier'];
+const idleDigitTransform = 'translate3d(0px, 0px, 0px) rotateX(0deg) rotateY(0deg)';
 
 async function expectNoHorizontalOverflow(page: Page) {
   const dimensions = await page.evaluate(() => ({
@@ -39,6 +40,24 @@ async function expectWheelScrollsDocument(page: Page, route: string, selector: s
     .toBeGreaterThan(scrollState.top);
 }
 
+async function moveActivityDigits(page: Page) {
+  const digits = page.locator('[data-activity-digit]');
+  await expect(digits).toHaveCount(4);
+  const container = digits.first().locator('..');
+  const box = await container.boundingBox();
+  expect(box).toBeTruthy();
+
+  await container.dispatchEvent('pointermove', {
+    bubbles: true,
+    clientX: box!.x + box!.width * 0.14,
+    clientY: box!.y + box!.height * 0.22,
+    pointerId: 1,
+    pointerType: 'mouse',
+  });
+
+  return digits;
+}
+
 for (const route of publicRoutes) {
   test(`${route} renders`, async ({ page }) => {
     const response = await page.goto(route);
@@ -70,13 +89,18 @@ test('slow navigation keeps the current page visible with immediate feedback', a
   const activity = page.locator('[aria-label="Four weeks of GitHub activity"]');
   await expect(activity).toBeVisible();
 
-  await page
-    .getByRole('link', { name: /Open the time converter/i })
-    .evaluate((link: HTMLAnchorElement) => link.click());
-  await expect(page.getByText('Opening time')).toBeVisible();
-  await expect(activity).toBeVisible();
+  try {
+    const timeLink = page.getByRole('link', { name: /Open the time converter/i });
+    const box = await timeLink.boundingBox();
+    expect(box).toBeTruthy();
+    await page.mouse.click(box!.x + box!.width / 2, box!.y + box!.height / 2);
 
-  releaseNavigation();
+    await expect(page.getByText('Opening time')).toBeVisible();
+    await expect(activity).toBeVisible();
+  } finally {
+    releaseNavigation();
+  }
+
   await expect(page.locator('input[type="range"]')).toBeVisible();
   await expect(page.getByText('Opening time')).toBeHidden();
 });
@@ -94,34 +118,30 @@ test('gallery wheel scrolls over the canvas', async ({ page }) => {
 });
 
 test('homepage counter uses four independently reactive digits', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/');
-  const digits = page.locator('[data-activity-digit]');
-  await expect(digits).toHaveCount(4);
+  const digits = await moveActivityDigits(page);
 
-  const firstBox = await digits.first().boundingBox();
-  expect(firstBox).toBeTruthy();
-  await page.mouse.move(firstBox!.x + firstBox!.width * 0.82, firstBox!.y + firstBox!.height * 0.28);
-  await page.waitForTimeout(200);
+  await expect
+    .poll(() => digits.first().evaluate((element) => (element as HTMLElement).style.transform))
+    .not.toBe(idleDigitTransform);
 
   const transforms = await digits.evaluateAll((elements) =>
     elements.map((element) => (element as HTMLElement).style.transform),
   );
+  expect(new Set(transforms).size).toBeGreaterThan(1);
   expect(transforms[0]).not.toEqual(transforms[3]);
 });
 
 test('homepage counter respects reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  const digits = page.locator('[data-activity-digit]');
-  const firstBox = await digits.first().boundingBox();
-  expect(firstBox).toBeTruthy();
-  await page.mouse.move(firstBox!.x + firstBox!.width * 0.82, firstBox!.y + firstBox!.height * 0.28);
-  await page.waitForTimeout(100);
+  const digits = await moveActivityDigits(page);
 
   const transforms = await digits.evaluateAll((elements) =>
     elements.map((element) => (element as HTMLElement).style.transform),
   );
-  expect(new Set(transforms)).toEqual(new Set(['translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg)']));
+  expect(new Set(transforms)).toEqual(new Set([idleDigitTransform]));
 });
 
 test('homepage activity stays inside a mobile viewport', async ({ page }) => {
