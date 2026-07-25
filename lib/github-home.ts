@@ -8,6 +8,7 @@ import {
 const GITHUB_USERNAME = 'teamleaderleo';
 const FEATURED_REPOSITORIES = ['smolrunner', 'stensibly'] as const;
 const CACHE_SECONDS = 300;
+const HOME_WINDOW_DAYS = 35;
 
 export type ContributionDay = {
   date: string;
@@ -19,6 +20,11 @@ export type GitHubHomeData = {
   source: 'public-profile' | 'public-events' | 'unavailable';
   generatedAt: string;
   total: number | null;
+  periodLabel: 'this year' | 'last 35 days';
+  today: number;
+  weekTotal: number;
+  activeDays: number;
+  currentStreak: number;
   days: ContributionDay[];
   repositories: Array<{
     name: string;
@@ -43,7 +49,50 @@ type RestRepository = {
   description: string | null;
 };
 
-async function fetchPublicProfileDays(): Promise<ContributionDay[]> {
+type ActivitySource = GitHubHomeData['source'];
+
+function daysFromCounts(counts: Map<string, number>, now: Date, length = HOME_WINDOW_DAYS) {
+  return getRecentDateKeys(now, length).map((date) => ({ date, count: counts.get(date) ?? 0 }));
+}
+
+function countCurrentStreak(days: ContributionDay[]): number {
+  let index = days.length - 1;
+
+  // Keep yesterday's streak visible until the current day has activity.
+  if (days[index]?.count === 0) index -= 1;
+
+  let streak = 0;
+  while (index >= 0 && days[index].count > 0) {
+    streak += 1;
+    index -= 1;
+  }
+
+  return streak;
+}
+
+function summarizeCounts(counts: Map<string, number>, source: ActivitySource, now = new Date()) {
+  const days = daysFromCounts(counts, now);
+  const today = dateKeyInTimeZone(now);
+  const periodLabel = source === 'public-profile' ? 'this year' : 'last 35 days';
+  const periodEntries =
+    source === 'public-profile'
+      ? [...counts.entries()].filter(([date]) => date.startsWith(today.slice(0, 4)) && date <= today)
+      : days.map((day) => [day.date, day.count] as const);
+  const streakDays =
+    source === 'public-profile' ? daysFromCounts(counts, now, 366) : days;
+
+  return {
+    total: periodEntries.reduce((sum, [, count]) => sum + count, 0),
+    periodLabel,
+    today: days.at(-1)?.count ?? 0,
+    weekTotal: days.slice(-7).reduce((sum, day) => sum + day.count, 0),
+    activeDays: periodEntries.filter(([, count]) => count > 0).length,
+    currentStreak: countCurrentStreak(streakDays),
+    days,
+  };
+}
+
+async function fetchPublicProfileCounts(): Promise<Map<string, number>> {
   const response = await fetch(`https://github.com/users/${GITHUB_USERNAME}/contributions`, {
     cache: 'no-store',
     headers: {
@@ -57,7 +106,7 @@ async function fetchPublicProfileDays(): Promise<ContributionDay[]> {
   const counts = parsePublicContributionHtml(await response.text());
   if (counts.size === 0) throw new Error('GitHub contribution page could not be parsed');
 
-  return getRecentDateKeys().map((date) => ({ date, count: counts.get(date) ?? 0 }));
+  return counts;
 }
 
 function eventWeight(event: RestEvent): number {
@@ -84,7 +133,7 @@ async function githubJson<T>(url: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-async function fetchPublicEventDays(): Promise<ContributionDay[]> {
+async function fetchPublicEventCounts(): Promise<Map<string, number>> {
   const events = await githubJson<RestEvent[]>(
     `https://api.github.com/users/${GITHUB_USERNAME}/events/public?per_page=100`,
   );
@@ -98,7 +147,7 @@ async function fetchPublicEventDays(): Promise<ContributionDay[]> {
     counts.set(key, (counts.get(key) ?? 0) + weight);
   }
 
-  return getRecentDateKeys().map((date) => ({ date, count: counts.get(date) ?? 0 }));
+  return counts;
 }
 
 async function fetchRepositories() {
@@ -128,13 +177,12 @@ async function loadGitHubHomeData(): Promise<GitHubHomeData> {
   const repositoriesPromise = fetchRepositories();
 
   try {
-    const days = await fetchPublicProfileDays();
+    const summary = summarizeCounts(await fetchPublicProfileCounts(), 'public-profile');
     return {
       username: GITHUB_USERNAME,
       source: 'public-profile',
       generatedAt: new Date().toISOString(),
-      total: days.reduce((sum, day) => sum + day.count, 0),
-      days,
+      ...summary,
       repositories: await repositoriesPromise,
     };
   } catch (profileError) {
@@ -142,24 +190,23 @@ async function loadGitHubHomeData(): Promise<GitHubHomeData> {
   }
 
   try {
-    const days = await fetchPublicEventDays();
+    const summary = summarizeCounts(await fetchPublicEventCounts(), 'public-events');
     return {
       username: GITHUB_USERNAME,
       source: 'public-events',
       generatedAt: new Date().toISOString(),
-      total: days.reduce((sum, day) => sum + day.count, 0),
-      days,
+      ...summary,
       repositories: await repositoriesPromise,
     };
   } catch (eventError) {
     console.error('GitHub public event fetch failed', eventError);
-    const days = getRecentDateKeys().map((date) => ({ date, count: 0 }));
+    const summary = summarizeCounts(new Map(), 'unavailable');
     return {
       username: GITHUB_USERNAME,
       source: 'unavailable',
       generatedAt: new Date().toISOString(),
+      ...summary,
       total: null,
-      days,
       repositories: await repositoriesPromise,
     };
   }
@@ -167,7 +214,7 @@ async function loadGitHubHomeData(): Promise<GitHubHomeData> {
 
 const getCachedGitHubHomeData = unstable_cache(
   loadGitHubHomeData,
-  ['github-homepage-v3'],
+  ['github-homepage-v4'],
   { revalidate: CACHE_SECONDS },
 );
 
