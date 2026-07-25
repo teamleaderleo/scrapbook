@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
+import { connection } from 'next/server';
 import { getRecentDateKeys, parsePublicContributionHtml } from '@/lib/github-activity-utils';
 
 const GITHUB_USERNAME = 'teamleaderleo';
 
 export async function GET() {
+  await connection();
   const requestId = crypto.randomUUID();
 
   try {
