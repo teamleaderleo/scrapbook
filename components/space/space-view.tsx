@@ -31,6 +31,9 @@ export function SpaceView() {
     hasMore,
     loadMore,
     loadingMore,
+    refreshing,
+    error,
+    reload,
   } = useItems();
   const nowMs = useNow(initialNowMs, 30_000);
 
@@ -60,6 +63,7 @@ export function SpaceView() {
   const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
   const itemCount = `${items.length}${hasMore ? '+' : ''}`;
   const headerStatus = tagsParam ? `${itemCount} · ${tagsParam}` : `${itemCount} items`;
+  const visibleHeaderStatus = refreshing ? `${headerStatus} · Updating` : headerStatus;
 
   useEffect(() => {
     if (page >= totalPages && hasMore && !loadingMore) {
@@ -111,14 +115,14 @@ export function SpaceView() {
 
       setMutations((previous) => ({ ...previous, [id]: initialReview }));
 
-      const { error } = await supabase.from('reviews').insert({
+      const { error: enrollError } = await supabase.from('reviews').insert({
         item_id: id,
         user_id: user?.id || null,
         ...initialReview,
       });
 
-      if (error) {
-        console.error('Failed to enroll:', error);
+      if (enrollError) {
+        console.error('Failed to enroll:', enrollError);
         setMutations((previous) => {
           const { [id]: _removed, ...rest } = previous;
           return rest;
@@ -139,7 +143,7 @@ export function SpaceView() {
       debugCard(next, 'AFTER');
       setMutations((previous) => ({ ...previous, [id]: next }));
 
-      const { error } = await supabase.from('reviews').upsert({
+      const { error: reviewError } = await supabase.from('reviews').upsert({
         item_id: id,
         user_id: user?.id || null,
         state: next.state,
@@ -154,7 +158,7 @@ export function SpaceView() {
         suspended: next.suspended || false,
       });
 
-      if (error) console.error('Failed to save review:', error);
+      if (reviewError) console.error('Failed to save review:', reviewError);
     },
     [allItems, mutations, nowMs, supabase],
   );
@@ -162,11 +166,20 @@ export function SpaceView() {
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
       <SpaceHeader
-        leftContent={headerStatus}
+        leftContent={visibleHeaderStatus}
         onEditorToggle={() => setEditorOpen(!editorOpen)}
         isEditorOpen={editorOpen}
       />
       <main className="min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:p-4">
+        {error ? (
+          <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm" role="alert">
+            <span className="min-w-0">{error}</span>
+            <Button variant="outline" size="sm" className="shrink-0" onClick={() => void reload()}>
+              Retry
+            </Button>
+          </div>
+        ) : null}
+
         <ResultsClient
           items={paginatedItems}
           onReview={onReview}
