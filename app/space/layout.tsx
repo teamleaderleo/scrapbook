@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Suspense } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/space/app-sidebar';
 import { ItemsProvider } from '../lib/contexts/item-context';
@@ -51,7 +50,7 @@ async function getInitialData() {
 
   if (itemsResult.error) {
     console.error('Error loading items:', itemsResult.error);
-    return { items: [], isAdmin, user, nowMs, hasMore: false };
+    throw new Error('Space items could not be loaded');
   }
 
   const databaseItems = (itemsResult.data ?? []) as unknown as DbItem[];
@@ -104,11 +103,5 @@ async function SpaceDataShell({ children }: { children: React.ReactNode }) {
 }
 
 export default function SpaceLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="h-dvh min-h-0 w-full min-w-0 overflow-hidden bg-background text-foreground">
-      <Suspense fallback={null}>
-        <SpaceDataShell>{children}</SpaceDataShell>
-      </Suspense>
-    </div>
-  );
+  return <SpaceDataShell>{children}</SpaceDataShell>;
 }
