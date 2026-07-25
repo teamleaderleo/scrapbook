@@ -1,17 +1,10 @@
-import { Suspense } from 'react';
-import { Metadata } from 'next';
-// import Dashboard from '@/components/dashboard/dashboard';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
 };
 
-export default async function Page() {
-  return (
-    <>
-      <Suspense fallback={<div>Loading dashboard...</div>}>
-        {/* <Dashboard /> */}
-      </Suspense>
-    </>
-  );
+// The parent layout redirects legacy dashboard URLs to /space.
+export default function LegacyDashboardPage() {
+  return null;
 }

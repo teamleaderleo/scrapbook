@@ -1,44 +1,38 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
-import { useTheme } from "next-themes";
-import { useSidebar } from "@/components/ui/sidebar";
-import { useItems } from "@/app/lib/contexts/item-context";
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { useTheme } from 'next-themes';
+import { useSidebar } from '@/components/ui/sidebar';
+import { useItems } from '@/app/lib/contexts/item-context';
 
 export function MonacoEditorPanel() {
   const { editorOpen, setEditorOpen } = useItems();
   const editorRef = useRef<HTMLDivElement>(null);
-  const editorInstanceRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
   const { resolvedTheme } = useTheme();
   const { state } = useSidebar();
   const [editorHeight, setEditorHeight] = useState(384);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [initializationError, setInitializationError] = useState<string | null>(null);
 
-  // Determine theme based on resolved theme
-  const isDark = resolvedTheme === "dark";
-  const shikiTheme = isDark ? "catppuccin-macchiato" : "one-light";
+  const isDark = resolvedTheme === 'dark';
+  const shikiTheme = isDark ? 'catppuccin-macchiato' : 'one-light';
+  const sidebarWidth = state === 'collapsed' ? '3rem' : '16rem';
 
-  // Calculate left position based on sidebar state
-  const sidebarWidth = state === "collapsed" ? "3rem" : "16rem";
-
-  // Global keyboard shortcut for toggling editor
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      const isMod = e.metaKey || e.ctrlKey;
+    const handleKey = (event: KeyboardEvent) => {
+      const isMod = event.metaKey || event.ctrlKey;
 
-      // Toggle Editor (Cmd/Ctrl + I) - always allow this
-      if (isMod && !e.altKey && !e.shiftKey && (e.key === "i" || e.code === "KeyI")) {
-        e.preventDefault();
-        setEditorOpen(!editorOpen);  // Changed from: setEditorOpen(prev => !prev)
-        return;
+      if (isMod && !event.altKey && !event.shiftKey && (event.key === 'i' || event.code === 'KeyI')) {
+        event.preventDefault();
+        setEditorOpen(!editorOpen);
       }
     };
 
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [setEditorOpen, editorOpen]); // Add editorOpen to dependencies
+  }, [editorOpen, setEditorOpen]);
 
-  // --- Theme switching: switch Monaco theme only ---
   useEffect(() => {
     if (!monacoRef.current) return;
     monacoRef.current.editor.setTheme(shikiTheme);
@@ -46,73 +40,65 @@ export function MonacoEditorPanel() {
 
   useEffect(() => {
     if (!editorOpen) {
-      setEditorHeight(384); // Reset to default when closed
+      setEditorHeight(384);
+      setIsInitializing(false);
+      setInitializationError(null);
       return;
     }
-    
+
     if (!editorRef.current) return;
 
     setIsInitializing(true);
+    setInitializationError(null);
 
-    // Inject CSS to disable italics in tokens (cosmetic)
-    const styleId = "monaco-no-italics";
+    const styleId = 'monaco-no-italics';
     if (!document.getElementById(styleId)) {
-      const style = document.createElement("style");
+      const style = document.createElement('style');
       style.id = styleId;
-      style.textContent = `
-        .monaco-editor .view-line span { font-style: normal !important; }
-      `;
+      style.textContent = '.monaco-editor .view-line span { font-style: normal !important; }';
       document.head.appendChild(style);
     }
 
+    let disposed = false;
     let cleanup: (() => void) | undefined;
 
     const initEditor = async () => {
-      // Minimal worker wiring (prevents network fetches for workers in this embed)
-      if (typeof window !== "undefined") {
+      if (typeof window !== 'undefined') {
         (window as any).MonacoEnvironment = {
           getWorker() {
             return new Worker(
               URL.createObjectURL(
-                new Blob(["self.onmessage = () => {}"], { type: "text/javascript" })
-              )
+                new Blob(['self.onmessage = () => {}'], { type: 'text/javascript' }),
+              ),
             );
           },
         };
       }
 
-      // Load Monaco + Shiki integration
-      const [
-        { createHighlighter },
-        { shikiToMonaco },
-        // registers python tokens provider (tree-shaken if unnecessary)
-        _pythonContribution,
-        monaco,
-      ] = await Promise.all([
-        import("shiki"),
-        import("@shikijs/monaco"),
-        import("monaco-editor/esm/vs/basic-languages/python/python.contribution"),
-        import("monaco-editor"),
-      ]);
+      const [{ createHighlighter }, { shikiToMonaco }, _pythonContribution, monaco] =
+        await Promise.all([
+          import('shiki'),
+          import('@shikijs/monaco'),
+          import('monaco-editor/esm/vs/basic-languages/python/python.contribution'),
+          import('monaco-editor'),
+        ]);
 
-      // Create a highlighter with BOTH themes up-front; register once
+      if (disposed || !editorRef.current) return;
+
       const highlighter = await createHighlighter({
-        themes: ["one-light", "catppuccin-macchiato"],
-        langs: ["python"],
+        themes: ['one-light', 'catppuccin-macchiato'],
+        langs: ['python'],
       });
 
+      if (disposed || !editorRef.current) return;
+
       monacoRef.current = monaco;
-
-      // Optional: ensure language is registered (harmless if already present)
-      monaco.languages.register?.({ id: "python" });
-
-      // Register Shiki themes with Monaco ONE TIME ONLY
+      monaco.languages.register?.({ id: 'python' });
       shikiToMonaco(highlighter, monaco);
 
-      // Create the editor
-      const editor = monaco.editor.create(editorRef.current!, {
-        value: "",
-        language: "python",
+      const editor = monaco.editor.create(editorRef.current, {
+        value: '',
+        language: 'python',
         theme: shikiTheme,
         automaticLayout: true,
         minimap: { enabled: false },
@@ -120,9 +106,9 @@ export function MonacoEditorPanel() {
         lineHeight: 24,
         fontFamily:
           'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace',
-        lineNumbers: "on",
+        lineNumbers: 'on',
         scrollBeyondLastLine: false,
-        wordWrap: "on",
+        wordWrap: 'on',
         tabSize: 4,
         insertSpaces: true,
         scrollbar: { verticalScrollbarSize: 10, horizontalScrollbarSize: 10 },
@@ -131,68 +117,72 @@ export function MonacoEditorPanel() {
         lineNumbersMinChars: 3,
       });
 
-      editorInstanceRef.current = editor;
-      // Need to explicitly set theme after creation/after registering all the token rules
-      // so every syntax element gets the correct color from the theme.
       monaco.editor.setTheme(shikiTheme);
-
-      // Hide loading state once ready
       setIsInitializing(false);
 
-      // Add keybinding for Ctrl+I to close editor
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
         setEditorOpen(false);
       });
 
-      // Focus the editor immediately
       editor.focus();
 
-      // Adjust height based on content
       editor.onDidContentSizeChange(() => {
         const contentHeight = editor.getContentHeight();
-        // Calculate max height: viewport height - top position (96px) - bottom margin (16px)
-        const maxHeight = window.innerHeight - 96 - 16;
+        const maxHeight = window.innerHeight - 112;
         const newHeight = Math.max(384, Math.min(contentHeight + 32, maxHeight));
         setEditorHeight(newHeight);
       });
 
-      cleanup = () => {
-        editor.dispose();
-      };
+      cleanup = () => editor.dispose();
     };
 
-    initEditor().catch(console.error);
-    return () => cleanup?.();
-  }, [editorOpen, shikiTheme, setEditorOpen]);
+    void initEditor().catch((error) => {
+      console.error('Unable to initialize Monaco editor', error);
+      if (disposed) return;
+      setIsInitializing(false);
+      setInitializationError('The editor could not open. Close it and try again.');
+    });
+
+    return () => {
+      disposed = true;
+      cleanup?.();
+    };
+  }, [editorOpen, setEditorOpen, shikiTheme]);
 
   if (!editorOpen) return null;
 
   return (
     <div
-      className="fixed z-50 border border-border rounded-lg shadow-2xl transition-[left,width] duration-200 ease-linear top-24 overflow-hidden"
+      className="fixed top-24 z-50 overflow-hidden rounded-lg border border-border shadow-2xl transition-[left,width] duration-200 ease-linear"
       style={{
         left: `calc(${sidebarWidth} + 1rem)`,
         width: 'calc((100vw - var(--sidebar-width) - 2rem) / 2 - 0.375rem)',
         height: `${editorHeight}px`,
       }}
     >
-      {isInitializing && (
-        <div 
-          className="absolute inset-0 flex items-center justify-center backdrop-blur-sm"
-          style={{
-            backgroundColor: isDark ? 'rgba(36, 39, 58, 0.7)' : 'rgba(250, 250, 250, 0.5)'
-          }}
-        >
-          <div 
-            className="text-sm animate-pulse"
-            style={{
-              color: isDark ? '#cad3f5' : '#383a42'
-            }}
-          >
-            Let&apos;s do some good work today :)
-          </div>
+      {isInitializing ? (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#f4f1ea] px-6 text-center dark:bg-[#202126]">
+          <p className="animate-pulse text-sm text-[#383a42] dark:text-[#cad3f5]">
+            Opening a clean workbench…
+          </p>
         </div>
-      )}
+      ) : null}
+
+      {initializationError ? (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-[#f4f1ea] px-6 text-center dark:bg-[#202126]">
+          <p className="max-w-sm text-sm leading-relaxed text-[#383a42] dark:text-[#cad3f5]">
+            {initializationError}
+          </p>
+          <button
+            type="button"
+            onClick={() => setEditorOpen(false)}
+            className="rounded-md border border-black/15 bg-white px-3 py-1.5 text-sm font-medium text-black/75 transition hover:bg-black/[0.04] active:scale-[0.98] dark:border-white/15 dark:bg-[#18191d] dark:text-white/80 dark:hover:bg-[#25262c]"
+          >
+            Close editor
+          </button>
+        </div>
+      ) : null}
+
       <div ref={editorRef} className="h-full w-full" />
     </div>
   );

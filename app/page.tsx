@@ -43,24 +43,48 @@ export default async function Page() {
             }}
           />
 
-          <section className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
-            {activity.repositories.map((repository) => (
-              <Link
-                key={repository.name}
-                href={repository.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex min-w-0 items-center justify-between gap-4 rounded-xl border border-black/12 bg-[#f2f0ea] px-4 py-3.5 transition hover:-translate-y-0.5 hover:border-black/25 hover:bg-[#f7f4ed] dark:border-white/10 dark:bg-[#18191d] dark:hover:border-white/22 dark:hover:bg-[#1d1e23]"
-              >
-                <span className="min-w-0">
-                  <span className="block truncate font-medium">{repository.name}</span>
-                  <span className="mt-0.5 block truncate text-xs text-black/55 dark:text-white/55">
-                    {repository.description ?? `github.com/${activity.username}/${repository.name}`}
+          <section aria-labelledby="recent-systems-title" className="min-w-0">
+            <div className="flex items-end justify-between gap-4 px-0.5">
+              <div>
+                <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-black/48 dark:text-white/48">
+                  Recent systems
+                </p>
+                <h2 id="recent-systems-title" className="mt-1 text-lg font-semibold tracking-tight sm:text-xl">
+                  Tools that remember their boundaries
+                </h2>
+              </div>
+              <span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.14em] text-black/42 dark:text-white/42">
+                {activity.repositories.length} projects
+              </span>
+            </div>
+
+            <div className="mt-3 grid min-w-0 grid-cols-1 gap-3 md:grid-cols-3">
+              {activity.repositories.map((repository) => (
+                <Link
+                  key={repository.name}
+                  href={repository.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex min-h-36 min-w-0 flex-col justify-between gap-5 rounded-xl border border-black/12 bg-[#f2f0ea] p-4 transition hover:-translate-y-0.5 hover:border-black/25 hover:bg-[#f7f4ed] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/35 dark:border-white/10 dark:bg-[#18191d] dark:hover:border-white/22 dark:hover:bg-[#1d1e23] dark:focus-visible:ring-white/45"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="truncate font-medium">{repository.name}</h3>
+                      <ArrowUpRight
+                        size={15}
+                        className="shrink-0 text-black/40 transition group-hover:text-black/75 dark:text-white/45 dark:group-hover:text-white/80"
+                      />
+                    </div>
+                    <p className="mt-3 text-sm leading-relaxed text-black/62 dark:text-white/62">
+                      {repository.note}
+                    </p>
+                  </div>
+                  <span className="font-mono text-[9px] uppercase tracking-[0.13em] text-black/42 dark:text-white/42">
+                    open repository
                   </span>
-                </span>
-                <ArrowUpRight size={15} className="shrink-0 text-black/40 transition group-hover:text-black/75 dark:text-white/45 dark:group-hover:text-white/80" />
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
           </section>
         </div>
       </div>

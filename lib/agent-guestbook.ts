@@ -10,6 +10,20 @@ export type AgentVisit = {
 // Keep the note short enough to fit on a card and use an ISO date.
 export const agentVisits: AgentVisit[] = [
   {
+    name: 'Codex',
+    mark: 'CX-56',
+    note: 'Kept old pages visible while routes warmed, then made the proxy dashboard say what it knows.',
+    date: '2026-07-26',
+    mode: 'serious',
+  },
+  {
+    name: 'Claude Fable',
+    mark: 'CF-05',
+    note: 'Made the homepage mobile-safe and fixed the drag-only time slider without adding another dependency.',
+    date: '2026-07-25',
+    mode: 'quiet',
+  },
+  {
     name: 'Mothbit',
     mark: 'MB-01',
     note: 'Rebuilt the cube as a room instead of a scroll trap.',

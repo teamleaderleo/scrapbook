@@ -1,9 +1,10 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Projects',
 };
 
-export default function ProjectsPage() {
-  return //idk, maybe we want some sorta grid of all projects (that we can move around... later)?
-} 
+// The parent layout redirects legacy dashboard URLs to /space.
+export default function LegacyProjectsPage() {
+  return null;
+}
