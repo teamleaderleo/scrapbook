@@ -1,117 +1,103 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Sidebar,
-  SidebarHeader,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
   SidebarFooter,
-} from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { LogOut, Loader2, Search, ArrowLeft, ArrowRight, Plus } from "lucide-react";
-import { shortcuts } from "@/app/lib/sidebar-data";
-import { useItems } from "@/app/lib/contexts/item-context";
-import { createClient } from "@/utils/supabase/client";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { GoogleIcon } from "@/components/icons/google-icon";
-import { GitHubIcon } from "@/components/icons/github-icon";
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ArrowLeft, ArrowRight, Loader2, LogOut, Plus, Search } from 'lucide-react';
+import { shortcuts } from '@/app/lib/sidebar-data';
+import { useItems } from '@/app/lib/contexts/item-context';
+import { createClient } from '@/utils/supabase/client';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { GoogleIcon } from '@/components/icons/google-icon';
+import { GitHubIcon } from '@/components/icons/github-icon';
+import { SpaceLinkHint } from '@/components/space/space-link-hint';
 
 export function AppSidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
-
-  const currentQuery = searchParams.get("tags") || "";
-
-  // Treat /space/review, /space/add, and /space/edit/* as the same "review-like" context
+  const { isMobile, setOpenMobile } = useSidebar();
+  const currentQuery = searchParams.get('tags') || '';
   const isReviewLike =
-    pathname === "/space/review" ||
-    pathname?.startsWith("/space/add") ||
-    pathname?.startsWith("/space/edit");
-
+    pathname === '/space/review' ||
+    pathname?.startsWith('/space/add') ||
+    pathname?.startsWith('/space/edit');
   const { user, isAdmin, signOut } = useItems();
   const [loading, setLoading] = useState(false);
-
-  const listHref = `/space${currentQuery ? `?tags=${currentQuery}` : ""}`;
-  const reviewHref = `/space/review${currentQuery ? `?tags=${currentQuery}` : ""}`;
+  const listHref = `/space${currentQuery ? `?tags=${currentQuery}` : ''}`;
+  const reviewHref = `/space/review${currentQuery ? `?tags=${currentQuery}` : ''}`;
   const toggleViewHref = isReviewLike ? listHref : reviewHref;
+  const isMac = useMemo(
+    () =>
+      typeof navigator !== 'undefined' &&
+      (navigator.platform.includes('Mac') || /iPhone|iPad/i.test(navigator.platform)),
+    [],
+  );
 
-  // Hotkeys:
-  // ⌘/Ctrl + Alt + A => /space/add
-  // ⌘/Ctrl + E => prefers /space (if already there, toggles to /space/review)
-  // ⌘/Ctrl + Shift + E => prefers /space/review (if already there, toggles to /space)
+  const closeMobile = () => {
+    if (isMobile) setOpenMobile(false);
+  };
+
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
       const tag = target?.tagName?.toLowerCase();
-      const role = target?.getAttribute?.("role");
+      const role = target?.getAttribute?.('role');
       const isTyping =
-        tag === "input" ||
-        tag === "textarea" ||
-        target?.getAttribute("contenteditable") === "true" ||
-        role === "textbox";
-
+        tag === 'input' ||
+        tag === 'textarea' ||
+        target?.getAttribute('contenteditable') === 'true' ||
+        role === 'textbox';
       if (isTyping) return;
 
-      const isMod = e.metaKey || e.ctrlKey;
-
-      // Add Item
-      if (isMod && e.altKey && (e.key === "a" || e.code === "KeyA")) {
-        e.preventDefault();
-        router.push("/space/add");
+      const isMod = event.metaKey || event.ctrlKey;
+      if (isMod && event.altKey && (event.key === 'a' || event.code === 'KeyA')) {
+        event.preventDefault();
+        router.push('/space/add');
         return;
       }
 
-      // Base Space (E)
-      if (isMod && !e.altKey && !e.shiftKey && (e.key === "e" || e.code === "KeyE")) {
-        e.preventDefault();
-        if (isReviewLike) {
-          router.push(listHref);
-        } else {
-          router.push(reviewHref); // toggle if already on base
-        }
+      if (isMod && !event.altKey && !event.shiftKey && (event.key === 'e' || event.code === 'KeyE')) {
+        event.preventDefault();
+        router.push(isReviewLike ? listHref : reviewHref);
         return;
       }
 
-      // Review Mode (Shift+E)
-      if (isMod && !e.altKey && e.shiftKey && (e.key === "e" || e.code === "KeyE")) {
-        e.preventDefault();
-        if (isReviewLike) {
-          router.push(listHref); // toggle if already on review-like
-        } else {
-          router.push(reviewHref);
-        }
-        return;
+      if (isMod && !event.altKey && event.shiftKey && (event.key === 'e' || event.code === 'KeyE')) {
+        event.preventDefault();
+        router.push(isReviewLike ? listHref : reviewHref);
       }
     };
 
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [router, isReviewLike, listHref, reviewHref]);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isReviewLike, listHref, reviewHref, router]);
 
-  // TODO: add signInWithOAuth into the context later to centralize all auth flows
-  const handleOAuthSignIn = async (provider: "google" | "github") => {
+  const handleOAuthSignIn = async (provider: 'google' | 'github') => {
     setLoading(true);
     const supabase = createClient();
-
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
 
     if (error) {
-      console.error("OAuth error:", error);
+      console.error('OAuth error:', error);
       setLoading(false);
     }
   };
@@ -120,141 +106,81 @@ export function AppSidebar() {
     try {
       await signOut();
       router.refresh();
-    } catch (e) {
-      // Already logged inside signOut, but we can toast here if desired
+    } catch {
+      // The context reports sign-out failures.
     }
   };
 
-  // Trigger search dialog (will be handled by Ctrl+K event)
   const triggerSearch = () => {
     window.dispatchEvent(new Event('open-search'));
+    closeMobile();
   };
 
-  // Safe-ish platform check (client component)
-  const isMac = useMemo(
-    () =>
-      typeof navigator !== "undefined" &&
-      (navigator.platform.includes("Mac") || /iPhone|iPad/i.test(navigator.platform)),
-    []
-  );
-
   return (
-    <Sidebar className="flex flex-col h-screen">
-      <SidebarHeader className="h-[48px] p-0 m-0 bg-background text-foreground border-b">
+    <Sidebar className="flex h-dvh max-h-dvh max-w-[calc(100vw-0.75rem)] flex-col pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] md:h-svh md:max-h-svh md:pb-0 md:pt-0">
+      <SidebarHeader className="m-0 h-12 shrink-0 border-b bg-background p-0 text-foreground">
         <div className="flex h-full items-center justify-between px-4">
-          <Link href="/" className="text-lg font-bold leading-none">
+          <Link href="/" onClick={closeMobile} className="text-lg font-bold leading-none">
             teamleaderleo
           </Link>
           <ThemeToggle />
         </div>
       </SidebarHeader>
 
-      {/* Search Bar */}
-      <div className="p-4 border-b">
+      <div className="shrink-0 border-b p-3">
         <button
           onClick={triggerSearch}
-          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground bg-muted/50 hover:bg-muted rounded-md transition-colors"
+          className="flex w-full items-center gap-2 rounded-md bg-muted/50 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted"
+          type="button"
         >
           <Search className="h-4 w-4" />
-          <span className="flex-1 text-left">Search...</span>
-          <div className="flex gap-1">
-            <kbd className="px-1.5 py-0.5 text-xs font-semibold border rounded bg-background">
-              {isMac ? "⌘" : "Ctrl"}
+          <span className="flex-1 text-left">Search</span>
+          <span className="hidden gap-1 sm:flex">
+            <kbd className="rounded border bg-background px-1.5 py-0.5 text-xs font-semibold">
+              {isMac ? '⌘' : 'Ctrl'}
             </kbd>
-            <kbd className="px-1.5 py-0.5 text-xs font-semibold border rounded bg-background">
-              K
-            </kbd>
-          </div>
+            <kbd className="rounded border bg-background px-1.5 py-0.5 text-xs font-semibold">K</kbd>
+          </span>
         </button>
       </div>
 
-      {/* Only show Actions if admin */}
-      {isAdmin && (
-        <SidebarGroup>
-          <SidebarGroupLabel className="px-4">Actions</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                {/* Make the button itself the flex row to control wrapping */}
-                <SidebarMenuButton
-                  className="flex w-full items-center justify-between gap-2 px-4 pl-6"
-                  asChild
-                >
-                  <Link href="/space/add">
-                    {/* Left: icon + label (no literal "+") */}
-                    <span className="flex items-center gap-2 truncate whitespace-nowrap leading-none">
-                      <Plus className="h-4 w-4 shrink-0" />
-                      <span className="truncate">Add Item</span>
-                    </span>
-                    {/* Right: hotkeys */}
-                    <span className="flex gap-1 text-muted-foreground shrink-0 whitespace-nowrap">
-                      <kbd className="px-1.5 py-0.5 text-[10px] font-semibold border rounded bg-background">
-                        {isMac ? "⌘" : "Ctrl"}
-                      </kbd>
-                      <kbd className="px-1.5 py-0.5 text-[10px] font-semibold border rounded bg-background">
-                        Alt
-                      </kbd>
-                      <kbd className="px-1.5 py-0.5 text-[10px] font-semibold border rounded bg-background">
-                        A
-                      </kbd>
-                    </span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      )}
+      <ScrollArea className="min-h-0 flex-1">
+        <SidebarContent className="py-3">
+          {isAdmin ? (
+            <SidebarGroup>
+              <SidebarGroupLabel className="px-4">Actions</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton className="px-4 pl-6" asChild>
+                      <Link href="/space/add" onClick={closeMobile} className="flex items-center gap-2">
+                        <Plus className="h-4 w-4 shrink-0" />
+                        <span className="min-w-0 flex-1 truncate">Add item</span>
+                        <SpaceLinkHint />
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ) : null}
 
-      <ScrollArea className="flex-1">
-        <SidebarContent className="py-4">
-          {/* View mode toggle */}
           <SidebarGroup>
-            <SidebarGroupLabel className="px-4">View Mode</SidebarGroupLabel>
+            <SidebarGroupLabel className="px-4">View</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  {/* Make the button itself the flex row + no-wrap */}
-                  <SidebarMenuButton
-                    className="flex w-full items-center justify-between gap-2 px-4 pl-6"
-                    asChild
-                  >
-                    <Link href={toggleViewHref}>
-                      {/* Left: arrow icon + label */}
-                      <span className="flex items-center gap-2 truncate whitespace-nowrap leading-none">
-                        {isReviewLike ? (
-                          <ArrowLeft className="h-4 w-4 shrink-0" />
-                        ) : (
-                          <ArrowRight className="h-4 w-4 shrink-0" />
-                        )}
-                        <span className="truncate">
-                          {isReviewLike ? "Back to List" : "Review"}
-                        </span>
-                      </span>
-
-                      {/* Show ONLY the opposite view's hotkey and keep it on one line */}
+                  <SidebarMenuButton className="px-4 pl-6" asChild>
+                    <Link href={toggleViewHref} onClick={closeMobile} className="flex items-center gap-2">
                       {isReviewLike ? (
-                        <span className="flex gap-1 text-muted-foreground shrink-0 whitespace-nowrap">
-                          <kbd className="px-1.5 py-0.5 text-[10px] font-semibold border rounded bg-background">
-                            {isMac ? "⌘" : "Ctrl"}
-                          </kbd>
-                          <kbd className="px-1.5 py-0.5 text-[10px] font-semibold border rounded bg-background">
-                            E
-                          </kbd>
-                        </span>
+                        <ArrowLeft className="h-4 w-4 shrink-0" />
                       ) : (
-                        <span className="flex gap-1 text-muted-foreground shrink-0 whitespace-nowrap">
-                          <kbd className="px-1.5 py-0.5 text-[10px] font-semibold border rounded bg-background">
-                            {isMac ? "⌘" : "Ctrl"}
-                          </kbd>
-                          <kbd className="px-1.5 py-0.5 text-[10px] font-semibold border rounded bg-background">
-                            Shift
-                          </kbd>
-                          <kbd className="px-1.5 py-0.5 text-[10px] font-semibold border rounded bg-background">
-                            E
-                          </kbd>
-                        </span>
+                        <ArrowRight className="h-4 w-4 shrink-0" />
                       )}
+                      <span className="min-w-0 flex-1 truncate">
+                        {isReviewLike ? 'List' : 'Review'}
+                      </span>
+                      <SpaceLinkHint />
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -262,18 +188,21 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {/* Shortcuts */}
           <SidebarGroup>
             <SidebarGroupLabel className="px-4">Shortcuts</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {shortcuts.map((s) => {
-                  // When in review-like contexts (review/add/edit), mirror how you rewrite links
-                  const href = isReviewLike ? s.href.replace("/space", "/space/review") : s.href;
+                {shortcuts.map((shortcut) => {
+                  const href = isReviewLike
+                    ? shortcut.href.replace('/space', '/space/review')
+                    : shortcut.href;
                   return (
-                    <SidebarMenuItem key={s.label}>
+                    <SidebarMenuItem key={shortcut.label}>
                       <SidebarMenuButton asChild className="justify-start gap-2 px-4 pl-6">
-                        <Link href={href}>{s.label}</Link>
+                        <Link href={href} onClick={closeMobile} className="flex items-center gap-2">
+                          <span className="min-w-0 flex-1 truncate">{shortcut.label}</span>
+                          <SpaceLinkHint />
+                        </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
@@ -284,50 +213,38 @@ export function AppSidebar() {
         </SidebarContent>
       </ScrollArea>
 
-      {/* Auth Section */}
-      <SidebarFooter className="border-t p-4 space-y-2">
+      <SidebarFooter className="shrink-0 space-y-2 border-t p-3">
         {user ? (
-          // User is logged in
           <>
-            <div className="text-sm text-muted-foreground truncate px-2" title={user.email}>
+            <div className="truncate px-2 text-sm text-muted-foreground" title={user.email}>
               {user.email}
             </div>
             <Button variant="outline" size="sm" onClick={handleSignOut} className="w-full">
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
             </Button>
           </>
         ) : (
-          // User is not logged in
           <>
             <Button
               variant="default"
               size="sm"
-              onClick={() => handleOAuthSignIn("google")}
+              onClick={() => handleOAuthSignIn('google')}
               disabled={loading}
               className="w-full"
             >
-              {loading ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <GoogleIcon className="w-4 h-4 mr-2" />
-              )}
-              Sign in with Google
+              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
+              Google
             </Button>
-
             <Button
               variant="outline"
               size="sm"
-              onClick={() => handleOAuthSignIn("github")}
+              onClick={() => handleOAuthSignIn('github')}
               disabled={loading}
               className="w-full"
             >
-              {loading ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <GitHubIcon className="w-4 h-4 mr-2" />
-              )}
-              Sign in with GitHub
+              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GitHubIcon className="mr-2 h-4 w-4" />}
+              GitHub
             </Button>
           </>
         )}

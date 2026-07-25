@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 function countdownToMidnight() {
   const now = new Date();
@@ -36,14 +36,14 @@ export function ActivityScoreboard({
   today,
   weekTotal,
   yearTotal,
-  unit,
 }: {
   today: number;
   weekTotal: number;
   yearTotal: number | null;
-  unit: string;
 }) {
   const [countdown, setCountdown] = useState('--:--:--');
+  const panelRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<number | null>(null);
 
   useEffect(() => {
     const update = () => setCountdown(countdownToMidnight());
@@ -52,37 +52,66 @@ export function ActivityScoreboard({
     return () => window.clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
+    };
+  }, []);
+
+  const movePanel = (clientX: number, clientY: number, currentTarget: HTMLElement) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const rect = currentTarget.getBoundingClientRect();
+    const x = Math.max(-1, Math.min(1, ((clientX - rect.left) / rect.width - 0.5) * 2));
+    const y = Math.max(-1, Math.min(1, ((clientY - rect.top) / rect.height - 0.5) * 2));
+
+    if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
+    frameRef.current = window.requestAnimationFrame(() => {
+      if (!panelRef.current) return;
+      panelRef.current.style.transform = `perspective(900px) rotateX(${(-y * 1.4).toFixed(2)}deg) rotateY(${(x * 1.8).toFixed(2)}deg) translate3d(${(x * 1.4).toFixed(2)}px, ${(y * 1.1).toFixed(2)}px, 0)`;
+    });
+  };
+
+  const resetPanel = () => {
+    if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
+    frameRef.current = window.requestAnimationFrame(() => {
+      if (panelRef.current) panelRef.current.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translate3d(0,0,0)';
+    });
+  };
+
   return (
-    <section className="overflow-hidden rounded-[1.4rem] border border-black/15 bg-[#d8d5ce] shadow-[0_22px_55px_rgba(24,24,26,0.13)] dark:border-white/12 dark:bg-[#202126] dark:shadow-[0_24px_70px_rgba(0,0,0,0.35)]">
-      <div className="border-b border-black/15 bg-[#c9c6bf] px-4 py-2.5 dark:border-white/10 dark:bg-[#18191d] sm:px-5">
-        <div className="flex items-center justify-between gap-4 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-black/60 dark:text-white/58">
-          <span>Contribution counter</span>
-          <span className="tabular-nums">rollover {countdown}</span>
+    <section
+      className="touch-pan-y overflow-hidden rounded-[1.4rem] border border-black/15 bg-[#d8d5ce] shadow-[0_22px_55px_rgba(24,24,26,0.13)] dark:border-white/12 dark:bg-[#202126] dark:shadow-[0_24px_70px_rgba(0,0,0,0.35)]"
+      onPointerMove={(event) => movePanel(event.clientX, event.clientY, event.currentTarget)}
+      onPointerDown={(event) => movePanel(event.clientX, event.clientY, event.currentTarget)}
+      onPointerLeave={resetPanel}
+      onPointerCancel={resetPanel}
+    >
+      <div
+        ref={panelRef}
+        className="origin-center transition-transform duration-200 ease-out motion-reduce:transform-none"
+        style={{ transform: 'perspective(900px) rotateX(0deg) rotateY(0deg) translate3d(0,0,0)' }}
+      >
+        <div className="border-b border-black/15 bg-[#c9c6bf] px-4 py-2.5 dark:border-white/10 dark:bg-[#18191d] sm:px-5">
+          <div className="flex items-center justify-between gap-4 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-black/60 dark:text-white/58">
+            <span>Today</span>
+            <span className="tabular-nums">rollover {countdown}</span>
+          </div>
         </div>
-      </div>
 
-      <div className="grid gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_12rem]">
-        <div className="min-w-0">
-          <div className="mb-2 flex items-end justify-between gap-3">
-            <div>
-              <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-black/55 dark:text-white/55">Today</p>
-              <p className="mt-0.5 text-xs text-black/45 dark:text-white/42">{unit}</p>
+        <div className="grid gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_12rem]">
+          <div className="min-w-0">
+            <ScoreDigits value={today} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
+            <div className="rounded-xl border border-black/10 bg-[#ece9e2]/70 px-3 py-3 dark:border-white/10 dark:bg-white/[0.035]">
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/48 dark:text-white/45">7 days</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">{weekTotal.toLocaleString('en-US')}</p>
             </div>
-            <span className="rounded-full border border-black/10 bg-black/[0.045] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-black/55 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/55">
-              local midnight
-            </span>
-          </div>
-          <ScoreDigits value={today} />
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
-          <div className="rounded-xl border border-black/10 bg-[#ece9e2]/70 px-3 py-3 dark:border-white/10 dark:bg-white/[0.035]">
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-black/48 dark:text-white/45">Last 7 days</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">{weekTotal.toLocaleString('en-US')}</p>
-          </div>
-          <div className="rounded-xl border border-black/10 bg-[#ece9e2]/70 px-3 py-3 dark:border-white/10 dark:bg-white/[0.035]">
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-black/48 dark:text-white/45">This year</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">{yearTotal?.toLocaleString('en-US') ?? '—'}</p>
+            <div className="rounded-xl border border-black/10 bg-[#ece9e2]/70 px-3 py-3 dark:border-white/10 dark:bg-white/[0.035]">
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/48 dark:text-white/45">Year</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">{yearTotal?.toLocaleString('en-US') ?? '—'}</p>
+            </div>
           </div>
         </div>
       </div>

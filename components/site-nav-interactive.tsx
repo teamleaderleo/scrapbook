@@ -65,12 +65,12 @@ export function NavMenu({ label, children }: { label: string; children: ReactNod
   }, []);
 
   return (
-    <details ref={detailsRef} className="group relative">
-      <summary className="flex cursor-pointer list-none items-center gap-1 rounded-full px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground [&::-webkit-details-marker]:hidden">
+    <details ref={detailsRef} className="group relative min-w-0">
+      <summary className="flex cursor-pointer list-none items-center gap-1 rounded-full px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
         <span>{label}</span>
         <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
       </summary>
-      <div className="absolute right-0 top-full z-50 mt-2 w-max min-w-[8.5rem] rounded-xl border bg-background/95 p-1 shadow-xl backdrop-blur">
+      <div className="absolute right-0 top-full z-50 mt-2 w-56 max-w-[calc(100vw-1rem)] overflow-hidden rounded-xl border bg-background/96 p-1 shadow-xl backdrop-blur">
         {children}
       </div>
     </details>

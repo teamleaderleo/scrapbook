@@ -21,7 +21,7 @@ const siteLinks: NavLinkItem[] = [
     href: '/proxy-dashboard',
     label: 'proxy',
     icon: <Activity size={15} />,
-    hoverClass: 'hover:text-emerald-500 focus:text-emerald-500',
+    hoverClass: 'hover:text-emerald-600 focus:text-emerald-600 dark:hover:text-emerald-400 dark:focus:text-emerald-400',
   },
   {
     href: '/space',
@@ -100,11 +100,19 @@ function InlineLink({ item }: { item: NavLinkItem }) {
   );
 }
 
+function MenuLabel({ children }: { children: ReactNode }) {
+  return (
+    <p className="px-2.5 pb-1 pt-2 font-mono text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
+      {children}
+    </p>
+  );
+}
+
 export default function SiteNav() {
   return (
-    <nav className="border-b bg-background text-foreground">
+    <nav className="min-w-0 border-b bg-background text-foreground">
       <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-        <div className="flex h-12 min-w-0 items-center justify-between gap-3">
+        <div className="flex h-12 min-w-0 items-center justify-between gap-2 sm:gap-3">
           <Link href="/" className="min-w-0 shrink truncate text-base font-bold sm:text-lg">
             teamleaderleo
           </Link>
@@ -128,25 +136,27 @@ export default function SiteNav() {
             <NavThemeToggle />
           </div>
 
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2 lg:hidden">
+          <div className="flex min-w-0 shrink-0 items-center gap-1.5 lg:hidden">
             <TimeLink />
-
-            <NavMenu label="site">
+            <NavMenu label="menu">
+              <MenuLabel>site</MenuLabel>
               {siteLinks.map((item) => (
                 <MenuLink key={item.label} item={item} />
               ))}
-            </NavMenu>
 
-            <NavMenu label="socials">
+              <div className="my-1 border-t" />
+              <MenuLabel>social</MenuLabel>
               {socialLinks.map((item) => (
                 <MenuLink key={item.label} item={item} />
               ))}
               <DiscordButton menu />
-            </NavMenu>
 
-            <div className="ml-0.5 border-l pl-1 sm:ml-2 sm:pl-2">
-              <NavThemeToggle />
-            </div>
+              <div className="my-1 border-t" />
+              <div className="flex items-center justify-between gap-4 px-2.5 py-2">
+                <span className="text-sm text-muted-foreground">appearance</span>
+                <NavThemeToggle />
+              </div>
+            </NavMenu>
           </div>
         </div>
       </div>

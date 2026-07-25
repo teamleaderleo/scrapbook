@@ -14,15 +14,12 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="group relative inline-flex h-8 w-14 items-center rounded-full border border-black/10 bg-gradient-to-r from-[#e8dfcc] via-[#c9c5c7] to-[#24252b] p-0.5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.18),0_1px_0_rgba(255,255,255,0.45)] transition hover:contrast-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:border-white/15"
+      className="relative inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-black/12 bg-[#e2dfd8] text-black/58 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_1px_3px_rgba(0,0,0,0.08)] transition hover:bg-[#d8d4cc] hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:border-white/12 dark:bg-[#202126] dark:text-white/60 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_1px_4px_rgba(0,0,0,0.25)] dark:hover:bg-[#292a30] dark:hover:text-white"
       aria-label="Toggle light and dark mode"
       type="button"
     >
-      <Sun className="absolute left-1.5 h-3.5 w-3.5 text-[#725e32] transition-opacity dark:opacity-45" />
-      <Moon className="absolute right-1.5 h-3.5 w-3.5 text-[#ded9e7] opacity-55 transition-opacity dark:opacity-100" />
-      <span className="relative z-10 inline-flex h-6 w-6 translate-x-0 items-center justify-center rounded-full border border-black/10 bg-[#f4efe4] shadow-[0_2px_7px_rgba(0,0,0,0.28)] transition-transform duration-200 dark:translate-x-6 dark:border-white/10 dark:bg-[#18191e]">
-        <span className="h-1.5 w-1.5 rounded-full bg-[#a58e5b] dark:bg-[#aaa2b5]" />
-      </span>
+      <Sun className="h-3.5 w-3.5 transition-all dark:scale-75 dark:opacity-0" />
+      <Moon className="absolute h-3.5 w-3.5 scale-75 opacity-0 transition-all dark:scale-100 dark:opacity-100" />
     </button>
   );
 }

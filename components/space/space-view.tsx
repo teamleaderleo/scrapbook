@@ -58,6 +58,8 @@ export function SpaceView() {
   }, [items, page]);
 
   const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
+  const itemCount = `${items.length}${hasMore ? '+' : ''}`;
+  const headerStatus = tagsParam ? `${itemCount} · ${tagsParam}` : `${itemCount} items`;
 
   useEffect(() => {
     if (page >= totalPages && hasMore && !loadingMore) {
@@ -160,11 +162,11 @@ export function SpaceView() {
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
       <SpaceHeader
-        leftContent={`Query: ${tagsParam ?? '(none)'} · ${items.length} loaded${hasMore ? '+' : ''}${totalPages > 1 ? ` · Page ${page}/${totalPages}` : ''}`}
+        leftContent={headerStatus}
         onEditorToggle={() => setEditorOpen(!editorOpen)}
         isEditorOpen={editorOpen}
       />
-      <main className="min-h-0 flex-1 overflow-y-auto p-4">
+      <main className="min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:p-4">
         <ResultsClient
           items={paginatedItems}
           onReview={onReview}
