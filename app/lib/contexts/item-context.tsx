@@ -74,7 +74,7 @@ export function ItemsProvider({
   const [editorOpen, setEditorOpen] = useState(false);
   const activeReload = useRef<AbortController | null>(null);
   const activeLoadMore = useRef<AbortController | null>(null);
-  const lastRefreshAt = useRef(Date.now());
+  const lastRefreshAt = useRef(initialNowMs ?? 0);
   const isAdmin = initialIsAdmin;
 
   useEffect(() => {
