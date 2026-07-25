@@ -7,8 +7,6 @@ import type { Metadata } from 'next';
 
 type SlugParams = Promise<{ slug: string }>;
 
-export const dynamicParams = false;
-
 export async function generateStaticParams() {
   const posts = await getBlogPosts();
   return posts.map((post) => ({ slug: post.slug }));
