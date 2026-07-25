@@ -15,26 +15,35 @@ const satellites: Array<[number, number, number, number]> = [
 
 type RotationTarget = { x: number; y: number };
 
-function AgentRoom({ target, dragging }: { target: RotationTarget; dragging: boolean }) {
+function AgentRoom({
+  rotationX,
+  rotationY,
+  dragging,
+}: {
+  rotationX: number;
+  rotationY: number;
+  dragging: boolean;
+}) {
   const group = useRef<THREE.Group>(null);
   const idleRotation = useRef(0);
 
   useFrame((state, delta) => {
-    if (!group.current) return;
+    const currentGroup = group.current;
+    if (!currentGroup) return;
     if (!dragging) idleRotation.current += delta * 0.12;
 
-    group.current.rotation.x = THREE.MathUtils.lerp(
-      group.current.rotation.x,
-      target.x + state.pointer.y * 0.06,
+    currentGroup.rotation.x = THREE.MathUtils.lerp(
+      currentGroup.rotation.x,
+      rotationX + state.pointer.y * 0.06,
       0.08,
     );
-    group.current.rotation.y = THREE.MathUtils.lerp(
-      group.current.rotation.y,
-      target.y + idleRotation.current + state.pointer.x * 0.05,
+    currentGroup.rotation.y = THREE.MathUtils.lerp(
+      currentGroup.rotation.y,
+      rotationY + idleRotation.current + state.pointer.x * 0.05,
       0.08,
     );
-    group.current.rotation.z = THREE.MathUtils.lerp(
-      group.current.rotation.z,
+    currentGroup.rotation.z = THREE.MathUtils.lerp(
+      currentGroup.rotation.z,
       -state.pointer.x * 0.035,
       0.05,
     );
@@ -143,7 +152,11 @@ export default function Scene3D() {
         <ambientLight intensity={1.25} />
         <directionalLight position={[4, 6, 5]} intensity={2.4} color="#f1eaf5" />
         <pointLight position={[-4, -2, 3]} intensity={22} distance={9} color="#756b83" />
-        <AgentRoom target={rotationTarget} dragging={isDragging} />
+        <AgentRoom
+          rotationX={rotationTarget.x}
+          rotationY={rotationTarget.y}
+          dragging={isDragging}
+        />
       </Canvas>
     </div>
   );
