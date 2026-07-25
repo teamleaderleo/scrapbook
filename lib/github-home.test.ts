@@ -29,15 +29,15 @@ describe('parsePublicContributionHtml', () => {
 });
 
 describe('getRecentDateKeys', () => {
-  it('uses Pacific calendar dates before local midnight', () => {
+  it('uses the GitHub UTC contribution date', () => {
     const days = getRecentDateKeys(new Date('2026-07-25T06:30:00Z'));
-    expect(days.at(-1)).toBe('2026-07-24');
+    expect(days.at(-1)).toBe('2026-07-25');
     expect(days).toHaveLength(7);
   });
 
-  it('rolls over at Pacific midnight', () => {
-    const days = getRecentDateKeys(new Date('2026-07-25T07:30:00Z'));
-    expect(days.at(-1)).toBe('2026-07-25');
+  it('rolls over at UTC midnight', () => {
+    expect(getRecentDateKeys(new Date('2026-07-24T23:59:59Z')).at(-1)).toBe('2026-07-24');
+    expect(getRecentDateKeys(new Date('2026-07-25T00:00:01Z')).at(-1)).toBe('2026-07-25');
   });
 
   it('supports the 35-day homepage window', () => {
