@@ -1,4 +1,5 @@
 import '@/app/globals.css';
+import '@/app/navigation-feedback.css';
 import { inter } from '@/components/ui/assets/fonts';
 import type { Metadata, Viewport } from 'next';
 import { ThemeProvider } from '@/components/theme-provider';
