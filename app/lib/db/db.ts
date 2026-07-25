@@ -1,17 +1,51 @@
-import 'dotenv/config'
+import 'dotenv/config';
 
-import { drizzle } from 'drizzle-orm/postgres-js'
-import postgres from 'postgres'
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import * as schema from './schema';
 
-const databaseUrl = process.env.DATABASE_URL;
+type PostgresClient = ReturnType<typeof postgres>;
+type Database = ReturnType<typeof drizzle<typeof schema>>;
 
-if (!databaseUrl) {
-  throw new Error('DATABASE_URL is not set in the environment variables');
+let clientInstance: PostgresClient | null = null;
+let databaseInstance: Database | null = null;
+
+export function getDatabaseClient(): PostgresClient {
+  if (clientInstance) return clientInstance;
+
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL is not set in the environment variables');
+  }
+
+  clientInstance = postgres(databaseUrl, { prepare: false });
+  return clientInstance;
 }
 
-console.log('Using database URL:', databaseUrl.replace(/:[^:@]+@/, ':***@')); // Mask the password
+const lazyClientTarget = (() => undefined) as unknown as PostgresClient;
 
-// Disable prefetch as it is not supported for "Transaction" pool mode
-export const client = postgres(databaseUrl, { prepare: false });
-export const db = drizzle(client, { schema });
+export const client = new Proxy(lazyClientTarget, {
+  apply(_target, _thisArg, argumentsList) {
+    const activeClient = getDatabaseClient();
+    return Reflect.apply(activeClient, activeClient, argumentsList);
+  },
+  get(_target, property) {
+    const activeClient = getDatabaseClient();
+    const value = Reflect.get(activeClient, property, activeClient);
+    return typeof value === 'function' ? value.bind(activeClient) : value;
+  },
+});
+
+export function getDatabase(): Database {
+  if (databaseInstance) return databaseInstance;
+  databaseInstance = drizzle(getDatabaseClient(), { schema });
+  return databaseInstance;
+}
+
+export const db = new Proxy({} as Database, {
+  get(_target, property) {
+    const activeDatabase = getDatabase();
+    const value = Reflect.get(activeDatabase, property, activeDatabase);
+    return typeof value === 'function' ? value.bind(activeDatabase) : value;
+  },
+});

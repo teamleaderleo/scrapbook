@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { useEffect, useState } from 'react';
+import type { Session, User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
 
 interface AuthState {
@@ -9,18 +9,16 @@ interface AuthState {
 }
 
 export function useAuth(initialUser: User | null = null) {
-  const supabase = createClient();
-  
+  const [supabase] = useState(() => createClient());
   const [authState, setAuthState] = useState<AuthState>({
-    user: initialUser, // Start with server-provided user
+    user: initialUser,
     session: null,
-    loading: initialUser === null, // Only loading if no initial user
+    loading: initialUser === null,
   });
 
   useEffect(() => {
-    // Only fetch if we don't have initial user
     if (initialUser === null) {
-      supabase.auth.getSession().then(({ data: { session } }) => {
+      void supabase.auth.getSession().then(({ data: { session } }) => {
         setAuthState({
           user: session?.user ?? null,
           session,
@@ -29,7 +27,6 @@ export function useAuth(initialUser: User | null = null) {
       });
     }
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {

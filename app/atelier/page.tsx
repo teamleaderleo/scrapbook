@@ -1,11 +1,24 @@
+import ViewportPageShell from '@/components/viewport-page-shell';
 import Link from 'next/link';
-import SiteNav from '@/components/site-nav';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Atelier',
+  description: 'Experimental interface sketches and navigation ideas.',
+  alternates: { canonical: '/atelier' },
+};
 
 const wheelLinks = [
   { href: '/proxy-dashboard', label: 'Signal', detail: 'proxy cockpit', angle: -90 },
   { href: '/space', label: 'Space', detail: 'notes and thoughts', angle: -38 },
   { href: '/gallery', label: 'Cube', detail: 'visual objects', angle: 18 },
-  { href: 'https://glossless.app/', label: 'Glossless', detail: 'writing tool', angle: 72, external: true },
+  {
+    href: 'https://glossless.app/',
+    label: 'Glossless',
+    detail: 'writing tool',
+    angle: 72,
+    external: true,
+  },
 ];
 
 const futureNodes = [
@@ -16,26 +29,36 @@ const futureNodes = [
 
 export default function AtelierPage() {
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(184,181,255,0.18),_transparent_34rem)] text-foreground">
-      <SiteNav />
-      <section className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
+    <ViewportPageShell className="bg-[radial-gradient(circle_at_top,_rgba(184,181,255,0.18),_transparent_34rem)] text-foreground">
+      <section className="mx-auto flex max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">Atelier</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-5xl">Experimental interface room</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+            Atelier
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-5xl">
+            Experimental interface room
+          </h1>
         </div>
 
         <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
           <div className="rounded-3xl border bg-background/80 p-5 shadow-sm backdrop-blur sm:p-7">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">lavender build</p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-4xl">Weapon wheel</h2>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                  lavender build
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-4xl">
+                  Weapon wheel
+                </h2>
               </div>
-              <div className="rounded-full border bg-[#b8b5ff]/15 px-3 py-1 text-xs font-medium text-foreground">CSS cube</div>
+              <div className="rounded-full border bg-[#b8b5ff]/15 px-3 py-1 text-xs font-medium text-foreground">
+                CSS cube
+              </div>
             </div>
 
             <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-              A quiet place to test radial navigation, soft game UI, reference-vault sketches, reader surfaces, and small dashboard objects.
+              A quiet place to test radial navigation, soft game UI, reference-vault sketches,
+              reader surfaces, and small dashboard objects.
             </p>
 
             <div className="mt-8">
@@ -63,10 +86,16 @@ export default function AtelierPage() {
                     target={item.external ? '_blank' : undefined}
                     rel={item.external ? 'noopener noreferrer' : undefined}
                     className="group absolute left-1/2 top-1/2 z-20 flex w-28 -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-2xl border bg-background/85 px-3 py-2 text-center shadow-sm backdrop-blur transition hover:-translate-y-[calc(50%+2px)] hover:border-[#b8b5ff]/70 hover:bg-[#b8b5ff]/15 focus:border-[#b8b5ff]/70 focus:outline-none focus:ring-2 focus:ring-[#b8b5ff]/30 sm:w-32"
-                    style={{ transform: `translate(-50%, -50%) rotate(${item.angle}deg) translateY(-11rem) rotate(${-item.angle}deg)` }}
+                    style={{
+                      transform: `translate(-50%, -50%) rotate(${item.angle}deg) translateY(-11rem) rotate(${-item.angle}deg)`,
+                    }}
                   >
-                    <span className="text-sm font-semibold tracking-tight text-foreground">{item.label}</span>
-                    <span className="mt-0.5 text-[11px] leading-tight text-muted-foreground group-hover:text-foreground">{item.detail}</span>
+                    <span className="text-sm font-semibold tracking-tight text-foreground">
+                      {item.label}
+                    </span>
+                    <span className="mt-0.5 text-[11px] leading-tight text-muted-foreground group-hover:text-foreground">
+                      {item.detail}
+                    </span>
                   </Link>
                 ))}
               </div>
@@ -74,13 +103,17 @@ export default function AtelierPage() {
           </div>
 
           <aside className="rounded-3xl border bg-background/80 p-5 shadow-sm backdrop-blur">
-            <div className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">Future shelves</div>
+            <div className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+              Future shelves
+            </div>
             <div className="mt-4 space-y-3">
               {futureNodes.map((node) => (
                 <div key={node.label} className="rounded-2xl border bg-muted/30 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <h2 className="font-semibold tracking-tight">{node.label}</h2>
-                    <span className="rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground">sketch</span>
+                    <span className="rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground">
+                      sketch
+                    </span>
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">{node.detail}</p>
                 </div>
@@ -90,10 +123,7 @@ export default function AtelierPage() {
         </section>
 
         <style>{`
-          .atelier-cube-scene {
-            perspective: 700px;
-          }
-
+          .atelier-cube-scene { perspective: 700px; }
           .atelier-cube {
             position: relative;
             height: 100%;
@@ -101,7 +131,6 @@ export default function AtelierPage() {
             transform-style: preserve-3d;
             animation: atelier-cube-spin 16s linear infinite;
           }
-
           .atelier-cube-face {
             position: absolute;
             inset: 0;
@@ -110,14 +139,12 @@ export default function AtelierPage() {
             box-shadow: inset 0 0 28px rgba(184, 181, 255, 0.18), 0 0 22px rgba(184, 181, 255, 0.12);
             backdrop-filter: blur(10px);
           }
-
           .atelier-cube-front { transform: translateZ(3.5rem); }
           .atelier-cube-back { transform: rotateY(180deg) translateZ(3.5rem); }
           .atelier-cube-right { transform: rotateY(90deg) translateZ(3.5rem); }
           .atelier-cube-left { transform: rotateY(-90deg) translateZ(3.5rem); }
           .atelier-cube-top { transform: rotateX(90deg) translateZ(3.5rem); }
           .atelier-cube-bottom { transform: rotateX(-90deg) translateZ(3.5rem); }
-
           @media (min-width: 640px) {
             .atelier-cube-front { transform: translateZ(4rem); }
             .atelier-cube-back { transform: rotateY(180deg) translateZ(4rem); }
@@ -126,13 +153,15 @@ export default function AtelierPage() {
             .atelier-cube-top { transform: rotateX(90deg) translateZ(4rem); }
             .atelier-cube-bottom { transform: rotateX(-90deg) translateZ(4rem); }
           }
-
+          @media (prefers-reduced-motion: reduce) {
+            .atelier-cube { animation: none; }
+          }
           @keyframes atelier-cube-spin {
             from { transform: rotateX(-18deg) rotateY(0deg) rotateZ(6deg); }
             to { transform: rotateX(-18deg) rotateY(360deg) rotateZ(6deg); }
           }
         `}</style>
       </section>
-    </main>
+    </ViewportPageShell>
   );
 }
