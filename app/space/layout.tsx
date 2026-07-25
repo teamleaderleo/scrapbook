@@ -92,7 +92,7 @@ async function SpaceDataShell({ children }: { children: React.ReactNode }) {
         initialNowMs={nowMs}
         initialHasMore={hasMore}
       >
-        <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-background text-foreground">
+        <div className="flex h-dvh min-h-0 w-full min-w-0 overflow-hidden bg-background text-foreground">
           <SearchCommand />
           <AppSidebar />
           <div className="h-full min-h-0 min-w-0 flex-1 overflow-hidden">{children}</div>
@@ -105,8 +105,10 @@ async function SpaceDataShell({ children }: { children: React.ReactNode }) {
 
 export default function SpaceLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense fallback={<div className="h-dvh bg-background" aria-hidden="true" />}>
-      <SpaceDataShell>{children}</SpaceDataShell>
-    </Suspense>
+    <div className="h-dvh min-h-0 w-full min-w-0 overflow-hidden bg-background text-foreground">
+      <Suspense fallback={null}>
+        <SpaceDataShell>{children}</SpaceDataShell>
+      </Suspense>
+    </div>
   );
 }
