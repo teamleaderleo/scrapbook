@@ -82,14 +82,17 @@ async function copyDiscord() {
   toast.success('Discord username copied', { description: 'teamleaderleo' });
 }
 
+const discordHover =
+  'hover:text-[#91889b] focus:text-[#91889b] dark:hover:text-[#cbc4d2] dark:focus:text-[#cbc4d2]';
+
 export function DiscordButton({ menu = false }: { menu?: boolean }) {
   return (
     <button
       onClick={() => void copyDiscord()}
       className={
         menu
-          ? 'flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-indigo-500 focus:bg-muted focus:text-indigo-500 focus:outline-none'
-          : 'flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-500 focus:text-indigo-500 focus:outline-none'
+          ? `flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted focus:bg-muted focus:outline-none ${discordHover}`
+          : `flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors focus:outline-none ${discordHover}`
       }
       type="button"
     >
