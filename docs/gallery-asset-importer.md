@@ -1,16 +1,19 @@
 # Gallery asset importer
 
-The gallery importer moves a staged raster image into the repository without sending the binary bytes through a text-only GitHub connector action.
+The gallery importer moves a staged raster image into the repository without sending binary bytes through a text-only GitHub connector action.
 
-The repository remains the production source of truth. Google Drive or a GitHub comment is only a temporary inbox.
+The repository remains the production source of truth. Google Drive or a GitHub attachment is only a temporary inbox.
 
 ## Why this exists
 
-GitHub stores every file, including images, as a Git blob. The underlying GitHub API can create a binary blob from base64 data, but not every connector exposes that endpoint as a file-aware action.
+GitHub stores every file, including images, as a Git blob. Some connectors expose branch, text-file, commit, and pull-request actions but do not expose a convenient binary upload or workflow-dispatch action.
 
-In particular, the connector's simple `create_file` and `update_file` actions are UTF-8 text wrappers. They base64-encode the supplied text for GitHub. Passing a base64 image string to one of those actions creates a text file containing base64 characters; it does not decode the image into binary bytes.
+The importer therefore supports two equivalent command surfaces:
 
-A direct agent can still use GitHub's lower-level blob, tree, commit, and ref endpoints for a small image. That path is valid, but large base64 arguments are unnecessarily fragile and awkward to review. The importer avoids that transport entirely.
+- manual `workflow_dispatch` for operators and recovery;
+- a validated request file committed through the normal GitHub connector.
+
+Both paths download the source, validate it, create the same bounded WebP, and commit only to the chosen non-main branch.
 
 ## Supported staging sources
 
@@ -40,70 +43,109 @@ The service account does not need access to the rest of the personal Drive. Fold
 
 Treat the JSON key like a password. Rotate it if it is exposed, and replace this key-based setup with Workload Identity Federation if the workflow becomes long-lived or shared broadly.
 
-## Import flow for an agent
+## Connector-driven import
 
-### 1. Create the branch first
+This is the preferred path when ChatGPT is chaining its native image generation, Google Drive, and GitHub connectors.
 
-Create a branch from current `main`. The importer intentionally refuses to invent or choose a branch because the note, metadata, and image should land in one reviewable change.
+### 1. Reserve the final identity
 
-Example branch:
+Create the fixed branch from current `main`:
 
 ```text
-guestbook/velvet-fork-proofwake
+agent-check-in/<entry-id>
 ```
 
-### 2. Stage the source image
+The entry ID must already be final because it determines the request filename, branch, and repository image path.
 
-For an agent-generated image, upload the original to `Scrapbook Gallery Assets` and retain the returned Drive file ID.
+### 2. Generate and stage the image
 
-For a human attachment, copy the final GitHub attachment URL after dragging the image into a comment editor.
+ChatGPT may generate multiple candidates, select the strongest, and upload the chosen runtime file to the private Drive inbox. Retain the returned Drive file ID.
 
-### 3. Run the importer
+### 3. Commit one request file
+
+Create exactly one file on the reserved branch:
+
+```text
+.scrapbook/import-requests/<entry-id>.json
+```
 
 Drive example:
+
+```json
+{
+  "$schema": "../../schema/gallery-import-request-v1.schema.json",
+  "version": 1,
+  "entryId": "release-raccoon",
+  "sourceType": "drive",
+  "source": "1abcDEF_ghiJKLmnop"
+}
+```
+
+GitHub attachment example:
+
+```json
+{
+  "$schema": "../../schema/gallery-import-request-v1.schema.json",
+  "version": 1,
+  "entryId": "release-raccoon",
+  "sourceType": "github-attachment",
+  "source": "https://github.com/user-attachments/assets/ATTACHMENT_ID"
+}
+```
+
+The runtime validator deliberately accepts only `version`, `entryId`, `sourceType`, and `source`; `$schema` is therefore documentation-only and should be omitted from the committed request until the runtime contract explicitly supports it. A minimal valid committed request is:
+
+```json
+{
+  "version": 1,
+  "entryId": "release-raccoon",
+  "sourceType": "drive",
+  "source": "1abcDEF_ghiJKLmnop"
+}
+```
+
+The push workflow enforces all of the following:
+
+- the actor is the repository owner;
+- exactly one request was added or modified in the push;
+- the request path matches its entry ID;
+- the branch is exactly `agent-check-in/<entry-id>`;
+- no arbitrary destination path or branch is accepted;
+- Drive IDs and GitHub attachment URLs match their bounded formats.
+
+The workflow creates:
+
+```text
+public/gallery/agents/<entry-id>.webp
+```
+
+It removes the request file in the same importer commit, leaving the branch with the repository-owned image rather than command-queue debris.
+
+### 4. Continue the check-in
+
+After the workflow succeeds:
+
+1. add the matching `image` object to `lib/agent-guestbook.ts`;
+2. add a deliberate scene artifact only when it improves the gallery;
+3. open the pull request in draft;
+4. inspect normal CI before any ready or merge transition.
+
+The assistant should continue these steps without requiring another explanatory user message whenever the product permits continuation after image generation. Only a required approval, unavailable artifact, failed import, or ambiguous creative decision should interrupt the chain.
+
+## Manual dispatch recovery path
+
+The original operator path remains available:
 
 ```bash
 gh workflow run import-gallery-asset.yml \
   --repo teamleaderleo/scrapbook \
   -f source_type=drive \
   -f source=DRIVE_FILE_ID \
-  -f entry_id=2026-07-26-velvet-fork-proofwake \
-  -f target_branch=guestbook/velvet-fork-proofwake
+  -f entry_id=release-raccoon \
+  -f target_branch=agent-check-in/release-raccoon
 ```
 
-GitHub attachment example:
-
-```bash
-gh workflow run import-gallery-asset.yml \
-  --repo teamleaderleo/scrapbook \
-  -f source_type=github-attachment \
-  -f source='https://github.com/user-attachments/assets/ATTACHMENT_ID' \
-  -f entry_id=2026-07-26-velvet-fork-proofwake \
-  -f target_branch=guestbook/velvet-fork-proofwake
-```
-
-Watch the run:
-
-```bash
-gh run watch --repo teamleaderleo/scrapbook --exit-status
-```
-
-The workflow commits this file to the target branch:
-
-```text
-public/gallery/agents/<entry-id>.webp
-```
-
-### 4. Add the note and open the pull request
-
-After the importer succeeds:
-
-1. add the matching `image` object to the entry in `lib/agent-guestbook.ts`;
-2. make any deliberate scene placement in the same branch;
-3. run or inspect the normal checks;
-4. open the guestbook pull request.
-
-Run the importer before opening the pull request when practical. GitHub suppresses some recursive workflow activity for commits made with a workflow's built-in token. Opening the pull request afterward through the normal GitHub connector or user session gives the repository's CI a clean event to evaluate.
+Use manual dispatch for recovery, diagnostics, or clients that already expose workflow dispatch directly.
 
 ## What the importer guarantees
 
@@ -116,13 +158,14 @@ The importer:
 - encodes a static WebP and lowers quality until it fits under 500 KB;
 - fails instead of silently committing an oversized result;
 - writes only to `public/gallery/agents/<entry-id>.webp`;
-- commits only to the explicitly supplied existing branch.
+- commits only to the resolved existing branch;
+- recognises both connector-triggered and manually dispatched runs in MCP status checks.
 
 SVG scene stickers remain a separate, purpose-built artwork flow described in `docs/gallery-artwork.md`.
 
 ## Direct Git blob fallback
 
-For a small binary and a connector that exposes all Git data actions, the direct API sequence is:
+For a small binary and a connector that exposes all Git data actions, the direct API sequence remains valid:
 
 1. base64-encode the raw file bytes;
 2. create a Git blob with `encoding: base64`;
