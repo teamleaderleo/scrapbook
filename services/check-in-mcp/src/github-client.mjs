@@ -1,6 +1,8 @@
 const OWNER = 'teamleaderleo';
 const REPO = 'scrapbook';
 const API_ROOT = `https://api.github.com/repos/${OWNER}/${REPO}`;
+const GRAPHQL_URL = 'https://api.github.com/graphql';
+const REQUEST_TIMEOUT_MS = 15_000;
 
 export class GitHubError extends Error {
   constructor(message, status, details) {
@@ -15,18 +17,30 @@ function encodePath(path) {
   return path.split('/').map(encodeURIComponent).join('/');
 }
 
+function resolveApiUrl(path) {
+  if (!path.startsWith('https://')) return `${API_ROOT}${path}`;
+  if (path === GRAPHQL_URL) return path;
+  throw new GitHubError('The GitHub client rejected a non-Scrapbook API destination.', 400);
+}
+
 export class ScrapbookGitHubClient {
-  constructor({ token = process.env.SCRAPBOOK_GITHUB_TOKEN, fetchImpl = fetch } = {}) {
+  constructor({
+    token = process.env.SCRAPBOOK_GITHUB_TOKEN,
+    fetchImpl = fetch,
+    timeoutMs = REQUEST_TIMEOUT_MS,
+  } = {}) {
     this.token = token;
     this.fetchImpl = fetchImpl;
+    this.timeoutMs = timeoutMs;
   }
 
   async request(path, { method = 'GET', body, write = false, headers = {} } = {}) {
     if (write && !this.token) {
       throw new GitHubError('SCRAPBOOK_GITHUB_TOKEN is required for repository writes.', 401);
     }
-    const response = await this.fetchImpl(path.startsWith('https://') ? path : `${API_ROOT}${path}`, {
+    const response = await this.fetchImpl(resolveApiUrl(path), {
       method,
+      signal: AbortSignal.timeout(this.timeoutMs),
       headers: {
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
@@ -151,7 +165,7 @@ export class ScrapbookGitHubClient {
 
   async markPullRequestReady(nodeId) {
     const query = `mutation MarkReady($id: ID!) { markPullRequestReadyForReview(input: {pullRequestId: $id}) { pullRequest { number isDraft url } } }`;
-    const response = await this.request('https://api.github.com/graphql', {
+    const response = await this.request(GRAPHQL_URL, {
       method: 'POST',
       write: true,
       body: { query, variables: { id: nodeId } },
