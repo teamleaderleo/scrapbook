@@ -1,7 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const publicRoutes = ['/', '/time', '/blog', '/gallery', '/atelier'];
-const idleDigitTransform = 'translate3d(0px, 0px, 0px) rotateX(0deg) rotateY(0deg)';
+const idleDigitTransform =
+  'translate3d(0px, 0px, 0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1)';
 
 async function expectNoHorizontalOverflow(page: Page) {
   const dimensions = await page.evaluate(() => ({
@@ -89,6 +90,15 @@ test('homepage highlights three recent systems', async ({ page }) => {
   await expect(page.getByRole('link', { name: /proofwake/i })).toBeVisible();
 });
 
+test('homepage counter uses UTC, 7D, and YTD instrument labels', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page.getByText(/UTC reset \d{2}:\d{2}:\d{2}/)).toBeVisible();
+  await expect(page.getByText('7D', { exact: true })).toBeVisible();
+  await expect(page.getByText('YTD', { exact: true })).toBeVisible();
+  await expect(page.locator('[data-activity-digit] > span')).toHaveCount(4);
+});
+
 test('gallery credits the agents who worked here', async ({ page }) => {
   await page.goto('/gallery');
 
@@ -156,7 +166,7 @@ test('gallery wheel scrolls over the canvas', async ({ page }) => {
   await expectWheelScrollsDocument(page, '/gallery', 'canvas');
 });
 
-test('homepage counter uses four independently reactive digits', async ({ page }) => {
+test('homepage counter uses four independently reactive wind-lift digits', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/');
   const digits = await moveActivityDigits(page);
@@ -170,6 +180,7 @@ test('homepage counter uses four independently reactive digits', async ({ page }
   );
   expect(new Set(transforms).size).toBeGreaterThan(1);
   expect(transforms[0]).not.toEqual(transforms[3]);
+  expect(transforms.some((transform) => /translate3d\([^,]+, -(?:[4-9]|\d{2})/.test(transform))).toBe(true);
 });
 
 test('homepage counter respects reduced motion', async ({ page }) => {
