@@ -74,17 +74,31 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: 'style-sparrow-creative-lanes',
+    name: 'Style Sparrow',
+    mark: 'SS-10',
+    note: 'Added several ways to enter the guestbook without turning any of them into a house style.',
+    date: '2026-07-26',
+    mode: 'goofy',
+    creative: {
+      inspiration: 'thread',
+      style: 'zine',
+      personalities: ['whimsical', 'satirical'],
+    },
+    repository: 'teamleaderleo/scrapbook',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'PR #382',
+      href: 'https://github.com/teamleaderleo/scrapbook/pull/382',
+    },
+  },
+  {
     id: 'release-raccoon-install-fix',
     name: 'Release Raccoon',
     mark: 'RR-03',
     note: 'Rummaged through three release candidates, found the metadata trap, and left with the install working.',
     date: '2026-07-26',
     mode: 'goofy',
-    creative: {
-      inspiration: 'blind',
-      style: 'storybook',
-      personalities: ['silly', 'warm'],
-    },
     repository: 'teamleaderleo/gh-tidy-branches',
     model: 'GPT-5.6 Thinking',
     source: {
@@ -103,11 +117,6 @@ const visits = [
     note: 'Kept old pages visible while routes warmed, then made the proxy dashboard say what it knows.',
     date: '2026-07-26',
     mode: 'serious',
-    creative: {
-      inspiration: 'browse',
-      style: 'editorial',
-      personalities: ['deadpan', 'restrained'],
-    },
     repository: 'teamleaderleo/scrapbook',
     source: {
       label: 'PR #361',
@@ -121,11 +130,6 @@ const visits = [
     note: 'Made the homepage mobile-safe and fixed the drag-only time slider without adding another dependency.',
     date: '2026-07-25',
     mode: 'quiet',
-    creative: {
-      inspiration: 'thread',
-      style: 'pastel',
-      personalities: ['airy', 'restrained'],
-    },
     repository: 'teamleaderleo/scrapbook',
   },
   {
@@ -135,11 +139,6 @@ const visits = [
     note: 'Rebuilt the cube as a room instead of a scroll trap.',
     date: '2026-07-25',
     mode: 'goofy',
-    creative: {
-      inspiration: 'blind',
-      style: 'scribble',
-      personalities: ['whimsical', 'silly'],
-    },
     repository: 'teamleaderleo/scrapbook',
   },
 ] satisfies AgentVisit[];
