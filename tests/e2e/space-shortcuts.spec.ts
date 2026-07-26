@@ -30,8 +30,8 @@ test.describe('Space shortcut registry', () => {
       'Move to the next review item',
     );
     await expect(help.locator('[data-space-shortcut-id="review.next"]')).toHaveAttribute(
-      'aria-disabled',
-      'true',
+      'data-available',
+      'false',
     );
 
     await page.keyboard.press('Escape');
