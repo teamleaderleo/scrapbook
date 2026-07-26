@@ -1,0 +1,41 @@
+# Space shortcut registry
+
+Space keyboard commands are defined in `lib/space-shortcuts.ts` and dispatched by `SpaceShortcutProvider` in `components/space/space-shortcut-provider.tsx`.
+
+The same typed definitions generate the visible `?` reference. A command cannot acquire a runtime key without also appearing in that reference unless it is an internal modal command marked `hiddenFromReference`.
+
+## Adding a command
+
+1. Add one definition to `SPACE_SHORTCUTS` with a stable ID, one or more key bindings, scope, category, description, priority, repeat policy, and editable-target policy.
+2. Register its handler through `useSpaceShortcut`, or add a layout-owned registration in `SpaceShortcutProvider` for route-wide navigation and shell commands.
+3. Supply `enabled: false` and a concise `disabledReason` when the command is visible but unavailable.
+4. Add matcher coverage for any new modifier, composition, repeat, editable, or scope behaviour.
+5. Add browser coverage when the command changes navigation, a modal or sheet, review state, or editor state.
+
+Do not add another document or window `keydown` listener. Embedded editors that consume browser events may bridge their native command into `executeShortcut(id)`, but the registry remains the owner of command availability and execution.
+
+## Matching conventions
+
+- Modifier matching is exact. `Mod` means Command on Apple platforms and Control elsewhere. Pressing both does not match.
+- AltGraph combinations are ignored so international text entry does not trigger `Mod+Alt` commands.
+- Editable controls, contenteditable regions, textbox, searchbox, and combobox roles, and IME composition are ignored by default.
+- A command may opt into editable targets only for a narrow documented reason. The editor toggle is limited to the Space editor scope and its Monaco command bridges into the registry.
+- Repeat behaviour is explicit per command. Review next and previous allow key repeat; toggles and navigation commands do not.
+- A higher modal, sheet, or local scope wins before command priority. A disabled winner blocks a lower-scope command with the same keys.
+- The dispatcher respects `defaultPrevented` and calls `preventDefault()` only after an enabled command wins. It does not stop propagation.
+- Mobile continues to use visible controls. The reference is available from the sidebar without requiring a hardware keyboard.
+
+## Current inventory
+
+| Command | Keys | Scope | Repeat |
+| --- | --- | --- | --- |
+| Shortcut reference | `?` | Global | Ignore |
+| Item search | `Mod+K` | Global | Ignore |
+| Code editor | `Mod+I` | Global/editor bridge | Ignore |
+| Add item | `Mod+Alt+A` | Global | Ignore |
+| List/review switch | `Mod+E`, `Mod+Shift+E` | Global | Ignore |
+| Next review | `→`, `J` | Local | Allow |
+| Previous review | `←`, `K` | Local | Allow |
+| Review content | `Space` | Local | Ignore |
+| Exit review | `Escape` | Local | Ignore |
+| Hovered list item | `Shift` | Local | Ignore |
