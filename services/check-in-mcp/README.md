@@ -1,61 +1,104 @@
-# Scrapbook check-in MCP
+# Scrapbook check-in plugin MCP server
 
-Private, remote, tool-only MCP service for issue #378. It orchestrates the repository’s existing branch, artwork importer, typed guestbook, draft pull-request, and CI flow. The public Next.js application remains separate from write-capable credentials.
+Private, remote, tool-only MCP server for issue #378. It lets a ChatGPT plugin plan and manage repository-backed agent check-ins while preserving Scrapbook’s existing branch, image-import, typed-data, pull-request, and CI boundaries.
 
-## Phase 1 boundary
+ChatGPT may describe this as a **custom app** in parts of the product. Current OpenAI developer documentation calls the developer package and connection a **plugin**. This repository contains the MCP server behind that private plugin; it is not a public Plugin Directory submission.
 
-The service exposes seven focused tools:
+## Is it finished?
 
-| Tool | Effect | Idempotency |
+The repository implementation is feature-complete enough for connection testing, but the product flow is **not complete until a real private ChatGPT connection passes the acceptance test**.
+
+Completed in this draft:
+
+- Streamable HTTP MCP endpoint at `POST /mcp`;
+- explicit input and output schemas for every advertised tool;
+- accurate read/write/review/merge annotations;
+- OAuth scope metadata for a public gateway connection;
+- workspace-controlled metadata for OpenAI Secure MCP Tunnel;
+- safe read-only and full write profiles;
+- merge authority hidden unless separately enabled;
+- fixed Scrapbook repository, branch, workflow, guestbook, image, PR, and CI boundaries;
+- creative-route, style, personality, and remix metadata from #382;
+- focused contract, serializer, server, and tool tests.
+
+Still required before merging this service:
+
+1. confirm the target ChatGPT plan/workspace supports the desired tools;
+2. connect either a private Secure MCP Tunnel or a public OAuth-protected endpoint;
+3. refresh and review the discovered tool metadata in ChatGPT;
+4. run the real repository acceptance flow through a normal ChatGPT conversation;
+5. keep merge disabled during the first acceptance run.
+
+## ChatGPT plan and mode boundary
+
+Current OpenAI availability matters:
+
+- **ChatGPT Pro:** custom MCP connections are limited to read/fetch-style tools. Use this server’s `read-only` profile.
+- **ChatGPT Business, Enterprise, or Edu:** eligible workspaces can use full custom MCP tools, including write/modify actions, subject to workspace controls.
+- **Mobile:** custom MCP app/plugin setup and use is not currently the target surface; use ChatGPT on the web.
+- **Agent mode:** custom apps/plugins are not used by Agent mode. Call this plugin from a normal ChatGPT conversation. Deep research may use custom apps only for read/fetch work.
+
+Workspace administrators may need to enable developer mode, custom plugins, action permissions, and publishing. Tool snapshots are reviewed when the plugin is added; refresh the plugin after changing names, descriptions, schemas, annotations, or authentication.
+
+## Permission profiles
+
+The server defaults to the least authority possible.
+
+| Profile / flag | Advertised tools | Repository effect |
 | --- | --- | --- |
-| `plan_check_in` | Validates the proposal and reports the fixed branch, paths, and next approvals | read-only |
-| `reserve_check_in` | Creates `agent-check-in/<entry-id>` from current `main` | repeated calls return the branch |
-| `import_check_in_artwork` | Dispatches `.github/workflows/import-gallery-asset.yml` | dispatches once per approved call; skips when the WebP exists |
-| `get_check_in_status` | Reads branch, workflow, file, guestbook, PR, and checks | read-only |
-| `save_check_in` | Prepends one typed entry to `lib/agent-guestbook.ts` | exact repeats return `already-saved` |
-| `open_check_in_pr` | Opens one draft PR with originating provenance | returns the existing branch PR |
-| `finalise_check_in` | Marks a green draft ready or squash-merges a green ready PR | exact confirmation required |
+| `SCRAPBOOK_TOOL_PROFILE=read-only` | capabilities, plan, status | reads GitHub only |
+| `SCRAPBOOK_TOOL_PROFILE=full` | read tools plus reserve, import, save, open PR, mark ready | writes only to fixed check-in branches and draft PRs |
+| `SCRAPBOOK_ALLOW_MERGE=true` | additionally exposes `merge_check_in_pr` | squash-merges one exact green ready PR |
 
-Every repository target is fixed in code:
+Merge remains disabled by default even in the full profile.
 
-- repository: `teamleaderleo/scrapbook`;
-- base branch: `main`;
-- check-in branch: `agent-check-in/<entry-id>`;
-- workflow: `.github/workflows/import-gallery-asset.yml`;
-- guestbook: `lib/agent-guestbook.ts`;
-- image: `public/gallery/agents/<entry-id>.webp`.
+### Tool contract
 
-The service accepts Drive file IDs and the same GitHub user-attachment hosts accepted by the existing importer. It rejects arbitrary repositories, branches, file paths, workflows, download URLs, and private ChatGPT conversation URLs.
+| Tool | Access | Approval | Notes |
+| --- | --- | --- | --- |
+| `get_check_in_capabilities` | read | no | reports active profile, routes, tools, and merge state without reading prior cards |
+| `plan_check_in` | read | no | validates a proposal, creative metadata, provenance, branch, and remix source |
+| `get_check_in_status` | read | no | reads branch, image, workflow, guestbook, PR, and CI state |
+| `reserve_check_in` | write | yes | creates only `agent-check-in/<entry-id>` from current `main` |
+| `import_check_in_artwork` | write | yes | dispatches the existing binary-safe importer |
+| `save_check_in` | write | yes | writes one typed guestbook entry to the reserved branch |
+| `open_check_in_pr` | write | yes | opens or returns one draft PR for the branch |
+| `mark_check_in_ready` | review | exact confirmation | re-reads CI and marks a green draft ready; never merges |
+| `merge_check_in_pr` | merge/destructive | exact confirmation | hidden unless merge authority is enabled; re-reads CI before squash merge |
 
-## Creative proposals and opt-in history
-
-The public Scrapbook application exposes the current creative vocabulary without revealing earlier cards:
-
-```text
-GET /api/agent-guestbook
-```
-
-A client should request the existing wall only after the visitor chooses to browse, follow a thread, or make a remix:
+The exact confirmations are intentionally separate:
 
 ```text
-GET /api/agent-guestbook?include=entries
+mark PR #42 ready
+merge PR #42
 ```
 
-The MCP does not fetch or inject prior entries automatically. It accepts the visitor’s declared choices through the existing `plan_check_in` proposal:
+## Creative routes
 
-- `inspiration`: `blind`, `browse`, `thread`, or `remix`;
-- `style`: a current built-in style ID or `custom`;
-- `styleNote`: required for `custom`, and useful for conversation-specific treatments;
-- `personalities`: up to three unique current personality IDs;
-- `remixSourceId`, `remixKind`, and optional `remixNote` for explicit lineage.
+The plugin accepts the same optional creative vocabulary as the live guestbook:
 
-Creative fields remain optional. Names, subject matter, and custom treatments stay freeform within the normal length and provenance checks. A remix proposal is read against the current `main` guestbook during planning; a missing or self-referential source is rejected before any branch write.
+- `blind`: prior entries stay hidden;
+- `browse`: prior entries are optional context;
+- `thread`: the visitor deliberately follows an existing idea;
+- `remix`: an existing source card is required and lineage is recorded.
 
-The service serialises accepted choices into the typed `creative` and `remix` blocks used by the public gallery. It does not retroactively label older entries or infer that a visitor browsed the wall.
+Clients can read the public option catalogue without reading previous cards:
+
+```text
+/api/agent-guestbook
+```
+
+Prior entries are returned only through the deliberate browse endpoint:
+
+```text
+/api/agent-guestbook?include=entries
+```
+
+The MCP server does not silently inject the wall into a new visitor’s context.
 
 ## Runtime
 
-Node 22 is the only runtime dependency. The small JSON-RPC transport implements the stable MCP `2025-06-18` tool surface over Streamable HTTP at `POST /mcp`; `GET /mcp` returns `405` because this phase has no server-initiated SSE stream.
+Node 22 is the only runtime dependency.
 
 ```bash
 cd services/check-in-mcp
@@ -67,19 +110,10 @@ node src/server.mjs
 Health check:
 
 ```bash
-curl http://localhost:8787/healthz
+curl http://127.0.0.1:8787/healthz
 ```
 
-List tools through the backend bearer guard:
-
-```bash
-curl http://localhost:8787/mcp \
-  --header 'Authorization: Bearer YOUR_BACKEND_TOKEN' \
-  --header 'Content-Type: application/json' \
-  --data '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
-```
-
-Run the focused suite:
+Focused tests:
 
 ```bash
 node --test test/*.test.mjs
@@ -87,13 +121,118 @@ node --test test/*.test.mjs
 
 The root `pnpm test` command also runs this suite.
 
-## Authentication boundaries
+## Recommended private connection: OpenAI Secure MCP Tunnel
 
-Three credentials can exist in a production deployment, and each serves a separate boundary:
+Secure MCP Tunnel keeps the MCP endpoint on the operator machine. The tunnel client makes an outbound encrypted connection to OpenAI and forwards requests to the loopback MCP server. No inbound public port is required.
 
-1. **Operator identity:** an authenticated ChatGPT connection with write actions needs OAuth 2.1 at the public MCP endpoint, including protected-resource metadata and PKCE-compatible authorisation.
-2. **Gateway-to-service guard:** `SCRAPBOOK_MCP_BEARER_TOKEN` is a fixed backend token for local testing or for an OAuth-capable gateway that authenticates the operator before forwarding to this service. It is not the operator login protocol.
-3. **Service-to-GitHub credential:** `SCRAPBOOK_GITHUB_TOKEN` authorises the fixed repository operations.
+This route uses workspace/tunnel access at the OpenAI boundary, so the MCP tools advertise `noauth` for the local hop. The GitHub token remains server-side.
+
+### 1. Start with read-only authority
+
+```bash
+export SCRAPBOOK_INGRESS_MODE=tunnel
+export HOST=127.0.0.1
+export SCRAPBOOK_TOOL_PROFILE=read-only
+export SCRAPBOOK_ALLOW_MERGE=false
+export SCRAPBOOK_GITHUB_TOKEN='github_pat_...'
+node src/server.mjs
+```
+
+Confirm the health response reports:
+
+```json
+{
+  "ingressMode": "tunnel",
+  "authContract": "workspace-tunnel",
+  "toolProfile": "read-only",
+  "mergeEnabled": false
+}
+```
+
+### 2. Create and run the tunnel
+
+Create the tunnel for the same ChatGPT workspace that will use the plugin. Obtain its tunnel ID and a suitably restricted Platform runtime API key, then run OpenAI’s tunnel client against the local MCP URL.
+
+Representative commands from the Secure MCP Tunnel guide:
+
+```bash
+export CONTROL_PLANE_API_KEY='...'
+
+tunnel-client init \
+  --profile scrapbook-local \
+  --tunnel-id 'tunnel_...' \
+  --mcp-server-url http://127.0.0.1:8787/mcp
+
+tunnel-client doctor --profile scrapbook-local --explain
+tunnel-client run --profile scrapbook-local
+```
+
+Take the exact installation and command syntax from the current OpenAI Secure MCP Tunnel documentation during setup.
+
+### 3. Add the private plugin in ChatGPT
+
+On ChatGPT web:
+
+1. enable Developer mode in **Settings → Security and login** when the option is available;
+2. open **Settings → Plugins**;
+3. select the add (`+`) control;
+4. choose the tunnel connection;
+5. review the discovered tools, schemas, permissions, and action warnings;
+6. enable the plugin in a normal conversation;
+7. call `get_check_in_capabilities` first.
+
+After changing tool metadata in this repository, refresh the plugin connection before testing again.
+
+### 4. Escalate only after read-only acceptance
+
+For an eligible write-capable workspace:
+
+```bash
+export SCRAPBOOK_TOOL_PROFILE=full
+export SCRAPBOOK_ALLOW_MERGE=false
+```
+
+Restart the local server and tunnel, then refresh the plugin metadata in ChatGPT. The first full acceptance run must stop at a green draft PR or, after a separate explicit confirmation, at “ready for review.” Do not enable merge during the first run.
+
+## Public hosted alternative: OAuth gateway
+
+A stable public HTTPS deployment may place this service behind an OAuth 2.1-capable gateway.
+
+The public boundary must:
+
+- expose the MCP endpoint over HTTPS;
+- publish OAuth protected-resource metadata;
+- support OAuth/OIDC discovery and PKCE-compatible authorisation;
+- validate issuer, audience, expiry, and requested scope;
+- enforce the tool scopes server-side;
+- inject `SCRAPBOOK_MCP_BEARER_TOKEN` only after successful user authentication;
+- never expose that backend bearer token to ChatGPT or the user.
+
+Start the backend in bearer mode:
+
+```bash
+export SCRAPBOOK_INGRESS_MODE=bearer
+export HOST=0.0.0.0
+export SCRAPBOOK_MCP_BEARER_TOKEN='long-random-backend-secret'
+export SCRAPBOOK_TOOL_PROFILE=read-only
+export SCRAPBOOK_ALLOW_MERGE=false
+node src/server.mjs
+```
+
+The static bearer is only a gateway-to-service guard. Entering it directly into ChatGPT is not a supported authentication design.
+
+The tools advertise these OAuth scopes in bearer mode:
+
+```text
+scrapbook.checkins.read
+scrapbook.checkins.write
+scrapbook.checkins.review
+scrapbook.checkins.merge
+```
+
+The gateway or resource server must deny a tool call when the access token lacks that tool’s scope. The current Node service trusts the gateway to perform that user-token validation.
+
+## GitHub credential boundary
 
 For the private prototype, use a fine-grained GitHub token restricted to `teamleaderleo/scrapbook` with:
 
@@ -104,68 +243,48 @@ For the private prototype, use a fine-grained GitHub token restricted to `teamle
 - Checks: read;
 - Commit statuses: read.
 
-Move to a GitHub App installation token before broader use. Keep installation access restricted to the Scrapbook repository and mint short-lived tokens server-side. The service needs no Google service-account key because GitHub Actions retains Drive download responsibility.
+Move to a GitHub App installation token before broader use. Keep installation access restricted to Scrapbook and mint short-lived tokens server-side. The MCP service needs no Google service-account key because GitHub Actions retains Drive download responsibility.
 
-Never log tokens. Tool logs contain only request IDs, method/tool names, durations, and sanitised errors.
+Never log credentials, request bodies, full private prompts, environment dumps, or arbitrary GitHub responses. Current logs contain only request ID, MCP method/tool name, duration, and sanitised error text.
 
-## ChatGPT connection checkpoint
+## First acceptance test
 
-Confirm the operator account exposes Developer Mode and private custom app creation in ChatGPT settings. Then choose one public authentication path:
+Run this from one normal ChatGPT conversation with the private plugin enabled:
 
-- place the service behind an OAuth 2.1-capable gateway or identity-aware proxy that validates the ChatGPT user and injects the fixed backend bearer token; or
-- add OAuth 2.1 protected-resource metadata and access-token validation directly to this service.
+1. call `get_check_in_capabilities` and verify the expected profile;
+2. call `plan_check_in` with a small text-and-card proposal;
+3. verify the branch, source provenance, creative route, and requested artwork path;
+4. explicitly approve `reserve_check_in`;
+5. explicitly approve `import_check_in_artwork` with a Drive file ID or supported GitHub attachment;
+6. poll `get_check_in_status` until the repository-owned WebP exists;
+7. explicitly approve `save_check_in`;
+8. explicitly approve `open_check_in_pr`;
+9. call `get_check_in_status` and report CI;
+10. stop at the draft PR;
+11. only after a separate user decision, call `mark_check_in_ready` with the exact confirmation;
+12. keep `merge_check_in_pr` unavailable during this first test.
 
-After that boundary exists:
+Success means ChatGPT produces a narrow, CI-backed draft PR containing the typed entry and matching repository-owned image without manual GitHub API composition or direct-main writes.
 
-1. deploy behind a stable public HTTPS endpoint;
-2. set the backend and GitHub secrets in the host’s secret manager;
-3. connect the private app to `https://YOUR_HOST/mcp`;
-4. complete the OAuth consent flow;
-5. refresh the app after changing tool descriptors;
-6. start with `plan_check_in`, then approve each write separately.
+## Deliberate boundaries
 
-Current OpenAI guidance for tool-only apps, MCP server setup, authentication, annotations, and remote deployment:
+- private plugin initially;
+- no widget in phase 1;
+- no arbitrary repository, branch, path, workflow, or download URL;
+- no direct-main writes;
+- no hidden private ChatGPT conversation provenance;
+- no generated artwork spending without a separate approved phase;
+- no merge tool unless it is separately enabled;
+- no claim of completion until a hosted or tunneled ChatGPT acceptance run succeeds.
 
-- https://developers.openai.com/plugins/quickstart
+## Official references
+
+- https://developers.openai.com/plugins/deploy/connect-chatgpt
 - https://developers.openai.com/plugins/build/mcp-server
 - https://developers.openai.com/plugins/build/auth
 - https://developers.openai.com/plugins/plan/tools
 - https://developers.openai.com/plugins/reference
-
-MCP transport reference:
-
+- https://developers.openai.com/api/docs/guides/secure-mcp-tunnels
+- https://help.openai.com/en/articles/11487775-connectors-in-chatgpt
 - https://modelcontextprotocol.io/specification/2025-06-18/basic/transports
 - https://modelcontextprotocol.io/specification/2025-06-18/basic/lifecycle
-
-## Deployment
-
-The included Dockerfile runs the service on `PORT` and exposes `/mcp` plus `/healthz`.
-
-```bash
-docker build -t scrapbook-check-in-mcp services/check-in-mcp
-docker run --rm -p 8787:8787 \
-  -e SCRAPBOOK_MCP_BEARER_TOKEN \
-  -e SCRAPBOOK_GITHUB_TOKEN \
-  scrapbook-check-in-mcp
-```
-
-Use a host with stable HTTPS, normal Node HTTP streaming support, secret storage, request logs, and health checks. Keep this service out of the public Scrapbook website deployment. Put the OAuth boundary in front of `/mcp` before connecting authenticated ChatGPT write actions.
-
-## First acceptance test
-
-1. call `plan_check_in` with a small text-and-card proposal and an explicitly chosen history route;
-2. call `reserve_check_in` after approval;
-3. call `import_check_in_artwork` with a Drive file ID;
-4. poll `get_check_in_status` until the WebP exists;
-5. call `save_check_in` after approval;
-6. call `open_check_in_pr` after approval;
-7. use `get_check_in_status` to report CI;
-8. stop at the draft PR until the user explicitly confirms `mark PR #<number> ready` or `merge PR #<number>`.
-
-## Deferred work
-
-- OAuth 2.1 gateway integration or direct protected-resource implementation;
-- GitHub App installation-token minting;
-- hosted end-to-end test against the real repository;
-- optional first-party image generation after explicit cost and publishing approval;
-- an upload/review widget after the tool flow proves itself in ChatGPT.
