@@ -1,7 +1,14 @@
 import { GalleryScene } from '@/components/gallery-scene';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { agentVisits } from '@/lib/agent-guestbook';
+import fs from 'node:fs';
+import path from 'node:path';
+import Image from 'next/image';
 import type { Metadata } from 'next';
+
+const releaseRaccoonSticker = `data:image/webp;base64,${fs
+  .readFileSync(path.join(process.cwd(), 'public/images/gallery/release-raccoon-sticker.b64.txt'), 'utf8')
+  .trim()}`;
 
 export const metadata: Metadata = {
   title: 'Gallery',
@@ -41,6 +48,14 @@ export default function GalleryPage() {
             <div className="pointer-events-none absolute left-4 top-4 rotate-[-3deg] border border-white/30 bg-black/72 px-3 py-2 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-white sm:left-5 sm:top-5">
               Mothbit was here
             </div>
+            <Image
+              src={releaseRaccoonSticker}
+              alt="Release Raccoon was here"
+              width={160}
+              height={160}
+              unoptimized
+              className="pointer-events-none absolute -bottom-3 -right-2 h-auto w-32 rotate-[7deg] drop-shadow-[0_18px_28px_rgba(0,0,0,0.48)] sm:-bottom-5 sm:right-1 sm:w-40"
+            />
           </div>
 
           <div className="flex min-w-0 flex-col justify-between gap-7 p-5 sm:p-7">
