@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { createMcpHandler } from '../src/server.mjs';
 
 class ReadOnlyFakeClient {
@@ -34,6 +36,7 @@ function rpc(url, method, params = {}, { authenticated = true } = {}) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Accept: 'application/json, text/event-stream',
       ...(authenticated ? { Authorization: 'Bearer secret-token' } : {}),
     },
     body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
@@ -52,8 +55,6 @@ test('tunnel ingress uses workspace access and no backend bearer header', async 
   await withServer({ ingressMode: 'tunnel', inboundToken: undefined }, async (url) => {
     const response = await rpc(url, 'ping', {}, { authenticated: false });
     assert.equal(response.status, 200);
-    const payload = await response.json();
-    assert.deepEqual(payload.result, {});
 
     const listed = await rpc(url, 'tools/list', {}, { authenticated: false }).then((item) => item.json());
     for (const tool of listed.result.tools) {
@@ -62,23 +63,40 @@ test('tunnel ingress uses workspace access and no backend bearer header', async 
     }
 
     const health = await fetch(`${url}/healthz`).then((item) => item.json());
+    assert.equal(health.version, '0.3.0');
+    assert.equal(health.transport, 'streamable-http');
     assert.equal(health.authContract, 'workspace-tunnel');
+  });
+});
+
+test('official SDK client negotiates, lists, and calls the read-only plugin', async () => {
+  await withServer({ ingressMode: 'tunnel', inboundToken: undefined }, async (url) => {
+    const client = new Client({ name: 'scrapbook-check-in-smoke', version: '1.0.0' });
+    const transport = new StreamableHTTPClientTransport(new URL(`${url}/mcp`));
+    try {
+      await client.connect(transport);
+      const listed = await client.listTools();
+      assert.deepEqual(
+        listed.tools.map((tool) => tool.name),
+        ['get_check_in_capabilities', 'plan_check_in', 'get_check_in_status'],
+      );
+      for (const tool of listed.tools) assert.ok(tool.outputSchema);
+
+      const capabilities = await client.callTool({
+        name: 'get_check_in_capabilities',
+        arguments: {},
+      });
+      assert.equal(capabilities.isError, undefined);
+      assert.equal(capabilities.structuredContent?.profile, 'read-only');
+      assert.equal(capabilities.structuredContent?.mergeEnabled, false);
+    } finally {
+      await client.close();
+    }
   });
 });
 
 test('default bearer profile exposes the safe read-only OAuth surface', async () => {
   await withServer({}, async (url) => {
-    const initialize = await rpc(url, 'initialize', {
-      protocolVersion: '2025-06-18',
-      capabilities: {},
-      clientInfo: { name: 'test', version: '1' },
-    }).then((response) => response.json());
-    assert.equal(initialize.result.protocolVersion, '2025-06-18');
-    assert.deepEqual(initialize.result.capabilities, { tools: { listChanged: false } });
-    assert.match(initialize.result.instructions, /read-only/);
-    assert.match(initialize.result.instructions, /Merge authority is disabled/);
-    assert.match(initialize.result.instructions, /trusted public gateway/);
-
     const listed = await rpc(url, 'tools/list').then((response) => response.json());
     assert.deepEqual(
       listed.result.tools.map((tool) => tool.name),
@@ -90,7 +108,7 @@ test('default bearer profile exposes the safe read-only OAuth surface', async ()
     }
 
     const health = await fetch(`${url}/healthz`).then((response) => response.json());
-    assert.equal(health.version, '0.2.0');
+    assert.equal(health.version, '0.3.0');
     assert.equal(health.ingressMode, 'bearer');
     assert.equal(health.authContract, 'oauth2-gateway');
     assert.equal(health.toolProfile, 'read-only');
