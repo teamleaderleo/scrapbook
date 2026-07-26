@@ -147,7 +147,10 @@ export function SpaceView() {
         onEditorToggle={() => setEditorOpen(!editorOpen)}
         isEditorOpen={editorOpen}
       />
-      <main className="min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:p-4">
+      <main
+        data-space-scroll-region
+        className="min-h-0 flex-1 overflow-y-auto px-3 pt-3 pb-[calc(5.75rem+env(safe-area-inset-bottom))] sm:px-4 sm:pt-4 md:pb-4"
+      >
         {error ? (
           <div
             className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm"
