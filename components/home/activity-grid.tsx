@@ -41,7 +41,6 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
   const previousLatest = useRef(days.at(-1)?.date ?? '');
   const hideTimer = useRef<number | null>(null);
   const positionFrame = useRef<number | null>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
   const pendingPosition = useRef({ x: 12, y: 12 });
 
   useEffect(() => {
@@ -56,6 +55,8 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
     return () => {
       if (hideTimer.current !== null) window.clearTimeout(hideTimer.current);
       if (positionFrame.current !== null) window.cancelAnimationFrame(positionFrame.current);
+      document.documentElement.style.removeProperty('--activity-tooltip-x');
+      document.documentElement.style.removeProperty('--activity-tooltip-y');
     };
   }, []);
 
@@ -86,12 +87,9 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
 
     if (positionFrame.current !== null) return;
     positionFrame.current = window.requestAnimationFrame(() => {
-      const tooltip = tooltipRef.current;
-      if (tooltip) {
-        const { x, y } = pendingPosition.current;
-        tooltip.style.setProperty('--tooltip-x', `${x}px`);
-        tooltip.style.setProperty('--tooltip-y', `${y}px`);
-      }
+      const { x, y } = pendingPosition.current;
+      document.documentElement.style.setProperty('--activity-tooltip-x', `${x}px`);
+      document.documentElement.style.setProperty('--activity-tooltip-y', `${y}px`);
       positionFrame.current = null;
     });
   };
@@ -166,9 +164,11 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
 
       {finePointer && tooltipLabel ? (
         <div
-          ref={tooltipRef}
           className={`pointer-events-none fixed left-0 top-0 z-[90] whitespace-nowrap rounded-lg border border-border/70 bg-popover/88 px-2.5 py-1.5 font-mono text-[10px] font-semibold text-popover-foreground shadow-[0_8px_24px_rgba(20,20,24,0.2)] backdrop-blur-xl transition-opacity duration-100 ${tooltipVisible ? 'opacity-100' : 'opacity-0'}`}
-          style={{ transform: 'translate3d(var(--tooltip-x, 12px), var(--tooltip-y, 12px), 0)' }}
+          style={{
+            transform:
+              'translate3d(var(--activity-tooltip-x, 12px), var(--activity-tooltip-y, 12px), 0)',
+          }}
         >
           {tooltipLabel}
         </div>
