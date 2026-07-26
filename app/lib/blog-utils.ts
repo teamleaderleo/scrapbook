@@ -2,40 +2,54 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { unstable_cache } from 'next/cache';
-import { BlogPost, PostCategory } from '@/app/lib/definitions/blog';
+import {
+  type AuthorType,
+  type BlogPost,
+  type EditorialStatus,
+  type PostCategory,
+} from '@/app/lib/definitions/blog';
 
 const POSTS_PATH = path.join(process.cwd(), 'content/posts');
 
-function formatDate(date: string | Date): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return dateObj.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+function normaliseDate(value: string | Date) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) throw new Error(`Invalid blog post date: ${String(value)}`);
+
+  return {
+    iso: date.toISOString(),
+    display: new Intl.DateTimeFormat('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(date),
+  };
 }
 
 function parsePost(fileName: string): BlogPost {
   const slug = fileName.replace(/\.mdx?$/, '');
   const filePath = path.join(POSTS_PATH, fileName);
   const fileContents = fs.readFileSync(filePath, 'utf8');
-  
   const { data, content } = matter(fileContents);
-  
+  const date = normaliseDate(data.date);
+
   return {
-    id: data.id,
+    id: Number(data.id),
     slug,
-    title: data.title,
-    date: formatDate(data.date),
+    title: String(data.title),
+    date: date.display,
+    dateIso: date.iso,
     category: data.category as PostCategory,
-    blurb: data.blurb,
-    content: content,
+    blurb: String(data.blurb),
+    content,
+    author: String(data.author ?? 'Scrapbook archive'),
+    authorType: (data.authorType ?? (data.author ? 'human' : 'collective')) as AuthorType,
+    model: data.model ? String(data.model) : undefined,
+    editor: data.editor ? String(data.editor) : undefined,
+    editorialStatus: (data.editorialStatus ?? 'published') as EditorialStatus,
   };
 }
 
-// Cache the blog posts list
-// Cache indefinitely in production (new posts = new deployment)
-// Short cache in development for quick iteration
 const cacheConfig: { revalidate: number | false; tags: string[] } = {
   revalidate: process.env.NODE_ENV === 'development' ? 10 : false,
   tags: ['blog-posts'],
@@ -47,35 +61,31 @@ export const getBlogPosts = unstable_cache(
       .readdirSync(POSTS_PATH)
       .filter((file) => /\.mdx?$/.test(file));
 
-    const posts = postFiles.map(parsePost);
-
-    return posts.sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
+    return postFiles
+      .map(parsePost)
+      .sort((a, b) => new Date(b.dateIso).getTime() - new Date(a.dateIso).getTime());
   },
-  ['blog-posts'],
-  cacheConfig
+  ['blog-posts-v2'],
+  cacheConfig,
 );
 
-// Cache individual blog posts
 export const getBlogPost = unstable_cache(
   async (slug: string): Promise<BlogPost | null> => {
     try {
       return parsePost(`${slug}.mdx`);
-    } catch (e) {
+    } catch {
       return null;
     }
   },
-  ['blog-post'],
-  cacheConfig
+  ['blog-post-v2'],
+  cacheConfig,
 );
 
-// Cache posts by category
 export const getPostsByCategory = unstable_cache(
   async (category: PostCategory): Promise<BlogPost[]> => {
     const allPosts = await getBlogPosts();
-    return allPosts.filter(post => post.category === category);
+    return allPosts.filter((post) => post.category === category);
   },
-  ['blog-posts-by-category'],
-  cacheConfig
+  ['blog-posts-by-category-v2'],
+  cacheConfig,
 );
