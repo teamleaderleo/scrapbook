@@ -79,14 +79,26 @@ function normaliseIngressMode(value) {
   return value;
 }
 
-function pluginInstructions(registry) {
+function applyIngressSecurity(registry, ingressMode) {
+  if (ingressMode !== 'tunnel') return;
+  for (const tool of registry.tools) {
+    const securitySchemes = [{ type: 'noauth' }];
+    tool.securitySchemes = securitySchemes;
+    tool._meta = { ...tool._meta, securitySchemes };
+  }
+}
+
+function pluginInstructions(registry, ingressMode) {
   const writes = registry.profile === 'full'
     ? 'Ask for explicit approval before each write.'
     : 'This connection is read-only; do not ask it to change GitHub.';
   const merge = registry.allowMerge
     ? 'Merge is a separate destructive tool and requires the exact pull request confirmation.'
     : 'Merge authority is disabled on this connection.';
-  return `Read capabilities first. ${writes} Preserve the fixed Scrapbook branch, importer, typed guestbook, provenance, draft PR, and green-check boundaries. ${merge}`;
+  const auth = ingressMode === 'tunnel'
+    ? 'Connection access is controlled by the private OpenAI tunnel and workspace permissions.'
+    : 'User OAuth is enforced by the trusted public gateway before this backend bearer boundary.';
+  return `Read capabilities first. ${writes} Preserve the fixed Scrapbook branch, importer, typed guestbook, provenance, draft PR, and green-check boundaries. ${merge} ${auth}`;
 }
 
 export function createMcpHandler({
@@ -105,6 +117,7 @@ export function createMcpHandler({
 } = {}) {
   const resolvedIngressMode = normaliseIngressMode(ingressMode);
   const registry = createToolRegistry(githubClient, { profile: toolProfile, allowMerge });
+  applyIngressSecurity(registry, resolvedIngressMode);
 
   return async function handle(req, res) {
     const requestId = req.headers['x-request-id'] || randomUUID();
@@ -116,6 +129,7 @@ export function createMcpHandler({
         service: SERVER_NAME,
         version: SERVER_VERSION,
         ingressMode: resolvedIngressMode,
+        authContract: resolvedIngressMode === 'tunnel' ? 'workspace-tunnel' : 'oauth2-gateway',
         toolProfile: registry.profile,
         mergeEnabled: registry.allowMerge,
       });
@@ -165,7 +179,7 @@ export function createMcpHandler({
             protocolVersion: negotiatedProtocol(message.params?.protocolVersion),
             capabilities: { tools: { listChanged: false } },
             serverInfo: { name: SERVER_NAME, title: 'Scrapbook check-in plugin', version: SERVER_VERSION },
-            instructions: pluginInstructions(registry),
+            instructions: pluginInstructions(registry, resolvedIngressMode),
           };
           break;
         case 'ping':
