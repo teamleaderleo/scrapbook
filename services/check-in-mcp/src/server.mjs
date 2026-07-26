@@ -1,42 +1,36 @@
-import http from 'node:http';
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
+import express from 'express';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { ScrapbookGitHubClient } from './github-client.mjs';
 import { createToolRegistry } from './tools.mjs';
 
 const SERVER_NAME = 'scrapbook-check-in-mcp';
-const SERVER_VERSION = '0.2.0';
-const LATEST_PROTOCOL = '2025-06-18';
-const SUPPORTED_PROTOCOLS = new Set(['2025-06-18', '2025-03-26']);
+const SERVER_VERSION = '0.3.0';
 const INGRESS_MODES = new Set(['bearer', 'tunnel']);
-const MAX_BODY_BYTES = 1024 * 1024;
-
-function jsonResponse(res, status, body, extraHeaders = {}) {
-  const payload = body === undefined ? '' : JSON.stringify(body);
-  res.writeHead(status, {
-    'Content-Type': 'application/json; charset=utf-8',
-    'Cache-Control': 'no-store',
-    ...extraHeaders,
-  });
-  res.end(payload);
-}
-
-function jsonRpcResult(id, result) {
-  return { jsonrpc: '2.0', id, result };
-}
-
-function jsonRpcError(id, code, message, data) {
-  return {
-    jsonrpc: '2.0',
-    id: id ?? null,
-    error: { code, message, ...(data === undefined ? {} : { data }) },
-  };
-}
 
 function constantTimeEquals(left, right) {
   const a = Buffer.from(left);
   const b = Buffer.from(right);
   return a.length === b.length && timingSafeEqual(a, b);
+}
+
+function normaliseIngressMode(value) {
+  if (!INGRESS_MODES.has(value)) {
+    throw new Error(`SCRAPBOOK_INGRESS_MODE must be bearer or tunnel, received: ${value}`);
+  }
+  return value;
+}
+
+function parseAllowedOrigins(value = process.env.SCRAPBOOK_ALLOWED_ORIGINS || '') {
+  return new Set(
+    value
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean),
+  );
 }
 
 function bearerIsValid(req, expectedToken, ingressMode) {
@@ -53,30 +47,23 @@ function originIsAllowed(req, allowedOrigins) {
   return allowedOrigins.has(origin);
 }
 
-async function readJson(req) {
-  let size = 0;
-  const chunks = [];
-  for await (const chunk of req) {
-    size += chunk.length;
-    if (size > MAX_BODY_BYTES) throw Object.assign(new Error('Request body exceeds 1 MiB.'), { status: 413 });
-    chunks.push(chunk);
-  }
-  const text = Buffer.concat(chunks).toString('utf8');
-  if (!text) throw Object.assign(new Error('Request body is required.'), { status: 400 });
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw Object.assign(new Error('Request body must be valid JSON.'), { status: 400 });
-  }
+function sendJson(res, status, body, extraHeaders = {}) {
+  const payload = JSON.stringify(body);
+  res.statusCode = status;
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store');
+  for (const [name, value] of Object.entries(extraHeaders)) res.setHeader(name, value);
+  res.end(payload);
 }
 
-function negotiatedProtocol(requested) {
-  return SUPPORTED_PROTOCOLS.has(requested) ? requested : LATEST_PROTOCOL;
-}
-
-function normaliseIngressMode(value) {
-  if (!INGRESS_MODES.has(value)) throw new Error(`SCRAPBOOK_INGRESS_MODE must be bearer or tunnel, received: ${value}`);
-  return value;
+function setCorsHeaders(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Authorization, Content-Type, Accept, Mcp-Session-Id, Last-Event-ID, MCP-Protocol-Version, X-Request-Id',
+  );
+  res.setHeader('Access-Control-Expose-Headers', 'Mcp-Session-Id, X-Request-Id');
 }
 
 function applyIngressSecurity(registry, ingressMode) {
@@ -107,112 +94,128 @@ function pluginInstructions(registry, ingressMode) {
   return `Read capabilities first. ${writes} Preserve the fixed Scrapbook branch, importer, typed guestbook, provenance, draft PR, and green-check boundaries. ${merge} ${auth}`;
 }
 
-export function createMcpHandler({
+function resolveRuntime({
   githubClient = new ScrapbookGitHubClient(),
   inboundToken = process.env.SCRAPBOOK_MCP_BEARER_TOKEN,
   ingressMode = process.env.SCRAPBOOK_INGRESS_MODE || 'bearer',
   toolProfile = process.env.SCRAPBOOK_TOOL_PROFILE || 'read-only',
   allowMerge = process.env.SCRAPBOOK_ALLOW_MERGE === 'true',
-  allowedOrigins = new Set(
-    (process.env.SCRAPBOOK_ALLOWED_ORIGINS || '')
-      .split(',')
-      .map((value) => value.trim())
-      .filter(Boolean),
-  ),
+  allowedOrigins = parseAllowedOrigins(),
   logger = console,
 } = {}) {
   const resolvedIngressMode = normaliseIngressMode(ingressMode);
   const registry = createToolRegistry(githubClient, { profile: toolProfile, allowMerge });
   applyIngressSecurity(registry, resolvedIngressMode);
+  return {
+    inboundToken,
+    ingressMode: resolvedIngressMode,
+    allowedOrigins,
+    logger,
+    registry,
+    instructions: pluginInstructions(registry, resolvedIngressMode),
+  };
+}
 
-  return async function handle(req, res) {
-    const requestId = req.headers['x-request-id'] || randomUUID();
-    res.setHeader('X-Request-Id', requestId);
+function healthPayload(runtime) {
+  return {
+    ok: true,
+    service: SERVER_NAME,
+    version: SERVER_VERSION,
+    transport: 'streamable-http',
+    ingressMode: runtime.ingressMode,
+    authContract: runtime.ingressMode === 'tunnel' ? 'workspace-tunnel' : 'oauth2-gateway',
+    toolProfile: runtime.registry.profile,
+    mergeEnabled: runtime.registry.allowMerge,
+  };
+}
 
-    if (req.url === '/healthz' && req.method === 'GET') {
-      return jsonResponse(res, 200, {
-        ok: true,
-        service: SERVER_NAME,
-        version: SERVER_VERSION,
-        ingressMode: resolvedIngressMode,
-        authContract: resolvedIngressMode === 'tunnel' ? 'workspace-tunnel' : 'oauth2-gateway',
-        toolProfile: registry.profile,
-        mergeEnabled: registry.allowMerge,
+export function createProtocolServer(runtime) {
+  const server = new Server(
+    { name: SERVER_NAME, version: SERVER_VERSION },
+    {
+      capabilities: { tools: { listChanged: false } },
+      instructions: runtime.instructions,
+    },
+  );
+
+  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: runtime.registry.tools }));
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    const startedAt = Date.now();
+    const name = request.params.name;
+    const result = normaliseToolResult(await runtime.registry.call(name, request.params.arguments || {}));
+    runtime.logger.info?.({
+      method: 'tools/call',
+      tool: name,
+      durationMs: Date.now() - startedAt,
+      isError: Boolean(result?.isError),
+    });
+    return result;
+  });
+
+  return server;
+}
+
+export async function handleMcpRequest(req, res, options = {}) {
+  const runtime = options.registry ? options : resolveRuntime(options);
+  const requestId = req.headers['x-request-id'] || randomUUID();
+  res.setHeader('X-Request-Id', requestId);
+  setCorsHeaders(res);
+
+  if (req.method === 'OPTIONS') {
+    res.statusCode = 204;
+    res.end();
+    return;
+  }
+  if (!originIsAllowed(req, runtime.allowedOrigins)) {
+    sendJson(res, 403, { error: 'Origin is not allowed.' });
+    return;
+  }
+  if (!bearerIsValid(req, runtime.inboundToken, runtime.ingressMode)) {
+    sendJson(res, 401, { error: 'Bearer authentication is required.' }, { 'WWW-Authenticate': 'Bearer' });
+    return;
+  }
+
+  const server = createProtocolServer(runtime);
+  const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
+  let closed = false;
+  const close = () => {
+    if (closed) return;
+    closed = true;
+    transport.close().catch(() => {});
+    server.close().catch(() => {});
+  };
+  res.on?.('close', close);
+
+  try {
+    await server.connect(transport);
+    await transport.handleRequest(req, res, req.body);
+  } catch (error) {
+    runtime.logger.error?.({ requestId, method: req.body?.method, error: error?.message });
+    if (!res.headersSent) {
+      sendJson(res, 500, {
+        jsonrpc: '2.0',
+        error: { code: -32603, message: 'Internal server error', data: { requestId } },
+        id: null,
       });
     }
-    if (req.url !== '/mcp') return jsonResponse(res, 404, { error: 'Not found.' });
-    if (!originIsAllowed(req, allowedOrigins)) return jsonResponse(res, 403, { error: 'Origin is not allowed.' });
-    if (!bearerIsValid(req, inboundToken, resolvedIngressMode)) {
-      res.setHeader('WWW-Authenticate', 'Bearer');
-      return jsonResponse(res, 401, { error: 'Bearer authentication is required.' });
-    }
-    if (req.method === 'GET') {
-      return jsonResponse(
-        res,
-        405,
-        { error: 'This tool-only server uses JSON responses over POST and does not expose an SSE stream.' },
-        { Allow: 'POST, GET' },
-      );
-    }
-    if (req.method !== 'POST') return jsonResponse(res, 405, { error: 'Method not allowed.' }, { Allow: 'POST, GET' });
-    const contentType = req.headers['content-type'] || '';
-    if (!contentType.toLowerCase().startsWith('application/json')) {
-      return jsonResponse(res, 415, { error: 'Content-Type must be application/json.' });
-    }
+  } finally {
+    if (res.writableEnded) close();
+  }
+}
 
-    let message;
-    try {
-      message = await readJson(req);
-    } catch (error) {
-      return jsonResponse(res, error.status || 400, jsonRpcError(null, -32700, error.message));
-    }
-    if (Array.isArray(message) || !message || message.jsonrpc !== '2.0' || typeof message.method !== 'string') {
-      return jsonResponse(res, 400, jsonRpcError(message?.id, -32600, 'Invalid JSON-RPC request.'));
-    }
+export function createHttpApp(options = {}) {
+  const runtime = resolveRuntime(options);
+  const app = express();
+  app.disable('x-powered-by');
+  app.use(express.json({ limit: '1mb' }));
+  app.get('/healthz', (_req, res) => sendJson(res, 200, healthPayload(runtime)));
+  app.all('/mcp', (req, res) => handleMcpRequest(req, res, runtime));
+  return app;
+}
 
-    const startedAt = Date.now();
-    try {
-      if (message.method === 'notifications/initialized' || message.method.startsWith('notifications/')) {
-        res.writeHead(202, { 'Cache-Control': 'no-store' });
-        res.end();
-        return;
-      }
-
-      let result;
-      switch (message.method) {
-        case 'initialize':
-          result = {
-            protocolVersion: negotiatedProtocol(message.params?.protocolVersion),
-            capabilities: { tools: { listChanged: false } },
-            serverInfo: { name: SERVER_NAME, title: 'Scrapbook check-in plugin', version: SERVER_VERSION },
-            instructions: pluginInstructions(registry, resolvedIngressMode),
-          };
-          break;
-        case 'ping':
-          result = {};
-          break;
-        case 'tools/list':
-          result = { tools: registry.tools };
-          break;
-        case 'tools/call': {
-          const name = message.params?.name;
-          if (typeof name !== 'string') {
-            return jsonResponse(res, 200, jsonRpcError(message.id, -32602, 'tools/call requires params.name.'));
-          }
-          result = normaliseToolResult(await registry.call(name, message.params?.arguments || {}));
-          break;
-        }
-        default:
-          return jsonResponse(res, 200, jsonRpcError(message.id, -32601, `Method not found: ${message.method}`));
-      }
-
-      logger.info?.({ requestId, method: message.method, tool: message.params?.name, durationMs: Date.now() - startedAt });
-      return jsonResponse(res, 200, jsonRpcResult(message.id, result));
-    } catch (error) {
-      logger.error?.({ requestId, method: message.method, durationMs: Date.now() - startedAt, error: error?.message });
-      return jsonResponse(res, 500, jsonRpcError(message.id, -32603, 'Internal server error.', { requestId }));
-    }
-  };
+// Kept for existing callers while the implementation now uses Express + the official SDK.
+export function createMcpHandler(options = {}) {
+  return createHttpApp(options);
 }
 
 export function startServer({
@@ -228,8 +231,9 @@ export function startServer({
   if (ingressMode === 'tunnel' && !['127.0.0.1', '::1', 'localhost'].includes(host)) {
     throw new Error('Tunnel ingress must bind only to loopback. Set HOST=127.0.0.1.');
   }
-  const server = http.createServer(createMcpHandler({ ...options, ingressMode, inboundToken }));
-  server.listen(port, host, () => {
+
+  const app = createHttpApp({ ...options, ingressMode, inboundToken });
+  const server = app.listen(port, host, () => {
     console.log(`${SERVER_NAME} listening on http://${host}:${port}/mcp (${ingressMode}, ${process.env.SCRAPBOOK_TOOL_PROFILE || 'read-only'})`);
   });
   return server;
