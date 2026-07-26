@@ -1,50 +1,93 @@
 # Deployment workflow
 
-Vercel Hobby accounts have two rolling limits relevant to this repository:
+Scrapbook treats GitHub CI and Vercel deployment as separate signals.
 
-- 32 builds per 3,600 seconds;
-- 100 deployments per 86,400 seconds.
+GitHub CI is the required merge signal. It runs lint, typecheck, unit tests, the production build, and Chromium/WebKit regressions. A skipped Vercel preview is an intentional deployment decision, not a code failure.
 
-Using Next.js is classed as a build. The Git integration creates a preview deployment for each push to an ordinary non-production branch and a production deployment for pushes to `main`.
+## Deployment policy
 
-The current failing GitHub checks point to Vercel's `build-rate-limit`, so the immediate lockout is the 32-build hourly limit. The daily deployment limit remains a second ceiling.
+| Source | Vercel behaviour |
+| --- | --- |
+| `main` | Deploy automatically to production. |
+| Ordinary feature, fix, docs, chore, internal, audit, or agent branches | Skip automatic Vercel deployment. |
+| Commit message containing `[preview]` | Promote that commit to `preview/opt-in/<source-branch>` and deploy it. |
+| Branch prefixed `preview/` | Deploy every push as a persistent preview branch. |
+| Manual or non-Git deployment with no Git ref | Continue the deployment. |
 
-The counters begin before a deployment succeeds. A deployment can consume quota when its build is cancelled or later errors.
+The marker is exact and case-sensitive: use `[preview]`.
 
-## Branches that receive previews
+## How the repository enforces the policy
 
-Use a normal feature branch when browser inspection provides useful evidence:
+There are three small controls.
 
-- `feature/*` for visible product work;
-- `fix/*` for behaviour that needs a live reproduction;
-- `preview/*` for an explicit visual review pass.
+### 1. Git branch gate
 
-These branches continue to deploy automatically.
+The root `vercel.json` uses `git.deploymentEnabled` with a deny-by-default rule:
 
-## Branches that use GitHub CI only
+- `main` is enabled;
+- `preview/**` is enabled;
+- every other Git branch is disabled.
 
-The root `vercel.json` disables automatic deployments for:
+This gate runs at the Git integration layer, before Vercel creates a routine feature-branch deployment. It is the quota-saving control.
 
-- `docs/**`;
-- `chore/**`;
-- `internal/**`;
-- `audit/**`.
+### 2. Commit-marker promotion
 
-Use these prefixes for prose, repository maintenance, investigations, and planning that can be judged through diffs and GitHub Actions.
+`.github/workflows/vercel-preview-opt-in.yml` watches non-production pushes. When the latest commit message contains `[preview]`, it force-updates a stable branch named:
+
+```text
+preview/opt-in/<source-branch>
+```
+
+Vercel sees that explicit preview branch and deploys the marked commit. Later ordinary commits on the source branch stay CI-only until another commit carries `[preview]`.
+
+A contributor who wants every push deployed can work directly on a `preview/…` branch instead.
+
+### 3. Vercel ignored-build safeguard
+
+`scripts/vercel-preview-policy.mjs` is the repository-owned final decision for any deployment that reaches Vercel's Ignored Build Step. It continues for:
+
+- `main`;
+- `preview/…` branches;
+- a commit containing `[preview]`;
+- a deployment with no Git ref.
+
+It exits `0` for a routine branch so Vercel ignores the build, and exits `1` when the build should continue. The command prints one concise reason in the deployment log.
+
+The decision function is pure and covered by unit tests. The ignored-build command is defence in depth; the branch gate does the quota-saving work for ordinary Git pushes.
+
+## When a preview is warranted
+
+Request a preview when a shareable deployed URL will change the review decision, especially for:
+
+- visual or responsive inspection;
+- serverless or runtime-environment behaviour;
+- authentication, cookies, headers, redirects, middleware, or edge behaviour;
+- Vercel routing, caching, image optimisation, or deployment configuration;
+- stakeholder review outside the local and CI environments.
+
+Routine prose, tests, repository maintenance, and changes already covered by deterministic browser CI should stay on ordinary branches without a marker.
 
 ## Practical cadence
 
 1. Run local checks before pushing when local access is available.
-2. Accumulate related changes on one branch.
-3. Let GitHub CI answer lint, type, unit, and build questions.
-4. Push a visual branch when a live browser review will change the decision.
-5. Merge accepted work to `main` for the production deployment.
+2. Accumulate related changes instead of pushing tiny deployment probes.
+3. Let GitHub CI answer lint, type, unit, build, and browser questions.
+4. Add `[preview]` to one commit when a deployed review URL adds useful evidence, or use a `preview/…` branch for a longer preview session.
+5. Merge accepted work to `main` for the automatic production deployment.
+
+## Quota accounting
+
+Vercel Hobby accounts have rolling build and deployment limits. Vercel's Ignored Build Step executes after a deployment has already been created, and Vercel documents ignored or cancelled builds as counting toward deployment quotas and concurrent build slots.
+
+For that reason, this repository does not rely on the ignored-build command alone. `git.deploymentEnabled` blocks routine branches before deployment creation. The ignored-build script remains a readable safeguard for manual deployments and any deployment that reaches the build stage through another route.
 
 ## Retrying a blocked production deployment
 
-When a `main` deployment hits the rolling build limit, wait until enough earlier builds leave the 3,600-second window, then trigger one deliberate retry. Avoid repeated rapid retries because every created deployment consumes quota even when Vercel cancels it before building.
+When a `main` deployment hits a rolling limit, wait until enough earlier activity leaves the quota window, then trigger one deliberate retry. Repeated rapid retries create more deployment attempts and extend the problem.
 
-Vercel's Ignored Build Step runs after a deployment has already been created. Cancelled builds from that mechanism still count toward deployment quotas and concurrent build slots, so branch-level `git.deploymentEnabled` rules are the useful control for this repository.
+## Project boundary
+
+This policy applies to the existing Vercel project `setzen`. It changes repository-controlled Git deployment behaviour only. Production domains, project environment variables, and runtime settings stay unchanged.
 
 ## Sources
 
@@ -52,3 +95,4 @@ Vercel's Ignored Build Step runs after a deployment has already been created. Ca
 - [Deploying Git repositories with Vercel](https://vercel.com/docs/git)
 - [Git configuration](https://vercel.com/docs/project-configuration/git-configuration)
 - [Project settings and Ignored Build Step accounting](https://vercel.com/docs/project-configuration/project-settings)
+- [System environment variables](https://vercel.com/docs/environment-variables/system-environment-variables)
