@@ -70,15 +70,10 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
   }, []);
 
   return (
-    <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
-      <div className="flex h-4 items-center justify-end" aria-live="polite">
-        {updating ? (
-          <span className="flex items-center gap-1.5 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-black/50 dark:text-white/50">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current motion-reduce:animate-none" />
-            Updating activity
-          </span>
-        ) : null}
-      </div>
+    <div className="relative grid min-w-0 gap-4 lg:grid-cols-[minmax(15rem,0.42fr)_minmax(0,1fr)] lg:items-start">
+      <span className="sr-only" aria-live="polite">
+        {updating ? 'Updating GitHub activity' : ''}
+      </span>
       <ActivityScoreboard
         today={activity.today}
         weekTotal={activity.weekTotal}
