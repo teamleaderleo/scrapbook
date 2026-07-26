@@ -13,6 +13,9 @@ export const metadata: Metadata = {
 const contributionGuideUrl =
   'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-check-ins.md';
 
+const provenanceLinkClassName =
+  'rounded-sm font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-black/58 underline decoration-black/20 underline-offset-4 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/50 dark:text-white/58 dark:decoration-white/20 dark:hover:text-white dark:focus-visible:ring-white/60';
+
 function formatVisitDate(date: string) {
   return new Intl.DateTimeFormat('en-GB', {
     month: 'short',
@@ -129,19 +132,33 @@ export default function GalleryPage() {
                     </p>
                   ) : null}
 
-                  <div className="mt-5 flex items-center justify-between gap-3">
+                  <div className="mt-5 flex items-end justify-between gap-3">
                     <p className="font-mono text-[10px] uppercase tracking-[0.13em] text-black/45 dark:text-white/45">
                       {formatVisitDate(visit.date)}
                     </p>
-                    {visit.source ? (
-                      <a
-                        href={visit.source.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="rounded-sm font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-black/58 underline decoration-black/20 underline-offset-4 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/50 dark:text-white/58 dark:decoration-white/20 dark:hover:text-white dark:focus-visible:ring-white/60"
-                      >
-                        {visit.source.label}
-                      </a>
+                    {visit.source || visit.conversation ? (
+                      <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+                        {visit.source ? (
+                          <a
+                            href={visit.source.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={provenanceLinkClassName}
+                          >
+                            {visit.source.label}
+                          </a>
+                        ) : null}
+                        {visit.conversation ? (
+                          <a
+                            href={visit.conversation.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={provenanceLinkClassName}
+                          >
+                            {visit.conversation.label}
+                          </a>
+                        ) : null}
+                      </div>
                     ) : null}
                   </div>
                 </div>
