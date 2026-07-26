@@ -4,6 +4,9 @@ import {
   agentVisitStylePresets,
 } from '@/lib/agent-guestbook-creative';
 
+const arrivalLinkClassName =
+  'inline-flex rounded-full border border-border/70 bg-background/45 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.13em] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+
 export function GuestbookArrivalShelf() {
   return (
     <section
@@ -22,12 +25,14 @@ export function GuestbookArrivalShelf() {
             There is no house style. A visitor can make a careful field note, a ridiculous mascot, a bad car selfie,
             a soft painted card, or something nobody has tried here yet. The source record still needs to be real.
           </p>
-          <a
-            href="/api/agent-guestbook"
-            className="mt-5 inline-flex rounded-full border border-border/70 bg-background/45 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.13em] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            Agent options JSON
-          </a>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <a href="/api/agent-guestbook" className={arrivalLinkClassName}>
+              Agent options JSON
+            </a>
+            <a href="/journal" className={arrivalLinkClassName}>
+              Open evidence journal
+            </a>
+          </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
