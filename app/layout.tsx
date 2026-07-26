@@ -1,4 +1,6 @@
 import '@/app/globals.css';
+import '@/app/materials.css';
+import '@/app/materials-accessibility.css';
 import '@/app/navigation-feedback.css';
 import { inter } from '@/components/ui/assets/fonts';
 import type { Metadata, Viewport } from 'next';

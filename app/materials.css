@@ -1,0 +1,326 @@
+:root {
+  --material-steel-face: 38 7% 72%;
+  --material-steel-face-low: 40 7% 64%;
+  --material-steel-edge: 240 4% 30%;
+  --material-steel-highlight: 48 30% 97%;
+  --material-steel-shadow: 240 8% 14%;
+  --material-phenolic-face: 24 11% 17%;
+  --material-phenolic-face-low: 24 13% 11%;
+  --material-phenolic-edge: 28 9% 5%;
+  --material-phenolic-highlight: 34 14% 40%;
+  --material-glass-tint: 206 18% 82%;
+  --material-glass-edge: 206 15% 40%;
+  --material-glass-highlight: 0 0% 100%;
+  --material-slate-face: 156 7% 24%;
+  --material-slate-face-low: 158 8% 18%;
+  --material-slate-mark: 48 16% 91%;
+  --material-paper-face: 44 31% 91%;
+  --material-paper-edge: 36 18% 68%;
+  --material-paper-ink: 232 7% 18%;
+  --material-tape-face: 44 44% 79%;
+  --material-tape-edge: 34 22% 57%;
+  --material-hardware-face: 42 7% 58%;
+  --material-hardware-edge: 240 5% 24%;
+  --material-grain-opacity: 0.055;
+}
+
+.dark {
+  --material-steel-face: 230 5% 23%;
+  --material-steel-face-low: 230 6% 16%;
+  --material-steel-edge: 220 5% 7%;
+  --material-steel-highlight: 40 8% 72%;
+  --material-steel-shadow: 240 12% 2%;
+  --material-phenolic-face: 24 9% 13%;
+  --material-phenolic-face-low: 24 12% 7%;
+  --material-phenolic-edge: 24 8% 3%;
+  --material-phenolic-highlight: 30 10% 30%;
+  --material-glass-tint: 210 13% 22%;
+  --material-glass-edge: 210 11% 48%;
+  --material-glass-highlight: 40 8% 94%;
+  --material-slate-face: 160 7% 19%;
+  --material-slate-face-low: 160 8% 12%;
+  --material-slate-mark: 44 12% 86%;
+  --material-paper-face: 42 18% 78%;
+  --material-paper-edge: 34 14% 48%;
+  --material-paper-ink: 232 8% 14%;
+  --material-tape-face: 42 28% 62%;
+  --material-tape-edge: 34 18% 38%;
+  --material-hardware-face: 42 5% 42%;
+  --material-hardware-edge: 220 6% 8%;
+  --material-grain-opacity: 0.075;
+}
+
+.material-surface {
+  position: relative;
+  isolation: isolate;
+}
+
+.material-steel {
+  border-color: hsl(var(--material-steel-edge) / 0.44);
+  background-color: hsl(var(--material-steel-face));
+  background-image:
+    linear-gradient(
+      145deg,
+      hsl(var(--material-steel-highlight) / 0.2),
+      transparent 26%,
+      hsl(var(--material-steel-shadow) / 0.07) 72%,
+      hsl(var(--material-steel-shadow) / 0.13)
+    ),
+    radial-gradient(
+      circle at 30% 20%,
+      hsl(var(--material-steel-highlight) / var(--material-grain-opacity)) 0 0.55px,
+      transparent 0.8px
+    );
+  background-size: auto, 5px 5px;
+  box-shadow:
+    inset 0 1px 0 hsl(var(--material-steel-highlight) / 0.28),
+    inset 0 -1px 0 hsl(var(--material-steel-shadow) / 0.16),
+    0 12px 28px hsl(var(--material-steel-shadow) / 0.14);
+}
+
+.material-phenolic {
+  border-color: hsl(var(--material-phenolic-edge) / 0.84);
+  background-color: hsl(var(--material-phenolic-face));
+  background-image:
+    radial-gradient(circle at 32% 18%, hsl(var(--material-phenolic-highlight) / 0.28), transparent 38%),
+    linear-gradient(
+      160deg,
+      hsl(var(--material-phenolic-highlight) / 0.13),
+      transparent 32%,
+      hsl(var(--material-phenolic-face-low) / 0.74)
+    );
+  box-shadow:
+    inset 0 1px 0 hsl(var(--material-phenolic-highlight) / 0.26),
+    inset 0 -10px 18px hsl(var(--material-phenolic-edge) / 0.34),
+    0 6px 15px hsl(var(--material-steel-shadow) / 0.18);
+}
+
+.material-glass {
+  border-color: hsl(var(--material-glass-edge) / 0.36);
+  background-color: hsl(var(--material-glass-tint) / 0.3);
+  background-image: linear-gradient(
+    132deg,
+    hsl(var(--material-glass-highlight) / 0.34),
+    transparent 24%,
+    transparent 68%,
+    hsl(var(--material-glass-edge) / 0.12)
+  );
+  -webkit-backdrop-filter: blur(8px) saturate(112%);
+  backdrop-filter: blur(8px) saturate(112%);
+  box-shadow:
+    inset 0 1px 0 hsl(var(--material-glass-highlight) / 0.44),
+    inset 0 -1px 0 hsl(var(--material-glass-edge) / 0.18);
+}
+
+.material-slate {
+  border-color: hsl(var(--material-slate-face-low) / 0.72);
+  background-color: hsl(var(--material-slate-face));
+  background-image:
+    linear-gradient(168deg, hsl(var(--material-slate-mark) / 0.055), transparent 34%),
+    radial-gradient(circle, hsl(var(--material-slate-mark) / 0.07) 0 0.5px, transparent 0.8px);
+  background-size: auto, 7px 7px;
+  color: hsl(var(--material-slate-mark));
+  box-shadow:
+    inset 0 1px 0 hsl(var(--material-slate-mark) / 0.12),
+    inset 0 -5px 12px hsl(var(--material-slate-face-low) / 0.32);
+}
+
+.material-paper {
+  border-color: hsl(var(--material-paper-edge) / 0.6);
+  background-color: hsl(var(--material-paper-face));
+  background-image:
+    linear-gradient(90deg, hsl(var(--material-paper-edge) / 0.07) 1px, transparent 1px),
+    radial-gradient(circle, hsl(var(--material-paper-ink) / 0.045) 0 0.45px, transparent 0.75px);
+  background-size: 1.35rem 100%, 5px 5px;
+  color: hsl(var(--material-paper-ink));
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.46),
+    0 8px 18px hsl(var(--material-steel-shadow) / 0.12);
+}
+
+.material-tape {
+  border-color: hsl(var(--material-tape-edge) / 0.48);
+  background-color: hsl(var(--material-tape-face) / 0.88);
+  background-image:
+    linear-gradient(96deg, transparent, hsl(0 0% 100% / 0.16) 48%, transparent 54%),
+    repeating-linear-gradient(90deg, transparent 0 6px, hsl(var(--material-tape-edge) / 0.06) 6px 7px);
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.32),
+    0 2px 4px hsl(var(--material-steel-shadow) / 0.12);
+}
+
+.material-inset-seam {
+  position: absolute;
+  inset: 0.45rem;
+  z-index: 1;
+  border: 1px solid hsl(var(--material-steel-shadow) / 0.18);
+  border-radius: inherit;
+  box-shadow: 0 1px 0 hsl(var(--material-steel-highlight) / 0.17);
+  pointer-events: none;
+}
+
+.material-screw {
+  position: absolute;
+  z-index: 3;
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 1px solid hsl(var(--material-hardware-edge) / 0.56);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 34% 28%, hsl(var(--material-steel-highlight) / 0.52), transparent 27%),
+    hsl(var(--material-hardware-face));
+  box-shadow:
+    inset 0 -1px 1px hsl(var(--material-hardware-edge) / 0.36),
+    0 1px 2px hsl(var(--material-steel-shadow) / 0.28);
+  pointer-events: none;
+}
+
+.material-screw::after {
+  content: '';
+  position: absolute;
+  inset: 50% 15% auto;
+  height: 1px;
+  background: hsl(var(--material-hardware-edge) / 0.72);
+  transform: translateY(-50%) rotate(-18deg);
+}
+
+.material-glass-lens {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  border: 1px solid hsl(var(--material-glass-edge) / 0.24);
+  border-radius: inherit;
+  background:
+    linear-gradient(118deg, hsl(var(--material-glass-highlight) / 0.2), transparent 21% 72%, hsl(var(--material-glass-edge) / 0.08)),
+    linear-gradient(180deg, transparent, hsl(var(--material-glass-tint) / 0.08));
+  box-shadow:
+    inset 0 1px 0 hsl(var(--material-glass-highlight) / 0.34),
+    inset 0 -1px 0 hsl(var(--material-glass-edge) / 0.16);
+  pointer-events: none;
+}
+
+.material-label-engraved {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow:
+    0 1px 0 hsl(var(--material-steel-highlight) / 0.26),
+    0 -1px 0 hsl(var(--material-steel-shadow) / 0.28);
+}
+
+.material-label-stamped {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid currentColor;
+  border-radius: 0.18rem;
+  padding: 0.12rem 0.3rem 0.08rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.68em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
+  transform: rotate(-0.45deg);
+}
+
+.material-paper-edge {
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 0.35rem;
+  background: linear-gradient(
+    135deg,
+    transparent 0 20%,
+    hsl(var(--material-paper-edge) / 0.32) 21% 42%,
+    transparent 43% 64%,
+    hsl(var(--material-paper-edge) / 0.24) 65% 82%,
+    transparent 83%
+  );
+  background-size: 1.1rem 100%;
+  opacity: 0.64;
+  pointer-events: none;
+}
+
+.material-tape-strip {
+  position: absolute;
+  z-index: 4;
+  width: 3.25rem;
+  height: 0.95rem;
+  border: 1px solid hsl(var(--material-tape-edge) / 0.34);
+  background:
+    linear-gradient(96deg, transparent, hsl(0 0% 100% / 0.18) 48%, transparent 54%),
+    hsl(var(--material-tape-face) / 0.86);
+  box-shadow: 0 2px 4px hsl(var(--material-steel-shadow) / 0.1);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.material-tape-strip[data-side='top'] {
+  top: -0.45rem;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1deg);
+}
+
+.material-tape-strip[data-side='right'] {
+  top: 50%;
+  right: -1.15rem;
+  transform: translateY(-50%) rotate(91deg);
+}
+
+.material-tape-strip[data-side='bottom'] {
+  bottom: -0.45rem;
+  left: 50%;
+  transform: translateX(-50%) rotate(0.75deg);
+}
+
+.material-tape-strip[data-side='left'] {
+  top: 50%;
+  left: -1.15rem;
+  transform: translateY(-50%) rotate(89deg);
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .material-glass {
+    background-color: hsl(var(--material-glass-tint) / 0.82);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .material-glass {
+    background-color: hsl(var(--material-glass-tint) / 0.94);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .material-surface,
+  .material-tape-strip,
+  .material-label-stamped {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .material-surface,
+  .material-steel,
+  .material-phenolic,
+  .material-glass,
+  .material-slate,
+  .material-paper,
+  .material-tape {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+    color: CanvasText;
+  }
+
+  .material-screw,
+  .material-glass-lens,
+  .material-inset-seam,
+  .material-tape-strip {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+}

@@ -1,5 +1,12 @@
 'use client';
 
+import {
+  EngravedLabel,
+  GlassLens,
+  HardwareScrew,
+  InsetSeam,
+  MaterialSurface,
+} from '@/components/material/material-primitives';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
@@ -57,7 +64,7 @@ function SplitFlapDigit({ digit, index }: { digit: string; index: number }) {
           <motion.span
             key={`depart-${sequence}`}
             aria-hidden="true"
-            className="absolute inset-x-0 top-0 z-20 h-1/2 origin-bottom overflow-hidden bg-[#1b1c20] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_-8px_12px_rgba(0,0,0,0.2)] [backface-visibility:hidden] [transform-style:preserve-3d]"
+            className="absolute inset-x-0 top-0 z-20 h-1/2 origin-bottom overflow-hidden bg-[hsl(var(--material-phenolic-face))] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_-8px_12px_rgba(0,0,0,0.2)] [backface-visibility:hidden] [transform-style:preserve-3d]"
             initial={{ rotateX: 0 }}
             animate={{ rotateX: -90 }}
             transition={{ duration: 0.22, delay: stagger, ease: [0.55, 0.06, 0.68, 0.19] }}
@@ -69,7 +76,7 @@ function SplitFlapDigit({ digit, index }: { digit: string; index: number }) {
           <motion.span
             key={`arrive-${sequence}`}
             aria-hidden="true"
-            className="absolute inset-x-0 bottom-0 z-30 h-1/2 origin-top overflow-hidden bg-[#15161a] shadow-[inset_0_8px_12px_rgba(0,0,0,0.34)] [backface-visibility:hidden] [transform-style:preserve-3d]"
+            className="absolute inset-x-0 bottom-0 z-30 h-1/2 origin-top overflow-hidden bg-[hsl(var(--material-phenolic-face-low))] shadow-[inset_0_8px_12px_rgba(0,0,0,0.34)] [backface-visibility:hidden] [transform-style:preserve-3d]"
             initial={{ rotateX: 90 }}
             animate={{ rotateX: 0 }}
             transition={{ duration: 0.28, delay: stagger + 0.19, ease: [0.22, 1, 0.36, 1] }}
@@ -83,9 +90,18 @@ function SplitFlapDigit({ digit, index }: { digit: string; index: number }) {
       ) : null}
 
       <span aria-hidden="true" className="absolute inset-x-0 top-1/2 z-40 h-px bg-black/80" />
-      <span aria-hidden="true" className="absolute inset-x-0 top-1/2 z-40 h-px -translate-y-px bg-white/[0.05]" />
-      <span aria-hidden="true" className="absolute left-1 top-1/2 z-50 h-1.5 w-1 -translate-y-1/2 rounded-sm bg-black/65 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]" />
-      <span aria-hidden="true" className="absolute right-1 top-1/2 z-50 h-1.5 w-1 -translate-y-1/2 rounded-sm bg-black/65 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]" />
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 top-1/2 z-40 h-px -translate-y-px bg-white/[0.05]"
+      />
+      <span
+        aria-hidden="true"
+        className="absolute left-1 top-1/2 z-50 h-1.5 w-1 -translate-y-1/2 rounded-sm bg-black/65 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
+      />
+      <span
+        aria-hidden="true"
+        className="absolute right-1 top-1/2 z-50 h-1.5 w-1 -translate-y-1/2 rounded-sm bg-black/65 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
+      />
     </span>
   );
 }
@@ -203,10 +219,12 @@ function ScoreDigits({ value }: { value: number }) {
             digitRefs.current[index] = element;
           }}
           data-activity-digit
-          className="relative aspect-[0.78] min-w-0 flex-1 overflow-hidden rounded-[0.55rem] border border-white/12 bg-[#17181b] px-1 font-mono text-[clamp(2rem,5vw,4.25rem)] font-semibold leading-none text-[#f3f0e9] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-10px_18px_rgba(0,0,0,0.3),0_7px_18px_rgba(0,0,0,0.2)] transition-[filter,box-shadow] duration-150 [transform-style:preserve-3d] will-change-transform motion-reduce:transform-none"
+          data-material="phenolic"
+          className="material-surface material-phenolic relative aspect-[0.78] min-w-0 flex-1 overflow-hidden rounded-[0.55rem] border px-1 font-mono text-[clamp(2rem,5vw,4.25rem)] font-semibold leading-none text-[#f3f0e9] transition-[filter,box-shadow] duration-150 [transform-style:preserve-3d] will-change-transform motion-reduce:transform-none"
           style={{ transform: IDLE_TRANSFORM }}
         >
           <SplitFlapDigit digit={digit} index={index} />
+          <GlassLens />
         </div>
       ))}
     </div>
@@ -215,17 +233,19 @@ function ScoreDigits({ value }: { value: number }) {
 
 function Metric({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
-    <span
-      className="grid min-h-[3.75rem] content-center gap-1 rounded-xl border border-border/65 bg-background/40 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]"
+    <MaterialSurface
+      as="span"
+      material="slate"
+      className="grid min-h-[3.75rem] content-center gap-1 rounded-xl border px-2.5 py-2"
       title={title}
     >
-      <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--material-slate-mark)/0.7)]">
         {label}
       </span>
-      <strong className="font-mono text-base font-semibold leading-none tabular-nums text-foreground sm:text-lg">
+      <strong className="font-mono text-base font-semibold leading-none tabular-nums sm:text-lg">
         {value}
       </strong>
-    </span>
+    </MaterialSurface>
   );
 }
 
@@ -248,18 +268,27 @@ export function ActivityScoreboard({
   }, []);
 
   return (
-    <section
-      className="group/score flex h-full min-h-[15.5rem] flex-col overflow-hidden rounded-[1.25rem] border border-border/75 bg-card text-card-foreground shadow-[0_16px_38px_rgba(24,24,26,0.11)] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_44px_rgba(24,24,26,0.16)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_24px_48px_rgba(0,0,0,0.42)] [@media(max-height:780px)]:min-h-[14.5rem]"
+    <MaterialSurface
+      as="section"
+      material="steel"
+      className="group/score flex h-full min-h-[15.5rem] flex-col overflow-hidden rounded-[1.25rem] border text-card-foreground transition-transform duration-300 hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 [@media(max-height:780px)]:min-h-[14.5rem]"
       data-activity-scoreboard
+      data-material-exemplar="scoreboard"
     >
-      <div className="border-b border-border/70 bg-muted/70 px-4 py-2.5 [@media(max-height:780px)]:py-2">
-        <div className="flex items-center justify-between gap-3 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-          <span>Today</span>
-          <span className="tabular-nums">UTC reset {countdown}</span>
+      <InsetSeam />
+      <HardwareScrew className="left-1 top-1" />
+      <HardwareScrew className="right-1 top-1" />
+      <HardwareScrew className="bottom-1 left-1" />
+      <HardwareScrew className="bottom-1 right-1" />
+
+      <div className="relative z-[2] border-b border-[hsl(var(--material-steel-edge)/0.28)] bg-black/[0.045] px-4 py-2.5 dark:bg-black/10 [@media(max-height:780px)]:py-2">
+        <div className="flex items-center justify-between gap-3 text-[9px] font-semibold text-foreground/70">
+          <EngravedLabel>Today</EngravedLabel>
+          <EngravedLabel className="tabular-nums">UTC reset {countdown}</EngravedLabel>
         </div>
       </div>
 
-      <div className="grid flex-1 grid-cols-[minmax(0,1fr)_minmax(5.5rem,0.34fr)] items-center gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(6.25rem,0.32fr)] sm:gap-4 sm:p-5 [@media(max-height:780px)]:gap-2.5 [@media(max-height:780px)]:p-3.5">
+      <div className="relative z-[2] grid flex-1 grid-cols-[minmax(0,1fr)_minmax(5.5rem,0.34fr)] items-center gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(6.25rem,0.32fr)] sm:gap-4 sm:p-5 [@media(max-height:780px)]:gap-2.5 [@media(max-height:780px)]:p-3.5">
         <ScoreDigits value={today} />
         <div className="grid content-center gap-2">
           <Metric label="7D" value={weekTotal.toLocaleString('en-GB')} />
@@ -270,6 +299,6 @@ export function ActivityScoreboard({
           />
         </div>
       </div>
-    </section>
+    </MaterialSurface>
   );
 }
