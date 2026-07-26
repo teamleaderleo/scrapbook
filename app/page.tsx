@@ -32,8 +32,8 @@ export default async function Page() {
         }}
       />
 
-      <div className="relative mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-7xl flex-col justify-center px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
-        <div className="flex min-w-0 flex-col gap-5 sm:gap-6">
+      <div className="relative mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-7xl flex-col justify-start px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+        <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
           <ActivityDashboard
             initial={{
               today: activity.today,
@@ -45,7 +45,7 @@ export default async function Page() {
             }}
           />
 
-          <section aria-label="Recent systems" className="min-w-0">
+          <section aria-label="Recent systems" className="min-w-0" data-recent-systems>
             <div className="flex items-center justify-between gap-4 px-0.5">
               <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
                 Recent systems
@@ -55,14 +55,14 @@ export default async function Page() {
               </span>
             </div>
 
-            <div className="mt-3 grid min-w-0 grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="mt-2.5 grid min-w-0 grid-cols-1 gap-2.5 md:grid-cols-3">
               {activity.repositories.map((repository) => (
                 <WindLiftCard
                   key={repository.name}
                   href={repository.url}
-                  className="min-h-32"
+                  className="min-h-28 p-3.5"
                 >
-                  <div className="flex min-h-24 flex-col justify-between gap-4">
+                  <div className="flex min-h-20 flex-col justify-between gap-3">
                     <div>
                       <div className="flex items-center justify-between gap-3">
                         <h3 className="truncate font-medium">{repository.name}</h3>
@@ -71,7 +71,7 @@ export default async function Page() {
                           className="shrink-0 text-muted-foreground transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
                         />
                       </div>
-                      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                      <p className="mt-2 text-sm leading-snug text-muted-foreground">
                         {repository.note}
                       </p>
                     </div>
