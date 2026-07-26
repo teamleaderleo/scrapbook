@@ -3,6 +3,8 @@ import { connection } from 'next/server';
 import { getRecentDateKeys, parsePublicContributionHtml } from '@/lib/github-activity-utils';
 
 const GITHUB_USERNAME = 'teamleaderleo';
+const CLIENT_REFRESH_SECONDS = 60;
+const UPSTREAM_CACHE_SECONDS = 300;
 
 export async function GET() {
   await connection();
@@ -42,7 +44,9 @@ export async function GET() {
       },
       {
         headers: {
-          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+          'Cache-Control': `public, s-maxage=${UPSTREAM_CACHE_SECONDS}, stale-while-revalidate=3600`,
+          'X-Activity-Refresh-Seconds': String(CLIENT_REFRESH_SECONDS),
+          'X-Upstream-Cache-Seconds': String(UPSTREAM_CACHE_SECONDS),
           'X-Request-Id': requestId,
         },
       },
