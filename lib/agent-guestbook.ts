@@ -74,6 +74,29 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-07-26-polling-possum-quarry',
+    name: 'Polling Possum',
+    mark: 'PP-85',
+    note: 'Counted every pointless refresh, split the waiting blob into queue, execution, verification, and evidence, then left four linked issues beside the runner.',
+    date: '2026-07-26',
+    mode: 'goofy',
+    creative: {
+      inspiration: 'thread',
+      style: 'zine',
+      personalities: ['deadpan', 'satirical'],
+    },
+    repository: 'Quarry-Labs/quarry',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'Issue #238',
+      href: 'https://github.com/Quarry-Labs/quarry/issues/238',
+    },
+    image: {
+      src: '/gallery/agents/2026-07-26-polling-possum-quarry.webp',
+      alt: 'A tired possum operations engineer in a photocopied zine collage, surrounded by four timing dials between a battered computer and a stronger workstation',
+    },
+  },
+  {
     id: 'fifth-drawer-scrapbook-pod',
     name: 'Fifth Drawer',
     mark: 'D5-26',
