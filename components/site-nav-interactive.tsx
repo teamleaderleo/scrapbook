@@ -30,7 +30,7 @@ export function TimeLink() {
     <Link
       href="/time"
       prefetch
-      className="group flex shrink-0 items-center gap-1.5 rounded-full border bg-muted/70 px-2 py-1 text-xs font-semibold text-foreground shadow-sm transition hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      className="group flex shrink-0 items-center gap-1.5 rounded-full border border-border/60 bg-background/38 px-2.5 py-1 text-xs font-semibold text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_5px_14px_rgba(20,20,24,0.07)] backdrop-blur-xl transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-background/58 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_18px_rgba(20,20,24,0.1)] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_6px_16px_rgba(0,0,0,0.22)]"
       title="Open the time converter"
       aria-label={`Open the time converter. Local time ${time}`}
     >
@@ -69,11 +69,11 @@ export function NavMenu({ label, children }: { label: string; children: ReactNod
 
   return (
     <details ref={detailsRef} className="group relative min-w-0">
-      <summary ref={summaryRef} className="flex cursor-pointer list-none items-center gap-1 rounded-full px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+      <summary ref={summaryRef} className="flex cursor-pointer list-none items-center gap-1 rounded-full border border-transparent px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:border-border/55 hover:bg-background/45 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
         <span>{label}</span>
         <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
       </summary>
-      <div className="absolute right-0 top-full z-50 mt-2 w-56 max-w-[calc(100vw-1rem)] overflow-hidden rounded-xl border border-black/15 bg-[#f4f1ea] p-1 text-[#242328] shadow-xl dark:border-white/15 dark:bg-[#18191d] dark:text-[#f0ece5]">
+      <div className="absolute right-0 top-full z-50 mt-2 w-56 max-w-[calc(100vw-1rem)] overflow-hidden rounded-2xl border border-border/65 bg-popover/84 p-1 text-popover-foreground shadow-[0_22px_58px_rgba(20,20,24,0.2)] backdrop-blur-2xl">
         {children}
       </div>
     </details>

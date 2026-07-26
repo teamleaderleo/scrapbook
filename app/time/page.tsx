@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 export default function TimePage() {
   return (
     <ViewportPageShell
-      className="bg-[#ecebe6] text-[#17181b] dark:bg-[#101115] dark:text-[#eeeae3]"
-      contentClassName="min-h-0"
+      className="bg-background text-foreground"
+      contentClassName="min-h-[calc(100dvh-3rem)]"
     >
       <UTCTimeVisualizer />
     </ViewportPageShell>

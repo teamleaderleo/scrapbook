@@ -82,7 +82,9 @@ export function WindLiftCard({
       onPointerMove={handlePointerMove}
       onPointerLeave={(event) => settle(event.currentTarget)}
       onPointerCancel={(event) => settle(event.currentTarget)}
-      onFocus={(event) => lift(event.currentTarget)}
+      onFocus={(event) => {
+        if (event.currentTarget.matches(':focus-visible')) lift(event.currentTarget);
+      }}
       onBlur={(event) => settle(event.currentTarget)}
       style={{
         transform: restTransform,
@@ -91,7 +93,7 @@ export function WindLiftCard({
         willChange: 'transform',
       }}
       className={cn(
-        'group relative block overflow-hidden rounded-2xl border border-black/12 bg-[#d8d3c8] p-4 shadow-[0_8px_18px_rgb(45_39_30/0.08)] transition-[border-color,box-shadow] duration-150 hover:border-black/20 hover:shadow-[0_26px_52px_rgb(45_39_30/0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/65 focus-visible:ring-offset-2 focus-visible:ring-offset-[#e4e0d7] dark:border-white/12 dark:bg-[#282b30] dark:shadow-[0_8px_18px_rgb(0_0_0/0.22)] dark:hover:border-white/20 dark:hover:shadow-[0_28px_58px_rgb(0_0_0/0.48)] dark:focus-visible:ring-white/80 dark:focus-visible:ring-offset-[#1b1d21] motion-reduce:!transform-none motion-reduce:transition-none',
+        'group relative block overflow-hidden rounded-2xl border border-border/65 bg-card p-4 text-card-foreground shadow-[0_8px_18px_rgb(45_39_30/0.08)] transition-[border-color,box-shadow] duration-150 hover:border-border hover:shadow-[0_26px_52px_rgb(45_39_30/0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:shadow-[0_8px_18px_rgb(0_0_0/0.22)] dark:hover:shadow-[0_28px_58px_rgb(0_0_0/0.46)] motion-reduce:!transform-none motion-reduce:transition-none',
         className,
       )}
     >
