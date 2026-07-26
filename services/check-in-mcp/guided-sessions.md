@@ -58,7 +58,7 @@ For the private single-operator plugin this is sufficient. A future multi-user o
    - is idempotent and returns the existing branch on repeated calls;
    - returns `awaiting_artwork`.
 
-The read-only profile deliberately stops before reservation. The same signed token can continue after reconnecting to a full profile that uses the same `SCRAPBOOK_SESSION_SECRET`.
+The read-only profile deliberately stops before reservation. Continue with a full-profile endpoint using the same `SCRAPBOOK_SESSION_SECRET`; the signed token remains valid across that profile switch.
 
 ## Dedicated artwork turn
 
