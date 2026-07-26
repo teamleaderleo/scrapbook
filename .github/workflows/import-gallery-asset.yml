@@ -33,8 +33,31 @@ concurrency:
 jobs:
   import:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
+      - name: Validate import target
+        env:
+          ENTRY_ID: ${{ inputs.entry_id }}
+          TARGET_BRANCH: ${{ inputs.target_branch }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$ENTRY_ID" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+            echo "Entry ID must be a lowercase kebab-case slug." >&2
+            exit 1
+          fi
+
+          if [[ ! "$TARGET_BRANCH" =~ ^[A-Za-z0-9._/-]+$ ]] || \
+             [[ "$TARGET_BRANCH" == refs/* ]] || \
+             [[ "$TARGET_BRANCH" == */ ]] || \
+             [[ "$TARGET_BRANCH" == /* ]] || \
+             [[ "$TARGET_BRANCH" == *..* ]] || \
+             [[ "$TARGET_BRANCH" == main ]]; then
+            echo "Target branch must be a safe, existing non-main branch name." >&2
+            exit 1
+          fi
+
       - name: Check out the target branch
         uses: actions/checkout@v4
         with:
