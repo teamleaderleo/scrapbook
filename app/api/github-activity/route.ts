@@ -1,48 +1,40 @@
-import { NextResponse } from 'next/server';
+import { getGitHubHomeData } from '@/lib/github-home';
 import { connection } from 'next/server';
-import { getRecentDateKeys, parsePublicContributionHtml } from '@/lib/github-activity-utils';
+import { NextResponse } from 'next/server';
 
-const GITHUB_USERNAME = 'teamleaderleo';
+const CLIENT_REFRESH_SECONDS = 60;
+const UPSTREAM_CACHE_SECONDS = 300;
 
 export async function GET() {
   await connection();
   const requestId = crypto.randomUUID();
 
   try {
-    const response = await fetch(`https://github.com/users/${GITHUB_USERNAME}/contributions`, {
-      cache: 'no-store',
-      headers: {
-        Accept: 'text/html',
-        'User-Agent': 'teamleaderleo-scrapbook',
-      },
-      signal: AbortSignal.timeout(8_000),
-    });
+    const activity = await getGitHubHomeData();
 
-    if (!response.ok) throw new Error(`GitHub contribution page returned ${response.status}`);
-
-    const counts = parsePublicContributionHtml(await response.text());
-    if (counts.size === 0) throw new Error('GitHub contribution page could not be parsed');
-
-    const now = new Date();
-    const dateKeys = getRecentDateKeys(now, 35);
-    const todayKey = dateKeys.at(-1) ?? now.toISOString().slice(0, 10);
-    const days = dateKeys.map((date) => ({ date, count: counts.get(date) ?? 0 }));
-    const yearTotal = [...counts.entries()]
-      .filter(([date]) => date.startsWith(todayKey.slice(0, 4)) && date <= todayKey)
-      .reduce((sum, [, count]) => sum + count, 0);
+    if (activity.source === 'unavailable') {
+      return NextResponse.json(
+        { ok: false, error: 'GitHub activity is temporarily unavailable', requestId },
+        { status: 503, headers: { 'Cache-Control': 'no-store', 'X-Request-Id': requestId } },
+      );
+    }
 
     return NextResponse.json(
       {
-        source: 'public-profile',
-        generatedAt: now.toISOString(),
-        today: days.at(-1)?.count ?? 0,
-        weekTotal: days.slice(-7).reduce((sum, day) => sum + day.count, 0),
-        yearTotal,
-        days: days.slice(-28),
+        source: activity.source,
+        generatedAt: activity.generatedAt,
+        today: activity.today,
+        weekTotal: activity.weekTotal,
+        yearTotal: activity.periodLabel === 'this year' ? activity.total : null,
+        days: activity.days.slice(-28),
       },
       {
         headers: {
-          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+          'Cache-Control': `public, s-maxage=${CLIENT_REFRESH_SECONDS}, stale-while-revalidate=3600`,
+          'X-Activity-Source': activity.source,
+          'X-Activity-Generated-At': activity.generatedAt,
+          'X-Client-Refresh-Seconds': String(CLIENT_REFRESH_SECONDS),
+          'X-Upstream-Cache-Seconds': String(UPSTREAM_CACHE_SECONDS),
           'X-Request-Id': requestId,
         },
       },
@@ -51,7 +43,7 @@ export async function GET() {
     console.error('Unable to refresh GitHub activity', { requestId, error });
     return NextResponse.json(
       { ok: false, error: 'GitHub activity is temporarily unavailable', requestId },
-      { status: 502, headers: { 'Cache-Control': 'no-store', 'X-Request-Id': requestId } },
+      { status: 503, headers: { 'Cache-Control': 'no-store', 'X-Request-Id': requestId } },
     );
   }
 }
