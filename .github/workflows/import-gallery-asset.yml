@@ -1,5 +1,5 @@
 name: Import gallery asset
-run-name: Import gallery asset for ${{ inputs.entry_id }} on ${{ inputs.target_branch }}
+run-name: Import gallery asset on ${{ inputs.target_branch || github.ref_name }}
 
 on:
   workflow_dispatch:
@@ -23,23 +23,45 @@ on:
         description: Existing branch that should receive the WebP file
         required: true
         type: string
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - .scrapbook/import-requests/*.json
 
 permissions:
   contents: write
 
 concurrency:
-  group: gallery-asset-${{ inputs.target_branch }}
+  group: gallery-asset-${{ inputs.target_branch || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
-  import:
+  resolve:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
+    outputs:
+      entry_id: ${{ steps.manual.outputs.entry_id || steps.request.outputs.entry_id }}
+      source_type: ${{ steps.manual.outputs.source_type || steps.request.outputs.source_type }}
+      source: ${{ steps.manual.outputs.source || steps.request.outputs.source }}
+      target_branch: ${{ steps.manual.outputs.target_branch || steps.request.outputs.target_branch }}
+      request_path: ${{ steps.manual.outputs.request_path || steps.request.outputs.request_path }}
+      output_path: ${{ steps.manual.outputs.output_path || steps.request.outputs.output_path }}
 
     steps:
-      - name: Validate import target
+      - name: Check out the target branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.target_branch || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Resolve manual workflow inputs
+        if: github.event_name == 'workflow_dispatch'
+        id: manual
         env:
           ENTRY_ID: ${{ inputs.entry_id }}
+          SOURCE: ${{ inputs.source }}
+          SOURCE_TYPE: ${{ inputs.source_type }}
           TARGET_BRANCH: ${{ inputs.target_branch }}
         run: |
           set -euo pipefail
@@ -59,10 +81,59 @@ jobs:
             exit 1
           fi
 
+          printf '%s\n' \
+            "entry_id=$ENTRY_ID" \
+            "source_type=$SOURCE_TYPE" \
+            "source=$SOURCE" \
+            "target_branch=$TARGET_BRANCH" \
+            "request_path=" \
+            "output_path=public/gallery/agents/$ENTRY_ID.webp" \
+            >> "$GITHUB_OUTPUT"
+
+      - name: Resolve connector import request
+        if: github.event_name == 'push'
+        id: request
+        env:
+          ACTOR: ${{ github.actor }}
+          AFTER_SHA: ${{ github.event.after }}
+          BEFORE_SHA: ${{ github.event.before }}
+          TARGET_BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$ACTOR" != "teamleaderleo" ]]; then
+            echo "Connector import requests are restricted to the repository owner." >&2
+            exit 1
+          fi
+
+          if [[ "$BEFORE_SHA" =~ ^0+$ ]]; then
+            mapfile -t requests < <(
+              git diff-tree --no-commit-id --name-only --diff-filter=AM -r "$AFTER_SHA" -- '.scrapbook/import-requests/*.json'
+            )
+          else
+            mapfile -t requests < <(
+              git diff --name-only --diff-filter=AM "$BEFORE_SHA" "$AFTER_SHA" -- '.scrapbook/import-requests/*.json'
+            )
+          fi
+
+          if [[ "${#requests[@]}" -ne 1 ]]; then
+            echo "Exactly one added or modified gallery import request is required per push." >&2
+            printf 'Observed request paths:\n%s\n' "${requests[*]:-none}" >&2
+            exit 1
+          fi
+
+          node scripts/validate-gallery-import-request.mjs "${requests[0]}" "$TARGET_BRANCH" "$GITHUB_OUTPUT"
+
+  import:
+    needs: resolve
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
       - name: Check out the target branch
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.target_branch }}
+          ref: ${{ needs.resolve.outputs.target_branch }}
           fetch-depth: 0
 
       - name: Set up pnpm
@@ -80,7 +151,7 @@ jobs:
         run: pnpm install --frozen-lockfile --reporter=silent
 
       - name: Authenticate to Google Drive
-        if: inputs.source_type == 'drive'
+        if: needs.resolve.outputs.source_type == 'drive'
         id: google-auth
         uses: google-github-actions/auth@v3
         with:
@@ -93,9 +164,9 @@ jobs:
       - name: Download staged artwork
         env:
           DRIVE_ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
-          ENTRY_ID: ${{ inputs.entry_id }}
-          SOURCE: ${{ inputs.source }}
-          SOURCE_TYPE: ${{ inputs.source_type }}
+          ENTRY_ID: ${{ needs.resolve.outputs.entry_id }}
+          SOURCE: ${{ needs.resolve.outputs.source }}
+          SOURCE_TYPE: ${{ needs.resolve.outputs.source_type }}
         run: |
           set -euo pipefail
 
@@ -131,7 +202,7 @@ jobs:
             url.hostname === 'user-images.githubusercontent.com' ||
             url.hostname === 'private-user-images.githubusercontent.com';
 
-          if (url.protocol !== 'https:' || !allowed) {
+          if (url.protocol !== 'https:' || !allowed || url.username || url.password) {
             console.error('Only HTTPS GitHub user-attachment URLs are accepted.');
             process.exit(1);
           }
@@ -157,15 +228,20 @@ jobs:
 
       - name: Commit the repository-owned WebP
         env:
-          ENTRY_ID: ${{ inputs.entry_id }}
-          TARGET_BRANCH: ${{ inputs.target_branch }}
+          ENTRY_ID: ${{ needs.resolve.outputs.entry_id }}
+          OUTPUT_PATH: ${{ needs.resolve.outputs.output_path }}
+          REQUEST_PATH: ${{ needs.resolve.outputs.request_path }}
+          TARGET_BRANCH: ${{ needs.resolve.outputs.target_branch }}
         run: |
           set -euo pipefail
 
-          output="public/gallery/agents/$ENTRY_ID.webp"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$output"
+          git add "$OUTPUT_PATH"
+
+          if [[ -n "$REQUEST_PATH" && -f "$REQUEST_PATH" ]]; then
+            git rm "$REQUEST_PATH"
+          fi
 
           if git diff --cached --quiet; then
             echo "The target branch already contains the same optimised artwork."
