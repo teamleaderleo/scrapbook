@@ -187,7 +187,7 @@ function ScoreDigits({ value }: { value: number }) {
 
   return (
     <div
-      className="flex min-w-0 touch-pan-y gap-1.5 [perspective:780px]"
+      className="flex min-w-0 touch-pan-y gap-2 [perspective:780px] sm:gap-2.5"
       aria-label={`${value} contributions today`}
       data-wind-scoreboard
       onPointerMove={(event) => moveDigits(event.clientX, event.clientY, event.currentTarget)}
@@ -203,13 +203,29 @@ function ScoreDigits({ value }: { value: number }) {
             digitRefs.current[index] = element;
           }}
           data-activity-digit
-          className="relative aspect-[0.78] min-w-0 flex-1 overflow-hidden rounded-[0.45rem] border border-white/12 bg-[#17181b] px-1 font-mono text-[clamp(1.8rem,6.5vw,3.4rem)] font-semibold leading-none text-[#f3f0e9] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-10px_18px_rgba(0,0,0,0.3),0_5px_12px_rgba(0,0,0,0.18)] transition-[filter,box-shadow] duration-150 [transform-style:preserve-3d] will-change-transform motion-reduce:transform-none"
+          className="relative aspect-[0.78] min-w-0 flex-1 overflow-hidden rounded-[0.55rem] border border-white/12 bg-[#17181b] px-1 font-mono text-[clamp(2.2rem,6vw,4.9rem)] font-semibold leading-none text-[#f3f0e9] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-10px_18px_rgba(0,0,0,0.3),0_7px_18px_rgba(0,0,0,0.2)] transition-[filter,box-shadow] duration-150 [transform-style:preserve-3d] will-change-transform motion-reduce:transform-none"
           style={{ transform: IDLE_TRANSFORM }}
         >
           <SplitFlapDigit digit={digit} index={index} />
         </div>
       ))}
     </div>
+  );
+}
+
+function Metric({ label, value, title }: { label: string; value: string; title?: string }) {
+  return (
+    <span
+      className="grid min-h-16 content-center gap-1 rounded-xl border border-border/65 bg-background/40 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]"
+      title={title}
+    >
+      <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        {label}
+      </span>
+      <strong className="font-mono text-xl font-semibold leading-none tabular-nums text-foreground">
+        {value}
+      </strong>
+    </span>
   );
 }
 
@@ -232,29 +248,23 @@ export function ActivityScoreboard({
   }, []);
 
   return (
-    <section className="group/score h-full overflow-hidden rounded-[1.1rem] border border-black/18 bg-[#d0cdc5] shadow-[0_12px_28px_rgba(24,24,26,0.11)] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_38px_rgba(24,24,26,0.16)] dark:border-white/16 dark:bg-[#202126] dark:shadow-[0_14px_34px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_22px_44px_rgba(0,0,0,0.42)]">
-      <div className="border-b border-black/16 bg-[#bfbbb2] px-3 py-1.5 dark:border-white/12 dark:bg-[#292a30]">
-        <div className="flex items-center justify-between gap-3 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-black/68 dark:text-white/72">
+    <section className="group/score flex h-full min-h-[18rem] flex-col overflow-hidden rounded-[1.25rem] border border-border/75 bg-card text-card-foreground shadow-[0_16px_38px_rgba(24,24,26,0.11)] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_44px_rgba(24,24,26,0.16)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_24px_48px_rgba(0,0,0,0.42)]">
+      <div className="border-b border-border/70 bg-muted/70 px-4 py-2.5">
+        <div className="flex items-center justify-between gap-3 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           <span>Today</span>
           <span className="tabular-nums">UTC reset {countdown}</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 p-3 sm:p-4">
+      <div className="flex flex-1 flex-col justify-center gap-4 p-4 sm:gap-5 sm:p-5">
         <ScoreDigits value={today} />
-        <div className="grid min-w-[4.6rem] gap-2 pb-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-black/62 dark:text-white/64">
-          <span className="grid gap-0.5">
-            <span>7D</span>
-            <strong className="text-sm font-semibold leading-none text-black/88 dark:text-white/90">
-              {weekTotal.toLocaleString('en-GB')}
-            </strong>
-          </span>
-          <span className="grid gap-0.5" title="Calendar year to date, measured in UTC">
-            <span>YTD</span>
-            <strong className="text-sm font-semibold leading-none text-black/88 dark:text-white/90">
-              {yearTotal?.toLocaleString('en-GB') ?? '—'}
-            </strong>
-          </span>
+        <div className="grid grid-cols-2 gap-3">
+          <Metric label="7D" value={weekTotal.toLocaleString('en-GB')} />
+          <Metric
+            label="YTD"
+            value={yearTotal?.toLocaleString('en-GB') ?? '—'}
+            title="Calendar year to date, measured in UTC"
+          />
         </div>
       </div>
     </section>

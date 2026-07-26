@@ -49,19 +49,19 @@ export default function UTCTimeVisualizer() {
             : 'Night';
 
   return (
-    <div className="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-5xl items-center px-4 py-8 sm:px-6">
-      <div className="w-full rounded-[1.5rem] border border-black/12 bg-[#dedcd6] p-5 shadow-[0_18px_46px_rgba(24,24,26,0.1)] dark:border-white/10 dark:bg-[#18191d] dark:shadow-[0_20px_48px_rgba(0,0,0,0.3)] sm:p-7">
+    <div className="mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-6xl items-center px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="w-full rounded-[1.5rem] border border-border/70 bg-card/92 p-5 text-card-foreground shadow-[0_22px_58px_rgba(24,24,26,0.11)] backdrop-blur-xl dark:shadow-[0_24px_64px_rgba(0,0,0,0.32)] sm:p-7">
         <CurrentTimeDisplay onJumpToTime={setLocalTime} />
 
         <div className="mt-7">
           <div className="mb-3 flex items-center justify-between gap-3">
             <label
               htmlFor="time-of-day"
-              className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-black/50 dark:text-white/48"
+              className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
             >
               Local time of day
             </label>
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/45 dark:text-white/42">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
               {timeOfDay}
             </span>
           </div>
@@ -78,7 +78,7 @@ export default function UTCTimeVisualizer() {
             className="time-day-slider h-14 w-full cursor-pointer rounded-full"
             style={{ background: DAY_GRADIENT }}
           />
-          <div className="mt-2 flex justify-between font-mono text-[10px] text-black/45 dark:text-white/42">
+          <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground">
             <span>00:00</span>
             <span>06:00</span>
             <span>12:00</span>
@@ -88,31 +88,31 @@ export default function UTCTimeVisualizer() {
         </div>
 
         <div className="mt-7 grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
-          <div className="rounded-xl border border-black/10 bg-[#ebe8e1] p-4 dark:border-white/10 dark:bg-[#202126]">
+          <div className="rounded-xl border border-border/65 bg-background/46 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-md">
             <div className="flex items-end gap-3">
               <p className="font-mono text-5xl font-semibold tabular-nums tracking-[-0.05em] sm:text-6xl">
                 {formatTime(localHours, localMinutes)}
               </p>
-              <p className="pb-1 text-xl text-black/50 dark:text-white/48">
+              <p className="pb-1 text-xl text-muted-foreground">
                 {formatTime12Hour(localHours, localMinutes)} {period}
               </p>
             </div>
-            <p className="mt-2 text-sm text-black/52 dark:text-white/50">Selected local time</p>
+            <p className="mt-2 text-sm text-muted-foreground">Selected local time</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-black/10 bg-[#ebe8e1] p-3 dark:border-white/10 dark:bg-[#202126]">
-              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-black/46 dark:text-white/44">UTC</p>
+            <div className="rounded-xl border border-border/65 bg-background/46 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md">
+              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">UTC</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums">{formatTime(utcHours, utcMinutes)}</p>
             </div>
-            <div className="rounded-xl border border-black/10 bg-[#ebe8e1] p-3 dark:border-white/10 dark:bg-[#202126]">
-              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-black/46 dark:text-white/44">Eastern</p>
+            <div className="rounded-xl border border-border/65 bg-background/46 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md">
+              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Eastern</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums">
                 {formatTime((utcHours + easternOffset + 24) % 24, utcMinutes)}
               </p>
             </div>
-            <div className="rounded-xl border border-black/10 bg-[#ebe8e1] p-3 dark:border-white/10 dark:bg-[#202126]">
-              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-black/46 dark:text-white/44">Pacific</p>
+            <div className="rounded-xl border border-border/65 bg-background/46 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md">
+              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Pacific</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums">
                 {formatTime((utcHours + pacificOffset + 24) % 24, utcMinutes)}
               </p>

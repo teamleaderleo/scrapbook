@@ -99,9 +99,69 @@ test('homepage counter uses UTC, 7D, and YTD instrument labels', async ({ page }
   await expect(page.locator('[data-activity-digit] > span')).toHaveCount(4);
 });
 
+test('homepage activity tooltip stays anchored through a pointer click', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/');
+  await waitForClientHydration(page);
+
+  const grid = page.locator('[aria-label="Four weeks of GitHub activity"]');
+  const cell = grid.getByRole('button').nth(8);
+  const label = await cell.getAttribute('aria-label');
+  expect(label).toBeTruthy();
+
+  const cellBox = await cell.boundingBox();
+  expect(cellBox).toBeTruthy();
+  const x = cellBox!.x + cellBox!.width / 2;
+  const y = cellBox!.y + cellBox!.height / 2;
+  await page.mouse.move(x, y);
+
+  const tooltip = page.locator('div.fixed').filter({ hasText: label! });
+  await expect(tooltip).toBeVisible();
+  const before = await tooltip.boundingBox();
+  expect(before).toBeTruthy();
+
+  await page.mouse.click(x, y);
+  const after = await tooltip.boundingBox();
+  expect(after).toBeTruthy();
+  expect(Math.abs(after!.x - before!.x)).toBeLessThan(1);
+  expect(Math.abs(after!.y - before!.y)).toBeLessThan(1);
+});
+
+test('homepage shell covers the viewport with the document background', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+
+  const shell = await page.evaluate(() => {
+    const root = document.querySelector('nav')?.parentElement;
+    if (!root) throw new Error('Missing viewport page shell');
+    return {
+      shellBackground: getComputedStyle(root).backgroundColor,
+      bodyBackground: getComputedStyle(document.body).backgroundColor,
+      shellHeight: root.getBoundingClientRect().height,
+      viewportHeight: window.innerHeight,
+    };
+  });
+
+  expect(shell.shellBackground).toBe(shell.bodyBackground);
+  expect(shell.shellHeight).toBeGreaterThanOrEqual(shell.viewportHeight);
+});
+
+test('desktop clock sits beside the site identity', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/');
+  await waitForClientHydration(page);
+
+  const brand = await page.getByRole('link', { name: 'teamleaderleo', exact: true }).boundingBox();
+  const clock = await page.getByRole('link', { name: /Open the time converter/i }).boundingBox();
+  expect(brand).toBeTruthy();
+  expect(clock).toBeTruthy();
+  expect(clock!.x - (brand!.x + brand!.width)).toBeLessThan(36);
+});
+
 test('gallery credits the agents who worked here', async ({ page }) => {
   await page.goto('/gallery');
 
+  await expect(page.getByRole('img', { name: 'Draggable nested-cube gallery orbit' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Codex' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Claude Fable' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Mothbit' })).toBeVisible();

@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 html {
+  min-height: 100%;
   scrollbar-gutter: stable;
 }
 
@@ -106,6 +107,7 @@ html {
   }
 
   body {
+    min-height: 100dvh;
     @apply bg-background text-foreground;
   }
 }
@@ -131,7 +133,7 @@ input[type='number']::-webkit-outer-spin-button {
 .time-day-slider {
   appearance: none;
   border: 1px solid rgb(0 0 0 / 0.16);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 6px 16px rgb(20 20 24 / 0.12);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 8px 20px rgb(20 20 24 / 0.13);
 }
 
 .time-day-slider:focus-visible {
@@ -141,7 +143,7 @@ input[type='number']::-webkit-outer-spin-button {
 
 .dark .time-day-slider {
   border-color: rgb(255 255 255 / 0.16);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 8px 18px rgb(0 0 0 / 0.28);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 9px 22px rgb(0 0 0 / 0.3);
 }
 
 .dark .time-day-slider:focus-visible {
@@ -150,40 +152,60 @@ input[type='number']::-webkit-outer-spin-button {
 
 .time-day-slider::-webkit-slider-thumb {
   appearance: none;
-  width: 2.5rem;
-  height: 2.5rem;
-  border: 1px solid rgb(35 35 39 / 0.42);
+  width: 2.7rem;
+  height: 2.7rem;
+  border: 1px solid rgb(255 255 255 / 0.48);
   border-radius: 999px;
-  background: #d5d0c7;
-  box-shadow: 0 3px 9px rgb(0 0 0 / 0.24);
+  background: rgb(255 255 255 / 0.3);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
+  backdrop-filter: blur(18px) saturate(145%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.72),
+    inset 0 -1px 0 rgb(40 40 46 / 0.14),
+    0 5px 16px rgb(0 0 0 / 0.24);
   cursor: grab;
+  transition: transform 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
 }
 
 .dark .time-day-slider::-webkit-slider-thumb {
-  border-color: rgb(255 255 255 / 0.22);
-  background: #444750;
-  box-shadow: 0 3px 9px rgb(0 0 0 / 0.38);
+  border-color: rgb(255 255 255 / 0.28);
+  background: rgb(38 40 47 / 0.48);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    inset 0 -1px 0 rgb(0 0 0 / 0.34),
+    0 6px 18px rgb(0 0 0 / 0.42);
 }
 
 .time-day-slider:active::-webkit-slider-thumb {
   cursor: grabbing;
-  box-shadow: 0 2px 6px rgb(0 0 0 / 0.3);
+  transform: scale(0.96);
+  background: rgb(255 255 255 / 0.4);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.74),
+    0 3px 10px rgb(0 0 0 / 0.28);
 }
 
 .time-day-slider::-moz-range-thumb {
-  width: 2.5rem;
-  height: 2.5rem;
-  border: 1px solid rgb(35 35 39 / 0.42);
+  width: 2.7rem;
+  height: 2.7rem;
+  border: 1px solid rgb(255 255 255 / 0.48);
   border-radius: 999px;
-  background: #d5d0c7;
-  box-shadow: 0 3px 9px rgb(0 0 0 / 0.24);
+  background: rgb(255 255 255 / 0.3);
+  backdrop-filter: blur(18px) saturate(145%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.72),
+    inset 0 -1px 0 rgb(40 40 46 / 0.14),
+    0 5px 16px rgb(0 0 0 / 0.24);
   cursor: grab;
 }
 
 .dark .time-day-slider::-moz-range-thumb {
-  border-color: rgb(255 255 255 / 0.22);
-  background: #444750;
-  box-shadow: 0 3px 9px rgb(0 0 0 / 0.38);
+  border-color: rgb(255 255 255 / 0.28);
+  background: rgb(38 40 47 / 0.48);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    inset 0 -1px 0 rgb(0 0 0 / 0.34),
+    0 6px 18px rgb(0 0 0 / 0.42);
 }
 
 @layer components {

@@ -37,10 +37,12 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
   const [selectedDate, setSelectedDate] = useState(days.at(-1)?.date ?? '');
   const [tooltipDate, setTooltipDate] = useState<string | null>(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 12, y: 12 });
   const [finePointer, setFinePointer] = useState(false);
   const previousLatest = useRef(days.at(-1)?.date ?? '');
   const hideTimer = useRef<number | null>(null);
+  const positionFrame = useRef<number | null>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const pendingPosition = useRef({ x: 12, y: 12 });
 
   useEffect(() => {
     const media = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -53,6 +55,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
   useEffect(() => {
     return () => {
       if (hideTimer.current !== null) window.clearTimeout(hideTimer.current);
+      if (positionFrame.current !== null) window.cancelAnimationFrame(positionFrame.current);
     };
   }, []);
 
@@ -76,11 +79,19 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
   const tooltipLabel = tooltipDay ? labelForDay(tooltipDay, unit) : '';
 
   const placeTooltip = (clientX: number, clientY: number) => {
-    const maxX = Math.max(12, window.innerWidth - 300);
-    const maxY = Math.max(12, window.innerHeight - 48);
-    setTooltipPosition({
-      x: Math.min(maxX, Math.max(12, clientX + 14)),
-      y: Math.min(maxY, Math.max(12, clientY + 14)),
+    pendingPosition.current = {
+      x: Math.min(Math.max(12, window.innerWidth - 300), Math.max(12, clientX + 14)),
+      y: Math.min(Math.max(12, window.innerHeight - 48), Math.max(12, clientY + 14)),
+    };
+
+    if (positionFrame.current !== null) return;
+    positionFrame.current = window.requestAnimationFrame(() => {
+      const tooltip = tooltipRef.current;
+      if (tooltip) {
+        const { x, y } = pendingPosition.current;
+        tooltip.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      }
+      positionFrame.current = null;
     });
   };
 
@@ -99,12 +110,12 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
   };
 
   return (
-    <section className="min-w-0 overflow-hidden rounded-[1.25rem] border border-black/14 bg-[#d7d3ca] p-4 shadow-[0_16px_38px_rgba(35,31,26,0.1)] dark:border-white/12 dark:bg-[#222429] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] sm:p-5">
+    <section className="min-w-0 overflow-hidden rounded-[1.25rem] border border-border/70 bg-card p-4 text-card-foreground shadow-[0_16px_38px_rgba(35,31,26,0.1)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] sm:p-5">
       <div className="flex items-center justify-between gap-4">
-        <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-black/52 dark:text-white/58">
+        <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           28 days · UTC
         </span>
-        <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.12em] text-black/55 dark:text-white/58" aria-hidden="true">
+        <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground" aria-hidden="true">
           <span>less</span>
           <span className="h-2.5 w-2.5 rounded-[3px] bg-[#9f97a7]" />
           <span className="h-2.5 w-2.5 rounded-[3px] bg-[#cec4d6]" />
@@ -124,7 +135,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
             <button
               key={day.date}
               type="button"
-              className={`relative aspect-square min-w-0 rounded-[0.6rem] transition-[transform,filter,box-shadow] duration-150 ease-out hover:z-10 hover:-translate-y-1 hover:scale-[1.08] hover:shadow-[0_14px_24px_rgba(35,31,26,0.2)] focus-visible:z-10 focus-visible:-translate-y-1 focus-visible:scale-[1.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/40 dark:hover:shadow-[0_16px_28px_rgba(0,0,0,0.44)] dark:focus-visible:ring-white/50 ${tilt} ${activityClass(day.count, maximum)} ${isLatest ? 'outline outline-2 outline-offset-2 outline-black/22 dark:outline-white/28' : ''} ${isSelected ? 'brightness-[1.04] dark:brightness-110' : ''}`}
+              className={`relative aspect-square min-w-0 rounded-[0.6rem] transition-[transform,filter,box-shadow] duration-150 ease-out will-change-transform hover:z-10 hover:-translate-y-1 hover:scale-[1.08] hover:shadow-[0_14px_24px_rgba(35,31,26,0.2)] focus-visible:z-10 focus-visible:-translate-y-1 focus-visible:scale-[1.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:shadow-[0_16px_28px_rgba(0,0,0,0.44)] ${tilt} ${activityClass(day.count, maximum)} ${isLatest ? 'outline outline-2 outline-offset-2 outline-foreground/20' : ''} ${isSelected ? 'brightness-[1.04] dark:brightness-110' : ''}`}
               aria-label={label}
               aria-pressed={isSelected}
               onPointerEnter={(event) => {
@@ -137,8 +148,9 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
               onPointerLeave={hideTooltip}
               onFocus={(event) => {
                 setSelectedDate(day.date);
+                if (!event.currentTarget.matches(':focus-visible')) return;
                 const rect = event.currentTarget.getBoundingClientRect();
-                showTooltip(day.date, rect.right, rect.bottom);
+                showTooltip(day.date, rect.left + rect.width / 2, rect.bottom);
               }}
               onBlur={hideTooltip}
               onClick={() => setSelectedDate(day.date)}
@@ -147,14 +159,15 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
         })}
       </div>
 
-      <div className="mt-3 flex min-h-9 items-center justify-center rounded-lg border border-black/12 bg-[#e9e5dc] px-3 py-2 text-center font-mono text-[10px] font-medium text-black/68 dark:border-white/12 dark:bg-[#2a2c31] dark:text-white/72 md:hidden" aria-live="polite">
+      <div className="mt-3 flex min-h-9 items-center justify-center rounded-lg border border-border/70 bg-background/55 px-3 py-2 text-center font-mono text-[10px] font-medium text-muted-foreground md:hidden" aria-live="polite">
         {selectedLabel}
       </div>
 
       {finePointer && tooltipLabel ? (
         <div
-          className={`pointer-events-none fixed z-[90] whitespace-nowrap rounded-lg border border-black/18 bg-[#e9e5dc] px-2.5 py-1.5 font-mono text-[10px] font-semibold text-[#242328] shadow-[0_8px_24px_rgba(20,20,24,0.2)] transition-opacity duration-100 dark:border-white/18 dark:bg-[#2a2c31] dark:text-[#f4f0e8] ${tooltipVisible ? 'opacity-100' : 'opacity-0'}`}
-          style={{ left: tooltipPosition.x, top: tooltipPosition.y }}
+          ref={tooltipRef}
+          className={`pointer-events-none fixed left-0 top-0 z-[90] whitespace-nowrap rounded-lg border border-border/70 bg-popover/88 px-2.5 py-1.5 font-mono text-[10px] font-semibold text-popover-foreground shadow-[0_8px_24px_rgba(20,20,24,0.2)] backdrop-blur-xl transition-opacity duration-100 ${tooltipVisible ? 'opacity-100' : 'opacity-0'}`}
+          style={{ transform: 'translate3d(12px, 12px, 0)' }}
         >
           {tooltipLabel}
         </div>

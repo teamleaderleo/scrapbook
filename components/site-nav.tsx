@@ -112,34 +112,34 @@ function MenuLabel({ children }: { children: ReactNode }) {
 
 export default function SiteNav() {
   return (
-    <nav className="min-w-0 border-b bg-background text-foreground">
+    <nav className="sticky top-0 z-50 min-w-0 border-b border-border/55 bg-background/72 text-foreground shadow-[0_1px_0_rgba(255,255,255,0.2),0_10px_30px_rgba(20,20,24,0.05)] backdrop-blur-2xl supports-[backdrop-filter]:bg-background/58 dark:shadow-[0_1px_0_rgba(255,255,255,0.035),0_12px_34px_rgba(0,0,0,0.2)]">
       <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-        <div className="flex h-12 min-w-0 items-center justify-between gap-2 sm:gap-3">
-          <Link href="/" prefetch className="min-w-0 shrink truncate rounded-sm text-base font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-lg">
-            teamleaderleo
-          </Link>
+        <div className="flex h-12 min-w-0 items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <Link href="/" prefetch className="min-w-0 shrink truncate rounded-sm text-base font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-lg">
+              teamleaderleo
+            </Link>
+            <TimeLink />
+          </div>
 
           <div className="hidden min-w-0 items-center gap-5 lg:flex">
-            <TimeLink />
-            <div className="h-5 border-l" />
             <div className="flex items-center gap-4">
               {siteLinks.map((item) => (
                 <InlineLink key={item.label} item={item} />
               ))}
             </div>
-            <div className="h-5 border-l" />
+            <div className="h-5 border-l border-border/60" />
             <div className="flex items-center gap-4">
               {socialLinks.map((item) => (
                 <InlineLink key={item.label} item={item} />
               ))}
               <DiscordButton />
             </div>
-            <div className="h-5 border-l" />
+            <div className="h-5 border-l border-border/60" />
             <NavThemeToggle />
           </div>
 
           <div className="flex min-w-0 shrink-0 items-center gap-1.5 lg:hidden">
-            <TimeLink />
             <NavMenu label="menu">
               <MenuLabel>site</MenuLabel>
               {siteLinks.map((item) => (
