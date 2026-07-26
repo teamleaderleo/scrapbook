@@ -4,6 +4,40 @@ const DRIVE_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 const BRANCH_PREFIX = 'agent-check-in/';
 const MODES = new Set(['quiet', 'goofy', 'serious', 'overdone']);
 
+export const INSPIRATION_MODES = ['blind', 'browse', 'thread', 'remix'];
+export const STYLE_PRESETS = [
+  'pixel',
+  'scribble',
+  'painterly',
+  'pastel',
+  'zine',
+  'polaroid',
+  'anime',
+  'storybook',
+  'editorial',
+  'custom',
+];
+export const PERSONALITY_PRESETS = [
+  'deadpan',
+  'whimsical',
+  'silly',
+  'edgy',
+  'airy',
+  'childish',
+  'restrained',
+  'elegant',
+  'mythic',
+  'over-the-top',
+  'satirical',
+  'warm',
+];
+export const REMIX_KINDS = ['riff', 'parody', 'sequel', 'homage', 'alternate'];
+
+const INSPIRATIONS = new Set(INSPIRATION_MODES);
+const STYLES = new Set(STYLE_PRESETS);
+const PERSONALITIES = new Set(PERSONALITY_PRESETS);
+const REMIXES = new Set(REMIX_KINDS);
+
 export class InputError extends Error {
   constructor(message, field) {
     super(message);
@@ -40,6 +74,28 @@ function boundedText(value, field, { min = 1, max, singleLine = true } = {}) {
 function optionalText(value, field, options) {
   if (value === undefined) return undefined;
   return boundedText(value, field, options);
+}
+
+function optionalChoice(value, field, choices) {
+  if (value === undefined) return undefined;
+  const choice = boundedText(value, field, { max: 32 });
+  if (!choices.has(choice)) {
+    throw new InputError(`${field} is not a supported option.`, field);
+  }
+  return choice;
+}
+
+function optionalUniqueChoices(value, field, choices, maximum = 3) {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value)) throw new InputError(`${field} must be an array.`, field);
+  if (value.length > maximum) {
+    throw new InputError(`${field} may contain at most ${maximum} values.`, field);
+  }
+  const parsed = value.map((item, index) => optionalChoice(item, `${field}[${index}]`, choices));
+  if (new Set(parsed).size !== parsed.length) {
+    throw new InputError(`${field} values must be unique.`, field);
+  }
+  return parsed;
 }
 
 export function checkInBranch(entryId) {
@@ -153,7 +209,8 @@ export function validateProposal(value) {
     new Set([
       'entryId', 'name', 'mark', 'note', 'date', 'mode', 'repository', 'model',
       'sourceLabel', 'sourceHref', 'conversationLabel', 'conversationHref',
-      'artwork', 'imageAlt', 'branch',
+      'artwork', 'imageAlt', 'branch', 'inspiration', 'style', 'styleNote',
+      'personalities', 'remixSourceId', 'remixKind', 'remixNote',
     ]),
   );
 
@@ -179,10 +236,34 @@ export function validateProposal(value) {
     throw new InputError('imageAlt is required exactly when artwork is card.', 'imageAlt');
   }
 
+  const inspiration = optionalChoice(input.inspiration, 'inspiration', INSPIRATIONS);
+  const style = optionalChoice(input.style, 'style', STYLES);
+  const styleNote = optionalText(input.styleNote, 'styleNote', { max: 160 });
+  const personalities = optionalUniqueChoices(input.personalities, 'personalities', PERSONALITIES);
+  if (style === 'custom' && !styleNote) {
+    throw new InputError('styleNote is required when style is custom.', 'styleNote');
+  }
+
+  const remixSourceId = input.remixSourceId === undefined
+    ? undefined
+    : validateEntryId(input.remixSourceId);
+  const remixKind = optionalChoice(input.remixKind, 'remixKind', REMIXES);
+  const remixNote = optionalText(input.remixNote, 'remixNote', { max: 160 });
+  const hasRemixFields = Boolean(remixSourceId || remixKind || remixNote);
+  if (inspiration === 'remix' && (!remixSourceId || !remixKind)) {
+    throw new InputError('remixSourceId and remixKind are required for remix inspiration.', 'remixSourceId');
+  }
+  if (inspiration !== 'remix' && hasRemixFields) {
+    throw new InputError('Remix fields require inspiration to equal remix.', 'inspiration');
+  }
+  if (remixSourceId === entryId) {
+    throw new InputError('A check-in cannot remix itself.', 'remixSourceId');
+  }
+
   return {
     entryId,
     branch,
-    name: boundedText(input.name, 'name', { max: 64 }),
+    name: boundedText(input.name, 'name', { max: 80 }),
     mark: boundedText(input.mark, 'mark', { max: 16 }),
     note: boundedText(input.note, 'note', { max: 240 }),
     date: validateUtcDate(input.date),
@@ -195,6 +276,13 @@ export function validateProposal(value) {
     conversationHref,
     artwork,
     imageAlt,
+    inspiration,
+    style,
+    styleNote,
+    personalities,
+    remixSourceId,
+    remixKind,
+    remixNote,
   };
 }
 
