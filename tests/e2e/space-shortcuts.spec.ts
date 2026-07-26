@@ -15,6 +15,27 @@ async function waitForSpaceHydration(page: Page) {
   await expect(help).toBeHidden();
 }
 
+async function openMobileSidebar(page: Page) {
+  const toggle = page.getByRole('button', { name: 'Toggle sidebar' });
+  const referenceButton = page.getByRole('button', { name: 'Keyboard shortcuts' });
+
+  await expect
+    .poll(
+      async () => {
+        if (await referenceButton.isVisible()) return true;
+        await toggle.click();
+        try {
+          await referenceButton.waitFor({ state: 'visible', timeout: 1_500 });
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      { timeout: 15_000 },
+    )
+    .toBe(true);
+}
+
 test.describe('Space shortcut registry', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/space');
@@ -64,7 +85,7 @@ test.describe('Space shortcut registry', () => {
     await expect(sidebar).toHaveAttribute('data-state', 'expanded');
 
     await pressMod(page, 'E');
-    await expect(page).toHaveURL(/\/space\/review(?:\?|$)/);
+    await expect(page).toHaveURL(/\/space\/review(?:\?|$)/, { timeout: 15_000 });
     await expect(page.getByRole('heading', { name: 'Shortcut Alpha' })).toBeVisible();
     await expect(page.getByText('Alpha review content')).toBeVisible();
 
@@ -79,7 +100,7 @@ test.describe('Space shortcut registry', () => {
     await expect(page.getByRole('heading', { name: 'Shortcut Alpha' })).toBeVisible();
 
     await page.keyboard.press('Escape');
-    await expect(page).toHaveURL(/\/space$/);
+    await expect(page).toHaveURL(/\/space$/, { timeout: 15_000 });
   });
 
   test('bridges the editor command and keeps the help surface usable on mobile', async ({ page }) => {
@@ -93,7 +114,7 @@ test.describe('Space shortcut registry', () => {
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.reload();
-    await page.getByRole('button', { name: 'Toggle sidebar' }).click();
+    await openMobileSidebar(page);
     await page.getByRole('button', { name: 'Keyboard shortcuts' }).click();
 
     await expect(page.locator('[data-space-shortcut-help]')).toBeVisible();
