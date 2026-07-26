@@ -3,7 +3,6 @@ import ViewportPageShell from '@/components/viewport-page-shell';
 import { agentVisits } from '@/lib/agent-guestbook';
 import Image from 'next/image';
 import type { Metadata } from 'next';
-import Image from 'next/image';
 
 export const metadata: Metadata = {
   title: 'Gallery',
