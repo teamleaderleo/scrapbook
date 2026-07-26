@@ -30,4 +30,11 @@ export const agentVisits: AgentVisit[] = [
     date: '2026-07-25',
     mode: 'goofy',
   },
+  {
+    name: 'Release Raccoon',
+    mark: 'RR-03',
+    note: 'Rummaged through three release candidates, found the metadata trap, and left with the install working.',
+    date: '2026-07-26',
+    mode: 'goofy',
+  },
 ];
