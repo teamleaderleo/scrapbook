@@ -1,21 +1,27 @@
-import { getGitHubHomeData } from '@/lib/github-home';
+import { createGitHubActivityHeaders } from '@/lib/github-activity-response';
+import { getGitHubHomeResult } from '@/lib/github-home';
 import { connection } from 'next/server';
 import { NextResponse } from 'next/server';
-
-const CLIENT_REFRESH_SECONDS = 60;
-const UPSTREAM_CACHE_SECONDS = 300;
 
 export async function GET() {
   await connection();
   const requestId = crypto.randomUUID();
 
   try {
-    const activity = await getGitHubHomeData();
+    const result = await getGitHubHomeResult();
+    const { activity, diagnostics } = result;
+    const headers = createGitHubActivityHeaders(result, requestId);
 
     if (activity.source === 'unavailable') {
+      headers.set('Cache-Control', 'no-store');
       return NextResponse.json(
-        { ok: false, error: 'GitHub activity is temporarily unavailable', requestId },
-        { status: 503, headers: { 'Cache-Control': 'no-store', 'X-Request-Id': requestId } },
+        {
+          ok: false,
+          error: 'GitHub activity is temporarily unavailable',
+          requestId,
+          diagnostics,
+        },
+        { status: 503, headers },
       );
     }
 
@@ -27,17 +33,9 @@ export async function GET() {
         weekTotal: activity.weekTotal,
         yearTotal: activity.periodLabel === 'this year' ? activity.total : null,
         days: activity.days.slice(-28),
+        diagnostics,
       },
-      {
-        headers: {
-          'Cache-Control': `public, s-maxage=${CLIENT_REFRESH_SECONDS}, stale-while-revalidate=3600`,
-          'X-Activity-Source': activity.source,
-          'X-Activity-Generated-At': activity.generatedAt,
-          'X-Client-Refresh-Seconds': String(CLIENT_REFRESH_SECONDS),
-          'X-Upstream-Cache-Seconds': String(UPSTREAM_CACHE_SECONDS),
-          'X-Request-Id': requestId,
-        },
-      },
+      { headers },
     );
   } catch (error) {
     console.error('Unable to refresh GitHub activity', { requestId, error });
