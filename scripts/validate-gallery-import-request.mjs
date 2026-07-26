@@ -25,7 +25,11 @@ function requireObject(value) {
 
 function requireSingleLine(value, field, maximum) {
   if (typeof value !== 'string') fail(`${field} must be a string`);
-  if (/[\n\u0000-\u001f\u007f]/.test(value)) fail(`${field} must be one printable line`);
+  const hasControlCharacter = Array.from(value).some((character) => {
+    const codePoint = character.codePointAt(0);
+    return codePoint !== undefined && (codePoint <= 0x1f || codePoint === 0x7f);
+  });
+  if (hasControlCharacter) fail(`${field} must be one printable line`);
   const trimmed = value.trim();
   if (!trimmed || trimmed.length > maximum) fail(`${field} is empty or too long`);
   return trimmed;
