@@ -104,6 +104,9 @@ function resolveRuntime({
   logger = console,
 } = {}) {
   const resolvedIngressMode = normaliseIngressMode(ingressMode);
+  if (process.env.NODE_ENV === 'production' && resolvedIngressMode === 'bearer' && !inboundToken) {
+    throw new Error('SCRAPBOOK_MCP_BEARER_TOKEN is required for production bearer ingress.');
+  }
   const registry = createToolRegistry(githubClient, { profile: toolProfile, allowMerge });
   applyIngressSecurity(registry, resolvedIngressMode);
   return {
@@ -133,7 +136,7 @@ export function createProtocolServer(runtime) {
   const server = new Server(
     { name: SERVER_NAME, version: SERVER_VERSION },
     {
-      capabilities: { tools: { listChanged: false } },
+      capabilities: { tools: {} },
       instructions: runtime.instructions,
     },
   );
@@ -225,9 +228,6 @@ export function startServer({
 } = {}) {
   const ingressMode = normaliseIngressMode(options.ingressMode || process.env.SCRAPBOOK_INGRESS_MODE || 'bearer');
   const inboundToken = options.inboundToken ?? process.env.SCRAPBOOK_MCP_BEARER_TOKEN;
-  if (process.env.NODE_ENV === 'production' && ingressMode === 'bearer' && !inboundToken) {
-    throw new Error('SCRAPBOOK_MCP_BEARER_TOKEN is required for production bearer ingress.');
-  }
   if (ingressMode === 'tunnel' && !['127.0.0.1', '::1', 'localhost'].includes(host)) {
     throw new Error('Tunnel ingress must bind only to loopback. Set HOST=127.0.0.1.');
   }
