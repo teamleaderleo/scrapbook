@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/teamleaderleo/scrapbook/main/schema/gallery-import-request-v1.schema.json",
+  "title": "Scrapbook gallery import request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "entryId", "sourceType", "source"],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "entryId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 80
+    },
+    "sourceType": {
+      "type": "string",
+      "enum": ["drive", "github-attachment"]
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "sourceType": { "const": "drive" }
+        }
+      },
+      "then": {
+        "properties": {
+          "source": {
+            "pattern": "^[A-Za-z0-9_-]{10,256}$"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "sourceType": { "const": "github-attachment" }
+        }
+      },
+      "then": {
+        "properties": {
+          "source": {
+            "pattern": "^https://(github\\.com/user-attachments/assets/|user-images\\.githubusercontent\\.com/|private-user-images\\.githubusercontent\\.com/)"
+          }
+        }
+      }
+    }
+  ]
+}
