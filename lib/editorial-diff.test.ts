@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildRedline, diffWords, splitEditorialBlocks } from '@/lib/editorial-diff';
+import { buildRedline, diffWords, splitEditorialBlocks } from './editorial-diff';
 
 describe('editorial redlines', () => {
   it('marks inserted and removed words inside a changed block', () => {
