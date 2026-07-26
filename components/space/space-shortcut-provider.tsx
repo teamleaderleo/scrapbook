@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -142,7 +143,7 @@ export function SpaceShortcutProvider({ children }: { children: ReactNode }) {
     return registrations;
   }, [baseRegistrations, helpOpen]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     runtimeRegistrations.current = dispatchRegistrations;
   }, [dispatchRegistrations]);
 
@@ -303,5 +304,8 @@ export function useSpaceShortcut(
   registration: SpaceShortcutRegistration,
 ) {
   const { registerShortcut } = useSpaceShortcuts();
-  useEffect(() => registerShortcut(id, registration), [id, registerShortcut, registration]);
+  useLayoutEffect(
+    () => registerShortcut(id, registration),
+    [id, registerShortcut, registration],
+  );
 }
