@@ -1,0 +1,29 @@
+name: Opt in Vercel preview
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - 'preview/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vercel-preview-opt-in-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  promote:
+    if: ${{ github.event.deleted == false && contains(github.event.head_commit.message, '[preview]') }}
+    runs-on: ubuntu-latest
+    env:
+      PREVIEW_REF: preview/opt-in/${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Promote marked commit to a preview branch
+        run: |
+          echo "Promoting ${GITHUB_SHA} to ${PREVIEW_REF}"
+          git push --force origin "${GITHUB_SHA}:refs/heads/${PREVIEW_REF}"

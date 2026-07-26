@@ -2,10 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
     "deploymentEnabled": {
-      "docs/**": false,
-      "chore/**": false,
-      "internal/**": false,
-      "audit/**": false
+      "**": false,
+      "main": true,
+      "preview/**": true
     }
-  }
+  },
+  "ignoreCommand": "node scripts/vercel-preview-policy.mjs"
 }
