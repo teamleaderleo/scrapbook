@@ -157,7 +157,7 @@ export default function GalleryPage() {
                             alt={visit.image.alt}
                             fill
                             sizes="(min-width: 1024px) 20rem, (min-width: 640px) 46vw, calc(100vw - 4rem)"
-                            className="object-cover"
+                            className="object-contain"
                           />
                         </div>
                       </figure>
