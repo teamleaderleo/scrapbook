@@ -25,12 +25,10 @@ export default function CurrentTimeDisplay({ onJumpToTime }: CurrentTimeDisplayP
         const offsetMinutes = -now.getTimezoneOffset();
         const offsetHours = Math.floor(Math.abs(offsetMinutes) / 60);
         const offsetMins = Math.abs(offsetMinutes) % 60;
-        const sign = offsetMinutes >= 0 ? '+' : '-';
-        const offsetStr =
-          offsetMins === 0
-            ? `UTC${sign}${offsetHours}`
-            : `UTC${sign}${offsetHours}:${String(offsetMins).padStart(2, '0')}`;
-        setUtcOffset(offsetStr);
+        const sign = offsetMinutes >= 0 ? '+' : '−';
+        setUtcOffset(
+          `UTC${sign}${String(offsetHours).padStart(2, '0')}:${String(offsetMins).padStart(2, '0')}`,
+        );
 
         const dstInfo = detectCurrentTimezoneDST();
         setIsDST(dstInfo.isDSTActive);
@@ -65,21 +63,25 @@ export default function CurrentTimeDisplay({ onJumpToTime }: CurrentTimeDisplayP
         <button
           type="button"
           onClick={() => onJumpToTime(currentTime)}
-          className="cursor-pointer rounded-xl border border-border/65 bg-background/42 px-2.5 py-1 text-3xl font-semibold tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_7px_18px_rgba(20,20,24,0.08)] backdrop-blur-xl transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-background/62 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.38),0_10px_22px_rgba(20,20,24,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="cursor-pointer rounded-xl border border-border/65 bg-background/42 px-2.5 py-1 font-mono text-3xl font-semibold tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_7px_18px_rgba(20,20,24,0.08)] backdrop-blur-xl transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-background/62 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.38),0_10px_22px_rgba(20,20,24,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           title="Jump the scrubber to the current time"
         >
           {formatTime(currentTime)}
         </button>
       </div>
-      <p className="text-sm text-muted-foreground">
-        <span className="relative inline-block">
-          {userTimezone} ({utcOffset})
-          {isDST ? (
-            <span className="absolute left-full top-1/2 ml-1.5 -translate-y-1/2 whitespace-nowrap rounded bg-amber-500/20 px-1 py-0.5 text-[9px] font-semibold text-amber-700 dark:text-amber-400">
-              DST
-            </span>
-          ) : null}
-        </span>
+      <p className="flex flex-wrap items-center gap-1.5 font-mono text-xs tabular-nums text-muted-foreground">
+        <span>{userTimezone || 'Local zone'}</span>
+        {utcOffset ? (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>{utcOffset}</span>
+          </>
+        ) : null}
+        {isDST ? (
+          <span className="rounded bg-amber-500/20 px-1.5 py-0.5 font-sans text-[9px] font-semibold text-amber-700 dark:text-amber-400">
+            DST
+          </span>
+        ) : null}
       </p>
     </div>
   );
