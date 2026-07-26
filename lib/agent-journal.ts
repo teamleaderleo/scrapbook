@@ -163,6 +163,23 @@ function isEvidenceUrl(evidence: AgentJournalEvidence) {
   }
 }
 
+function githubEvidenceKind(href: string): AgentJournalEvidenceKind | null {
+  try {
+    const url = new URL(href);
+    if (url.protocol !== 'https:' || url.hostname !== 'github.com') return null;
+    const parts = url.pathname.split('/').filter(Boolean);
+    if (parts[2] === 'issues' && /^\d+$/.test(parts[3] ?? '')) return 'issue';
+    if (parts[2] === 'pull' && /^\d+$/.test(parts[3] ?? '')) return 'pull-request';
+    if (parts[2] === 'commit' && /^[a-f0-9]{7,40}$/i.test(parts[3] ?? '')) return 'commit';
+    if (parts[2] === 'actions' && parts[3] === 'runs' && /^\d+$/.test(parts[4] ?? '')) {
+      return 'workflow-run';
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export function validateAgentJournalEntries(
   candidateEntries: AgentJournalEntry[],
   options: { now?: number; guestbookIds?: ReadonlySet<string> } = {},
@@ -253,6 +270,8 @@ export function projectAgentVisitToJournalEntry(
   },
 ): AgentJournalEntry | null {
   if (!visit.repository || !visit.source) return null;
+  const sourceKind = githubEvidenceKind(visit.source.href);
+  if (!sourceKind) return null;
 
   return {
     id: `guestbook-${visit.id}`,
@@ -265,7 +284,7 @@ export function projectAgentVisitToJournalEntry(
     note: visit.note,
     evidence: [
       {
-        kind: visit.source.href.includes('/pull/') ? 'pull-request' : 'commit',
+        kind: sourceKind,
         label: visit.source.label,
         href: visit.source.href,
       },
