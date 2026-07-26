@@ -1,7 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 
 async function pressMod(page: Page, key: string) {
-  await page.keyboard.press(`Control+${key}`);
+  const modifier = await page.evaluate(() =>
+    /Mac|iPhone|iPad/i.test(navigator.platform) ? 'Meta' : 'Control',
+  );
+  await page.keyboard.press(`${modifier}+${key}`);
 }
 
 test.describe('Space shortcut registry', () => {
