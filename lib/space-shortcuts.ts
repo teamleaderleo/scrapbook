@@ -249,9 +249,13 @@ export function matchesSpaceShortcutBinding(event: KeyboardEvent, binding: Space
   const expectedMod = binding.modifiers?.mod ?? false;
   const expectedAlt = binding.modifiers?.alt ?? false;
   const expectedShift = binding.modifiers?.shift ?? false;
-  const actualMod = event.metaKey || event.ctrlKey;
+  const pressedModKeys = Number(event.metaKey) + Number(event.ctrlKey);
 
-  if (actualMod !== expectedMod || event.altKey !== expectedAlt || event.shiftKey !== expectedShift) {
+  if (
+    (expectedMod ? pressedModKeys !== 1 : pressedModKeys !== 0) ||
+    event.altKey !== expectedAlt ||
+    event.shiftKey !== expectedShift
+  ) {
     return false;
   }
 
@@ -282,7 +286,11 @@ export function resolveSpaceShortcut(
   const candidates = definitions
     .map((definition, registryIndex) => {
       const registration = registrations.get(definition.id);
-      if (!registration || registration.active === false || !definitionMatchesEvent(definition, event)) {
+      if (
+        !registration ||
+        registration.active === false ||
+        !definitionMatchesEvent(definition, event)
+      ) {
         return null;
       }
 
