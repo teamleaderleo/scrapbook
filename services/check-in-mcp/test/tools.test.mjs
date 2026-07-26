@@ -25,7 +25,11 @@ const baseGuestbook = `import 'server-only';\n\nconst visits = [\n  {\n    id: '
 class FakeClient {
   constructor() {
     this.refs = new Map([['main', { object: { sha: 'main-sha' } }]]);
-    this.files = new Map([['main:lib/agent-guestbook.ts', { sha: 'guestbook-sha', content: baseGuestbook, htmlUrl: 'https://github.test/guestbook' }]]);
+    this.files = new Map([['main:lib/agent-guestbook.ts', {
+      sha: 'guestbook-sha',
+      content: baseGuestbook,
+      htmlUrl: 'https://github.test/guestbook',
+    }]]);
     this.dispatched = [];
     this.pulls = [];
   }
@@ -41,7 +45,16 @@ class FakeClient {
   async dispatchArtworkImport(input) { this.dispatched.push(input); }
   async listArtworkRuns() { return []; }
   async listPullRequestsForBranch(branch) { return this.pulls.filter((pr) => pr.head.ref === branch); }
-  async getCheckRuns() { return { check_runs: [{ name: 'CI / verify', status: 'completed', conclusion: 'success', html_url: 'https://github.test/check' }] }; }
+  async getCheckRuns() {
+    return {
+      check_runs: [{
+        name: 'CI / verify',
+        status: 'completed',
+        conclusion: 'success',
+        html_url: 'https://github.test/check',
+      }],
+    };
+  }
   async getCombinedStatus() { return { state: 'success', statuses: [] }; }
   async updateFile(path, ref, _sha, content) {
     this.files.set(`${ref}:${path}`, { sha: 'new-sha', content, htmlUrl: 'https://github.test/guestbook' });
@@ -62,17 +75,65 @@ class FakeClient {
     return pr;
   }
   async getPullRequest(number) { return this.pulls.find((pr) => pr.number === number); }
-  async markPullRequestReady() { this.pulls[0].draft = false; return { number: 99, isDraft: false, url: 'https://github.test/pr/99' }; }
-  async mergePullRequest() { this.pulls[0].merged = true; return { merged: true, sha: 'merge-sha' }; }
+  async markPullRequestReady() {
+    this.pulls[0].draft = false;
+    return { number: 99, isDraft: false, url: 'https://github.test/pr/99' };
+  }
+  async mergePullRequest() {
+    this.pulls[0].merged = true;
+    return { merged: true, sha: 'merge-sha' };
+  }
 }
 
-test('tool annotations keep planning read-only and finalisation destructive', () => {
+function fullRegistry(client = new FakeClient(), allowMerge = false) {
+  return createToolRegistry(client, { profile: 'full', allowMerge });
+}
+
+test('read-only profile exposes capabilities, planning, and status only', async () => {
   const registry = createToolRegistry(new FakeClient());
-  const plan = registry.tools.find((tool) => tool.name === 'plan_check_in');
-  const finalise = registry.tools.find((tool) => tool.name === 'finalise_check_in');
-  assert.equal(plan.annotations.readOnlyHint, true);
-  assert.equal(plan.annotations.idempotentHint, true);
-  assert.equal(finalise.annotations.destructiveHint, true);
+  assert.deepEqual(
+    registry.tools.map((tool) => tool.name),
+    ['get_check_in_capabilities', 'plan_check_in', 'get_check_in_status'],
+  );
+  const hiddenWrite = await registry.call('reserve_check_in', {
+    entryId: proposal.entryId,
+    branch: 'agent-check-in/copper-moth',
+    approved: true,
+  });
+  assert.equal(hiddenWrite.isError, true);
+  assert.match(hiddenWrite.content[0].text, /unavailable in the read-only profile/);
+
+  const capabilities = await registry.call('get_check_in_capabilities', {});
+  assert.equal(capabilities.structuredContent.profile, 'read-only');
+  assert.equal(capabilities.structuredContent.mergeEnabled, false);
+  assert.deepEqual(capabilities.structuredContent.routes[0], { id: 'blind', priorEntries: 'hidden' });
+});
+
+test('full profile separates review from opt-in merge authority', () => {
+  const withoutMerge = fullRegistry();
+  assert.ok(withoutMerge.tools.some((tool) => tool.name === 'mark_check_in_ready'));
+  assert.ok(!withoutMerge.tools.some((tool) => tool.name === 'merge_check_in_pr'));
+
+  const withMerge = fullRegistry(new FakeClient(), true);
+  const markReady = withMerge.tools.find((tool) => tool.name === 'mark_check_in_ready');
+  const merge = withMerge.tools.find((tool) => tool.name === 'merge_check_in_pr');
+  assert.equal(markReady.annotations.destructiveHint, false);
+  assert.equal(merge.annotations.destructiveHint, true);
+  assert.deepEqual(markReady.securitySchemes[0].scopes, ['scrapbook.checkins.review']);
+  assert.deepEqual(merge.securitySchemes[0].scopes, ['scrapbook.checkins.merge']);
+});
+
+test('every advertised tool declares outputs, security, and required annotations', () => {
+  const registry = fullRegistry(new FakeClient(), true);
+  for (const tool of registry.tools) {
+    assert.equal(tool.inputSchema.type, 'object');
+    assert.equal(tool.outputSchema.type, 'object');
+    assert.ok(Array.isArray(tool.securitySchemes));
+    assert.deepEqual(tool._meta.securitySchemes, tool.securitySchemes);
+    assert.equal(typeof tool.annotations.readOnlyHint, 'boolean');
+    assert.equal(typeof tool.annotations.destructiveHint, 'boolean');
+    assert.equal(typeof tool.annotations.openWorldHint, 'boolean');
+  }
 });
 
 test('plan schema exposes the guestbook creative vocabulary', () => {
@@ -111,7 +172,7 @@ test('plan validates remix lineage against the current guestbook', async () => {
 
 test('reserve, import, save, and PR tools preserve the check-in order', async () => {
   const client = new FakeClient();
-  const registry = createToolRegistry(client);
+  const registry = fullRegistry(client);
   const branch = 'agent-check-in/copper-moth';
 
   const beforeReserve = await registry.call('import_check_in_artwork', {
@@ -156,27 +217,42 @@ test('reserve, import, save, and PR tools preserve the check-in order', async ()
   assert.equal(reopened.structuredContent.status, 'already-opened');
 });
 
-test('finalise re-checks green CI and requires ready before merge', async () => {
+test('review and merge tools re-check CI and cannot be substituted for each other', async () => {
   const client = new FakeClient();
-  const registry = createToolRegistry(client);
-  await registry.call('reserve_check_in', { entryId: proposal.entryId, branch: 'agent-check-in/copper-moth', approved: true });
-  client.files.set('agent-check-in/copper-moth:public/gallery/agents/copper-moth.webp', { sha: 'image', content: '', htmlUrl: '' });
+  const registry = fullRegistry(client, true);
+  const branch = 'agent-check-in/copper-moth';
+  await registry.call('reserve_check_in', { entryId: proposal.entryId, branch, approved: true });
+  client.files.set(`${branch}:public/gallery/agents/copper-moth.webp`, { sha: 'image', content: '', htmlUrl: '' });
   await registry.call('save_check_in', { proposal, approved: true });
   await registry.call('open_check_in_pr', { proposal, approved: true });
 
-  const mergeDraft = await registry.call('finalise_check_in', {
-    prNumber: 99, action: 'merge', confirmation: 'merge PR #99', approved: true,
+  const mergeDraft = await registry.call('merge_check_in_pr', {
+    prNumber: 99,
+    confirmation: 'merge PR #99',
+    approved: true,
   });
   assert.equal(mergeDraft.isError, true);
   assert.match(mergeDraft.content[0].text, /Mark the pull request ready/);
 
-  const ready = await registry.call('finalise_check_in', {
-    prNumber: 99, action: 'mark-ready', confirmation: 'mark PR #99 ready', approved: true,
+  const wrongConfirmation = await registry.call('mark_check_in_ready', {
+    prNumber: 99,
+    confirmation: 'merge PR #99',
+    approved: true,
+  });
+  assert.equal(wrongConfirmation.isError, true);
+  assert.match(wrongConfirmation.content[0].text, /mark PR #99 ready/);
+
+  const ready = await registry.call('mark_check_in_ready', {
+    prNumber: 99,
+    confirmation: 'mark PR #99 ready',
+    approved: true,
   });
   assert.equal(ready.structuredContent.status, 'ready');
 
-  const merged = await registry.call('finalise_check_in', {
-    prNumber: 99, action: 'merge', confirmation: 'merge PR #99', approved: true,
+  const merged = await registry.call('merge_check_in_pr', {
+    prNumber: 99,
+    confirmation: 'merge PR #99',
+    approved: true,
   });
   assert.equal(merged.structuredContent.status, 'merged');
 });
