@@ -7,6 +7,7 @@ import { ItemsProvider } from '../lib/contexts/item-context';
 import { createClient } from '@/utils/supabase/server';
 import { SearchCommand } from '@/components/space/search-command';
 import { MonacoEditorPanel } from '@/components/space/monaco-editor-panel';
+import { SpaceShortcutProvider } from '@/components/space/space-shortcut-provider';
 import { mapDatabaseItemsToItems } from '@/app/lib/utils/database';
 import { isAdminUser } from '@/app/lib/auth/admin';
 import { SPACE_ITEM_SELECT, SPACE_PAGE_SIZE } from '@/app/lib/space-data';
@@ -93,12 +94,14 @@ async function SpaceDataShell({ children }: { children: React.ReactNode }) {
         initialNowMs={nowMs}
         initialHasMore={hasMore}
       >
-        <div className="flex h-dvh min-h-0 w-full min-w-0 overflow-hidden bg-background text-foreground">
-          <SearchCommand />
-          <AppSidebar />
-          <div className="h-full min-h-0 min-w-0 flex-1 overflow-hidden">{children}</div>
-          <MonacoEditorPanel />
-        </div>
+        <SpaceShortcutProvider>
+          <div className="flex h-dvh min-h-0 w-full min-w-0 overflow-hidden bg-background text-foreground">
+            <SearchCommand />
+            <AppSidebar />
+            <div className="h-full min-h-0 min-w-0 flex-1 overflow-hidden">{children}</div>
+            <MonacoEditorPanel />
+          </div>
+        </SpaceShortcutProvider>
       </ItemsProvider>
     </SidebarProvider>
   );
