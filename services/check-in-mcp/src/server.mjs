@@ -105,6 +105,39 @@ function resolveSessionSecret({ sessionSecret, inboundToken }) {
   return DEVELOPMENT_SESSION_SECRET;
 }
 
+function toolAccess(tool) {
+  const scope = tool.securitySchemes?.flatMap((scheme) => scheme.scopes || [])[0] || '';
+  if (scope.endsWith('.merge')) return 'merge';
+  if (scope.endsWith('.review')) return 'review';
+  if (scope.endsWith('.write')) return 'write';
+  return 'read';
+}
+
+function finaliseRegistry(source) {
+  const tools = source.tools.map((tool) => tool.name === 'advance_check_in_session'
+    ? { ...tool, annotations: { ...tool.annotations, idempotentHint: false } }
+    : tool);
+  const summaries = tools.map((tool) => ({
+    name: tool.name,
+    access: toolAccess(tool),
+    requiresApproval: tool.annotations.readOnlyHint === false,
+    destructive: tool.annotations.destructiveHint,
+  }));
+  return {
+    tools,
+    profile: source.profile,
+    allowMerge: source.allowMerge,
+    async call(name, args) {
+      const result = await source.call(name, args);
+      if (name !== 'get_check_in_capabilities' || result?.isError) return result;
+      return {
+        ...result,
+        structuredContent: { ...result.structuredContent, tools: summaries },
+      };
+    },
+  };
+}
+
 function resolveRuntime({
   githubClient = new ScrapbookGitHubClient(),
   inboundToken = process.env.SCRAPBOOK_MCP_BEARER_TOKEN,
@@ -120,9 +153,10 @@ function resolveRuntime({
     throw new Error('SCRAPBOOK_MCP_BEARER_TOKEN is required for production bearer ingress.');
   }
   const baseRegistry = createToolRegistry(githubClient, { profile: toolProfile, allowMerge });
-  const registry = createSessionToolRegistry(baseRegistry, {
+  const sessionRegistry = createSessionToolRegistry(baseRegistry, {
     sessionSecret: resolveSessionSecret({ sessionSecret, inboundToken }),
   });
+  const registry = finaliseRegistry(sessionRegistry);
   applyIngressSecurity(registry, resolvedIngressMode);
   return {
     inboundToken,
