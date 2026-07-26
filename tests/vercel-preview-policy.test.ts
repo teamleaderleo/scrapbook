@@ -38,11 +38,16 @@ describe('Vercel preview deployment policy', () => {
       gitRef: 'feature/navigation-copy',
       commitMessage: 'Tighten navigation copy [preview]',
     });
+    const upperCaseDecision = decideVercelDeployment({
+      gitRef: 'feature/navigation-copy',
+      commitMessage: 'Tighten navigation copy [PREVIEW]',
+    });
 
     expect(decision).toEqual({
       deploy: true,
       reason: 'commit message contains [preview]',
     });
+    expect(upperCaseDecision).toEqual(decision);
   });
 
   it('continues for a persistent preview branch', () => {
