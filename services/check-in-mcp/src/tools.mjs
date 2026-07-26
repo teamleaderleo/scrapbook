@@ -1,5 +1,9 @@
 import {
+  INSPIRATION_MODES,
   InputError,
+  PERSONALITY_PRESETS,
+  REMIX_KINDS,
+  STYLE_PRESETS,
   validateFinalise,
   validateImport,
   validateOpenPr,
@@ -72,9 +76,14 @@ function checksAreGreen(checkRuns, combinedStatus) {
 }
 
 function schemas() {
+  const entryIdProperty = {
+    type: 'string',
+    pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$',
+    maxLength: 96,
+  };
   const proposalProperties = {
-    entryId: { type: 'string', pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', maxLength: 96 },
-    name: { type: 'string', minLength: 1, maxLength: 64 },
+    entryId: entryIdProperty,
+    name: { type: 'string', minLength: 1, maxLength: 80 },
     mark: { type: 'string', minLength: 1, maxLength: 16 },
     note: { type: 'string', minLength: 1, maxLength: 240 },
     date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$' },
@@ -88,6 +97,18 @@ function schemas() {
     artwork: { type: 'string', enum: ['none', 'card'] },
     imageAlt: { type: 'string', minLength: 1, maxLength: 240 },
     branch: { type: 'string', maxLength: 160 },
+    inspiration: { type: 'string', enum: INSPIRATION_MODES },
+    style: { type: 'string', enum: STYLE_PRESETS },
+    styleNote: { type: 'string', minLength: 1, maxLength: 160 },
+    personalities: {
+      type: 'array',
+      maxItems: 3,
+      uniqueItems: true,
+      items: { type: 'string', enum: PERSONALITY_PRESETS },
+    },
+    remixSourceId: entryIdProperty,
+    remixKind: { type: 'string', enum: REMIX_KINDS },
+    remixNote: { type: 'string', minLength: 1, maxLength: 160 },
   };
   const proposalSchema = {
     type: 'object',
@@ -105,7 +126,7 @@ export function createToolRegistry(client) {
     {
       name: 'plan_check_in',
       title: 'Plan a Scrapbook check-in',
-      description: 'Use this when a user wants to validate a proposed Scrapbook gallery check-in and see the exact branch, file, provenance, artwork, and approval steps before any write.',
+      description: 'Use this when a user wants to validate a proposed Scrapbook gallery check-in, including optional creative direction or remix lineage, and see the exact branch, file, provenance, artwork, and approval steps before any write.',
       inputSchema: proposalSchema,
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     },
@@ -198,6 +219,9 @@ export function createToolRegistry(client) {
       if (!guestbook) throw new Error('Scrapbook guestbook file is unavailable on main.');
       if (containsEntry(guestbook.content, proposal.entryId)) {
         throw new InputError(`Entry ID ${proposal.entryId} already exists on main.`, 'entryId');
+      }
+      if (proposal.remixSourceId && !containsEntry(guestbook.content, proposal.remixSourceId)) {
+        throw new InputError(`Remix source ${proposal.remixSourceId} does not exist on main.`, 'remixSourceId');
       }
       const branch = await client.getRef(proposal.branch);
       return toolResult(
