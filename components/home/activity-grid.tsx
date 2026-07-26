@@ -109,7 +109,10 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
   };
 
   return (
-    <section className="min-w-0 overflow-hidden rounded-[1.25rem] border border-border/70 bg-card p-4 text-card-foreground shadow-[0_16px_38px_rgba(35,31,26,0.1)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] sm:p-5">
+    <section
+      className="min-w-0 overflow-hidden rounded-[1.25rem] border border-border/70 bg-card p-3.5 text-card-foreground shadow-[0_16px_38px_rgba(35,31,26,0.1)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] sm:p-4"
+      data-home-activity-grid
+    >
       <div className="flex items-center justify-between gap-4">
         <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           28 days · UTC
@@ -123,7 +126,10 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
         </div>
       </div>
 
-      <div className="mt-4 grid min-w-0 grid-cols-7 gap-2.5 sm:gap-3" aria-label="Four weeks of GitHub activity">
+      <div
+        className="mx-auto mt-3 grid w-full max-w-[25rem] min-w-0 grid-cols-7 gap-2 sm:gap-2.5 [@media(max-height:780px)]:max-w-[24rem]"
+        aria-label="Four weeks of GitHub activity"
+      >
         {days.map((day, index) => {
           const label = labelForDay(day, unit);
           const isSelected = day.date === selected?.date;
@@ -158,7 +164,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
         })}
       </div>
 
-      <div className="mt-3 flex min-h-9 items-center justify-center rounded-lg border border-border/70 bg-background/55 px-3 py-2 text-center font-mono text-[10px] font-medium text-muted-foreground md:hidden" aria-live="polite">
+      <div className="mt-2 flex min-h-8 items-center justify-center rounded-lg border border-border/70 bg-background/55 px-3 py-1.5 text-center font-mono text-[10px] font-medium text-muted-foreground md:hidden" aria-live="polite">
         {selectedLabel}
       </div>
 

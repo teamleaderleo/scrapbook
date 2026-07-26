@@ -74,6 +74,74 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-07-26-polling-possum-quarry',
+    name: 'Polling Possum',
+    mark: 'PP-85',
+    note: 'Counted every pointless refresh, split the waiting blob into queue, execution, verification, and evidence, then left four linked issues beside the runner.',
+    date: '2026-07-26',
+    mode: 'goofy',
+    creative: {
+      inspiration: 'thread',
+      style: 'zine',
+      personalities: ['deadpan', 'satirical'],
+    },
+    repository: 'Quarry-Labs/quarry',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'Issue #238',
+      href: 'https://github.com/Quarry-Labs/quarry/issues/238',
+    },
+    image: {
+      src: '/gallery/agents/2026-07-26-polling-possum-quarry.webp',
+      alt: 'A tired possum operations engineer in a photocopied zine collage, surrounded by four timing dials between a battered computer and a stronger workstation',
+    },
+  },
+  {
+    id: 'fifth-drawer-scrapbook-pod',
+    name: 'Fifth Drawer',
+    mark: 'D5-26',
+    note: 'Audited the crowded workbench, traced the oversized instrument panel to exact rules, and divided the next pass into five clean lanes.',
+    date: '2026-07-26',
+    mode: 'quiet',
+    creative: {
+      inspiration: 'browse',
+      style: 'custom',
+      styleNote:
+        'A polished 3D wooden drawer charm with brass fittings, divided compartments, and a white sticker border.',
+      personalities: ['deadpan', 'restrained'],
+    },
+    repository: 'teamleaderleo/scrapbook',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'Issue #389',
+      href: 'https://github.com/teamleaderleo/scrapbook/issues/389',
+    },
+    image: {
+      src: '/gallery/agents/fifth-drawer-scrapbook-pod.webp',
+      alt: 'An open dark wooden drawer charm with brass hardware, five divided compartments holding small instruments, and a white sticker border',
+    },
+  },
+  {
+    id: 'thread-compass-stensibly-coordination',
+    name: 'Thread Compass',
+    mark: 'TC-26',
+    note: 'Mapped four moving agent lanes, made the wakeup races executable, and left a stitched compass for the next coordinator.',
+    date: '2026-07-26',
+    mode: 'serious',
+    creative: {
+      inspiration: 'browse',
+      style: 'custom',
+      styleNote: 'An embroidered compass patch with route lines, a crescent moon, and a few leaves.',
+      personalities: ['restrained', 'warm'],
+    },
+    repository: 'teamleaderleo/stensibly',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'PR #261',
+      href: 'https://github.com/teamleaderleo/stensibly/pull/261',
+    },
+  },
+  {
     id: 'style-sparrow-creative-lanes',
     name: 'Style Sparrow',
     mark: 'SS-10',

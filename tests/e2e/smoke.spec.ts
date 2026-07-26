@@ -181,7 +181,7 @@ test('gallery credits the agents who worked here', async ({ page }) => {
   await expect(raccoonArtwork).toHaveCount(1);
 });
 
-test('slow navigation keeps the current page visible with immediate feedback', async ({ page }) => {
+test('slow navigation keeps the current page visible behind a monotonic rail', async ({ page }) => {
   await page.addInitScript(() => {
     const idleWindow = window as Window & {
       requestIdleCallback?: (callback: () => void) => number;
@@ -208,6 +208,7 @@ test('slow navigation keeps the current page visible with immediate feedback', a
   await waitForClientHydration(page);
 
   const activity = page.locator('[aria-label="Four weeks of GitHub activity"]');
+  const feedback = page.locator('[data-navigation-feedback]');
   await expect(activity).toBeVisible();
 
   try {
@@ -216,14 +217,58 @@ test('slow navigation keeps the current page visible with immediate feedback', a
     expect(box).toBeTruthy();
     await page.mouse.click(box!.x + box!.width / 2, box!.y + box!.height / 2);
 
-    await expect(page.getByText('Opening time')).toBeVisible();
+    await expect(feedback).toBeVisible();
+    await expect(page.getByText('Opening time')).toHaveCount(0);
     await expect(activity).toBeVisible();
+
+    const initialProgress = Number(await feedback.getAttribute('data-navigation-progress'));
+    await expect
+      .poll(async () => Number(await feedback.getAttribute('data-navigation-progress')))
+      .toBeGreaterThan(initialProgress);
+    expect(initialProgress).toBeGreaterThan(0.1);
+    expect(initialProgress).toBeLessThanOrEqual(0.9);
   } finally {
     releaseNavigation();
   }
 
   await expect(page.locator('input[type="range"]')).toBeVisible();
-  await expect(page.getByText('Opening time')).toBeHidden();
+  await expect(feedback).toBeHidden();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => performance.getEntriesByName('scrapbook:navigation:link').length,
+      ),
+    )
+    .toBeGreaterThan(0);
+});
+
+test('navigation rail honours reduced motion without a sweeping loop', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await waitForClientHydration(page);
+
+  await page.evaluate(() => {
+    window.dispatchEvent(
+      new CustomEvent('scrapbook:navigation-start', {
+        detail: { href: '/time', label: 'time' },
+      }),
+    );
+  });
+
+  const progress = page.locator('.navigation-progress');
+  await expect(progress).toBeVisible();
+  const motion = await progress.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      animationName: style.animationName,
+      transitionDuration: style.transitionDuration,
+    };
+  });
+  expect(motion.animationName).toBe('none');
+  expect(motion.transitionDuration).toBe('0.001s');
+
+  await page.evaluate(() => window.dispatchEvent(new Event('scrapbook:navigation-cancel')));
+  await expect(page.locator('[data-navigation-feedback]')).toBeHidden();
 });
 
 test('homepage wheel scrolls over the activity grid', async ({ page }) => {

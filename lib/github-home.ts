@@ -4,6 +4,7 @@ import {
   getRecentDateKeys,
   parsePublicContributionHtml,
 } from './github-activity-utils';
+import { createStaleWhileErrorCache } from './stale-while-error-cache';
 
 const GITHUB_USERNAME = 'teamleaderleo';
 const FEATURED_REPOSITORIES = [
@@ -23,12 +24,24 @@ const FEATURED_REPOSITORIES = [
     note: 'Builds a privacy-minded evidence trail around revisions, failures, recovery, and missing signals.',
   },
 ] as const;
-const CACHE_SECONDS = 300;
+
+export const GITHUB_ACTIVITY_FRESH_SECONDS = 300;
+export const GITHUB_ACTIVITY_STALE_SECONDS = 3_600;
+const RETRY_BASE_MS = 60_000;
+const MAX_FAILURE_BACKOFF_MS = 15 * 60_000;
 const HOME_WINDOW_DAYS = 35;
 
 export type ContributionDay = {
   date: string;
   count: number;
+};
+
+export type GitHubRateLimit = {
+  limit: number | null;
+  remaining: number | null;
+  used: number | null;
+  resetAt: string | null;
+  resource: string | null;
 };
 
 export type GitHubHomeData = {
@@ -49,6 +62,21 @@ export type GitHubHomeData = {
   }>;
 };
 
+export type GitHubActivityDiagnostics = {
+  cacheStatus: 'hit' | 'miss' | 'stale';
+  upstreamSource: GitHubHomeData['source'];
+  lastUpstreamAttempt: string | null;
+  lastUpstreamFetch: string | null;
+  consecutiveFailures: number;
+  nextRetryAt: string | null;
+  rateLimit: GitHubRateLimit | null;
+};
+
+export type GitHubHomeResult = {
+  activity: GitHubHomeData;
+  diagnostics: GitHubActivityDiagnostics;
+};
+
 type RestEvent = {
   type: string;
   created_at: string | null;
@@ -64,6 +92,20 @@ type ActivitySummary = Pick<
   GitHubHomeData,
   'total' | 'periodLabel' | 'today' | 'weekTotal' | 'activeDays' | 'currentStreak' | 'days'
 >;
+type UpstreamActivity = {
+  activity: GitHubHomeData;
+  rateLimit: GitHubRateLimit | null;
+};
+
+class GitHubRestError extends Error {
+  rateLimit: GitHubRateLimit | null;
+
+  constructor(status: number, rateLimit: GitHubRateLimit | null) {
+    super(`GitHub REST returned ${status}`);
+    this.name = 'GitHubRestError';
+    this.rateLimit = rateLimit;
+  }
+}
 
 function daysFromCounts(counts: Map<string, number>, now: Date, length = HOME_WINDOW_DAYS) {
   return getRecentDateKeys(now, length).map((date) => ({ date, count: counts.get(date) ?? 0 }));
@@ -138,7 +180,34 @@ function eventWeight(event: RestEvent): number {
   return 0;
 }
 
-async function githubJson<T>(url: string): Promise<T> {
+function headerInteger(headers: Headers, name: string): number | null {
+  const value = headers.get(name);
+  if (value === null) return null;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+export function parseGitHubRateLimit(headers: Headers): GitHubRateLimit | null {
+  const limit = headerInteger(headers, 'x-ratelimit-limit');
+  const remaining = headerInteger(headers, 'x-ratelimit-remaining');
+  const used = headerInteger(headers, 'x-ratelimit-used');
+  const reset = headerInteger(headers, 'x-ratelimit-reset');
+  const resource = headers.get('x-ratelimit-resource');
+
+  if (limit === null && remaining === null && used === null && reset === null && resource === null) {
+    return null;
+  }
+
+  return {
+    limit,
+    remaining,
+    used,
+    resetAt: reset === null ? null : new Date(reset * 1_000).toISOString(),
+    resource,
+  };
+}
+
+async function githubJson<T>(url: string): Promise<{ data: T; rateLimit: GitHubRateLimit | null }> {
   const response = await fetch(url, {
     cache: 'no-store',
     headers: {
@@ -147,13 +216,17 @@ async function githubJson<T>(url: string): Promise<T> {
       'X-GitHub-Api-Version': '2022-11-28',
     },
   });
+  const rateLimit = parseGitHubRateLimit(response.headers);
 
-  if (!response.ok) throw new Error(`GitHub REST returned ${response.status}`);
-  return (await response.json()) as T;
+  if (!response.ok) throw new GitHubRestError(response.status, rateLimit);
+  return { data: (await response.json()) as T, rateLimit };
 }
 
-async function fetchPublicEventCounts(): Promise<Map<string, number>> {
-  const events = await githubJson<RestEvent[]>(
+async function fetchPublicEventCounts(): Promise<{
+  counts: Map<string, number>;
+  rateLimit: GitHubRateLimit | null;
+}> {
+  const { data: events, rateLimit } = await githubJson<RestEvent[]>(
     `https://api.github.com/users/${GITHUB_USERNAME}/events/public?per_page=100`,
   );
   const counts = new Map<string, number>();
@@ -166,56 +239,103 @@ async function fetchPublicEventCounts(): Promise<Map<string, number>> {
     counts.set(key, (counts.get(key) ?? 0) + weight);
   }
 
-  return counts;
+  return { counts, rateLimit };
 }
 
 function featuredRepositories(): GitHubHomeData['repositories'] {
   return FEATURED_REPOSITORIES.map((repository) => ({ ...repository }));
 }
 
-async function loadGitHubHomeData(): Promise<GitHubHomeData> {
+function unavailableHomeData(now = new Date()): GitHubHomeData {
+  const summary = summarizeCounts(new Map(), 'unavailable', now);
+  return {
+    username: GITHUB_USERNAME,
+    source: 'unavailable',
+    generatedAt: now.toISOString(),
+    ...summary,
+    total: null,
+    repositories: featuredRepositories(),
+  };
+}
+
+async function loadGitHubHomeData(): Promise<UpstreamActivity> {
   try {
     const summary = summarizeCounts(await fetchPublicProfileCounts(), 'public-profile');
     return {
-      username: GITHUB_USERNAME,
-      source: 'public-profile',
-      generatedAt: new Date().toISOString(),
-      ...summary,
-      repositories: featuredRepositories(),
+      activity: {
+        username: GITHUB_USERNAME,
+        source: 'public-profile',
+        generatedAt: new Date().toISOString(),
+        ...summary,
+        repositories: featuredRepositories(),
+      },
+      rateLimit: null,
     };
   } catch (profileError) {
     console.error('GitHub public contribution fetch failed', profileError);
   }
 
   try {
-    const summary = summarizeCounts(await fetchPublicEventCounts(), 'public-events');
+    const { counts, rateLimit } = await fetchPublicEventCounts();
+    const summary = summarizeCounts(counts, 'public-events');
     return {
-      username: GITHUB_USERNAME,
-      source: 'public-events',
-      generatedAt: new Date().toISOString(),
-      ...summary,
-      repositories: featuredRepositories(),
+      activity: {
+        username: GITHUB_USERNAME,
+        source: 'public-events',
+        generatedAt: new Date().toISOString(),
+        ...summary,
+        repositories: featuredRepositories(),
+      },
+      rateLimit,
     };
   } catch (eventError) {
     console.error('GitHub public event fetch failed', eventError);
-    const summary = summarizeCounts(new Map(), 'unavailable');
-    return {
-      username: GITHUB_USERNAME,
-      source: 'unavailable',
-      generatedAt: new Date().toISOString(),
-      ...summary,
-      total: null,
-      repositories: featuredRepositories(),
-    };
+    throw eventError;
   }
 }
 
-const getCachedGitHubHomeData = unstable_cache(
+const getCachedUpstreamActivity = unstable_cache(
   loadGitHubHomeData,
-  ['github-homepage-v5'],
-  { revalidate: CACHE_SECONDS },
+  ['github-homepage-v6'],
+  { revalidate: GITHUB_ACTIVITY_FRESH_SECONDS },
 );
 
+const githubHomeCache = createStaleWhileErrorCache<UpstreamActivity>({
+  load: getCachedUpstreamActivity,
+  freshForMs: GITHUB_ACTIVITY_FRESH_SECONDS * 1_000,
+  staleForMs: GITHUB_ACTIVITY_STALE_SECONDS * 1_000,
+  retryBaseMs: RETRY_BASE_MS,
+  retryMaxMs: MAX_FAILURE_BACKOFF_MS,
+});
+
+function rateLimitFromError(error: unknown): GitHubRateLimit | null {
+  return error instanceof GitHubRestError ? error.rateLimit : null;
+}
+
+export async function getGitHubHomeResult(): Promise<GitHubHomeResult> {
+  const cached = await githubHomeCache.get();
+  const activity = cached.value?.activity ?? unavailableHomeData();
+  const rateLimit = rateLimitFromError(cached.error) ?? cached.value?.rateLimit ?? null;
+
+  return {
+    activity,
+    diagnostics: {
+      cacheStatus: cached.diagnostics.status,
+      upstreamSource: activity.source,
+      lastUpstreamAttempt: cached.diagnostics.lastAttemptAt,
+      lastUpstreamFetch: cached.value?.activity.generatedAt ?? null,
+      consecutiveFailures: cached.diagnostics.consecutiveFailures,
+      nextRetryAt: cached.diagnostics.nextRetryAt,
+      rateLimit,
+    },
+  };
+}
+
 export async function getGitHubHomeData(): Promise<GitHubHomeData> {
-  return getCachedGitHubHomeData();
+  try {
+    return (await getCachedUpstreamActivity()).activity;
+  } catch (error) {
+    console.error('Unable to load cached GitHub homepage activity', error);
+    return unavailableHomeData();
+  }
 }
