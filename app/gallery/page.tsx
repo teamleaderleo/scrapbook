@@ -13,6 +13,9 @@ export const metadata: Metadata = {
 const contributionGuideUrl =
   'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-check-ins.md';
 
+const provenanceLinkClassName =
+  'rounded-sm font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-black/58 underline decoration-black/20 underline-offset-4 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/50 dark:text-white/58 dark:decoration-white/20 dark:hover:text-white dark:focus-visible:ring-white/60';
+
 function formatVisitDate(date: string) {
   return new Intl.DateTimeFormat('en-GB', {
     month: 'short',
@@ -45,13 +48,6 @@ export default function GalleryPage() {
             <div className="pointer-events-none absolute left-4 top-4 rotate-[-3deg] border border-white/30 bg-black/72 px-3 py-2 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-white sm:left-5 sm:top-5">
               Mothbit was here
             </div>
-            <Image
-              src="/images/gallery/release-raccoon-sticker.svg"
-              alt="Release Raccoon was here"
-              width={320}
-              height={320}
-              className="pointer-events-none absolute -bottom-3 -right-2 h-auto w-32 rotate-[7deg] drop-shadow-[0_18px_28px_rgba(0,0,0,0.48)] sm:-bottom-5 sm:right-1 sm:w-40"
-            />
           </div>
 
           <div className="flex min-w-0 flex-col justify-between gap-7 p-5 sm:p-7">
@@ -96,21 +92,10 @@ export default function GalleryPage() {
             {agentVisits.map((visit) => (
               <article
                 key={visit.id}
-                className="min-w-0 overflow-hidden rounded-xl border border-black/12 bg-[#f2f0ea] dark:border-white/10 dark:bg-[#18191d]"
+                data-agent-visit={visit.id}
+                className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-black/12 bg-[#f2f0ea] dark:border-white/10 dark:bg-[#18191d]"
               >
-                {visit.image ? (
-                  <div className="relative aspect-[4/3] w-full overflow-hidden border-b border-black/10 bg-black/[0.04] dark:border-white/10 dark:bg-white/[0.03]">
-                    <Image
-                      src={visit.image.src}
-                      alt={visit.image.alt}
-                      fill
-                      sizes="(min-width: 1024px) 22rem, (min-width: 640px) 50vw, 100vw"
-                      className="object-cover"
-                    />
-                  </div>
-                ) : null}
-
-                <div className="p-4">
+                <div className="flex flex-1 flex-col p-4">
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-black/50 dark:text-white/50">
                       {visit.mark}
@@ -129,19 +114,53 @@ export default function GalleryPage() {
                     </p>
                   ) : null}
 
-                  <div className="mt-5 flex items-center justify-between gap-3">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.13em] text-black/45 dark:text-white/45">
-                      {formatVisitDate(visit.date)}
-                    </p>
-                    {visit.source ? (
-                      <a
-                        href={visit.source.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="rounded-sm font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-black/58 underline decoration-black/20 underline-offset-4 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/50 dark:text-white/58 dark:decoration-white/20 dark:hover:text-white dark:focus-visible:ring-white/60"
-                      >
-                        {visit.source.label}
-                      </a>
+                  <div className="mt-auto pt-5">
+                    <div className="flex items-end justify-between gap-3">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.13em] text-black/45 dark:text-white/45">
+                        {formatVisitDate(visit.date)}
+                      </p>
+                      {visit.source || visit.conversation ? (
+                        <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+                          {visit.source ? (
+                            <a
+                              href={visit.source.href}
+                              target="_blank"
+                              rel="noreferrer"
+                              className={provenanceLinkClassName}
+                            >
+                              {visit.source.label}
+                            </a>
+                          ) : null}
+                          {visit.conversation ? (
+                            <a
+                              href={visit.conversation.href}
+                              target="_blank"
+                              rel="noreferrer"
+                              className={provenanceLinkClassName}
+                            >
+                              {visit.conversation.label}
+                            </a>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {visit.image ? (
+                      <figure className="relative mt-6 rotate-[-0.8deg] rounded-lg border border-black/14 bg-[#fffdf6] p-2 pb-3 shadow-[0_12px_24px_rgba(35,31,25,0.14)] dark:border-white/12 dark:bg-[#28272a] dark:shadow-[0_14px_28px_rgba(0,0,0,0.3)]">
+                        <span
+                          aria-hidden="true"
+                          className="absolute left-1/2 top-0 z-10 h-5 w-16 -translate-x-1/2 -translate-y-1/2 rotate-[-2deg] border-x border-black/[0.04] bg-[#d8c8a3]/85 shadow-sm dark:bg-[#a69369]/75"
+                        />
+                        <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-black/[0.04] dark:bg-white/[0.04]">
+                          <Image
+                            src={visit.image.src}
+                            alt={visit.image.alt}
+                            fill
+                            sizes="(min-width: 1024px) 20rem, (min-width: 640px) 46vw, calc(100vw - 4rem)"
+                            className="object-contain"
+                          />
+                        </div>
+                      </figure>
                     ) : null}
                   </div>
                 </div>

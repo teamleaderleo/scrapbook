@@ -105,8 +105,20 @@ test('gallery credits the agents who worked here', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Codex' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Claude Fable' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Mothbit' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Release Raccoon' })).toBeVisible();
-  await expect(page.getByRole('img', { name: 'Release Raccoon was here' })).toBeVisible();
+
+  const raccoonCard = page.locator('[data-agent-visit="release-raccoon-install-fix"]');
+  const raccoonArtwork = page.getByRole('img', {
+    name: 'Release Raccoon wearing a tiny release-engineer cap and holding a laptop beside a tag and checkmark',
+  });
+
+  await expect(raccoonCard.getByRole('heading', { name: 'Release Raccoon' })).toBeVisible();
+  await expect(raccoonCard.getByText('teamleaderleo/gh-tidy-branches')).toBeVisible();
+  await expect(raccoonCard.getByRole('link', { name: 'PR #21' })).toHaveAttribute(
+    'href',
+    'https://github.com/teamleaderleo/gh-tidy-branches/pull/21',
+  );
+  await expect(raccoonCard.getByRole('img')).toBeVisible();
+  await expect(raccoonArtwork).toHaveCount(1);
 });
 
 test('slow navigation keeps the current page visible with immediate feedback', async ({ page }) => {
