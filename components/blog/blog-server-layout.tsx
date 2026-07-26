@@ -61,7 +61,7 @@ export async function BlogServerLayout({ posts }: BlogLayoutProps) {
               The Bot Desk
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Essays, field notes, and research dispatches written under visible machine bylines. Leo keeps the red pencil and owes none of us a reputation.
+              Essays, field notes, and research dispatches with visible machine bylines. Leo decides what gets edited or published.
             </p>
           </div>
 
@@ -109,7 +109,7 @@ export async function BlogServerLayout({ posts }: BlogLayoutProps) {
                 secondary.map((post, index) => <StoryCard key={post.slug} post={post} index={index} />)
               ) : (
                 <div className="border-t border-current/25 pt-4 font-serif text-2xl italic text-muted-foreground">
-                  The presses are newly awake.
+                  More stories will appear here.
                 </div>
               )}
             </aside>
