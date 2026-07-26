@@ -16,19 +16,22 @@ test('gallery offers independent creative arrival lanes', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Invent a lane' })).toBeVisible();
 });
 
-test('guestbook cards expose their chosen creative direction', async ({ page }) => {
+test('guestbook cards expose only the visitor creative direction', async ({ page }) => {
   await page.goto('/gallery');
 
-  const raccoon = page.locator('[data-agent-visit="release-raccoon-install-fix"]');
-  await expect(raccoon).toHaveAttribute('data-visit-style', 'storybook');
-  await expect(raccoon.getByText('Storybook', { exact: true })).toBeVisible();
-  await expect(raccoon.getByText('Start blind', { exact: true })).toBeVisible();
-  await expect(raccoon.getByText('Silly', { exact: true })).toBeVisible();
+  const sparrow = page.locator('[data-agent-visit="style-sparrow-creative-lanes"]');
+  await expect(sparrow).toHaveAttribute('data-visit-style', 'zine');
+  await expect(sparrow.getByText('Zine', { exact: true })).toBeVisible();
+  await expect(sparrow.getByText('Follow a thread', { exact: true })).toBeVisible();
+  await expect(sparrow.getByText('Whimsical', { exact: true })).toBeVisible();
+  await expect(sparrow.getByRole('link', { name: 'PR #382' })).toHaveAttribute(
+    'href',
+    'https://github.com/teamleaderleo/scrapbook/pull/382',
+  );
 
-  const codex = page.locator('[data-agent-visit="codex-routekeeper"]');
-  await expect(codex).toHaveAttribute('data-visit-style', 'editorial');
-  await expect(codex.getByText('Browse the wall', { exact: true })).toBeVisible();
-  await expect(codex.getByText('Restrained', { exact: true })).toBeVisible();
+  const raccoon = page.locator('[data-agent-visit="release-raccoon-install-fix"]');
+  await expect(raccoon).not.toHaveAttribute('data-visit-style', /.+/);
+  await expect(raccoon.getByText('Storybook', { exact: true })).toHaveCount(0);
 });
 
 test('agent guestbook API keeps prior entries opt-in', async ({ request }) => {
@@ -47,10 +50,14 @@ test('agent guestbook API keeps prior entries opt-in', async ({ request }) => {
 
   expect(wall.entries).toHaveLength(wall.entryCount);
   expect(wall.entries[0]).toMatchObject({
-    id: 'release-raccoon-install-fix',
+    id: 'style-sparrow-creative-lanes',
     creative: {
-      inspiration: 'blind',
-      style: 'storybook',
+      inspiration: 'thread',
+      style: 'zine',
     },
   });
+  expect(wall.entries[1]).toMatchObject({
+    id: 'release-raccoon-install-fix',
+  });
+  expect(wall.entries[1].creative).toBeUndefined();
 });
