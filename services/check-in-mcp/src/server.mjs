@@ -5,9 +5,10 @@ import { ScrapbookGitHubClient } from './github-client.mjs';
 import { createToolRegistry } from './tools.mjs';
 
 const SERVER_NAME = 'scrapbook-check-in-mcp';
-const SERVER_VERSION = '0.1.0';
+const SERVER_VERSION = '0.2.0';
 const LATEST_PROTOCOL = '2025-06-18';
 const SUPPORTED_PROTOCOLS = new Set(['2025-06-18', '2025-03-26']);
+const INGRESS_MODES = new Set(['bearer', 'tunnel']);
 const MAX_BODY_BYTES = 1024 * 1024;
 
 function jsonResponse(res, status, body, extraHeaders = {}) {
@@ -38,7 +39,8 @@ function constantTimeEquals(left, right) {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-function bearerIsValid(req, expectedToken) {
+function bearerIsValid(req, expectedToken, ingressMode) {
+  if (ingressMode === 'tunnel') return true;
   if (!expectedToken) return true;
   const header = req.headers.authorization || '';
   if (!header.startsWith('Bearer ')) return false;
@@ -72,9 +74,27 @@ function negotiatedProtocol(requested) {
   return SUPPORTED_PROTOCOLS.has(requested) ? requested : LATEST_PROTOCOL;
 }
 
+function normaliseIngressMode(value) {
+  if (!INGRESS_MODES.has(value)) throw new Error(`SCRAPBOOK_INGRESS_MODE must be bearer or tunnel, received: ${value}`);
+  return value;
+}
+
+function pluginInstructions(registry) {
+  const writes = registry.profile === 'full'
+    ? 'Ask for explicit approval before each write.'
+    : 'This connection is read-only; do not ask it to change GitHub.';
+  const merge = registry.allowMerge
+    ? 'Merge is a separate destructive tool and requires the exact pull request confirmation.'
+    : 'Merge authority is disabled on this connection.';
+  return `Read capabilities first. ${writes} Preserve the fixed Scrapbook branch, importer, typed guestbook, provenance, draft PR, and green-check boundaries. ${merge}`;
+}
+
 export function createMcpHandler({
   githubClient = new ScrapbookGitHubClient(),
   inboundToken = process.env.SCRAPBOOK_MCP_BEARER_TOKEN,
+  ingressMode = process.env.SCRAPBOOK_INGRESS_MODE || 'bearer',
+  toolProfile = process.env.SCRAPBOOK_TOOL_PROFILE || 'read-only',
+  allowMerge = process.env.SCRAPBOOK_ALLOW_MERGE === 'true',
   allowedOrigins = new Set(
     (process.env.SCRAPBOOK_ALLOWED_ORIGINS || '')
       .split(',')
@@ -83,31 +103,38 @@ export function createMcpHandler({
   ),
   logger = console,
 } = {}) {
-  const registry = createToolRegistry(githubClient);
+  const resolvedIngressMode = normaliseIngressMode(ingressMode);
+  const registry = createToolRegistry(githubClient, { profile: toolProfile, allowMerge });
 
   return async function handle(req, res) {
     const requestId = req.headers['x-request-id'] || randomUUID();
     res.setHeader('X-Request-Id', requestId);
 
     if (req.url === '/healthz' && req.method === 'GET') {
-      return jsonResponse(res, 200, { ok: true, service: SERVER_NAME, version: SERVER_VERSION });
+      return jsonResponse(res, 200, {
+        ok: true,
+        service: SERVER_NAME,
+        version: SERVER_VERSION,
+        ingressMode: resolvedIngressMode,
+        toolProfile: registry.profile,
+        mergeEnabled: registry.allowMerge,
+      });
     }
-    if (req.url !== '/mcp') {
-      return jsonResponse(res, 404, { error: 'Not found.' });
-    }
-    if (!originIsAllowed(req, allowedOrigins)) {
-      return jsonResponse(res, 403, { error: 'Origin is not allowed.' });
-    }
-    if (!bearerIsValid(req, inboundToken)) {
+    if (req.url !== '/mcp') return jsonResponse(res, 404, { error: 'Not found.' });
+    if (!originIsAllowed(req, allowedOrigins)) return jsonResponse(res, 403, { error: 'Origin is not allowed.' });
+    if (!bearerIsValid(req, inboundToken, resolvedIngressMode)) {
       res.setHeader('WWW-Authenticate', 'Bearer');
       return jsonResponse(res, 401, { error: 'Bearer authentication is required.' });
     }
     if (req.method === 'GET') {
-      return jsonResponse(res, 405, { error: 'This server uses JSON responses over POST and does not expose an SSE stream.' }, { Allow: 'POST, GET' });
+      return jsonResponse(
+        res,
+        405,
+        { error: 'This tool-only server uses JSON responses over POST and does not expose an SSE stream.' },
+        { Allow: 'POST, GET' },
+      );
     }
-    if (req.method !== 'POST') {
-      return jsonResponse(res, 405, { error: 'Method not allowed.' }, { Allow: 'POST, GET' });
-    }
+    if (req.method !== 'POST') return jsonResponse(res, 405, { error: 'Method not allowed.' }, { Allow: 'POST, GET' });
     const contentType = req.headers['content-type'] || '';
     if (!contentType.toLowerCase().startsWith('application/json')) {
       return jsonResponse(res, 415, { error: 'Content-Type must be application/json.' });
@@ -133,15 +160,14 @@ export function createMcpHandler({
 
       let result;
       switch (message.method) {
-        case 'initialize': {
+        case 'initialize':
           result = {
             protocolVersion: negotiatedProtocol(message.params?.protocolVersion),
             capabilities: { tools: { listChanged: false } },
-            serverInfo: { name: SERVER_NAME, title: 'Scrapbook check-in orchestrator', version: SERVER_VERSION },
-            instructions: 'Plan first. Ask for explicit approval before each write. Preserve the fixed Scrapbook branch, importer, typed guestbook, draft PR, and green-check boundaries.',
+            serverInfo: { name: SERVER_NAME, title: 'Scrapbook check-in plugin', version: SERVER_VERSION },
+            instructions: pluginInstructions(registry),
           };
           break;
-        }
         case 'ping':
           result = {};
           break;
@@ -169,13 +195,22 @@ export function createMcpHandler({
   };
 }
 
-export function startServer({ port = Number(process.env.PORT || 8787), ...options } = {}) {
-  if (process.env.NODE_ENV === 'production' && !process.env.SCRAPBOOK_MCP_BEARER_TOKEN) {
-    throw new Error('SCRAPBOOK_MCP_BEARER_TOKEN is required in production.');
+export function startServer({
+  port = Number(process.env.PORT || 8787),
+  host = process.env.HOST || (process.env.SCRAPBOOK_INGRESS_MODE === 'tunnel' ? '127.0.0.1' : '0.0.0.0'),
+  ...options
+} = {}) {
+  const ingressMode = normaliseIngressMode(options.ingressMode || process.env.SCRAPBOOK_INGRESS_MODE || 'bearer');
+  const inboundToken = options.inboundToken ?? process.env.SCRAPBOOK_MCP_BEARER_TOKEN;
+  if (process.env.NODE_ENV === 'production' && ingressMode === 'bearer' && !inboundToken) {
+    throw new Error('SCRAPBOOK_MCP_BEARER_TOKEN is required for production bearer ingress.');
   }
-  const server = http.createServer(createMcpHandler(options));
-  server.listen(port, '0.0.0.0', () => {
-    console.log(`${SERVER_NAME} listening on http://0.0.0.0:${port}/mcp`);
+  if (ingressMode === 'tunnel' && !['127.0.0.1', '::1', 'localhost'].includes(host)) {
+    throw new Error('Tunnel ingress must bind only to loopback. Set HOST=127.0.0.1.');
+  }
+  const server = http.createServer(createMcpHandler({ ...options, ingressMode, inboundToken }));
+  server.listen(port, host, () => {
+    console.log(`${SERVER_NAME} listening on http://${host}:${port}/mcp (${ingressMode}, ${process.env.SCRAPBOOK_TOOL_PROFILE || 'read-only'})`);
   });
   return server;
 }
