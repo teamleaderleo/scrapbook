@@ -23,6 +23,7 @@ async function expectWheelScrollsDocument(page: Page, route: string, selector: s
   await page.setViewportSize({ width: 900, height: 420 });
   const response = await page.goto(route);
   expect(response?.ok()).toBe(true);
+  await waitForClientHydration(page);
 
   const target = page.locator(selector).first();
   await expect(target).toBeVisible();
