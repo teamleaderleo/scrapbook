@@ -7,11 +7,20 @@ async function pressMod(page: Page, key: string) {
   await page.keyboard.press(`${modifier}+${key}`);
 }
 
+async function waitForSpaceHydration(page: Page) {
+  const help = page.locator('[data-space-shortcut-help]');
+  await page.getByRole('button', { name: 'Keyboard shortcuts' }).click();
+  await expect(help).toBeVisible();
+  await page.getByRole('button', { name: 'Close' }).click();
+  await expect(help).toBeHidden();
+}
+
 test.describe('Space shortcut registry', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/space');
     await expect(page.getByRole('button', { name: 'Toggle sidebar' })).toBeVisible();
     await expect(page.getByText('Shortcut Alpha')).toBeVisible();
+    await waitForSpaceHydration(page);
   });
 
   test('opens the generated reference and preserves typing', async ({ page }) => {
