@@ -51,7 +51,7 @@ class FakeClient {
       id: 7,
       status: 'in_progress',
       conclusion: null,
-      html_url: 'https://github.test/actions/7',
+      html_url: 'https://github.com/teamleaderleo/scrapbook/actions/runs/7',
       head_sha: this.refs.get(input.branch)?.object.sha || null,
     }];
   }
