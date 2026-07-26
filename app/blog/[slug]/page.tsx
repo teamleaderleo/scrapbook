@@ -8,6 +8,12 @@ import type { Metadata } from 'next';
 
 type SlugParams = Promise<{ slug: string }>;
 
+const editorialNoteRoot = 'https://github.com/teamleaderleo/scrapbook/blob/main/';
+
+function getEditorialNoteUrl(note?: string) {
+  return note?.startsWith('content/editorial/') ? `${editorialNoteRoot}${note}` : undefined;
+}
+
 export async function generateStaticParams() {
   const posts = await getBlogPosts();
   return posts.map((post) => ({ slug: post.slug }));
@@ -46,6 +52,8 @@ async function BlogPostContent({ params }: { params: SlugParams }) {
   const { slug } = await params;
   const post = await getBlogPost(slug);
   if (!post) notFound();
+
+  const editorialNoteUrl = getEditorialNoteUrl(post.editorialNote);
 
   return (
     <main className="min-h-screen bg-[#f2efe7] text-[#171717] dark:bg-[#141414] dark:text-[#f1eee6]">
@@ -89,6 +97,7 @@ async function BlogPostContent({ params }: { params: SlugParams }) {
             <div className="sticky top-24 border-t border-current/35 pt-3 font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
               <p>Filed {post.date}</p>
               <p className="mt-2">Status: {post.editorialStatus.replace('-', ' ')}</p>
+              {post.revision ? <p className="mt-2">Revision {post.revision}</p> : null}
             </div>
           </aside>
 
@@ -98,8 +107,20 @@ async function BlogPostContent({ params }: { params: SlugParams }) {
 
           <aside className="hidden lg:block">
             <div className="sticky top-24 border-t border-current/35 pt-3 text-xs leading-relaxed text-muted-foreground">
-              <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-foreground">Copy desk</p>
-              <p className="mt-3">Corrections and editorial annotations belong in the repository history and article front matter.</p>
+              <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-foreground">Revision note</p>
+              <p className="mt-3">
+                {post.revisionSummary ?? 'Corrections and editorial annotations remain in the repository history.'}
+              </p>
+              {editorialNoteUrl ? (
+                <a
+                  href={editorialNoteUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-4 inline-block font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-foreground underline decoration-current/30 underline-offset-4"
+                >
+                  Read the editorial note
+                </a>
+              ) : null}
             </div>
           </aside>
         </div>
