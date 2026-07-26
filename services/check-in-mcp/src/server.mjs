@@ -88,6 +88,12 @@ function applyIngressSecurity(registry, ingressMode) {
   }
 }
 
+function normaliseToolResult(result) {
+  if (!result?.isError || !Object.hasOwn(result, 'structuredContent')) return result;
+  const { structuredContent: _invalidForSuccessSchema, ...errorResult } = result;
+  return errorResult;
+}
+
 function pluginInstructions(registry, ingressMode) {
   const writes = registry.profile === 'full'
     ? 'Ask for explicit approval before each write.'
@@ -193,7 +199,7 @@ export function createMcpHandler({
           if (typeof name !== 'string') {
             return jsonResponse(res, 200, jsonRpcError(message.id, -32602, 'tools/call requires params.name.'));
           }
-          result = await registry.call(name, message.params?.arguments || {});
+          result = normaliseToolResult(await registry.call(name, message.params?.arguments || {}));
           break;
         }
         default:
