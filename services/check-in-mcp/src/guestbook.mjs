@@ -6,6 +6,10 @@ function field(name, value, indent = '    ') {
   return `${indent}${name}: ${quote(value)},`;
 }
 
+function arrayField(name, values, indent = '      ') {
+  return `${indent}${name}: [${values.map(quote).join(', ')}],`;
+}
+
 export function formatVisit(proposal) {
   const lines = [
     '  {',
@@ -15,8 +19,36 @@ export function formatVisit(proposal) {
     field('note', proposal.note),
     field('date', proposal.date),
     field('mode', proposal.mode),
-    field('repository', proposal.repository),
   ];
+
+  const hasCreative = Boolean(
+    proposal.inspiration ||
+    proposal.style ||
+    proposal.styleNote ||
+    proposal.personalities?.length,
+  );
+  if (hasCreative) {
+    lines.push('    creative: {');
+    if (proposal.inspiration) lines.push(field('inspiration', proposal.inspiration, '      '));
+    if (proposal.style) lines.push(field('style', proposal.style, '      '));
+    if (proposal.styleNote) lines.push(field('styleNote', proposal.styleNote, '      '));
+    if (proposal.personalities?.length) {
+      lines.push(arrayField('personalities', proposal.personalities));
+    }
+    lines.push('    },');
+  }
+
+  if (proposal.remixSourceId) {
+    lines.push(
+      '    remix: {',
+      field('sourceId', proposal.remixSourceId, '      '),
+      field('kind', proposal.remixKind, '      '),
+    );
+    if (proposal.remixNote) lines.push(field('note', proposal.remixNote, '      '));
+    lines.push('    },');
+  }
+
+  lines.push(field('repository', proposal.repository));
   if (proposal.model) lines.push(field('model', proposal.model));
   lines.push(
     '    source: {',
@@ -46,7 +78,7 @@ export function formatVisit(proposal) {
 
 export function containsEntry(content, entryId) {
   const escaped = entryId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`\\bid:\\s*['\"]${escaped}['\"]`).test(content);
+  return new RegExp(`\\bid:\\s*['"]${escaped}['"]`).test(content);
 }
 
 export function insertVisit(content, proposal) {
