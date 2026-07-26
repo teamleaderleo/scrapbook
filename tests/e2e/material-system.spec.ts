@@ -82,8 +82,11 @@ test('keeps the material exemplar calm with reduced motion', async ({ page }) =>
   await digit.hover();
   const after = await digit.evaluate((element) => element.style.transform);
   const transitionDurationMs = await scoreboard.evaluate((element) => {
-    const value = window.getComputedStyle(element).transitionDuration.split(',')[0] ?? '0s';
-    return value.endsWith('ms') ? Number.parseFloat(value) : Number.parseFloat(value) * 1_000;
+    const value = window.getComputedStyle(element).transitionDuration.split(',')[0]?.trim() ?? '';
+    if (!value) return 0;
+    const duration = Number.parseFloat(value);
+    if (!Number.isFinite(duration)) return 0;
+    return value.endsWith('ms') ? duration : duration * 1_000;
   });
 
   expect(after).toBe(before);
