@@ -98,6 +98,23 @@ test('default bearer profile exposes the safe read-only OAuth surface', async ()
   });
 });
 
+test('tool errors omit structuredContent that would violate the success output schema', async () => {
+  await withServer({}, async (url) => {
+    const payload = await rpc(url, 'tools/call', {
+      name: 'reserve_check_in',
+      arguments: {
+        entryId: 'blocked-write',
+        branch: 'agent-check-in/blocked-write',
+        approved: true,
+      },
+    }).then((response) => response.json());
+
+    assert.equal(payload.result.isError, true);
+    assert.equal(Object.hasOwn(payload.result, 'structuredContent'), false);
+    assert.match(payload.result.content[0].text, /unavailable in the read-only profile/);
+  });
+});
+
 test('full profile advertises write and review tools while merge stays opt-in', async () => {
   await withServer({ toolProfile: 'full' }, async (url) => {
     const listed = await rpc(url, 'tools/list').then((response) => response.json());
