@@ -66,6 +66,7 @@ describe('Space shortcut matching', () => {
       'search.toggle',
       'sidebar.toggle',
       'editor.toggle',
+      'editor.close',
       'navigation.add',
       'navigation.toggle-view',
       'review.next',
@@ -179,6 +180,23 @@ describe('Space shortcut matching', () => {
     expect(resolution?.enabled).toBe(false);
   });
 
+  it('lets the mobile editor sheet own Escape while Monaco is focused', () => {
+    const commands = registrations({
+      'review.exit': { run: vi.fn() },
+      'editor.close': { run: vi.fn() },
+    });
+
+    const resolution = resolveSpaceShortcut(
+      keyboardEvent('Escape', {
+        target: fakeTarget({ editable: true, editor: true }),
+      }),
+      commands,
+    );
+
+    expect(resolution?.definition.id).toBe('editor.close');
+    expect(resolution?.definition.scope).toBe('sheet');
+  });
+
   it('respects events already owned by the browser or another widget', () => {
     const commands = registrations({ 'search.toggle': { run: vi.fn() } });
     expect(
@@ -206,6 +224,7 @@ describe('Space shortcut matching', () => {
       reference.find((entry) => entry.definition.id === 'navigation.add')?.unavailableReason,
     ).toBe('Admin access is required');
     expect(reference.some((entry) => entry.definition.id === 'help.close')).toBe(false);
+    expect(reference.some((entry) => entry.definition.id === 'editor.close')).toBe(false);
   });
 });
 
