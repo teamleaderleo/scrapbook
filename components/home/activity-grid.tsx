@@ -133,7 +133,11 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
 
       <div className="mt-2.5 grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-stretch gap-3">
         <div
-          className="grid w-fit grid-flow-col grid-rows-7 auto-cols-[1rem] gap-0.5"
+          className="grid grid-flow-col justify-self-start gap-0.5"
+          style={{
+            gridTemplateColumns: 'repeat(4, 1rem)',
+            gridTemplateRows: 'repeat(7, 1rem)',
+          }}
           aria-label="Four weeks of GitHub activity"
         >
           {days.map((day, index) => {
