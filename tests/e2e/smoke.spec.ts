@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const publicRoutes = ['/', '/time', '/blog', '/gallery', '/atelier'];
-const idleDigitTransform = 'translate3d(0px, 0px, 0px) rotateX(0deg) rotateY(0deg)';
+const idleDigitTransform = 'translate3d(0px, 0px, 0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1)';
 
 async function expectNoHorizontalOverflow(page: Page) {
   const dimensions = await page.evaluate(() => ({
@@ -78,18 +78,17 @@ for (const route of publicRoutes) {
   });
 }
 
-test('homepage highlights three recent systems', async ({ page }) => {
+test('homepage highlights three recent systems without an extra slogan', async ({ page }) => {
   await page.goto('/');
 
-  await expect(
-    page.getByRole('heading', { name: 'Tools that remember their boundaries' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Recent systems' })).toBeVisible();
+  await expect(page.getByText('Tools that remember their boundaries')).toHaveCount(0);
   await expect(page.getByRole('link', { name: /smolrunner/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /stensibly/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /proofwake/i })).toBeVisible();
 });
 
-test('homepage presents activity as a compact YTD matrix', async ({ page }) => {
+test('homepage presents activity as a wide YTD matrix', async ({ page }) => {
   await page.goto('/');
 
   await expect(page.getByText('YTD', { exact: true })).toBeVisible();
@@ -99,10 +98,10 @@ test('homepage presents activity as a compact YTD matrix', async ({ page }) => {
 
   const box = await grid.boundingBox();
   expect(box).toBeTruthy();
-  expect(box!.height).toBeGreaterThan(box!.width);
+  expect(box!.width).toBeGreaterThan(box!.height);
 });
 
-test('homepage activity tooltip stays continuous between cells', async ({ page }) => {
+test('homepage activity tooltip stays continuous, single-line, and fades on exit', async ({ page }) => {
   await page.goto('/');
   await waitForClientHydration(page);
 
@@ -111,10 +110,14 @@ test('homepage activity tooltip stays continuous between cells', async ({ page }
   await cells.nth(0).hover();
   await expect(tooltip).toBeVisible();
   const firstLabel = await tooltip.textContent();
+  expect(await tooltip.evaluate((element) => getComputedStyle(element).whiteSpace)).toBe('nowrap');
 
   await cells.nth(1).hover();
   await expect(tooltip).toBeVisible();
   await expect.poll(() => tooltip.textContent()).not.toBe(firstLabel);
+
+  await page.mouse.move(2, 2);
+  await expect(tooltip).toBeHidden({ timeout: 1_000 });
 });
 
 test('gallery credits the agents who worked here', async ({ page }) => {
@@ -182,7 +185,7 @@ test('gallery wheel scrolls over the canvas', async ({ page }) => {
   await expectWheelScrollsDocument(page, '/gallery', 'canvas');
 });
 
-test('homepage counter uses four independently reactive digits', async ({ page }) => {
+test('homepage counter uses four independently reactive wind-lift digits', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/');
   const digits = await moveActivityDigits(page);
@@ -196,6 +199,7 @@ test('homepage counter uses four independently reactive digits', async ({ page }
   );
   expect(new Set(transforms).size).toBeGreaterThan(1);
   expect(transforms[0]).not.toEqual(transforms[3]);
+  expect(transforms.some((transform) => /translate3d\([^,]+, -(?:[4-9]|\d{2})/.test(transform))).toBe(true);
 });
 
 test('homepage counter respects reduced motion', async ({ page }) => {
