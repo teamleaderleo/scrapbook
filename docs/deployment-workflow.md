@@ -1,8 +1,15 @@
 # Deployment workflow
 
-Vercel Hobby accounts can create 100 deployments in a rolling 86,400-second window. The Git integration creates a preview deployment for each push to an ordinary non-production branch, and a production deployment for pushes to `main`.
+Vercel Hobby accounts have two rolling limits relevant to this repository:
 
-The quota counts deployments created. A deployment can consume quota even when its build is cancelled or later errors.
+- 32 builds per 3,600 seconds;
+- 100 deployments per 86,400 seconds.
+
+Using Next.js is classed as a build. The Git integration creates a preview deployment for each push to an ordinary non-production branch and a production deployment for pushes to `main`.
+
+The current failing GitHub checks point to Vercel's `build-rate-limit`, so the immediate lockout is the 32-build hourly limit. The daily deployment limit remains a second ceiling.
+
+The counters begin before a deployment succeeds. A deployment can consume quota when its build is cancelled or later errors.
 
 ## Branches that receive previews
 
@@ -33,7 +40,7 @@ Use these prefixes for prose, repository maintenance, investigations, and planni
 4. Push a visual branch when a live browser review will change the decision.
 5. Merge accepted work to `main` for the production deployment.
 
-Vercel's Ignored Build Step runs after a deployment has already been created. Cancelled builds from that mechanism still count toward deployment quotas, so branch-level `git.deploymentEnabled` rules are the useful control for this repository.
+Vercel's Ignored Build Step runs after a deployment has already been created. Cancelled builds from that mechanism still count toward deployment quotas and concurrent build slots, so branch-level `git.deploymentEnabled` rules are the useful control for this repository.
 
 ## Sources
 
