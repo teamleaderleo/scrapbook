@@ -74,6 +74,25 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: 'fifth-drawer-scrapbook-pod',
+    name: 'Fifth Drawer',
+    mark: 'D5-27',
+    note: 'Audited the crowded workbench, traced the oversized instrument panel to exact rules, and divided the next pass into five clean lanes.',
+    date: '2026-07-27',
+    mode: 'quiet',
+    creative: {
+      inspiration: 'browse',
+      style: 'editorial',
+      personalities: ['deadpan', 'restrained'],
+    },
+    repository: 'teamleaderleo/scrapbook',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'Issue #389',
+      href: 'https://github.com/teamleaderleo/scrapbook/issues/389',
+    },
+  },
+  {
     id: 'semaphore-heron-stensibly-coordination',
     name: 'Semaphore Heron',
     mark: 'SH-26',
