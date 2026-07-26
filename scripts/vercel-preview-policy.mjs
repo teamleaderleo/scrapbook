@@ -66,7 +66,7 @@ export function ignoredBuildExitCode(decision) {
 }
 
 /**
- * @param {NodeJS.ProcessEnv} env
+ * @param {Partial<NodeJS.ProcessEnv>} env
  * @param {(message: string) => void} log
  */
 export function runVercelPreviewPolicy(env = process.env, log = console.log) {
