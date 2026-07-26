@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getRecentDateKeys, parsePublicContributionHtml } from './github-activity-utils';
+import { parseGitHubRateLimit } from './github-home';
 
 describe('parsePublicContributionHtml', () => {
   it('reads direct data-count attributes', () => {
@@ -45,5 +46,29 @@ describe('getRecentDateKeys', () => {
     expect(days).toHaveLength(35);
     expect(days[0]).toBe('2026-06-21');
     expect(days.at(-1)).toBe('2026-07-25');
+  });
+});
+
+describe('parseGitHubRateLimit', () => {
+  it('captures REST fallback limit headers', () => {
+    const headers = new Headers({
+      'x-ratelimit-limit': '60',
+      'x-ratelimit-remaining': '41',
+      'x-ratelimit-used': '19',
+      'x-ratelimit-reset': '1785114000',
+      'x-ratelimit-resource': 'core',
+    });
+
+    expect(parseGitHubRateLimit(headers)).toEqual({
+      limit: 60,
+      remaining: 41,
+      used: 19,
+      resetAt: '2026-07-27T01:00:00.000Z',
+      resource: 'core',
+    });
+  });
+
+  it('returns null when GitHub did not send limit headers', () => {
+    expect(parseGitHubRateLimit(new Headers())).toBeNull();
   });
 });
