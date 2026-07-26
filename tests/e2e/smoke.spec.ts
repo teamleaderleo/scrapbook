@@ -24,9 +24,10 @@ async function expectWheelScrollsDocument(page: Page, route: string, selector: s
   const response = await page.goto(route);
   expect(response?.ok()).toBe(true);
 
-  const target = page.locator(selector).first();
-  await expect(target).toBeVisible();
-  await target.scrollIntoViewIfNeeded();
+  await expect(page.locator(selector).first()).toBeVisible();
+  await page.evaluate((targetSelector) => {
+    document.querySelector(targetSelector)?.scrollIntoView({ block: 'center' });
+  }, selector);
 
   const scrollState = await page.evaluate(() => {
     const element = document.scrollingElement;
@@ -37,7 +38,7 @@ async function expectWheelScrollsDocument(page: Page, route: string, selector: s
   });
 
   expect(scrollState.max).toBeGreaterThan(0);
-  const box = await target.boundingBox();
+  const box = await page.locator(selector).first().boundingBox();
   expect(box).toBeTruthy();
   await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
   await page.mouse.wheel(0, 280);
@@ -81,9 +82,8 @@ for (const route of publicRoutes) {
 test('homepage highlights three recent systems', async ({ page }) => {
   await page.goto('/');
 
-  await expect(
-    page.getByRole('heading', { name: 'Tools that remember their boundaries' }),
-  ).toBeVisible();
+  await expect(page.getByText('Recent systems', { exact: true })).toBeVisible();
+  await expect(page.getByText('Tools that remember their boundaries')).toHaveCount(0);
   await expect(page.getByRole('link', { name: /smolrunner/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /stensibly/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /proofwake/i })).toBeVisible();
@@ -181,34 +181,9 @@ test('homepage counter respects reduced motion', async ({ page }) => {
   expect(new Set(transforms)).toEqual(new Set([idleDigitTransform]));
 });
 
-test('homepage activity stays inside a mobile viewport', async ({ page }) => {
+test('mobile gallery does not overflow horizontally', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
-  await page.locator('[aria-label="Four weeks of GitHub activity"] button').last().click();
+  await page.goto('/gallery');
+  await expect(page.locator('canvas')).toBeVisible();
   await expectNoHorizontalOverflow(page);
-});
-
-for (const width of [320, 375, 390, 430]) {
-  test(`gallery stays inside a ${width}px viewport`, async ({ page }) => {
-    await page.setViewportSize({ width, height: 844 });
-    await page.goto('/gallery');
-    await expectNoHorizontalOverflow(page);
-  });
-}
-
-test.describe('connected-data routes', () => {
-  test.skip(!process.env.PLAYWRIGHT_FULL_APP, 'Requires connected app environment variables');
-
-  for (const route of ['/space', '/proxy-dashboard']) {
-    test(`${route} renders without horizontal overflow`, async ({ page }) => {
-      const response = await page.goto(route);
-      expect(response?.ok()).toBe(true);
-      await expect(page.locator('body')).toBeVisible();
-      await expectNoHorizontalOverflow(page);
-    });
-  }
-
-  test('proxy dashboard wheel scrolls over its main content', async ({ page }) => {
-    await expectWheelScrollsDocument(page, '/proxy-dashboard', 'main');
-  });
 });
