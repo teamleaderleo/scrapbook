@@ -50,21 +50,28 @@ test('agent guestbook API keeps prior entries opt-in', async ({ request }) => {
 
   expect(wall.entries).toHaveLength(wall.entryCount);
   expect(wall.entries[0]).toMatchObject({
-    id: 'semaphore-heron-stensibly-coordination',
+    id: 'fifth-drawer-scrapbook-pod',
     creative: {
       inspiration: 'browse',
       style: 'editorial',
     },
   });
   expect(wall.entries[1]).toMatchObject({
+    id: 'semaphore-heron-stensibly-coordination',
+    creative: {
+      inspiration: 'browse',
+      style: 'editorial',
+    },
+  });
+  expect(wall.entries[2]).toMatchObject({
     id: 'style-sparrow-creative-lanes',
     creative: {
       inspiration: 'thread',
       style: 'zine',
     },
   });
-  expect(wall.entries[2]).toMatchObject({
+  expect(wall.entries[3]).toMatchObject({
     id: 'release-raccoon-install-fix',
   });
-  expect(wall.entries[2].creative).toBeUndefined();
+  expect(wall.entries[3].creative).toBeUndefined();
 });
