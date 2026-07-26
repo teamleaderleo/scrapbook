@@ -27,9 +27,11 @@ import {
 const DEFAULT_EDITOR_HEIGHT = 384;
 
 function visibleEditorTrigger() {
-  return Array.from(
-    document.querySelectorAll<HTMLElement>('[data-space-editor-trigger]'),
-  ).find((element) => element.offsetParent !== null) ?? null;
+  return (
+    Array.from(
+      document.querySelectorAll<HTMLElement>('[data-space-editor-trigger]'),
+    ).find((element) => element.offsetParent !== null) ?? null
+  );
 }
 
 export function MonacoEditorPanel() {
@@ -39,6 +41,8 @@ export function MonacoEditorPanel() {
   const editorInstanceRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
   const executeShortcutRef = useRef(executeShortcut);
+  const editorOpenRef = useRef(editorOpen);
+  const shikiThemeRef = useRef('one-light');
   const historyTokenRef = useRef<string | null>(null);
   const restorationRef = useRef<ReturnType<typeof createBrowserEditorSheetRestoration> | null>(
     null,
@@ -61,7 +65,9 @@ export function MonacoEditorPanel() {
 
   useLayoutEffect(() => {
     executeShortcutRef.current = executeShortcut;
-  }, [executeShortcut]);
+    editorOpenRef.current = editorOpen;
+    shikiThemeRef.current = shikiTheme;
+  }, [editorOpen, executeShortcut, shikiTheme]);
 
   useEffect(() => {
     if (editorOpen) setHasOpened(true);
@@ -231,7 +237,7 @@ export function MonacoEditorPanel() {
       editor = monaco.editor.create(editorRef.current, {
         value: '',
         language: 'python',
-        theme: shikiTheme,
+        theme: shikiThemeRef.current,
         automaticLayout: true,
         minimap: { enabled: false },
         fontSize: 14,
@@ -250,7 +256,7 @@ export function MonacoEditorPanel() {
       });
 
       editorInstanceRef.current = editor;
-      monaco.editor.setTheme(shikiTheme);
+      monaco.editor.setTheme(shikiThemeRef.current);
       setIsInitializing(false);
 
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
@@ -268,7 +274,7 @@ export function MonacoEditorPanel() {
         setEditorHeight(nextHeight);
       });
 
-      if (editorOpen) editor.focus();
+      if (editorOpenRef.current) editor.focus();
     };
 
     void initEditor().catch((error) => {
@@ -284,7 +290,7 @@ export function MonacoEditorPanel() {
       editor?.dispose();
       editorInstanceRef.current = null;
     };
-  }, [editorOpen, hasOpened, shikiTheme]);
+  }, [hasOpened]);
 
   useEffect(() => {
     if (!editorOpen || !editorInstanceRef.current) return;
@@ -301,7 +307,7 @@ export function MonacoEditorPanel() {
     left: 0,
     top: `${sheetViewport.top}px`,
     width: '100vw',
-    height: `${sheetViewport.height || window.innerHeight}px`,
+    height: sheetViewport.height ? `${sheetViewport.height}px` : '100dvh',
   };
   const desktopStyle = {
     left: `calc(${sidebarWidth} + 1rem)`,
