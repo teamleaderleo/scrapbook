@@ -1,4 +1,5 @@
 name: Import gallery asset
+run-name: Import gallery asset for ${{ inputs.entry_id }} on ${{ inputs.target_branch }}
 
 on:
   workflow_dispatch:
