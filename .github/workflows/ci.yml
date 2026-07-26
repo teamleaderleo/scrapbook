@@ -45,6 +45,8 @@ jobs:
           name: typecheck-log
           path: typecheck.log
 
+      - name: Install MCP service dependencies
+        run: npm --prefix services/check-in-mcp install --no-package-lock --ignore-scripts --silent
       - name: Unit tests
         run: pnpm test > test.log 2>&1
       - name: Upload test diagnostics
