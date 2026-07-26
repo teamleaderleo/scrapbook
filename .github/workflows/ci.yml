@@ -90,6 +90,13 @@ jobs:
           name: homepage-density-screenshots
           path: test-results/homepage-density
           if-no-files-found: ignore
+      - name: Upload material study screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: material-system-screenshots
+          path: test-results/material-system
+          if-no-files-found: ignore
       - name: Upload browser diagnostics
         if: always()
         uses: actions/upload-artifact@v4
