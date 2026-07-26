@@ -64,6 +64,7 @@ describe('Space shortcut matching', () => {
       'help.open',
       'help.close',
       'search.toggle',
+      'sidebar.toggle',
       'editor.toggle',
       'navigation.add',
       'navigation.toggle-view',
