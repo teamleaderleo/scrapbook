@@ -1,6 +1,6 @@
 # Scrapbook check-in plugin MCP server
 
-Private, tool-only MCP service for issue #378. It lets a ChatGPT plugin plan and manage repository-backed agent check-ins while preserving Scrapbook’s existing branch, image-import, typed-data, pull-request, and CI boundaries.
+Private, tool-only MCP service for issue #378. It lets a ChatGPT plugin run a guided repository-backed agent check-in while preserving Scrapbook’s existing branch, image-import, typed-data, pull-request, and CI boundaries.
 
 ChatGPT may call the connection a custom app in parts of the product. Current OpenAI developer documentation calls the developer package and connection a plugin. This repository contains the MCP server behind a private plugin; it is not a public Plugin Directory submission.
 
@@ -13,6 +13,7 @@ Implemented in draft PR #381:
 - official `@modelcontextprotocol/sdk` Streamable HTTP transport;
 - stateless `POST /mcp` handling compatible with normal Node hosting and Vercel Functions;
 - real SDK-client negotiation, tool-list, and tool-call smoke coverage;
+- signed seven-day guided sessions for turn-by-turn collection and publication;
 - explicit input and output schemas for every advertised tool;
 - accurate read, write, review, and merge annotations;
 - OAuth scope metadata for a public gateway connection;
@@ -26,13 +27,59 @@ Still required before merging the service:
 
 1. connect the service to the target ChatGPT account or workspace;
 2. refresh and review the discovered tool snapshot;
-3. pass the read-only evaluation set;
+3. pass the read-only guided evaluation set;
 4. on an eligible write-capable workspace, create one narrow draft PR with merge disabled;
 5. record the acceptance result on PR #381.
 
+## Guided turn-by-turn flow
+
+The preferred sequence is:
+
+1. `get_check_in_capabilities`
+2. `start_check_in_session`
+3. `submit_check_in_text`
+4. create the image through the separate evolving creative/image-brief flow
+5. `attach_check_in_artwork_source`, or deliberately call `skip_check_in_artwork`
+6. `plan_check_in_session`
+7. in the full profile, call `advance_check_in_session` after each explicit approval until a draft PR exists
+8. inspect CI with `get_check_in_status`
+
+Each session result includes a signed `sessionToken`, current stage, collected draft, artwork source, missing fields, exact next eligible tools, and whether the next action requires approval.
+
+```text
+awaiting_text
+  -> awaiting_artwork
+  -> ready_for_plan
+  -> awaiting_branch
+  -> awaiting_artwork_import?  # image visits only
+  -> awaiting_entry_save
+  -> awaiting_draft_pr
+  -> published
+```
+
+`advance_check_in_session` performs at most one repository mutation per approved call. It delegates to the existing granular tools to reserve the branch, dispatch the importer, save the typed entry, or open the draft PR. It never marks ready or merges, and it does not dispatch a duplicate importer while one is pending.
+
+The image brief itself remains a separate evolving step. The MCP records only an already-created Drive file ID, a supported GitHub attachment, or an explicit text-only choice; it does not constrain the creative prompt.
+
+See [`guided-sessions.md`](guided-sessions.md) for the full state machine and token boundary.
+
+## Signed stateless sessions
+
+Vercel may route consecutive MCP calls to different Function processes. The guided flow therefore carries its state in an HMAC-signed token rather than an in-memory map or database.
+
+Set a dedicated signing key:
+
+```bash
+export SCRAPBOOK_SESSION_SECRET='another-long-random-value'
+```
+
+The token expires after seven days and rejects client edits. It is signed, not encrypted, and must not contain secrets or private prompts. It is also not an authentication credential: ingress authentication, OAuth scopes, the active profile, explicit approval, and the server-side GitHub credential still control repository actions.
+
+A future multi-user or marketplace version must also bind sessions to the authenticated OAuth subject and tenant.
+
 ## Reused from One More Legend
 
-`teamleaderleo/one-more-legend` already runs a ChatGPT MCP app at a Vercel `/mcp` endpoint. Scrapbook now reuses its proven infrastructure pattern:
+`teamleaderleo/one-more-legend` already runs a ChatGPT MCP app at a Vercel `/mcp` endpoint. Scrapbook reuses its proven infrastructure pattern:
 
 - official MCP SDK server and Streamable HTTP transport;
 - one stateless server/transport pair per request;
@@ -49,17 +96,31 @@ The service defaults to the least authority possible.
 
 | Profile / flag | Advertised tools | Repository effect |
 | --- | --- | --- |
-| `SCRAPBOOK_TOOL_PROFILE=read-only` | capabilities, plan, status | reads GitHub only |
-| `SCRAPBOOK_TOOL_PROFILE=full` | read tools plus reserve, import, save, open PR, mark ready | writes only to fixed check-in branches and draft PRs |
+| `SCRAPBOOK_TOOL_PROFILE=read-only` | guided collection, planning, and status | reads GitHub only |
+| `SCRAPBOOK_TOOL_PROFILE=full` | read tools plus guided advance, granular writes, and mark-ready | writes only to fixed check-in branches and draft PRs |
 | `SCRAPBOOK_ALLOW_MERGE=true` | additionally exposes `merge_check_in_pr` | squash-merges one exact green ready PR |
 
 Merge remains disabled by default even in the full profile.
 
-### Tool contract
+### Guided tools
 
 | Tool | Access | Approval | Notes |
 | --- | --- | --- | --- |
-| `get_check_in_capabilities` | read | no | reports active profile, routes, tools, and merge state without loading prior cards |
+| `start_check_in_session` | read | no | starts a signed session from repository provenance and optional creative direction |
+| `submit_check_in_text` | read | no | records identity, note, date, and tone |
+| `attach_check_in_artwork_source` | read | no | records an already-created Drive or GitHub image source without importing it |
+| `skip_check_in_artwork` | read | no | deliberately continues text-only; reversible before planning |
+| `get_check_in_session` | read | no | restores the token and re-reads live repository progress after planning |
+| `plan_check_in_session` | read | no | validates the proposal, branch, and remix lineage against current `main` |
+| `advance_check_in_session` | write | yes | performs at most one next repository mutation; never marks ready or merges |
+
+### Granular tools
+
+The lower-level tools remain available for recovery, testing, and precise operator control.
+
+| Tool | Access | Approval | Notes |
+| --- | --- | --- | --- |
+| `get_check_in_capabilities` | read | no | reports active profile, routes, guided flow, tools, and merge state without loading prior cards |
 | `plan_check_in` | read | no | validates proposal, creative metadata, provenance, branch, and remix source |
 | `get_check_in_status` | read | no | reads branch, image, workflow, guestbook, PR, and CI state |
 | `reserve_check_in` | write | yes | creates only `agent-check-in/<entry-id>` from current `main` |
@@ -105,20 +166,13 @@ Node 22 is required. From this directory:
 npm install
 cp .env.example .env
 set -a && source .env && set +a
+npm test
 npm start
 ```
 
 The endpoint is `http://127.0.0.1:8787/mcp`. Local health information is available at `http://127.0.0.1:8787/healthz`.
 
-Run the focused suite:
-
-```bash
-npm test
-```
-
-The suite includes an actual `@modelcontextprotocol/sdk` client connection that negotiates with the server, lists the active profile’s tools, and calls `get_check_in_capabilities`.
-
-Root CI installs the service’s pinned direct dependencies before running `pnpm test`.
+The suite includes an actual `@modelcontextprotocol/sdk` client connection that negotiates with the server, lists the active profile’s tools, calls `get_check_in_capabilities`, and starts a guided session. Root CI installs the service’s pinned direct dependencies before running `pnpm test`.
 
 ## Recommended private connection: Secure MCP Tunnel
 
@@ -129,15 +183,17 @@ export SCRAPBOOK_INGRESS_MODE=tunnel
 export HOST=127.0.0.1
 export SCRAPBOOK_TOOL_PROFILE=read-only
 export SCRAPBOOK_ALLOW_MERGE=false
+export SCRAPBOOK_SESSION_SECRET='another-long-random-value'
 export SCRAPBOOK_GITHUB_TOKEN='github_pat_...'
 npm start
 ```
 
-Expected health fields:
+Expected health fields include:
 
 ```json
 {
   "transport": "streamable-http",
+  "sessionMode": "signed-stateless",
   "ingressMode": "tunnel",
   "authContract": "workspace-tunnel",
   "toolProfile": "read-only",
@@ -188,6 +244,7 @@ Required production environment variables include:
 ```text
 SCRAPBOOK_INGRESS_MODE=bearer
 SCRAPBOOK_MCP_BEARER_TOKEN=<long random backend secret>
+SCRAPBOOK_SESSION_SECRET=<separate long random signing key>
 SCRAPBOOK_TOOL_PROFILE=read-only
 SCRAPBOOK_ALLOW_MERGE=false
 SCRAPBOOK_GITHUB_TOKEN=<repository-restricted token>
@@ -228,25 +285,26 @@ For the private prototype, use a fine-grained GitHub token restricted to `teamle
 
 Move to a GitHub App installation token before broader use. The MCP service needs no Google service-account key because GitHub Actions retains Drive download responsibility.
 
-The GitHub adapter only permits the fixed Scrapbook REST root and exact GitHub GraphQL endpoint, and applies a bounded request timeout. Do not log credentials, full request bodies, private prompts, environment dumps, or arbitrary GitHub responses.
+The GitHub adapter only permits the fixed Scrapbook REST root and exact GitHub GraphQL endpoint, and applies a bounded request timeout. Do not log credentials, session tokens, full request bodies, private prompts, environment dumps, or arbitrary GitHub responses.
 
 ## First acceptance test
 
 From one normal ChatGPT conversation with the private plugin enabled:
 
-1. call `get_check_in_capabilities` and verify `read-only`;
-2. plan a small check-in and inspect its branch, provenance, creative route, and image path;
-3. verify planning and status calls make no GitHub mutation;
-4. on an eligible workspace, restart with `SCRAPBOOK_TOOL_PROFILE=full` and merge disabled;
-5. refresh and review the plugin tool snapshot;
-6. explicitly approve branch reservation;
-7. explicitly approve one artwork import;
-8. poll status until the repository-owned WebP exists;
-9. explicitly approve the typed guestbook write;
-10. explicitly approve opening the draft PR;
-11. report CI and stop at the draft PR;
-12. optionally mark the green PR ready after the separate exact confirmation;
-13. do not expose or call the merge tool during this test.
+1. call `get_check_in_capabilities` and verify `read-only` plus the guided session flow;
+2. call `start_check_in_session` with originating provenance;
+3. submit the visitor text;
+4. generate the image through the separate creative flow;
+5. attach the image source or explicitly continue text-only;
+6. validate with `plan_check_in_session` and confirm no mutation occurred;
+7. on an eligible workspace, restart with `SCRAPBOOK_TOOL_PROFILE=full` and merge disabled;
+8. refresh and review the plugin tool snapshot;
+9. explicitly approve one `advance_check_in_session` call at a time;
+10. poll session/status while the image importer is running;
+11. stop when the draft PR exists;
+12. report CI;
+13. optionally mark the green PR ready after the separate exact confirmation;
+14. do not expose or call the merge tool during this test.
 
 ## Deliberate boundaries
 
@@ -254,7 +312,7 @@ From one normal ChatGPT conversation with the private plugin enabled:
 - no arbitrary repository, branch, path, workflow, or download URL;
 - no direct-main writes;
 - no hidden private ChatGPT conversation provenance;
-- no generated-artwork spending without a separate approved phase;
+- no generated-artwork spending inside this service;
 - no merge tool unless separately enabled;
 - no claim of completion until a tunneled or OAuth-hosted ChatGPT acceptance run succeeds.
 
