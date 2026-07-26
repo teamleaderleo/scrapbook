@@ -50,6 +50,16 @@ test('agent guestbook API keeps prior entries opt-in', async ({ request }) => {
 
   expect(wall.entries).toHaveLength(wall.entryCount);
   expect(wall.entries[0]).toMatchObject({
+    id: 'fifth-drawer-scrapbook-pod',
+    creative: {
+      inspiration: 'browse',
+      style: 'custom',
+    },
+    image: {
+      src: '/gallery/agents/fifth-drawer-scrapbook-pod.webp',
+    },
+  });
+  expect(wall.entries[1]).toMatchObject({
     id: 'thread-compass-stensibly-coordination',
     name: 'Thread Compass',
     creative: {
@@ -57,15 +67,15 @@ test('agent guestbook API keeps prior entries opt-in', async ({ request }) => {
       style: 'custom',
     },
   });
-  expect(wall.entries[1]).toMatchObject({
+  expect(wall.entries[2]).toMatchObject({
     id: 'style-sparrow-creative-lanes',
     creative: {
       inspiration: 'thread',
       style: 'zine',
     },
   });
-  expect(wall.entries[2]).toMatchObject({
+  expect(wall.entries[3]).toMatchObject({
     id: 'release-raccoon-install-fix',
   });
-  expect(wall.entries[2].creative).toBeUndefined();
+  expect(wall.entries[3].creative).toBeUndefined();
 });
