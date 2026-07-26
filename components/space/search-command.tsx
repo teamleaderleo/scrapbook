@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   CommandDialog,
@@ -18,6 +18,7 @@ import { searchItems } from '@/app/lib/item-search';
 import type { Item } from '@/app/lib/item-types';
 import { Download, Plus, Search } from 'lucide-react';
 import { startNavigationFeedback } from '@/components/navigation-feedback';
+import { useSpaceShortcuts } from '@/components/space/space-shortcut-provider';
 
 function filterItems(allItems: Item[], search: string, nowMs: number): Item[] {
   if (!search) return allItems.slice(0, 50);
@@ -46,28 +47,11 @@ function filterItems(allItems: Item[], search: string, nowMs: number): Item[] {
 }
 
 export function SearchCommand() {
-  const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const { searchOpen: open, setSearchOpen: setOpen } = useSpaceShortcuts();
   const router = useRouter();
   const { items, isAdmin, hasMore, loadMore, loadingMore } = useItems();
   const [nowMs] = useState(() => Date.now());
-
-  useEffect(() => {
-    const down = (event: KeyboardEvent) => {
-      if (event.key === 'k' && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault();
-        setOpen((current) => !current);
-      }
-    };
-    document.addEventListener('keydown', down);
-    return () => document.removeEventListener('keydown', down);
-  }, []);
-
-  useEffect(() => {
-    const handleOpen = () => setOpen(true);
-    window.addEventListener('open-search', handleOpen);
-    return () => window.removeEventListener('open-search', handleOpen);
-  }, []);
 
   const filteredItems = filterItems(items, search, nowMs);
 
