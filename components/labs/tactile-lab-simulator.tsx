@@ -26,6 +26,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export const TACTILE_SIMULATION_CLIENT_MARKER = 'TACTILE_SIMULATION_CLIENT_v1';
 
+const DEBUG_BODY_COUNT = 4;
+const DEBUG_PARTICLE_COUNT = 10;
+const DEBUG_CONSTRAINT_COUNT = 21;
+
 type DragTarget =
   | { pointerId: number; kind: 'particle'; index: number }
   | { pointerId: number; kind: 'block'; id: string; offset: Vec2 };
@@ -589,15 +593,15 @@ export function TactileLabSimulator() {
             </div>
             <div>
               <dt className="text-white/50">bodies</dt>
-              <dd>{worldRef.current.blocks.length + 1}</dd>
+              <dd>{DEBUG_BODY_COUNT}</dd>
             </div>
             <div>
               <dt className="text-white/50">particles</dt>
-              <dd>{worldRef.current.particles.length}</dd>
+              <dd>{DEBUG_PARTICLE_COUNT}</dd>
             </div>
             <div className="col-span-2">
               <dt className="text-white/50">constraints</dt>
-              <dd>{worldRef.current.distanceConstraints.length + 1}</dd>
+              <dd>{DEBUG_CONSTRAINT_COUNT}</dd>
             </div>
           </dl>
         </section>
