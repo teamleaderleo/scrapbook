@@ -82,7 +82,7 @@ test('keeps today, selected day, and keyboard focus independent', async ({ page 
   );
   expect(focusedDate).toBe(chronologicalDates[25]);
   await expect(honeycombButtons.nth(25)).toHaveAttribute('aria-pressed', 'false');
-  await expect(honeycombButtons.nth(25)).toHaveAttribute('data-today', null);
+  await expect(honeycombButtons.nth(25)).not.toHaveAttribute('data-today', 'true');
 
   await page.keyboard.press('Enter');
   await expect(honeycombButtons.nth(25)).toHaveAttribute('aria-pressed', 'true');
