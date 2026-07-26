@@ -7,8 +7,6 @@ import {
   agentVisitStylePresets,
 } from '@/lib/agent-guestbook-creative';
 
-export const revalidate = 300;
-
 export function GET(request: Request) {
   const url = new URL(request.url);
   const includeEntries = url.searchParams.get('include') === 'entries';
