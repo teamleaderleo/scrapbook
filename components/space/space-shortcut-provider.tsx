@@ -21,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useSidebar } from '@/components/ui/sidebar';
 import {
   formatSpaceShortcutBinding,
   getSpaceShortcutReference,
@@ -53,6 +54,7 @@ export function SpaceShortcutProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { isAdmin, editorOpen, setEditorOpen } = useItems();
+  const { toggleSidebar } = useSidebar();
   const [searchOpen, setSearchOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [registrationVersion, bumpRegistrationVersion] = useReducer((value) => value + 1, 0);
@@ -88,6 +90,14 @@ export function SpaceShortcutProvider({ children }: { children: ReactNode }) {
     registrations.set('search.toggle', {
       run: () => setSearchOpen((open) => !open),
     });
+    registrations.set('sidebar.toggle', {
+      run: (event) => {
+        toggleSidebar();
+        // The shared SidebarProvider retains a window fallback for non-Space consumers.
+        // Stop this handled Space event before that fallback can toggle a second time.
+        event?.stopPropagation();
+      },
+    });
     registrations.set('editor.toggle', {
       run: () => setEditorOpen(!editorOpen),
     });
@@ -102,7 +112,17 @@ export function SpaceShortcutProvider({ children }: { children: ReactNode }) {
     });
 
     return registrations;
-  }, [editorOpen, helpOpen, isAdmin, isReviewLike, listHref, navigate, reviewHref, setEditorOpen]);
+  }, [
+    editorOpen,
+    helpOpen,
+    isAdmin,
+    isReviewLike,
+    listHref,
+    navigate,
+    reviewHref,
+    setEditorOpen,
+    toggleSidebar,
+  ]);
 
   const getBaseRegistrations = useCallback(() => {
     const registrations = new Map<SpaceShortcutId, SpaceShortcutRegistration>();
