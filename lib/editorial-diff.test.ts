@@ -4,8 +4,8 @@ import { buildRedline, diffWords, splitEditorialBlocks } from './editorial-diff'
 describe('editorial redlines', () => {
   it('marks inserted and removed words inside a changed block', () => {
     const spans = diffWords(
-      'The mistake is treating every tool as the same stage.',
-      'Use CI for mechanical checks and previews for browser review.',
+      'Vercel allows thirty-two builds each hour.',
+      'Vercel allows 32 builds in a rolling hour.',
     );
 
     expect(spans.some((span) => span.kind === 'removed')).toBe(true);
@@ -27,9 +27,35 @@ describe('editorial redlines', () => {
       ],
     );
 
+    const commentedRow = rows.find((row) => row.commentIds.includes('formula'));
+    expect(commentedRow).toMatchObject({
+      before: 'The mistake is treating every tool as the same stage.',
+      after: undefined,
+      changed: true,
+    });
+  });
+
+  it('keeps unrelated replacement blocks as separate deletion and insertion rows', () => {
+    const rows = buildRedline(
+      'A ceremonial paragraph about ribbon cuttings and launch parties.',
+      'GitHub Actions runs lint, types, tests, and the production build.',
+    );
+
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toMatchObject({ oldLine: 1, newLine: null });
+    expect(rows[1]).toMatchObject({ oldLine: null, newLine: 1 });
+  });
+
+  it('pairs related blocks for word-level comparison', () => {
+    const rows = buildRedline(
+      'Vercel allows thirty-two builds each hour.',
+      'Vercel allows 32 builds in a rolling hour.',
+    );
+
     expect(rows).toHaveLength(1);
-    expect(rows[0].commentIds).toEqual(['formula']);
-    expect(rows[0].changed).toBe(true);
+    expect(rows[0].oldLine).toBe(1);
+    expect(rows[0].newLine).toBe(1);
+    expect(rows[0].spans.some((span) => span.kind === 'same')).toBe(true);
   });
 
   it('removes common Markdown syntax from comparison rows', () => {
