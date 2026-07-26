@@ -9,6 +9,9 @@ const proposal = {
   note: 'Built the private check-in path and kept every consequential write visible.',
   date: '2026-07-26',
   mode: 'serious',
+  inspiration: 'thread',
+  style: 'zine',
+  personalities: ['deadpan', 'satirical'],
   repository: 'teamleaderleo/scrapbook',
   model: 'GPT-5.6 Thinking',
   sourceLabel: 'Issue #378',
@@ -17,7 +20,7 @@ const proposal = {
   imageAlt: 'A copper moth carrying a tiny gallery card',
 };
 
-const baseGuestbook = `import 'server-only';\n\nconst visits = [\n] satisfies AgentVisit[];\n`;
+const baseGuestbook = `import 'server-only';\n\nconst visits = [\n  {\n    id: 'older-entry',\n  },\n] satisfies AgentVisit[];\n`;
 
 class FakeClient {
   constructor() {
@@ -72,6 +75,40 @@ test('tool annotations keep planning read-only and finalisation destructive', ()
   assert.equal(finalise.annotations.destructiveHint, true);
 });
 
+test('plan schema exposes the guestbook creative vocabulary', () => {
+  const registry = createToolRegistry(new FakeClient());
+  const plan = registry.tools.find((tool) => tool.name === 'plan_check_in');
+  assert.deepEqual(plan.inputSchema.properties.inspiration.enum, ['blind', 'browse', 'thread', 'remix']);
+  assert.ok(plan.inputSchema.properties.style.enum.includes('polaroid'));
+  assert.ok(plan.inputSchema.properties.style.enum.includes('custom'));
+  assert.equal(plan.inputSchema.properties.personalities.maxItems, 3);
+  assert.ok(plan.inputSchema.properties.remixKind.enum.includes('parody'));
+});
+
+test('plan validates remix lineage against the current guestbook', async () => {
+  const registry = createToolRegistry(new FakeClient());
+  const missing = await registry.call('plan_check_in', {
+    ...proposal,
+    entryId: 'missing-remix',
+    inspiration: 'remix',
+    remixSourceId: 'not-on-the-wall',
+    remixKind: 'riff',
+  });
+  assert.equal(missing.isError, true);
+  assert.match(missing.content[0].text, /does not exist on main/);
+
+  const valid = await registry.call('plan_check_in', {
+    ...proposal,
+    entryId: 'older-entry-parody',
+    inspiration: 'remix',
+    remixSourceId: 'older-entry',
+    remixKind: 'parody',
+    remixNote: 'Turns the older card into an unnecessarily dramatic sequel.',
+  });
+  assert.equal(valid.structuredContent.ok, true);
+  assert.equal(valid.structuredContent.proposal.remixSourceId, 'older-entry');
+});
+
 test('reserve, import, save, and PR tools preserve the check-in order', async () => {
   const client = new FakeClient();
   const registry = createToolRegistry(client);
@@ -107,6 +144,9 @@ test('reserve, import, save, and PR tools preserve the check-in order', async ()
   });
   const saved = await registry.call('save_check_in', { proposal, approved: true });
   assert.equal(saved.structuredContent.status, 'saved');
+  const savedGuestbook = client.files.get(`${branch}:lib/agent-guestbook.ts`).content;
+  assert.match(savedGuestbook, /creative:/);
+  assert.match(savedGuestbook, /style: 'zine'/);
 
   const opened = await registry.call('open_check_in_pr', { proposal, approved: true });
   assert.equal(opened.structuredContent.status, 'opened');
