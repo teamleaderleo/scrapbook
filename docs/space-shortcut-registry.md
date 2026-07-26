@@ -22,7 +22,8 @@ Do not add another document or window `keydown` listener. Embedded editors that 
 - A command may opt into editable targets only for a narrow documented reason. The editor toggle is limited to the Space editor scope and its Monaco command bridges into the registry.
 - Repeat behaviour is explicit per command. Review next and previous allow key repeat; toggles and navigation commands do not.
 - A higher modal, sheet, or local scope wins before command priority. A disabled winner blocks a lower-scope command with the same keys.
-- The dispatcher respects `defaultPrevented` and calls `preventDefault()` only after an enabled command wins. It does not stop propagation.
+- The dispatcher respects `defaultPrevented` and calls `preventDefault()` only after an enabled command wins.
+- The Space `Mod+B` handler stops propagation after toggling because the shared `SidebarProvider` retains a window-level fallback for non-Space consumers. This prevents a second toggle without changing other sidebar users.
 - Mobile continues to use visible controls. The reference is available from the sidebar without requiring a hardware keyboard.
 
 ## Current inventory
@@ -31,6 +32,7 @@ Do not add another document or window `keydown` listener. Embedded editors that 
 | --- | --- | --- | --- |
 | Shortcut reference | `?` | Global | Ignore |
 | Item search | `Mod+K` | Global | Ignore |
+| Navigation sidebar | `Mod+B` | Global/shared-provider bridge | Ignore |
 | Code editor | `Mod+I` | Global/editor bridge | Ignore |
 | Add item | `Mod+Alt+A` | Global | Ignore |
 | List/review switch | `Mod+E`, `Mod+Shift+E` | Global | Ignore |
