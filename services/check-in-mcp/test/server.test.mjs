@@ -43,6 +43,20 @@ function rpc(url, method, params = {}, { authenticated = true } = {}) {
   });
 }
 
+async function readRpcPayload(response) {
+  const text = await response.text();
+  if (!response.headers.get('content-type')?.includes('text/event-stream')) {
+    return JSON.parse(text);
+  }
+  const data = text
+    .split(/\r?\n/)
+    .filter((line) => line.startsWith('data:'))
+    .map((line) => line.slice(5).trim())
+    .filter(Boolean);
+  assert.ok(data.length > 0, 'SSE response should contain a data event');
+  return JSON.parse(data.at(-1));
+}
+
 test('bearer ingress requires backend authentication', async () => {
   await withServer({}, async (url) => {
     const response = await rpc(url, 'ping', {}, { authenticated: false });
@@ -56,7 +70,7 @@ test('tunnel ingress uses workspace access and no backend bearer header', async 
     const response = await rpc(url, 'ping', {}, { authenticated: false });
     assert.equal(response.status, 200);
 
-    const listed = await rpc(url, 'tools/list', {}, { authenticated: false }).then((item) => item.json());
+    const listed = await rpc(url, 'tools/list', {}, { authenticated: false }).then(readRpcPayload);
     for (const tool of listed.result.tools) {
       assert.deepEqual(tool.securitySchemes, [{ type: 'noauth' }]);
       assert.deepEqual(tool._meta.securitySchemes, [{ type: 'noauth' }]);
@@ -97,7 +111,7 @@ test('official SDK client negotiates, lists, and calls the read-only plugin', as
 
 test('default bearer profile exposes the safe read-only OAuth surface', async () => {
   await withServer({}, async (url) => {
-    const listed = await rpc(url, 'tools/list').then((response) => response.json());
+    const listed = await rpc(url, 'tools/list').then(readRpcPayload);
     assert.deepEqual(
       listed.result.tools.map((tool) => tool.name),
       ['get_check_in_capabilities', 'plan_check_in', 'get_check_in_status'],
@@ -125,7 +139,7 @@ test('tool errors omit structuredContent that would violate the success output s
         branch: 'agent-check-in/blocked-write',
         approved: true,
       },
-    }).then((response) => response.json());
+    }).then(readRpcPayload);
 
     assert.equal(payload.result.isError, true);
     assert.equal(Object.hasOwn(payload.result, 'structuredContent'), false);
@@ -135,14 +149,14 @@ test('tool errors omit structuredContent that would violate the success output s
 
 test('full profile advertises write and review tools while merge stays opt-in', async () => {
   await withServer({ toolProfile: 'full' }, async (url) => {
-    const listed = await rpc(url, 'tools/list').then((response) => response.json());
+    const listed = await rpc(url, 'tools/list').then(readRpcPayload);
     assert.ok(listed.result.tools.some((tool) => tool.name === 'reserve_check_in'));
     assert.ok(listed.result.tools.some((tool) => tool.name === 'mark_check_in_ready'));
     assert.ok(!listed.result.tools.some((tool) => tool.name === 'merge_check_in_pr'));
   });
 
   await withServer({ toolProfile: 'full', allowMerge: true }, async (url) => {
-    const listed = await rpc(url, 'tools/list').then((response) => response.json());
+    const listed = await rpc(url, 'tools/list').then(readRpcPayload);
     const merge = listed.result.tools.find((tool) => tool.name === 'merge_check_in_pr');
     assert.equal(merge.annotations.destructiveHint, true);
     assert.deepEqual(merge.securitySchemes[0].scopes, ['scrapbook.checkins.merge']);
