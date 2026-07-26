@@ -40,6 +40,7 @@ export default async function Page() {
               yearTotal: activity.total,
               days,
               unit,
+              generatedAt: activity.generatedAt,
             }}
           />
 
