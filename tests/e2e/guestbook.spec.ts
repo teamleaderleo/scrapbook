@@ -1,5 +1,23 @@
 import { expect, test } from '@playwright/test';
 
+type GuestbookEntry = {
+  id: string;
+  name?: string;
+  creative?: {
+    inspiration?: string;
+    style?: string;
+  };
+  image?: {
+    src: string;
+  };
+};
+
+function uniqueEntry(entries: GuestbookEntry[], id: string) {
+  const matches = entries.filter((entry) => entry.id === id);
+  expect(matches, `Expected exactly one guestbook entry with id ${id}`).toHaveLength(1);
+  return matches[0]!;
+}
+
 test('gallery offers independent creative arrival lanes', async ({ page }) => {
   await page.goto('/gallery');
 
@@ -47,9 +65,12 @@ test('agent guestbook API keeps prior entries opt-in', async ({ request }) => {
   const wallResponse = await request.get('/api/agent-guestbook?include=entries');
   expect(wallResponse.ok()).toBe(true);
   const wall = await wallResponse.json();
+  const entries = wall.entries as GuestbookEntry[];
+  const ids = entries.map((entry) => entry.id);
 
-  expect(wall.entries).toHaveLength(wall.entryCount);
-  expect(wall.entries[0]).toMatchObject({
+  expect(entries).toHaveLength(wall.entryCount);
+  expect(new Set(ids).size, 'Guestbook entry ids must stay unique').toBe(ids.length);
+  expect(entries[0]).toMatchObject({
     id: '2026-07-26-polling-possum-quarry',
     creative: {
       inspiration: 'thread',
@@ -59,8 +80,8 @@ test('agent guestbook API keeps prior entries opt-in', async ({ request }) => {
       src: '/gallery/agents/2026-07-26-polling-possum-quarry.webp',
     },
   });
-  expect(wall.entries[1]).toMatchObject({
-    id: 'fifth-drawer-scrapbook-pod',
+
+  expect(uniqueEntry(entries, 'fifth-drawer-scrapbook-pod')).toMatchObject({
     creative: {
       inspiration: 'browse',
       style: 'custom',
@@ -69,23 +90,20 @@ test('agent guestbook API keeps prior entries opt-in', async ({ request }) => {
       src: '/gallery/agents/fifth-drawer-scrapbook-pod.webp',
     },
   });
-  expect(wall.entries[2]).toMatchObject({
-    id: 'thread-compass-stensibly-coordination',
+  expect(uniqueEntry(entries, 'thread-compass-stensibly-coordination')).toMatchObject({
     name: 'Thread Compass',
     creative: {
       inspiration: 'browse',
       style: 'custom',
     },
   });
-  expect(wall.entries[3]).toMatchObject({
-    id: 'style-sparrow-creative-lanes',
+  expect(uniqueEntry(entries, 'style-sparrow-creative-lanes')).toMatchObject({
     creative: {
       inspiration: 'thread',
       style: 'zine',
     },
   });
-  expect(wall.entries[4]).toMatchObject({
-    id: 'release-raccoon-install-fix',
-  });
-  expect(wall.entries[4].creative).toBeUndefined();
+
+  const raccoon = uniqueEntry(entries, 'release-raccoon-install-fix');
+  expect(raccoon.creative).toBeUndefined();
 });
