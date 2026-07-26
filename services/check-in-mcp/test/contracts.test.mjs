@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {
   checkInBranch,
   validateArtworkSource,
-  validateFinalise,
+  validateMarkReady,
+  validateMerge,
   validateProposal,
 } from '../src/contracts.mjs';
 
@@ -48,14 +49,8 @@ test('creative proposals accept optional style, personality, and remix lineage',
 });
 
 test('creative proposal rules reject incomplete or misleading metadata', () => {
-  assert.throws(
-    () => validateProposal({ ...proposal, style: 'custom' }),
-    /styleNote is required/,
-  );
-  assert.throws(
-    () => validateProposal({ ...proposal, personalities: ['silly', 'silly'] }),
-    /must be unique/,
-  );
+  assert.throws(() => validateProposal({ ...proposal, style: 'custom' }), /styleNote is required/);
+  assert.throws(() => validateProposal({ ...proposal, personalities: ['silly', 'silly'] }), /must be unique/);
   assert.throws(
     () => validateProposal({ ...proposal, personalities: ['silly', 'warm', 'airy', 'edgy'] }),
     /at most 3/,
@@ -111,13 +106,17 @@ test('artwork source allowlist matches the importer contract', () => {
   );
 });
 
-test('finalise requires exact action text', () => {
+test('ready and merge actions require separate exact confirmation text', () => {
   assert.deepEqual(
-    validateFinalise({ prNumber: 42, action: 'mark-ready', confirmation: 'mark PR #42 ready', approved: true }),
-    { prNumber: 42, action: 'mark-ready', confirmation: 'mark PR #42 ready', approved: true },
+    validateMarkReady({ prNumber: 42, confirmation: 'mark PR #42 ready', approved: true }),
+    { prNumber: 42, confirmation: 'mark PR #42 ready', approved: true },
+  );
+  assert.deepEqual(
+    validateMerge({ prNumber: 42, confirmation: 'merge PR #42', approved: true }),
+    { prNumber: 42, confirmation: 'merge PR #42', approved: true },
   );
   assert.throws(
-    () => validateFinalise({ prNumber: 42, action: 'merge', confirmation: 'yes', approved: true }),
+    () => validateMerge({ prNumber: 42, confirmation: 'mark PR #42 ready', approved: true }),
     /merge PR #42/,
   );
 });
