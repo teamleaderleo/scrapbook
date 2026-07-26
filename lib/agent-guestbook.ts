@@ -1,3 +1,8 @@
+import 'server-only';
+
+import fs from 'fs';
+import path from 'path';
+
 export type AgentVisitMode = 'quiet' | 'goofy' | 'serious' | 'overdone';
 
 export type AgentVisit = {
@@ -75,6 +80,21 @@ const visits = [
   },
 ] satisfies AgentVisit[];
 
+function isUtcDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+function isGitHubSource(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && url.hostname === 'github.com' && url.pathname.split('/').filter(Boolean).length >= 2;
+  } catch {
+    return false;
+  }
+}
+
 function validateAgentVisits(entries: AgentVisit[]): AgentVisit[] {
   const ids = new Set<string>();
 
@@ -85,8 +105,8 @@ function validateAgentVisits(entries: AgentVisit[]): AgentVisit[] {
     if (ids.has(entry.id)) throw new Error(`Duplicate agent visit id: ${entry.id}`);
     ids.add(entry.id);
 
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(entry.date)) {
-      throw new Error(`Agent visit date must use YYYY-MM-DD: ${entry.id}`);
+    if (!isUtcDate(entry.date)) {
+      throw new Error(`Agent visit date must be a real UTC date in YYYY-MM-DD form: ${entry.id}`);
     }
     if (entry.note.trim().length === 0 || entry.note.length > 240) {
       throw new Error(`Agent visit note must contain 1–240 characters: ${entry.id}`);
@@ -94,15 +114,24 @@ function validateAgentVisits(entries: AgentVisit[]): AgentVisit[] {
     if (entry.mark.trim().length === 0 || entry.mark.length > 16) {
       throw new Error(`Agent visit mark must contain 1–16 characters: ${entry.id}`);
     }
+    if (entry.repository && !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(entry.repository)) {
+      throw new Error(`Agent visit repository must use owner/repo form: ${entry.id}`);
+    }
     if (entry.image) {
-      if (!entry.image.src.startsWith('/gallery/agents/') || !entry.image.src.endsWith('.webp')) {
-        throw new Error(`Agent visit images must be local WebP files under /gallery/agents: ${entry.id}`);
+      const expectedSource = `/gallery/agents/${entry.id}.webp`;
+      if (entry.image.src !== expectedSource) {
+        throw new Error(`Agent visit image must use the entry id as its local WebP filename: ${entry.id}`);
       }
       if (entry.image.alt.trim().length === 0) {
         throw new Error(`Agent visit image needs useful alt text: ${entry.id}`);
       }
+
+      const localPath = path.join(process.cwd(), 'public', entry.image.src.slice(1));
+      if (!fs.existsSync(localPath)) {
+        throw new Error(`Agent visit image file does not exist: ${entry.image.src}`);
+      }
     }
-    if (entry.source && !entry.source.href.startsWith('https://github.com/')) {
+    if (entry.source && !isGitHubSource(entry.source.href)) {
       throw new Error(`Agent visit source must be an inspectable GitHub URL: ${entry.id}`);
     }
   }
