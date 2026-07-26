@@ -44,11 +44,11 @@ Health check:
 curl http://localhost:8787/healthz
 ```
 
-List tools:
+List tools through the backend bearer guard:
 
 ```bash
 curl http://localhost:8787/mcp \
-  --header 'Authorization: Bearer YOUR_PRIVATE_APP_TOKEN' \
+  --header 'Authorization: Bearer YOUR_BACKEND_TOKEN' \
   --header 'Content-Type: application/json' \
   --data '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 ```
@@ -61,14 +61,15 @@ node --test test/*.test.mjs
 
 The root `pnpm test` command also runs this suite.
 
-## Authentication
+## Authentication boundaries
 
-Two credentials serve different boundaries:
+Three credentials can exist in a production deployment, and each serves a separate boundary:
 
-- `SCRAPBOOK_MCP_BEARER_TOKEN` protects the remote MCP endpoint. Production startup requires it.
-- `SCRAPBOOK_GITHUB_TOKEN` authorises the fixed repository operations.
+1. **Operator identity:** an authenticated ChatGPT connection with write actions needs OAuth 2.1 at the public MCP endpoint, including protected-resource metadata and PKCE-compatible authorisation.
+2. **Gateway-to-service guard:** `SCRAPBOOK_MCP_BEARER_TOKEN` is a fixed backend token for local testing or for an OAuth-capable gateway that authenticates the operator before forwarding to this service. It is not the operator login protocol.
+3. **Service-to-GitHub credential:** `SCRAPBOOK_GITHUB_TOKEN` authorises the fixed repository operations.
 
-For the private prototype, use a fine-grained token restricted to `teamleaderleo/scrapbook` with:
+For the private prototype, use a fine-grained GitHub token restricted to `teamleaderleo/scrapbook` with:
 
 - Actions: write;
 - Contents: write;
@@ -79,23 +80,29 @@ For the private prototype, use a fine-grained token restricted to `teamleaderleo
 
 Move to a GitHub App installation token before broader use. Keep installation access restricted to the Scrapbook repository and mint short-lived tokens server-side. The service needs no Google service-account key because GitHub Actions retains Drive download responsibility.
 
-Never log either token. Tool logs contain only request IDs, method/tool names, durations, and sanitised errors.
+Never log tokens. Tool logs contain only request IDs, method/tool names, durations, and sanitised errors.
 
 ## ChatGPT connection checkpoint
 
-Confirm the operator account exposes Developer Mode and private custom app creation in ChatGPT settings. Then:
+Confirm the operator account exposes Developer Mode and private custom app creation in ChatGPT settings. Then choose one public authentication path:
 
-1. deploy this directory behind a stable public HTTPS endpoint;
-2. set the two secrets in the host’s secret manager;
-3. connect the app to `https://YOUR_HOST/mcp`;
-4. configure bearer authentication with `SCRAPBOOK_MCP_BEARER_TOKEN`;
+- place the service behind an OAuth 2.1-capable gateway or identity-aware proxy that validates the ChatGPT user and injects the fixed backend bearer token; or
+- add OAuth 2.1 protected-resource metadata and access-token validation directly to this service.
+
+After that boundary exists:
+
+1. deploy behind a stable public HTTPS endpoint;
+2. set the backend and GitHub secrets in the host’s secret manager;
+3. connect the private app to `https://YOUR_HOST/mcp`;
+4. complete the OAuth consent flow;
 5. refresh the app after changing tool descriptors;
 6. start with `plan_check_in`, then approve each write separately.
 
-Current OpenAI guidance for tool-only apps, MCP server setup, annotations, and remote deployment:
+Current OpenAI guidance for tool-only apps, MCP server setup, authentication, annotations, and remote deployment:
 
 - https://developers.openai.com/plugins/quickstart
 - https://developers.openai.com/plugins/build/mcp-server
+- https://developers.openai.com/plugins/build/auth
 - https://developers.openai.com/plugins/plan/tools
 - https://developers.openai.com/plugins/reference
 
@@ -116,7 +123,7 @@ docker run --rm -p 8787:8787 \
   scrapbook-check-in-mcp
 ```
 
-Use a host with stable HTTPS, normal Node HTTP streaming support, secret storage, request logs, and health checks. Keep this service out of the public Scrapbook website deployment.
+Use a host with stable HTTPS, normal Node HTTP streaming support, secret storage, request logs, and health checks. Keep this service out of the public Scrapbook website deployment. Put the OAuth boundary in front of `/mcp` before connecting authenticated ChatGPT write actions.
 
 ## First acceptance test
 
@@ -131,6 +138,7 @@ Use a host with stable HTTPS, normal Node HTTP streaming support, secret storage
 
 ## Deferred work
 
+- OAuth 2.1 gateway integration or direct protected-resource implementation;
 - GitHub App installation-token minting;
 - hosted end-to-end test against the real repository;
 - optional first-party image generation after explicit cost and publishing approval;
