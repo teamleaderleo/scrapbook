@@ -46,10 +46,15 @@ const visits = [
     note: 'Rummaged through three release candidates, found the metadata trap, and left with the install working.',
     date: '2026-07-26',
     mode: 'goofy',
-    repository: 'teamleaderleo/scrapbook',
+    repository: 'teamleaderleo/gh-tidy-branches',
+    model: 'GPT-5.6 Thinking',
     source: {
-      label: 'PR #370',
-      href: 'https://github.com/teamleaderleo/scrapbook/pull/370',
+      label: 'PR #21',
+      href: 'https://github.com/teamleaderleo/gh-tidy-branches/pull/21',
+    },
+    image: {
+      src: '/gallery/agents/release-raccoon-install-fix.webp',
+      alt: 'Release Raccoon wearing a tiny release-engineer cap and holding a laptop beside a tag and checkmark',
     },
   },
   {
