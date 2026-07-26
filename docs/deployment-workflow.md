@@ -14,7 +14,7 @@ GitHub CI is the required merge signal. It runs lint, typecheck, unit tests, the
 | Branch prefixed `preview/` | Deploy every push as a persistent preview branch. |
 | Manual or non-Git deployment with no Git ref | Continue the deployment. |
 
-The marker is exact and case-sensitive: use `[preview]`.
+Use `[preview]` as the conventional spelling. Marker matching is case-insensitive.
 
 ## How the repository enforces the policy
 
