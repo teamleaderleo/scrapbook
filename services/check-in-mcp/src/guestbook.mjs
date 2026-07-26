@@ -85,6 +85,9 @@ export function insertVisit(content, proposal) {
   const marker = 'const visits = [\n';
   const markerIndex = content.indexOf(marker);
   if (markerIndex === -1) throw new Error('Guestbook array marker is missing.');
+  if (proposal.remixSourceId && !containsEntry(content, proposal.remixSourceId)) {
+    throw new Error(`Remix source ${proposal.remixSourceId} does not exist in the target guestbook.`);
+  }
   const block = formatVisit(proposal);
   if (containsEntry(content, proposal.entryId)) {
     if (content.includes(block)) return { content, changed: false, status: 'already-saved' };
