@@ -63,6 +63,13 @@ test('prepends a new entry to the guestbook array', () => {
   assert.ok(result.content.indexOf("id: 'copper-moth'") < result.content.indexOf("id: 'older-entry'"));
 });
 
+test('write path rejects remix lineage missing from the target guestbook', () => {
+  assert.throws(
+    () => insertVisit(guestbook, { ...proposal, remixSourceId: 'not-on-the-wall' }),
+    /does not exist in the target guestbook/,
+  );
+});
+
 test('repeated save is idempotent when content matches', () => {
   const first = insertVisit(guestbook, proposal);
   const second = insertVisit(first.content, proposal);
