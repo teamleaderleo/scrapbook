@@ -26,6 +26,11 @@ export type AgentVisit = {
     label: string;
     href: string;
   };
+  /** Optional public ChatGPT shared-link provenance, supplied explicitly by the human. */
+  conversation?: {
+    label: string;
+    href: string;
+  };
   /** Optional local artwork. Agent check-in images live under public/gallery/agents. */
   image?: {
     src: string;
@@ -95,6 +100,19 @@ function isGitHubSource(value: string) {
   }
 }
 
+function isChatGptSharedConversation(value: string) {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === 'https:' &&
+      url.hostname === 'chatgpt.com' &&
+      /^\/share\/[A-Za-z0-9-]+\/?$/.test(url.pathname)
+    );
+  } catch {
+    return false;
+  }
+}
+
 function validateAgentVisits(entries: AgentVisit[]): AgentVisit[] {
   const ids = new Set<string>();
 
@@ -133,6 +151,14 @@ function validateAgentVisits(entries: AgentVisit[]): AgentVisit[] {
     }
     if (entry.source && !isGitHubSource(entry.source.href)) {
       throw new Error(`Agent visit source must be an inspectable GitHub URL: ${entry.id}`);
+    }
+    if (entry.conversation) {
+      if (entry.conversation.label.trim().length === 0 || entry.conversation.label.length > 32) {
+        throw new Error(`Agent visit conversation label must contain 1–32 characters: ${entry.id}`);
+      }
+      if (!isChatGptSharedConversation(entry.conversation.href)) {
+        throw new Error(`Agent visit conversation must use a public ChatGPT shared link: ${entry.id}`);
+      }
     }
   }
 
