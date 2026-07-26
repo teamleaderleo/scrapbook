@@ -10,266 +10,24 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { isDSTActive } from '@/app/lib/dst-utils';
+import {
+  DEFAULT_RECENT_ZONE_IDS,
+  TIMEZONE_OPTIONS,
+  UTC_OPTION,
+  formatOffset,
+  formatSearchOffset,
+  formatTime,
+  getAdjustedOffset,
+  type TimezoneOption,
+} from '@/lib/timezone-options';
+import {
+  createBrowserViewportRestorationScheduler,
+  type ViewportRestorationScheduler,
+} from '@/lib/visual-viewport-restoration';
 
 interface TimezoneSelectorProps {
   utcHours: number;
   utcMinutes: number;
-}
-
-type TimezoneOption = {
-  id: string;
-  offset: number;
-  label: string;
-  abbreviation: string;
-  dst: boolean;
-  region: string | null;
-};
-
-const UTC_OPTION: TimezoneOption = {
-  id: 'utc',
-  offset: 0,
-  label: 'Coordinated Universal Time',
-  abbreviation: 'UTC',
-  dst: false,
-  region: null,
-};
-
-const TIMEZONE_OPTIONS: TimezoneOption[] = [
-  {
-    id: 'baker',
-    offset: -12,
-    label: 'Baker Island',
-    abbreviation: 'BIT',
-    dst: false,
-    region: null,
-  },
-  {
-    id: 'samoa',
-    offset: -11,
-    label: 'American Samoa',
-    abbreviation: 'SST',
-    dst: false,
-    region: null,
-  },
-  {
-    id: 'hawaii',
-    offset: -10,
-    label: 'Hawaii',
-    abbreviation: 'HST',
-    dst: false,
-    region: null,
-  },
-  {
-    id: 'alaska',
-    offset: -9,
-    label: 'Alaska',
-    abbreviation: 'AKT',
-    dst: true,
-    region: 'us',
-  },
-  {
-    id: 'pacific',
-    offset: -8,
-    label: 'Pacific Time',
-    abbreviation: 'PT',
-    dst: true,
-    region: 'us',
-  },
-  {
-    id: 'mountain',
-    offset: -7,
-    label: 'Mountain Time',
-    abbreviation: 'MT',
-    dst: true,
-    region: 'us',
-  },
-  {
-    id: 'central',
-    offset: -6,
-    label: 'Central Time',
-    abbreviation: 'CT',
-    dst: true,
-    region: 'us',
-  },
-  {
-    id: 'eastern',
-    offset: -5,
-    label: 'Eastern Time',
-    abbreviation: 'ET',
-    dst: true,
-    region: 'us',
-  },
-  {
-    id: 'atlantic',
-    offset: -4,
-    label: 'Atlantic Time',
-    abbreviation: 'AT',
-    dst: true,
-    region: 'us',
-  },
-  {
-    id: 'buenos-aires',
-    offset: -3,
-    label: 'Buenos Aires',
-    abbreviation: 'ART',
-    dst: false,
-    region: null,
-  },
-  {
-    id: 'mid-atlantic',
-    offset: -2,
-    label: 'Mid-Atlantic',
-    abbreviation: 'UTC−2',
-    dst: false,
-    region: null,
-  },
-  {
-    id: 'azores',
-    offset: -1,
-    label: 'Azores',
-    abbreviation: 'AZOT',
-    dst: true,
-    region: 'eu',
-  },
-  UTC_OPTION,
-  {
-    id: 'london',
-    offset: 0,
-    label: 'London',
-    abbreviation: 'UK',
-    dst: true,
-    region: 'eu',
-  },
-  {
-    id: 'central-europe',
-    offset: 1,
-    label: 'Central European',
-    abbreviation: 'CET',
-    dst: true,
-    region: 'eu',
-  },
-  {
-    id: 'eastern-europe',
-    offset: 2,
-    label: 'Eastern European',
-    abbreviation: 'EET',
-    dst: true,
-    region: 'eu',
-  },
-  {
-    id: 'moscow',
-    offset: 3,
-    label: 'Moscow',
-    abbreviation: 'MSK',
-    dst: false,
-    region: null,
-  },
-  {
-    id: 'dubai',
-    offset: 4,
-    label: 'Dubai',
-    abbreviation: 'GST',
-    dst: false,
-    region: null,
-  },
-  {
-    id: 'pakistan',
-    offset: 5,
-    label: 'Pakistan',
-    abbreviation: 'PKT',
-    dst: false,
-    region: null,
-  },
-  {
-    id: 'india',
-    offset: 5.5,
-    label: 'India',
-    abbreviation: 'IST',
-    dst: false,
-    region: null,
-  },
-  {
-    id: 'bangladesh',
-    offset: 6,
-    label: 'Bangladesh',
-    abbreviation: 'BST',
-    dst: false,
-    region: null,
-  },
-  {
-    id: 'bangkok',
-    offset: 7,
-    label: 'Bangkok',
-    abbreviation: 'ICT',
-    dst: false,
-    region: null,
-  },
-  {
-    id: 'singapore',
-    offset: 8,
-    label: 'Singapore',
-    abbreviation: 'SGT',
-    dst: false,
-    region: null,
-  },
-  {
-    id: 'tokyo',
-    offset: 9,
-    label: 'Tokyo',
-    abbreviation: 'JST',
-    dst: false,
-    region: null,
-  },
-  {
-    id: 'sydney',
-    offset: 10,
-    label: 'Sydney',
-    abbreviation: 'AET',
-    dst: true,
-    region: 'aus',
-  },
-  {
-    id: 'solomon',
-    offset: 11,
-    label: 'Solomon Islands',
-    abbreviation: 'SBT',
-    dst: false,
-    region: null,
-  },
-  {
-    id: 'new-zealand',
-    offset: 12,
-    label: 'New Zealand',
-    abbreviation: 'NZT',
-    dst: true,
-    region: 'nz',
-  },
-];
-
-const DEFAULT_RECENT_ZONE_IDS = ['utc', 'eastern', 'pacific'];
-
-function getAdjustedOffset(option: TimezoneOption, canApplyDST: boolean) {
-  if (!canApplyDST || !option.dst || !option.region) return option.offset;
-  return isDSTActive(option.region) ? option.offset + 1 : option.offset;
-}
-
-function formatTime(hours: number, minutes: number) {
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-}
-
-function formatOffset(offset: number) {
-  if (offset === 0) return 'UTC±00:00';
-
-  const totalMinutes = Math.round(Math.abs(offset) * 60);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return `UTC${offset >= 0 ? '+' : '−'}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-}
-
-function formatSearchOffset(offset: number) {
-  if (offset === 0) return 'UTC 0 UTC+0 UTC-0';
-  return `UTC${offset >= 0 ? '+' : ''}${offset} UTC ${offset}`;
 }
 
 export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelectorProps) {
@@ -285,6 +43,7 @@ export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelec
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const restorePositionRef = useRef({ left: 0, top: 0 });
+  const restorationSchedulerRef = useRef<ViewportRestorationScheduler | null>(null);
 
   const selectedOption =
     TIMEZONE_OPTIONS.find((option) => option.id === selectedZoneId) ?? UTC_OPTION;
@@ -331,17 +90,24 @@ export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelec
     setPreviewZoneId(null);
     setQuery('');
 
+    const trigger = triggerRef.current;
+    const position = restorePositionRef.current;
+    const focusTrigger = () => trigger?.focus({ preventScroll: true });
+    const scheduler = restorationSchedulerRef.current;
+
+    if (scheduler) {
+      scheduler.schedule({ focus: focusTrigger, position });
+      return;
+    }
+
+    focusTrigger();
     window.requestAnimationFrame(() => {
-      triggerRef.current?.focus({ preventScroll: true });
-      window.scrollTo({
-        left: restorePositionRef.current.left,
-        top: restorePositionRef.current.top,
-        behavior: 'auto',
-      });
+      window.scrollTo({ ...position, behavior: 'auto' });
     });
   }, []);
 
   const openPicker = useCallback(() => {
+    restorationSchedulerRef.current?.cancel();
     restorePositionRef.current = { left: window.scrollX, top: window.scrollY };
     setPreviewZoneId(selectedZoneId);
     setIsOpen(true);
@@ -369,7 +135,18 @@ export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelec
     [closePicker, rememberZone],
   );
 
-  useEffect(() => setCanApplyDST(true), []);
+  useEffect(() => {
+    setCanApplyDST(true);
+    const scheduler = createBrowserViewportRestorationScheduler();
+    restorationSchedulerRef.current = scheduler;
+
+    return () => {
+      scheduler.cancel();
+      if (restorationSchedulerRef.current === scheduler) {
+        restorationSchedulerRef.current = null;
+      }
+    };
+  }, []);
 
   useLayoutEffect(() => {
     if (!isOpen) return;
