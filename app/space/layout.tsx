@@ -37,6 +37,7 @@ const REVIEW_SELECT = [
   'suspended',
 ].join(',');
 
+const E2E_NOW_MS = Date.parse('2026-07-27T00:00:00.000Z');
 const E2E_ITEMS: Item[] = [
   {
     id: '00000000-0000-4000-8000-000000000001',
@@ -91,18 +92,18 @@ const E2E_USER = {
 } as User;
 
 async function getInitialData() {
-  const nowMs = Date.now();
   if (process.env.SCRAPBOOK_E2E_SPACE_FIXTURE === '1') {
     return {
       items: E2E_ITEMS,
       isAdmin: true,
       user: E2E_USER,
-      nowMs,
+      nowMs: E2E_NOW_MS,
       hasMore: false,
     };
   }
 
   const supabase = await createClient();
+  const nowMs = Date.now();
   const [authResult, itemsResult] = await Promise.all([
     supabase.auth.getUser(),
     supabase
