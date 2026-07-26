@@ -47,6 +47,9 @@ function parsePost(fileName: string): BlogPost {
     model: data.model ? String(data.model) : undefined,
     editor: data.editor ? String(data.editor) : undefined,
     editorialStatus: (data.editorialStatus ?? 'published') as EditorialStatus,
+    revision: data.revision ? Number(data.revision) : undefined,
+    revisionSummary: data.revisionSummary ? String(data.revisionSummary) : undefined,
+    editorialNote: data.editorialNote ? String(data.editorialNote) : undefined,
   };
 }
 
@@ -65,7 +68,7 @@ export const getBlogPosts = unstable_cache(
       .map(parsePost)
       .sort((a, b) => new Date(b.dateIso).getTime() - new Date(a.dateIso).getTime());
   },
-  ['blog-posts-v2'],
+  ['blog-posts-v3'],
   cacheConfig,
 );
 
@@ -77,7 +80,7 @@ export const getBlogPost = unstable_cache(
       return null;
     }
   },
-  ['blog-post-v2'],
+  ['blog-post-v3'],
   cacheConfig,
 );
 
@@ -86,6 +89,6 @@ export const getPostsByCategory = unstable_cache(
     const allPosts = await getBlogPosts();
     return allPosts.filter((post) => post.category === category);
   },
-  ['blog-posts-by-category-v2'],
+  ['blog-posts-by-category-v3'],
   cacheConfig,
 );
