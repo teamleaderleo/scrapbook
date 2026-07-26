@@ -4,12 +4,15 @@ import { ActivityGrid, type ActivityGridDay } from '@/components/home/activity-g
 import { ActivityScoreboard } from '@/components/home/activity-scoreboard';
 import { useEffect, useRef, useState } from 'react';
 
+const REFRESH_INTERVAL_MS = 60_000;
+
 type ActivitySnapshot = {
   today: number;
   weekTotal: number;
   yearTotal: number | null;
   days: ActivityGridDay[];
   unit: string;
+  generatedAt: string;
 };
 
 type LiveActivityResponse = {
@@ -17,18 +20,26 @@ type LiveActivityResponse = {
   weekTotal: number;
   yearTotal: number;
   days: ActivityGridDay[];
+  generatedAt: string;
 };
+
+function timestampOrNow(value: string) {
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : Date.now();
+}
 
 export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
   const [activity, setActivity] = useState(initial);
   const [updating, setUpdating] = useState(false);
   const inFlight = useRef<AbortController | null>(null);
+  const lastSuccessAt = useRef(timestampOrNow(initial.generatedAt));
 
   useEffect(() => {
     let mounted = true;
 
     const refresh = async () => {
       if (document.visibilityState !== 'visible' || inFlight.current) return;
+      if (Date.now() - lastSuccessAt.current < REFRESH_INTERVAL_MS - 1_000) return;
 
       const controller = new AbortController();
       inFlight.current = controller;
@@ -43,6 +54,7 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
 
         const next = (await response.json()) as LiveActivityResponse;
         if (!mounted) return;
+        lastSuccessAt.current = timestampOrNow(next.generatedAt);
         setActivity({ ...next, unit: 'contributions' });
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') return;
@@ -53,8 +65,10 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
       }
     };
 
-    const initialRefresh = window.setTimeout(() => void refresh(), 2_500);
-    const interval = window.setInterval(() => void refresh(), 75_000);
+    const age = Math.max(0, Date.now() - lastSuccessAt.current);
+    const firstDelay = Math.max(3_000, REFRESH_INTERVAL_MS - age);
+    const initialRefresh = window.setTimeout(() => void refresh(), firstDelay);
+    const interval = window.setInterval(() => void refresh(), REFRESH_INTERVAL_MS);
     const onVisibilityChange = () => {
       if (document.visibilityState === 'visible') void refresh();
     };
@@ -70,21 +84,24 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
   }, []);
 
   return (
-    <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
-      <div className="flex h-4 items-center justify-end" aria-live="polite">
+    <div className="relative min-w-0">
+      <div className="pointer-events-none absolute right-2 top-2 z-10 min-h-4" aria-live="polite">
         {updating ? (
-          <span className="flex items-center gap-1.5 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-black/50 dark:text-white/50">
+          <span className="flex items-center gap-1.5 rounded-full border border-black/10 bg-[#f4f1ea] px-2 py-1 font-mono text-[8px] font-semibold uppercase tracking-[0.12em] text-black/50 shadow-sm dark:border-white/10 dark:bg-[#202126] dark:text-white/50">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current motion-reduce:animate-none" />
-            Updating activity
+            Updating
           </span>
         ) : null}
       </div>
-      <ActivityScoreboard
-        today={activity.today}
-        weekTotal={activity.weekTotal}
-        yearTotal={activity.yearTotal}
-      />
-      <ActivityGrid days={activity.days} unit={activity.unit} />
+
+      <div className="grid min-w-0 items-stretch gap-3 lg:grid-cols-[minmax(19rem,0.9fr)_minmax(20rem,1.1fr)]">
+        <ActivityScoreboard
+          today={activity.today}
+          weekTotal={activity.weekTotal}
+          yearTotal={activity.yearTotal}
+        />
+        <ActivityGrid days={activity.days} unit={activity.unit} />
+      </div>
     </div>
   );
 }
