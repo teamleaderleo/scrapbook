@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/space/app-sidebar';
 import { SpaceShellSkeleton } from '@/components/space/space-shell-skeleton';
@@ -12,6 +13,7 @@ import { mapDatabaseItemsToItems } from '@/app/lib/utils/database';
 import { isAdminUser } from '@/app/lib/auth/admin';
 import { SPACE_ITEM_SELECT, SPACE_PAGE_SIZE } from '@/app/lib/space-data';
 import type { DbItem, DbReview } from '@/app/lib/db/supabase';
+import type { Item } from '@/app/lib/item-types';
 
 export const metadata: Metadata = {
   title: 'Space',
@@ -35,10 +37,72 @@ const REVIEW_SELECT = [
   'suspended',
 ].join(',');
 
-async function getInitialData() {
-  const supabase = await createClient();
-  const nowMs = Date.now();
+const E2E_ITEMS: Item[] = [
+  {
+    id: '00000000-0000-4000-8000-000000000001',
+    title: 'Shortcut Alpha',
+    slug: 'shortcut-alpha',
+    url: null,
+    defaultIndex: 0,
+    versions: [
+      {
+        label: 'notes',
+        content: 'Alpha review content',
+        contentHtml: '<p>Alpha review content</p>',
+        code: 'print("alpha")',
+        codeHtml: '<pre><code>print(&quot;alpha&quot;)</code></pre>',
+      },
+    ],
+    tags: ['topic:shortcuts', 'type:test'],
+    category: 'reference',
+    createdAt: 1,
+    updatedAt: 1,
+  },
+  {
+    id: '00000000-0000-4000-8000-000000000002',
+    title: 'Shortcut Beta',
+    slug: 'shortcut-beta',
+    url: null,
+    defaultIndex: 0,
+    versions: [
+      {
+        label: 'notes',
+        content: 'Beta review content',
+        contentHtml: '<p>Beta review content</p>',
+        code: null,
+        codeHtml: '',
+      },
+    ],
+    tags: ['topic:shortcuts', 'type:test'],
+    category: 'reference',
+    createdAt: 2,
+    updatedAt: 2,
+  },
+];
 
+const E2E_USER = {
+  id: '00000000-0000-4000-8000-000000000099',
+  aud: 'authenticated',
+  role: 'authenticated',
+  email: 'space-e2e@example.com',
+  app_metadata: {},
+  user_metadata: {},
+  created_at: '2026-07-27T00:00:00.000Z',
+} as User;
+
+async function getInitialData() {
+  const nowMs = Date.now();
+  if (process.env.SCRAPBOOK_E2E_SPACE_FIXTURE === '1') {
+    return {
+      items: E2E_ITEMS,
+      isAdmin: true,
+      user: E2E_USER,
+      nowMs,
+      hasMore: false,
+    };
+  }
+
+  const supabase = await createClient();
   const [authResult, itemsResult] = await Promise.all([
     supabase.auth.getUser(),
     supabase
