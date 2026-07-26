@@ -31,6 +31,7 @@ export function SpaceHeader({
     pathname === '/space/review' ||
     pathname?.startsWith('/space/add') ||
     pathname?.startsWith('/space/edit');
+  const usesMobileActionRail = pathname === '/space' || pathname === '/space/review';
   const isMac = useMemo(
     () => typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform),
     [],
@@ -76,7 +77,7 @@ export function SpaceHeader({
           <button
             data-space-editor-trigger
             onClick={onEditorToggle}
-            className={`hidden h-8 items-center gap-1.5 rounded-md px-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:inline-flex ${
+            className={`${usesMobileActionRail ? 'hidden md:inline-flex' : 'inline-flex'} h-8 items-center gap-1.5 rounded-md px-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
               isEditorOpen
                 ? 'bg-muted text-foreground'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground'
@@ -87,7 +88,7 @@ export function SpaceHeader({
             type="button"
           >
             <Code className="h-4 w-4" />
-            <span>Editor</span>
+            <span className={usesMobileActionRail ? '' : 'hidden sm:inline'}>Editor</span>
           </button>
         ) : null}
 
