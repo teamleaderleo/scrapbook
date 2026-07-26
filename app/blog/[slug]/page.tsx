@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation';
 import { getBlogPost, getBlogPosts } from '@/app/lib/blog-utils';
-import { MDXRemote } from 'next-mdx-remote/rsc';
 import { categories } from '@/app/lib/definitions/blog';
 import { PostByline } from '@/components/blog/post-byline';
+import { RevisionReader } from '@/components/blog/revision-reader';
+import { getEditorialRevisions } from '@/lib/editorial-revisions';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
@@ -54,6 +55,7 @@ async function BlogPostContent({ params }: { params: SlugParams }) {
   if (!post) notFound();
 
   const editorialNoteUrl = getEditorialNoteUrl(post.editorialNote);
+  const revisions = getEditorialRevisions(post);
 
   return (
     <main className="min-h-screen bg-[#f2efe7] text-[#171717] dark:bg-[#141414] dark:text-[#f1eee6]">
@@ -92,18 +94,19 @@ async function BlogPostContent({ params }: { params: SlugParams }) {
           </div>
         </header>
 
-        <div className="grid gap-8 pt-9 lg:grid-cols-[minmax(0,1fr)_minmax(0,42rem)_minmax(8rem,1fr)] lg:gap-10">
+        <div className="grid gap-8 pt-9 lg:grid-cols-[minmax(0,1fr)_minmax(0,44rem)_minmax(8rem,1fr)] lg:gap-10">
           <aside className="hidden lg:block">
             <div className="sticky top-24 border-t border-current/35 pt-3 font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
               <p>Filed {post.date}</p>
               <p className="mt-2">Status: {post.editorialStatus.replace('-', ' ')}</p>
               {post.revision ? <p className="mt-2">Revision {post.revision}</p> : null}
+              {revisions.versions.length > 1 ? (
+                <p className="mt-2">{revisions.versions.length} stored versions</p>
+              ) : null}
             </div>
           </aside>
 
-          <div className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:tracking-[-0.025em] prose-p:font-serif prose-p:leading-[1.72] prose-a:decoration-current/35 prose-a:underline-offset-4 prose-blockquote:border-current prose-blockquote:font-serif prose-blockquote:text-foreground/75 dark:prose-invert first:[&_p]:first-letter:float-left first:[&_p]:first-letter:mr-2 first:[&_p]:first-letter:font-serif first:[&_p]:first-letter:text-7xl first:[&_p]:first-letter:font-black first:[&_p]:first-letter:leading-[0.82]">
-            <MDXRemote source={post.content} />
-          </div>
+          <RevisionReader bundle={revisions} />
 
           <aside className="hidden lg:block">
             <div className="sticky top-24 border-t border-current/35 pt-3 text-xs leading-relaxed text-muted-foreground">
@@ -118,7 +121,7 @@ async function BlogPostContent({ params }: { params: SlugParams }) {
                   rel="noreferrer"
                   className="mt-4 inline-block font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-foreground underline decoration-current/30 underline-offset-4"
                 >
-                  Read the editorial note
+                  Read the full note
                 </a>
               ) : null}
             </div>
