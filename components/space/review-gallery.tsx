@@ -157,7 +157,10 @@ export function ReviewGallery() {
           onEditorToggle={() => setEditorOpen(!editorOpen)}
           isEditorOpen={editorOpen}
         />
-        <div className="p-4 text-muted-foreground">
+        <div
+          data-space-scroll-region
+          className="min-h-0 flex-1 overflow-y-auto px-4 pt-4 pb-[calc(5.75rem+env(safe-area-inset-bottom))] text-muted-foreground md:pb-4"
+        >
           {error ? (
             <div
               className="flex max-w-xl items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm text-foreground"
@@ -181,7 +184,10 @@ export function ReviewGallery() {
   const progress = `${currentIndex + 1} / ${items.length}${hasMore ? '+' : ''}${refreshing ? ' · Updating' : ''}`;
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-background">
+    <div
+      data-space-review-content={showContent ? 'visible' : 'hidden'}
+      className="flex h-full min-h-0 flex-col bg-background"
+    >
       <SpaceHeader
         leftContent={progress}
         onEditorToggle={() => setEditorOpen(!editorOpen)}
@@ -204,7 +210,10 @@ export function ReviewGallery() {
         }
       />
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-3 sm:p-6">
+      <div
+        data-space-scroll-region
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 pt-3 pb-[calc(5.75rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-6 md:pb-6 lg:overflow-hidden"
+      >
         {error ? (
           <div
             className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm"
@@ -217,7 +226,9 @@ export function ReviewGallery() {
           </div>
         ) : null}
 
-        <h1 className="mb-4 text-2xl font-bold text-foreground">{current.title}</h1>
+        <h1 data-space-current-item={current.id} className="mb-4 text-2xl font-bold text-foreground">
+          {current.title}
+        </h1>
 
         {current.versions.length > 1 && (
           <div className="mb-4 flex flex-wrap gap-2 text-sm">
@@ -241,7 +252,10 @@ export function ReviewGallery() {
         )}
 
         {showContent && active && (
-          <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto lg:flex-row lg:overflow-hidden">
+          <div
+            data-space-scroll-region
+            className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto lg:flex-row lg:overflow-hidden"
+          >
             <div className="min-h-48 min-w-0 flex-1 overflow-auto rounded border border-border bg-white p-4 dark:border-sidebar-border dark:bg-sidebar">
               <div className="prose prose-sm max-w-none dark:prose-invert">
                 <MarkdownContent
