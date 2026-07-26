@@ -87,14 +87,14 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
     <div className="relative min-w-0">
       <div className="pointer-events-none absolute right-2 top-2 z-10 min-h-4" aria-live="polite">
         {updating ? (
-          <span className="flex items-center gap-1.5 rounded-full border border-black/10 bg-[#f4f1ea] px-2 py-1 font-mono text-[8px] font-semibold uppercase tracking-[0.12em] text-black/50 shadow-sm dark:border-white/10 dark:bg-[#202126] dark:text-white/50">
+          <span className="flex items-center gap-1.5 rounded-full border border-black/14 bg-[#ddd9d0] px-2 py-1 font-mono text-[8px] font-semibold uppercase tracking-[0.12em] text-black/62 shadow-sm dark:border-white/16 dark:bg-[#292a30] dark:text-white/68">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current motion-reduce:animate-none" />
             Updating
           </span>
         ) : null}
       </div>
 
-      <div className="grid min-w-0 items-stretch gap-3 lg:grid-cols-[minmax(19rem,0.9fr)_minmax(20rem,1.1fr)]">
+      <div className="grid min-w-0 items-stretch gap-3 lg:grid-cols-[minmax(18rem,0.78fr)_minmax(24rem,1.22fr)]">
         <ActivityScoreboard
           today={activity.today}
           weekTotal={activity.weekTotal}
