@@ -20,6 +20,7 @@ export const VERCEL_CONTINUE_BUILD_EXIT_CODE = 1;
 export function decideVercelDeployment({ gitRef, commitMessage }) {
   const ref = typeof gitRef === 'string' ? gitRef.trim() : '';
   const message = typeof commitMessage === 'string' ? commitMessage : '';
+  const hasPreviewMarker = message.toLowerCase().includes('[preview]');
 
   if (!ref) {
     return {
@@ -42,7 +43,7 @@ export function decideVercelDeployment({ gitRef, commitMessage }) {
     };
   }
 
-  if (message.includes('[preview]')) {
+  if (hasPreviewMarker) {
     return {
       deploy: true,
       reason: 'commit message contains [preview]',
