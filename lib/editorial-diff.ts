@@ -243,7 +243,7 @@ function alignChangedBlocks(
       if (pairCost <= deleteCost && pairCost <= insertCost) {
         costs[oldIndex][newIndex] = pairCost;
         decisions[oldIndex][newIndex] = 3;
-      } else if (deleteCost <= insertCost) {
+      } else if (deleteCost < insertCost) {
         costs[oldIndex][newIndex] = deleteCost;
         decisions[oldIndex][newIndex] = 1;
       } else {
