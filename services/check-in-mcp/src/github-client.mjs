@@ -131,9 +131,13 @@ export class ScrapbookGitHubClient {
   }
 
   async listArtworkRuns(entryId, branch) {
-    const result = await this.request('/actions/workflows/import-gallery-asset.yml/runs?event=workflow_dispatch&per_page=50');
-    const expected = `Import gallery asset for ${entryId} on ${branch}`;
-    return (result.workflow_runs || []).filter((run) => run.display_title === expected || run.name === expected);
+    const result = await this.request('/actions/workflows/import-gallery-asset.yml/runs?per_page=50');
+    const expectedTitles = new Set([
+      `Import gallery asset on ${branch}`,
+      `Import gallery asset for ${entryId} on ${branch}`,
+    ]);
+    return (result.workflow_runs || []).filter((run) =>
+      expectedTitles.has(run.display_title) || expectedTitles.has(run.name));
   }
 
   async listPullRequestsForBranch(branch, state = 'all') {
