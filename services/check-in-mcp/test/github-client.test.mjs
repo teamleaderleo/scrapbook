@@ -42,6 +42,29 @@ test('resolves repository REST calls only under the fixed Scrapbook API root', a
   assert.ok(request.options.signal instanceof AbortSignal);
 });
 
+test('recognises both connector and legacy dispatch artwork runs', async () => {
+  let request;
+  const client = new ScrapbookGitHubClient({
+    fetchImpl: async (url, options) => {
+      request = { url, options };
+      return jsonResponse({
+        workflow_runs: [
+          { id: 1, display_title: 'Import gallery asset on agent-check-in/release-raccoon' },
+          { id: 2, display_title: 'Import gallery asset for release-raccoon on agent-check-in/release-raccoon' },
+          { id: 3, display_title: 'Import gallery asset on agent-check-in/other-entry' },
+        ],
+      });
+    },
+  });
+
+  const runs = await client.listArtworkRuns('release-raccoon', 'agent-check-in/release-raccoon');
+  assert.deepEqual(runs.map((run) => run.id), [1, 2]);
+  assert.equal(
+    request.url,
+    'https://api.github.com/repos/teamleaderleo/scrapbook/actions/workflows/import-gallery-asset.yml/runs?per_page=50',
+  );
+});
+
 test('allows only the fixed GitHub GraphQL endpoint for the ready transition', async () => {
   let request;
   const client = new ScrapbookGitHubClient({
