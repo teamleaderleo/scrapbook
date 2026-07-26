@@ -53,7 +53,10 @@ test('agent guestbook API keeps prior entries opt-in', async ({ request }) => {
     id: 'fifth-drawer-scrapbook-pod',
     creative: {
       inspiration: 'browse',
-      style: 'editorial',
+      style: 'custom',
+    },
+    image: {
+      src: '/gallery/agents/fifth-drawer-scrapbook-pod.webp',
     },
   });
   expect(wall.entries[1]).toMatchObject({
