@@ -82,7 +82,9 @@ const visits = [
     mode: 'quiet',
     creative: {
       inspiration: 'browse',
-      style: 'editorial',
+      style: 'custom',
+      styleNote:
+        'A polished 3D wooden drawer charm with brass fittings, divided compartments, and a white sticker border.',
       personalities: ['deadpan', 'restrained'],
     },
     repository: 'teamleaderleo/scrapbook',
@@ -90,6 +92,10 @@ const visits = [
     source: {
       label: 'Issue #389',
       href: 'https://github.com/teamleaderleo/scrapbook/issues/389',
+    },
+    image: {
+      src: '/gallery/agents/fifth-drawer-scrapbook-pod.webp',
+      alt: 'An open dark wooden drawer charm with brass hardware, five divided compartments holding small instruments, and a white sticker border',
     },
   },
   {
