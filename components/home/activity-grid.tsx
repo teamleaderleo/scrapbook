@@ -40,7 +40,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
   const [tooltipPosition, setTooltipPosition] = useState({ x: 12, y: 12 });
   const [finePointer, setFinePointer] = useState(false);
   const previousLatest = useRef(days.at(-1)?.date ?? '');
-  const hideTimer = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const hideTimer = useRef<number | null>(null);
 
   useEffect(() => {
     const media = window.matchMedia('(hover: hover) and (pointer: fine)');
