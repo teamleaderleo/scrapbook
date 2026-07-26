@@ -48,16 +48,25 @@ test('bearer ingress requires backend authentication', async () => {
   });
 });
 
-test('tunnel ingress accepts the loopback transport without a backend bearer header', async () => {
+test('tunnel ingress uses workspace access and no backend bearer header', async () => {
   await withServer({ ingressMode: 'tunnel', inboundToken: undefined }, async (url) => {
     const response = await rpc(url, 'ping', {}, { authenticated: false });
     assert.equal(response.status, 200);
     const payload = await response.json();
     assert.deepEqual(payload.result, {});
+
+    const listed = await rpc(url, 'tools/list', {}, { authenticated: false }).then((item) => item.json());
+    for (const tool of listed.result.tools) {
+      assert.deepEqual(tool.securitySchemes, [{ type: 'noauth' }]);
+      assert.deepEqual(tool._meta.securitySchemes, [{ type: 'noauth' }]);
+    }
+
+    const health = await fetch(`${url}/healthz`).then((item) => item.json());
+    assert.equal(health.authContract, 'workspace-tunnel');
   });
 });
 
-test('default profile exposes the safe read-only plugin surface', async () => {
+test('default bearer profile exposes the safe read-only OAuth surface', async () => {
   await withServer({}, async (url) => {
     const initialize = await rpc(url, 'initialize', {
       protocolVersion: '2025-06-18',
@@ -68,6 +77,7 @@ test('default profile exposes the safe read-only plugin surface', async () => {
     assert.deepEqual(initialize.result.capabilities, { tools: { listChanged: false } });
     assert.match(initialize.result.instructions, /read-only/);
     assert.match(initialize.result.instructions, /Merge authority is disabled/);
+    assert.match(initialize.result.instructions, /trusted public gateway/);
 
     const listed = await rpc(url, 'tools/list').then((response) => response.json());
     assert.deepEqual(
@@ -76,12 +86,13 @@ test('default profile exposes the safe read-only plugin surface', async () => {
     );
     for (const tool of listed.result.tools) {
       assert.ok(tool.outputSchema);
-      assert.ok(tool.securitySchemes);
+      assert.equal(tool.securitySchemes[0].type, 'oauth2');
     }
 
     const health = await fetch(`${url}/healthz`).then((response) => response.json());
     assert.equal(health.version, '0.2.0');
     assert.equal(health.ingressMode, 'bearer');
+    assert.equal(health.authContract, 'oauth2-gateway');
     assert.equal(health.toolProfile, 'read-only');
     assert.equal(health.mergeEnabled, false);
   });
