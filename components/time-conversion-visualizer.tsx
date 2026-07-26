@@ -8,6 +8,15 @@ import { isDSTActive } from '@/app/lib/dst-utils';
 const DAY_GRADIENT =
   'linear-gradient(90deg, #151720 0%, #252938 9%, #493f55 18%, #715767 28%, #9f6f68 38%, #bd916c 46%, #c9a574 50%, #bd916c 56%, #9f6f68 64%, #715767 73%, #493f55 82%, #252938 91%, #151720 100%)';
 
+function formatOffset(offsetMinutes: number) {
+  if (offsetMinutes === 0) return 'UTC±00:00';
+
+  const absoluteMinutes = Math.abs(offsetMinutes);
+  const hours = Math.floor(absoluteMinutes / 60);
+  const minutes = absoluteMinutes % 60;
+  return `UTC${offsetMinutes >= 0 ? '+' : '−'}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
 export default function UTCTimeVisualizer() {
   const [localTime, setLocalTime] = useState(0);
   const [localOffsetMinutes, setLocalOffsetMinutes] = useState(0);
@@ -49,11 +58,15 @@ export default function UTCTimeVisualizer() {
             : 'Night';
 
   return (
-    <div className="mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-6xl items-center px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <div className="w-full rounded-[1.5rem] border border-border/70 bg-card/92 p-5 text-card-foreground shadow-[0_22px_58px_rgba(24,24,26,0.11)] backdrop-blur-xl dark:shadow-[0_24px_64px_rgba(0,0,0,0.32)] sm:p-7">
+    <div className="mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-6xl items-start px-4 py-4 sm:px-6 sm:py-8 lg:px-8">
+      <div className="w-full rounded-[1.5rem] border border-border/70 bg-card/92 p-4 text-card-foreground shadow-[0_22px_58px_rgba(24,24,26,0.11)] backdrop-blur-xl dark:shadow-[0_24px_64px_rgba(0,0,0,0.32)] sm:p-7">
         <CurrentTimeDisplay onJumpToTime={setLocalTime} />
 
-        <div className="mt-7">
+        <div className="mt-5 sm:mt-7">
+          <TimezoneSelector utcHours={utcHours} utcMinutes={utcMinutes} />
+        </div>
+
+        <div className="mt-6 sm:mt-7">
           <div className="mb-3 flex items-center justify-between gap-3">
             <label
               htmlFor="time-of-day"
@@ -78,7 +91,7 @@ export default function UTCTimeVisualizer() {
             className="time-day-slider h-14 w-full cursor-pointer rounded-full"
             style={{ background: DAY_GRADIENT }}
           />
-          <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground">
+          <div className="mt-2 flex justify-between font-mono text-[10px] tabular-nums text-muted-foreground">
             <span>00:00</span>
             <span>06:00</span>
             <span>12:00</span>
@@ -87,41 +100,56 @@ export default function UTCTimeVisualizer() {
           </div>
         </div>
 
-        <div className="mt-7 grid gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
-          <div className="rounded-xl border border-border/65 bg-background/46 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-md">
-            <div className="flex items-end gap-3">
-              <p className="font-mono text-5xl font-semibold tabular-nums tracking-[-0.05em] sm:text-6xl">
-                {formatTime(localHours, localMinutes)}
-              </p>
-              <p className="pb-1 text-xl text-muted-foreground">
-                {formatTime12Hour(localHours, localMinutes)} {period}
-              </p>
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">Selected local time</p>
+        <section
+          aria-label="Time comparisons"
+          className="mt-6 grid grid-cols-2 gap-3 sm:mt-7 sm:grid-cols-4"
+        >
+          <div className="col-span-2 rounded-xl border border-border/65 bg-background/46 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-md sm:col-span-1">
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              Local
+            </p>
+            <p className="mt-1 font-mono text-3xl font-semibold tabular-nums tracking-[-0.03em]">
+              {formatTime(localHours, localMinutes)}
+            </p>
+            <p className="mt-1 font-mono text-[10px] tabular-nums text-muted-foreground">
+              {formatTime12Hour(localHours, localMinutes)} {period} ·{' '}
+              {formatOffset(localOffsetMinutes)}
+            </p>
           </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-border/65 bg-background/46 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md">
-              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">UTC</p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums">{formatTime(utcHours, utcMinutes)}</p>
-            </div>
-            <div className="rounded-xl border border-border/65 bg-background/46 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md">
-              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Eastern</p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums">
-                {formatTime((utcHours + easternOffset + 24) % 24, utcMinutes)}
-              </p>
-            </div>
-            <div className="rounded-xl border border-border/65 bg-background/46 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md">
-              <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Pacific</p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums">
-                {formatTime((utcHours + pacificOffset + 24) % 24, utcMinutes)}
-              </p>
-            </div>
-            <div className="col-span-2 sm:col-span-3">
-              <TimezoneSelector utcHours={utcHours} utcMinutes={utcMinutes} />
-            </div>
+          <div className="rounded-xl border border-border/65 bg-background/46 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md">
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              UTC
+            </p>
+            <p className="mt-1 font-mono text-2xl font-semibold tabular-nums">
+              {formatTime(utcHours, utcMinutes)}
+            </p>
+            <p className="mt-1 font-mono text-[10px] tabular-nums text-muted-foreground">
+              UTC±00:00
+            </p>
           </div>
-        </div>
+          <div className="rounded-xl border border-border/65 bg-background/46 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md">
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              Eastern
+            </p>
+            <p className="mt-1 font-mono text-2xl font-semibold tabular-nums">
+              {formatTime((utcHours + easternOffset + 24) % 24, utcMinutes)}
+            </p>
+            <p className="mt-1 font-mono text-[10px] tabular-nums text-muted-foreground">
+              {formatOffset(easternOffset * 60)}
+            </p>
+          </div>
+          <div className="rounded-xl border border-border/65 bg-background/46 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md">
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              Pacific
+            </p>
+            <p className="mt-1 font-mono text-2xl font-semibold tabular-nums">
+              {formatTime((utcHours + pacificOffset + 24) % 24, utcMinutes)}
+            </p>
+            <p className="mt-1 font-mono text-[10px] tabular-nums text-muted-foreground">
+              {formatOffset(pacificOffset * 60)}
+            </p>
+          </div>
+        </section>
       </div>
     </div>
   );
