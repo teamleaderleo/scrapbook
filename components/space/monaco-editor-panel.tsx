@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useItems } from '@/app/lib/contexts/item-context';
+import { useSpaceShortcuts } from '@/components/space/space-shortcut-provider';
 
 export function MonacoEditorPanel() {
   const { editorOpen, setEditorOpen } = useItems();
+  const { executeShortcut } = useSpaceShortcuts();
   const editorRef = useRef<HTMLDivElement>(null);
   const monacoRef = useRef<any>(null);
   const { resolvedTheme } = useTheme();
@@ -18,20 +20,6 @@ export function MonacoEditorPanel() {
   const isDark = resolvedTheme === 'dark';
   const shikiTheme = isDark ? 'catppuccin-macchiato' : 'one-light';
   const sidebarWidth = state === 'collapsed' ? '3rem' : '16rem';
-
-  useEffect(() => {
-    const handleKey = (event: KeyboardEvent) => {
-      const isMod = event.metaKey || event.ctrlKey;
-
-      if (isMod && !event.altKey && !event.shiftKey && (event.key === 'i' || event.code === 'KeyI')) {
-        event.preventDefault();
-        setEditorOpen(!editorOpen);
-      }
-    };
-
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [editorOpen, setEditorOpen]);
 
   useEffect(() => {
     if (!monacoRef.current) return;
@@ -121,7 +109,7 @@ export function MonacoEditorPanel() {
       setIsInitializing(false);
 
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
-        setEditorOpen(false);
+        executeShortcut('editor.toggle');
       });
 
       editor.focus();
@@ -147,12 +135,13 @@ export function MonacoEditorPanel() {
       disposed = true;
       cleanup?.();
     };
-  }, [editorOpen, setEditorOpen, shikiTheme]);
+  }, [editorOpen, executeShortcut, shikiTheme]);
 
   if (!editorOpen) return null;
 
   return (
     <div
+      data-space-shortcut-scope="editor"
       className="fixed top-24 z-50 overflow-hidden rounded-lg border border-border shadow-2xl transition-[left,width] duration-200 ease-linear"
       style={{
         left: `calc(${sidebarWidth} + 1rem)`,

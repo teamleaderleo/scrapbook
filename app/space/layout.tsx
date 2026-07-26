@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/space/app-sidebar';
 import { SpaceShellSkeleton } from '@/components/space/space-shell-skeleton';
@@ -7,10 +8,12 @@ import { ItemsProvider } from '../lib/contexts/item-context';
 import { createClient } from '@/utils/supabase/server';
 import { SearchCommand } from '@/components/space/search-command';
 import { MonacoEditorPanel } from '@/components/space/monaco-editor-panel';
+import { SpaceShortcutProvider } from '@/components/space/space-shortcut-provider';
 import { mapDatabaseItemsToItems } from '@/app/lib/utils/database';
 import { isAdminUser } from '@/app/lib/auth/admin';
 import { SPACE_ITEM_SELECT, SPACE_PAGE_SIZE } from '@/app/lib/space-data';
 import type { DbItem, DbReview } from '@/app/lib/db/supabase';
+import type { Item } from '@/app/lib/item-types';
 
 export const metadata: Metadata = {
   title: 'Space',
@@ -34,10 +37,73 @@ const REVIEW_SELECT = [
   'suspended',
 ].join(',');
 
+const E2E_NOW_MS = Date.parse('2026-07-27T00:00:00.000Z');
+const E2E_ITEMS: Item[] = [
+  {
+    id: '00000000-0000-4000-8000-000000000001',
+    title: 'Shortcut Alpha',
+    slug: 'shortcut-alpha',
+    url: null,
+    defaultIndex: 0,
+    versions: [
+      {
+        label: 'notes',
+        content: 'Alpha review content',
+        contentHtml: '<p>Alpha review content</p>',
+        code: 'print("alpha")',
+        codeHtml: '<pre><code>print(&quot;alpha&quot;)</code></pre>',
+      },
+    ],
+    tags: ['topic:shortcuts', 'type:test'],
+    category: 'reference',
+    createdAt: 1,
+    updatedAt: 1,
+  },
+  {
+    id: '00000000-0000-4000-8000-000000000002',
+    title: 'Shortcut Beta',
+    slug: 'shortcut-beta',
+    url: null,
+    defaultIndex: 0,
+    versions: [
+      {
+        label: 'notes',
+        content: 'Beta review content',
+        contentHtml: '<p>Beta review content</p>',
+        code: null,
+        codeHtml: '',
+      },
+    ],
+    tags: ['topic:shortcuts', 'type:test'],
+    category: 'reference',
+    createdAt: 2,
+    updatedAt: 2,
+  },
+];
+
+const E2E_USER = {
+  id: '00000000-0000-4000-8000-000000000099',
+  aud: 'authenticated',
+  role: 'authenticated',
+  email: 'space-e2e@example.com',
+  app_metadata: {},
+  user_metadata: {},
+  created_at: '2026-07-27T00:00:00.000Z',
+} as User;
+
 async function getInitialData() {
+  if (process.env.SCRAPBOOK_E2E_SPACE_FIXTURE === '1') {
+    return {
+      items: E2E_ITEMS,
+      isAdmin: true,
+      user: E2E_USER,
+      nowMs: E2E_NOW_MS,
+      hasMore: false,
+    };
+  }
+
   const supabase = await createClient();
   const nowMs = Date.now();
-
   const [authResult, itemsResult] = await Promise.all([
     supabase.auth.getUser(),
     supabase
@@ -93,12 +159,14 @@ async function SpaceDataShell({ children }: { children: React.ReactNode }) {
         initialNowMs={nowMs}
         initialHasMore={hasMore}
       >
-        <div className="flex h-dvh min-h-0 w-full min-w-0 overflow-hidden bg-background text-foreground">
-          <SearchCommand />
-          <AppSidebar />
-          <div className="h-full min-h-0 min-w-0 flex-1 overflow-hidden">{children}</div>
-          <MonacoEditorPanel />
-        </div>
+        <SpaceShortcutProvider>
+          <div className="flex h-dvh min-h-0 w-full min-w-0 overflow-hidden bg-background text-foreground">
+            <SearchCommand />
+            <AppSidebar />
+            <div className="h-full min-h-0 min-w-0 flex-1 overflow-hidden">{children}</div>
+            <MonacoEditorPanel />
+          </div>
+        </SpaceShortcutProvider>
       </ItemsProvider>
     </SidebarProvider>
   );

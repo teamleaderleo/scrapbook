@@ -71,29 +71,6 @@ export function SpaceView() {
     }
   }, [hasMore, loadMore, loadingMore, page, totalPages]);
 
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      const isMod = event.metaKey || event.ctrlKey;
-      if (!isMod || event.key.toLowerCase() !== 'i') return;
-
-      const target = event.target as HTMLElement | null;
-      const tag = target?.tagName?.toLowerCase();
-      const role = target?.getAttribute?.('role');
-      const isTyping =
-        tag === 'input' ||
-        tag === 'textarea' ||
-        target?.getAttribute('contenteditable') === 'true' ||
-        role === 'textbox';
-
-      if (isTyping) return;
-      event.preventDefault();
-      setEditorOpen(!editorOpen);
-    };
-
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [editorOpen, setEditorOpen]);
-
   const onEnroll = useCallback(
     async (id: string) => {
       const {
@@ -172,7 +149,10 @@ export function SpaceView() {
       />
       <main className="min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:p-4">
         {error ? (
-          <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm" role="alert">
+          <div
+            className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm"
+            role="alert"
+          >
             <span className="min-w-0">{error}</span>
             <Button variant="outline" size="sm" className="shrink-0" onClick={() => void reload()}>
               Retry

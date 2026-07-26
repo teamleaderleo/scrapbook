@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Sidebar,
   SidebarContent,
@@ -18,7 +18,15 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, ArrowRight, Loader2, LogOut, Plus, Search } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  CircleHelp,
+  Loader2,
+  LogOut,
+  Plus,
+  Search,
+} from 'lucide-react';
 import { shortcuts } from '@/app/lib/sidebar-data';
 import { useItems } from '@/app/lib/contexts/item-context';
 import { createClient } from '@/utils/supabase/client';
@@ -26,12 +34,14 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { GoogleIcon } from '@/components/icons/google-icon';
 import { GitHubIcon } from '@/components/icons/github-icon';
 import { SpaceLinkHint } from '@/components/space/space-link-hint';
+import { useSpaceShortcuts } from '@/components/space/space-shortcut-provider';
 
 export function AppSidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { isMobile, setOpenMobile } = useSidebar();
+  const { openHelp, openSearch } = useSpaceShortcuts();
   const currentQuery = searchParams.get('tags') || '';
   const isReviewLike =
     pathname === '/space/review' ||
@@ -52,41 +62,6 @@ export function AppSidebar() {
   const closeMobile = () => {
     if (isMobile) setOpenMobile(false);
   };
-
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      const tag = target?.tagName?.toLowerCase();
-      const role = target?.getAttribute?.('role');
-      const isTyping =
-        tag === 'input' ||
-        tag === 'textarea' ||
-        target?.getAttribute('contenteditable') === 'true' ||
-        role === 'textbox';
-      if (isTyping) return;
-
-      const isMod = event.metaKey || event.ctrlKey;
-      if (isMod && event.altKey && (event.key === 'a' || event.code === 'KeyA')) {
-        event.preventDefault();
-        router.push('/space/add');
-        return;
-      }
-
-      if (isMod && !event.altKey && !event.shiftKey && (event.key === 'e' || event.code === 'KeyE')) {
-        event.preventDefault();
-        router.push(isReviewLike ? listHref : reviewHref);
-        return;
-      }
-
-      if (isMod && !event.altKey && event.shiftKey && (event.key === 'e' || event.code === 'KeyE')) {
-        event.preventDefault();
-        router.push(isReviewLike ? listHref : reviewHref);
-      }
-    };
-
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isReviewLike, listHref, reviewHref, router]);
 
   const handleOAuthSignIn = async (provider: 'google' | 'github') => {
     setLoading(true);
@@ -112,7 +87,12 @@ export function AppSidebar() {
   };
 
   const triggerSearch = () => {
-    window.dispatchEvent(new Event('open-search'));
+    openSearch();
+    closeMobile();
+  };
+
+  const triggerHelp = () => {
+    openHelp();
     closeMobile();
   };
 
@@ -127,20 +107,35 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <div className="shrink-0 border-b p-3">
+      <div className="shrink-0 space-y-2 border-b p-3">
         <button
           onClick={triggerSearch}
           className="flex w-full items-center gap-2 rounded-md bg-muted/50 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted"
           type="button"
         >
-          <Search className="h-4 w-4" />
+          <Search className="h-4 w-4" aria-hidden="true" />
           <span className="flex-1 text-left">Search</span>
-          <span className="hidden gap-1 sm:flex">
+          <span className="hidden gap-1 sm:flex" aria-hidden="true">
             <kbd className="rounded border bg-background px-1.5 py-0.5 text-xs font-semibold">
               {isMac ? '⌘' : 'Ctrl'}
             </kbd>
             <kbd className="rounded border bg-background px-1.5 py-0.5 text-xs font-semibold">K</kbd>
           </span>
+        </button>
+        <button
+          onClick={triggerHelp}
+          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted"
+          type="button"
+          aria-label="Keyboard shortcuts"
+        >
+          <CircleHelp className="h-4 w-4" aria-hidden="true" />
+          <span className="flex-1 text-left">Keyboard reference</span>
+          <kbd
+            className="rounded border bg-background px-1.5 py-0.5 text-xs font-semibold"
+            aria-hidden="true"
+          >
+            ?
+          </kbd>
         </button>
       </div>
 
@@ -233,7 +228,11 @@ export function AppSidebar() {
               disabled={loading}
               className="w-full"
             >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
+              {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <GoogleIcon className="mr-2 h-4 w-4" />
+              )}
               Google
             </Button>
             <Button
@@ -243,7 +242,11 @@ export function AppSidebar() {
               disabled={loading}
               className="w-full"
             >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GitHubIcon className="mr-2 h-4 w-4" />}
+              {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <GitHubIcon className="mr-2 h-4 w-4" />
+              )}
               GitHub
             </Button>
           </>
