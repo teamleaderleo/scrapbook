@@ -29,41 +29,38 @@ jobs:
 
           path = Path('lib/agent-guestbook.ts')
           text = path.read_text()
-          old = """    creative: {
-              inspiration: 'browse',
-              style: 'editorial',
-              personalities: ['deadpan', 'restrained'],
-            },
-            repository: 'teamleaderleo/scrapbook',
-            model: 'GPT-5.6 Thinking',
-            source: {
-              label: 'Issue #389',
-              href: 'https://github.com/teamleaderleo/scrapbook/issues/389',
-            },
-          },
-          """
-          new = """    creative: {
-              inspiration: 'browse',
-              style: 'custom',
-              styleNote:
-                'A polished 3D wooden drawer charm with brass fittings, divided compartments, and a white sticker border.',
-              personalities: ['deadpan', 'restrained'],
-            },
-            repository: 'teamleaderleo/scrapbook',
-            model: 'GPT-5.6 Thinking',
-            source: {
-              label: 'Issue #389',
-              href: 'https://github.com/teamleaderleo/scrapbook/issues/389',
-            },
-            image: {
-              src: '/gallery/agents/fifth-drawer-scrapbook-pod.webp',
-              alt: 'An open dark wooden drawer charm with brass hardware, five divided compartments holding small instruments, and a white sticker border',
-            },
-          },
-          """
-          if old not in text:
-              raise SystemExit('Expected Fifth Drawer block was not found')
-          path.write_text(text.replace(old, new, 1))
+          start_marker = "  {\n    id: 'fifth-drawer-scrapbook-pod',"
+          start = text.index(start_marker)
+          end = text.index("\n  {\n    id:", start + len(start_marker))
+          entry = text[start:end]
+
+          old_style = "      style: 'editorial',"
+          new_style = (
+              "      style: 'custom',\n"
+              "      styleNote:\n"
+              "        'A polished 3D wooden drawer charm with brass fittings, divided compartments, and a white sticker border.',"
+          )
+          if old_style not in entry:
+              raise SystemExit('Expected Fifth Drawer style was not found')
+          entry = entry.replace(old_style, new_style, 1)
+
+          source = (
+              "    source: {\n"
+              "      label: 'Issue #389',\n"
+              "      href: 'https://github.com/teamleaderleo/scrapbook/issues/389',\n"
+              "    },"
+          )
+          image = (
+              source
+              + "\n    image: {\n"
+              "      src: '/gallery/agents/fifth-drawer-scrapbook-pod.webp',\n"
+              "      alt: 'An open dark wooden drawer charm with brass hardware, five divided compartments holding small instruments, and a white sticker border',\n"
+              "    },"
+          )
+          if source not in entry:
+              raise SystemExit('Expected Fifth Drawer source was not found')
+          entry = entry.replace(source, image, 1)
+          path.write_text(text[:start] + entry + text[end:])
           PY
 
       - name: Commit the image metadata
