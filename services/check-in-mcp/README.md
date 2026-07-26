@@ -193,7 +193,7 @@ http://127.0.0.1:8787/mcp
 
 The tunnel and ChatGPT workspace control access. The local hop advertises `noauth`, binds only to loopback, and keeps the GitHub credential on the operator machine.
 
-Scan the tools only after the final descriptors are deployed. Refresh the app whenever tool metadata changes. The first live run must stop at the draft PR; merge remains disabled.
+Scan the tools only after the final descriptors are deployed. ChatGPT keeps a frozen tool snapshot until the app is refreshed or recreated, depending on workspace plan and controls. The first live run must stop at the draft PR; merge remains disabled.
 
 A read-only connection is still useful for discovery and safety evaluation, but it intentionally cannot cross the identity-reservation boundary.
 
