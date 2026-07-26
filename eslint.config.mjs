@@ -41,6 +41,14 @@ const config = [
       ],
     },
   },
+  {
+    files: ['components/labs/tactile-lab-simulator.tsx'],
+    rules: {
+      // The compact debug panel reads immutable topology counts from the
+      // world ref; per-frame state still remains outside React rendering.
+      'react-hooks/refs': 'warn',
+    },
+  },
 ];
 
 export default config;
