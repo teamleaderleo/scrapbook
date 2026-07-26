@@ -47,25 +47,44 @@ Pause ambient and simulated motion while hidden. `prefers-reduced-motion` must l
 
 ## Materials have jobs
 
-### Machined metal
+Use material variation to explain the role of an object. Every recipe has light and dark tokens in `app/materials.css`; components consume them through `MaterialSurface` and the small details in `components/material/material-primitives.tsx`.
 
-Counters, hinges, calibrated controls, and status. Tight travel, restrained reflection, weighted settling.
+| Role | Use | Character | Keep plain when |
+| --- | --- | --- | --- |
+| Painted steel | Instrument housings, durable panels, calibrated frames | Low-contrast mottling, shallow bevel, hairline seam, sparse hardware | A normal content card carries no instrument meaning |
+| Phenolic plastic | Digit wells, bezels, compact controls, key-like objects | Warm near-black, tight inset shadow, slight moulded highlight | A large reading surface needs brighter contrast |
+| Smoked or frosted glass | Protected readouts, lenses, scrubber thumbs | Edge reflection and local tint; blur stays modest and optional | Translucency has no useful relationship to the layer behind it |
+| Slate | One small temporary datum, annotation, or status strip | Dry dark face, restrained chalk-like mark, minimal grain | Repeated metrics already have a clearer table or list |
+| Paper | Gallery provenance, field notes, tags, temporary annotations | Warm fibre, quiet ink, imperfect edge used sparingly | Dense application controls need predictable alignment |
+| Tape | Attachment cue for paper, prints, and provenance | Semi-opaque strip, slight skew, tiny lift shadow | The attachment is already obvious or the surface is interactive |
+| Restrained hardware | Screws, rivets, seams, engraved or stamped labels | Small and functional-looking; usually two or four details per object | Decoration would compete with content or imply a false control |
 
-### Rubber and keycaps
+### Reusable details
 
-High-frequency actions, grading controls, and shortcuts. One- or two-pixel compression with a quick release.
+- `InsetSeam` separates a faceplate from its housing without adding layout space.
+- `HardwareScrew` marks a panel corner; it never receives focus or pointer behaviour.
+- `GlassLens` adds a local reflection over a protected readout.
+- `EngravedLabel` belongs on durable housings and calibration marks.
+- `StampedLabel` belongs on temporary or inspected objects.
+- `PaperEdge` and `TapeStrip` support gallery and provenance objects.
 
-### Paper, tape, and card
+### Guardrails
 
-Gallery entrances, annotations, agent notes, provenance, and temporary-looking objects. Slight rotation, imperfect alignment, lifted corners.
+- Preserve WCAG text contrast on the final composited colour, including glass and texture layers.
+- Keep texture beneath reading level: it should appear through highlights or close inspection, then recede.
+- Use one dominant material and at most two supporting roles on an ordinary instrument.
+- Keep screws, seams, labels, and tape outside the reading and touch areas.
+- Let empty areas remain empty. Material depth never earns another metric.
+- Use CSS gradients and compact repeating marks; large texture images stay outside ordinary route bundles.
+- Give glass an opaque fallback. Honour reduced transparency, reduced motion, and forced-colour modes.
+- Avoid continuous pointer lighting. Any moving highlight must be frame-limited, optional, and visually quiet.
+- Preserve the dimensions owned by the component. A material pass may change paint and depth while leaving the tested footprint intact.
 
-### Smoked acrylic
+### Other tactile roles
 
-Depth and enclosure. Prefer tint and edge reflection over broad blur. Give text an opaque local backing whenever translucency lowers clarity.
+Rubber and keycaps serve high-frequency actions, grading controls, and shortcuts. Use one- or two-pixel compression with a quick release.
 
-### Jelly, gel, and slime
-
-Explicit playful surfaces and the tactile lab. Keep primary navigation, text, and predictable controls stable.
+Jelly, gel, and slime belong to explicit playful surfaces and the tactile lab. Keep primary navigation, text, and predictable controls stable.
 
 ## Loading and refreshes
 
@@ -126,4 +145,4 @@ Codenames, stickers, recurring motifs, and running conversations are welcome. Ea
 
 ## Historical memory
 
-Read `docs/interface-memory/2026-07-26-tactile-workshop.md` for the longer reasoning, material presets, physics candidates, implementation phases, and open questions that produced this guide.
+Read `docs/interface-memory/2026-07-26-tactile-workshop.md` for the longer reasoning, material presets, physics candidates, implementation phases, and open questions that produced this guide. The first bounded material vocabulary is recorded in `docs/interface-memory/2026-07-27-subdued-material-system.md`.
