@@ -5,11 +5,13 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { ScrapbookGitHubClient } from './github-client.mjs';
+import { createSessionToolRegistry } from './sessions.mjs';
 import { createToolRegistry } from './tools.mjs';
 
 const SERVER_NAME = 'scrapbook-check-in-mcp';
-const SERVER_VERSION = '0.3.0';
+const SERVER_VERSION = '0.4.0';
 const INGRESS_MODES = new Set(['bearer', 'tunnel']);
+const DEVELOPMENT_SESSION_SECRET = 'development-only-scrapbook-session-signing-secret';
 
 function constantTimeEquals(left, right) {
   const a = Buffer.from(left);
@@ -91,7 +93,16 @@ function pluginInstructions(registry, ingressMode) {
   const auth = ingressMode === 'tunnel'
     ? 'Connection access is controlled by the private OpenAI tunnel and workspace permissions.'
     : 'User OAuth is enforced by the trusted public gateway before this backend bearer boundary.';
-  return `Read capabilities first. ${writes} Preserve the fixed Scrapbook branch, importer, typed guestbook, provenance, draft PR, and green-check boundaries. ${merge} ${auth}`;
+  return `Read capabilities first. For a turn-by-turn visit, start_check_in_session and follow the returned next tools. The image brief is a separate evolving step; this service only records an attached image source or an explicit text-only choice. ${writes} Preserve the fixed Scrapbook branch, importer, typed guestbook, provenance, draft PR, and green-check boundaries. ${merge} ${auth}`;
+}
+
+function resolveSessionSecret({ sessionSecret, inboundToken }) {
+  const candidate = sessionSecret || process.env.SCRAPBOOK_SESSION_SECRET || (inboundToken?.length >= 32 ? inboundToken : undefined);
+  if (candidate) return candidate;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('SCRAPBOOK_SESSION_SECRET is required in production unless the backend bearer token contains at least 32 characters.');
+  }
+  return DEVELOPMENT_SESSION_SECRET;
 }
 
 function resolveRuntime({
@@ -100,6 +111,7 @@ function resolveRuntime({
   ingressMode = process.env.SCRAPBOOK_INGRESS_MODE || 'bearer',
   toolProfile = process.env.SCRAPBOOK_TOOL_PROFILE || 'read-only',
   allowMerge = process.env.SCRAPBOOK_ALLOW_MERGE === 'true',
+  sessionSecret,
   allowedOrigins = parseAllowedOrigins(),
   logger = console,
 } = {}) {
@@ -107,7 +119,10 @@ function resolveRuntime({
   if (process.env.NODE_ENV === 'production' && resolvedIngressMode === 'bearer' && !inboundToken) {
     throw new Error('SCRAPBOOK_MCP_BEARER_TOKEN is required for production bearer ingress.');
   }
-  const registry = createToolRegistry(githubClient, { profile: toolProfile, allowMerge });
+  const baseRegistry = createToolRegistry(githubClient, { profile: toolProfile, allowMerge });
+  const registry = createSessionToolRegistry(baseRegistry, {
+    sessionSecret: resolveSessionSecret({ sessionSecret, inboundToken }),
+  });
   applyIngressSecurity(registry, resolvedIngressMode);
   return {
     inboundToken,
@@ -125,6 +140,7 @@ function healthPayload(runtime) {
     service: SERVER_NAME,
     version: SERVER_VERSION,
     transport: 'streamable-http',
+    sessionMode: 'signed-stateless',
     ingressMode: runtime.ingressMode,
     authContract: runtime.ingressMode === 'tunnel' ? 'workspace-tunnel' : 'oauth2-gateway',
     toolProfile: runtime.registry.profile,
