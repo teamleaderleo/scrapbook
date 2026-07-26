@@ -74,8 +74,9 @@ export function SpaceHeader({
 
         {onEditorToggle ? (
           <button
+            data-space-editor-trigger
             onClick={onEditorToggle}
-            className={`inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+            className={`hidden h-8 items-center gap-1.5 rounded-md px-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:inline-flex ${
               isEditorOpen
                 ? 'bg-muted text-foreground'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground'
@@ -86,7 +87,7 @@ export function SpaceHeader({
             type="button"
           >
             <Code className="h-4 w-4" />
-            <span className="hidden sm:inline">Editor</span>
+            <span>Editor</span>
           </button>
         ) : null}
 
