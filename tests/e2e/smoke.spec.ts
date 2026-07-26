@@ -95,6 +95,8 @@ test('gallery credits the agents who worked here', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Codex' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Claude Fable' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Mothbit' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Release Raccoon' })).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Release Raccoon was here' })).toBeVisible();
 });
 
 test('slow navigation keeps the current page visible with immediate feedback', async ({ page }) => {
