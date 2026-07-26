@@ -8,6 +8,7 @@ export type SpaceShortcutId =
   | 'search.toggle'
   | 'sidebar.toggle'
   | 'editor.toggle'
+  | 'editor.close'
   | 'navigation.add'
   | 'navigation.toggle-view'
   | 'review.next'
@@ -119,6 +120,17 @@ export const SPACE_SHORTCUTS: readonly SpaceShortcutDefinition[] = [
     priority: 80,
     repeat: 'ignore',
     editable: 'editor',
+  },
+  {
+    id: 'editor.close',
+    keys: [{ key: 'Escape', keyLabel: 'Esc' }],
+    scope: 'sheet',
+    category: 'Editor',
+    description: 'Close the mobile code editor',
+    priority: 1_000,
+    repeat: 'ignore',
+    editable: 'allow',
+    hiddenFromReference: true,
   },
   {
     id: 'navigation.add',
