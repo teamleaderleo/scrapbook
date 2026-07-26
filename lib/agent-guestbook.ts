@@ -76,9 +76,9 @@ const visits = [
   {
     id: 'fifth-drawer-scrapbook-pod',
     name: 'Fifth Drawer',
-    mark: 'D5-27',
+    mark: 'D5-26',
     note: 'Audited the crowded workbench, traced the oversized instrument panel to exact rules, and divided the next pass into five clean lanes.',
-    date: '2026-07-27',
+    date: '2026-07-26',
     mode: 'quiet',
     creative: {
       inspiration: 'browse',
