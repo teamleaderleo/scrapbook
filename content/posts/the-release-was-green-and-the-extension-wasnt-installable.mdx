@@ -1,0 +1,189 @@
+---
+id: 9
+title: The Release Was Green and the Extension Wasn't Installable
+date: 2026-07-26
+category: learning
+blurb: The binaries existed. The workflow passed. GitHub CLI still said no.
+---
+
+I made a GitHub CLI extension called [Tidy Branches](https://github.com/teamleaderleo/gh-tidy-branches). It finds remote branches whose pull requests already merged, checks that each branch still points to the exact recorded head commit, and then very carefully offers to delete them.
+
+The actual branch-safety work went pretty well.
+
+Publishing it took three release candidates.
+
+This is the part I want to remember, because every failure looked like success from one layer lower down.
+
+## Green is a very relative colour
+
+The normal test suite was green. The program built on Linux, macOS, and Windows. The local extension install worked. The command printed the right help. The release workflow even succeeded eventually and uploaded five binaries.
+
+And then this happened:
+
+```text
+extension is not installable: no usable release artifact or script found
+```
+
+The release existed. The binaries existed. Their checksums existed. GitHub CLI still refused to install the thing.
+
+There are several different statements hiding inside the phrase “the release works”:
+
+1. The source compiles.
+2. The binary runs.
+3. The release workflow can build the binary.
+4. GitHub can publish the assets.
+5. GitHub CLI can discover the repository as a binary extension.
+6. GitHub CLI can select the right platform asset.
+7. GitHub CLI can download and execute it.
+8. The installed binary reports the tag I thought I released.
+
+We had tests for most of the early statements. The user only cares about the later ones.
+
+## Release candidate one: the build command was not actually a build command
+
+The first release used the official precompile action, but I passed several `go build` arguments through one quoted option. The action also supplied linker flags of its own.
+
+It checked out the tag successfully and then failed before creating any release assets.
+
+The fix was straightforward once the error was visible: stop trying to smuggle a miniature command line through one configuration string. Put the release build in a real script.
+
+```bash
+./script/build-release.sh "$VERSION"
+```
+
+The same script now runs in ordinary pull-request CI with a fake version. That test checks the output filename and verifies that the binary reports the supplied version.
+
+This was the first useful lesson: release commands deserve normal code structure and normal tests. YAML strings are not a substitute for a script once quoting and multiple flags are involved.
+
+## Release candidate two: we found the wrong explanation
+
+The second candidate published valid binaries. They were named like this:
+
+```text
+darwin-arm64
+linux-amd64
+windows-amd64.exe
+```
+
+Installation still failed.
+
+We blamed the filenames. The next release changed them to the much clearer convention:
+
+```text
+gh-tidy-branches-darwin-arm64
+gh-tidy-branches-linux-amd64
+gh-tidy-branches-windows-amd64.exe
+```
+
+That naming scheme is good. It is easier to understand on a release page and easier to assert in CI.
+
+It was not the real reason installation failed.
+
+This is worth writing down because debugging stories have a habit of becoming cleaner every time they are retold. A nearby difference is not automatically the cause. We saw unusual filenames, changed them, and felt like the story made sense.
+
+Then the third release failed in exactly the same place.
+
+## Release candidate three: read the consumer
+
+At that point, the assets had the conventional names. The workflow passed. The release page looked healthy.
+
+GitHub CLI still said the repository had no usable release artifact.
+
+So we read the current GitHub CLI installer source.
+
+The important order of operations was not what I expected:
+
+1. Ask GitHub for the repository's latest non-prerelease release.
+2. Inspect that release to decide whether the repository is a binary extension.
+3. Only after the repository is classified as binary, fetch the tag supplied with `--pin`.
+
+The repository only had release candidates, all marked as GitHub prereleases. GitHub's latest-release endpoint excludes prereleases.
+
+So this command:
+
+```bash
+gh extension install teamleaderleo/gh-tidy-branches --pin v0.1.0-rc.3
+```
+
+never got as far as inspecting `v0.1.0-rc.3`.
+
+The pinned release existed. The correct Apple Silicon asset existed. The installer rejected the repository during the earlier classification step.
+
+That was the actual trap.
+
+## The weird metadata workaround
+
+The source tag and binary did not need another rebuild. The existing release only needed to become visible to the endpoint GitHub CLI used for discovery.
+
+```bash
+gh release edit v0.1.0-rc.3 \
+  --repo teamleaderleo/gh-tidy-branches \
+  --prerelease=false \
+  --latest
+```
+
+The tag, title, and notes still say release candidate. The GitHub Release metadata says non-prerelease because the current installer needs one non-prerelease binary release before it will classify the repository correctly.
+
+Then the same install command worked:
+
+```text
+✓ Installed extension teamleaderleo/gh-tidy-branches
+✓ Pinned extension at v0.1.0-rc.3
+v0.1.0-rc.3
+```
+
+No binaries were replaced. No tag moved. The metadata changed because the metadata was the broken part.
+
+## Another smaller trap: local installs do not build things
+
+There was one earlier problem that belongs in the same family.
+
+A local GitHub CLI extension install points at the repository root executable. Pulling new Go source does not rebuild that executable. I had new flags in the source and an old command in the terminal.
+
+The development command now rebuilds before reinstalling:
+
+```bash
+make install-dev
+```
+
+The broader rule is the same: test the boundary the user actually touches. Running `go test` does not prove `gh example` is invoking the binary you think it is invoking.
+
+## What I would do first next time
+
+For another precompiled GitHub CLI extension, I would start with this release definition of done:
+
+```bash
+gh extension install OWNER/gh-EXAMPLE --pin TAG
+gh EXAMPLE --version
+```
+
+The release workflow should run that against the thing it just published and fail unless the installed version exactly equals the tag.
+
+Before the first tag, I would also make sure that:
+
+- the repository is named `gh-command`
+- a root executable exists for local installation
+- the local install test invokes the extension through `gh`
+- one release script owns all platform builds
+- every binary embeds the requested version
+- asset names are explicit and asserted
+- the first release-candidate metadata works with GitHub CLI's current discovery path
+- the workflow installs the published extension, not merely a local build
+
+The [full playbook](https://github.com/teamleaderleo/gh-tidy-branches/blob/main/docs/GITHUB_CLI_EXTENSION_RELEASE_PLAYBOOK.md) lives with the project so it can be kept current.
+
+## Do not protect the nice story
+
+The most useful part of this process was eventually correcting the explanation for `rc.2`.
+
+The filename diagnosis sounded plausible. We had already written it into release notes and documentation. It would have been easy to leave it alone because the later release worked.
+
+But the installer source contradicted it.
+
+A postmortem should preserve uncertainty and corrections, not just produce a satisfying sequence of causes and fixes. Otherwise it becomes marketing copy for our own memory.
+
+The final lesson is annoyingly simple:
+
+> A release is not done when the workflow is green. It is done when a clean user-facing install works.
+
+That is now part of the workflow too.
