@@ -89,6 +89,34 @@ test('homepage highlights three recent systems', async ({ page }) => {
   await expect(page.getByRole('link', { name: /proofwake/i })).toBeVisible();
 });
 
+test('homepage presents activity as a compact YTD matrix', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page.getByText('YTD', { exact: true })).toBeVisible();
+  const grid = page.locator('[aria-label="Four weeks of GitHub activity"]');
+  const cells = grid.locator('[data-activity-cell]');
+  await expect(cells).toHaveCount(28);
+
+  const box = await grid.boundingBox();
+  expect(box).toBeTruthy();
+  expect(box!.height).toBeGreaterThan(box!.width);
+});
+
+test('homepage activity tooltip stays continuous between cells', async ({ page }) => {
+  await page.goto('/');
+  await waitForClientHydration(page);
+
+  const cells = page.locator('[data-activity-cell]');
+  const tooltip = page.locator('[data-activity-tooltip]');
+  await cells.nth(0).hover();
+  await expect(tooltip).toBeVisible();
+  const firstLabel = await tooltip.textContent();
+
+  await cells.nth(1).hover();
+  await expect(tooltip).toBeVisible();
+  await expect.poll(() => tooltip.textContent()).not.toBe(firstLabel);
+});
+
 test('gallery credits the agents who worked here', async ({ page }) => {
   await page.goto('/gallery');
 
