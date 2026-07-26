@@ -6,7 +6,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useReducer,
   useRef,
   useState,
   type ReactNode,
@@ -57,9 +56,10 @@ export function SpaceShortcutProvider({ children }: { children: ReactNode }) {
   const { toggleSidebar } = useSidebar();
   const [searchOpen, setSearchOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const [registrationVersion, bumpRegistrationVersion] = useReducer((value) => value + 1, 0);
-  const dynamicRegistrations = useRef(new Map<SpaceShortcutId, OwnedRegistration>());
-  const getRuntimeRegistrations = useRef<() => SpaceShortcutRegistrations>(() => new Map());
+  const [dynamicRegistrations, setDynamicRegistrations] = useState(
+    () => new Map<SpaceShortcutId, OwnedRegistration>(),
+  );
+  const runtimeRegistrations = useRef<SpaceShortcutRegistrations>(new Map());
 
   const currentQuery = searchParams.get('tags') ?? '';
   const isReviewLike =
@@ -124,51 +124,57 @@ export function SpaceShortcutProvider({ children }: { children: ReactNode }) {
     toggleSidebar,
   ]);
 
-  const getBaseRegistrations = useCallback(() => {
+  const baseRegistrations = useMemo(() => {
     const registrations = new Map<SpaceShortcutId, SpaceShortcutRegistration>();
     for (const [id, registration] of builtInRegistrations) registrations.set(id, registration);
-    for (const [id, registration] of dynamicRegistrations.current) {
-      registrations.set(id, registration);
-    }
+    for (const [id, registration] of dynamicRegistrations) registrations.set(id, registration);
     return registrations;
-  }, [builtInRegistrations]);
+  }, [builtInRegistrations, dynamicRegistrations]);
 
-  const getRegistrationsForDispatch = useCallback(() => {
-    const registrations = getBaseRegistrations();
-    if (!helpOpen) return registrations;
+  const dispatchRegistrations = useMemo(() => {
+    if (!helpOpen) return baseRegistrations;
 
+    const registrations = new Map(baseRegistrations);
     for (const [id, registration] of registrations) {
       if (id === 'help.open' || id === 'help.close') continue;
       registrations.set(id, { ...registration, active: false });
     }
     return registrations;
-  }, [getBaseRegistrations, helpOpen]);
+  }, [baseRegistrations, helpOpen]);
 
-  getRuntimeRegistrations.current = getRegistrationsForDispatch;
+  useEffect(() => {
+    runtimeRegistrations.current = dispatchRegistrations;
+  }, [dispatchRegistrations]);
 
   useEffect(
-    () => installSpaceShortcutListener(document, () => getRuntimeRegistrations.current()),
+    () => installSpaceShortcutListener(document, () => runtimeRegistrations.current),
     [],
   );
 
   const registerShortcut = useCallback(
     (id: SpaceShortcutId, registration: SpaceShortcutRegistration) => {
       const token = Symbol(id);
-      dynamicRegistrations.current.set(id, { ...registration, token });
-      bumpRegistrationVersion();
+      setDynamicRegistrations((current) => {
+        const next = new Map(current);
+        next.set(id, { ...registration, token });
+        return next;
+      });
 
       return () => {
-        const current = dynamicRegistrations.current.get(id);
-        if (current?.token !== token) return;
-        dynamicRegistrations.current.delete(id);
-        bumpRegistrationVersion();
+        setDynamicRegistrations((current) => {
+          const owned = current.get(id);
+          if (owned?.token !== token) return current;
+          const next = new Map(current);
+          next.delete(id);
+          return next;
+        });
       };
     },
     [],
   );
 
   const executeShortcut = useCallback((id: SpaceShortcutId) => {
-    const registration = getRuntimeRegistrations.current().get(id);
+    const registration = runtimeRegistrations.current.get(id);
     if (!registration || registration.active === false || registration.enabled === false) {
       return false;
     }
@@ -192,8 +198,8 @@ export function SpaceShortcutProvider({ children }: { children: ReactNode }) {
   );
 
   const referenceEntries = useMemo(
-    () => getSpaceShortcutReference(getBaseRegistrations()),
-    [getBaseRegistrations, registrationVersion],
+    () => getSpaceShortcutReference(baseRegistrations),
+    [baseRegistrations],
   );
   const isMac = useMemo(
     () =>
@@ -233,19 +239,20 @@ export function SpaceShortcutProvider({ children }: { children: ReactNode }) {
                   >
                     {category}
                   </h2>
-                  <div className="divide-y rounded-lg border" role="list">
+                  <ul className="divide-y rounded-lg border">
                     {entries.map(({ definition, available, unavailableReason }) => (
-                      <div
+                      <li
                         key={definition.id}
                         data-space-shortcut-id={definition.id}
-                        aria-disabled={!available}
-                        className="flex items-start justify-between gap-4 px-3 py-3 aria-disabled:opacity-55"
-                        role="listitem"
+                        data-available={available ? 'true' : 'false'}
+                        className="flex items-start justify-between gap-4 px-3 py-3 data-[available=false]:opacity-55"
                       >
                         <div className="min-w-0">
                           <p className="text-sm font-medium">{definition.description}</p>
                           {!available ? (
-                            <p className="mt-1 text-xs text-muted-foreground">{unavailableReason}</p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              Unavailable: {unavailableReason}
+                            </p>
                           ) : null}
                         </div>
                         <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
@@ -272,9 +279,9 @@ export function SpaceShortcutProvider({ children }: { children: ReactNode }) {
                             );
                           })}
                         </div>
-                      </div>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </section>
               );
             })}
