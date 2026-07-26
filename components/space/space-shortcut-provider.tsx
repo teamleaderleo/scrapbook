@@ -167,17 +167,14 @@ export function SpaceShortcutProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const executeShortcut = useCallback(
-    (id: SpaceShortcutId) => {
-      const registration = getBaseRegistrations().get(id);
-      if (!registration || registration.active === false || registration.enabled === false) {
-        return false;
-      }
-      registration.run();
-      return true;
-    },
-    [getBaseRegistrations],
-  );
+  const executeShortcut = useCallback((id: SpaceShortcutId) => {
+    const registration = getRuntimeRegistrations.current().get(id);
+    if (!registration || registration.active === false || registration.enabled === false) {
+      return false;
+    }
+    registration.run();
+    return true;
+  }, []);
 
   const openSearch = useCallback(() => setSearchOpen(true), []);
   const openHelp = useCallback(() => setHelpOpen(true), []);
