@@ -53,6 +53,12 @@ async function readHomepageFootprint(page: Page) {
   });
 }
 
+async function removeDevelopmentChrome(page: Page) {
+  await page.evaluate(() => {
+    document.querySelectorAll('nextjs-portal').forEach((portal) => portal.remove());
+  });
+}
+
 for (const viewport of desktopViewports) {
   test(`keeps the homepage instrument compact at ${viewport.width}x${viewport.height}`, async ({
     page,
@@ -75,6 +81,7 @@ for (const viewport of desktopViewports) {
     expect(footprint.activityCell.width).toBeLessThanOrEqual(56);
     expect(Math.abs(footprint.activityCell.width - footprint.activityCell.height)).toBeLessThan(1);
 
+    await removeDevelopmentChrome(page);
     const screenshotPath = path.join(
       'test-results',
       'homepage-density',
