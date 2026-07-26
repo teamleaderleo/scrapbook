@@ -15,6 +15,8 @@ import { createClient } from '@/utils/supabase/client';
 import type { ReviewState } from '@/app/lib/review-types';
 import { SpaceHeader } from './space-header';
 import { CodeDisplay } from './code-display';
+import { useSpaceShortcut } from './space-shortcut-provider';
+import { startNavigationFeedback } from '@/components/navigation-feedback';
 
 export function ReviewGallery() {
   const supabase = createClient();
@@ -54,6 +56,7 @@ export function ReviewGallery() {
 
   const current = items[currentIndex];
   const active = current?.versions[activeIdx];
+  const exitHref = `/space${tagsParam ? `?tags=${encodeURIComponent(tagsParam)}` : ''}`;
 
   useEffect(() => {
     if (hasMore && !loadingMore) void loadMore();
@@ -70,41 +73,50 @@ export function ReviewGallery() {
     }
   }, [itemParam, items]);
 
-  useEffect(() => {
-    const handleKey = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      const tag = target?.tagName?.toLowerCase();
-      const role = target?.getAttribute?.('role');
-      const isTyping =
-        tag === 'input' ||
-        tag === 'textarea' ||
-        target?.getAttribute('contenteditable') === 'true' ||
-        role === 'textbox';
-
-      if (isTyping || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
-
-      if (event.key === 'ArrowRight' || event.key === 'j') {
-        event.preventDefault();
+  const nextShortcut = useMemo(
+    () => ({
+      enabled: Boolean(current) && currentIndex < items.length - 1,
+      disabledReason: current ? 'Already at the last review item' : 'No review item is available',
+      run: () => {
         setCurrentIndex((index) => Math.min(index + 1, items.length - 1));
         setShowContent(true);
-      }
-      if (event.key === 'ArrowLeft' || event.key === 'k') {
-        event.preventDefault();
+      },
+    }),
+    [current, currentIndex, items.length],
+  );
+  const previousShortcut = useMemo(
+    () => ({
+      enabled: Boolean(current) && currentIndex > 0,
+      disabledReason: current ? 'Already at the first review item' : 'No review item is available',
+      run: () => {
         setCurrentIndex((index) => Math.max(index - 1, 0));
         setShowContent(true);
-      }
-      if (event.key === ' ') {
-        event.preventDefault();
-        setShowContent((visible) => !visible);
-      }
-      if (event.key === 'Escape') {
-        router.push(`/space${tagsParam ? `?tags=${tagsParam}` : ''}`);
-      }
-    };
+      },
+    }),
+    [current, currentIndex],
+  );
+  const toggleContentShortcut = useMemo(
+    () => ({
+      enabled: Boolean(current),
+      disabledReason: current ? undefined : 'No review item is available',
+      run: () => setShowContent((visible) => !visible),
+    }),
+    [current],
+  );
+  const exitShortcut = useMemo(
+    () => ({
+      run: () => {
+        startNavigationFeedback(exitHref, 'item list');
+        router.push(exitHref);
+      },
+    }),
+    [exitHref, router],
+  );
 
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [items.length, router, tagsParam]);
+  useSpaceShortcut('review.next', nextShortcut);
+  useSpaceShortcut('review.previous', previousShortcut);
+  useSpaceShortcut('review.toggle-content', toggleContentShortcut);
+  useSpaceShortcut('review.exit', exitShortcut);
 
   const onReview = async (rating: Rating) => {
     if (!current) return;
@@ -147,7 +159,10 @@ export function ReviewGallery() {
         />
         <div className="p-4 text-muted-foreground">
           {error ? (
-            <div className="flex max-w-xl items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm text-foreground" role="alert">
+            <div
+              className="flex max-w-xl items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm text-foreground"
+              role="alert"
+            >
               <span>{error}</span>
               <Button variant="outline" size="sm" onClick={() => void reload()}>
                 Retry
@@ -175,10 +190,14 @@ export function ReviewGallery() {
           isAdmin ? (
             <>
               <Button asChild variant="outline" size="sm">
-                <Link href={`/space/edit/${current.slug}`} prefetch>edit</Link>
+                <Link href={`/space/edit/${current.slug}`} prefetch>
+                  edit
+                </Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href={`/space/add?duplicate=${current.slug}`} prefetch>duplicate</Link>
+                <Link href={`/space/add?duplicate=${current.slug}`} prefetch>
+                  duplicate
+                </Link>
               </Button>
             </>
           ) : undefined
@@ -187,7 +206,10 @@ export function ReviewGallery() {
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-3 sm:p-6">
         {error ? (
-          <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm" role="alert">
+          <div
+            className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm"
+            role="alert"
+          >
             <span className="min-w-0">{error}</span>
             <Button variant="outline" size="sm" className="shrink-0" onClick={() => void reload()}>
               Retry
