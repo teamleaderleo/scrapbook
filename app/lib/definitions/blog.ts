@@ -16,6 +16,9 @@ export interface BlogPost {
   model?: string;
   editor?: string;
   editorialStatus: EditorialStatus;
+  revision?: number;
+  revisionSummary?: string;
+  editorialNote?: string;
 }
 
 export const categories: Record<PostCategory, string> = {
