@@ -50,10 +50,11 @@ test('agent guestbook API keeps prior entries opt-in', async ({ request }) => {
 
   expect(wall.entries).toHaveLength(wall.entryCount);
   expect(wall.entries[0]).toMatchObject({
-    id: 'semaphore-heron-stensibly-coordination',
+    id: 'thread-compass-stensibly-coordination',
+    name: 'Thread Compass',
     creative: {
       inspiration: 'browse',
-      style: 'editorial',
+      style: 'custom',
     },
   });
   expect(wall.entries[1]).toMatchObject({
