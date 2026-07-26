@@ -40,6 +40,10 @@ Use these prefixes for prose, repository maintenance, investigations, and planni
 4. Push a visual branch when a live browser review will change the decision.
 5. Merge accepted work to `main` for the production deployment.
 
+## Retrying a blocked production deployment
+
+When a `main` deployment hits the rolling build limit, wait until enough earlier builds leave the 3,600-second window, then trigger one deliberate retry. Avoid repeated rapid retries because every created deployment consumes quota even when Vercel cancels it before building.
+
 Vercel's Ignored Build Step runs after a deployment has already been created. Cancelled builds from that mechanism still count toward deployment quotas and concurrent build slots, so branch-level `git.deploymentEnabled` rules are the useful control for this repository.
 
 ## Sources
