@@ -6,6 +6,7 @@ export type SpaceShortcutId =
   | 'help.open'
   | 'help.close'
   | 'search.toggle'
+  | 'sidebar.toggle'
   | 'editor.toggle'
   | 'navigation.add'
   | 'navigation.toggle-view'
@@ -96,6 +97,16 @@ export const SPACE_SHORTCUTS: readonly SpaceShortcutDefinition[] = [
     category: 'General',
     description: 'Open or close item search',
     priority: 90,
+    repeat: 'ignore',
+    editable: 'ignore',
+  },
+  {
+    id: 'sidebar.toggle',
+    keys: [{ key: 'b', code: 'KeyB', keyLabel: 'B', modifiers: { mod: true } }],
+    scope: 'global',
+    category: 'General',
+    description: 'Open or close the navigation sidebar',
+    priority: 85,
     repeat: 'ignore',
     editable: 'ignore',
   },
