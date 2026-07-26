@@ -29,6 +29,13 @@ type BlockOperation = {
   newLine: number | null;
 };
 
+type ChangedBlockPair = {
+  oldBlock?: BlockOperation;
+  newBlock?: BlockOperation;
+};
+
+const MINIMUM_PAIR_SIMILARITY = 0.22;
+
 function cleanMarkdown(value: string) {
   return value
     .replace(/^#{1,6}\s+/gm, '')
@@ -66,6 +73,31 @@ function coalesceSpans(spans: RedlineSpan[]) {
 
 function tokenise(value: string) {
   return value.match(/\s+|[^\s]+/g) ?? [];
+}
+
+function comparisonWords(value: string) {
+  return cleanMarkdown(value).toLocaleLowerCase('en-GB').match(/[\p{L}\p{N}]+/gu) ?? [];
+}
+
+function sequenceSimilarity(before: string, after: string) {
+  const oldWords = comparisonWords(before);
+  const newWords = comparisonWords(after);
+  if (oldWords.length === 0 || newWords.length === 0) return 0;
+
+  const table = Array.from({ length: oldWords.length + 1 }, () =>
+    new Uint16Array(newWords.length + 1),
+  );
+
+  for (let oldIndex = oldWords.length - 1; oldIndex >= 0; oldIndex -= 1) {
+    for (let newIndex = newWords.length - 1; newIndex >= 0; newIndex -= 1) {
+      table[oldIndex][newIndex] =
+        oldWords[oldIndex] === newWords[newIndex]
+          ? table[oldIndex + 1][newIndex + 1] + 1
+          : Math.max(table[oldIndex + 1][newIndex], table[oldIndex][newIndex + 1]);
+    }
+  }
+
+  return (2 * table[0][0]) / (oldWords.length + newWords.length);
 }
 
 export function diffWords(before: string, after: string): RedlineSpan[] {
@@ -175,6 +207,77 @@ function buildBlockOperations(before: string[], after: string[]): BlockOperation
   return operations;
 }
 
+function alignChangedBlocks(
+  removed: BlockOperation[],
+  added: BlockOperation[],
+): ChangedBlockPair[] {
+  const costs = Array.from({ length: removed.length + 1 }, () =>
+    new Float64Array(added.length + 1),
+  );
+  const decisions = Array.from({ length: removed.length + 1 }, () =>
+    new Uint8Array(added.length + 1),
+  );
+
+  for (let oldIndex = 1; oldIndex <= removed.length; oldIndex += 1) {
+    costs[oldIndex][0] = oldIndex;
+    decisions[oldIndex][0] = 1;
+  }
+  for (let newIndex = 1; newIndex <= added.length; newIndex += 1) {
+    costs[0][newIndex] = newIndex;
+    decisions[0][newIndex] = 2;
+  }
+
+  for (let oldIndex = 1; oldIndex <= removed.length; oldIndex += 1) {
+    for (let newIndex = 1; newIndex <= added.length; newIndex += 1) {
+      const deleteCost = costs[oldIndex - 1][newIndex] + 1;
+      const insertCost = costs[oldIndex][newIndex - 1] + 1;
+      const similarity = sequenceSimilarity(
+        removed[oldIndex - 1].text,
+        added[newIndex - 1].text,
+      );
+      const pairCost =
+        similarity >= MINIMUM_PAIR_SIMILARITY
+          ? costs[oldIndex - 1][newIndex - 1] + 1.5 - similarity
+          : Number.POSITIVE_INFINITY;
+
+      if (pairCost <= deleteCost && pairCost <= insertCost) {
+        costs[oldIndex][newIndex] = pairCost;
+        decisions[oldIndex][newIndex] = 3;
+      } else if (deleteCost <= insertCost) {
+        costs[oldIndex][newIndex] = deleteCost;
+        decisions[oldIndex][newIndex] = 1;
+      } else {
+        costs[oldIndex][newIndex] = insertCost;
+        decisions[oldIndex][newIndex] = 2;
+      }
+    }
+  }
+
+  const pairs: ChangedBlockPair[] = [];
+  let oldIndex = removed.length;
+  let newIndex = added.length;
+
+  while (oldIndex > 0 || newIndex > 0) {
+    const decision = decisions[oldIndex][newIndex];
+    if (decision === 3) {
+      pairs.push({
+        oldBlock: removed[oldIndex - 1],
+        newBlock: added[newIndex - 1],
+      });
+      oldIndex -= 1;
+      newIndex -= 1;
+    } else if (decision === 1) {
+      pairs.push({ oldBlock: removed[oldIndex - 1] });
+      oldIndex -= 1;
+    } else {
+      pairs.push({ newBlock: added[newIndex - 1] });
+      newIndex -= 1;
+    }
+  }
+
+  return pairs.reverse();
+}
+
 function normaliseForMatch(value: string) {
   return cleanMarkdown(value).toLocaleLowerCase('en-GB');
 }
@@ -230,10 +333,7 @@ export function buildRedline(
       index += 1;
     }
 
-    const rowCount = Math.max(removed.length, added.length);
-    for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
-      const oldBlock = removed[rowIndex];
-      const newBlock = added[rowIndex];
+    for (const { oldBlock, newBlock } of alignChangedBlocks(removed, added)) {
       const before = oldBlock?.text;
       const after = newBlock?.text;
       const spans =
