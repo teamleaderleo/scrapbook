@@ -98,9 +98,9 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
   const showTooltip = (date: string, clientX: number, clientY: number) => {
     if (!finePointer) return;
     if (hideTimer.current !== null) window.clearTimeout(hideTimer.current);
+    placeTooltip(clientX, clientY);
     setTooltipDate(date);
     setTooltipVisible(true);
-    placeTooltip(clientX, clientY);
   };
 
   const hideTooltip = () => {
@@ -108,6 +108,8 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
     if (hideTimer.current !== null) window.clearTimeout(hideTimer.current);
     hideTimer.current = window.setTimeout(() => setTooltipDate(null), 120);
   };
+
+  const tooltipTransform = `translate3d(${pendingPosition.current.x}px, ${pendingPosition.current.y}px, 0)`;
 
   return (
     <section className="min-w-0 overflow-hidden rounded-[1.25rem] border border-border/70 bg-card p-4 text-card-foreground shadow-[0_16px_38px_rgba(35,31,26,0.1)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] sm:p-5">
@@ -167,7 +169,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
         <div
           ref={tooltipRef}
           className={`pointer-events-none fixed left-0 top-0 z-[90] whitespace-nowrap rounded-lg border border-border/70 bg-popover/88 px-2.5 py-1.5 font-mono text-[10px] font-semibold text-popover-foreground shadow-[0_8px_24px_rgba(20,20,24,0.2)] backdrop-blur-xl transition-opacity duration-100 ${tooltipVisible ? 'opacity-100' : 'opacity-0'}`}
-          style={{ transform: 'translate3d(12px, 12px, 0)' }}
+          style={{ transform: tooltipTransform }}
         >
           {tooltipLabel}
         </div>
