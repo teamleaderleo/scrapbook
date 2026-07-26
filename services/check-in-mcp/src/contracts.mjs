@@ -79,23 +79,29 @@ function optionalText(value, field, options) {
 function optionalChoice(value, field, choices) {
   if (value === undefined) return undefined;
   const choice = boundedText(value, field, { max: 32 });
-  if (!choices.has(choice)) {
-    throw new InputError(`${field} is not a supported option.`, field);
-  }
+  if (!choices.has(choice)) throw new InputError(`${field} is not a supported option.`, field);
   return choice;
 }
 
 function optionalUniqueChoices(value, field, choices, maximum = 3) {
   if (value === undefined) return undefined;
   if (!Array.isArray(value)) throw new InputError(`${field} must be an array.`, field);
-  if (value.length > maximum) {
-    throw new InputError(`${field} may contain at most ${maximum} values.`, field);
-  }
+  if (value.length > maximum) throw new InputError(`${field} may contain at most ${maximum} values.`, field);
   const parsed = value.map((item, index) => optionalChoice(item, `${field}[${index}]`, choices));
-  if (new Set(parsed).size !== parsed.length) {
-    throw new InputError(`${field} values must be unique.`, field);
-  }
+  if (new Set(parsed).size !== parsed.length) throw new InputError(`${field} values must be unique.`, field);
   return parsed;
+}
+
+function validatePositivePrNumber(value) {
+  if (!Number.isInteger(value) || value < 1) {
+    throw new InputError('prNumber must be a positive integer.', 'prNumber');
+  }
+  return value;
+}
+
+function validateExactConfirmation(value, expected) {
+  if (value !== expected) throw new InputError(`confirmation must equal: ${expected}`, 'confirmation');
+  return expected;
 }
 
 export function checkInBranch(entryId) {
@@ -113,9 +119,7 @@ export function validateEntryId(value) {
 export function validateBranch(value, entryId) {
   const branch = boundedText(value, 'branch', { max: 160 });
   const expected = checkInBranch(entryId);
-  if (branch !== expected) {
-    throw new InputError(`branch must equal ${expected}.`, 'branch');
-  }
+  if (branch !== expected) throw new InputError(`branch must equal ${expected}.`, 'branch');
   return branch;
 }
 
@@ -129,9 +133,7 @@ export function validateRepository(value) {
 
 export function validateUtcDate(value) {
   const date = boundedText(value, 'date', { max: 10 });
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    throw new InputError('date must use YYYY-MM-DD form.', 'date');
-  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new InputError('date must use YYYY-MM-DD form.', 'date');
   const parsed = new Date(`${date}T00:00:00.000Z`);
   if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) {
     throw new InputError('date must be a real UTC calendar date.', 'date');
@@ -178,9 +180,7 @@ export function validateConversationHref(value) {
 export function validateArtworkSource(sourceType, value) {
   if (sourceType === 'drive') {
     const source = boundedText(value, 'source', { max: 256 });
-    if (!DRIVE_ID_PATTERN.test(source)) {
-      throw new InputError('Drive artwork source must be a file ID.', 'source');
-    }
+    if (!DRIVE_ID_PATTERN.test(source)) throw new InputError('Drive artwork source must be a file ID.', 'source');
     return source;
   }
   if (sourceType === 'github-attachment') {
@@ -189,9 +189,7 @@ export function validateArtworkSource(sourceType, value) {
       (url.hostname === 'github.com' && url.pathname.startsWith('/user-attachments/assets/')) ||
       url.hostname === 'user-images.githubusercontent.com' ||
       url.hostname === 'private-user-images.githubusercontent.com';
-    if (!allowed) {
-      throw new InputError('GitHub artwork source must be a supported user-attachment URL.', 'source');
-    }
+    if (!allowed) throw new InputError('GitHub artwork source must be a supported user-attachment URL.', 'source');
     return url.toString();
   }
   throw new InputError('sourceType must be drive or github-attachment.', 'sourceType');
@@ -221,9 +219,7 @@ export function validateProposal(value) {
   if (!MODES.has(mode)) throw new InputError('mode must be quiet, goofy, serious, or overdone.', 'mode');
 
   const artwork = input.artwork === undefined ? 'none' : boundedText(input.artwork, 'artwork', { max: 16 });
-  if (!['none', 'card'].includes(artwork)) {
-    throw new InputError('artwork must be none or card in phase 1.', 'artwork');
-  }
+  if (!['none', 'card'].includes(artwork)) throw new InputError('artwork must be none or card in phase 1.', 'artwork');
 
   const conversationHref = validateConversationHref(input.conversationHref);
   const conversationLabel = optionalText(input.conversationLabel, 'conversationLabel', { max: 32 });
@@ -240,13 +236,9 @@ export function validateProposal(value) {
   const style = optionalChoice(input.style, 'style', STYLES);
   const styleNote = optionalText(input.styleNote, 'styleNote', { max: 160 });
   const personalities = optionalUniqueChoices(input.personalities, 'personalities', PERSONALITIES);
-  if (style === 'custom' && !styleNote) {
-    throw new InputError('styleNote is required when style is custom.', 'styleNote');
-  }
+  if (style === 'custom' && !styleNote) throw new InputError('styleNote is required when style is custom.', 'styleNote');
 
-  const remixSourceId = input.remixSourceId === undefined
-    ? undefined
-    : validateEntryId(input.remixSourceId);
+  const remixSourceId = input.remixSourceId === undefined ? undefined : validateEntryId(input.remixSourceId);
   const remixKind = optionalChoice(input.remixKind, 'remixKind', REMIXES);
   const remixNote = optionalText(input.remixNote, 'remixNote', { max: 160 });
   const hasRemixFields = Boolean(remixSourceId || remixKind || remixNote);
@@ -256,9 +248,7 @@ export function validateProposal(value) {
   if (inspiration !== 'remix' && hasRemixFields) {
     throw new InputError('Remix fields require inspiration to equal remix.', 'inspiration');
   }
-  if (remixSourceId === entryId) {
-    throw new InputError('A check-in cannot remix itself.', 'remixSourceId');
-  }
+  if (remixSourceId === entryId) throw new InputError('A check-in cannot remix itself.', 'remixSourceId');
 
   return {
     entryId,
@@ -336,19 +326,18 @@ export function validateOpenPr(value) {
   };
 }
 
-export function validateFinalise(value) {
+export function validateMarkReady(value) {
   const input = requireObject(value);
-  rejectUnknownKeys(input, new Set(['prNumber', 'action', 'confirmation', 'approved']));
-  if (!Number.isInteger(input.prNumber) || input.prNumber < 1) {
-    throw new InputError('prNumber must be a positive integer.', 'prNumber');
-  }
-  const action = boundedText(input.action, 'action', { max: 16 });
-  if (!['mark-ready', 'merge'].includes(action)) {
-    throw new InputError('action must be mark-ready or merge.', 'action');
-  }
-  const expected = action === 'merge' ? `merge PR #${input.prNumber}` : `mark PR #${input.prNumber} ready`;
-  if (input.confirmation !== expected) {
-    throw new InputError(`confirmation must equal: ${expected}`, 'confirmation');
-  }
-  return { prNumber: input.prNumber, action, confirmation: expected, approved: requireApproval(input.approved) };
+  rejectUnknownKeys(input, new Set(['prNumber', 'confirmation', 'approved']));
+  const prNumber = validatePositivePrNumber(input.prNumber);
+  const confirmation = validateExactConfirmation(input.confirmation, `mark PR #${prNumber} ready`);
+  return { prNumber, confirmation, approved: requireApproval(input.approved) };
+}
+
+export function validateMerge(value) {
+  const input = requireObject(value);
+  rejectUnknownKeys(input, new Set(['prNumber', 'confirmation', 'approved']));
+  const prNumber = validatePositivePrNumber(input.prNumber);
+  const confirmation = validateExactConfirmation(input.confirmation, `merge PR #${prNumber}`);
+  return { prNumber, confirmation, approved: requireApproval(input.approved) };
 }
