@@ -7,28 +7,76 @@
   filter: brightness(0.9);
 }
 
-.navigation-progress {
-  animation: navigation-progress 1.05s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  transform-origin: left center;
+.navigation-feedback {
+  opacity: 1;
+  transition: opacity 180ms ease-out;
 }
 
-@keyframes navigation-progress {
-  0% {
-    transform: translateX(-110%) scaleX(0.55);
-  }
+.navigation-feedback[data-navigation-state='fading'] {
+  opacity: 0;
+}
 
-  55% {
-    transform: translateX(105%) scaleX(1.15);
-  }
+.navigation-rail {
+  height: 2px;
+  overflow: hidden;
+  background: linear-gradient(90deg, rgb(0 0 0 / 0.04), rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.04));
+}
 
-  100% {
-    transform: translateX(270%) scaleX(0.65);
-  }
+.dark .navigation-rail {
+  background: linear-gradient(90deg, rgb(255 255 255 / 0.03), rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.03));
+}
+
+.navigation-progress {
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  transition: transform 140ms cubic-bezier(0.22, 0.72, 0.28, 1);
+  will-change: transform;
+  background: linear-gradient(90deg, #595161, #83788f 72%, #b3a8bd);
+  box-shadow:
+    0 0 8px rgb(111 104 120 / 0.42),
+    0 1px 0 rgb(255 255 255 / 0.32) inset;
+}
+
+.dark .navigation-progress {
+  background: linear-gradient(90deg, #aaa0b4, #d0c8d7 72%, #eee8f2);
+  box-shadow:
+    0 0 10px rgb(208 200 215 / 0.34),
+    0 1px 0 rgb(255 255 255 / 0.38) inset;
+}
+
+.navigation-status {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.65rem;
+  max-width: min(24rem, calc(100vw - 1.5rem));
+  border: 1px solid rgb(0 0 0 / 0.14);
+  border-radius: 0.55rem;
+  background: rgb(244 241 234 / 0.94);
+  padding: 0.42rem 0.65rem;
+  color: #343038;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  box-shadow: 0 8px 24px rgb(20 20 24 / 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.dark .navigation-status {
+  border-color: rgb(255 255 255 / 0.14);
+  background: rgb(24 25 29 / 0.94);
+  color: #eee9f1;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.24);
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .navigation-feedback,
   .navigation-progress {
-    width: 100%;
-    animation: none;
+    transition-duration: 1ms;
+  }
+
+  .navigation-progress {
+    will-change: auto;
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.25) inset;
   }
 }
