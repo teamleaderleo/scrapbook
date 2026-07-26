@@ -15,6 +15,7 @@ export default async function Page() {
   const activity = await getGitHubHomeData();
   const unit = activity.source === 'public-events' ? 'public actions' : 'contributions';
   const days = activity.days.slice(-28);
+  const yearTotal = activity.periodLabel === 'this year' ? activity.total : null;
 
   return (
     <ViewportPageShell
@@ -37,9 +38,10 @@ export default async function Page() {
             initial={{
               today: activity.today,
               weekTotal: activity.weekTotal,
-              yearTotal: activity.total,
+              yearTotal,
               days,
               unit,
+              generatedAt: activity.generatedAt,
             }}
           />
 
