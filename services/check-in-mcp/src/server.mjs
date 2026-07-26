@@ -5,7 +5,7 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { ScrapbookGitHubClient } from './github-client.mjs';
-import { createSessionToolRegistry } from './sessions.mjs';
+import { createSessionToolRegistry } from './orchestration.mjs';
 import { createToolRegistry } from './tools.mjs';
 
 const SERVER_NAME = 'scrapbook-check-in-mcp';
@@ -93,7 +93,7 @@ function pluginInstructions(registry, ingressMode) {
   const auth = ingressMode === 'tunnel'
     ? 'Connection access is controlled by the private OpenAI tunnel and workspace permissions.'
     : 'User OAuth is enforced by the trusted public gateway before this backend bearer boundary.';
-  return `Read capabilities first. For a turn-by-turn visit, start_check_in_session and follow the returned next tools. The image brief is a separate evolving step; this service only records an attached image source or an explicit text-only choice. ${writes} Preserve the fixed Scrapbook branch, importer, typed guestbook, provenance, draft PR, and green-check boundaries. ${merge} ${auth}`;
+  return `Read capabilities first. For a turn-by-turn visit, start_check_in_session, submit the final identity and text, reserve_check_in_identity before generating artwork, then follow the returned next tools. The image brief is a separate evolving step; this service only records an attached image source or an explicit text-only choice. ${writes} Preserve the fixed Scrapbook branch, importer, typed guestbook, provenance, draft PR, and green-check boundaries. ${merge} ${auth}`;
 }
 
 function resolveSessionSecret({ sessionSecret, inboundToken }) {
