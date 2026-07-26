@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import type { EditorialRevisionBundle } from '@/lib/editorial-revisions';
 import type { RedlineSpan } from '@/lib/editorial-diff';
@@ -56,7 +56,13 @@ function RedlineText({ spans }: { spans: RedlineSpan[] }) {
   );
 }
 
-export function RevisionReader({ bundle }: { bundle: EditorialRevisionBundle }) {
+export function RevisionReader({
+  bundle,
+  children,
+}: {
+  bundle: EditorialRevisionBundle;
+  children: ReactNode;
+}) {
   const latest = bundle.versions.at(-1)!;
   const [view, setView] = useState<ArticleView>('read');
   const [selectedRevision, setSelectedRevision] = useState(latest.revision);
@@ -104,8 +110,8 @@ export function RevisionReader({ bundle }: { bundle: EditorialRevisionBundle }) 
       </div>
 
       {view === 'read' ? (
-        <div id="article-panel-read" role="tabpanel">
-          <MarkdownCopy content={latest.content} />
+        <div id="article-panel-read" role="tabpanel" className={proseClassName}>
+          {children}
         </div>
       ) : null}
 
@@ -241,7 +247,11 @@ export function RevisionReader({ bundle }: { bundle: EditorialRevisionBundle }) 
             <span>Showing revision {selectedVersion.revision}</span>
             <span>{selectedVersion.latest ? 'Current article' : 'Stored snapshot'}</span>
           </div>
-          <MarkdownCopy content={selectedVersion.content} />
+          {selectedVersion.latest ? (
+            <div className={proseClassName}>{children}</div>
+          ) : (
+            <MarkdownCopy content={selectedVersion.content} />
+          )}
         </div>
       ) : null}
     </section>
