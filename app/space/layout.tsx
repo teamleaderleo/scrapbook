@@ -8,6 +8,7 @@ import { ItemsProvider } from '../lib/contexts/item-context';
 import { createClient } from '@/utils/supabase/server';
 import { SearchCommand } from '@/components/space/search-command';
 import { MonacoEditorPanel } from '@/components/space/monaco-editor-panel';
+import { SpaceMobileActions } from '@/components/space/space-mobile-actions';
 import { SpaceShortcutProvider } from '@/components/space/space-shortcut-provider';
 import { mapDatabaseItemsToItems } from '@/app/lib/utils/database';
 import { isAdminUser } from '@/app/lib/auth/admin';
@@ -160,10 +161,19 @@ async function SpaceDataShell({ children }: { children: React.ReactNode }) {
         initialHasMore={hasMore}
       >
         <SpaceShortcutProvider>
-          <div className="flex h-dvh min-h-0 w-full min-w-0 overflow-hidden bg-background text-foreground">
-            <SearchCommand />
-            <AppSidebar />
-            <div className="h-full min-h-0 min-w-0 flex-1 overflow-hidden">{children}</div>
+          <div
+            data-space-shell
+            className="flex h-dvh min-h-0 w-full min-w-0 overflow-hidden bg-background text-foreground"
+          >
+            <div
+              data-space-background
+              className="flex h-full min-h-0 min-w-0 flex-1 overflow-hidden"
+            >
+              <SearchCommand />
+              <AppSidebar />
+              <div className="h-full min-h-0 min-w-0 flex-1 overflow-hidden">{children}</div>
+              <SpaceMobileActions />
+            </div>
             <MonacoEditorPanel />
           </div>
         </SpaceShortcutProvider>
