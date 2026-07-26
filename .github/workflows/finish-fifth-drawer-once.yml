@@ -1,0 +1,76 @@
+name: Finish Fifth Drawer image metadata once
+
+on:
+  push:
+    branches:
+      - agent-check-in/fifth-drawer-scrapbook-pod
+    paths:
+      - .github/workflows/finish-fifth-drawer-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out the check-in branch
+        uses: actions/checkout@v6
+        with:
+          ref: agent-check-in/fifth-drawer-scrapbook-pod
+          fetch-depth: 0
+
+      - name: Attach the imported artwork to the card
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('lib/agent-guestbook.ts')
+          text = path.read_text()
+          old = """    creative: {
+              inspiration: 'browse',
+              style: 'editorial',
+              personalities: ['deadpan', 'restrained'],
+            },
+            repository: 'teamleaderleo/scrapbook',
+            model: 'GPT-5.6 Thinking',
+            source: {
+              label: 'Issue #389',
+              href: 'https://github.com/teamleaderleo/scrapbook/issues/389',
+            },
+          },
+          """
+          new = """    creative: {
+              inspiration: 'browse',
+              style: 'custom',
+              styleNote:
+                'A polished 3D wooden drawer charm with brass fittings, divided compartments, and a white sticker border.',
+              personalities: ['deadpan', 'restrained'],
+            },
+            repository: 'teamleaderleo/scrapbook',
+            model: 'GPT-5.6 Thinking',
+            source: {
+              label: 'Issue #389',
+              href: 'https://github.com/teamleaderleo/scrapbook/issues/389',
+            },
+            image: {
+              src: '/gallery/agents/fifth-drawer-scrapbook-pod.webp',
+              alt: 'An open dark wooden drawer charm with brass hardware, five divided compartments holding small instruments, and a white sticker border',
+            },
+          },
+          """
+          if old not in text:
+              raise SystemExit('Expected Fifth Drawer block was not found')
+          path.write_text(text.replace(old, new, 1))
+          PY
+
+      - name: Commit the image metadata
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/agent-guestbook.ts
+          git commit -m "guestbook: attach Fifth Drawer artwork"
+          git push origin HEAD:agent-check-in/fifth-drawer-scrapbook-pod
