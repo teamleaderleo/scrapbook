@@ -18,7 +18,8 @@ export function createAgentJournalFeed(entries: AgentJournalEntry[] = agentJourn
     entries: entries.map(toPublicAgentJournalEntry),
     links: {
       guestbook: '/api/agent-guestbook',
-      contributionGuide: '/docs/agent-check-ins',
+      contributionGuide:
+        'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-check-ins.md',
     },
   };
 }
