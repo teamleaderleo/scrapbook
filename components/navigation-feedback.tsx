@@ -1,19 +1,42 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import {
+  NAVIGATION_COMPLETION_HOLD_MS,
+  NAVIGATION_FADE_MS,
+  NAVIGATION_HISTORY_STORAGE_KEY,
+  NAVIGATION_MIN_VISIBLE_MS,
+  NAVIGATION_TICK_MS,
+  createNavigationDurationHistory,
+  estimateNavigationDuration,
+  idleNavigationProgressState,
+  parseNavigationDurationHistory,
+  recordNavigationDuration,
+  transitionNavigationProgress,
+  type NavigationKind,
+} from '@/lib/navigation-progress';
 
 const IDLE_PREFETCH_ROUTES = ['/', '/time', '/gallery', '/blog', '/atelier'];
 const NAVIGATION_START_EVENT = 'scrapbook:navigation-start';
-
-type PendingNavigation = {
-  href: string;
-  label: string;
-};
+const NAVIGATION_CANCEL_EVENT = 'scrapbook:navigation-cancel';
+const NAVIGATION_ERROR_EVENT = 'scrapbook:navigation-error';
 
 type NavigationStartDetail = {
   href: string;
   label?: string;
+};
+
+type NavigationErrorDetail = {
+  message?: string;
+};
+
+type ActiveNavigation = {
+  href: string;
+  label: string;
+  kind: NavigationKind;
+  startedAt: number;
+  minVisibleUntil: number;
 };
 
 export function startNavigationFeedback(href: string, label?: string) {
@@ -21,6 +44,20 @@ export function startNavigationFeedback(href: string, label?: string) {
   window.dispatchEvent(
     new CustomEvent<NavigationStartDetail>(NAVIGATION_START_EVENT, {
       detail: { href, label },
+    }),
+  );
+}
+
+export function cancelNavigationFeedback() {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new Event(NAVIGATION_CANCEL_EVENT));
+}
+
+export function failNavigationFeedback(message?: string) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(
+    new CustomEvent<NavigationErrorDetail>(NAVIGATION_ERROR_EVENT, {
+      detail: { message },
     }),
   );
 }
@@ -40,23 +77,155 @@ function internalDestination(anchor: HTMLAnchorElement) {
   return `${url.pathname}${url.search}`;
 }
 
+function normaliseDestination(href: string) {
+  try {
+    const url = new URL(href, window.location.href);
+    if (url.origin !== window.location.origin) return null;
+    if (!['http:', 'https:'].includes(url.protocol)) return null;
+    return `${url.pathname}${url.search}`;
+  } catch {
+    return null;
+  }
+}
+
 function destinationLabel(href: string) {
   const path = href.split('?')[0];
   if (path === '/') return 'home';
   return path.split('/').filter(Boolean).at(-1)?.replaceAll('-', ' ') ?? 'page';
 }
 
+function persistDurationHistory(history: ReturnType<typeof createNavigationDurationHistory>) {
+  try {
+    window.localStorage.setItem(NAVIGATION_HISTORY_STORAGE_KEY, JSON.stringify(history));
+  } catch {
+    // Navigation feedback stays in-memory when storage is unavailable.
+  }
+}
+
 export function NavigationFeedback() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [pending, setPending] = useState<PendingNavigation | null>(null);
+  const [state, dispatch] = useReducer(transitionNavigationProgress, idleNavigationProgressState);
+  const activeNavigation = useRef<ActiveNavigation | null>(null);
+  const historyRef = useRef(createNavigationDurationHistory());
   const prefetched = useRef(new Set<string>());
-  const routeKey = useMemo(() => `${pathname}?${searchParams.toString()}`, [pathname, searchParams]);
+  const completionTimer = useRef<number | null>(null);
+  const fadeTimer = useRef<number | null>(null);
+  const resetTimer = useRef<number | null>(null);
+  const routeKey = useMemo(() => {
+    const query = searchParams.toString();
+    return query ? `${pathname}?${query}` : pathname;
+  }, [pathname, searchParams]);
+  const previousRouteKey = useRef(routeKey);
 
   useEffect(() => {
-    setPending(null);
-  }, [routeKey]);
+    try {
+      historyRef.current = parseNavigationDurationHistory(
+        window.localStorage.getItem(NAVIGATION_HISTORY_STORAGE_KEY),
+      );
+    } catch {
+      historyRef.current = createNavigationDurationHistory();
+    }
+  }, []);
+
+  const clearPhaseTimers = useCallback(() => {
+    for (const timer of [completionTimer, fadeTimer, resetTimer]) {
+      if (timer.current !== null) window.clearTimeout(timer.current);
+      timer.current = null;
+    }
+  }, []);
+
+  const scheduleFade = useCallback(() => {
+    fadeTimer.current = window.setTimeout(() => {
+      dispatch({ type: 'fade' });
+    }, NAVIGATION_COMPLETION_HOLD_MS);
+    resetTimer.current = window.setTimeout(() => {
+      dispatch({ type: 'reset' });
+    }, NAVIGATION_COMPLETION_HOLD_MS + NAVIGATION_FADE_MS);
+  }, []);
+
+  const beginNavigation = useCallback(
+    (rawHref: string, rawLabel: string | undefined, kind: NavigationKind) => {
+      const href = normaliseDestination(rawHref);
+      if (!href) return;
+      const current = `${window.location.pathname}${window.location.search}`;
+      if (kind !== 'history' && href === current) return;
+
+      clearPhaseTimers();
+      const now = performance.now();
+      const label = rawLabel ?? destinationLabel(href);
+      activeNavigation.current = {
+        href,
+        label,
+        kind,
+        startedAt: now,
+        minVisibleUntil: now + NAVIGATION_MIN_VISIBLE_MS,
+      };
+      dispatch({
+        type: 'start',
+        href,
+        label,
+        kind,
+        estimateMs: estimateNavigationDuration(historyRef.current, href),
+        now,
+      });
+    },
+    [clearPhaseTimers],
+  );
+
+  const settleNavigation = useCallback(() => {
+    const active = activeNavigation.current;
+    if (!active) return;
+    activeNavigation.current = null;
+
+    const now = performance.now();
+    const durationMs = Math.max(0, now - active.startedAt);
+    historyRef.current = recordNavigationDuration(historyRef.current, active.href, durationMs);
+    persistDurationHistory(historyRef.current);
+
+    try {
+      performance.measure(`scrapbook:navigation:${active.kind}`, {
+        start: active.startedAt,
+        end: now,
+      });
+    } catch {
+      // Performance measurements are advisory and never affect navigation.
+    }
+
+    dispatch({ type: 'settle', now });
+    const remainingVisibleMs = Math.max(0, active.minVisibleUntil - now);
+    if (remainingVisibleMs > 0) {
+      completionTimer.current = window.setTimeout(() => {
+        dispatch({ type: 'complete', now: performance.now() });
+        scheduleFade();
+      }, remainingVisibleMs);
+      return;
+    }
+
+    scheduleFade();
+  }, [scheduleFade]);
+
+  const cancelNavigation = useCallback(() => {
+    activeNavigation.current = null;
+    clearPhaseTimers();
+    dispatch({ type: 'cancel' });
+    resetTimer.current = window.setTimeout(() => dispatch({ type: 'reset' }), NAVIGATION_FADE_MS);
+  }, [clearPhaseTimers]);
+
+  useEffect(() => {
+    if (previousRouteKey.current === routeKey) return;
+    previousRouteKey.current = routeKey;
+    settleNavigation();
+  }, [routeKey, settleNavigation]);
+
+  useEffect(() => {
+    if (state.phase !== 'running' && state.phase !== 'slow') return;
+    const interval = window.setInterval(() => {
+      dispatch({ type: 'tick', now: performance.now() });
+    }, NAVIGATION_TICK_MS);
+    return () => window.clearInterval(interval);
+  }, [state.phase]);
 
   useEffect(() => {
     const prefetch = (href: string) => {
@@ -73,7 +242,14 @@ export function NavigationFeedback() {
     };
 
     const startNavigation = (event: MouseEvent) => {
-      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
         return;
       }
 
@@ -86,24 +262,29 @@ export function NavigationFeedback() {
       if (href === current || anchor.hash) return;
 
       prefetch(href);
-      setPending({ href, label: destinationLabel(href) });
+      beginNavigation(href, destinationLabel(href), 'link');
     };
 
     const startProgrammaticNavigation = (event: Event) => {
       const detail = (event as CustomEvent<NavigationStartDetail>).detail;
       if (!detail?.href) return;
-      prefetch(detail.href);
-      setPending({
-        href: detail.href,
-        label: detail.label ?? destinationLabel(detail.href),
-      });
+      const href = normaliseDestination(detail.href);
+      if (!href) return;
+      prefetch(href);
+      beginNavigation(href, detail.label, 'programmatic');
     };
 
     const startHistoryNavigation = () => {
-      setPending({
-        href: `${window.location.pathname}${window.location.search}`,
-        label: 'previous page',
-      });
+      const href = `${window.location.pathname}${window.location.search}`;
+      beginNavigation(href, destinationLabel(href), 'history');
+    };
+
+    const cancelProgrammaticNavigation = () => cancelNavigation();
+    const failProgrammaticNavigation = (event: Event) => {
+      const detail = (event as CustomEvent<NavigationErrorDetail>).detail;
+      activeNavigation.current = null;
+      clearPhaseTimers();
+      dispatch({ type: 'fail', message: detail?.message });
     };
 
     document.addEventListener('pointerover', prefetchFromEvent, true);
@@ -111,6 +292,8 @@ export function NavigationFeedback() {
     document.addEventListener('pointerdown', prefetchFromEvent, true);
     document.addEventListener('click', startNavigation, true);
     window.addEventListener(NAVIGATION_START_EVENT, startProgrammaticNavigation);
+    window.addEventListener(NAVIGATION_CANCEL_EVENT, cancelProgrammaticNavigation);
+    window.addEventListener(NAVIGATION_ERROR_EVENT, failProgrammaticNavigation);
     window.addEventListener('popstate', startHistoryNavigation);
 
     const idlePrefetch = () => {
@@ -133,29 +316,46 @@ export function NavigationFeedback() {
       document.removeEventListener('pointerdown', prefetchFromEvent, true);
       document.removeEventListener('click', startNavigation, true);
       window.removeEventListener(NAVIGATION_START_EVENT, startProgrammaticNavigation);
+      window.removeEventListener(NAVIGATION_CANCEL_EVENT, cancelProgrammaticNavigation);
+      window.removeEventListener(NAVIGATION_ERROR_EVENT, failProgrammaticNavigation);
       window.removeEventListener('popstate', startHistoryNavigation);
       if (windowWithIdle.cancelIdleCallback) windowWithIdle.cancelIdleCallback(idleId);
       else window.clearTimeout(idleId);
     };
-  }, [pathname, router]);
+  }, [beginNavigation, cancelNavigation, clearPhaseTimers, pathname, router]);
 
-  useEffect(() => {
-    if (!pending) return;
-    const timeout = window.setTimeout(() => setPending(null), 15_000);
-    return () => window.clearTimeout(timeout);
-  }, [pending]);
+  useEffect(
+    () => () => {
+      clearPhaseTimers();
+    },
+    [clearPhaseTimers],
+  );
 
-  if (!pending) return null;
+  if (state.phase === 'idle') return null;
+
+  const showSlowStatus = state.phase === 'slow';
+  const showFailureStatus = state.phase === 'failed';
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-[100]" role="status" aria-live="polite">
-      <div className="h-0.5 overflow-hidden bg-black/10 dark:bg-white/10">
-        <div className="navigation-progress h-full w-2/5 bg-[#6f6878] dark:bg-[#d0c8d7]" />
+    <div
+      className="navigation-feedback pointer-events-none fixed inset-x-0 top-0 z-[100]"
+      data-navigation-feedback=""
+      data-navigation-kind={state.kind}
+      data-navigation-progress={state.progress.toFixed(3)}
+      data-navigation-state={state.phase}
+    >
+      <div className="navigation-rail" aria-hidden="true">
+        <div className="navigation-progress" style={{ transform: `scaleX(${state.progress})` }} />
       </div>
-      <div className="absolute right-3 top-3 flex items-center gap-2 rounded-lg border border-black/18 bg-[#f4f1ea] px-3 py-2 text-xs font-semibold text-[#242328] shadow-[0_10px_28px_rgba(20,20,24,0.16)] dark:border-white/16 dark:bg-[#18191d] dark:text-[#f0ece5] sm:right-4 sm:top-4">
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current motion-reduce:animate-none" />
-        <span>Opening {pending.label}</span>
-      </div>
+      {(showSlowStatus || showFailureStatus) && (
+        <div
+          className="navigation-status"
+          role="status"
+          aria-live={showFailureStatus ? 'assertive' : 'polite'}
+        >
+          {showFailureStatus ? state.failureMessage : `Still opening ${state.label}…`}
+        </div>
+      )}
     </div>
   );
 }
