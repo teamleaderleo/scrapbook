@@ -5,6 +5,18 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { createMcpHandler } from '../src/server.mjs';
 
+const READ_ONLY_TOOLS = [
+  'get_check_in_capabilities',
+  'start_check_in_session',
+  'submit_check_in_text',
+  'attach_check_in_artwork_source',
+  'skip_check_in_artwork',
+  'get_check_in_session',
+  'plan_check_in_session',
+  'plan_check_in',
+  'get_check_in_status',
+];
+
 class ReadOnlyFakeClient {
   async getFile(path, ref) {
     if (path === 'lib/agent-guestbook.ts' && ref === 'main') {
@@ -19,6 +31,7 @@ async function withServer(options, run) {
   const server = http.createServer(createMcpHandler({
     githubClient: new ReadOnlyFakeClient(),
     inboundToken: 'secret-token',
+    sessionSecret: 'server-test-session-secret-with-enough-bytes',
     logger: { info() {}, error() {} },
     ...options,
   }));
@@ -77,23 +90,21 @@ test('tunnel ingress uses workspace access and no backend bearer header', async 
     }
 
     const health = await fetch(`${url}/healthz`).then((item) => item.json());
-    assert.equal(health.version, '0.3.0');
+    assert.equal(health.version, '0.4.0');
     assert.equal(health.transport, 'streamable-http');
+    assert.equal(health.sessionMode, 'signed-stateless');
     assert.equal(health.authContract, 'workspace-tunnel');
   });
 });
 
-test('official SDK client negotiates, lists, and calls the read-only plugin', async () => {
+test('official SDK client negotiates, lists, and calls the guided read-only plugin', async () => {
   await withServer({ ingressMode: 'tunnel', inboundToken: undefined }, async (url) => {
     const client = new Client({ name: 'scrapbook-check-in-smoke', version: '1.0.0' });
     const transport = new StreamableHTTPClientTransport(new URL(`${url}/mcp`));
     try {
       await client.connect(transport);
       const listed = await client.listTools();
-      assert.deepEqual(
-        listed.tools.map((tool) => tool.name),
-        ['get_check_in_capabilities', 'plan_check_in', 'get_check_in_status'],
-      );
+      assert.deepEqual(listed.tools.map((tool) => tool.name), READ_ONLY_TOOLS);
       for (const tool of listed.tools) assert.ok(tool.outputSchema);
 
       const capabilities = await client.callTool({
@@ -103,26 +114,37 @@ test('official SDK client negotiates, lists, and calls the read-only plugin', as
       assert.equal(capabilities.isError, undefined);
       assert.equal(capabilities.structuredContent?.profile, 'read-only');
       assert.equal(capabilities.structuredContent?.mergeEnabled, false);
+      assert.equal(capabilities.structuredContent?.sessionFlow?.mode, 'signed-stateless');
+
+      const started = await client.callTool({
+        name: 'start_check_in_session',
+        arguments: {
+          repository: 'teamleaderleo/scrapbook',
+          sourceLabel: 'Issue #378',
+          sourceHref: 'https://github.com/teamleaderleo/scrapbook/issues/378',
+        },
+      });
+      assert.equal(started.isError, undefined);
+      assert.equal(started.structuredContent?.session?.stage, 'awaiting_text');
+      assert.equal(typeof started.structuredContent?.sessionToken, 'string');
     } finally {
       await client.close();
     }
   });
 });
 
-test('default bearer profile exposes the safe read-only OAuth surface', async () => {
+test('default bearer profile exposes the guided read-only OAuth surface', async () => {
   await withServer({}, async (url) => {
     const listed = await rpc(url, 'tools/list').then(readRpcPayload);
-    assert.deepEqual(
-      listed.result.tools.map((tool) => tool.name),
-      ['get_check_in_capabilities', 'plan_check_in', 'get_check_in_status'],
-    );
+    assert.deepEqual(listed.result.tools.map((tool) => tool.name), READ_ONLY_TOOLS);
     for (const tool of listed.result.tools) {
       assert.ok(tool.outputSchema);
       assert.equal(tool.securitySchemes[0].type, 'oauth2');
     }
 
     const health = await fetch(`${url}/healthz`).then((response) => response.json());
-    assert.equal(health.version, '0.3.0');
+    assert.equal(health.version, '0.4.0');
+    assert.equal(health.sessionMode, 'signed-stateless');
     assert.equal(health.ingressMode, 'bearer');
     assert.equal(health.authContract, 'oauth2-gateway');
     assert.equal(health.toolProfile, 'read-only');
@@ -147,9 +169,10 @@ test('tool errors omit structuredContent that would violate the success output s
   });
 });
 
-test('full profile advertises write and review tools while merge stays opt-in', async () => {
+test('full profile advertises guided publication, granular writes, and review while merge stays opt-in', async () => {
   await withServer({ toolProfile: 'full' }, async (url) => {
     const listed = await rpc(url, 'tools/list').then(readRpcPayload);
+    assert.ok(listed.result.tools.some((tool) => tool.name === 'advance_check_in_session'));
     assert.ok(listed.result.tools.some((tool) => tool.name === 'reserve_check_in'));
     assert.ok(listed.result.tools.some((tool) => tool.name === 'mark_check_in_ready'));
     assert.ok(!listed.result.tools.some((tool) => tool.name === 'merge_check_in_pr'));
