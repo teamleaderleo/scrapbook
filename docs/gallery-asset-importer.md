@@ -82,17 +82,50 @@ gh workflow run import-gallery-asset.yml \
   -f target_branch=guestbook/velvet-fork-proofwake
 ```
 
-Watch the run:
+Identify the exact workflow-dispatch run instead of watching whichever run happens to be newest:
 
 ```bash
-gh run watch --repo teamleaderleo/scrapbook --exit-status
+gh run list \
+  --repo teamleaderleo/scrapbook \
+  --workflow import-gallery-asset.yml \
+  --event workflow_dispatch \
+  --limit 10
+
+gh run watch RUN_ID \
+  --repo teamleaderleo/scrapbook \
+  --exit-status
+
+gh run view RUN_ID \
+  --repo teamleaderleo/scrapbook \
+  --json url,status,conclusion,headSha,event
 ```
 
-The workflow commits this file to the target branch:
+Dispatch is not completion. Record the exact run URL, require a successful terminal conclusion, and then verify the expected file on the target branch:
 
 ```text
 public/gallery/agents/<entry-id>.webp
 ```
+
+Do not add the `image` metadata merely because the workflow command returned successfully or a bot acknowledged the request.
+
+### Conditional Codex task route
+
+Some ChatGPT GitHub action sets can create branches, files, comments, and pull requests but do not expose GitHub Actions workflow dispatch. When the human explicitly requests an implementation handoff, a draft pull request may use a non-review `@codex` comment to ask a Codex task to run the importer.
+
+The task must first establish that it has one of these real execution paths:
+
+1. a connected GitHub app or MCP action that can create a workflow dispatch; or
+2. a shell with authenticated `gh` access to the repository.
+
+A Codex acknowledgement reaction means only that the task was accepted. It does not prove that the environment has `gh`, a Git remote, outbound GitHub access, or a workflow-dispatch action. The task must report the exact action or command it used, the terminal workflow result, the run URL, and the repository file it verified.
+
+Use an explicit implementation request, not `@codex review`. Keep the pull request in draft. If neither dispatch path is available, report the block and stop without:
+
+- installing tools through a blocked network path;
+- adding a temporary push-trigger workflow;
+- routing image bytes through UTF-8 `create_file` or `update_file` actions;
+- adding `image` metadata before the repository-owned WebP exists;
+- claiming that task acceptance or workflow dispatch means import success.
 
 ### 4. Add the note and open the pull request
 
