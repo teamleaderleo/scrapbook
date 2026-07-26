@@ -111,7 +111,13 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
   }, []);
 
   return (
-    <div className="relative grid min-w-0 gap-4 xl:grid-cols-[minmax(22rem,0.72fr)_minmax(32rem,1fr)] xl:items-stretch">
+    <div
+      className="relative grid min-w-0 items-stretch gap-3.5 sm:gap-4"
+      data-home-activity-dashboard
+      style={{
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 24rem), 1fr))',
+      }}
+    >
       <span className="sr-only" aria-live="polite">
         {updating ? 'Updating GitHub activity' : ''}
       </span>
