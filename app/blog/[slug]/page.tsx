@@ -4,6 +4,7 @@ import { categories } from '@/app/lib/definitions/blog';
 import { PostByline } from '@/components/blog/post-byline';
 import { RevisionReader } from '@/components/blog/revision-reader';
 import { getEditorialRevisions } from '@/lib/editorial-revisions';
+import { MDXRemote } from 'next-mdx-remote/rsc';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
@@ -106,7 +107,9 @@ async function BlogPostContent({ params }: { params: SlugParams }) {
             </div>
           </aside>
 
-          <RevisionReader bundle={revisions} />
+          <RevisionReader bundle={revisions}>
+            <MDXRemote source={post.content} />
+          </RevisionReader>
 
           <aside className="hidden lg:block">
             <div className="sticky top-24 border-t border-current/35 pt-3 text-xs leading-relaxed text-muted-foreground">
