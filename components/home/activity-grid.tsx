@@ -8,7 +8,7 @@ export type ActivityGridDay = {
 };
 
 function formatDay(date: string): string {
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat('en-GB', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -17,19 +17,19 @@ function formatDay(date: string): string {
 }
 
 function activityClass(count: number, maximum: number): string {
-  const base = 'ring-1 ring-inset ring-black/[0.05] dark:ring-white/[0.07]';
-  if (count === 0) return `${base} bg-[#c9c7c1] dark:bg-[#292a2f]`;
+  const base = 'ring-1 ring-inset ring-black/[0.08] dark:ring-white/[0.12]';
+  if (count === 0) return `${base} bg-[#b9b6ae] dark:bg-[#303138]`;
 
   const ratio = maximum === 0 ? 0 : count / maximum;
-  if (ratio > 0.8) return `${base} bg-[#faf8f2] dark:bg-[#eeeaf2]`;
-  if (ratio > 0.55) return `${base} bg-[#e8e2ec] dark:bg-[#c9c2d0]`;
-  if (ratio > 0.3) return `${base} bg-[#d4cddb] dark:bg-[#8e8798]`;
-  if (ratio > 0.12) return `${base} bg-[#bfb8c7] dark:bg-[#66606d]`;
-  return `${base} bg-[#a9a3af] dark:bg-[#4b4750]`;
+  if (ratio > 0.8) return `${base} bg-[#ece8de] dark:bg-[#eee9f1]`;
+  if (ratio > 0.55) return `${base} bg-[#d8d1dc] dark:bg-[#c8c0cf]`;
+  if (ratio > 0.3) return `${base} bg-[#beb5c6] dark:bg-[#958a9e]`;
+  if (ratio > 0.12) return `${base} bg-[#a79dae] dark:bg-[#706777]`;
+  return `${base} bg-[#8f8797] dark:bg-[#514b57]`;
 }
 
 function labelForDay(day: ActivityGridDay, unit: string) {
-  return `${formatDay(day.date)} · ${day.count.toLocaleString('en-US')} ${unit}`;
+  return `${formatDay(day.date)} · ${day.count.toLocaleString('en-GB')} ${unit}`;
 }
 
 export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: string }) {
@@ -81,7 +81,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
     hideTimerRef.current = window.setTimeout(() => {
       setTooltipVisible(false);
       hideTimerRef.current = null;
-    }, 140);
+    }, 90);
   }, [cancelHide]);
 
   const placeTooltip = useCallback((clientX: number, clientY: number) => {
@@ -89,8 +89,8 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
     positionFrameRef.current = window.requestAnimationFrame(() => {
       const tooltip = tooltipRef.current;
       if (!tooltip) return;
-      const width = tooltip.offsetWidth || 208;
-      const height = tooltip.offsetHeight || 40;
+      const width = tooltip.offsetWidth || 240;
+      const height = tooltip.offsetHeight || 34;
       const x = Math.min(window.innerWidth - width - 12, Math.max(12, clientX + 14));
       const y = Math.min(window.innerHeight - height - 12, Math.max(12, clientY + 14));
       tooltip.style.transform = `translate3d(${x}px, ${y}px, 0)`;
@@ -107,7 +107,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
 
   return (
     <section
-      className="relative h-full min-w-0 rounded-[1.1rem] border border-black/12 bg-[#dedcd6] p-3 shadow-[0_12px_28px_rgba(24,24,26,0.07)] dark:border-white/10 dark:bg-[#18191d] dark:shadow-none"
+      className="relative flex h-full min-w-0 flex-col rounded-[1.1rem] border border-black/16 bg-[#d6d3cb] p-3 shadow-[0_12px_28px_rgba(24,24,26,0.09)] dark:border-white/14 dark:bg-[#1b1c21] dark:shadow-[0_14px_34px_rgba(0,0,0,0.24)]"
       onPointerEnter={cancelHide}
       onPointerLeave={scheduleHide}
       onPointerMove={(event) => {
@@ -119,78 +119,75 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
       }}
     >
       <div className="flex items-center justify-between gap-3">
-        <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-black/55 dark:text-white/55">
+        <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-black/64 dark:text-white/68">
           28D activity
         </span>
-        <div className="flex items-center gap-1 font-mono text-[8px] uppercase tracking-[0.1em] text-black/48 dark:text-white/48" aria-hidden="true">
+        <div className="flex items-center gap-1 font-mono text-[8px] uppercase tracking-[0.1em] text-black/56 dark:text-white/58" aria-hidden="true">
           <span>less</span>
-          <span className="h-2 w-2 rounded-[2px] bg-[#a9a3af]" />
-          <span className="h-2 w-2 rounded-[2px] bg-[#d4cddb]" />
-          <span className="h-2 w-2 rounded-[2px] bg-[#faf8f2] ring-1 ring-inset ring-black/[0.05]" />
+          <span className="h-2 w-2 rounded-[2px] bg-[#8f8797]" />
+          <span className="h-2 w-2 rounded-[2px] bg-[#beb5c6]" />
+          <span className="h-2 w-2 rounded-[2px] bg-[#ece8de] ring-1 ring-inset ring-black/[0.08]" />
           <span>more</span>
         </div>
       </div>
 
-      <div className="mt-2.5 grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-stretch gap-3">
-        <div
-          className="grid grid-flow-col justify-self-start gap-0.5"
-          style={{
-            gridTemplateColumns: 'repeat(4, 1rem)',
-            gridTemplateRows: 'repeat(7, 1rem)',
-          }}
-          aria-label="Four weeks of GitHub activity"
-        >
-          {days.map((day, index) => {
-            const label = labelForDay(day, unit);
-            const isSelected = day.date === selected?.date;
-            const isLatest = index === days.length - 1;
+      <div
+        className="mt-3 grid min-h-0 flex-1 grid-cols-7 gap-1.5 sm:gap-2"
+        aria-label="Four weeks of GitHub activity"
+      >
+        {days.map((day, index) => {
+          const label = labelForDay(day, unit);
+          const isSelected = day.date === selected?.date;
+          const isLatest = index === days.length - 1;
 
-            return (
-              <button
-                key={day.date}
-                type="button"
-                data-activity-cell
-                className="group flex h-4 w-4 items-center justify-center rounded-[4px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/35 focus-visible:ring-offset-1 focus-visible:ring-offset-[#dedcd6] dark:focus-visible:ring-white/45 dark:focus-visible:ring-offset-[#18191d]"
-                aria-label={label}
-                aria-pressed={isSelected}
-                onPointerEnter={(event) => {
-                  setSelectedDate(day.date);
-                  if (finePointer) {
-                    cancelHide();
-                    setTooltipDate(day.date);
-                    setTooltipVisible(true);
-                    placeTooltip(event.clientX, event.clientY);
-                  }
-                }}
-                onFocus={(event) => {
-                  setSelectedDate(day.date);
-                  if (finePointer && event.currentTarget.matches(':focus-visible')) {
-                    const rect = event.currentTarget.getBoundingClientRect();
-                    cancelHide();
-                    setTooltipDate(day.date);
-                    setTooltipVisible(true);
-                    placeTooltip(rect.right, rect.top + rect.height / 2);
-                  }
-                }}
-                onClick={() => setSelectedDate(day.date)}
-              >
-                <span
-                  className={`h-2.5 w-2.5 rounded-[3px] transition-transform duration-150 group-hover:scale-125 group-focus-visible:scale-125 motion-reduce:transition-none ${activityClass(day.count, maximum)} ${isLatest ? 'outline outline-1 outline-offset-1 outline-black/25 dark:outline-white/30' : ''} ${isSelected ? 'scale-110 brightness-[1.04] dark:brightness-110' : ''}`}
-                />
-              </button>
-            );
-          })}
-        </div>
+          return (
+            <button
+              key={day.date}
+              type="button"
+              data-activity-cell
+              className="group relative flex min-h-8 min-w-0 items-center justify-center rounded-lg border border-black/8 bg-black/[0.025] p-1 transition-[transform,background-color] duration-150 hover:-translate-y-0.5 hover:bg-black/[0.055] focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/40 focus-visible:ring-offset-1 focus-visible:ring-offset-[#d6d3cb] dark:border-white/8 dark:bg-white/[0.025] dark:hover:bg-white/[0.07] dark:focus-visible:ring-white/55 dark:focus-visible:ring-offset-[#1b1c21]"
+              aria-label={label}
+              aria-pressed={isSelected}
+              onPointerEnter={(event) => {
+                setSelectedDate(day.date);
+                if (finePointer) {
+                  cancelHide();
+                  setTooltipDate(day.date);
+                  setTooltipVisible(true);
+                  placeTooltip(event.clientX, event.clientY);
+                }
+              }}
+              onFocus={(event) => {
+                setSelectedDate(day.date);
+                if (finePointer && event.currentTarget.matches(':focus-visible')) {
+                  const rect = event.currentTarget.getBoundingClientRect();
+                  cancelHide();
+                  setTooltipDate(day.date);
+                  setTooltipVisible(true);
+                  placeTooltip(rect.right, rect.top + rect.height / 2);
+                }
+              }}
+              onClick={() => setSelectedDate(day.date)}
+            >
+              <span
+                className={`aspect-square w-[72%] max-w-10 rounded-[22%] transition-[transform,filter] duration-150 group-hover:scale-110 group-focus-visible:scale-110 motion-reduce:transition-none ${activityClass(day.count, maximum)} ${isLatest ? 'outline outline-1 outline-offset-2 outline-black/35 dark:outline-white/42' : ''} ${isSelected ? 'scale-105 brightness-[1.04] dark:brightness-110' : ''}`}
+              />
+            </button>
+          );
+        })}
+      </div>
 
-        <div className="flex min-w-0 items-center rounded-lg border border-black/10 bg-[#f4f1ea] px-3 py-2 font-mono text-[9px] font-medium leading-relaxed text-black/62 dark:border-white/10 dark:bg-[#202126] dark:text-white/66" aria-live="polite">
-          {selectedLabel}
-        </div>
+      <div
+        className={`mt-2.5 min-h-7 overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border border-black/10 bg-[#e3dfd6] px-3 py-1.5 font-mono text-[9px] font-medium text-black/70 transition-opacity duration-100 dark:border-white/12 dark:bg-[#25262c] dark:text-white/76 ${finePointer && !tooltipVisible ? 'opacity-0' : 'opacity-100'}`}
+        aria-live="polite"
+      >
+        {selectedLabel}
       </div>
 
       <div
         ref={tooltipRef}
         data-activity-tooltip
-        className={`pointer-events-none fixed left-0 top-0 z-[90] max-w-[13rem] rounded-lg border border-black/18 bg-[#f4f1ea] px-2.5 py-1.5 font-mono text-[10px] font-semibold text-[#242328] shadow-[0_8px_24px_rgba(20,20,24,0.18)] transition-opacity duration-100 dark:border-white/16 dark:bg-[#202126] dark:text-[#f0ece5] ${finePointer && tooltipVisible && tooltipLabel ? 'visible opacity-100' : 'invisible opacity-0'}`}
+        className={`pointer-events-none fixed left-0 top-0 z-[90] max-w-none whitespace-nowrap rounded-lg border border-black/20 bg-[#ddd9d0] px-2.5 py-1.5 font-mono text-[10px] font-semibold text-[#222328] shadow-[0_8px_24px_rgba(20,20,24,0.2)] transition-opacity duration-75 dark:border-white/18 dark:bg-[#292a30] dark:text-[#f3efe8] ${finePointer && tooltipVisible && tooltipLabel ? 'visible opacity-100' : 'invisible opacity-0'}`}
         aria-hidden="true"
       >
         {tooltipLabel}
