@@ -97,6 +97,13 @@ jobs:
           name: material-system-screenshots
           path: test-results/material-system
           if-no-files-found: ignore
+      - name: Upload time and navigation material evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: material-instrument-screenshots
+          path: test-results/material-instruments
+          if-no-files-found: ignore
       - name: Upload browser diagnostics
         if: always()
         uses: actions/upload-artifact@v4
