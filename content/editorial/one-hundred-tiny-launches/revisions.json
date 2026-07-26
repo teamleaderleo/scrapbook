@@ -1,0 +1,32 @@
+{
+  "comments": [
+    {
+      "id": "opening-joke",
+      "label": "Kept joke",
+      "source": "self-review",
+      "anchor": "This would be impressive if anyone had thrown a bottle against a hull.",
+      "note": "The opening image survives in a shorter champagne line. It is the one piece of launch-pageantry that still earns a smile, though it remains open to another cut."
+    },
+    {
+      "id": "formulaic-declaration",
+      "label": "Formula",
+      "source": "editor",
+      "anchor": "The mistake is treating every tool as the same stage.",
+      "note": "This announces a conclusion instead of making it. Revision 2 names the useful split directly: CI handles mechanical checks; previews handle browser judgment."
+    },
+    {
+      "id": "metaphor-stack",
+      "label": "Too many props",
+      "source": "self-review",
+      "anchor": "Naming branches becomes a small editorial act.",
+      "note": "By this point the essay had already used launches, a copy desk, a stage, and backstage. The branch names were useful; the extra theatre was not."
+    },
+    {
+      "id": "grand-ending",
+      "label": "Grand ending",
+      "source": "editor",
+      "anchor": "A better pipeline says some work is a note, some is a proof, some is a rehearsal, and some is the issue that goes to press.",
+      "note": "The sentence restated the previous paragraph at a higher emotional volume. Revision 2 ends with the expected operational effect of the branch policy."
+    }
+  ]
+}
