@@ -4,6 +4,15 @@ import type { ProxyHealthPayload, ProxyHealthSample } from '@/app/lib/proxy-heal
 import { readProxyHealth } from '@/app/lib/proxy-health-store';
 import { UsageDashboard } from './usage-dashboard';
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+type UsageValues = {
+  used: number | null;
+  limit: number | null;
+  remaining: number | null;
+  resetAt: string | null;
+};
+
 function usageLimitBytes() {
   const gb = Number(process.env.PROXY_USAGE_30D_LIMIT_GB ?? '1024');
   const safeGb = Number.isFinite(gb) && gb > 0 ? gb : 1024;
@@ -30,28 +39,150 @@ function latestStatusSample(payload: ProxyHealthPayload): ProxyHealthSample | nu
   };
 }
 
-function formatTimestamp(value: string | null) {
-  if (!value) return 'Unavailable';
+function providerUsage(payload: ProxyHealthPayload, fallbackLimit: number): UsageValues {
+  const usage = (payload as {
+    provider?: {
+      usage?: {
+        used_bytes?: unknown;
+        limit_bytes?: unknown;
+        remaining_bytes?: unknown;
+        reset_at?: unknown;
+      };
+    };
+  }).provider?.usage;
+
+  const used = numberOrNull(usage?.used_bytes);
+  const limit = numberOrNull(usage?.limit_bytes) ?? fallbackLimit;
+  const reportedRemaining = numberOrNull(usage?.remaining_bytes);
+  const remaining = reportedRemaining ?? (used !== null && limit !== null ? Math.max(0, limit - used) : null);
+
+  return {
+    used,
+    limit,
+    remaining,
+    resetAt: typeof usage?.reset_at === 'string' ? usage.reset_at : null,
+  };
+}
+
+function formatBytes(value: number | null) {
+  if (value === null) return '—';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let size = value;
+  let unit = 0;
+  while (size >= 1024 && unit < units.length - 1) {
+    size /= 1024;
+    unit += 1;
+  }
+  return `${size.toFixed(unit === 0 ? 0 : 2)} ${units[unit]}`;
+}
+
+function formatPercent(value: number | null) {
+  if (value === null) return '—';
+  if (value > 0 && value < 1) return '<1%';
+  return `${Math.round(value)}%`;
+}
+
+function formatReset(value: string | null) {
+  if (!value) return '—';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Unavailable';
+  if (Number.isNaN(date.getTime())) return '—';
   return new Intl.DateTimeFormat('en-GB', {
-    dateStyle: 'medium',
-    timeStyle: 'medium',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
     timeZone: 'UTC',
   }).format(date);
 }
 
-function reportAge(checkedAt: string | null) {
-  if (!checkedAt) return { label: 'Unknown', stale: true };
-  const checked = new Date(checkedAt).getTime();
-  if (!Number.isFinite(checked)) return { label: 'Unknown', stale: true };
+function previousMonthlyReset(reset: Date) {
+  const year = reset.getUTCFullYear();
+  const month = reset.getUTCMonth();
+  const requestedDay = reset.getUTCDate();
+  const finalDayOfPreviousMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return new Date(Date.UTC(
+    year,
+    month - 1,
+    Math.min(requestedDay, finalDayOfPreviousMonth),
+    reset.getUTCHours(),
+    reset.getUTCMinutes(),
+    reset.getUTCSeconds(),
+    reset.getUTCMilliseconds(),
+  ));
+}
 
-  const ageMs = Math.max(0, Date.now() - checked);
-  const staleAfterMinutes = Number(process.env.PROXY_HEALTH_STALE_AFTER_MINUTES ?? '15');
-  const staleAfterMs = (Number.isFinite(staleAfterMinutes) && staleAfterMinutes > 0 ? staleAfterMinutes : 15) * 60_000;
-  const minutes = Math.floor(ageMs / 60_000);
-  const label = minutes < 1 ? 'Under a minute' : minutes < 60 ? `${minutes} minutes` : `${Math.floor(minutes / 60)} hours`;
-  return { label, stale: ageMs > staleAfterMs };
+function cyclePercent(resetAt: string | null) {
+  if (!resetAt) return null;
+  const reset = new Date(resetAt);
+  if (Number.isNaN(reset.getTime())) return null;
+  const start = previousMonthlyReset(reset);
+  const span = reset.getTime() - start.getTime();
+  if (span <= 0) return null;
+  return Math.min(100, Math.max(0, ((Date.now() - start.getTime()) / span) * 100));
+}
+
+function quotaPercent(usage: UsageValues) {
+  if (usage.used === null || usage.limit === null || usage.limit <= 0) return null;
+  return Math.min(100, Math.max(0, (usage.used / usage.limit) * 100));
+}
+
+function roomPerDay(usage: UsageValues) {
+  if (usage.remaining === null || !usage.resetAt) return null;
+  const reset = new Date(usage.resetAt).getTime();
+  if (!Number.isFinite(reset)) return null;
+  const days = Math.max(1, Math.ceil((reset - Date.now()) / DAY_MS));
+  return usage.remaining / days;
+}
+
+function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
+  return (
+    <div className="min-w-0 rounded-xl border bg-muted/35 px-3 py-3">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">{label}</div>
+      <div className="mt-1 truncate text-2xl font-semibold tracking-tight text-foreground">{value}</div>
+      <div className="mt-0.5 truncate text-xs text-muted-foreground">{detail}</div>
+    </div>
+  );
+}
+
+function ProxyUsageSummary({ payload, fallbackLimit }: { payload: ProxyHealthPayload; fallbackLimit: number }) {
+  const usage = providerUsage(payload, fallbackLimit);
+  const quota = quotaPercent(usage);
+  const cycle = cyclePercent(usage.resetAt);
+  const room = roomPerDay(usage);
+
+  return (
+    <section className="rounded-2xl border bg-background/90 p-3 shadow-sm" aria-label="Proxy quota and reset cycle">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Metric
+          label="Quota used"
+          value={formatPercent(quota)}
+          detail={`${formatBytes(usage.used)} of ${formatBytes(usage.limit)}`}
+        />
+        <Metric
+          label="Cycle elapsed"
+          value={formatPercent(cycle)}
+          detail="calendar month between provider resets"
+        />
+        <Metric
+          label="Room / day"
+          value={formatBytes(room)}
+          detail={`${formatBytes(usage.remaining)} remaining`}
+        />
+        <Metric
+          label="Reset"
+          value={formatReset(usage.resetAt)}
+          detail="provider timestamp · UTC"
+        />
+      </div>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2" aria-hidden="true">
+        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full bg-[#8d8299] transition-[width] duration-300 dark:bg-[#b8adc4]" style={{ width: `${quota ?? 0}%` }} />
+        </div>
+        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full bg-[#6f7d77] transition-[width] duration-300 dark:bg-[#9eb0a8]" style={{ width: `${cycle ?? 0}%` }} />
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function StateCard({ title, body, requestId }: { title: string; body: string; requestId?: string }) {
@@ -84,38 +215,14 @@ export async function UsageDashboardContainer() {
   const { report, samples } = result;
   const fallbackSample = latestStatusSample(report.payload);
   const visibleSamples = samples.length > 0 || !fallbackSample ? samples : [fallbackSample];
-  const age = reportAge(report.checkedAt);
+  const fallbackLimit = usageLimitBytes();
 
   return (
     <div className="space-y-3">
-      <section className="rounded-xl border bg-background/80 px-4 py-3 shadow-sm" aria-label="Proxy report freshness">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Report freshness</p>
-            <p className="mt-1 text-sm">
-              Age <span className="font-medium">{age.label}</span>
-            </p>
-          </div>
-          <span
-            className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
-              age.stale ? 'border-amber-500/45 bg-amber-500/12' : 'border-emerald-500/45 bg-emerald-500/12'
-            }`}
-          >
-            {age.stale ? 'Stale' : 'Current'}
-          </span>
-        </div>
-        <dl className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
-          <div>
-            <dt>Payload checked_at</dt>
-            <dd className="mt-0.5 font-mono text-foreground">{formatTimestamp(report.checkedAt)}</dd>
-          </div>
-          <div>
-            <dt>Row updated_at</dt>
-            <dd className="mt-0.5 font-mono text-foreground">{formatTimestamp(report.updatedAt)}</dd>
-          </div>
-        </dl>
-      </section>
-      <UsageDashboard samples={visibleSamples} status={report} limitBytes={usageLimitBytes()} />
+      <ProxyUsageSummary payload={report.payload} fallbackLimit={fallbackLimit} />
+      <div className="proxy-usage-dashboard">
+        <UsageDashboard samples={visibleSamples} status={report} limitBytes={fallbackLimit} />
+      </div>
     </div>
   );
 }
