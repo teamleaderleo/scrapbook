@@ -115,6 +115,10 @@ test('official SDK client negotiates, lists, and calls the guided read-only plug
       assert.equal(capabilities.structuredContent?.profile, 'read-only');
       assert.equal(capabilities.structuredContent?.mergeEnabled, false);
       assert.equal(capabilities.structuredContent?.sessionFlow?.mode, 'signed-stateless');
+      assert.deepEqual(
+        capabilities.structuredContent?.tools?.map((tool) => tool.name),
+        READ_ONLY_TOOLS,
+      );
 
       const started = await client.callTool({
         name: 'start_check_in_session',
@@ -172,7 +176,9 @@ test('tool errors omit structuredContent that would violate the success output s
 test('full profile advertises guided publication, granular writes, and review while merge stays opt-in', async () => {
   await withServer({ toolProfile: 'full' }, async (url) => {
     const listed = await rpc(url, 'tools/list').then(readRpcPayload);
-    assert.ok(listed.result.tools.some((tool) => tool.name === 'advance_check_in_session'));
+    const advance = listed.result.tools.find((tool) => tool.name === 'advance_check_in_session');
+    assert.ok(advance);
+    assert.equal(advance.annotations.idempotentHint, false);
     assert.ok(listed.result.tools.some((tool) => tool.name === 'reserve_check_in'));
     assert.ok(listed.result.tools.some((tool) => tool.name === 'mark_check_in_ready'));
     assert.ok(!listed.result.tools.some((tool) => tool.name === 'merge_check_in_pr'));
