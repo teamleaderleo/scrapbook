@@ -36,12 +36,15 @@ function result(source: GitHubHomeResult['activity']['source']): GitHubHomeResul
 }
 
 describe('createGitHubActivityHeaders', () => {
-  it('exposes freshness, retry, and REST rate-limit diagnostics', () => {
+  it('keeps live polling out of browser and CDN caches while exposing diagnostics', () => {
     const headers = createGitHubActivityHeaders(result('public-events'), 'request-123');
 
-    expect(headers.get('cache-control')).toBe(
-      'public, s-maxage=300, stale-while-revalidate=3600',
-    );
+    expect(headers.get('cache-control')).toBe('private, no-store, max-age=0');
+    expect(headers.get('cdn-cache-control')).toBe('no-store');
+    expect(headers.get('vercel-cdn-cache-control')).toBe('no-store');
+    expect(headers.get('x-client-refresh-seconds')).toBe('30');
+    expect(headers.get('x-upstream-cache-seconds')).toBe('30');
+    expect(headers.get('x-stale-fallback-seconds')).toBe('3600');
     expect(headers.get('x-activity-cache')).toBe('stale');
     expect(headers.get('x-activity-source')).toBe('public-events');
     expect(headers.get('x-activity-generated-at')).toBe('2026-07-27T01:00:00.000Z');
