@@ -11,7 +11,6 @@ import {
   CommandList,
 } from '@/components/ui/command';
 import {
-  DEFAULT_RECENT_ZONE_IDS,
   TIMEZONE_OPTIONS,
   UTC_OPTION,
   formatOffset,
@@ -33,7 +32,6 @@ interface TimezoneSelectorProps {
 export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelectorProps) {
   const [selectedZoneId, setSelectedZoneId] = useState(UTC_OPTION.id);
   const [previewZoneId, setPreviewZoneId] = useState<string | null>(null);
-  const [recentZoneIds, setRecentZoneIds] = useState(DEFAULT_RECENT_ZONE_IDS);
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [canApplyDST, setCanApplyDST] = useState(false);
@@ -120,19 +118,12 @@ export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelec
     });
   }, [selectedZoneId]);
 
-  const rememberZone = useCallback((option: TimezoneOption) => {
-    setSelectedZoneId(option.id);
-    setRecentZoneIds((current) =>
-      [option.id, ...current.filter((id) => id !== option.id)].slice(0, 3),
-    );
-  }, []);
-
   const selectZone = useCallback(
     (option: TimezoneOption) => {
-      rememberZone(option);
+      setSelectedZoneId(option.id);
       closePicker();
     },
-    [closePicker, rememberZone],
+    [closePicker],
   );
 
   useEffect(() => {
@@ -185,15 +176,13 @@ export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelec
     <section
       ref={rootRef}
       data-timezone-instrument
-      data-material-role="instrument-housing"
       aria-label="Selected time zone"
-      className="scroll-mt-3 rounded-2xl border border-border/65 bg-background/36 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-md sm:p-4 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(18rem,1.1fr)] lg:gap-4"
+      className="scroll-mt-3 rounded-2xl border border-border/70 bg-card p-3 text-card-foreground shadow-[0_14px_34px_rgba(20,20,24,0.1)] sm:p-4 lg:grid lg:grid-cols-[minmax(0,0.9fr)_minmax(18rem,1.1fr)] lg:gap-4 dark:shadow-[0_16px_38px_rgba(0,0,0,0.3)]"
     >
       <div
         data-selected-time-readout
-        data-material-role="instrument-readout"
         aria-live={isOpen ? 'off' : 'polite'}
-        className="rounded-xl border border-border/70 bg-background/58 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_12px_30px_rgba(20,20,24,0.08)]"
+        className="rounded-xl border border-border/70 bg-background p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_10px_24px_rgba(20,20,24,0.07)]"
       >
         <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
           {isPreviewing ? 'Preview time' : 'Selected time'}
@@ -218,35 +207,7 @@ export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelec
         </div>
       </div>
 
-      <div className="mt-4 min-w-0 lg:mt-0">
-        <div>
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Recent zones
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {recentZoneIds.map((zoneId) => {
-              const option = TIMEZONE_OPTIONS.find((candidate) => candidate.id === zoneId);
-              if (!option) return null;
-              const isSelected = option.id === selectedOption.id;
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => {
-                    rememberZone(option);
-                    if (isOpen) closePicker();
-                  }}
-                  aria-pressed={isSelected}
-                  className="min-h-10 rounded-full border border-border/65 bg-background/52 px-3 font-mono text-xs tabular-nums text-muted-foreground transition-colors hover:bg-background/72 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-pressed:border-foreground/25 aria-pressed:bg-accent aria-pressed:text-accent-foreground"
-                >
-                  {option.abbreviation}{' '}
-                  {formatOffset(getAdjustedOffset(option, canApplyDST))}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
+      <div className="mt-3 min-w-0 lg:mt-0">
         <button
           ref={triggerRef}
           data-timezone-trigger
@@ -254,7 +215,7 @@ export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelec
           aria-expanded={isOpen}
           aria-controls="timezone-picker-results"
           onClick={() => (isOpen ? closePicker() : openPicker())}
-          className="mt-3 flex min-h-11 w-full items-center gap-2 rounded-xl border border-border/70 bg-background/58 px-3 text-left text-sm font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] transition-colors hover:bg-background/74 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex min-h-11 w-full items-center gap-2 rounded-xl border border-border/70 bg-background px-3 text-left text-sm font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
           <span>{isOpen ? 'Hide zone search' : 'Search time zones'}</span>
@@ -267,13 +228,13 @@ export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelec
           <div
             id="timezone-picker-results"
             data-timezone-picker
-            className="mt-2 overflow-hidden rounded-xl border border-border/65 bg-popover/92 text-popover-foreground shadow-[0_18px_42px_rgba(20,20,24,0.16)] backdrop-blur-xl"
+            className="mt-2 overflow-hidden rounded-xl border border-border/70 bg-popover text-popover-foreground shadow-[0_18px_42px_rgba(20,20,24,0.18)]"
           >
             <Command
               loop
               value={previewZoneId ?? undefined}
               onValueChange={setPreviewZoneId}
-              className="rounded-xl"
+              className="rounded-xl bg-popover"
               onKeyDown={(event) => {
                 if (event.key === 'Escape') {
                   event.preventDefault();
