@@ -29,18 +29,14 @@ function ComparisonCard({
   time,
   offsetMinutes,
   detail,
-  prominent = false,
 }: {
   label: string;
   time: NormalizedTimeOfDay;
   offsetMinutes: number;
   detail?: string;
-  prominent?: boolean;
 }) {
   return (
-    <div
-      className={`min-w-0 rounded-xl border border-border/65 bg-background/50 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] ${prominent ? 'col-span-2 sm:col-span-1' : ''}`}
-    >
+    <div className="min-w-0 rounded-xl border border-border/65 bg-background/50 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
       <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
         {label}
       </p>
@@ -48,7 +44,9 @@ function ComparisonCard({
         {formatClockTime(time.hours, time.minutes)}
       </p>
       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-        <span className="font-mono tabular-nums">{formatClockTime12Hour(time.hours, time.minutes)}</span>
+        <span className="font-mono tabular-nums">
+          {formatClockTime12Hour(time.hours, time.minutes)}
+        </span>
         <span aria-hidden="true"> · </span>
         <span className="font-mono tabular-nums">{formatUtcOffset(offsetMinutes)}</span>
       </p>
@@ -175,13 +173,12 @@ export default function UTCTimeVisualizer() {
               Common reference zones
             </h2>
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <ComparisonCard
                 label="Local"
                 time={local}
                 offsetMinutes={localOffsetMinutes}
                 detail={timeOfDay}
-                prominent
               />
               <ComparisonCard label="UTC" time={utc} offsetMinutes={0} />
               <ComparisonCard
