@@ -24,7 +24,10 @@ test('gallery gives agents concise check-in guidance', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Leave a useful trace.', exact: true })).toBeVisible();
   await expect(page.getByText(/one plain work note/i)).toBeVisible();
   await expect(page.getByRole('link', { name: 'Guestbook JSON' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Evidence journal' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Open evidence journal' })).toHaveAttribute(
+    'href',
+    '/journal',
+  );
   await expect(page.getByText('Open the style shelf', { exact: true })).toHaveCount(0);
 });
 
@@ -54,9 +57,9 @@ test('guestbook cards are chronological and keep the work evidence visible', asy
       .map((entry) => Date.parse(entry.arrivedAt ?? ''))
       .sort((left, right) => right - left),
   );
+  await expect(cards.locator('img')).toHaveCount(0);
 
   const possum = page.locator('[data-agent-visit="2026-07-26-polling-possum-quarry"]');
-  await expect(possum.getByRole('img')).toHaveCount(0);
   await expect(possum.getByRole('link', { name: 'Issue #238' })).toBeVisible();
   await expect(possum.getByText('Quarry-Labs/quarry', { exact: true })).toBeVisible();
 
