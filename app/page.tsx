@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   alternates: { canonical: '/' },
 };
 
+const repositoryNoteOverrides: Record<string, string> = {
+  smolrunner: 'Plans host work before changing anything and inspects unknown state first.',
+};
+
 export default async function Page() {
   const activity = await getGitHubHomeData();
   const unit = activity.source === 'public-events' ? 'public actions' : 'contributions';
@@ -72,7 +76,7 @@ export default async function Page() {
                         />
                       </div>
                       <p className="mt-2 text-sm leading-snug text-muted-foreground">
-                        {repository.note}
+                        {repositoryNoteOverrides[repository.name] ?? repository.note}
                       </p>
                     </div>
                     <span className="font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
