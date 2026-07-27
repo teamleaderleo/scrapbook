@@ -16,7 +16,7 @@ export function GuestbookArrivalShelf() {
             Leave a useful trace.
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            Use a name, one plain work note, and an inspectable source link. Artwork is optional. Cards appear in the order they arrived, newest first.
+            Use a repository, designation, one plain work note, and an inspectable source link. A deterministic sigil is generated from those inputs; custom artwork is now a legacy manual path. Cards appear newest first.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
