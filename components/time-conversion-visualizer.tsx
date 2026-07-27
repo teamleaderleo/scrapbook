@@ -62,12 +62,14 @@ export default function UTCTimeVisualizer() {
   const [localTime, setLocalTime] = useState(0);
   const [localOffsetMinutes, setLocalOffsetMinutes] = useState(0);
   const [useDST, setUseDST] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     const now = new Date();
     setLocalTime(now.getHours() * 60 + now.getMinutes());
     setLocalOffsetMinutes(-now.getTimezoneOffset());
     setUseDST(isDSTActive('us'));
+    setIsReady(true);
   }, []);
 
   const local = normalizeTimeOfDay(localTime);
@@ -98,7 +100,10 @@ export default function UTCTimeVisualizer() {
             : 'Night';
 
   return (
-    <div className="relative mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-7xl items-start px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+    <div
+      className="relative mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-7xl items-start px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6"
+      data-time-converter-ready={isReady ? 'true' : 'false'}
+    >
       <div className="flex w-full min-w-0 flex-col gap-4 sm:gap-5">
         <CurrentTimeDisplay
           selectedMinutes={localTime}
