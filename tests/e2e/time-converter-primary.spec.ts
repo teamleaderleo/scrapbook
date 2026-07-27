@@ -1,4 +1,4 @@
-import { expect, test, type Locator } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 async function setNativeTimeValue(input: Locator, value: string) {
   await input.evaluate((element, nextValue) => {
@@ -10,7 +10,7 @@ async function setNativeTimeValue(input: Locator, value: string) {
   }, value);
 }
 
-async function waitForTimeConverter(page: Parameters<typeof test>[0] extends never ? never : any) {
+async function waitForTimeConverter(page: Page) {
   await expect(page.locator('[data-time-converter-ready="true"]')).toBeVisible();
 }
 
