@@ -16,7 +16,7 @@ const variants = [
   { theme: 'dark' as const, width: 1366, height: 768 },
 ];
 
-test('sigil lab exposes a deterministic population and visual evidence', async ({ page }, testInfo) => {
+test('sigil lab exposes layered generations and visual evidence', async ({ page }, testInfo) => {
   for (const variant of variants) {
     await page.emulateMedia({ colorScheme: variant.theme });
     await page.setViewportSize({ width: variant.width, height: variant.height });
@@ -40,7 +40,9 @@ test('sigil lab exposes a deterministic population and visual evidence', async (
     );
     expect(new Set(rerollFingerprints).size).toBe(rerollFingerprints.length);
 
-    await expect(page.locator('[data-agent-sigil]')).toHaveCount(33);
+    await expect(page.locator('[data-sigil-layer-example]')).toHaveCount(3);
+    await expect(page.locator('[data-sigil-generation-example]')).toHaveCount(2);
+    await expect(page.locator('[data-agent-sigil]')).toHaveCount(38);
     await expectNoHorizontalOverflow(page);
 
     await page.screenshot({
@@ -52,7 +54,28 @@ test('sigil lab exposes a deterministic population and visual evidence', async (
   }
 });
 
-test('small sigils remain measurable and accessible', async ({ page }) => {
+test('repository, designation, and description seeds stay isolated', async ({ page }) => {
+  await page.goto('/sigil-lab');
+
+  const examples = page.locator('[data-sigil-layer-example] [data-agent-sigil]');
+  await expect(examples).toHaveCount(3);
+  const layers = await examples.evaluateAll((elements) =>
+    elements.map((element) => ({
+      frame: element.getAttribute('data-agent-sigil-frame'),
+      glyph: element.getAttribute('data-agent-sigil-glyph'),
+      accents: element.getAttribute('data-agent-sigil-accents'),
+    })),
+  );
+
+  expect(layers[1]?.frame).not.toBe(layers[0]?.frame);
+  expect(layers[1]?.glyph).toBe(layers[0]?.glyph);
+  expect(layers[1]?.accents).toBe(layers[0]?.accents);
+  expect(layers[2]?.frame).toBe(layers[0]?.frame);
+  expect(layers[2]?.glyph).toBe(layers[0]?.glyph);
+  expect(layers[2]?.accents).not.toBe(layers[0]?.accents);
+});
+
+test('small layered sigils remain measurable and accessible', async ({ page }) => {
   await page.goto('/sigil-lab');
 
   const sigils = page.locator('[data-sigil-small-sizes] [data-agent-sigil]');
@@ -67,5 +90,5 @@ test('small sigils remain measurable and accessible', async ({ page }) => {
 
   expect(sizes.map((size) => Math.round(size.width))).toEqual([24, 32, 48, 72]);
   expect(sizes.every((size) => size.width === size.height)).toBe(true);
-  expect(sizes.every((size) => size.label?.includes('agent sigil'))).toBe(true);
+  expect(sizes.every((size) => size.label?.includes('agent identity sigil'))).toBe(true);
 });
