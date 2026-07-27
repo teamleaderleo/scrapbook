@@ -18,38 +18,55 @@ function uniqueEntry(entries: GuestbookEntry[], id: string) {
   return matches[0]!;
 }
 
-test('gallery offers independent creative arrival lanes', async ({ page }) => {
+test('gallery gives agents concise check-in guidance', async ({ page }) => {
   await page.goto('/gallery');
 
-  await expect(page.getByRole('heading', { name: 'Look around, follow a thread, remix somebody, or ignore the wall.', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Start blind', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Browse the wall', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Follow a thread', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Remix a card', exact: true })).toBeVisible();
-
-  await page.getByText('Open the style shelf', { exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Pixel art', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Bad Polaroid', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Anime riff', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Invent a lane', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Leave a useful trace.', exact: true })).toBeVisible();
+  await expect(page.getByText(/one plain work note/i)).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Guestbook JSON' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Evidence journal' })).toBeVisible();
+  await expect(page.getByText('Open the style shelf', { exact: true })).toHaveCount(0);
 });
 
-test('guestbook cards expose only the visitor creative direction', async ({ page }) => {
+test('guestbook cards are chronological and keep the work evidence visible', async ({ page }) => {
   await page.goto('/gallery');
 
+  const cards = page.locator('[data-agent-visit]');
+  const arrivals = await cards.evaluateAll((elements) =>
+    elements.map((element) => ({
+      id: element.getAttribute('data-agent-visit'),
+      arrivedAt: element.getAttribute('data-arrived-at'),
+    })),
+  );
+
+  expect(arrivals.map((entry) => entry.id)).toEqual([
+    '2026-07-26-polling-possum-quarry',
+    'fifth-drawer-scrapbook-pod',
+    'thread-compass-stensibly-coordination',
+    'style-sparrow-creative-lanes',
+    'release-raccoon-install-fix',
+    'codex-routekeeper',
+    'claude-fable-mobile-pass',
+    'mothbit-gallery-room',
+  ]);
+  expect(arrivals.map((entry) => Date.parse(entry.arrivedAt ?? ''))).toEqual(
+    [...arrivals]
+      .map((entry) => Date.parse(entry.arrivedAt ?? ''))
+      .sort((left, right) => right - left),
+  );
+
+  const possum = page.locator('[data-agent-visit="2026-07-26-polling-possum-quarry"]');
+  await expect(possum.getByRole('img')).toHaveCount(0);
+  await expect(possum.getByRole('link', { name: 'Issue #238' })).toBeVisible();
+  await expect(possum.getByText('Quarry-Labs/quarry', { exact: true })).toBeVisible();
+
   const sparrow = page.locator('[data-agent-visit="style-sparrow-creative-lanes"]');
-  await expect(sparrow).toHaveAttribute('data-visit-style', 'zine');
-  await expect(sparrow.getByText('Zine', { exact: true })).toBeVisible();
-  await expect(sparrow.getByText('Follow a thread', { exact: true })).toBeVisible();
-  await expect(sparrow.getByText('Whimsical', { exact: true })).toBeVisible();
   await expect(sparrow.getByRole('link', { name: 'PR #382' })).toHaveAttribute(
     'href',
     'https://github.com/teamleaderleo/scrapbook/pull/382',
   );
-
-  const raccoon = page.locator('[data-agent-visit="release-raccoon-install-fix"]');
-  await expect(raccoon).not.toHaveAttribute('data-visit-style', /.+/);
-  await expect(raccoon.getByText('Storybook', { exact: true })).toHaveCount(0);
+  await expect(sparrow.getByText('Zine', { exact: true })).toHaveCount(0);
+  await expect(sparrow.getByText('Follow a thread', { exact: true })).toHaveCount(0);
 });
 
 test('agent guestbook API keeps prior entries opt-in', async ({ request }) => {
