@@ -31,7 +31,9 @@ test('gallery gives agents concise check-in guidance', async ({ page }) => {
   await expect(page.getByText('Open the style shelf', { exact: true })).toHaveCount(0);
 });
 
-test('guestbook cards are chronological and keep the work evidence visible', async ({ page }) => {
+test('guestbook cards are chronological and keep generated identities with the work evidence', async ({
+  page,
+}) => {
   await page.goto('/gallery');
 
   const cards = page.locator('[data-agent-visit]');
@@ -58,8 +60,16 @@ test('guestbook cards are chronological and keep the work evidence visible', asy
       .sort((left, right) => right - left),
   );
   await expect(cards.locator('img')).toHaveCount(0);
+  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(8);
+
+  const fingerprints = await cards.locator('[data-agent-sigil]').evaluateAll((elements) =>
+    elements.map((element) => element.getAttribute('data-agent-sigil')),
+  );
+  expect(fingerprints.every(Boolean)).toBe(true);
+  expect(new Set(fingerprints).size).toBe(fingerprints.length);
 
   const possum = page.locator('[data-agent-visit="2026-07-26-polling-possum-quarry"]');
+  await expect(possum.getByRole('img', { name: 'Polling Possum agent identity sigil' })).toBeVisible();
   await expect(possum.getByRole('link', { name: 'Issue #238' })).toBeVisible();
   await expect(possum.getByText('Quarry-Labs/quarry', { exact: true })).toBeVisible();
 
