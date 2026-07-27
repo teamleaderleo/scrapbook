@@ -90,13 +90,6 @@ jobs:
           name: homepage-density-screenshots
           path: test-results/homepage-density
           if-no-files-found: ignore
-      - name: Upload homepage honeycomb screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: homepage-honeycomb-screenshots
-          path: test-results/homepage-honeycomb
-          if-no-files-found: ignore
       - name: Upload material study screenshots
         if: always()
         uses: actions/upload-artifact@v4
