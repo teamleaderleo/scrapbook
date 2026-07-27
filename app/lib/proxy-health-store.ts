@@ -124,6 +124,21 @@ function toNumber(value: unknown) {
   return null;
 }
 
+export function normalizeStoredProxyPayload(value: unknown): ProxyHealthPayload {
+  let current = value;
+
+  for (let depth = 0; depth < 3 && typeof current === 'string'; depth += 1) {
+    try {
+      current = JSON.parse(current);
+    } catch {
+      return {};
+    }
+  }
+
+  if (!current || typeof current !== 'object' || Array.isArray(current)) return {};
+  return current as ProxyHealthPayload;
+}
+
 export async function saveProxyHealth(payload: ProxyHealthPayload) {
   const host = normalizeHost(payload.host);
   const checkedAt = normalizeCheckedAt(payload.checked_at);
@@ -135,10 +150,11 @@ export async function saveProxyHealth(payload: ProxyHealthPayload) {
   const shanghaiLinodeMs = toNumber(payload.globalping?.linode_ms);
   const mode = typeof payload.mode === 'string' ? payload.mode.slice(0, 64) : null;
   const normalizedPayload: ProxyHealthPayload = { ...payload, host, checked_at: checkedAt };
+  const serializedPayload = JSON.stringify(normalizedPayload);
 
   await client`
     INSERT INTO proxy_health_status (host, payload, checked_at, updated_at)
-    VALUES (${host}, ${JSON.stringify(normalizedPayload)}::jsonb, ${checkedAt}, now())
+    VALUES (${host}, ${serializedPayload}::text::jsonb, ${checkedAt}, now())
     ON CONFLICT (host)
     DO UPDATE SET
       payload = EXCLUDED.payload,
@@ -169,7 +185,7 @@ export async function saveProxyHealth(payload: ProxyHealthPayload) {
       ${wgLatencyMs},
       ${shanghaiBandwagonMs},
       ${shanghaiLinodeMs},
-      ${JSON.stringify(normalizedPayload)}::jsonb
+      ${serializedPayload}::text::jsonb
     )
   `;
 
@@ -179,7 +195,7 @@ export async function saveProxyHealth(payload: ProxyHealthPayload) {
 export async function getLatestProxyHealth(host = 'bandwagon-la'): Promise<StoredProxyHealth | null> {
   const rows = await client<{
     host: string;
-    payload: ProxyHealthPayload;
+    payload: unknown;
     checked_at: Date | string | null;
     updated_at: Date | string;
   }[]>`
@@ -194,7 +210,7 @@ export async function getLatestProxyHealth(host = 'bandwagon-la'): Promise<Store
 
   return {
     host: row.host,
-    payload: row.payload,
+    payload: normalizeStoredProxyPayload(row.payload),
     checkedAt: row.checked_at ? new Date(row.checked_at).toISOString() : null,
     updatedAt: new Date(row.updated_at).toISOString(),
   };
