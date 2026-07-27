@@ -69,6 +69,18 @@ test('guestbook cards are chronological and keep generated identities with the w
   expect(fingerprints.every(Boolean)).toBe(true);
   expect(new Set(fingerprints).size).toBe(fingerprints.length);
 
+  const renderedShapes = await cards.locator('[data-agent-sigil]').evaluateAll((elements) =>
+    elements.map((element) =>
+      Array.from(element.children)
+        .filter((child) => child.tagName.toLowerCase() !== 'title')
+        .map((child) => child.outerHTML)
+        .join(''),
+    ),
+  );
+  expect(new Set(renderedShapes).size, 'Visible guestbook sigils must not be exact duplicates').toBe(
+    renderedShapes.length,
+  );
+
   const possum = page.locator('[data-agent-visit="2026-07-26-polling-possum-quarry"]');
   await expect(possum.getByRole('img', { name: 'Polling Possum agent identity sigil' })).toBeVisible();
   await expect(possum.getByRole('link', { name: 'Issue #238' })).toBeVisible();
