@@ -1,6 +1,8 @@
+import AgentIdentitySigil from '@/components/agent-identity-sigil';
 import { GuestbookArrivalShelf } from '@/components/gallery/guestbook-arrival-shelf';
 import { GalleryScene } from '@/components/gallery-scene';
 import ViewportPageShell from '@/components/viewport-page-shell';
+import { agentGuestbookSigilSelection } from '@/lib/agent-guestbook-sigils';
 import { agentVisits, type AgentVisit } from '@/lib/agent-guestbook';
 import type { Metadata } from 'next';
 
@@ -104,7 +106,7 @@ export default function GalleryPage() {
 
             <div className="min-w-0 rounded-xl border border-border/65 bg-background p-4">
               <p className="text-sm leading-relaxed text-muted-foreground">
-                The wall below is chronological. Every card keeps a direct link to the work it describes.
+                The wall below is chronological. Every card keeps a direct link to the work it describes and a deterministic identity sigil.
               </p>
               <a
                 href={contributionGuideUrl}
@@ -134,63 +136,76 @@ export default function GalleryPage() {
           </div>
 
           <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {orderedAgentVisits.map((visit) => (
-              <article
-                id={`visit-${visit.id}`}
-                key={visit.id}
-                data-agent-visit={visit.id}
-                data-arrived-at={arrivedAt(visit)}
-                className="flex min-w-0 scroll-mt-20 flex-col rounded-xl border border-border/65 bg-card p-4 text-card-foreground shadow-[0_8px_22px_rgba(24,24,26,0.05)] dark:shadow-none"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    {visit.mark}
-                  </span>
-                  <time
-                    dateTime={arrivedAt(visit)}
-                    className="text-right font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground"
-                  >
-                    {formatArrival(visit)}
-                  </time>
-                </div>
-
-                <h3 className="mt-5 text-lg font-semibold">{visit.name}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {clearerNotes[visit.id] ?? visit.note}
-                </p>
-
-                {visit.repository ? (
-                  <p className="mt-4 break-words font-mono text-[9px] uppercase tracking-[0.11em] text-muted-foreground/80">
-                    {visit.repository}
-                  </p>
-                ) : null}
-
-                {visit.source || visit.conversation ? (
-                  <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-5">
-                    {visit.source ? (
-                      <a
-                        href={visit.source.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={provenanceLinkClassName}
-                      >
-                        {visit.source.label}
-                      </a>
-                    ) : null}
-                    {visit.conversation ? (
-                      <a
-                        href={visit.conversation.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={provenanceLinkClassName}
-                      >
-                        {visit.conversation.label}
-                      </a>
-                    ) : null}
+            {orderedAgentVisits.map((visit) => {
+              const displayNote = clearerNotes[visit.id] ?? visit.note;
+              return (
+                <article
+                  id={`visit-${visit.id}`}
+                  key={visit.id}
+                  data-agent-visit={visit.id}
+                  data-arrived-at={arrivedAt(visit)}
+                  className="flex min-w-0 scroll-mt-20 flex-col rounded-xl border border-border/65 bg-card p-4 text-card-foreground shadow-[0_8px_22px_rgba(24,24,26,0.05)] dark:shadow-none"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-border/60 bg-background">
+                        <AgentIdentitySigil
+                          scope={visit.repository ?? 'teamleaderleo/scrapbook'}
+                          designation={visit.name}
+                          description={displayNote}
+                          selection={agentGuestbookSigilSelection(visit.id)}
+                          size={38}
+                          label={`${visit.name} agent identity sigil`}
+                        />
+                      </span>
+                      <span className="truncate font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        {visit.mark}
+                      </span>
+                    </div>
+                    <time
+                      dateTime={arrivedAt(visit)}
+                      className="shrink-0 text-right font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground"
+                    >
+                      {formatArrival(visit)}
+                    </time>
                   </div>
-                ) : null}
-              </article>
-            ))}
+
+                  <h3 className="mt-5 text-lg font-semibold">{visit.name}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{displayNote}</p>
+
+                  {visit.repository ? (
+                    <p className="mt-4 break-words font-mono text-[9px] uppercase tracking-[0.11em] text-muted-foreground/80">
+                      {visit.repository}
+                    </p>
+                  ) : null}
+
+                  {visit.source || visit.conversation ? (
+                    <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-5">
+                      {visit.source ? (
+                        <a
+                          href={visit.source.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={provenanceLinkClassName}
+                        >
+                          {visit.source.label}
+                        </a>
+                      ) : null}
+                      {visit.conversation ? (
+                        <a
+                          href={visit.conversation.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={provenanceLinkClassName}
+                        >
+                          {visit.conversation.label}
+                        </a>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </article>
+              );
+            })}
           </div>
         </section>
       </div>
