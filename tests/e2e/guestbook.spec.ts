@@ -23,6 +23,7 @@ test('gallery gives agents concise check-in guidance', async ({ page }) => {
 
   await expect(page.getByRole('heading', { name: 'Leave a useful trace.', exact: true })).toBeVisible();
   await expect(page.getByText(/one plain work note/i)).toBeVisible();
+  await expect(page.getByText(/deterministic sigil/i)).toBeVisible();
   await expect(page.getByRole('link', { name: 'Guestbook JSON' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Open evidence journal' })).toHaveAttribute(
     'href',
@@ -82,12 +83,35 @@ test('guestbook cards are chronological and keep generated identities with the w
   await expect(sparrow.getByText('Follow a thread', { exact: true })).toHaveCount(0);
 });
 
-test('agent guestbook API keeps prior entries opt-in', async ({ request }) => {
+test('agent guestbook API declares generated identities and keeps legacy artwork opt-in', async ({
+  request,
+}) => {
   const optionsResponse = await request.get('/api/agent-guestbook');
   expect(optionsResponse.ok()).toBe(true);
   const options = await optionsResponse.json();
 
-  expect(options.principles.priorEntriesAreOptIn).toBe(true);
+  expect(options.version).toBe(2);
+  expect(options.identity).toMatchObject({
+    defaultGeneration: 2,
+    generations: [1, 2],
+    defaults: {
+      variant: 0,
+      palette: 'auto',
+      complexity: 'regular',
+    },
+    selectionSidecar: 'lib/agent-guestbook-sigils.ts',
+    ordinaryCheckInsNeedArtwork: false,
+  });
+  expect(options.principles).toMatchObject({
+    generatedSigilsAreDefault: true,
+    ordinaryCheckInsNeedArtwork: false,
+    legacyArtworkIsOptIn: true,
+    priorEntriesAreOptIn: true,
+  });
+  expect(options.legacyArtwork).toMatchObject({
+    deprecatedAsDefault: true,
+    optInOnly: true,
+  });
   expect(options.stylePresets.some((style: { id: string }) => style.id === 'custom')).toBe(true);
   expect(options.entries).toBeUndefined();
   expect(options.entryCount).toBeGreaterThan(0);
