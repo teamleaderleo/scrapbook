@@ -2,10 +2,11 @@
 
 import { ActivityGrid, type ActivityGridDay } from '@/components/home/activity-grid';
 import { ActivityScoreboard } from '@/components/home/activity-scoreboard';
+import { GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS } from '@/lib/github-activity-policy';
 import { useEffect, useRef, useState } from 'react';
 
-const REFRESH_INTERVAL_MS = 60_000;
-const MAX_FAILURE_BACKOFF_MS = 15 * 60_000;
+const REFRESH_INTERVAL_MS = GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS * 1_000;
+const MAX_FAILURE_BACKOFF_MS = 5 * 60_000;
 
 type ActivitySnapshot = {
   today: number;
@@ -125,6 +126,7 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
         today={activity.today}
         weekTotal={activity.weekTotal}
         yearTotal={activity.yearTotal}
+        updating={updating}
       />
       <ActivityGrid days={activity.days} unit={activity.unit} />
     </div>
