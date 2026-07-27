@@ -1,8 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
 const publicRoutes = ['/', '/time', '/blog', '/gallery', '/atelier'];
-const idleDigitTransform =
-  'translate3d(0px, 0px, 0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1)';
 
 async function expectNoHorizontalOverflow(page: Page) {
   const dimensions = await page.evaluate(() => ({
@@ -49,7 +47,7 @@ async function expectWheelScrollsDocument(page: Page, route: string, selector: s
     .toBeGreaterThan(scrollState.top);
 }
 
-async function moveActivityDigits(page: Page) {
+async function hoverActivityDigits(page: Page) {
   await waitForClientHydration(page);
 
   const digits = page.locator('[data-activity-digit]');
@@ -283,32 +281,26 @@ test('gallery wheel scrolls over the canvas', async ({ page }) => {
   await expectWheelScrollsDocument(page, '/gallery', 'canvas');
 });
 
-test('homepage counter uses four independently reactive wind-lift digits', async ({ page }) => {
+test('homepage counter stays planted under pointer movement', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/');
-  const digits = await moveActivityDigits(page);
-
-  await expect
-    .poll(() => digits.first().evaluate((element) => (element as HTMLElement).style.transform))
-    .not.toBe(idleDigitTransform);
+  const digits = await hoverActivityDigits(page);
 
   const transforms = await digits.evaluateAll((elements) =>
     elements.map((element) => (element as HTMLElement).style.transform),
   );
-  expect(new Set(transforms).size).toBeGreaterThan(1);
-  expect(transforms[0]).not.toEqual(transforms[3]);
-  expect(transforms.some((transform) => /translate3d\([^,]+, -(?:[4-9]|\d{2})/.test(transform))).toBe(true);
+  expect(new Set(transforms)).toEqual(new Set(['']));
 });
 
-test('homepage counter respects reduced motion', async ({ page }) => {
+test('homepage counter remains planted with reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  const digits = await moveActivityDigits(page);
+  const digits = await hoverActivityDigits(page);
 
   const transforms = await digits.evaluateAll((elements) =>
     elements.map((element) => (element as HTMLElement).style.transform),
   );
-  expect(new Set(transforms)).toEqual(new Set([idleDigitTransform]));
+  expect(new Set(transforms)).toEqual(new Set(['']));
 });
 
 test('mobile gallery does not overflow horizontally', async ({ page }) => {
