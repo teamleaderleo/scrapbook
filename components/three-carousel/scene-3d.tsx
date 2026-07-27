@@ -1,58 +1,103 @@
 'use client';
 
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useEffect, useRef, useState, type MutableRefObject } from 'react';
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import * as THREE from 'three';
 
-const satellites: Array<[number, number, number, number]> = [
-  [-2.75, 1.25, -0.5, 0.3],
-  [2.55, 1.55, -0.2, 0.25],
-  [-2.25, -1.7, 0.45, 0.22],
-  [2.3, -1.4, -0.55, 0.34],
-  [0.1, 2.7, -1.1, 0.18],
-  [0.65, -2.55, 0.65, 0.23],
-];
-
-const nestedCubes = [
-  { size: 2.45, opacity: 0.7, rotation: [0, 0, 0] as [number, number, number] },
-  { size: 1.72, opacity: 0.5, rotation: [0.55, 0.72, 0.18] as [number, number, number] },
-  { size: 1.08, opacity: 0.38, rotation: [-0.42, 0.36, 0.7] as [number, number, number] },
-];
-
 type RotationTarget = { x: number; y: number };
+type Vector4 = [number, number, number, number];
 
-function NestedCube({
-  size,
-  opacity,
-  rotation,
-}: {
-  size: number;
-  opacity: number;
-  rotation: [number, number, number];
-}) {
+const vertices4d: Vector4[] = Array.from({ length: 16 }, (_, index) => [
+  index & 1 ? 1 : -1,
+  index & 2 ? 1 : -1,
+  index & 4 ? 1 : -1,
+  index & 8 ? 1 : -1,
+]);
+
+const tesseractEdges: Array<[number, number]> = [];
+for (let vertex = 0; vertex < 16; vertex += 1) {
+  for (let axis = 0; axis < 4; axis += 1) {
+    const neighbour = vertex ^ (1 << axis);
+    if (vertex < neighbour) tesseractEdges.push([vertex, neighbour]);
+  }
+}
+
+function rotatePlane(a: number, b: number, angle: number): [number, number] {
+  const cosine = Math.cos(angle);
+  const sine = Math.sin(angle);
+  return [a * cosine - b * sine, a * sine + b * cosine];
+}
+
+function rotateFourDimensions(vertex: Vector4, time: number): Vector4 {
+  let [x, y, z, w] = vertex;
+  [x, w] = rotatePlane(x, w, time * 0.31 + 0.35);
+  [y, w] = rotatePlane(y, w, time * 0.23 + 0.8);
+  [z, w] = rotatePlane(z, w, time * 0.17 + 0.2);
+  [x, y] = rotatePlane(x, y, time * 0.11);
+  return [x, y, z, w];
+}
+
+function projectToThreeDimensions([x, y, z, w]: Vector4): [number, number, number] {
+  const perspective = 3.6 / (4.4 - w);
+  const scale = 1.18;
+  return [x * perspective * scale, y * perspective * scale, z * perspective * scale];
+}
+
+function ProjectedTesseract({ visible, reduceMotion }: { visible: boolean; reduceMotion: boolean }) {
+  const lines = useRef<THREE.BufferGeometry>(null);
+  const points = useRef<THREE.BufferGeometry>(null);
+  const elapsed = useRef(0);
+  const linePositions = useMemo(() => new Float32Array(tesseractEdges.length * 2 * 3), []);
+  const pointPositions = useMemo(() => new Float32Array(vertices4d.length * 3), []);
+
+  useFrame((_state, delta) => {
+    if (!visible) return;
+    if (!reduceMotion) elapsed.current += Math.min(delta, 1 / 30);
+
+    const projected = vertices4d.map((vertex) =>
+      projectToThreeDimensions(rotateFourDimensions(vertex, elapsed.current)),
+    );
+
+    projected.forEach(([x, y, z], index) => {
+      const offset = index * 3;
+      pointPositions[offset] = x;
+      pointPositions[offset + 1] = y;
+      pointPositions[offset + 2] = z;
+    });
+
+    tesseractEdges.forEach(([from, to], index) => {
+      const offset = index * 6;
+      const start = projected[from];
+      const end = projected[to];
+      linePositions.set(start, offset);
+      linePositions.set(end, offset + 3);
+    });
+
+    const lineAttribute = lines.current?.getAttribute('position') as THREE.BufferAttribute | undefined;
+    const pointAttribute = points.current?.getAttribute('position') as THREE.BufferAttribute | undefined;
+    if (lineAttribute) lineAttribute.needsUpdate = true;
+    if (pointAttribute) pointAttribute.needsUpdate = true;
+  });
+
   return (
-    <group rotation={rotation}>
-      <mesh>
-        <boxGeometry args={[size, size, size]} />
-        <meshPhysicalMaterial
-          color="#b8b1c0"
-          transparent
-          opacity={0.035}
-          roughness={0.26}
-          metalness={0.04}
-          transmission={0.18}
-          thickness={0.45}
-        />
-      </mesh>
+    <group rotation={[0.24, -0.38, 0.08]}>
       <lineSegments>
-        <edgesGeometry args={[new THREE.BoxGeometry(size, size, size)]} />
-        <lineBasicMaterial color="#eee9f1" transparent opacity={opacity} />
+        <bufferGeometry ref={lines}>
+          <bufferAttribute attach="attributes-position" args={[linePositions, 3]} />
+        </bufferGeometry>
+        <lineBasicMaterial color="#eee9f1" transparent opacity={0.82} />
       </lineSegments>
+      <points>
+        <bufferGeometry ref={points}>
+          <bufferAttribute attach="attributes-position" args={[pointPositions, 3]} />
+        </bufferGeometry>
+        <pointsMaterial color="#b9afc3" size={0.075} sizeAttenuation transparent opacity={0.9} />
+      </points>
     </group>
   );
 }
 
-function AgentRoom({
+function HypercubeRoom({
   rotationTarget,
   dragging,
   visible,
@@ -64,8 +109,6 @@ function AgentRoom({
   reduceMotion: boolean;
 }) {
   const group = useRef<THREE.Group>(null);
-  const core = useRef<THREE.Group>(null);
-  const orbit = useRef<THREE.Group>(null);
   const idleRotation = useRef(0);
 
   useFrame((state, delta) => {
@@ -73,75 +116,30 @@ function AgentRoom({
     if (!currentGroup || !visible) return;
 
     const safeDelta = Math.min(delta, 1 / 30);
-    if (!dragging && !reduceMotion) idleRotation.current += safeDelta * 0.075;
+    if (!dragging && !reduceMotion) idleRotation.current += safeDelta * 0.045;
     const ease = 1 - Math.exp(-safeDelta * 8);
     const target = rotationTarget.current;
 
     currentGroup.rotation.x = THREE.MathUtils.lerp(
       currentGroup.rotation.x,
-      target.x + state.pointer.y * 0.045,
+      target.x + state.pointer.y * 0.035,
       ease,
     );
     currentGroup.rotation.y = THREE.MathUtils.lerp(
       currentGroup.rotation.y,
-      target.y + idleRotation.current + state.pointer.x * 0.04,
+      target.y + idleRotation.current + state.pointer.x * 0.035,
       ease,
     );
     currentGroup.rotation.z = THREE.MathUtils.lerp(
       currentGroup.rotation.z,
-      -state.pointer.x * 0.025,
+      -state.pointer.x * 0.018,
       ease * 0.65,
     );
-
-    if (!reduceMotion && core.current) {
-      core.current.rotation.x += safeDelta * 0.055;
-      core.current.rotation.y -= safeDelta * 0.08;
-      core.current.rotation.z += safeDelta * 0.035;
-    }
-    if (!reduceMotion && orbit.current) {
-      orbit.current.rotation.y += safeDelta * 0.045;
-      orbit.current.rotation.z -= safeDelta * 0.025;
-    }
   });
 
   return (
     <group ref={group}>
-      <group ref={core}>
-        {nestedCubes.map((cube) => (
-          <NestedCube key={cube.size} {...cube} />
-        ))}
-
-        <mesh rotation={[Math.PI / 4, Math.PI / 4, 0]}>
-          <icosahedronGeometry args={[0.48, 1]} />
-          <meshStandardMaterial color="#e8e2ec" roughness={0.2} metalness={0.16} />
-        </mesh>
-
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[1.42, 0.012, 8, 96]} />
-          <meshBasicMaterial color="#958aa3" transparent opacity={0.62} />
-        </mesh>
-        <mesh rotation={[0.42, 0.7, Math.PI / 2]}>
-          <torusGeometry args={[1.9, 0.009, 8, 96]} />
-          <meshBasicMaterial color="#d7d0dc" transparent opacity={0.32} />
-        </mesh>
-      </group>
-
-      <group ref={orbit}>
-        {satellites.map(([x, y, z, size], index) => (
-          <mesh
-            key={`${x}-${y}-${z}`}
-            position={[x, y, z]}
-            rotation={[index * 0.33, index * 0.52, index * 0.19]}
-          >
-            <boxGeometry args={[size, size, size]} />
-            <meshStandardMaterial
-              color={index % 2 === 0 ? '#8f8998' : '#d7d1dd'}
-              roughness={0.36}
-              metalness={0.12}
-            />
-          </mesh>
-        ))}
-      </group>
+      <ProjectedTesseract visible={visible} reduceMotion={reduceMotion} />
     </group>
   );
 }
@@ -172,9 +170,9 @@ export default function Scene3D() {
 
   return (
     <div
-      className={`h-full min-w-0 w-full touch-pan-y select-none overflow-hidden outline-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      className={`h-full w-full min-w-0 touch-pan-y select-none overflow-hidden outline-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
       role="img"
-      aria-label="Draggable nested-cube gallery orbit"
+      aria-label="Draggable projected four-dimensional hypercube"
       tabIndex={0}
       onPointerDown={(event) => {
         setIsDragging(true);
@@ -203,17 +201,13 @@ export default function Scene3D() {
       onKeyDown={(event) => {
         if (event.key === 'ArrowLeft') rotationTarget.current.y -= 0.18;
         if (event.key === 'ArrowRight') rotationTarget.current.y += 0.18;
-        if (event.key === 'ArrowUp') {
-          rotationTarget.current.x = Math.max(-0.72, rotationTarget.current.x - 0.14);
-        }
-        if (event.key === 'ArrowDown') {
-          rotationTarget.current.x = Math.min(0.72, rotationTarget.current.x + 0.14);
-        }
+        if (event.key === 'ArrowUp') rotationTarget.current.x = Math.max(-0.72, rotationTarget.current.x - 0.14);
+        if (event.key === 'ArrowDown') rotationTarget.current.x = Math.min(0.72, rotationTarget.current.x + 0.14);
       }}
     >
       <Canvas
-        className="block h-full min-w-0 w-full"
-        camera={{ position: [4.8, 3.4, 5.4], fov: 42 }}
+        className="block h-full w-full min-w-0"
+        camera={{ position: [4.7, 3.2, 5.5], fov: 40 }}
         dpr={[1, 1.35]}
         frameloop={isVisible ? 'always' : 'never'}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
@@ -221,10 +215,10 @@ export default function Scene3D() {
       >
         <color attach="background" args={['#15161a']} />
         <fog attach="fog" args={['#15161a', 7, 12]} />
-        <ambientLight intensity={1.18} />
-        <directionalLight position={[4, 6, 5]} intensity={2.2} color="#f1eaf5" />
-        <pointLight position={[-4, -2, 3]} intensity={18} distance={9} color="#756b83" />
-        <AgentRoom
+        <ambientLight intensity={0.9} />
+        <directionalLight position={[4, 6, 5]} intensity={1.6} color="#f1eaf5" />
+        <pointLight position={[-4, -2, 3]} intensity={9} distance={9} color="#756b83" />
+        <HypercubeRoom
           rotationTarget={rotationTarget}
           dragging={isDragging}
           visible={isVisible}
