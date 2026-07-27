@@ -112,7 +112,7 @@ function MenuLabel({ children }: { children: ReactNode }) {
 
 export default function SiteNav() {
   return (
-    <nav className="sticky top-0 z-50 min-w-0 border-b border-border/55 bg-background/72 text-foreground shadow-[0_1px_0_rgba(255,255,255,0.2),0_10px_30px_rgba(20,20,24,0.05)] backdrop-blur-2xl supports-[backdrop-filter]:bg-background/58 dark:shadow-[0_1px_0_rgba(255,255,255,0.035),0_12px_34px_rgba(0,0,0,0.2)]">
+    <nav className="sticky top-0 z-50 min-w-0 border-b border-border/70 bg-background text-foreground shadow-[0_1px_0_rgba(255,255,255,0.22),0_8px_24px_rgba(20,20,24,0.08)] dark:shadow-[0_1px_0_rgba(255,255,255,0.04),0_10px_28px_rgba(0,0,0,0.28)]">
       <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
         <div className="flex h-12 min-w-0 items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3 sm:gap-4">
