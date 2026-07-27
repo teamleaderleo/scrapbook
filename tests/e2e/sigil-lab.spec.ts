@@ -55,10 +55,7 @@ test('sigil lab exposes a deterministic population and visual evidence', async (
 test('small sigils remain measurable and accessible', async ({ page }) => {
   await page.goto('/sigil-lab');
 
-  const smallSizeSection = page.getByRole('heading', {
-    name: 'The silhouette must survive the list view',
-  }).locator('..');
-  const sigils = smallSizeSection.locator('[data-agent-sigil]');
+  const sigils = page.locator('[data-sigil-small-sizes] [data-agent-sigil]');
   await expect(sigils).toHaveCount(4);
 
   const sizes = await sigils.evaluateAll((elements) =>
