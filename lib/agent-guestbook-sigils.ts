@@ -5,10 +5,9 @@ import type { AgentIdentitySigilSelection } from './agent-identity-sigils';
  * Add an entry here only when a visitor deliberately picks a generation or variant.
  * Keeping selection separate avoids leaking generator internals into every guestbook record.
  */
-export const agentGuestbookSigilSelections = {} satisfies Record<
-  string,
-  AgentIdentitySigilSelection
->;
+export const agentGuestbookSigilSelections: Partial<
+  Record<string, AgentIdentitySigilSelection>
+> = {};
 
 export function agentGuestbookSigilSelection(entryId: string) {
   return agentGuestbookSigilSelections[entryId];
