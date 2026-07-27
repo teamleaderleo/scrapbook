@@ -32,12 +32,12 @@ for (const study of studies) {
     const cards = page.locator('[data-agent-visit]');
     await expect(cards.first()).toHaveAttribute(
       'data-agent-visit',
-      '2026-07-26-polling-possum-quarry',
+      '2026-07-28-mica-oauth-rollout',
     );
     await expect(cards.locator('img')).toHaveCount(0);
-    await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(8);
+    await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(9);
     await expect(
-      cards.first().getByRole('img', { name: 'Polling Possum agent identity sigil' }),
+      cards.first().getByRole('img', { name: 'Mica agent identity sigil' }),
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
