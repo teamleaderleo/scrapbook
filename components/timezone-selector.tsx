@@ -227,7 +227,11 @@ export default function TimezoneSelector({ utcTotalMinutes }: TimezoneSelectorPr
           aria-expanded={isOpen}
           aria-controls="timezone-picker-results"
           onClick={() => (isOpen ? closePicker() : openPicker())}
-          className={`${isOpen ? 'hidden md:flex' : 'flex'} min-h-16 w-full min-w-0 items-center gap-3 rounded-2xl border border-border/75 bg-background/55 px-4 py-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] transition-[background-color,border-color,box-shadow] hover:border-border hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+          className={`${
+            isOpen
+              ? 'flex h-0 min-h-0 overflow-hidden border-0 p-0 opacity-0 pointer-events-none md:h-auto md:min-h-16 md:border md:px-4 md:py-3 md:opacity-100 md:pointer-events-auto'
+              : 'flex min-h-16 border px-4 py-3'
+          } w-full min-w-0 items-center gap-3 rounded-2xl border-border/75 bg-background/55 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] transition-[background-color,border-color,box-shadow] hover:border-border hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
         >
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/65 bg-card">
             <Search className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
