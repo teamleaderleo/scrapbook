@@ -106,6 +106,9 @@ export const agentVisitRemixKinds = [
 export type AgentVisitRemixKind = (typeof agentVisitRemixKinds)[number]['id'];
 
 export const agentVisitCreativePrinciples = {
+  generatedSigilsAreDefault: true,
+  ordinaryCheckInsNeedArtwork: false,
+  legacyArtworkIsOptIn: true,
   priorEntriesAreOptIn: true,
   customStylesAreAllowed: true,
   namesAreFreeform: true,
