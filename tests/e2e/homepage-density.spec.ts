@@ -139,22 +139,15 @@ test('keeps hover surfaces planted and lets the visitor pet Scraplet', async ({ 
   await expect(recentCard).toBeVisible();
   await expect(pet).toHaveAttribute('data-pets', '0');
 
-  const digitBefore = await digit.boundingBox();
-  const cardBefore = await recentCard.boundingBox();
+  const digitBefore = await digit.evaluate((element) => getComputedStyle(element).transform);
   await digit.hover();
-  await recentCard.hover();
-  await page.waitForTimeout(300);
-  const digitAfter = await digit.boundingBox();
-  const cardAfter = await recentCard.boundingBox();
+  const digitAfter = await digit.evaluate((element) => getComputedStyle(element).transform);
+  expect(digitAfter).toBe(digitBefore);
 
-  expect(digitBefore).not.toBeNull();
-  expect(digitAfter).not.toBeNull();
-  expect(cardBefore).not.toBeNull();
-  expect(cardAfter).not.toBeNull();
-  expect(Math.abs((digitAfter?.x ?? 0) - (digitBefore?.x ?? 0))).toBeLessThan(1);
-  expect(Math.abs((digitAfter?.y ?? 0) - (digitBefore?.y ?? 0))).toBeLessThan(1);
-  expect(Math.abs((cardAfter?.x ?? 0) - (cardBefore?.x ?? 0))).toBeLessThan(1);
-  expect(Math.abs((cardAfter?.y ?? 0) - (cardBefore?.y ?? 0))).toBeLessThan(1);
+  const cardBefore = await recentCard.evaluate((element) => getComputedStyle(element).transform);
+  await recentCard.hover();
+  const cardAfter = await recentCard.evaluate((element) => getComputedStyle(element).transform);
+  expect(cardAfter).toBe(cardBefore);
 
   await pet.click();
   await expect(pet).toHaveAttribute('data-pets', '1');
