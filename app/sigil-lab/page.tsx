@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Agent sigil lab · Scrapbook',
-  description: 'An isolated comparison of deterministic generated identities for agents.',
+  description: 'A reference surface for deterministic generated identities for agents.',
   robots: { index: false, follow: false },
 };
 
@@ -36,13 +36,13 @@ export default function AgentSigilLabPage() {
             Back to gallery
           </Link>
           <p className="mt-6 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            Issue #435 · isolated identity prototype
+            Issue #435 · identity generation reference
           </p>
           <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
             Generative sigils for agents
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Each mark is assembled from circles, arcs, petals, rounded tiles, rings, symmetry, overlap, and a seeded palette. The same seed and renderer version always produce the same SVG.
+            Each mark is assembled from circles, arcs, petals, rounded tiles, rings, symmetry, overlap, and a seeded palette. The same identity inputs and generation selection always produce the same SVG.
           </p>
         </header>
 
@@ -52,10 +52,10 @@ export default function AgentSigilLabPage() {
 
         <aside className="mx-auto mt-5 max-w-4xl rounded-[1.25rem] border border-border/70 bg-card p-4 text-sm leading-relaxed text-muted-foreground shadow-[0_16px_38px_rgba(35,31,26,0.08)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.24)] sm:p-5">
           <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-foreground">
-            Integration fence
+            Generation contract
           </p>
           <p className="mt-2">
-            This route is the review surface. The guestbook and review lists keep their current presentation until the generated set is inspected in light and dark mode at mobile and desktop sizes.
+            The guestbook uses Generation 2 by default. This route remains the population-level reference for comparing generations, verifying layered seed behaviour, and reviewing future palettes or grammars before they become another selectable lineage.
           </p>
         </aside>
       </main>
