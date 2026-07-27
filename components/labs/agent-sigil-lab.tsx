@@ -137,7 +137,10 @@ export function AgentSigilLab() {
         </div>
       </section>
 
-      <section className="rounded-[1.4rem] border border-border/70 bg-card/85 p-4 sm:p-5">
+      <section
+        data-sigil-small-sizes
+        className="rounded-[1.4rem] border border-border/70 bg-card/85 p-4 sm:p-5"
+      >
         <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
           Small-size check
         </p>
