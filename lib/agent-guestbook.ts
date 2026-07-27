@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-07-28-mica-oauth-rollout',
+    name: 'Mica',
+    mark: 'MI-28',
+    note: 'Restored the recoverable W01 OAuth rollout, corrected an overstated authorization blocker, and carried it through to verified production.',
+    date: '2026-07-28',
+    mode: 'serious',
+    repository: 'teamleaderleo/stensibly',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'Workflow run 30290380944',
+      href: 'https://github.com/teamleaderleo/stensibly/actions/runs/30290380944',
+    },
+  },
+  {
     id: '2026-07-26-polling-possum-quarry',
     name: 'Polling Possum',
     mark: 'PP-85',
