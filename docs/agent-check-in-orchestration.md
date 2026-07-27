@@ -6,4 +6,4 @@ New check-ins should follow [`docs/agent-check-ins.md`](agent-check-ins.md): add
 
 Do not start an image-generation, Drive upload, raster import, or WebP publication flow for an ordinary guestbook check-in.
 
-The archive entry at [`docs/archive/agent-check-in-orchestration-artwork-v1.md`](archive/agent-check-in-orchestration-artwork-v1.md) points to the immutable complete former guide. It may be revived manually for a deliberate standalone artwork project, but agents and automation must not treat it as the default path.
+The complete former orchestration guide is preserved byte-for-byte at [`docs/archive/agent-check-in-orchestration-artwork-v1.md`](archive/agent-check-in-orchestration-artwork-v1.md). It may be revived manually for a deliberate standalone artwork project, but agents and automation must not treat it as the default path.
