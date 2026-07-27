@@ -10,9 +10,14 @@ async function setNativeTimeValue(input: Locator, value: string) {
   }, value);
 }
 
+async function waitForTimeConverter(page: Parameters<typeof test>[0] extends never ? never : any) {
+  await expect(page.locator('[data-time-converter-ready="true"]')).toBeVisible();
+}
+
 test.describe('time converter primary controls', () => {
   test('keeps the primary time field, scrubber, and local card synchronized', async ({ page }) => {
     await page.goto('/time');
+    await waitForTimeConverter(page);
 
     const timeField = page.getByLabel('Selected local time', { exact: true });
     const scrubber = page.getByRole('slider', { name: 'Selected local time scrubber' });
@@ -23,7 +28,7 @@ test.describe('time converter primary controls', () => {
     await expect(scrubber).toHaveValue(String(14 * 60 + 30));
     await expect(localCard).toContainText('14:30');
 
-    await page.getByRole('button', { name: /Morning 09:00/ }).click();
+    await page.getByRole('button', { name: /Morning/ }).click();
     await expect(timeField).toHaveValue('09:00');
     await expect(scrubber).toHaveValue(String(9 * 60));
     await expect(localCard).toContainText('09:00');
@@ -32,6 +37,7 @@ test.describe('time converter primary controls', () => {
   test('renders the zone picker as a substantial full-width input surface', async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 900 });
     await page.goto('/time');
+    await waitForTimeConverter(page);
 
     const trigger = page.locator('[data-timezone-trigger]');
     const triggerBox = await trigger.boundingBox();
