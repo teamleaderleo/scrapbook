@@ -18,6 +18,7 @@ type ActivitySnapshot = {
 };
 
 type LiveActivityResponse = {
+  source: 'public-profile' | 'public-events';
   today: number;
   weekTotal: number;
   yearTotal: number | null;
@@ -60,7 +61,10 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
         if (!mounted) return;
         consecutiveFailures.current = 0;
         nextAllowedAt.current = Date.now() + REFRESH_INTERVAL_MS;
-        setActivity({ ...next, unit: 'contributions' });
+        setActivity({
+          ...next,
+          unit: next.source === 'public-events' ? 'public actions' : 'contributions',
+        });
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') return;
         consecutiveFailures.current += 1;
