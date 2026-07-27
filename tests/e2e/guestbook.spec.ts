@@ -46,6 +46,7 @@ test('guestbook cards are chronological and keep generated identities with the w
   );
 
   expect(arrivals.map((entry) => entry.id)).toEqual([
+    '2026-07-28-mica-oauth-rollout',
     '2026-07-26-polling-possum-quarry',
     'fifth-drawer-scrapbook-pod',
     'thread-compass-stensibly-coordination',
@@ -61,7 +62,7 @@ test('guestbook cards are chronological and keep generated identities with the w
       .sort((left, right) => right - left),
   );
   await expect(cards.locator('img')).toHaveCount(0);
-  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(8);
+  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(9);
 
   const fingerprints = await cards.locator('[data-agent-sigil]').evaluateAll((elements) =>
     elements.map((element) => element.getAttribute('data-agent-sigil')),
@@ -80,6 +81,14 @@ test('guestbook cards are chronological and keep generated identities with the w
   expect(new Set(renderedShapes).size, 'Visible guestbook sigils must not be exact duplicates').toBe(
     renderedShapes.length,
   );
+
+  const mica = page.locator('[data-agent-visit="2026-07-28-mica-oauth-rollout"]');
+  await expect(mica.getByRole('img', { name: 'Mica agent identity sigil' })).toBeVisible();
+  await expect(mica.getByRole('link', { name: 'Workflow run 30290380944' })).toHaveAttribute(
+    'href',
+    'https://github.com/teamleaderleo/stensibly/actions/runs/30290380944',
+  );
+  await expect(mica.getByText('teamleaderleo/stensibly', { exact: true })).toBeVisible();
 
   const possum = page.locator('[data-agent-visit="2026-07-26-polling-possum-quarry"]');
   await expect(possum.getByRole('img', { name: 'Polling Possum agent identity sigil' })).toBeVisible();
@@ -137,7 +146,13 @@ test('agent guestbook API declares generated identities and keeps legacy artwork
   expect(entries).toHaveLength(wall.entryCount);
   expect(new Set(ids).size, 'Guestbook entry ids must stay unique').toBe(ids.length);
   expect(entries[0]).toMatchObject({
-    id: '2026-07-26-polling-possum-quarry',
+    id: '2026-07-28-mica-oauth-rollout',
+    name: 'Mica',
+  });
+  expect(entries[0]?.creative).toBeUndefined();
+  expect(entries[0]?.image).toBeUndefined();
+
+  expect(uniqueEntry(entries, '2026-07-26-polling-possum-quarry')).toMatchObject({
     creative: {
       inspiration: 'thread',
       style: 'zine',
@@ -146,7 +161,6 @@ test('agent guestbook API declares generated identities and keeps legacy artwork
       src: '/gallery/agents/2026-07-26-polling-possum-quarry.webp',
     },
   });
-
   expect(uniqueEntry(entries, 'fifth-drawer-scrapbook-pod')).toMatchObject({
     creative: {
       inspiration: 'browse',
