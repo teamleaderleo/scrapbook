@@ -18,10 +18,19 @@ async function readHomepageFootprint(page: Page) {
     const activityCell = document.querySelector<HTMLElement>(
       '[aria-label="Four weeks of GitHub activity"] button',
     );
+    const pet = document.querySelector<HTMLElement>('[data-scrapbook-pet]');
     const recentSection = document.querySelector<HTMLElement>('[data-recent-systems]');
     const recentCard = recentSection?.querySelector<HTMLElement>('a');
 
-    if (!dashboard || !scoreboard || !activityGrid || !activityCell || !recentSection || !recentCard) {
+    if (
+      !dashboard ||
+      !scoreboard ||
+      !activityGrid ||
+      !activityCell ||
+      !pet ||
+      !recentSection ||
+      !recentCard
+    ) {
       throw new Error('Missing homepage density instrument');
     }
 
@@ -47,6 +56,7 @@ async function readHomepageFootprint(page: Page) {
       scoreboard: rect(scoreboard),
       activityGrid: rect(activityGrid),
       activityCell: rect(activityCell),
+      pet: rect(pet),
       recentSection: rect(recentSection),
       recentCard: rect(recentCard),
     };
@@ -69,12 +79,14 @@ for (const viewport of desktopViewports) {
 
     await expect(page.locator('[data-wind-scoreboard]')).toBeVisible();
     await expect(page.locator('[aria-label="Four weeks of GitHub activity"]')).toBeVisible();
+    await expect(page.locator('[data-scrapbook-pet]')).toBeVisible();
     await expect(page.getByText('Recent systems', { exact: true })).toBeVisible();
 
     const footprint = await readHomepageFootprint(page);
     expect(footprint.document.width).toBeLessThanOrEqual(footprint.viewport.width);
     expect(footprint.document.height - footprint.viewport.height).toBeLessThanOrEqual(4);
     expect(footprint.dashboard.bottom).toBeLessThan(footprint.viewport.height);
+    expect(footprint.pet.bottom).toBeLessThanOrEqual(footprint.scoreboard.bottom);
     expect(footprint.recentSection.y).toBeLessThan(footprint.viewport.height - 72);
     expect(footprint.recentCard.y).toBeLessThan(footprint.viewport.height - 40);
     expect(footprint.activityCell.width).toBeGreaterThanOrEqual(42);
@@ -112,4 +124,31 @@ test('moves through the desktop layout transition without inflating the activity
   expect(Math.abs(sideBySide.scoreboard.y - sideBySide.activityGrid.y)).toBeLessThan(2);
   expect(Math.abs(stacked.activityCell.width - sideBySide.activityCell.width)).toBeLessThan(6);
   expect(sideBySide.document.width).toBeLessThanOrEqual(sideBySide.viewport.width);
+});
+
+test('keeps hover surfaces planted and lets the visitor pet Scraplet', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const response = await page.goto('/');
+  expect(response?.ok()).toBe(true);
+
+  const digit = page.locator('[data-activity-digit]').first();
+  const recentCard = page.locator('[data-recent-systems] a').first();
+  const pet = page.locator('[data-scrapbook-pet]');
+
+  await expect(digit).toBeVisible();
+  await expect(recentCard).toBeVisible();
+  await expect(pet).toHaveAttribute('data-pets', '0');
+
+  const digitBefore = await digit.evaluate((element) => getComputedStyle(element).transform);
+  await digit.hover();
+  const digitAfter = await digit.evaluate((element) => getComputedStyle(element).transform);
+  expect(digitAfter).toBe(digitBefore);
+
+  const cardBefore = await recentCard.evaluate((element) => getComputedStyle(element).transform);
+  await recentCard.hover();
+  const cardAfter = await recentCard.evaluate((element) => getComputedStyle(element).transform);
+  expect(cardAfter).toBe(cardBefore);
+
+  await pet.click();
+  await expect(pet).toHaveAttribute('data-pets', '1');
 });

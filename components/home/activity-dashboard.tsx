@@ -2,10 +2,11 @@
 
 import { ActivityGrid, type ActivityGridDay } from '@/components/home/activity-grid';
 import { ActivityScoreboard } from '@/components/home/activity-scoreboard';
+import { GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS } from '@/lib/github-activity-policy';
 import { useEffect, useRef, useState } from 'react';
 
-const REFRESH_INTERVAL_MS = 60_000;
-const MAX_FAILURE_BACKOFF_MS = 15 * 60_000;
+const REFRESH_INTERVAL_MS = GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS * 1_000;
+const MAX_FAILURE_BACKOFF_MS = 5 * 60_000;
 
 type ActivitySnapshot = {
   today: number;
@@ -17,6 +18,7 @@ type ActivitySnapshot = {
 };
 
 type LiveActivityResponse = {
+  source: 'public-profile' | 'public-events';
   today: number;
   weekTotal: number;
   yearTotal: number | null;
@@ -59,7 +61,10 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
         if (!mounted) return;
         consecutiveFailures.current = 0;
         nextAllowedAt.current = Date.now() + REFRESH_INTERVAL_MS;
-        setActivity({ ...next, unit: 'contributions' });
+        setActivity({
+          ...next,
+          unit: next.source === 'public-events' ? 'public actions' : 'contributions',
+        });
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') return;
         consecutiveFailures.current += 1;
@@ -125,6 +130,7 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
         today={activity.today}
         weekTotal={activity.weekTotal}
         yearTotal={activity.yearTotal}
+        updating={updating}
       />
       <ActivityGrid days={activity.days} unit={activity.unit} />
     </div>

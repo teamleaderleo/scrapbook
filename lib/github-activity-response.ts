@@ -1,20 +1,24 @@
 import {
-  GITHUB_ACTIVITY_FRESH_SECONDS,
+  GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS,
   GITHUB_ACTIVITY_STALE_SECONDS,
-  type GitHubHomeResult,
-} from './github-home';
+  GITHUB_ACTIVITY_UPSTREAM_FRESH_SECONDS,
+} from './github-activity-policy';
+import type { GitHubHomeResult } from './github-home';
 
-export const GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS = 60;
+export { GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS } from './github-activity-policy';
 
 export function createGitHubActivityHeaders(result: GitHubHomeResult, requestId: string) {
   const { activity, diagnostics } = result;
   const headers = new Headers({
-    'Cache-Control': `public, s-maxage=${GITHUB_ACTIVITY_FRESH_SECONDS}, stale-while-revalidate=${GITHUB_ACTIVITY_STALE_SECONDS}`,
+    'Cache-Control': 'private, no-store, max-age=0',
+    'CDN-Cache-Control': 'no-store',
+    'Vercel-CDN-Cache-Control': 'no-store',
     'X-Activity-Cache': diagnostics.cacheStatus,
     'X-Activity-Source': diagnostics.upstreamSource,
     'X-Activity-Failures': String(diagnostics.consecutiveFailures),
     'X-Client-Refresh-Seconds': String(GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS),
-    'X-Upstream-Cache-Seconds': String(GITHUB_ACTIVITY_FRESH_SECONDS),
+    'X-Upstream-Cache-Seconds': String(GITHUB_ACTIVITY_UPSTREAM_FRESH_SECONDS),
+    'X-Stale-Fallback-Seconds': String(GITHUB_ACTIVITY_STALE_SECONDS),
     'X-Request-Id': requestId,
   });
 

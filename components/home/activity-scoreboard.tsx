@@ -1,9 +1,8 @@
 'use client';
 
+import { ScrapbookPet } from '@/components/home/scrapbook-pet';
 import { motion, useReducedMotion } from 'framer-motion';
-import { useEffect, useMemo, useRef, useState } from 'react';
-
-const IDLE_TRANSFORM = 'translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1)';
+import { useEffect, useMemo, useState } from 'react';
 
 function countdownToUtcMidnight() {
   const now = new Date();
@@ -83,9 +82,18 @@ function SplitFlapDigit({ digit, index }: { digit: string; index: number }) {
       ) : null}
 
       <span aria-hidden="true" className="absolute inset-x-0 top-1/2 z-40 h-px bg-black/80" />
-      <span aria-hidden="true" className="absolute inset-x-0 top-1/2 z-40 h-px -translate-y-px bg-white/[0.05]" />
-      <span aria-hidden="true" className="absolute left-1 top-1/2 z-50 h-1.5 w-1 -translate-y-1/2 rounded-sm bg-black/65 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]" />
-      <span aria-hidden="true" className="absolute right-1 top-1/2 z-50 h-1.5 w-1 -translate-y-1/2 rounded-sm bg-black/65 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]" />
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 top-1/2 z-40 h-px -translate-y-px bg-white/[0.05]"
+      />
+      <span
+        aria-hidden="true"
+        className="absolute left-1 top-1/2 z-50 h-1.5 w-1 -translate-y-1/2 rounded-sm bg-black/65 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
+      />
+      <span
+        aria-hidden="true"
+        className="absolute right-1 top-1/2 z-50 h-1.5 w-1 -translate-y-1/2 rounded-sm bg-black/65 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
+      />
     </span>
   );
 }
@@ -95,116 +103,18 @@ function ScoreDigits({ value }: { value: number }) {
     () => String(Math.max(0, Math.floor(value))).slice(-4).padStart(4, '0').split(''),
     [value],
   );
-  const digitRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const animationsRef = useRef<Array<Animation | null>>([]);
-  const frameRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
-      for (const animation of animationsRef.current) animation?.cancel();
-    };
-  }, []);
-
-  const resetImmediately = () => {
-    if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
-    for (const animation of animationsRef.current) animation?.cancel();
-    for (const digit of digitRefs.current) {
-      if (digit) digit.style.transform = IDLE_TRANSFORM;
-    }
-  };
-
-  const settleDigits = () => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      resetImmediately();
-      return;
-    }
-
-    if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
-    digitRefs.current.forEach((digit, index) => {
-      if (!digit) return;
-      animationsRef.current[index]?.cancel();
-      const from = digit.style.transform || IDLE_TRANSFORM;
-      const direction = index % 2 === 0 ? -1 : 1;
-      const animation = digit.animate(
-        [
-          { transform: from, offset: 0 },
-          {
-            transform: `translate3d(${direction * 1.5}px, -3px, 0) rotateX(-2deg) rotateY(${direction * 2.5}deg) rotateZ(${direction * 0.8}deg) scale(1.012)`,
-            offset: 0.34,
-          },
-          {
-            transform: `translate3d(${direction * -0.6}px, 0.8px, 0) rotateX(0.7deg) rotateY(${direction * -0.8}deg) rotateZ(${direction * -0.25}deg) scale(0.998)`,
-            offset: 0.72,
-          },
-          { transform: IDLE_TRANSFORM, offset: 1 },
-        ],
-        {
-          duration: 520 + index * 35,
-          easing: 'cubic-bezier(0.2, 0.75, 0.2, 1)',
-          fill: 'forwards',
-        },
-      );
-      animation.onfinish = () => {
-        digit.style.transform = IDLE_TRANSFORM;
-        animation.cancel();
-      };
-      animationsRef.current[index] = animation;
-    });
-  };
-
-  const moveDigits = (clientX: number, clientY: number, currentTarget: HTMLElement) => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const containerRect = currentTarget.getBoundingClientRect();
-    const influenceRadius = Math.max(130, containerRect.width * 0.48);
-
-    if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current);
-    frameRef.current = window.requestAnimationFrame(() => {
-      digitRefs.current.forEach((digit, index) => {
-        if (!digit) return;
-        animationsRef.current[index]?.cancel();
-        const rect = digit.getBoundingClientRect();
-        const centreX = rect.left + rect.width / 2;
-        const centreY = rect.top + rect.height / 2;
-        const deltaX = clientX - centreX;
-        const deltaY = clientY - centreY;
-        const distance = Math.hypot(deltaX, deltaY);
-        const influence = Math.max(0, 1 - distance / influenceRadius);
-        const lift = Math.pow(influence, 1.45);
-        const horizontal = Math.max(-1, Math.min(1, deltaX / Math.max(rect.width, 1)));
-        const vertical = Math.max(-1, Math.min(1, deltaY / Math.max(rect.height, 1)));
-        const translateX = -horizontal * lift * 4.5;
-        const translateY = -lift * 14 + vertical * lift * 1.5;
-        const rotateX = (vertical * 7 - 3.5) * lift;
-        const rotateY = -horizontal * lift * 13;
-        const rotateZ = horizontal * lift * 2.4;
-        const scale = 1 + lift * 0.045;
-
-        digit.style.transform = `translate3d(${translateX.toFixed(2)}px, ${translateY.toFixed(2)}px, 0) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) rotateZ(${rotateZ.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
-      });
-    });
-  };
 
   return (
     <div
-      className="flex min-w-0 touch-pan-y gap-1.5 [perspective:780px] sm:gap-2"
+      className="flex min-w-0 gap-1.5 sm:gap-2"
       aria-label={`${value} contributions today`}
       data-wind-scoreboard
-      onPointerMove={(event) => moveDigits(event.clientX, event.clientY, event.currentTarget)}
-      onPointerDown={(event) => moveDigits(event.clientX, event.clientY, event.currentTarget)}
-      onPointerLeave={settleDigits}
-      onPointerCancel={settleDigits}
-      onPointerUp={settleDigits}
     >
       {digits.map((digit, index) => (
         <div
           key={index}
-          ref={(element) => {
-            digitRefs.current[index] = element;
-          }}
           data-activity-digit
-          className="relative aspect-[0.78] min-w-0 flex-1 overflow-hidden rounded-[0.55rem] border border-white/12 bg-[#17181b] px-1 font-mono text-[clamp(2rem,5vw,4.25rem)] font-semibold leading-none text-[#f3f0e9] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-10px_18px_rgba(0,0,0,0.3),0_7px_18px_rgba(0,0,0,0.2)] transition-[filter,box-shadow] duration-150 [transform-style:preserve-3d] will-change-transform motion-reduce:transform-none"
-          style={{ transform: IDLE_TRANSFORM }}
+          className="relative aspect-[0.78] min-w-0 flex-1 overflow-hidden rounded-[0.55rem] border border-white/12 bg-[#17181b] px-1 font-mono text-[clamp(2rem,5vw,4.25rem)] font-semibold leading-none text-[#f3f0e9] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-10px_18px_rgba(0,0,0,0.3),0_7px_18px_rgba(0,0,0,0.2)]"
         >
           <SplitFlapDigit digit={digit} index={index} />
         </div>
@@ -216,7 +126,7 @@ function ScoreDigits({ value }: { value: number }) {
 function Metric({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
     <span
-      className="grid min-h-[3.75rem] content-center gap-1 rounded-xl border border-border/65 bg-background/40 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]"
+      className="grid min-h-[3.25rem] content-center gap-1 rounded-xl border border-border/65 bg-background/40 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]"
       title={title}
     >
       <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -233,10 +143,12 @@ export function ActivityScoreboard({
   today,
   weekTotal,
   yearTotal,
+  updating,
 }: {
   today: number;
   weekTotal: number;
   yearTotal: number | null;
+  updating: boolean;
 }) {
   const [countdown, setCountdown] = useState('--:--:--');
 
@@ -249,7 +161,7 @@ export function ActivityScoreboard({
 
   return (
     <section
-      className="group/score flex h-full min-h-[15.5rem] flex-col overflow-hidden rounded-[1.25rem] border border-border/75 bg-card text-card-foreground shadow-[0_16px_38px_rgba(24,24,26,0.11)] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_44px_rgba(24,24,26,0.16)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_24px_48px_rgba(0,0,0,0.42)] [@media(max-height:780px)]:min-h-[14.5rem]"
+      className="flex h-full min-h-[15.5rem] flex-col overflow-hidden rounded-[1.25rem] border border-border/75 bg-card text-card-foreground shadow-[0_16px_38px_rgba(24,24,26,0.11)] transition-[border-color,box-shadow] duration-200 hover:border-border dark:shadow-[0_16px_38px_rgba(0,0,0,0.3)] [@media(max-height:780px)]:min-h-[14.5rem]"
       data-activity-scoreboard
     >
       <div className="border-b border-border/70 bg-muted/70 px-4 py-2.5 [@media(max-height:780px)]:py-2">
@@ -259,7 +171,7 @@ export function ActivityScoreboard({
         </div>
       </div>
 
-      <div className="grid flex-1 grid-cols-[minmax(0,1fr)_minmax(5.5rem,0.34fr)] items-center gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(6.25rem,0.32fr)] sm:gap-4 sm:p-5 [@media(max-height:780px)]:gap-2.5 [@media(max-height:780px)]:p-3.5">
+      <div className="grid flex-1 grid-cols-[minmax(0,1fr)_minmax(5.75rem,0.36fr)] items-center gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(6.75rem,0.34fr)] sm:gap-4 sm:p-5 [@media(max-height:780px)]:gap-2.5 [@media(max-height:780px)]:p-3.5">
         <ScoreDigits value={today} />
         <div className="grid content-center gap-2">
           <Metric label="7D" value={weekTotal.toLocaleString('en-GB')} />
@@ -268,6 +180,7 @@ export function ActivityScoreboard({
             value={yearTotal?.toLocaleString('en-GB') ?? '—'}
             title="Calendar year to date, measured in UTC"
           />
+          <ScrapbookPet activity={today} updating={updating} />
         </div>
       </div>
     </section>
