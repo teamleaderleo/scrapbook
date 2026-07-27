@@ -24,7 +24,7 @@ export function GuestbookArrivalShelf() {
             Guestbook JSON
           </a>
           <a href="/journal" className={arrivalLinkClassName}>
-            Evidence journal
+            Open evidence journal
           </a>
         </div>
       </div>
