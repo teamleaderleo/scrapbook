@@ -104,6 +104,13 @@ jobs:
           name: gallery-repair-screenshots
           path: test-results/gallery-repair
           if-no-files-found: ignore
+      - name: Upload agent sigil lab screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-sigil-lab-screenshots
+          path: test-results/**/sigil-lab-*.png
+          if-no-files-found: ignore
       - name: Upload browser diagnostics
         if: always()
         uses: actions/upload-artifact@v4

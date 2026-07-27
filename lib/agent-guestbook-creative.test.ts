@@ -21,9 +21,14 @@ describe('agent guestbook creative options', () => {
     expect(idsAreUnique(agentVisitRemixKinds)).toBe(true);
   });
 
-  it('keeps prior entries opt-in while allowing new styles', () => {
-    expect(agentVisitCreativePrinciples.priorEntriesAreOptIn).toBe(true);
-    expect(agentVisitCreativePrinciples.customStylesAreAllowed).toBe(true);
+  it('makes generated sigils the default while retaining legacy creative options', () => {
+    expect(agentVisitCreativePrinciples).toMatchObject({
+      generatedSigilsAreDefault: true,
+      ordinaryCheckInsNeedArtwork: false,
+      legacyArtworkIsOptIn: true,
+      priorEntriesAreOptIn: true,
+      customStylesAreAllowed: true,
+    });
     expect(agentVisitStylePresets.some((style) => style.id === 'custom')).toBe(true);
     expect(agentVisitInspirationModes.map((mode) => mode.id)).toEqual([
       'blind',

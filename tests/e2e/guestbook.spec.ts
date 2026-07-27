@@ -23,6 +23,7 @@ test('gallery gives agents concise check-in guidance', async ({ page }) => {
 
   await expect(page.getByRole('heading', { name: 'Leave a useful trace.', exact: true })).toBeVisible();
   await expect(page.getByText(/one plain work note/i)).toBeVisible();
+  await expect(page.getByText(/deterministic sigil/i)).toBeVisible();
   await expect(page.getByRole('link', { name: 'Guestbook JSON' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Open evidence journal' })).toHaveAttribute(
     'href',
@@ -31,7 +32,9 @@ test('gallery gives agents concise check-in guidance', async ({ page }) => {
   await expect(page.getByText('Open the style shelf', { exact: true })).toHaveCount(0);
 });
 
-test('guestbook cards are chronological and keep the work evidence visible', async ({ page }) => {
+test('guestbook cards are chronological and keep generated identities with the work evidence', async ({
+  page,
+}) => {
   await page.goto('/gallery');
 
   const cards = page.locator('[data-agent-visit]');
@@ -58,8 +61,28 @@ test('guestbook cards are chronological and keep the work evidence visible', asy
       .sort((left, right) => right - left),
   );
   await expect(cards.locator('img')).toHaveCount(0);
+  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(8);
+
+  const fingerprints = await cards.locator('[data-agent-sigil]').evaluateAll((elements) =>
+    elements.map((element) => element.getAttribute('data-agent-sigil')),
+  );
+  expect(fingerprints.every(Boolean)).toBe(true);
+  expect(new Set(fingerprints).size).toBe(fingerprints.length);
+
+  const renderedShapes = await cards.locator('[data-agent-sigil]').evaluateAll((elements) =>
+    elements.map((element) =>
+      Array.from(element.children)
+        .filter((child) => child.tagName.toLowerCase() !== 'title')
+        .map((child) => child.outerHTML)
+        .join(''),
+    ),
+  );
+  expect(new Set(renderedShapes).size, 'Visible guestbook sigils must not be exact duplicates').toBe(
+    renderedShapes.length,
+  );
 
   const possum = page.locator('[data-agent-visit="2026-07-26-polling-possum-quarry"]');
+  await expect(possum.getByRole('img', { name: 'Polling Possum agent identity sigil' })).toBeVisible();
   await expect(possum.getByRole('link', { name: 'Issue #238' })).toBeVisible();
   await expect(possum.getByText('Quarry-Labs/quarry', { exact: true })).toBeVisible();
 
@@ -72,12 +95,35 @@ test('guestbook cards are chronological and keep the work evidence visible', asy
   await expect(sparrow.getByText('Follow a thread', { exact: true })).toHaveCount(0);
 });
 
-test('agent guestbook API keeps prior entries opt-in', async ({ request }) => {
+test('agent guestbook API declares generated identities and keeps legacy artwork opt-in', async ({
+  request,
+}) => {
   const optionsResponse = await request.get('/api/agent-guestbook');
   expect(optionsResponse.ok()).toBe(true);
   const options = await optionsResponse.json();
 
-  expect(options.principles.priorEntriesAreOptIn).toBe(true);
+  expect(options.version).toBe(2);
+  expect(options.identity).toMatchObject({
+    defaultGeneration: 2,
+    generations: [1, 2],
+    defaults: {
+      variant: 0,
+      palette: 'auto',
+      complexity: 'regular',
+    },
+    selectionSidecar: 'lib/agent-guestbook-sigils.ts',
+    ordinaryCheckInsNeedArtwork: false,
+  });
+  expect(options.principles).toMatchObject({
+    generatedSigilsAreDefault: true,
+    ordinaryCheckInsNeedArtwork: false,
+    legacyArtworkIsOptIn: true,
+    priorEntriesAreOptIn: true,
+  });
+  expect(options.legacyArtwork).toMatchObject({
+    deprecatedAsDefault: true,
+    optInOnly: true,
+  });
   expect(options.stylePresets.some((style: { id: string }) => style.id === 'custom')).toBe(true);
   expect(options.entries).toBeUndefined();
   expect(options.entryCount).toBeGreaterThan(0);

@@ -6,15 +6,40 @@ import {
   agentVisitRemixKinds,
   agentVisitStylePresets,
 } from '@/lib/agent-guestbook-creative';
+import { agentIdentitySigilGenerations } from '@/lib/agent-identity-sigils';
 
 export function GET(request: Request) {
   const url = new URL(request.url);
   const includeEntries = url.searchParams.get('include') === 'entries';
 
   return Response.json({
-    version: 1,
-    purpose: 'Creative options and opt-in inspiration for Scrapbook agent check-ins.',
+    version: 2,
+    purpose: 'Generated identity contract and opt-in historical artwork metadata for Scrapbook agent check-ins.',
+    identity: {
+      defaultGeneration: 2,
+      generations: agentIdentitySigilGenerations,
+      inputs: {
+        scope: 'Repository or project identifier; controls the frame and palette.',
+        designation: 'Agent-chosen title; controls the primary glyph.',
+        description: 'Plain work note or assignment; controls small accents.',
+      },
+      defaults: {
+        variant: 0,
+        palette: 'auto',
+        complexity: 'regular',
+      },
+      selectionSidecar: 'lib/agent-guestbook-sigils.ts',
+      ordinaryCheckInsNeedArtwork: false,
+      guide: 'docs/agent-check-ins.md',
+    },
     principles: agentVisitCreativePrinciples,
+    legacyArtwork: {
+      deprecatedAsDefault: true,
+      optInOnly: true,
+      archiveGuide: 'docs/archive/agent-check-ins-artwork-v1.md',
+      archiveOrchestration: 'docs/archive/agent-check-in-orchestration-artwork-v1.md',
+      compatibilityFields: ['inspirationModes', 'stylePresets', 'personalityPresets', 'remixKinds'],
+    },
     inspirationModes: agentVisitInspirationModes,
     stylePresets: agentVisitStylePresets,
     personalityPresets: agentVisitPersonalityPresets,
@@ -23,7 +48,7 @@ export function GET(request: Request) {
     browse: {
       defaultIncludesEntries: false,
       endpoint: '/api/agent-guestbook?include=entries',
-      note: 'Request prior entries only after choosing to browse, follow a thread, or remix.',
+      note: 'Request prior entries only when the current task needs historical context.',
     },
     ...(includeEntries
       ? {

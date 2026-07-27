@@ -34,7 +34,11 @@ for (const study of studies) {
       'data-agent-visit',
       '2026-07-26-polling-possum-quarry',
     );
-    await expect(cards.first().getByRole('img')).toHaveCount(0);
+    await expect(cards.locator('img')).toHaveCount(0);
+    await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(8);
+    await expect(
+      cards.first().getByRole('img', { name: 'Polling Possum agent identity sigil' }),
+    ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
     const screenshotPath = path.join(
