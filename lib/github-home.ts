@@ -4,6 +4,13 @@ import {
   getRecentDateKeys,
   parsePublicContributionHtml,
 } from './github-activity-utils';
+import {
+  GITHUB_ACTIVITY_INSTANCE_FRESH_MS,
+  GITHUB_ACTIVITY_RETRY_BASE_MS,
+  GITHUB_ACTIVITY_RETRY_MAX_MS,
+  GITHUB_ACTIVITY_STALE_SECONDS,
+  GITHUB_ACTIVITY_UPSTREAM_FRESH_SECONDS,
+} from './github-activity-policy';
 import { createStaleWhileErrorCache } from './stale-while-error-cache';
 
 const GITHUB_USERNAME = 'teamleaderleo';
@@ -25,10 +32,6 @@ const FEATURED_REPOSITORIES = [
   },
 ] as const;
 
-export const GITHUB_ACTIVITY_FRESH_SECONDS = 300;
-export const GITHUB_ACTIVITY_STALE_SECONDS = 3_600;
-const RETRY_BASE_MS = 60_000;
-const MAX_FAILURE_BACKOFF_MS = 15 * 60_000;
 const HOME_WINDOW_DAYS = 35;
 
 export type ContributionDay = {
@@ -139,8 +142,7 @@ function summarizeCounts(
     source === 'public-profile'
       ? [...counts.entries()].filter(([date]) => date.startsWith(today.slice(0, 4)) && date <= today)
       : days.map((day) => [day.date, day.count] as const);
-  const streakDays =
-    source === 'public-profile' ? daysFromCounts(counts, now, 366) : days;
+  const streakDays = source === 'public-profile' ? daysFromCounts(counts, now, 366) : days;
 
   return {
     total: periodEntries.reduce((sum, [, count]) => sum + count, 0),
@@ -296,16 +298,16 @@ async function loadGitHubHomeData(): Promise<UpstreamActivity> {
 
 const getCachedUpstreamActivity = unstable_cache(
   loadGitHubHomeData,
-  ['github-homepage-v6'],
-  { revalidate: GITHUB_ACTIVITY_FRESH_SECONDS },
+  ['github-homepage-v7'],
+  { revalidate: GITHUB_ACTIVITY_UPSTREAM_FRESH_SECONDS },
 );
 
 const githubHomeCache = createStaleWhileErrorCache<UpstreamActivity>({
   load: getCachedUpstreamActivity,
-  freshForMs: GITHUB_ACTIVITY_FRESH_SECONDS * 1_000,
+  freshForMs: GITHUB_ACTIVITY_INSTANCE_FRESH_MS,
   staleForMs: GITHUB_ACTIVITY_STALE_SECONDS * 1_000,
-  retryBaseMs: RETRY_BASE_MS,
-  retryMaxMs: MAX_FAILURE_BACKOFF_MS,
+  retryBaseMs: GITHUB_ACTIVITY_RETRY_BASE_MS,
+  retryMaxMs: GITHUB_ACTIVITY_RETRY_MAX_MS,
 });
 
 function rateLimitFromError(error: unknown): GitHubRateLimit | null {
