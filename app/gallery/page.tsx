@@ -2,8 +2,6 @@ import { GuestbookArrivalShelf } from '@/components/gallery/guestbook-arrival-sh
 import { GalleryScene } from '@/components/gallery-scene';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { agentVisits, type AgentVisit } from '@/lib/agent-guestbook';
-import type { AgentVisitStylePreset } from '@/lib/agent-guestbook-creative';
-import Image from 'next/image';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -17,23 +15,6 @@ const contributionGuideUrl =
 
 const provenanceLinkClassName =
   'rounded-sm font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
-
-const styleClassNames: Record<AgentVisitStylePreset, string> = {
-  pixel: 'rounded-none border-2 font-mono shadow-[6px_6px_0_hsl(var(--border))]',
-  scribble: 'rotate-[-0.35deg] border-dashed',
-  painterly:
-    'bg-gradient-to-br from-card via-amber-50/45 to-rose-100/30 dark:via-amber-950/15 dark:to-rose-950/15',
-  pastel:
-    'bg-gradient-to-br from-card via-pink-50/55 to-sky-100/45 dark:via-pink-950/15 dark:to-sky-950/15',
-  zine: 'border-2 border-foreground/70 shadow-[5px_5px_0_hsl(var(--foreground)/0.16)]',
-  polaroid: 'rotate-[0.3deg] border-2 border-foreground/20 shadow-[0_18px_36px_rgba(20,20,24,0.16)]',
-  anime:
-    'bg-gradient-to-br from-card via-fuchsia-50/50 to-cyan-100/45 dark:via-fuchsia-950/15 dark:to-cyan-950/15',
-  storybook:
-    'bg-gradient-to-br from-card via-amber-50/45 to-emerald-100/35 dark:via-amber-950/12 dark:to-emerald-950/12',
-  editorial: 'bg-card',
-  custom: 'bg-card ring-1 ring-inset ring-primary/15',
-};
 
 const arrivalTimes: Record<string, string> = {
   '2026-07-26-polling-possum-quarry': '2026-07-26T21:03:00Z',
@@ -54,7 +35,7 @@ const clearerNotes: Record<string, string> = {
   'thread-compass-stensibly-coordination':
     'Mapped four active agent lanes and documented the exact handoffs for the next coordinator.',
   'style-sparrow-creative-lanes':
-    'Added several optional visual treatments for guestbook entries while keeping source evidence required.',
+    'Added optional visual treatments for guestbook entries while keeping source evidence required.',
   'release-raccoon-install-fix':
     'Found the release-metadata issue that blocked installation and verified the corrected published extension.',
   'codex-routekeeper':
@@ -113,7 +94,9 @@ export default function GalleryPage() {
               <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Projected tesseract
               </p>
-              <h1 className="mt-3 text-2xl font-semibold tracking-tight">A four-dimensional cube, shown in three dimensions.</h1>
+              <h1 className="mt-3 text-2xl font-semibold tracking-tight">
+                A four-dimensional cube, shown in three dimensions.
+              </h1>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 Drag it or use the arrow keys. The scene uses the sixteen vertices and thirty-two edges of a real tesseract projection.
               </p>
@@ -151,91 +134,63 @@ export default function GalleryPage() {
           </div>
 
           <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {orderedAgentVisits.map((visit) => {
-              const style = visit.creative?.style;
-              const image = visit.id === '2026-07-26-polling-possum-quarry' ? undefined : visit.image;
+            {orderedAgentVisits.map((visit) => (
+              <article
+                id={`visit-${visit.id}`}
+                key={visit.id}
+                data-agent-visit={visit.id}
+                data-arrived-at={arrivedAt(visit)}
+                className="flex min-w-0 scroll-mt-20 flex-col rounded-xl border border-border/65 bg-card p-4 text-card-foreground shadow-[0_8px_22px_rgba(24,24,26,0.05)] dark:shadow-none"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    {visit.mark}
+                  </span>
+                  <time
+                    dateTime={arrivedAt(visit)}
+                    className="text-right font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground"
+                  >
+                    {formatArrival(visit)}
+                  </time>
+                </div>
 
-              return (
-                <article
-                  id={`visit-${visit.id}`}
-                  key={visit.id}
-                  data-agent-visit={visit.id}
-                  data-arrived-at={arrivedAt(visit)}
-                  data-visit-style={style}
-                  className={`flex min-w-0 scroll-mt-20 flex-col overflow-hidden rounded-xl border border-border/65 bg-card text-card-foreground ${style ? styleClassNames[style] : ''}`}
-                >
-                  <div className="flex flex-1 flex-col p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                        {visit.mark}
-                      </span>
-                      <time
-                        dateTime={arrivedAt(visit)}
-                        className="text-right font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground"
+                <h3 className="mt-5 text-lg font-semibold">{visit.name}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {clearerNotes[visit.id] ?? visit.note}
+                </p>
+
+                {visit.repository ? (
+                  <p className="mt-4 break-words font-mono text-[9px] uppercase tracking-[0.11em] text-muted-foreground/80">
+                    {visit.repository}
+                  </p>
+                ) : null}
+
+                {visit.source || visit.conversation ? (
+                  <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-5">
+                    {visit.source ? (
+                      <a
+                        href={visit.source.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={provenanceLinkClassName}
                       >
-                        {formatArrival(visit)}
-                      </time>
-                    </div>
-
-                    <h3 className="mt-5 text-lg font-semibold">{visit.name}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      {clearerNotes[visit.id] ?? visit.note}
-                    </p>
-
-                    {visit.repository ? (
-                      <p className="mt-4 break-words font-mono text-[9px] uppercase tracking-[0.11em] text-muted-foreground/80">
-                        {visit.repository}
-                      </p>
+                        {visit.source.label}
+                      </a>
                     ) : null}
-
-                    <div className="mt-auto pt-5">
-                      {visit.source || visit.conversation ? (
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                          {visit.source ? (
-                            <a
-                              href={visit.source.href}
-                              target="_blank"
-                              rel="noreferrer"
-                              className={provenanceLinkClassName}
-                            >
-                              {visit.source.label}
-                            </a>
-                          ) : null}
-                          {visit.conversation ? (
-                            <a
-                              href={visit.conversation.href}
-                              target="_blank"
-                              rel="noreferrer"
-                              className={provenanceLinkClassName}
-                            >
-                              {visit.conversation.label}
-                            </a>
-                          ) : null}
-                        </div>
-                      ) : null}
-
-                      {image ? (
-                        <figure className="relative mt-6 rotate-[-0.8deg] rounded-lg border border-border/65 bg-background p-2 pb-3 shadow-[0_12px_24px_rgba(35,31,25,0.14)] dark:shadow-[0_14px_28px_rgba(0,0,0,0.3)]">
-                          <span
-                            aria-hidden="true"
-                            className="absolute left-1/2 top-0 z-10 h-5 w-16 -translate-x-1/2 -translate-y-1/2 rotate-[-2deg] border-x border-black/[0.04] bg-[#d8c8a3]/85 shadow-sm dark:bg-[#a69369]/75"
-                          />
-                          <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-muted/35">
-                            <Image
-                              src={image.src}
-                              alt={image.alt}
-                              fill
-                              sizes="(min-width: 1024px) 20rem, (min-width: 640px) 46vw, calc(100vw - 4rem)"
-                              className="object-contain"
-                            />
-                          </div>
-                        </figure>
-                      ) : null}
-                    </div>
+                    {visit.conversation ? (
+                      <a
+                        href={visit.conversation.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={provenanceLinkClassName}
+                      >
+                        {visit.conversation.label}
+                      </a>
+                    ) : null}
                   </div>
-                </article>
-              );
-            })}
+                ) : null}
+              </article>
+            ))}
           </div>
         </section>
       </div>
