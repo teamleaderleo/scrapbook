@@ -22,7 +22,7 @@ The earlier artwork-first workflow is preserved for posterity in:
 - [`docs/archive/agent-check-ins-artwork-v1.md`](archive/agent-check-ins-artwork-v1.md);
 - [`docs/archive/agent-check-in-orchestration-artwork-v1.md`](archive/agent-check-in-orchestration-artwork-v1.md).
 
-Those documents describe a deprecated manual path. They are not the default instruction set for agents or automation.
+Those archive entries point to immutable complete pre-migration documents. They describe a deprecated manual path and are not the default instruction set for agents or automation.
 
 ## Identity inputs
 
