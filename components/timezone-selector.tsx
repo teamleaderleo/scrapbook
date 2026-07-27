@@ -177,16 +177,22 @@ export default function TimezoneSelector({ utcTotalMinutes }: TimezoneSelectorPr
       <div
         data-selected-time-readout
         aria-live={isOpen ? 'off' : 'polite'}
-        className="flex min-w-0 flex-col gap-4 rounded-2xl border border-border/70 bg-background/55 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] sm:flex-row sm:items-end sm:justify-between sm:p-5"
+        className={`flex min-w-0 rounded-2xl border border-border/70 bg-background/55 shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] ${
+          isOpen
+            ? 'flex-row items-end justify-between gap-3 p-3 md:gap-4 md:p-4'
+            : 'flex-col gap-4 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-5'
+        }`}
       >
         <div className="min-w-0">
           <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
             {isPreviewing ? 'Preview time' : 'Selected time'}
           </p>
-          <div className="mt-2 flex flex-wrap items-end gap-x-3 gap-y-1">
+          <div className={`${isOpen ? 'mt-1' : 'mt-2'} flex flex-wrap items-end gap-x-3 gap-y-1`}>
             <p
               data-converted-time
-              className="font-mono text-5xl font-semibold tabular-nums tracking-[-0.05em] sm:text-6xl"
+              className={`font-mono font-semibold tabular-nums tracking-[-0.05em] ${
+                isOpen ? 'text-3xl sm:text-4xl' : 'text-5xl sm:text-6xl'
+              }`}
             >
               {formatTime(displayTime.hours, displayTime.minutes)}
             </p>
@@ -196,11 +202,11 @@ export default function TimezoneSelector({ utcTotalMinutes }: TimezoneSelectorPr
           </div>
         </div>
 
-        <div className="min-w-0 sm:max-w-[24rem] sm:text-right">
-          <p className="truncate text-base font-medium text-foreground sm:text-lg">
+        <div className={`min-w-0 text-right ${isOpen ? 'max-w-[48%]' : 'sm:max-w-[24rem]'}`}>
+          <p className={`truncate font-medium text-foreground ${isOpen ? 'text-sm sm:text-base' : 'text-base sm:text-lg'}`}>
             {displayOption.label}
           </p>
-          <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground sm:justify-end">
+          <p className="mt-1 flex flex-wrap items-center justify-end gap-1.5 text-xs text-muted-foreground">
             <span className="font-mono tabular-nums">{formatOffset(displayOffset)}</span>
             <span aria-hidden="true">·</span>
             <span data-converted-day-offset>{formatDayOffset(displayTime.dayOffset)}</span>
@@ -213,7 +219,7 @@ export default function TimezoneSelector({ utcTotalMinutes }: TimezoneSelectorPr
         </div>
       </div>
 
-      <div className="mt-3 min-w-0">
+      <div className={`${isOpen ? 'mt-2 md:mt-3' : 'mt-3'} min-w-0`}>
         <button
           ref={triggerRef}
           data-timezone-trigger
@@ -221,7 +227,7 @@ export default function TimezoneSelector({ utcTotalMinutes }: TimezoneSelectorPr
           aria-expanded={isOpen}
           aria-controls="timezone-picker-results"
           onClick={() => (isOpen ? closePicker() : openPicker())}
-          className="flex min-h-16 w-full min-w-0 items-center gap-3 rounded-2xl border border-border/75 bg-background/55 px-4 py-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] transition-[background-color,border-color,box-shadow] hover:border-border hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className={`${isOpen ? 'hidden md:flex' : 'flex'} min-h-16 w-full min-w-0 items-center gap-3 rounded-2xl border border-border/75 bg-background/55 px-4 py-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] transition-[background-color,border-color,box-shadow] hover:border-border hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
         >
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/65 bg-card">
             <Search className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
@@ -243,7 +249,7 @@ export default function TimezoneSelector({ utcTotalMinutes }: TimezoneSelectorPr
           <div
             id="timezone-picker-results"
             data-timezone-picker
-            className="mt-3 overflow-hidden rounded-2xl border border-border/75 bg-popover text-popover-foreground shadow-[0_22px_52px_rgba(20,20,24,0.2)]"
+            className="mt-0 overflow-hidden rounded-2xl border border-border/75 bg-popover text-popover-foreground shadow-[0_22px_52px_rgba(20,20,24,0.2)] md:mt-3"
           >
             <Command
               loop
