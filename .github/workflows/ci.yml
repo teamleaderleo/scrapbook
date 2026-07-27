@@ -90,19 +90,12 @@ jobs:
           name: homepage-density-screenshots
           path: test-results/homepage-density
           if-no-files-found: ignore
-      - name: Upload homepage honeycomb screenshots
+      - name: Upload scoreboard appearance screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: homepage-honeycomb-screenshots
-          path: test-results/homepage-honeycomb
-          if-no-files-found: ignore
-      - name: Upload material study screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: material-system-screenshots
-          path: test-results/material-system
+          name: scoreboard-appearance-screenshots
+          path: test-results/scoreboard-appearance
           if-no-files-found: ignore
       - name: Upload browser diagnostics
         if: always()
