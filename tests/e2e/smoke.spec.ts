@@ -85,6 +85,8 @@ test('homepage highlights three recent systems', async ({ page }) => {
 
   await expect(page.getByText('Recent systems', { exact: true })).toBeVisible();
   await expect(page.getByText('Tools that remember their boundaries')).toHaveCount(0);
+  await expect(page.getByText('Plans host work before changing anything and inspects unknown state first.')).toBeVisible();
+  await expect(page.getByText(/not guess/i)).toHaveCount(0);
   await expect(page.getByRole('link', { name: /smolrunner/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /stensibly/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /proofwake/i })).toBeVisible();
@@ -161,24 +163,22 @@ test('desktop clock sits beside the site identity', async ({ page }) => {
 test('gallery credits the agents who worked here', async ({ page }) => {
   await page.goto('/gallery');
 
-  await expect(page.getByRole('img', { name: 'Draggable nested-cube gallery orbit' })).toBeVisible();
+  await expect(
+    page.getByRole('img', { name: 'Draggable projected four-dimensional hypercube' }),
+  ).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Codex' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Claude Fable' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Mothbit' })).toBeVisible();
+  await expect(page.getByText('Mothbit was here', { exact: true })).toHaveCount(0);
 
   const raccoonCard = page.locator('[data-agent-visit="release-raccoon-install-fix"]');
-  const raccoonArtwork = page.getByRole('img', {
-    name: 'Release Raccoon wearing a tiny release-engineer cap and holding a laptop beside a tag and checkmark',
-  });
-
   await expect(raccoonCard.getByRole('heading', { name: 'Release Raccoon' })).toBeVisible();
   await expect(raccoonCard.getByText('teamleaderleo/gh-tidy-branches')).toBeVisible();
   await expect(raccoonCard.getByRole('link', { name: 'PR #21' })).toHaveAttribute(
     'href',
     'https://github.com/teamleaderleo/gh-tidy-branches/pull/21',
   );
-  await expect(raccoonCard.getByRole('img')).toBeVisible();
-  await expect(raccoonArtwork).toHaveCount(1);
+  await expect(page.locator('[data-agent-visit] img')).toHaveCount(0);
 });
 
 test('slow navigation keeps the current page visible behind a monotonic rail', async ({ page }) => {
