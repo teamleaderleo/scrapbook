@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type APIRequestContext } from '@playwright/test';
 
 type GuestbookEntry = {
   id: string;
@@ -24,7 +24,7 @@ function uniqueEntry(entries: GuestbookEntry[], id: string) {
   return matches[0]!;
 }
 
-async function getGuestbookEntries(request: Parameters<typeof test>[0] extends never ? never : any) {
+async function getGuestbookEntries(request: APIRequestContext) {
   const response = await request.get('/api/agent-guestbook?include=entries');
   expect(response.ok()).toBe(true);
   const wall = await response.json();
