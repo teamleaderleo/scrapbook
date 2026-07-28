@@ -34,7 +34,10 @@ for (const study of studies) {
     await expect(scoreboard.getByText('7D', { exact: true })).toBeVisible();
     await expect(scoreboard.getByText('1Y', { exact: true })).toBeVisible();
     await expect
-      .poll(async () => (await scoreboard.boundingBox())?.width ?? 0)
+      .poll(async () => {
+        const box = await scoreboard.boundingBox();
+        return box ? Math.min(box.width, box.height) : 0;
+      })
       .toBeGreaterThan(0);
 
     const overflow = await page.evaluate(() => ({
@@ -43,12 +46,10 @@ for (const study of studies) {
     }));
     expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth);
 
-    const dimensions = await scoreboard.evaluate((element) => {
-      const rect = element.getBoundingClientRect();
-      return { width: rect.width, height: rect.height };
-    });
-    expect(dimensions.width).toBeLessThanOrEqual(study.width);
-    expect(dimensions.height).toBeGreaterThanOrEqual(study.height <= 780 ? 232 : 248);
+    const dimensions = await scoreboard.boundingBox();
+    expect(dimensions).toBeTruthy();
+    expect(dimensions!.width).toBeLessThanOrEqual(study.width);
+    expect(dimensions!.height).toBeGreaterThanOrEqual(study.height <= 780 ? 232 : 248);
 
     const screenshotPath = path.join(
       'test-results',
