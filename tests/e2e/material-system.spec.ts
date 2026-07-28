@@ -32,7 +32,7 @@ for (const study of studies) {
     await expect(scoreboard).toBeVisible();
     await expect(scoreboard.locator('[data-activity-digit]')).toHaveCount(4);
     await expect(scoreboard.getByText('7D', { exact: true })).toBeVisible();
-    await expect(scoreboard.getByText('YTD', { exact: true })).toBeVisible();
+    await expect(scoreboard.getByText('1Y', { exact: true })).toBeVisible();
 
     const overflow = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,
@@ -71,9 +71,9 @@ test('keeps the scoreboard calm with reduced motion', async ({ page }) => {
   const scoreboard = page.locator('[data-activity-scoreboard]');
   const digit = scoreboard.locator('[data-activity-digit]').first();
   await expect(digit).toBeVisible();
-  const before = await digit.evaluate((element) => (element as HTMLElement).style.transform);
-  await digit.hover();
-  const after = await digit.evaluate((element) => (element as HTMLElement).style.transform);
+  const before = await scoreboard.evaluate((element) => getComputedStyle(element).transform);
+  await scoreboard.hover();
+  const after = await scoreboard.evaluate((element) => getComputedStyle(element).transform);
 
   expect(after).toBe(before);
 });
