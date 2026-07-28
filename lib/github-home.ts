@@ -33,7 +33,7 @@ const FEATURED_REPOSITORIES = [
   },
 ] as const;
 
-const HOME_WINDOW_DAYS = 35;
+const HOME_WINDOW_DAYS = 28;
 const UPSTREAM_TIMEOUT_MS = 8_000;
 
 export type ContributionDay = {
@@ -54,7 +54,7 @@ export type GitHubHomeData = {
   source: 'public-profile' | 'unavailable';
   generatedAt: string;
   total: number | null;
-  periodLabel: 'last year' | 'last 35 days';
+  periodLabel: 'last year' | 'last 28 days';
   today: number;
   weekTotal: number;
   activeDays: number;
@@ -120,7 +120,7 @@ function summarizeCounts(
   const days = daysFromCounts(counts, now);
   const today = dateKeyInTimeZone(now);
   const periodLabel: GitHubHomeData['periodLabel'] =
-    source === 'public-profile' ? 'last year' : 'last 35 days';
+    source === 'public-profile' ? 'last year' : 'last 28 days';
   const periodEntries =
     source === 'public-profile'
       ? [...counts.entries()].filter(([date]) => date <= today)
@@ -225,7 +225,7 @@ async function loadGitHubHomeData(): Promise<UpstreamActivity> {
 
 const getCachedUpstreamActivity = unstable_cache(
   loadGitHubHomeData,
-  ['github-homepage-v8'],
+  ['github-homepage-v9'],
   { revalidate: GITHUB_ACTIVITY_UPSTREAM_FRESH_SECONDS },
 );
 
