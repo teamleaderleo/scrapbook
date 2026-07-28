@@ -111,6 +111,13 @@ jobs:
           name: agent-sigil-lab-screenshots
           path: test-results/**/sigil-lab-*.png
           if-no-files-found: ignore
+      - name: Upload site atlas screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-atlas-screenshots
+          path: test-results/**/site-atlas-*.png
+          if-no-files-found: ignore
       - name: Upload browser diagnostics
         if: always()
         uses: actions/upload-artifact@v4

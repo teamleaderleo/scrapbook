@@ -1,14 +1,18 @@
 'use client';
 
-import { DiscordIcon } from '@/components/icons/discord-icon';
+import { SiteAtlas } from '@/components/site-atlas';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { ChevronDown, Clock3 } from 'lucide-react';
+import {
+  getActiveNavigationItem,
+  isNavigationItemActive,
+  primaryNavigationItems,
+} from '@/lib/site-navigation';
+import { Clock3 } from 'lucide-react';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-export function TimeLink() {
+function TimeLink({ active }: { active: boolean }) {
   const [time, setTime] = useState('--:--');
 
   useEffect(() => {
@@ -30,85 +34,88 @@ export function TimeLink() {
     <Link
       href="/time"
       prefetch
-      className="group flex shrink-0 items-center gap-1.5 rounded-full border border-border/70 bg-card px-2.5 py-1 text-xs font-semibold text-foreground shadow-[0_3px_10px_rgba(20,20,24,0.08)] transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-muted hover:shadow-[0_6px_14px_rgba(20,20,24,0.12)] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:shadow-[0_4px_12px_rgba(0,0,0,0.28)]"
+      aria-current={active ? 'page' : undefined}
+      data-site-time
+      className={`group inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold shadow-[0_3px_10px_rgba(20,20,24,0.08)] transition-[background-color,box-shadow] hover:bg-muted hover:shadow-[0_6px_14px_rgba(20,20,24,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none dark:shadow-[0_4px_12px_rgba(0,0,0,0.28)] ${
+        active
+          ? 'border-foreground/30 bg-foreground/[0.075] text-foreground'
+          : 'border-border/70 bg-card text-foreground'
+      }`}
       title="Open the time converter"
       aria-label={`Open the time converter. Local time ${time}`}
     >
-      <Clock3 size={13} className="hidden sm:block" />
+      <Clock3 size={13} aria-hidden="true" />
       <span className="font-mono tabular-nums">{time}</span>
     </Link>
   );
 }
 
-export function NavMenu({ label, children }: { label: string; children: ReactNode }) {
-  const detailsRef = useRef<HTMLDetailsElement>(null);
-  const summaryRef = useRef<HTMLElement>(null);
+export function SiteNavBar() {
+  const pathname = usePathname() || '/';
+  const activeItem = getActiveNavigationItem(pathname);
+  const directItems = primaryNavigationItems.filter((item) => item.id !== 'home');
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const closeOnOutsideTap = (event: PointerEvent) => {
-      const details = detailsRef.current;
-      if (!details?.open) return;
-      if (event.target instanceof Node && details.contains(event.target)) return;
-      details.open = false;
-    };
-
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && detailsRef.current?.open) {
-        detailsRef.current.open = false;
-        summaryRef.current?.focus();
-      }
-    };
-
-    document.addEventListener('pointerdown', closeOnOutsideTap);
-    document.addEventListener('keydown', closeOnEscape);
-    return () => {
-      document.removeEventListener('pointerdown', closeOnOutsideTap);
-      document.removeEventListener('keydown', closeOnEscape);
-    };
+    setReady(true);
   }, []);
 
   return (
-    <details ref={detailsRef} className="group relative min-w-0">
-      <summary ref={summaryRef} className="flex cursor-pointer list-none items-center gap-1 rounded-full border border-border/60 bg-card px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-        <span>{label}</span>
-        <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
-      </summary>
-      <div className="absolute right-0 top-full z-50 mt-2 w-56 max-w-[calc(100vw-1rem)] overflow-hidden rounded-2xl border border-border/70 bg-popover p-1 text-popover-foreground shadow-[0_22px_58px_rgba(20,20,24,0.24)]">
-        {children}
-      </div>
-    </details>
-  );
-}
-
-async function copyDiscord() {
-  try {
-    await navigator.clipboard.writeText('teamleaderleo');
-    toast.success('Discord username copied', { description: 'teamleaderleo' });
-  } catch {
-    toast.error('Could not copy the Discord username', { description: 'teamleaderleo' });
-  }
-}
-
-const discordHover =
-  'hover:text-[#91889b] focus:text-[#91889b] dark:hover:text-[#cbc4d2] dark:focus:text-[#cbc4d2]';
-
-export function DiscordButton({ menu = false }: { menu?: boolean }) {
-  return (
-    <button
-      onClick={() => void copyDiscord()}
-      className={
-        menu
-          ? `flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted focus:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${discordHover}`
-          : `flex items-center gap-1.5 rounded-sm text-sm font-medium text-muted-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${discordHover}`
-      }
-      type="button"
+    <nav
+      aria-label="Site navigation"
+      className="sticky top-0 z-50 min-w-0 border-b border-border/70 bg-background text-foreground shadow-[0_1px_0_rgba(255,255,255,0.22),0_8px_24px_rgba(20,20,24,0.08)] dark:shadow-[0_1px_0_rgba(255,255,255,0.04),0_10px_28px_rgba(0,0,0,0.28)]"
+      data-site-nav
+      data-site-nav-ready={ready ? 'true' : undefined}
     >
-      <DiscordIcon className="h-4 w-4 shrink-0" />
-      <span>discord</span>
-    </button>
-  );
-}
+      <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-6">
+        <div className="flex h-12 min-w-0 items-center gap-1 sm:gap-1.5">
+          <Link
+            href="/"
+            prefetch
+            aria-current={pathname === '/' ? 'page' : undefined}
+            data-site-home
+            className="inline-flex h-11 min-w-0 max-w-[8.5rem] shrink items-center truncate rounded-md px-1.5 text-sm font-bold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:max-w-none sm:text-base"
+          >
+            teamleaderleo
+          </Link>
 
-export function NavThemeToggle() {
-  return <ThemeToggle />;
+          <TimeLink active={pathname === '/time' || pathname.startsWith('/time/')} />
+
+          <span
+            className="hidden min-h-8 min-w-0 max-w-[8rem] items-center truncate rounded-full border border-border/60 bg-card/70 px-2.5 font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:inline-flex xl:hidden"
+            data-site-current-place
+          >
+            {activeItem?.label ?? 'Scrapbook'}
+          </span>
+
+          <div className="ml-2 hidden min-w-0 flex-1 items-center justify-center gap-1 xl:flex">
+            {directItems.map((item) => {
+              const active = isNavigationItemActive(pathname, item);
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  prefetch
+                  aria-current={active ? 'page' : undefined}
+                  data-site-primary-link={item.id}
+                  className={`inline-flex h-11 items-center rounded-full px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                    active
+                      ? 'bg-foreground text-background'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="ml-auto flex shrink-0 items-center gap-1">
+            <ThemeToggle />
+            <SiteAtlas />
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
 }

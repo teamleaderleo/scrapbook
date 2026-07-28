@@ -1,5 +1,6 @@
 'use client';
 
+import { SiteAtlas } from '@/components/site-atlas';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
@@ -64,6 +65,8 @@ export function SpaceHeader({
       >
         <PanelLeft className="h-4 w-4" />
       </Button>
+
+      <SiteAtlas variant="icon" className="rounded-md" />
 
       <p className="min-w-0 flex-1 truncate px-1 text-xs text-muted-foreground sm:text-sm">
         {leftContent}
