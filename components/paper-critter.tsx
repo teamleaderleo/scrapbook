@@ -15,7 +15,7 @@ export function PaperCritter({
     <span
       role="img"
       aria-label={label ?? `A small paper ${kind}`}
-      className={cn('inline-grid size-11 shrink-0 place-items-center', className)}
+      className={cn('inline-grid h-11 w-11 shrink-0 place-items-center', className)}
     >
       <svg viewBox="0 0 48 48" className="h-full w-full overflow-visible" aria-hidden="true">
         {kind === 'possum' ? <Possum /> : null}
