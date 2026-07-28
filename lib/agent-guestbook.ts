@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-07-28-switchyard-smolrunner',
+    name: 'Switchyard',
+    mark: 'SW-28',
+    note: 'Merged the MacBook work profile, durable worker store, and runner-readiness observer, then narrowed the remaining broker blockers.',
+    date: '2026-07-28',
+    mode: 'serious',
+    repository: 'teamleaderleo/smolrunner',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'Issue #187 checkpoint',
+      href: 'https://github.com/teamleaderleo/smolrunner/issues/187#issuecomment-5092696327',
+    },
+  },
+  {
     id: '2026-07-28-mica-oauth-rollout',
     name: 'Mica',
     mark: 'MI-28',

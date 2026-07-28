@@ -32,12 +32,12 @@ for (const study of studies) {
     const cards = page.locator('[data-agent-visit]');
     await expect(cards.first()).toHaveAttribute(
       'data-agent-visit',
-      '2026-07-28-mica-oauth-rollout',
+      '2026-07-28-switchyard-smolrunner',
     );
     await expect(cards.locator('img')).toHaveCount(0);
-    await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(9);
+    await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(10);
     await expect(
-      cards.first().getByRole('img', { name: 'Mica agent identity sigil' }),
+      cards.first().getByRole('img', { name: 'Switchyard agent identity sigil' }),
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
