@@ -58,11 +58,12 @@ export function PaperCreature({
           : { duration: sleeping ? 3.6 : 2.8, repeat: Infinity, ease: 'easeInOut' }
       }
       className={cn('relative inline-block shrink-0', sizeClasses[size], className)}
+      data-paper-creature
     >
       <svg viewBox="0 0 72 48" className="h-full w-full overflow-visible" aria-hidden="true">
         <motion.path
           d="M23 28 5 20l12 15 10-1Z"
-          className="fill-[#aebaa0] stroke-[#4d5148] dark:fill-[#68705f] dark:stroke-[#e4e7dd]"
+          className="fill-[#b7adbf] stroke-[#4d4852] dark:fill-[#696270] dark:stroke-[#ded8e3]"
           strokeWidth="2"
           strokeLinejoin="round"
           animate={
@@ -84,19 +85,19 @@ export function PaperCreature({
 
         <path
           d="M22 17h25c9 0 15 6 15 14v2H20v-6c0-4 1-7 2-10Z"
-          className="fill-[#c8d0ba] stroke-[#4d5148] dark:fill-[#89917e] dark:stroke-[#eef0e9]"
+          className="fill-[#cec4d6] stroke-[#4d4852] dark:fill-[#918a9b] dark:stroke-[#eeeaf2]"
           strokeWidth="2"
           strokeLinejoin="round"
         />
         <path
           d="M42 8h14c6 0 10 4 10 10v10H43l-5-7 4-13Z"
-          className="fill-[#e2e0c8] stroke-[#4d5148] dark:fill-[#c7c8b5] dark:stroke-[#eef0e9]"
+          className="fill-[#e4dce9] stroke-[#4d4852] dark:fill-[#c9c2d0] dark:stroke-[#eeeaf2]"
           strokeWidth="2"
           strokeLinejoin="round"
         />
         <path
           d="m29 17 4-8 5 8 5-8 4 8"
-          className="fill-[#f4ead2] stroke-[#4d5148] dark:fill-[#e8ddc5] dark:stroke-[#eef0e9]"
+          className="fill-[#f7f2e9] stroke-[#4d4852] dark:fill-[#eeeaf2] dark:stroke-[#eeeaf2]"
           strokeWidth="2"
           strokeLinejoin="round"
         />
@@ -104,7 +105,7 @@ export function PaperCreature({
         {!sleeping ? (
           <path
             d="M28 32v8h8v-8M49 32v8h8v-8"
-            className="stroke-[#4d5148] dark:stroke-[#eef0e9]"
+            className="stroke-[#4d4852] dark:stroke-[#eeeaf2]"
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -112,7 +113,7 @@ export function PaperCreature({
         ) : (
           <path
             d="M27 34h11M48 34h11"
-            className="stroke-[#4d5148] dark:stroke-[#eef0e9]"
+            className="stroke-[#4d4852] dark:stroke-[#eeeaf2]"
             strokeWidth="3"
             strokeLinecap="round"
           />
@@ -121,16 +122,16 @@ export function PaperCreature({
         {sleeping ? (
           <path
             d="M52 17c2 1 4 1 6 0"
-            className="stroke-[#3f423b] dark:stroke-[#3f423b]"
+            className="stroke-[#4d4852] dark:stroke-[#4d4852]"
             strokeWidth="1.8"
             strokeLinecap="round"
           />
         ) : (
-          <circle cx="56" cy="17" r="2.2" className="fill-[#262923]" />
+          <circle cx="56" cy="17" r="2.2" className="fill-[#262329]" />
         )}
         <path
           d={sleeping ? 'M57 24c2 0 4 0 5-1' : 'M57 24c2 1 4 1 6-1'}
-          className="stroke-[#4d5148]"
+          className="stroke-[#4d4852]"
           strokeWidth="1.8"
           strokeLinecap="round"
         />
