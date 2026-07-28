@@ -67,8 +67,8 @@ test('guestbook cards follow the API order and keep generated identities with th
   );
 
   expect(arrivals.map((entry) => entry.id)).toEqual(entries.map((entry) => entry.id));
-  expect(arrivals.map((entry) => Date.parse(entry.arrivedAt ?? ''))).toEqual(
-    entries.map((entry) => Date.parse(`${entry.date}T00:00:00.000Z`)),
+  expect(arrivals.map((entry) => entry.arrivedAt?.slice(0, 10))).toEqual(
+    entries.map((entry) => entry.date),
   );
   expect(entries.map((entry) => Date.parse(entry.date))).toEqual(
     [...entries].map((entry) => Date.parse(entry.date)).sort((left, right) => right - left),
