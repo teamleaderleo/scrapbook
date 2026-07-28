@@ -19,25 +19,25 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: min(32rem, 78vw);
-  aspect-ratio: 1;
-  border-radius: 999px;
+  width: min(34rem, 82vw);
+  aspect-ratio: 2.35 / 1;
+  border-radius: 50%;
   background:
     radial-gradient(
-      circle,
-      rgb(var(--paper-raking-light) / 0.3) 0,
-      rgb(var(--paper-raking-light) / 0.13) 24%,
-      transparent 67%
+      ellipse at center,
+      rgb(var(--paper-raking-light) / 0.24) 0,
+      rgb(var(--paper-raking-light) / 0.1) 28%,
+      transparent 72%
     ),
     radial-gradient(
-      circle at 48% 52%,
-      transparent 0 43%,
-      rgb(var(--paper-raking-shadow) / 0.035) 69%,
-      transparent 76%
+      ellipse at 48% 52%,
+      transparent 0 48%,
+      rgb(var(--paper-raking-shadow) / 0.025) 72%,
+      transparent 80%
     );
-  filter: blur(7px);
+  filter: blur(10px);
   mix-blend-mode: soft-light;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) rotate(-12deg);
 }
 
 .fibreField {
@@ -62,6 +62,7 @@
       transparent 0.86px
     );
   background-size: auto, 17px 19px, 23px 27px;
+  -webkit-mask-image: radial-gradient(circle at 50% 48%, black 0 33%, transparent 74%);
   mask-image: radial-gradient(circle at 50% 48%, black 0 33%, transparent 74%);
   opacity: 0;
   pointer-events: none;
@@ -76,20 +77,20 @@
 .paperCurl {
   position: absolute;
   z-index: 8;
-  bottom: -0.08rem;
-  left: -0.08rem;
-  width: 4.1rem;
-  height: 4.1rem;
-  clip-path: polygon(0 24%, 76% 100%, 0 100%);
+  bottom: -0.06rem;
+  left: -0.06rem;
+  width: 3rem;
+  height: 3rem;
+  clip-path: polygon(0 50%, 50% 100%, 0 100%);
   background:
     linear-gradient(
       36deg,
-      rgb(var(--paper-raking-shadow) / 0.16) 0 5%,
-      rgb(var(--paper-raking-light) / 0.96) 17%,
-      rgb(var(--paper-raking-light) / 0.58) 54%,
-      transparent 55%
+      rgb(var(--paper-raking-shadow) / 0.12) 0 5%,
+      rgb(var(--paper-raking-light) / 0.78) 18%,
+      rgb(var(--paper-raking-light) / 0.36) 50%,
+      transparent 51%
     );
-  filter: drop-shadow(5px -5px 7px rgb(var(--paper-raking-shadow) / 0.13));
+  filter: drop-shadow(3px -3px 5px rgb(var(--paper-raking-shadow) / 0.09));
   opacity: 0;
   pointer-events: none;
   transform-origin: 0 100%;
@@ -100,12 +101,12 @@
 .paperCurl::after {
   content: '';
   position: absolute;
-  bottom: 0.2rem;
-  left: 0.18rem;
-  width: 68%;
+  bottom: 0.16rem;
+  left: 0.14rem;
+  width: 58%;
   height: 1px;
-  background: rgb(var(--paper-fibre-ink) / 0.14);
-  box-shadow: 0 -0.42rem 0 rgb(var(--paper-fibre-ink) / 0.05);
+  background: rgb(var(--paper-fibre-ink) / 0.11);
+  box-shadow: 0 -0.32rem 0 rgb(var(--paper-fibre-ink) / 0.035);
   transform: rotate(35deg);
   transform-origin: left center;
 }
@@ -313,19 +314,19 @@
 
 :global(.dark) .rakingLight {
   mix-blend-mode: screen;
-  opacity: 0.68;
+  opacity: 0.5;
 }
 
 :global(.dark) .paperCurl {
   background:
     linear-gradient(
       36deg,
-      rgb(0 0 0 / 0.4) 0 6%,
-      rgb(var(--paper-raking-light) / 0.16) 19%,
-      rgb(var(--paper-raking-light) / 0.08) 54%,
-      transparent 55%
+      rgb(0 0 0 / 0.18) 0 6%,
+      rgb(var(--paper-raking-light) / 0.12) 19%,
+      rgb(var(--paper-raking-light) / 0.05) 50%,
+      transparent 51%
     );
-  filter: drop-shadow(5px -5px 8px rgb(0 0 0 / 0.34));
+  filter: drop-shadow(3px -3px 6px rgb(0 0 0 / 0.2));
 }
 
 :global(.dark) .counter::before {
@@ -375,12 +376,12 @@
   }
 
   .fibreField {
-    opacity: 0.12;
+    opacity: 0.08;
     transition: none;
   }
 
   .scorecard:hover .fibreField {
-    opacity: 0.12;
+    opacity: 0.08;
   }
 }
 
