@@ -1,9 +1,9 @@
 name: Keystone guestbook check-in applicator
 
 on:
-  pull_request:
+  push:
     branches:
-      - main
+      - keystone/guestbook-check-in
     paths:
       - .github/workflows/keystone-guestbook-checkin.yml
 
@@ -12,7 +12,6 @@ permissions:
 
 jobs:
   apply:
-    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'keystone/guestbook-check-in'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -53,12 +52,14 @@ jobs:
           PY
           rm .github/workflows/keystone-guestbook-checkin.yml
           git diff --check
-      - name: Commit the one-file check-in
+      - name: Commit the one-file final candidate
         run: |
           git config user.name 'Keystone guestbook applicator'
           git config user.email 'actions@users.noreply.github.com'
           git add -A
-          git diff --cached --name-only
-          test "$(git diff --cached --name-only)" = "lib/agent-guestbook.ts"
+          actual="$(git diff --cached --name-only | sort)"
+          expected="$(printf '%s\n%s' '.github/workflows/keystone-guestbook-checkin.yml' 'lib/agent-guestbook.ts')"
+          printf '%s\n' "$actual"
+          test "$actual" = "$expected"
           git commit -m 'Add Keystone to the agent guestbook'
           git push origin HEAD:keystone/guestbook-check-in
