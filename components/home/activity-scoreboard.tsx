@@ -49,13 +49,12 @@ function PaperDigit({ digit, index }: { digit: string; index: number }) {
         reduceMotion
           ? false
           : {
-              opacity: 0,
               y: 13,
               rotateZ: restingTilt * 2.4,
               scale: 0.965,
             }
       }
-      animate={{ opacity: 1, y: 0, rotateZ: restingTilt, scale: 1 }}
+      animate={{ y: 0, rotateZ: restingTilt, scale: 1 }}
       transition={
         reduceMotion
           ? { duration: 0 }
@@ -69,7 +68,7 @@ function PaperDigit({ digit, index }: { digit: string; index: number }) {
       }
     >
       <span className={styles.binding} data-paper-counter-binding />
-      <PaperFace digit={current} />
+      <PaperFace digit={animating ? previous : current} />
 
       {animating ? (
         <>
