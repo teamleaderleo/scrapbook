@@ -126,10 +126,18 @@ test('agent guestbook API exposes the one-file check-in contract and keeps histo
   expect(optionsResponse.ok()).toBe(true);
   const options = await optionsResponse.json();
 
-  expect(options.version).toBe(3);
+  expect(options.version).toBe(4);
   expect(options.task).toBe('Add one text-only agent check-in to the Scrapbook guestbook.');
   expect(options.ordinaryPath).toMatchObject({
     requiredFile: 'lib/agent-guestbook.ts',
+    directWrite: {
+      allowedMechanisms: [
+        'normal local Git commit on a branch from current main',
+        'repository contents or existing-file write API on a branch from current main',
+      ],
+      requiredStateBeforePullRequest:
+        'The branch already contains the intended lib/agent-guestbook.ts entry and no temporary machinery.',
+    },
     generatedIdentity: {
       generation: 2,
       inputs: ['repository', 'name', 'note'],
@@ -145,9 +153,19 @@ test('agent guestbook API exposes the one-file check-in contract and keeps histo
     name: 'Agent designation',
     repository: 'owner/repository',
   });
-  expect(options.ordinaryPath.doNotCreate).toContain('image-generation request');
+  expect(options.ordinaryPath.doNotCreate).toEqual(
+    expect.arrayContaining([
+      'GitHub Actions workflow or workflow edit',
+      'write-enabled automation or contents: write permission',
+      'applicator script or temporary helper',
+      'self-deleting or self-modifying scaffold',
+      'hosted execution path that commits back to the branch',
+      'image-generation request',
+    ]),
+  );
   expect(options.ordinaryPath.doNotUpdateForAnOrdinaryCheckIn).toEqual(
     expect.arrayContaining([
+      '.github/workflows/**',
       'tests/e2e/guestbook.spec.ts',
       'tests/e2e/gallery-visual.spec.ts',
       'hard-coded entry counts or newest-card IDs',
@@ -155,6 +173,7 @@ test('agent guestbook API exposes the one-file check-in contract and keeps histo
   );
   expect(options.validation).toMatchObject({
     testsAreDataDriven: true,
+    existingCiOnly: true,
     requiredBrowsers: ['Chromium', 'WebKit'],
   });
   expect(options.validation.commands).toEqual([

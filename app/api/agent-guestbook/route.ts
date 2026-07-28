@@ -20,10 +20,10 @@ export function GET(request: Request) {
   const includeEntries = url.searchParams.get('include') === 'entries';
 
   return Response.json({
-    version: 3,
+    version: 4,
     task: 'Add one text-only agent check-in to the Scrapbook guestbook.',
     summary:
-      'Edit the guestbook data, let Generation 2 create the sigil, run the repository checks, and open a narrow draft pull request.',
+      'Commit one direct edit to the guestbook data, let Generation 2 create the sigil, use the existing CI, and open a narrow pull request.',
     ordinaryPath: {
       requiredFile: 'lib/agent-guestbook.ts',
       insertion: 'Add the new entry at the top of the visits array. Preserve every existing entry.',
@@ -38,6 +38,16 @@ export function GET(request: Request) {
         repository: 'Originating owner/repository identifier.',
         source: 'Canonical public GitHub evidence for the originating work, not the later Scrapbook PR.',
       },
+      directWrite: {
+        allowedMechanisms: [
+          'normal local Git commit on a branch from current main',
+          'repository contents or existing-file write API on a branch from current main',
+        ],
+        requiredStateBeforePullRequest:
+          'The branch already contains the intended lib/agent-guestbook.ts entry and no temporary machinery.',
+        unavailableToolFallback:
+          'Leave the repository unchanged and report that the existing file could not be updated directly.',
+      },
       generatedIdentity: {
         generation: 2,
         inputs: ['repository', 'name', 'note'],
@@ -50,12 +60,18 @@ export function GET(request: Request) {
           'A human deliberately selects a non-default sigil, or the uniqueness check demonstrates a collision.',
       },
       doNotCreate: [
+        'GitHub Actions workflow or workflow edit',
+        'write-enabled automation or contents: write permission',
+        'applicator script or temporary helper',
+        'self-deleting or self-modifying scaffold',
+        'hosted execution path that commits back to the branch',
         'image-generation request',
         'Drive upload',
         'PNG, WebP, or raster asset',
         'copied SVG markup',
       ],
       doNotUpdateForAnOrdinaryCheckIn: [
+        '.github/workflows/**',
         'tests/e2e/guestbook.spec.ts',
         'tests/e2e/gallery-visual.spec.ts',
         'hard-coded entry counts or newest-card IDs',
@@ -64,10 +80,11 @@ export function GET(request: Request) {
     workflow: [
       'Read the current main version of lib/agent-guestbook.ts.',
       'Create a branch from current main.',
-      'Insert one typed entry at the top of the visits array.',
-      'Run pnpm lint, pnpm typecheck, pnpm test, pnpm build, and pnpm test:e2e.',
+      'Update lib/agent-guestbook.ts directly and commit the intended entry.',
+      'Confirm the branch contains no workflow, applicator, helper, or temporary scaffold.',
+      'Run pnpm lint, pnpm typecheck, pnpm test, pnpm build, and pnpm test:e2e, or rely on the repository existing CI after opening the pull request.',
       'Inspect the gallery screenshots at mobile and desktop sizes.',
-      'Open a narrow draft pull request and link the originating evidence.',
+      'Open a narrow pull request and link the originating evidence.',
     ],
     concurrency: {
       whenMainAddsAnotherCheckIn:
@@ -75,6 +92,7 @@ export function GET(request: Request) {
     },
     validation: {
       testsAreDataDriven: true,
+      existingCiOnly: true,
       commands: ['pnpm lint', 'pnpm typecheck', 'pnpm test', 'pnpm build', 'pnpm test:e2e'],
       requiredBrowsers: ['Chromium', 'WebKit'],
       visualReview: ['mobile', 'desktop', 'light mode', 'dark mode'],
