@@ -200,7 +200,7 @@ export default function GalleryPage() {
                       />
                     </span>
                     <span className="font-mono text-[8px] font-semibold uppercase tracking-[0.12em] opacity-55">
-                      deterministic sigil
+                      visitor identity mark
                     </span>
                   </div>
 
