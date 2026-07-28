@@ -1,8 +1,9 @@
 'use client';
 
 import { ScrapbookPet } from '@/components/home/scrapbook-pet';
-import { motion, useReducedMotion } from 'framer-motion';
-import { useEffect, useMemo, useState } from 'react';
+import { motion, useAnimate, useReducedMotion } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import styles from './activity-scoreboard.module.css';
 
 function countdownToUtcMidnight() {
   const now = new Date();
@@ -14,27 +15,21 @@ function countdownToUtcMidnight() {
   return [hours, minutes, remainder].map((part) => String(part).padStart(2, '0')).join(':');
 }
 
-function StaticHalf({ digit, half }: { digit: string; half: 'top' | 'bottom' }) {
+function PaperFace({ digit, className = '' }: { digit: string; className?: string }) {
   return (
-    <span
-      aria-hidden="true"
-      className={`absolute inset-x-0 h-1/2 overflow-hidden ${half === 'top' ? 'top-0' : 'bottom-0'}`}
-    >
-      <span
-        className={`absolute inset-x-0 flex h-[200%] items-center justify-center tabular-nums ${half === 'top' ? 'top-0' : 'bottom-0'}`}
-      >
-        {digit}
-      </span>
+    <span aria-hidden="true" className={`${styles.face} ${className}`}>
+      <span className={styles.number}>{digit}</span>
     </span>
   );
 }
 
-function SplitFlapDigit({ digit, index }: { digit: string; index: number }) {
+function PaperDigit({ digit, index }: { digit: string; index: number }) {
   const reduceMotion = useReducedMotion();
   const [current, setCurrent] = useState(digit);
   const [previous, setPrevious] = useState(digit);
   const [sequence, setSequence] = useState(0);
   const [animating, setAnimating] = useState(false);
+  const restingTilt = index % 2 === 0 ? -0.72 : 0.58;
 
   useEffect(() => {
     if (digit === current) return;
@@ -44,57 +39,97 @@ function SplitFlapDigit({ digit, index }: { digit: string; index: number }) {
     setAnimating(!reduceMotion && document.visibilityState === 'visible');
   }, [current, digit, reduceMotion]);
 
-  const stagger = (3 - index) * 0.035;
+  const delay = (3 - index) * 0.055;
 
   return (
-    <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-      <StaticHalf digit={current} half="top" />
-      <StaticHalf digit={current} half="bottom" />
+    <motion.span
+      className={styles.digit}
+      data-paper-digit
+      initial={
+        reduceMotion
+          ? false
+          : {
+              opacity: 0,
+              y: 13,
+              rotateZ: restingTilt * 2.4,
+              scale: 0.965,
+            }
+      }
+      animate={{ opacity: 1, y: 0, rotateZ: restingTilt, scale: 1 }}
+      transition={
+        reduceMotion
+          ? { duration: 0 }
+          : {
+              type: 'spring',
+              stiffness: 280,
+              damping: 22,
+              mass: 0.72,
+              delay: 0.08 + index * 0.055,
+            }
+      }
+    >
+      <span className={styles.binding} data-paper-counter-binding />
+      <PaperFace digit={current} />
 
       {animating ? (
         <>
           <motion.span
             key={`depart-${sequence}`}
             aria-hidden="true"
-            className="absolute inset-x-0 top-0 z-20 h-1/2 origin-bottom overflow-hidden bg-[#1b1c20] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_-8px_12px_rgba(0,0,0,0.2)] [backface-visibility:hidden] [transform-style:preserve-3d]"
-            initial={{ rotateX: 0 }}
-            animate={{ rotateX: -90 }}
-            transition={{ duration: 0.22, delay: stagger, ease: [0.55, 0.06, 0.68, 0.19] }}
+            className={`${styles.sheet} ${styles.departing}`}
+            initial={{ rotateX: 0, y: 0, opacity: 1, filter: 'blur(0px)' }}
+            animate={{
+              rotateX: [0, -24, -103],
+              y: [0, -2, -12],
+              opacity: [1, 1, 0],
+              filter: ['blur(0px)', 'blur(0px)', 'blur(1.4px)'],
+            }}
+            transition={{
+              duration: 0.46,
+              delay,
+              times: [0, 0.42, 1],
+              ease: [0.55, 0.06, 0.68, 0.19],
+            }}
           >
-            <span className="absolute inset-x-0 top-0 flex h-[200%] items-center justify-center tabular-nums">
-              {previous}
-            </span>
+            <span className={styles.number}>{previous}</span>
           </motion.span>
+
           <motion.span
             key={`arrive-${sequence}`}
             aria-hidden="true"
-            className="absolute inset-x-0 bottom-0 z-30 h-1/2 origin-top overflow-hidden bg-[#15161a] shadow-[inset_0_8px_12px_rgba(0,0,0,0.34)] [backface-visibility:hidden] [transform-style:preserve-3d]"
-            initial={{ rotateX: 90 }}
-            animate={{ rotateX: 0 }}
-            transition={{ duration: 0.28, delay: stagger + 0.19, ease: [0.22, 1, 0.36, 1] }}
+            className={`${styles.sheet} ${styles.arriving}`}
+            initial={{ rotateX: 88, y: '20%', opacity: 0.2, scale: 0.955 }}
+            animate={{
+              rotateX: [88, -9, 2, 0],
+              y: ['20%', '-2.5%', '0.7%', '0%'],
+              opacity: [0.2, 1, 1, 1],
+              scale: [0.955, 1.018, 0.997, 1],
+            }}
+            transition={{
+              duration: 0.62,
+              delay: delay + 0.16,
+              times: [0, 0.58, 0.82, 1],
+              ease: [0.22, 1, 0.36, 1],
+            }}
             onAnimationComplete={() => setAnimating(false)}
           >
-            <span className="absolute inset-x-0 bottom-0 flex h-[200%] items-center justify-center tabular-nums">
+            <motion.span
+              className={styles.number}
+              initial={{ opacity: 0.35, scale: 1.2, filter: 'blur(2px)' }}
+              animate={{ opacity: 1, scale: [1.2, 0.96, 1], filter: 'blur(0px)' }}
+              transition={{
+                duration: 0.34,
+                delay: delay + 0.34,
+                times: [0, 0.7, 1],
+                ease: [0.16, 1, 0.3, 1],
+              }}
+            >
               {current}
-            </span>
+            </motion.span>
           </motion.span>
         </>
       ) : null}
-
-      <span aria-hidden="true" className="absolute inset-x-0 top-1/2 z-40 h-px bg-black/80" />
-      <span
-        aria-hidden="true"
-        className="absolute inset-x-0 top-1/2 z-40 h-px -translate-y-px bg-white/[0.05]"
-      />
-      <span
-        aria-hidden="true"
-        className="absolute left-1 top-1/2 z-50 h-1.5 w-1 -translate-y-1/2 rounded-sm bg-black/65 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
-      />
-      <span
-        aria-hidden="true"
-        className="absolute right-1 top-1/2 z-50 h-1.5 w-1 -translate-y-1/2 rounded-sm bg-black/65 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
-      />
-    </span>
+    </motion.span>
   );
 }
 
@@ -103,20 +138,56 @@ function ScoreDigits({ value }: { value: number }) {
     () => String(Math.max(0, Math.floor(value))).slice(-4).padStart(4, '0').split(''),
     [value],
   );
+  const reduceMotion = useReducedMotion();
+  const previousValue = useRef(value);
+  const [scope, animate] = useAnimate();
+
+  useEffect(() => {
+    if (previousValue.current === value) return;
+    previousValue.current = value;
+    if (reduceMotion || !scope.current) return;
+
+    void animate(
+      scope.current,
+      {
+        y: [0, -2.5, 1, 0],
+        rotateZ: [0, -0.32, 0.14, 0],
+      },
+      { duration: 0.72, times: [0, 0.32, 0.72, 1], ease: [0.2, 0.8, 0.2, 1] },
+    );
+    void animate(
+      '[data-paper-counter-binding]',
+      { scaleX: [1, 1.055, 0.985, 1] },
+      { duration: 0.68, ease: [0.2, 0.8, 0.2, 1] },
+    );
+    void animate(
+      '[data-paper-counter-shadow]',
+      { opacity: [0.46, 0.68, 0.38, 0.46], scaleX: [1, 1.025, 0.99, 1] },
+      { duration: 0.72, ease: [0.2, 0.8, 0.2, 1] },
+    );
+  }, [animate, reduceMotion, scope, value]);
 
   return (
     <div
-      className="flex min-w-0 gap-1.5 sm:gap-2"
+      ref={scope}
+      className={`${styles.counter} flex min-w-0 gap-1.5 sm:gap-2`}
       aria-label={`${value} contributions today`}
+      data-paper-counter
+      data-reduced-motion={reduceMotion ? 'true' : 'false'}
       data-wind-scoreboard
     >
+      <span
+        aria-hidden="true"
+        className={styles.counterShadow}
+        data-paper-counter-shadow
+      />
       {digits.map((digit, index) => (
         <div
           key={index}
           data-activity-digit
-          className="relative aspect-[0.78] min-w-0 flex-1 overflow-hidden rounded-[0.55rem] border border-white/12 bg-[#17181b] px-1 font-mono text-[clamp(2rem,5vw,4.25rem)] font-semibold leading-none text-[#f3f0e9] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-10px_18px_rgba(0,0,0,0.3),0_7px_18px_rgba(0,0,0,0.2)]"
+          className={`${styles.digitSlot} relative aspect-[0.78] min-w-0 flex-1 font-mono text-[clamp(2rem,5vw,4.25rem)] font-semibold leading-none tabular-nums`}
         >
-          <SplitFlapDigit digit={digit} index={index} />
+          <PaperDigit digit={digit} index={index} />
         </div>
       ))}
     </div>
