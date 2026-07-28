@@ -85,19 +85,21 @@ for (const study of studies) {
 
     const minimumHeight = study.height <= 780 ? 232 : 248;
     await expect
-      .poll(async () =>
-        scoreboard.evaluate((element, expectedHeight) => {
-          const rect = element.getBoundingClientRect();
-          return rect.width > 0 && rect.height >= expectedHeight;
-        }, minimumHeight),
+      .poll(
+        () =>
+          scoreboard.evaluate(
+            (element, constraints) => {
+              const rect = element.getBoundingClientRect();
+              return {
+                heightReady: rect.height >= constraints.minimumHeight,
+                widthContained: rect.width > 0 && rect.width <= constraints.viewportWidth,
+              };
+            },
+            { minimumHeight, viewportWidth: study.width },
+          ),
+        { timeout: 10_000 },
       )
-      .toBe(true);
-    const dimensions = await scoreboard.evaluate((element) => {
-      const rect = element.getBoundingClientRect();
-      return { width: rect.width, height: rect.height };
-    });
-    expect(dimensions.width).toBeLessThanOrEqual(study.width);
-    expect(dimensions.height).toBeGreaterThanOrEqual(minimumHeight);
+      .toEqual({ heightReady: true, widthContained: true });
 
     const screenshotPath = path.join(
       'test-results',
