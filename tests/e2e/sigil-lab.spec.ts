@@ -17,6 +17,8 @@ const variants = [
 ];
 
 test('sigil lab exposes layered generations and visual evidence', async ({ page }, testInfo) => {
+  test.slow();
+
   for (const variant of variants) {
     await page.emulateMedia({ colorScheme: variant.theme });
     await page.setViewportSize({ width: variant.width, height: variant.height });

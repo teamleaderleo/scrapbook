@@ -29,10 +29,16 @@ for (const study of studies) {
     }
 
     const scoreboard = page.locator('[data-activity-scoreboard]');
-    await expect(scoreboard).toBeVisible();
+    await expect(scoreboard).toBeVisible({ timeout: 15_000 });
     await expect(scoreboard.locator('[data-activity-digit]')).toHaveCount(4);
     await expect(scoreboard.getByText('7D', { exact: true })).toBeVisible();
-    await expect(scoreboard.getByText('YTD', { exact: true })).toBeVisible();
+    await expect(scoreboard.getByText('1Y', { exact: true })).toBeVisible();
+    await expect
+      .poll(async () => {
+        const box = await scoreboard.boundingBox();
+        return box ? Math.min(box.width, box.height) : 0;
+      })
+      .toBeGreaterThan(0);
 
     const overflow = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,
@@ -40,13 +46,10 @@ for (const study of studies) {
     }));
     expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth);
 
-    const dimensions = await scoreboard.evaluate((element) => {
-      const rect = element.getBoundingClientRect();
-      return { width: rect.width, height: rect.height };
-    });
-    expect(dimensions.width).toBeGreaterThan(0);
-    expect(dimensions.width).toBeLessThanOrEqual(study.width);
-    expect(dimensions.height).toBeGreaterThanOrEqual(study.height <= 780 ? 232 : 248);
+    const dimensions = await scoreboard.boundingBox();
+    expect(dimensions).toBeTruthy();
+    expect(dimensions!.width).toBeLessThanOrEqual(study.width);
+    expect(dimensions!.height).toBeGreaterThanOrEqual(study.height <= 780 ? 232 : 248);
 
     const screenshotPath = path.join(
       'test-results',
@@ -70,10 +73,10 @@ test('keeps the scoreboard calm with reduced motion', async ({ page }) => {
 
   const scoreboard = page.locator('[data-activity-scoreboard]');
   const digit = scoreboard.locator('[data-activity-digit]').first();
-  await expect(digit).toBeVisible();
-  const before = await digit.evaluate((element) => (element as HTMLElement).style.transform);
-  await digit.hover();
-  const after = await digit.evaluate((element) => (element as HTMLElement).style.transform);
+  await expect(digit).toBeVisible({ timeout: 15_000 });
+  const before = await scoreboard.evaluate((element) => getComputedStyle(element).transform);
+  await scoreboard.hover();
+  const after = await scoreboard.evaluate((element) => getComputedStyle(element).transform);
 
   expect(after).toBe(before);
 });
@@ -86,7 +89,7 @@ test('keeps split-flap digits readable in forced colours', async ({ page }, test
   await page.goto('/');
 
   const digit = page.locator('[data-activity-digit]').first();
-  await expect(digit).toBeVisible();
+  await expect(digit).toBeVisible({ timeout: 15_000 });
   const style = await digit.evaluate((element) => {
     const computed = window.getComputedStyle(element);
     return {

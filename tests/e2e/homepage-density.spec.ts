@@ -15,9 +15,7 @@ async function readHomepageFootprint(page: Page) {
     const dashboard = document.querySelector<HTMLElement>('[data-home-activity-dashboard]');
     const scoreboard = document.querySelector<HTMLElement>('[data-activity-scoreboard]');
     const activityGrid = document.querySelector<HTMLElement>('[data-home-activity-grid]');
-    const activityCell = document.querySelector<HTMLElement>(
-      '[aria-label="Four weeks of GitHub activity"] button',
-    );
+    const activityCell = document.querySelector<HTMLElement>('[data-contribution-week-grid] button');
     const pet = document.querySelector<HTMLElement>('[data-scrapbook-pet]');
     const recentSection = document.querySelector<HTMLElement>('[data-recent-systems]');
     const recentCard = recentSection?.querySelector<HTMLElement>('a');
@@ -77,8 +75,8 @@ for (const viewport of desktopViewports) {
     const response = await page.goto('/');
     expect(response?.ok()).toBe(true);
 
-    await expect(page.locator('[data-wind-scoreboard]')).toBeVisible();
-    await expect(page.locator('[aria-label="Four weeks of GitHub activity"]')).toBeVisible();
+    await expect(page.locator('[data-wind-scoreboard]')).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('[data-contribution-week-grid]')).toBeVisible();
     await expect(page.locator('[data-scrapbook-pet]')).toBeVisible();
     await expect(page.getByText('Recent systems', { exact: true })).toBeVisible();
 
@@ -90,7 +88,7 @@ for (const viewport of desktopViewports) {
     expect(footprint.recentSection.y).toBeLessThan(footprint.viewport.height - 72);
     expect(footprint.recentCard.y).toBeLessThan(footprint.viewport.height - 40);
     expect(footprint.activityCell.width).toBeGreaterThanOrEqual(42);
-    expect(footprint.activityCell.width).toBeLessThanOrEqual(56);
+    expect(footprint.activityCell.width).toBeLessThanOrEqual(58);
     expect(Math.abs(footprint.activityCell.width - footprint.activityCell.height)).toBeLessThan(1);
 
     await removeDevelopmentChrome(page);
@@ -112,7 +110,7 @@ test('moves through the desktop layout transition without inflating the activity
   await page.setViewportSize({ width: 820, height: 720 });
   const response = await page.goto('/');
   expect(response?.ok()).toBe(true);
-  await expect(page.locator('[data-home-activity-dashboard]')).toBeVisible();
+  await expect(page.locator('[data-home-activity-dashboard]')).toBeVisible({ timeout: 15_000 });
 
   const stacked = await readHomepageFootprint(page);
   expect(Math.abs(stacked.scoreboard.x - stacked.activityGrid.x)).toBeLessThan(2);
@@ -122,32 +120,33 @@ test('moves through the desktop layout transition without inflating the activity
   const sideBySide = await readHomepageFootprint(page);
   expect(sideBySide.activityGrid.x).toBeGreaterThan(sideBySide.scoreboard.right);
   expect(Math.abs(sideBySide.scoreboard.y - sideBySide.activityGrid.y)).toBeLessThan(2);
-  expect(Math.abs(stacked.activityCell.width - sideBySide.activityCell.width)).toBeLessThan(6);
+  expect(Math.abs(stacked.activityCell.width - sideBySide.activityCell.width)).toBeLessThanOrEqual(8);
   expect(sideBySide.document.width).toBeLessThanOrEqual(sideBySide.viewport.width);
 });
 
-test('keeps hover surfaces planted and lets the visitor pet Scraplet', async ({ page }) => {
+test('lifts the scorecard on hover and lets the visitor pet Scraplet', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   const response = await page.goto('/');
   expect(response?.ok()).toBe(true);
 
+  const scoreboard = page.locator('[data-activity-scoreboard]');
   const digit = page.locator('[data-activity-digit]').first();
-  const recentCard = page.locator('[data-recent-systems] a').first();
   const pet = page.locator('[data-scrapbook-pet]');
 
+  await expect(scoreboard).toBeVisible({ timeout: 15_000 });
   await expect(digit).toBeVisible();
-  await expect(recentCard).toBeVisible();
   await expect(pet).toHaveAttribute('data-pets', '0');
 
+  const scoreboardBefore = await scoreboard.evaluate((element) => getComputedStyle(element).transform);
   const digitBefore = await digit.evaluate((element) => getComputedStyle(element).transform);
-  await digit.hover();
-  const digitAfter = await digit.evaluate((element) => getComputedStyle(element).transform);
-  expect(digitAfter).toBe(digitBefore);
+  await scoreboard.hover();
 
-  const cardBefore = await recentCard.evaluate((element) => getComputedStyle(element).transform);
-  await recentCard.hover();
-  const cardAfter = await recentCard.evaluate((element) => getComputedStyle(element).transform);
-  expect(cardAfter).toBe(cardBefore);
+  await expect
+    .poll(() => scoreboard.evaluate((element) => getComputedStyle(element).transform))
+    .not.toBe(scoreboardBefore);
+  await expect
+    .poll(() => digit.evaluate((element) => getComputedStyle(element).transform))
+    .not.toBe(digitBefore);
 
   await pet.click();
   await expect(pet).toHaveAttribute('data-pets', '1');

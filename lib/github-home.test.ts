@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { getRecentDateKeys, parsePublicContributionHtml } from './github-activity-utils';
+import {
+  alignContributionDaysToWeekColumns,
+  getRecentDateKeys,
+  parsePublicContributionHtml,
+  parsePublicContributionTotal,
+} from './github-activity-utils';
 import { parseGitHubRateLimit } from './github-home';
 
 describe('parsePublicContributionHtml', () => {
@@ -29,6 +34,20 @@ describe('parsePublicContributionHtml', () => {
   });
 });
 
+describe('parsePublicContributionTotal', () => {
+  it('reads the rolling-year total reported by the profile calendar', () => {
+    expect(
+      parsePublicContributionTotal(
+        '<h2 class="f4 text-normal mb-2">1,234 contributions in the last year</h2>',
+      ),
+    ).toBe(1234);
+  });
+
+  it('returns null when the profile total is absent', () => {
+    expect(parsePublicContributionTotal('<main>Contribution calendar</main>')).toBeNull();
+  });
+});
+
 describe('getRecentDateKeys', () => {
   it('uses the GitHub UTC contribution date', () => {
     const days = getRecentDateKeys(new Date('2026-07-25T06:30:00Z'));
@@ -46,6 +65,26 @@ describe('getRecentDateKeys', () => {
     expect(days).toHaveLength(35);
     expect(days[0]).toBe('2026-06-21');
     expect(days.at(-1)).toBe('2026-07-25');
+  });
+});
+
+describe('alignContributionDaysToWeekColumns', () => {
+  it('pads the first and last weeks so columns run Sunday through Saturday', () => {
+    const days = [
+      { date: '2026-07-22', count: 1 },
+      { date: '2026-07-23', count: 2 },
+      { date: '2026-07-24', count: 3 },
+      { date: '2026-07-25', count: 4 },
+      { date: '2026-07-26', count: 5 },
+    ];
+
+    const cells = alignContributionDaysToWeekColumns(days);
+    expect(cells).toHaveLength(14);
+    expect(cells.slice(0, 3)).toEqual([null, null, null]);
+    expect(cells[3]).toEqual(days[0]);
+    expect(cells[6]).toEqual(days[3]);
+    expect(cells[7]).toEqual(days[4]);
+    expect(cells.slice(8)).toEqual([null, null, null, null, null, null]);
   });
 });
 
