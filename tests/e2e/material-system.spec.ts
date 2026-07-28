@@ -62,13 +62,20 @@ for (const study of studies) {
     }));
     expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.clientWidth);
 
+    const minimumHeight = study.height <= 780 ? 232 : 248;
+    await expect
+      .poll(async () =>
+        scoreboard.evaluate((element, expectedHeight) => {
+          const rect = element.getBoundingClientRect();
+          return rect.width > 0 && rect.height >= expectedHeight;
+        }, minimumHeight),
+      )
+      .toBe(true);
     const dimensions = await scoreboard.evaluate((element) => {
       const rect = element.getBoundingClientRect();
       return { width: rect.width, height: rect.height };
     });
-    expect(dimensions.width).toBeGreaterThan(0);
     expect(dimensions.width).toBeLessThanOrEqual(study.width);
-    expect(dimensions.height).toBeGreaterThanOrEqual(study.height <= 780 ? 232 : 248);
 
     const screenshotPath = path.join(
       'test-results',
