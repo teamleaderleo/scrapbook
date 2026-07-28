@@ -282,12 +282,26 @@ test('homepage scorecard lifts under pointer movement', async ({ page }) => {
   await waitForHomeActivity(page);
 
   const scoreboard = page.locator('[data-activity-scoreboard]');
-  const before = await scoreboard.evaluate((element) => getComputedStyle(element).transform);
-  await scoreboard.hover();
+  const counter = scoreboard.locator('[data-paper-counter]');
+  await expect(scoreboard).toBeVisible();
+  await expect(counter).toHaveAttribute('data-reduced-motion', 'false');
+  const before = await scoreboard.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  });
+
+  await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2, { steps: 6 });
 
   await expect
-    .poll(() => scoreboard.evaluate((element) => getComputedStyle(element).transform))
-    .not.toBe(before);
+    .poll(
+      () =>
+        scoreboard.evaluate((element, restingY) => {
+          const rect = element.getBoundingClientRect();
+          return restingY - rect.y;
+        }, before.y),
+      { timeout: 10_000 },
+    )
+    .toBeGreaterThan(2);
 });
 
 test('homepage scorecard remains planted with reduced motion', async ({ page }) => {
@@ -296,11 +310,25 @@ test('homepage scorecard remains planted with reduced motion', async ({ page }) 
   await waitForHomeActivity(page);
 
   const scoreboard = page.locator('[data-activity-scoreboard]');
-  const before = await scoreboard.evaluate((element) => getComputedStyle(element).transform);
-  await scoreboard.hover();
-  const after = await scoreboard.evaluate((element) => getComputedStyle(element).transform);
+  const counter = scoreboard.locator('[data-paper-counter]');
+  await expect(scoreboard).toBeVisible();
+  await expect(counter).toHaveAttribute('data-reduced-motion', 'true');
+  const before = await scoreboard.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  });
 
-  expect(after).toBe(before);
+  await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2, { steps: 6 });
+  await page.waitForTimeout(500);
+  const after = await scoreboard.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  });
+
+  expect(Math.abs(after.x - before.x)).toBeLessThan(1);
+  expect(Math.abs(after.y - before.y)).toBeLessThan(1);
+  expect(Math.abs(after.width - before.width)).toBeLessThan(1);
+  expect(Math.abs(after.height - before.height)).toBeLessThan(1);
 });
 
 test('mobile gallery does not overflow horizontally', async ({ page }) => {
