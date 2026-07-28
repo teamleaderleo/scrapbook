@@ -19,7 +19,7 @@ type ActivitySnapshot = {
 };
 
 type LiveActivityResponse = {
-  source: 'public-profile';
+  source: 'github-graphql' | 'public-profile';
   today: number;
   weekTotal: number;
   yearTotal: number | null;

@@ -1,4 +1,5 @@
 import { unstable_cache } from 'next/cache';
+import { fetchGitHubContributionCalendar } from './github-contribution-calendar';
 import {
   dateKeyInTimeZone,
   getRecentDateKeys,
@@ -51,7 +52,7 @@ export type GitHubRateLimit = {
 
 export type GitHubHomeData = {
   username: string;
-  source: 'public-profile' | 'unavailable';
+  source: 'github-graphql' | 'public-profile' | 'unavailable';
   generatedAt: string;
   total: number | null;
   periodLabel: 'last year' | 'last 35 days';
@@ -119,17 +120,18 @@ function summarizeCounts(
 ): ActivitySummary {
   const days = daysFromCounts(counts, now);
   const today = dateKeyInTimeZone(now);
-  const periodLabel: GitHubHomeData['periodLabel'] =
-    source === 'public-profile' ? 'last year' : 'last 35 days';
-  const periodEntries =
-    source === 'public-profile'
-      ? [...counts.entries()].filter(([date]) => date <= today)
-      : days.map((day) => [day.date, day.count] as const);
-  const streakDays = source === 'public-profile' ? daysFromCounts(counts, now, 366) : days;
+  const hasRollingYearCalendar = source !== 'unavailable';
+  const periodLabel: GitHubHomeData['periodLabel'] = hasRollingYearCalendar
+    ? 'last year'
+    : 'last 35 days';
+  const periodEntries = hasRollingYearCalendar
+    ? [...counts.entries()].filter(([date]) => date <= today)
+    : days.map((day) => [day.date, day.count] as const);
+  const streakDays = hasRollingYearCalendar ? daysFromCounts(counts, now, 366) : days;
   const calculatedTotal = periodEntries.reduce((sum, [, count]) => sum + count, 0);
 
   return {
-    total: source === 'public-profile' && reportedTotal !== null ? reportedTotal : calculatedTotal,
+    total: hasRollingYearCalendar && reportedTotal !== null ? reportedTotal : calculatedTotal,
     periodLabel,
     today: days.at(-1)?.count ?? 0,
     weekTotal: days.slice(-7).reduce((sum, day) => sum + day.count, 0),
@@ -207,25 +209,49 @@ function unavailableHomeData(now = new Date()): GitHubHomeData {
   };
 }
 
-async function loadGitHubHomeData(): Promise<UpstreamActivity> {
-  const { counts, total } = await fetchPublicProfileCounts();
-  const summary = summarizeCounts(counts, 'public-profile', new Date(), total);
-
+function createUpstreamActivity(
+  counts: Map<string, number>,
+  total: number | null,
+  source: Exclude<ActivitySource, 'unavailable'>,
+  rateLimit: GitHubRateLimit | null,
+  now = new Date(),
+): UpstreamActivity {
+  const summary = summarizeCounts(counts, source, now, total);
   return {
     activity: {
       username: GITHUB_USERNAME,
-      source: 'public-profile',
-      generatedAt: new Date().toISOString(),
+      source,
+      generatedAt: now.toISOString(),
       ...summary,
       repositories: featuredRepositories(),
     },
-    rateLimit: null,
+    rateLimit,
   };
+}
+
+async function loadGitHubHomeData(): Promise<UpstreamActivity> {
+  const profileToken = process.env.GITHUB_PROFILE_TOKEN?.trim();
+  if (profileToken) {
+    try {
+      const result = await fetchGitHubContributionCalendar(GITHUB_USERNAME, profileToken);
+      return createUpstreamActivity(
+        result.counts,
+        result.total,
+        'github-graphql',
+        result.rateLimit,
+      );
+    } catch (error) {
+      console.warn('Authenticated GitHub contribution calendar failed; using public profile', error);
+    }
+  }
+
+  const { counts, total } = await fetchPublicProfileCounts();
+  return createUpstreamActivity(counts, total, 'public-profile', null);
 }
 
 const getCachedUpstreamActivity = unstable_cache(
   loadGitHubHomeData,
-  ['github-homepage-v8'],
+  ['github-homepage-v9'],
   { revalidate: GITHUB_ACTIVITY_UPSTREAM_FRESH_SECONDS },
 );
 
