@@ -9,7 +9,7 @@ function result(source: GitHubHomeResult['activity']['source']): GitHubHomeResul
       source,
       generatedAt: '2026-07-27T01:00:00.000Z',
       total: 18,
-      periodLabel: source === 'public-profile' ? 'last year' : 'last 35 days',
+      periodLabel: source === 'unavailable' ? 'last 35 days' : 'last year',
       today: 3,
       weekTotal: 9,
       activeDays: 5,
@@ -48,6 +48,11 @@ describe('createGitHubActivityHeaders', () => {
     expect(headers.get('x-activity-failures')).toBe('2');
     expect(headers.has('x-activity-ratelimit-limit')).toBe(false);
     expect(headers.get('x-request-id')).toBe('request-123');
+  });
+
+  it('identifies the supported authenticated contribution source', () => {
+    const headers = createGitHubActivityHeaders(result('github-graphql'), 'request-graphql');
+    expect(headers.get('x-activity-source')).toBe('github-graphql');
   });
 
   it('does not label an unavailable placeholder as generated activity', () => {
