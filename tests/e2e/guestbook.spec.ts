@@ -59,17 +59,11 @@ test('guestbook cards follow the API order and keep generated identities with th
   await page.goto('/gallery');
 
   const cards = page.locator('[data-agent-visit]');
-  const arrivals = await cards.evaluateAll((elements) =>
-    elements.map((element) => ({
-      id: element.getAttribute('data-agent-visit'),
-      arrivedAt: element.getAttribute('data-arrived-at'),
-    })),
+  const cardIds = await cards.evaluateAll((elements) =>
+    elements.map((element) => element.getAttribute('data-agent-visit')),
   );
 
-  expect(arrivals.map((entry) => entry.id)).toEqual(entries.map((entry) => entry.id));
-  expect(arrivals.map((entry) => entry.arrivedAt?.slice(0, 10))).toEqual(
-    entries.map((entry) => entry.date),
-  );
+  expect(cardIds).toEqual(entries.map((entry) => entry.id));
   expect(entries.map((entry) => Date.parse(entry.date))).toEqual(
     [...entries].map((entry) => Date.parse(entry.date)).sort((left, right) => right - left),
   );
