@@ -1,5 +1,6 @@
 .paperMark {
   --paper-mark-angle: 0deg;
+  --paper-mark-hover-angle: 0deg;
   --paper-mark-shift-x: 0px;
   --paper-mark-shift-y: 0px;
   position: relative;
@@ -80,7 +81,7 @@
     inset 0 -1px 0 hsl(var(--foreground) / 0.055),
     0 9px 17px rgb(58 45 31 / 0.16);
   transform: translate(var(--paper-mark-shift-x), calc(var(--paper-mark-shift-y) - 0.2rem))
-    rotate(calc(var(--paper-mark-angle) * 0.34)) scale(1.085);
+    rotate(var(--paper-mark-hover-angle)) scale(1.085);
 }
 
 .paperMark:hover::after,
