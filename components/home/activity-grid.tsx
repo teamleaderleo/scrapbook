@@ -1,7 +1,8 @@
 'use client';
 
 import { alignContributionDaysToWeekColumns } from '@/lib/github-activity-utils';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
+import styles from './activity-grid.module.css';
 
 export type ActivityGridDay = {
   date: string;
@@ -9,6 +10,14 @@ export type ActivityGridDay = {
 };
 
 const WEEKDAY_LABELS = ['Sun', '', 'Tue', '', 'Thu', '', 'Sat'] as const;
+const PAPER_MARK_ANGLES = [-1.15, 0.58, -0.42, 0.92, 0.18, -0.74, 0.46] as const;
+const PAPER_MARK_SHIFTS = [
+  [-0.35, 0.15],
+  [0.2, -0.2],
+  [0.35, 0.25],
+  [-0.15, -0.1],
+  [0.1, 0.3],
+] as const;
 
 function formatDay(date: string): string {
   return new Intl.DateTimeFormat('en-GB', {
@@ -159,6 +168,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
           }}
           aria-label="GitHub contribution calendar for the last 35 days"
           data-contribution-week-grid
+          data-paper-activity-grid
         >
           {gridDays.map((day, index) => {
             const gridColumn = Math.floor(index / 7) + 1;
@@ -178,17 +188,26 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
             const label = labelForDay(day, unit);
             const isSelected = day.date === selected?.date;
             const isLatest = day.date === days.at(-1)?.date;
-            const tilt = index % 2 === 0 ? 'hover:rotate-[1.5deg]' : 'hover:-rotate-[1.5deg]';
+            const angle = PAPER_MARK_ANGLES[index % PAPER_MARK_ANGLES.length];
+            const [shiftX, shiftY] = PAPER_MARK_SHIFTS[index % PAPER_MARK_SHIFTS.length];
+            const markStyle = {
+              gridColumn,
+              gridRow,
+              '--paper-mark-angle': `${angle}deg`,
+              '--paper-mark-shift-x': `${shiftX}px`,
+              '--paper-mark-shift-y': `${shiftY}px`,
+            } as CSSProperties;
 
             return (
               <button
                 key={day.date}
                 type="button"
-                className={`relative aspect-square min-w-0 rounded-[0.38rem] transition-[transform,filter,box-shadow] duration-150 ease-out will-change-transform hover:z-10 hover:-translate-y-1 hover:scale-[1.12] hover:shadow-[0_14px_24px_rgba(35,31,26,0.2)] focus-visible:z-10 focus-visible:-translate-y-1 focus-visible:scale-[1.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:shadow-[0_16px_28px_rgba(0,0,0,0.44)] ${tilt} ${activityClass(day.count, maximum)} ${isLatest ? 'outline outline-2 outline-offset-2 outline-foreground/20' : ''} ${isSelected ? 'brightness-[1.04] dark:brightness-110' : ''}`}
-                style={{ gridColumn, gridRow }}
+                className={`${styles.paperMark} aspect-square min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activityClass(day.count, maximum)} ${isLatest ? 'outline outline-2 outline-offset-2 outline-foreground/20' : ''} ${isSelected ? 'brightness-[1.04] dark:brightness-110' : ''}`}
+                style={markStyle}
                 aria-label={label}
                 aria-pressed={isSelected}
                 data-contribution-date={day.date}
+                data-paper-activity-mark
                 onPointerEnter={(event) => {
                   setSelectedDate(day.date);
                   showTooltip(day.date, event.clientX, event.clientY);
