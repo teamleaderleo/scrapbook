@@ -194,6 +194,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
               gridColumn,
               gridRow,
               '--paper-mark-angle': `${angle}deg`,
+              '--paper-mark-hover-angle': `${angle * 0.34}deg`,
               '--paper-mark-shift-x': `${shiftX}px`,
               '--paper-mark-shift-y': `${shiftY}px`,
             } as CSSProperties;
