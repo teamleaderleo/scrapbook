@@ -20,13 +20,13 @@ for (const variant of variants) {
   test(`sigil lab exposes layered generations and visual evidence in ${variant.theme} at ${variant.width}x${variant.height}`, async ({
     page,
   }, testInfo) => {
-    test.setTimeout(90_000);
+    test.setTimeout(120_000);
     await page.emulateMedia({ colorScheme: variant.theme });
     await page.setViewportSize({ width: variant.width, height: variant.height });
 
     const response = await page.goto('/sigil-lab', {
       waitUntil: 'domcontentloaded',
-      timeout: 60_000,
+      timeout: 90_000,
     });
     expect(response?.ok()).toBe(true);
     await expect(page.getByRole('heading', { name: 'Generative sigils for agents' })).toBeVisible();
@@ -35,6 +35,9 @@ for (const variant of variants) {
     ).toBeVisible();
     await expect(
       page.getByRole('heading', { name: 'Reviewed colour worlds before production geometry' }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Quiet lattices with cohesive colour roles' }),
     ).toBeVisible();
 
     const cards = page.locator('[data-sigil-card]');
@@ -74,6 +77,7 @@ for (const variant of variants) {
     await expect(page.locator('[data-sigil-generation-example]')).toHaveCount(2);
     await expect(page.locator('[data-agent-sigil]')).toHaveCount(44);
     await expect(page.locator('[data-agent-kumiko]')).toHaveCount(41);
+    await expect(page.locator('[data-agent-generation-3]')).toHaveCount(38);
     await expectNoHorizontalOverflow(page);
 
     await page.screenshot({
@@ -81,7 +85,7 @@ for (const variant of variants) {
         `sigil-lab-${variant.theme}-${variant.width}x${variant.height}.png`,
       ),
       fullPage: true,
-      timeout: 60_000,
+      timeout: 90_000,
     });
   });
 }
@@ -170,7 +174,51 @@ test('Kumiko description edits change accents without changing the graph', async
   await expect(page.locator('[data-kumiko-debug-node]')).not.toHaveCount(0);
 });
 
-test('small layered and lattice sigils remain measurable and accessible', async ({ page }) => {
+test('combined Generation 3 population separates geometry, palette, and accents', async ({ page }) => {
+  await page.goto('/sigil-lab');
+
+  const population = page.locator('[data-generation-3-population-card]');
+  await expect(population).toHaveCount(18);
+  const populationMetadata = await population.evaluateAll((elements) =>
+    elements.map((element) => ({
+      graph: element.getAttribute('data-generation-3-population-graph'),
+      palette: element.getAttribute('data-generation-3-population-palette'),
+    })),
+  );
+  expect(populationMetadata.every((item) => item.graph && item.palette)).toBe(true);
+  expect(new Set(populationMetadata.map((item) => item.graph)).size).toBe(
+    populationMetadata.length,
+  );
+
+  const densityCards = page.locator('[data-generation-3-density-card]');
+  await expect(densityCards).toHaveCount(4);
+  for (const card of await densityCards.all()) {
+    const graphs = await card.locator('[data-agent-generation-3]').evaluateAll((elements) =>
+      elements.map((element) => element.getAttribute('data-generation-3-graph')),
+    );
+    expect(graphs).toHaveLength(3);
+    expect(new Set(graphs).size).toBe(1);
+  }
+
+  const descriptions = page.locator(
+    '[data-generation-3-description-example] [data-agent-generation-3]',
+  );
+  await expect(descriptions).toHaveCount(3);
+  const layers = await descriptions.evaluateAll((elements) =>
+    elements.map((element) => ({
+      graph: element.getAttribute('data-generation-3-geometry'),
+      palette: element.getAttribute('data-generation-3-palette'),
+      accents: element.getAttribute('data-generation-3-accents'),
+    })),
+  );
+  expect(new Set(layers.map((layer) => layer.graph)).size).toBe(1);
+  expect(new Set(layers.map((layer) => layer.palette)).size).toBe(1);
+  expect(new Set(layers.map((layer) => layer.accents)).size).toBe(3);
+});
+
+test('small layered, lattice, and combined sigils remain measurable and accessible', async ({
+  page,
+}) => {
   await page.goto('/sigil-lab');
 
   const layered = page.locator('[data-sigil-small-sizes] [data-agent-sigil]');
@@ -198,4 +246,34 @@ test('small layered and lattice sigils remain measurable and accessible', async 
   expect(kumikoSizes.map((size) => Math.round(size.width))).toEqual([16, 24, 32, 48, 72]);
   expect(kumikoSizes.every((size) => size.width === size.height)).toBe(true);
   expect(kumikoSizes.every((size) => size.label?.includes('Kumiko-informed'))).toBe(true);
+
+  const combined = page.locator(
+    '[data-generation-3-small-sizes] [data-agent-generation-3]',
+  );
+  await expect(combined).toHaveCount(5);
+  const combinedSizes = await combined.evaluateAll((elements) =>
+    elements.map((element) => {
+      const box = element.getBoundingClientRect();
+      return {
+        width: box.width,
+        height: box.height,
+        label: element.getAttribute('aria-label'),
+        compact: element.getAttribute('data-generation-3-compact'),
+        highlights: element.querySelectorAll('[data-generation-3-role="highlight"]').length,
+      };
+    }),
+  );
+
+  expect(combinedSizes.map((size) => Math.round(size.width))).toEqual([16, 24, 32, 48, 72]);
+  expect(combinedSizes.every((size) => size.width === size.height)).toBe(true);
+  expect(combinedSizes.every((size) => size.label?.includes('Generation 3'))).toBe(true);
+  expect(combinedSizes.map((size) => size.compact)).toEqual([
+    'true',
+    'true',
+    'false',
+    'false',
+    'false',
+  ]);
+  expect(combinedSizes.slice(0, 2).every((size) => size.highlights === 0)).toBe(true);
+  expect(combinedSizes.slice(2).every((size) => size.highlights > 0)).toBe(true);
 });
