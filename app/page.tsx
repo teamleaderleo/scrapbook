@@ -2,8 +2,9 @@ import { ActivityDashboard } from '@/components/home/activity-dashboard';
 import { WindLiftCard } from '@/components/home/wind-lift-card';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { getGitHubHomeData } from '@/lib/github-home';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
@@ -16,6 +17,37 @@ export const metadata: Metadata = {
 const repositoryNoteOverrides: Record<string, string> = {
   smolrunner: 'Plans host work before changing anything and inspects unknown state first.',
 };
+
+const scrapbookDestinations = [
+  {
+    id: 'space',
+    href: '/space',
+    eyebrow: 'Clipping drawer',
+    label: 'Space',
+    description: 'Search notes, references, code, and review queues.',
+  },
+  {
+    id: 'journal',
+    href: '/journal',
+    eyebrow: 'Evidence ledger',
+    label: 'Journal',
+    description: 'Follow repository-backed records from the agent pod.',
+  },
+  {
+    id: 'gallery',
+    href: '/gallery',
+    eyebrow: 'Object room',
+    label: 'Gallery',
+    description: 'Play with the projected object and meet recent visitors.',
+  },
+  {
+    id: 'atelier',
+    href: '/atelier',
+    eyebrow: 'Worktable',
+    label: 'Atelier',
+    description: 'Try interface sketches and early navigation experiments.',
+  },
+] as const;
 
 function HomeActivityFallback() {
   return (
@@ -102,6 +134,56 @@ async function HomeActivityContent() {
           ))}
         </div>
       </section>
+
+      <nav aria-labelledby="explore-scrapbook-title" className="min-w-0" data-home-room-shelf>
+        <div className="flex items-end justify-between gap-4 px-0.5">
+          <div>
+            <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
+              Continue exploring
+            </p>
+            <h2 id="explore-scrapbook-title" className="mt-1 text-lg font-semibold tracking-tight">
+              Pick a room in the scrapbook
+            </h2>
+          </div>
+          <span className="hidden font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground sm:block">
+            four useful stops
+          </span>
+        </div>
+
+        <div className="-mx-4 mt-2.5 grid snap-x snap-mandatory grid-flow-col auto-cols-[minmax(16rem,82vw)] gap-2.5 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid-flow-row sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 xl:grid-cols-4">
+          {scrapbookDestinations.map((destination, index) => (
+            <Link
+              key={destination.id}
+              href={destination.href}
+              prefetch
+              data-home-room-link={destination.id}
+              className="group relative min-w-0 snap-start overflow-hidden rounded-2xl border border-border/65 bg-card p-3.5 text-card-foreground shadow-[0_8px_20px_rgba(35,31,26,0.07)] transition-[border-color,background-color,box-shadow] hover:border-foreground/25 hover:bg-card/95 hover:shadow-[0_14px_30px_rgba(35,31,26,0.11)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:shadow-[0_8px_20px_rgba(0,0,0,0.22)] dark:hover:shadow-[0_16px_34px_rgba(0,0,0,0.32)]"
+            >
+              <span
+                aria-hidden="true"
+                className="absolute right-3 top-3 font-mono text-[9px] tabular-nums text-muted-foreground/45"
+              >
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <p className="pr-8 font-mono text-[8px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                {destination.eyebrow}
+              </p>
+              <h3 className="mt-2 text-base font-semibold tracking-tight">{destination.label}</h3>
+              <p className="mt-1.5 min-h-10 text-sm leading-snug text-muted-foreground">
+                {destination.description}
+              </p>
+              <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[9px] font-semibold uppercase tracking-[0.13em] text-muted-foreground transition-colors group-hover:text-foreground">
+                Open room
+                <ArrowRight
+                  size={13}
+                  aria-hidden="true"
+                  className="transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
+                />
+              </span>
+            </Link>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 }
