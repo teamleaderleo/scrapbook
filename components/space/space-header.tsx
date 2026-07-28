@@ -44,21 +44,21 @@ export function SpaceHeader({
     <Link
       href={toggleHref}
       prefetch
-      className="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-transparent px-2 text-sm font-medium text-muted-foreground transition hover:border-border/60 hover:bg-muted/65 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       aria-label={isReviewLike ? 'Back to list' : 'Open review'}
     >
       {isReviewLike ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
-      <span className="hidden sm:inline">{isReviewLike ? 'List' : 'Review'}</span>
+      <span className="hidden sm:inline">{isReviewLike ? 'Clippings' : 'Review drawer'}</span>
       <SpaceLinkHint />
     </Link>
   );
 
   return (
-    <header className="flex h-12 min-w-0 items-center gap-1.5 border-b border-border bg-background px-2 sm:gap-2 sm:px-4">
+    <header className="flex h-12 min-w-0 items-center gap-1.5 border-b border-dashed border-border/75 bg-background/88 px-2 backdrop-blur-sm sm:gap-2 sm:px-4">
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 shrink-0"
+        className="h-8 w-8 shrink-0 rounded-lg"
         aria-label="Toggle sidebar"
         title={`Toggle sidebar (${isMac ? '⌘' : 'Ctrl'} + B)`}
         onClick={() => toggleSidebar?.()}
@@ -66,9 +66,9 @@ export function SpaceHeader({
         <PanelLeft className="h-4 w-4" />
       </Button>
 
-      <SiteAtlas variant="icon" className="rounded-md" />
+      <SiteAtlas variant="icon" className="rounded-lg" />
 
-      <p className="min-w-0 flex-1 truncate px-1 text-xs text-muted-foreground sm:text-sm">
+      <p className="min-w-0 flex-1 truncate px-1 font-mono text-[9px] font-semibold uppercase tracking-[0.13em] text-muted-foreground sm:text-[10px]">
         {leftContent}
       </p>
 
@@ -78,10 +78,10 @@ export function SpaceHeader({
         {onEditorToggle ? (
           <button
             onClick={onEditorToggle}
-            className={`inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+            className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
               isEditorOpen
-                ? 'bg-muted text-foreground'
-                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                ? 'border-border bg-muted text-foreground'
+                : 'border-transparent text-muted-foreground hover:border-border/60 hover:bg-muted/65 hover:text-foreground'
             }`}
             title={`Toggle editor (${isMac ? '⌘' : 'Ctrl'} + I)`}
             aria-label="Toggle editor"
