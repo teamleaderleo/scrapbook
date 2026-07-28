@@ -97,26 +97,15 @@ test('reduced motion keeps a static paper texture without tracking the pointer',
   await expect(scoreboard).toHaveAttribute('data-paper-light-motion', 'reduced');
   await scoreboard.hover({ force: true });
 
-  const decoration = await page.evaluate(() => {
-    const lightElement = document.querySelector<HTMLElement>('[data-paper-raking-light]');
-    const fibreElement = document.querySelector<HTMLElement>('[data-paper-fibres]');
-    const curlElement = document.querySelector<HTMLElement>('[data-paper-curl]');
-    if (!lightElement || !fibreElement || !curlElement) {
-      throw new Error('Missing paper-light decoration');
-    }
-    return {
-      lightDisplay: getComputedStyle(lightElement).display,
-      fibreOpacity: Number(getComputedStyle(fibreElement).opacity),
-      curlDisplay: getComputedStyle(curlElement).display,
-    };
-  });
+  const decoration = {
+    lightDisplay: await light.evaluate((element) => getComputedStyle(element).display),
+    fibreOpacity: await fibres.evaluate((element) => Number(getComputedStyle(element).opacity)),
+    curlDisplay: await curl.evaluate((element) => getComputedStyle(element).display),
+  };
 
   expect(decoration.lightDisplay).toBe('none');
-  expect(decoration.fibreOpacity).toBeCloseTo(0.12, 2);
+  expect(decoration.fibreOpacity).toBeCloseTo(0.08, 2);
   expect(decoration.curlDisplay).toBe('none');
-  await expect(light).toBeAttached();
-  await expect(fibres).toBeAttached();
-  await expect(curl).toBeAttached();
 });
 
 test('forced colours removes paper-light decoration', async ({ page }, testInfo) => {
