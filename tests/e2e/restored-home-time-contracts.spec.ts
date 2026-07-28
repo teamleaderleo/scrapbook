@@ -8,6 +8,17 @@ async function waitForHydratedHomepage(page: Page) {
   return dashboard;
 }
 
+async function openTimezonePicker(page: Page) {
+  const trigger = page.locator('[data-timezone-trigger]');
+  await expect(trigger).toBeVisible({ timeout: 15_000 });
+  await expect
+    .poll(async () => {
+      if ((await trigger.getAttribute('aria-expanded')) !== 'true') await trigger.click();
+      return trigger.getAttribute('aria-expanded');
+    })
+    .toBe('true');
+}
+
 test('homepage keeps the requested 28-day activity window', async ({ page }) => {
   await page.goto('/');
   const dashboard = await waitForHydratedHomepage(page);
@@ -96,7 +107,7 @@ test('homepage has no one-pixel nav overflow and Atlas does not shift the layout
 
 test('timezone search recognises common city names', async ({ page }) => {
   await page.goto('/time');
-  await page.locator('[data-timezone-trigger]').click();
+  await openTimezonePicker(page);
 
   const picker = page.locator('[data-timezone-picker]');
   const results = picker.locator('[data-timezone-results]');

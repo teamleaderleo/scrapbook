@@ -4,12 +4,16 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import {
   NAVIGATION_COMPLETION_HOLD_MS,
+  NAVIGATION_FAILURE_STATUS_MS,
   NAVIGATION_FADE_MS,
   NAVIGATION_HISTORY_STORAGE_KEY,
+  NAVIGATION_INITIAL_PROGRESS,
   NAVIGATION_MIN_VISIBLE_MS,
-  NAVIGATION_TICK_MS,
+  NAVIGATION_PROGRESS_CAP,
+  NAVIGATION_SLOW_STATUS_MS,
   createNavigationDurationHistory,
   estimateNavigationDuration,
+  estimatedNavigationProgress,
   idleNavigationProgressState,
   parseNavigationDurationHistory,
   recordNavigationDuration,
@@ -21,6 +25,10 @@ const IDLE_PREFETCH_ROUTES = ['/', '/time', '/gallery', '/blog', '/atelier'];
 const NAVIGATION_START_EVENT = 'scrapbook:navigation-start';
 const NAVIGATION_CANCEL_EVENT = 'scrapbook:navigation-cancel';
 const NAVIGATION_ERROR_EVENT = 'scrapbook:navigation-error';
+const NAVIGATION_PROGRESS_SNAPSHOT_MS = 180;
+const NAVIGATION_ANIMATION_MIN_MS = 720;
+const NAVIGATION_ANIMATION_ESTIMATE_MULTIPLIER = 2.4;
+const NAVIGATION_ANIMATION_OFFSETS = [0, 0.08, 0.18, 0.32, 0.5, 0.72, 1] as const;
 
 type NavigationStartDetail = {
   href: string;
@@ -102,6 +110,29 @@ function persistDurationHistory(history: ReturnType<typeof createNavigationDurat
   }
 }
 
+function navigationAnimationDuration(estimateMs: number) {
+  return Math.min(
+    NAVIGATION_FAILURE_STATUS_MS,
+    Math.max(NAVIGATION_ANIMATION_MIN_MS, estimateMs * NAVIGATION_ANIMATION_ESTIMATE_MULTIPLIER),
+  );
+}
+
+function renderedProgress(element: HTMLElement | null) {
+  if (!element?.parentElement) return NAVIGATION_INITIAL_PROGRESS;
+  const railWidth = element.parentElement.getBoundingClientRect().width;
+  if (railWidth <= 0) return NAVIGATION_INITIAL_PROGRESS;
+  const progressWidth = element.getBoundingClientRect().width;
+  return Math.min(1, Math.max(NAVIGATION_INITIAL_PROGRESS, progressWidth / railWidth));
+}
+
+function progressKeyframes(startProgress: number, estimateMs: number) {
+  const duration = navigationAnimationDuration(estimateMs);
+  return NAVIGATION_ANIMATION_OFFSETS.map((offset) => ({
+    offset,
+    transform: `scaleX(${estimatedNavigationProgress(offset * duration, estimateMs, startProgress)})`,
+  }));
+}
+
 export function NavigationFeedback() {
   const router = useRouter();
   const pathname = usePathname();
@@ -110,6 +141,13 @@ export function NavigationFeedback() {
   const activeNavigation = useRef<ActiveNavigation | null>(null);
   const historyRef = useRef(createNavigationDurationHistory());
   const prefetched = useRef(new Set<string>());
+  const progressElement = useRef<HTMLDivElement | null>(null);
+  const progressAnimation = useRef<Animation | null>(null);
+  const animationOrigin = useRef(NAVIGATION_INITIAL_PROGRESS);
+  const completionFrame = useRef<number | null>(null);
+  const progressSnapshotTimer = useRef<number | null>(null);
+  const slowTimer = useRef<number | null>(null);
+  const failureTimer = useRef<number | null>(null);
   const completionTimer = useRef<number | null>(null);
   const fadeTimer = useRef<number | null>(null);
   const resetTimer = useRef<number | null>(null);
@@ -130,10 +168,31 @@ export function NavigationFeedback() {
   }, []);
 
   const clearPhaseTimers = useCallback(() => {
-    for (const timer of [completionTimer, fadeTimer, resetTimer]) {
+    for (const timer of [
+      progressSnapshotTimer,
+      slowTimer,
+      failureTimer,
+      completionTimer,
+      fadeTimer,
+      resetTimer,
+    ]) {
       if (timer.current !== null) window.clearTimeout(timer.current);
       timer.current = null;
     }
+  }, []);
+
+  const clearCompletionFrame = useCallback(() => {
+    if (completionFrame.current !== null) window.cancelAnimationFrame(completionFrame.current);
+    completionFrame.current = null;
+  }, []);
+
+  const freezeProgressAnimation = useCallback(() => {
+    const element = progressElement.current;
+    const currentProgress = renderedProgress(element);
+    progressAnimation.current?.cancel();
+    progressAnimation.current = null;
+    if (element) element.style.transform = `scaleX(${currentProgress})`;
+    return currentProgress;
   }, []);
 
   const scheduleFade = useCallback(() => {
@@ -153,6 +212,12 @@ export function NavigationFeedback() {
       if (kind !== 'history' && href === current) return;
 
       clearPhaseTimers();
+      clearCompletionFrame();
+      const startProgress = progressElement.current
+        ? freezeProgressAnimation()
+        : NAVIGATION_INITIAL_PROGRESS;
+      animationOrigin.current = startProgress;
+
       const now = performance.now();
       const label = rawLabel ?? destinationLabel(href);
       activeNavigation.current = {
@@ -168,16 +233,28 @@ export function NavigationFeedback() {
         label,
         kind,
         estimateMs: estimateNavigationDuration(historyRef.current, href),
+        startProgress,
         now,
       });
+
+      progressSnapshotTimer.current = window.setTimeout(() => {
+        dispatch({ type: 'tick', now: performance.now() });
+      }, NAVIGATION_PROGRESS_SNAPSHOT_MS);
+      slowTimer.current = window.setTimeout(() => {
+        dispatch({ type: 'tick', now: performance.now() });
+      }, NAVIGATION_SLOW_STATUS_MS);
+      failureTimer.current = window.setTimeout(() => {
+        dispatch({ type: 'tick', now: performance.now() });
+      }, NAVIGATION_FAILURE_STATUS_MS);
     },
-    [clearPhaseTimers],
+    [clearCompletionFrame, clearPhaseTimers, freezeProgressAnimation],
   );
 
   const settleNavigation = useCallback(() => {
     const active = activeNavigation.current;
     if (!active) return;
     activeNavigation.current = null;
+    clearPhaseTimers();
 
     const now = performance.now();
     const durationMs = Math.max(0, now - active.startedAt);
@@ -204,14 +281,16 @@ export function NavigationFeedback() {
     }
 
     scheduleFade();
-  }, [scheduleFade]);
+  }, [clearPhaseTimers, scheduleFade]);
 
   const cancelNavigation = useCallback(() => {
     activeNavigation.current = null;
     clearPhaseTimers();
+    clearCompletionFrame();
+    freezeProgressAnimation();
     dispatch({ type: 'cancel' });
     resetTimer.current = window.setTimeout(() => dispatch({ type: 'reset' }), NAVIGATION_FADE_MS);
-  }, [clearPhaseTimers]);
+  }, [clearCompletionFrame, clearPhaseTimers, freezeProgressAnimation]);
 
   useEffect(() => {
     if (previousRouteKey.current === routeKey) return;
@@ -220,12 +299,63 @@ export function NavigationFeedback() {
   }, [routeKey, settleNavigation]);
 
   useEffect(() => {
-    if (state.phase !== 'running' && state.phase !== 'slow') return;
-    const interval = window.setInterval(() => {
-      dispatch({ type: 'tick', now: performance.now() });
-    }, NAVIGATION_TICK_MS);
-    return () => window.clearInterval(interval);
-  }, [state.phase]);
+    const element = progressElement.current;
+    if (!element || state.startedAt === 0) return;
+
+    progressAnimation.current?.cancel();
+    progressAnimation.current = null;
+    const startProgress = animationOrigin.current;
+    element.style.transform = `scaleX(${startProgress})`;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const animation = element.animate(progressKeyframes(startProgress, state.estimateMs), {
+      duration: navigationAnimationDuration(state.estimateMs),
+      easing: 'linear',
+      fill: 'forwards',
+    });
+    progressAnimation.current = animation;
+
+    return () => {
+      if (progressAnimation.current !== animation) return;
+      const currentProgress = renderedProgress(element);
+      animation.cancel();
+      progressAnimation.current = null;
+      element.style.transform = `scaleX(${currentProgress})`;
+    };
+  }, [state.estimateMs, state.startedAt]);
+
+  useEffect(() => {
+    const element = progressElement.current;
+    if (!element) return;
+
+    if (state.phase === 'completing') {
+      const currentProgress = freezeProgressAnimation();
+      element.style.transform = `scaleX(${currentProgress})`;
+      clearCompletionFrame();
+      completionFrame.current = window.requestAnimationFrame(() => {
+        element.style.transform = 'scaleX(1)';
+        completionFrame.current = null;
+      });
+      return;
+    }
+
+    if (state.phase === 'failed') {
+      const currentProgress = freezeProgressAnimation();
+      element.style.transform = `scaleX(${currentProgress})`;
+      clearCompletionFrame();
+      completionFrame.current = window.requestAnimationFrame(() => {
+        element.style.transform = `scaleX(${Math.max(currentProgress, NAVIGATION_PROGRESS_CAP)})`;
+        completionFrame.current = null;
+      });
+      return;
+    }
+
+    if (state.phase === 'fading') {
+      clearCompletionFrame();
+      freezeProgressAnimation();
+    }
+  }, [clearCompletionFrame, freezeProgressAnimation, state.phase]);
 
   useEffect(() => {
     const prefetch = (href: string) => {
@@ -284,6 +414,8 @@ export function NavigationFeedback() {
       const detail = (event as CustomEvent<NavigationErrorDetail>).detail;
       activeNavigation.current = null;
       clearPhaseTimers();
+      clearCompletionFrame();
+      freezeProgressAnimation();
       dispatch({ type: 'fail', message: detail?.message });
     };
 
@@ -322,13 +454,24 @@ export function NavigationFeedback() {
       if (windowWithIdle.cancelIdleCallback) windowWithIdle.cancelIdleCallback(idleId);
       else window.clearTimeout(idleId);
     };
-  }, [beginNavigation, cancelNavigation, clearPhaseTimers, pathname, router]);
+  }, [
+    beginNavigation,
+    cancelNavigation,
+    clearCompletionFrame,
+    clearPhaseTimers,
+    freezeProgressAnimation,
+    pathname,
+    router,
+  ]);
 
   useEffect(
     () => () => {
       clearPhaseTimers();
+      clearCompletionFrame();
+      progressAnimation.current?.cancel();
+      progressAnimation.current = null;
     },
-    [clearPhaseTimers],
+    [clearCompletionFrame, clearPhaseTimers],
   );
 
   if (state.phase === 'idle') return null;
@@ -340,12 +483,17 @@ export function NavigationFeedback() {
     <div
       className="navigation-feedback pointer-events-none fixed inset-x-0 top-0 z-[100]"
       data-navigation-feedback=""
+      data-navigation-href={state.href}
       data-navigation-kind={state.kind}
       data-navigation-progress={state.progress.toFixed(3)}
       data-navigation-state={state.phase}
     >
       <div className="navigation-rail" aria-hidden="true">
-        <div className="navigation-progress" style={{ transform: `scaleX(${state.progress})` }} />
+        <div
+          ref={progressElement}
+          className="navigation-progress"
+          style={{ transform: `scaleX(${state.progress})` }}
+        />
       </div>
       {(showSlowStatus || showFailureStatus) && (
         <div
