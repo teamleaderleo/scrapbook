@@ -5,6 +5,7 @@ import TimezoneSelector from './timezone-selector';
 import CurrentTimeDisplay from './current-time-display';
 import { isDSTActive } from '@/app/lib/dst-utils';
 import { PaperCreature } from '@/components/paper-creature';
+import { CozyNote, PageCurl, PressedSprig, StitchedRule } from '@/components/cozy-flourishes';
 
 const DAY_GRADIENT =
   'linear-gradient(90deg, #151720 0%, #252938 9%, #493f55 18%, #715767 28%, #9f6f68 38%, #bd916c 46%, #c9a574 50%, #bd916c 56%, #9f6f68 64%, #715767 73%, #493f55 82%, #252938 91%, #151720 100%)';
@@ -65,11 +66,21 @@ export default function UTCTimeVisualizer() {
         : timeOfDay === 'Afternoon'
           ? 'carrying'
           : 'reading';
+  const deskNote =
+    timeOfDay === 'Night'
+      ? 'The clocks are whispering. Keep the lamp low.'
+      : timeOfDay === 'Morning'
+        ? 'Fresh page, warm mug, plenty of daylight.'
+        : timeOfDay === 'Afternoon'
+          ? 'A good hour for pencils and small decisions.'
+          : 'One last page while the room turns golden.';
 
   return (
     <div className="mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-6xl items-start px-4 py-4 sm:px-6 sm:py-8 lg:px-8">
       <div className="relative w-full overflow-hidden rounded-[1.5rem] border border-border/70 bg-card/94 p-4 text-card-foreground shadow-[0_22px_58px_rgba(24,24,26,0.11)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.32)] sm:p-7">
         <span className="material-tape-strip" data-side="top" aria-hidden="true" />
+        <PressedSprig className="absolute right-4 top-20 hidden rotate-[8deg] opacity-20 lg:block" />
+        <PageCurl className="opacity-65" />
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 opacity-35 dark:opacity-10"
@@ -83,7 +94,7 @@ export default function UTCTimeVisualizer() {
         <div className="relative">
           <div className="flex items-start justify-between gap-4">
             <CurrentTimeDisplay onJumpToTime={setLocalTime} />
-            <div className="hidden text-center sm:block">
+            <div className="hidden w-40 text-center sm:block">
               <PaperCreature
                 pose={scrapletPose}
                 size="lg"
@@ -92,6 +103,9 @@ export default function UTCTimeVisualizer() {
               <p className="mt-1 font-mono text-[8px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 {timeOfDay} desk
               </p>
+              <CozyNote label="desk note" className="mt-3 rotate-[0.6deg]">
+                {deskNote}
+              </CozyNote>
             </div>
           </div>
 
@@ -109,6 +123,7 @@ export default function UTCTimeVisualizer() {
               </label>
               <span className="material-label-stamped text-[9px] text-muted-foreground">{timeOfDay}</span>
             </div>
+            <StitchedRule className="mb-3" />
             <input
               id="time-of-day"
               type="range"
@@ -135,7 +150,7 @@ export default function UTCTimeVisualizer() {
             aria-label="Time comparisons"
             className="mt-6 grid grid-cols-2 gap-3 sm:mt-7 sm:grid-cols-4"
           >
-            <div className="material-paper col-span-2 rounded-xl border p-4 sm:col-span-1">
+            <div className="material-paper relative col-span-2 overflow-hidden rounded-xl border p-4 sm:col-span-1">
               <p className="font-mono text-[10px] uppercase tracking-[0.15em] opacity-65">Local</p>
               <p className="mt-1 font-mono text-3xl font-semibold tabular-nums tracking-[-0.03em]">
                 {formatTime(localHours, localMinutes)}
@@ -144,6 +159,7 @@ export default function UTCTimeVisualizer() {
                 {formatTime12Hour(localHours, localMinutes)} {period} ·{' '}
                 {formatOffset(localOffsetMinutes)}
               </p>
+              <PageCurl className="h-6 w-6 opacity-65 [&>span]:h-6 [&>span]:w-6" />
             </div>
             <TimeCard label="UTC" time={formatTime(utcHours, utcMinutes)} offset="UTC±00:00" />
             <TimeCard
@@ -165,10 +181,11 @@ export default function UTCTimeVisualizer() {
 
 function TimeCard({ label, time, offset }: { label: string; time: string; offset: string }) {
   return (
-    <div className="material-paper rounded-xl border p-3">
+    <div className="material-paper relative overflow-hidden rounded-xl border p-3 transition-transform duration-150 hover:-rotate-[0.2deg]">
       <p className="font-mono text-[10px] uppercase tracking-[0.15em] opacity-65">{label}</p>
       <p className="mt-1 font-mono text-2xl font-semibold tabular-nums">{time}</p>
       <p className="mt-1 font-mono text-[10px] tabular-nums opacity-65">{offset}</p>
+      <PageCurl className="h-5 w-5 opacity-55 [&>span]:h-5 [&>span]:w-5" />
     </div>
   );
 }
