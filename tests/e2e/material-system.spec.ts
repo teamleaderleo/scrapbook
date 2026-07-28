@@ -40,12 +40,13 @@ for (const study of studies) {
     const paperFaces = await scoreboard.locator('[data-activity-digit]').evaluateAll((digits) =>
       digits.map((digit) => {
         const face = digit.querySelector<HTMLElement>('[aria-hidden="true"]');
-        if (!face) throw new Error('Missing paper digit face');
+        const paperDigit = digit.querySelector<HTMLElement>('[data-paper-digit]');
+        if (!face || !paperDigit) throw new Error('Missing paper digit face');
         const style = getComputedStyle(face);
         return {
           backgroundImage: style.backgroundImage,
           borderStyle: style.borderStyle,
-          transformStyle: getComputedStyle(digit.querySelector<HTMLElement>('[data-paper-digit]')!).transformStyle,
+          transformStyle: getComputedStyle(paperDigit).transformStyle,
         };
       }),
     );
@@ -80,6 +81,106 @@ for (const study of studies) {
     await page.screenshot({ path: screenshotPath, animations: 'disabled' });
   });
 }
+
+test('captures the live paper counter choreography', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.addInitScript(() => {
+    const actualNow = Date.now.bind(Date);
+    Date.now = () => actualNow() + 60 * 60 * 1_000;
+    window.localStorage.setItem('theme', 'light');
+  });
+
+  let releaseResponse!: () => void;
+  const responseGate = new Promise<void>((resolve) => {
+    releaseResponse = resolve;
+  });
+  let targetToday = 0;
+  const days = Array.from({ length: 28 }, (_, index) => ({
+    date: `2026-07-${String(index + 1).padStart(2, '0')}`,
+    count: index % 7,
+  }));
+
+  await page.route('**/api/github-activity', async (route) => {
+    await responseGate;
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        source: 'public-profile',
+        today: targetToday,
+        weekTotal: 321,
+        yearTotal: 4_321,
+        days,
+        generatedAt: new Date().toISOString(),
+      }),
+    });
+  });
+
+  const refreshRequest = page.waitForRequest(
+    (request) => new URL(request.url()).pathname === '/api/github-activity',
+  );
+  const response = await page.goto('/');
+  expect(response?.ok()).toBe(true);
+
+  const scoreboard = page.locator('[data-activity-scoreboard]');
+  const counter = scoreboard.locator('[data-paper-counter]');
+  await expect(counter).toBeVisible();
+  await refreshRequest;
+
+  const initialLabel = await counter.getAttribute('aria-label');
+  const initialToday = Number(initialLabel?.match(/^\d+/)?.[0] ?? 0);
+  const changedDigits = String(initialToday)
+    .slice(-4)
+    .padStart(4, '0')
+    .split('')
+    .map((digit) => (Number(digit) + 5) % 10)
+    .join('');
+  targetToday = Number(changedDigits);
+
+  const frameDirectory = path.join(
+    'test-results',
+    'scoreboard-appearance',
+    'motion',
+    testInfo.project.name,
+  );
+  await mkdir(frameDirectory, { recursive: true });
+  await scoreboard.screenshot({
+    path: path.join(frameDirectory, '00-before.png'),
+    animations: 'allow',
+  });
+
+  releaseResponse();
+  const lastDigitFaces = counter
+    .locator('[data-paper-digit]')
+    .last()
+    .locator('[aria-hidden="true"]');
+  await expect(lastDigitFaces).toHaveCount(3, { timeout: 2_000 });
+  await scoreboard.screenshot({
+    path: path.join(frameDirectory, '01-lift.png'),
+    animations: 'allow',
+  });
+
+  await page.waitForTimeout(220);
+  await scoreboard.screenshot({
+    path: path.join(frameDirectory, '02-turn.png'),
+    animations: 'allow',
+  });
+
+  await page.waitForTimeout(300);
+  await scoreboard.screenshot({
+    path: path.join(frameDirectory, '03-ink.png'),
+    animations: 'allow',
+  });
+
+  await expect(counter).toHaveAttribute(
+    'aria-label',
+    `${targetToday} contributions today`,
+  );
+  await expect(lastDigitFaces).toHaveCount(1, { timeout: 3_000 });
+  await scoreboard.screenshot({
+    path: path.join(frameDirectory, '04-settled.png'),
+    animations: 'allow',
+  });
+});
 
 test('keeps the paper counter calm with reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' });
