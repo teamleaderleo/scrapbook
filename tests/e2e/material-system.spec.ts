@@ -21,8 +21,10 @@ function shiftedDigits(value: number, amount: number) {
 }
 
 function activityDays() {
+  const start = Date.UTC(2026, 5, 24);
+  const dayMilliseconds = 24 * 60 * 60 * 1_000;
   return Array.from({ length: 35 }, (_, index) => ({
-    date: `2026-07-${String(index + 1).padStart(2, '0')}`,
+    date: new Date(start + index * dayMilliseconds).toISOString().slice(0, 10),
     count: index % 7,
   }));
 }
