@@ -26,7 +26,7 @@ for (const theme of ['light', 'dark'] as const) {
     const marks = grid.locator('[data-paper-activity-mark]');
     await expect(section).toBeVisible({ timeout: 15_000 });
     await expect(grid).toBeVisible();
-    await expect(marks).toHaveCount(35);
+    await expect(marks).toHaveCount(28);
 
     const mark = marks.nth(8);
     const resting = await mark.evaluate((element) => {

@@ -81,7 +81,7 @@ function HomeActivityFallback() {
 async function HomeActivityContent() {
   await connection();
   const activity = await getGitHubHomeData();
-  const days = activity.days.slice(-35);
+  const days = activity.days.slice(-28);
   const yearTotal = activity.periodLabel === 'last year' ? activity.total : null;
 
   return (
