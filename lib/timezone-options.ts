@@ -48,6 +48,62 @@ const TIMEZONE_DEFINITIONS: readonly TimezoneDefinition[] = [
   ['new-zealand', 12, 'New Zealand', 'NZT', true, 'nz'],
 ];
 
+const TIMEZONE_SEARCH_ALIASES: Record<string, readonly string[]> = {
+  baker: ['Baker Island Time', 'Etc/GMT+12'],
+  samoa: ['Pago Pago', 'Pacific/Pago_Pago', 'Samoa Standard Time'],
+  hawaii: ['Honolulu', 'Hawaii-Aleutian', 'Pacific/Honolulu'],
+  alaska: ['Anchorage', 'Juneau', 'Fairbanks', 'AKST', 'AKDT', 'America/Anchorage'],
+  pacific: [
+    'Los Angeles',
+    'San Francisco',
+    'Seattle',
+    'Vancouver',
+    'PST',
+    'PDT',
+    'America/Los_Angeles',
+  ],
+  mountain: ['Denver', 'Salt Lake City', 'Calgary', 'MST', 'MDT', 'America/Denver'],
+  central: ['Chicago', 'Dallas', 'Houston', 'Winnipeg', 'CST', 'CDT', 'America/Chicago'],
+  eastern: [
+    'New York',
+    'Toronto',
+    'Washington DC',
+    'Boston',
+    'Miami',
+    'EST',
+    'EDT',
+    'America/New_York',
+  ],
+  atlantic: ['Halifax', 'Bermuda', 'AST', 'ADT', 'America/Halifax'],
+  'buenos-aires': ['Argentina', 'Buenos Aires Time', 'America/Argentina/Buenos_Aires'],
+  'mid-atlantic': ['UTC-2', 'GMT-2', 'Etc/GMT+2'],
+  azores: ['Ponta Delgada', 'AZOST', 'Atlantic/Azores'],
+  utc: ['GMT', 'Zulu', 'Universal Time', 'Etc/UTC', 'UTC+0', 'UTC-0'],
+  london: ['United Kingdom', 'England', 'GMT', 'BST', 'Europe/London'],
+  'central-europe': [
+    'Paris',
+    'Berlin',
+    'Madrid',
+    'Rome',
+    'Amsterdam',
+    'Warsaw',
+    'CEST',
+    'Europe/Paris',
+  ],
+  'eastern-europe': ['Athens', 'Bucharest', 'Helsinki', 'Kyiv', 'EEST', 'Europe/Athens'],
+  moscow: ['Russia', 'Europe/Moscow'],
+  dubai: ['United Arab Emirates', 'UAE', 'Asia/Dubai'],
+  pakistan: ['Karachi', 'Islamabad', 'Asia/Karachi'],
+  india: ['Delhi', 'Mumbai', 'Kolkata', 'Bengaluru', 'Asia/Kolkata'],
+  bangladesh: ['Dhaka', 'Asia/Dhaka'],
+  bangkok: ['Thailand', 'Jakarta', 'Ho Chi Minh City', 'Asia/Bangkok'],
+  singapore: ['Kuala Lumpur', 'Manila', 'Hong Kong', 'Beijing', 'Asia/Singapore'],
+  tokyo: ['Japan', 'Seoul', 'Osaka', 'Asia/Tokyo'],
+  sydney: ['Melbourne', 'Canberra', 'AEST', 'AEDT', 'Australia/Sydney'],
+  solomon: ['Honiara', 'Pacific/Guadalcanal'],
+  'new-zealand': ['Auckland', 'Wellington', 'NZST', 'NZDT', 'Pacific/Auckland'],
+};
+
 export const TIMEZONE_OPTIONS: TimezoneOption[] = TIMEZONE_DEFINITIONS.map(
   ([id, offset, label, abbreviation, dst, region]) => ({
     id,
@@ -61,6 +117,10 @@ export const TIMEZONE_OPTIONS: TimezoneOption[] = TIMEZONE_DEFINITIONS.map(
 
 export const UTC_OPTION = TIMEZONE_OPTIONS.find((option) => option.id === 'utc')!;
 export const DEFAULT_RECENT_ZONE_IDS = ['utc', 'eastern', 'pacific'];
+
+export function getTimezoneSearchTerms(option: TimezoneOption): readonly string[] {
+  return TIMEZONE_SEARCH_ALIASES[option.id] ?? [];
+}
 
 export function getAdjustedOffset(option: TimezoneOption, canApplyDST: boolean) {
   if (!canApplyDST || !option.dst || !option.region) return option.offset;
