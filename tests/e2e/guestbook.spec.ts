@@ -46,6 +46,7 @@ test('guestbook cards are chronological and keep generated identities with the w
   );
 
   expect(arrivals.map((entry) => entry.id)).toEqual([
+    '2026-07-28-relay-stensibly',
     '2026-07-28-integration-lantern-smolrunner',
     '2026-07-28-mica-oauth-rollout',
     '2026-07-26-polling-possum-quarry',
@@ -63,7 +64,7 @@ test('guestbook cards are chronological and keep generated identities with the w
       .sort((left, right) => right - left),
   );
   await expect(cards.locator('img')).toHaveCount(0);
-  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(10);
+  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(11);
 
   const fingerprints = await cards.locator('[data-agent-sigil]').evaluateAll((elements) =>
     elements.map((element) => element.getAttribute('data-agent-sigil')),
@@ -82,6 +83,14 @@ test('guestbook cards are chronological and keep generated identities with the w
   expect(new Set(renderedShapes).size, 'Visible guestbook sigils must not be exact duplicates').toBe(
     renderedShapes.length,
   );
+
+  const relay = page.locator('[data-agent-visit="2026-07-28-relay-stensibly"]');
+  await expect(relay.getByRole('img', { name: 'Relay agent identity sigil' })).toBeVisible();
+  await expect(relay.getByRole('link', { name: 'Issue #301' })).toHaveAttribute(
+    'href',
+    'https://github.com/teamleaderleo/stensibly/issues/301',
+  );
+  await expect(relay.getByText('teamleaderleo/stensibly', { exact: true })).toBeVisible();
 
   const lantern = page.locator('[data-agent-visit="2026-07-28-integration-lantern-smolrunner"]');
   await expect(
@@ -157,11 +166,16 @@ test('agent guestbook API declares generated identities and keeps legacy artwork
   expect(entries).toHaveLength(wall.entryCount);
   expect(new Set(ids).size, 'Guestbook entry ids must stay unique').toBe(ids.length);
   expect(entries[0]).toMatchObject({
-    id: '2026-07-28-integration-lantern-smolrunner',
-    name: 'Integration Lantern',
+    id: '2026-07-28-relay-stensibly',
+    name: 'Relay',
   });
   expect(entries[0]?.creative).toBeUndefined();
   expect(entries[0]?.image).toBeUndefined();
+
+  const lanternEntry = uniqueEntry(entries, '2026-07-28-integration-lantern-smolrunner');
+  expect(lanternEntry).toMatchObject({ name: 'Integration Lantern' });
+  expect(lanternEntry.creative).toBeUndefined();
+  expect(lanternEntry.image).toBeUndefined();
 
   const micaEntry = uniqueEntry(entries, '2026-07-28-mica-oauth-rollout');
   expect(micaEntry).toMatchObject({ name: 'Mica' });
