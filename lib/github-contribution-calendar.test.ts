@@ -59,7 +59,7 @@ describe('parseGitHubContributionCalendar', () => {
 
 describe('fetchGitHubContributionCalendar', () => {
   it('uses GitHub GraphQL with bearer authentication and the requested login', async () => {
-    const fetchImpl = vi.fn(async () =>
+    const fetchImpl = vi.fn(async (..._args: Parameters<typeof fetch>) =>
       new Response(JSON.stringify(payload), {
         status: 200,
         headers: {
@@ -76,7 +76,7 @@ describe('fetchGitHubContributionCalendar', () => {
     const result = await fetchGitHubContributionCalendar(
       'teamleaderleo',
       'profile-token',
-      fetchImpl as typeof fetch,
+      fetchImpl,
     );
 
     expect(result.total).toBe(18);
