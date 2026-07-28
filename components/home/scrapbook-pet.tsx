@@ -102,7 +102,7 @@ export function ScrapbookPet({ activity, updating }: { activity: number; updatin
         </svg>
       </motion.span>
 
-      <span className="min-w-0 leading-none">
+      <span className="relative z-[1] min-w-0 leading-none">
         <span className="block truncate font-mono text-[8px] font-semibold uppercase tracking-[0.12em] text-foreground">
           Scraplet
         </span>
