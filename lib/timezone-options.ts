@@ -50,7 +50,7 @@ const TIMEZONE_DEFINITIONS: readonly TimezoneDefinition[] = [
 
 const TIMEZONE_SEARCH_ALIASES: Record<string, readonly string[]> = {
   baker: ['Baker Island Time', 'Etc/GMT+12'],
-  samoa: ['Pago Pago', 'Pacific/Pago_Pago', 'Samoa Standard Time'],
+  samoa: ['Pago Pago', 'Pacific/Pago_Pago'],
   hawaii: ['Honolulu', 'Hawaii-Aleutian', 'Pacific/Honolulu'],
   alaska: ['Anchorage', 'Juneau', 'Fairbanks', 'AKST', 'AKDT', 'America/Anchorage'],
   pacific: [
