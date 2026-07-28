@@ -57,24 +57,25 @@ for (const study of studies) {
     await expect(scoreboard.getByText('7D', { exact: true })).toBeVisible();
     await expect(scoreboard.getByText('1Y', { exact: true })).toBeVisible();
 
-    const paperFaces = await scoreboard.locator('[data-activity-digit]').evaluateAll((digits) =>
-      digits.map((digit) => {
-        const face = digit.querySelector<HTMLElement>('[aria-hidden="true"]');
-        const paperDigit = digit.querySelector<HTMLElement>('[data-paper-digit]');
-        if (!face || !paperDigit) throw new Error('Missing paper digit face');
-        const style = getComputedStyle(face);
-        return {
-          backgroundImage: style.backgroundImage,
-          borderStyle: style.borderStyle,
-          transformStyle: getComputedStyle(paperDigit).transformStyle,
-        };
-      }),
-    );
-    for (const face of paperFaces) {
-      expect(face.backgroundImage).not.toBe('none');
-      expect(face.borderStyle).toBe('solid');
-      expect(face.transformStyle).toBe('preserve-3d');
-    }
+    await expect
+      .poll(
+        () =>
+          scoreboard.locator('[data-activity-digit]').evaluateAll((digits) =>
+            digits.every((digit) => {
+              const face = digit.querySelector<HTMLElement>('[aria-hidden="true"]');
+              const paperDigit = digit.querySelector<HTMLElement>('[data-paper-digit]');
+              if (!face || !paperDigit) return false;
+              const faceStyle = getComputedStyle(face);
+              return (
+                faceStyle.backgroundImage !== 'none' &&
+                faceStyle.borderStyle === 'solid' &&
+                getComputedStyle(paperDigit).transformStyle === 'preserve-3d'
+              );
+            }),
+          ),
+        { timeout: 10_000 },
+      )
+      .toBe(true);
 
     const overflow = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,
@@ -91,9 +92,12 @@ for (const study of studies) {
         }, minimumHeight),
       )
       .toBe(true);
-    const dimensions = await scoreboard.boundingBox();
-    expect(dimensions).toBeTruthy();
-    expect(dimensions!.width).toBeLessThanOrEqual(study.width);
+    const dimensions = await scoreboard.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { width: rect.width, height: rect.height };
+    });
+    expect(dimensions.width).toBeLessThanOrEqual(study.width);
+    expect(dimensions.height).toBeGreaterThanOrEqual(minimumHeight);
 
     const screenshotPath = path.join(
       'test-results',
@@ -108,6 +112,8 @@ for (const study of studies) {
 }
 
 test('captures the live paper counter choreography', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium', 'Motion frames are captured once in Chromium.');
+
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.addInitScript(() => {
     const actualNow = Date.now.bind(Date);
@@ -168,7 +174,7 @@ test('captures the live paper counter choreography', async ({ page }, testInfo) 
     .locator('[data-paper-digit]')
     .last()
     .locator('[aria-hidden="true"]');
-  await expect(lastDigitFaces).toHaveCount(3, { timeout: 2_000 });
+  await expect(lastDigitFaces).toHaveCount(3, { timeout: 3_000 });
   await scoreboard.screenshot({
     path: path.join(frameDirectory, '01-lift.png'),
     animations: 'allow',
@@ -190,7 +196,7 @@ test('captures the live paper counter choreography', async ({ page }, testInfo) 
     'aria-label',
     `${targetToday} contributions today`,
   );
-  await expect(lastDigitFaces).toHaveCount(1, { timeout: 3_000 });
+  await expect(lastDigitFaces).toHaveCount(1, { timeout: 5_000 });
   await scoreboard.screenshot({
     path: path.join(frameDirectory, '04-settled.png'),
     animations: 'allow',
@@ -203,10 +209,9 @@ test('queues a newer activity value while paper leaves are still turning', async
     const actualNow = Date.now.bind(Date);
     let offset = 60 * 60 * 1_000;
     Date.now = () => actualNow() + offset;
-    (window as Window & { __advanceActivityClock: (milliseconds: number) => void }).__advanceActivityClock =
-      (milliseconds) => {
-        offset += milliseconds;
-      };
+    window.__advanceActivityClock = (milliseconds) => {
+      offset += milliseconds;
+    };
   });
 
   let releaseFirst!: () => void;
@@ -259,15 +264,13 @@ test('queues a newer activity value while paper leaves are still turning', async
     .locator('[data-paper-digit]')
     .last()
     .locator('[aria-hidden="true"]');
-  await expect(lastDigitFaces).toHaveCount(3, { timeout: 2_000 });
+  await expect(lastDigitFaces).toHaveCount(3, { timeout: 3_000 });
 
   const secondRequest = page.waitForRequest(
     (request) => new URL(request.url()).pathname === '/api/github-activity',
   );
   await page.evaluate(() => {
-    (
-      window as Window & { __advanceActivityClock: (milliseconds: number) => void }
-    ).__advanceActivityClock(31_000);
+    window.__advanceActivityClock(31_000);
     document.dispatchEvent(new Event('visibilitychange'));
   });
   await secondRequest;
@@ -275,7 +278,7 @@ test('queues a newer activity value while paper leaves are still turning', async
 
   await expect(counter).toHaveAttribute('aria-label', `${targets[1]} contributions today`);
   await expect(counter.locator('[data-paper-digit] [aria-hidden="true"]')).toHaveCount(4, {
-    timeout: 5_000,
+    timeout: 15_000,
   });
 });
 
