@@ -135,7 +135,11 @@ async function HomeActivityContent() {
         </div>
       </section>
 
-      <nav aria-labelledby="explore-scrapbook-title" className="min-w-0" data-home-room-shelf>
+      <section
+        aria-labelledby="explore-scrapbook-title"
+        className="min-w-0 md:hidden"
+        data-home-room-shelf
+      >
         <div className="flex items-end justify-between gap-4 px-0.5">
           <div>
             <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
@@ -150,7 +154,7 @@ async function HomeActivityContent() {
           </span>
         </div>
 
-        <div className="-mx-4 mt-2.5 grid snap-x snap-mandatory grid-flow-col auto-cols-[minmax(16rem,82vw)] gap-2.5 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid-flow-row sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 xl:grid-cols-4">
+        <div className="-mx-4 mt-2.5 grid snap-x snap-mandatory grid-flow-col auto-cols-[minmax(16rem,82vw)] gap-2.5 overflow-x-auto px-4 pb-2">
           {scrapbookDestinations.map((destination, index) => (
             <Link
               key={destination.id}
@@ -183,7 +187,7 @@ async function HomeActivityContent() {
             </Link>
           ))}
         </div>
-      </nav>
+      </section>
     </div>
   );
 }
