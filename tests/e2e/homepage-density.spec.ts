@@ -153,7 +153,7 @@ test('keeps hover surfaces planted and lets the visitor pet Scraplet', async ({ 
   await expect(pet).toHaveAttribute('data-pets', '1');
 });
 
-test('keeps the paper grid legible and Scraplet cosy in both themes', async ({ page }) => {
+test('keeps the paper grid legible and Scraplet cosy in both themes', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1280, height: 720 });
 
   for (const study of [
@@ -188,5 +188,16 @@ test('keeps the paper grid legible and Scraplet cosy in both themes', async ({ p
     expect(appearance.gridAlpha).toBeCloseTo(study.alpha, 3);
     expect(appearance.gridImage).not.toBe('none');
     expect(appearance.petImage).not.toBe('none');
+
+    await removeDevelopmentChrome(page);
+    const screenshotPath = path.join(
+      'test-results',
+      'homepage-density',
+      'themes',
+      testInfo.project.name,
+      `${study.theme}-1280x720.png`,
+    );
+    await mkdir(path.dirname(screenshotPath), { recursive: true });
+    await page.screenshot({ path: screenshotPath, animations: 'disabled' });
   }
 });
