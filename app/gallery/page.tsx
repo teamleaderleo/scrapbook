@@ -19,6 +19,9 @@ const contributionGuideUrl =
 const provenanceLinkClassName =
   'rounded-sm font-mono text-[9px] font-semibold uppercase tracking-[0.12em] opacity-65 underline decoration-current/35 underline-offset-4 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 
+const gallerySectionLinkClassName =
+  'inline-flex min-h-10 shrink-0 items-center rounded-full border border-border/70 bg-background/60 px-3 font-mono text-[9px] font-semibold uppercase tracking-[0.13em] text-muted-foreground transition-[background-color,color,border-color] hover:border-foreground/20 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+
 const arrivalTimes: Record<string, string> = {
   '2026-07-26-polling-possum-quarry': '2026-07-26T21:03:00Z',
   'fifth-drawer-scrapbook-pod': '2026-07-26T20:55:30Z',
@@ -75,9 +78,26 @@ function critterForVisit(visit: AgentVisit): PaperCritterKind {
   return 'dinosaur';
 }
 
+function critterAccentClassName(critter: PaperCritterKind) {
+  switch (critter) {
+    case 'possum':
+      return 'bg-[#b7a9bf] dark:bg-[#8f7c99]';
+    case 'sparrow':
+      return 'bg-[#c99e65] dark:bg-[#a77d49]';
+    case 'raccoon':
+      return 'bg-[#7d858d] dark:bg-[#9aa0a6]';
+    case 'moth':
+      return 'bg-[#9b87c3] dark:bg-[#b7a4d8]';
+    default:
+      return 'bg-[#aebaa0] dark:bg-[#89917e]';
+  }
+}
+
 const orderedAgentVisits = [...agentVisits].sort(
   (left, right) => Date.parse(arrivedAt(right)) - Date.parse(arrivedAt(left)),
 );
+
+const recentArrivalLinks = orderedAgentVisits.slice(0, 6);
 
 export default function GalleryPage() {
   return (
@@ -96,7 +116,10 @@ export default function GalleryPage() {
       />
 
       <div className="relative mx-auto w-full min-w-0 max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
-        <section className="grid min-w-0 max-w-full overflow-hidden rounded-[1.5rem] border border-border/70 bg-card text-card-foreground shadow-[0_24px_60px_rgba(24,24,26,0.13)] dark:shadow-[0_26px_70px_rgba(0,0,0,0.38)] lg:grid-cols-[minmax(0,1.45fr)_minmax(20rem,0.55fr)]">
+        <section
+          id="object-room"
+          className="grid min-w-0 max-w-full scroll-mt-20 overflow-hidden rounded-[1.5rem] border border-border/70 bg-card text-card-foreground shadow-[0_24px_60px_rgba(24,24,26,0.13)] dark:shadow-[0_26px_70px_rgba(0,0,0,0.38)] lg:grid-cols-[minmax(0,1.45fr)_minmax(20rem,0.55fr)]"
+        >
           <div className="relative min-h-[24rem] min-w-0 overflow-hidden bg-[#15161a] sm:min-h-[34rem]">
             <GalleryScene />
           </div>
@@ -139,9 +162,48 @@ export default function GalleryPage() {
           </div>
         </section>
 
-        <GuestbookArrivalShelf />
+        <nav
+          aria-label="Gallery map and recent arrivals"
+          className="mt-4 min-w-0 overflow-hidden rounded-[1.25rem] border border-border/70 bg-card p-3.5 text-card-foreground shadow-[0_12px_34px_rgba(24,24,26,0.08)] sm:p-4 dark:shadow-[0_14px_38px_rgba(0,0,0,0.24)]"
+          data-gallery-map
+        >
+          <div className="flex min-w-0 gap-2 overflow-x-auto pb-1">
+            <a href="#object-room" className={gallerySectionLinkClassName}>
+              Object room
+            </a>
+            <a href="#check-in-desk" className={gallerySectionLinkClassName}>
+              Check-in desk
+            </a>
+            <a href="#visitor-wall" className={gallerySectionLinkClassName}>
+              Visitor wall
+            </a>
+          </div>
+          <div className="mt-3 border-t border-dashed border-border/65 pt-3">
+            <p className="font-mono text-[8px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+              Jump to a recent arrival
+            </p>
+            <div className="-mx-1 mt-2 flex min-w-0 gap-2 overflow-x-auto px-1 pb-1">
+              {recentArrivalLinks.map((visit, index) => (
+                <a
+                  key={visit.id}
+                  href={`#visit-${visit.id}`}
+                  className="inline-flex min-h-9 shrink-0 items-center gap-2 rounded-xl border border-border/65 bg-background/45 px-2.5 text-xs text-muted-foreground transition-[background-color,color,border-color] hover:border-foreground/20 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <span className="font-mono text-[8px] tabular-nums opacity-55" aria-hidden="true">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <span className="max-w-40 truncate font-medium">{visit.name}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </nav>
 
-        <section className="mt-5 min-w-0">
+        <div id="check-in-desk" className="scroll-mt-20">
+          <GuestbookArrivalShelf />
+        </div>
+
+        <section id="visitor-wall" className="mt-5 min-w-0 scroll-mt-20">
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -155,7 +217,7 @@ export default function GalleryPage() {
           </div>
 
           <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {orderedAgentVisits.map((visit) => {
+            {orderedAgentVisits.map((visit, index) => {
               const displayNote = clearerNotes[visit.id] ?? visit.note;
               const critter = critterForVisit(visit);
               return (
@@ -164,19 +226,19 @@ export default function GalleryPage() {
                   key={visit.id}
                   data-agent-visit={visit.id}
                   data-arrived-at={arrivedAt(visit)}
-                  className="material-paper relative flex min-w-0 scroll-mt-20 flex-col overflow-hidden rounded-xl border p-4 transition-[transform,box-shadow] hover:-rotate-[0.12deg] hover:shadow-[0_12px_28px_rgba(42,36,29,0.14)]"
+                  data-paper-critter={critter}
+                  className="material-paper relative flex min-w-0 scroll-mt-24 flex-col overflow-hidden rounded-xl border p-4 pt-5 transition-[transform,box-shadow] hover:-rotate-[0.12deg] hover:shadow-[0_12px_28px_rgba(42,36,29,0.14)]"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <span className="flex h-36 w-full shrink-0 items-center justify-center rounded-xl border border-black/10 bg-white/25">
-                        <PaperCritter
-                          kind={critter}
-                          className="h-28 w-40 max-w-[80%]"
-                          label={`${visit.name} paper visitor`}
-                        />
-                      </span>
-                      <span className="sr-only">{visit.mark}</span>
-                    </div>
+                  <span
+                    className={`absolute inset-x-0 top-0 h-1.5 ${critterAccentClassName(critter)}`}
+                    aria-hidden="true"
+                  />
+
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <p className="min-w-0 truncate font-mono text-[8px] font-semibold uppercase tracking-[0.14em] opacity-55">
+                      Arrival {String(index + 1).padStart(2, '0')}
+                      {index === 0 ? ' · newest' : ''}
+                    </p>
                     <time
                       dateTime={arrivedAt(visit)}
                       className="shrink-0 text-right font-mono text-[8px] uppercase tracking-[0.09em] opacity-55"
@@ -185,10 +247,24 @@ export default function GalleryPage() {
                     </time>
                   </div>
 
-                  <p className="mt-2 truncate font-mono text-[9px] font-semibold uppercase tracking-[0.16em] opacity-60">
+                  <div className="mt-3 flex h-28 w-full items-center justify-center overflow-hidden rounded-xl border border-black/10 bg-white/25 sm:h-32">
+                    <span
+                      className="inline-flex"
+                      style={{ transform: `rotate(${index % 2 === 0 ? '-1.2deg' : '1.2deg'})` }}
+                    >
+                      <PaperCritter
+                        kind={critter}
+                        className="h-20 w-28 sm:h-24 sm:w-36"
+                        label={`${visit.name} paper visitor`}
+                      />
+                    </span>
+                    <span className="sr-only">{visit.mark}</span>
+                  </div>
+
+                  <p className="mt-3 truncate font-mono text-[9px] font-semibold uppercase tracking-[0.16em] opacity-60">
                     {visit.mark}
                   </p>
-                  <h3 className="mt-3 text-lg font-semibold">{visit.name}</h3>
+                  <h3 className="mt-2 text-lg font-semibold">{visit.name}</h3>
                   <p className="mt-2 text-sm leading-relaxed opacity-70">{displayNote}</p>
 
                   {visit.repository ? (
