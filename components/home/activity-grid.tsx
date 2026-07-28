@@ -44,6 +44,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [finePointer, setFinePointer] = useState(false);
   const previousLatest = useRef(days.at(-1)?.date ?? '');
+  const sectionRef = useRef<HTMLElement | null>(null);
   const hideTimer = useRef<number | null>(null);
   const positionFrame = useRef<number | null>(null);
   const pendingPosition = useRef({ x: 12, y: 12 });
@@ -60,8 +61,6 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
     return () => {
       if (hideTimer.current !== null) window.clearTimeout(hideTimer.current);
       if (positionFrame.current !== null) window.cancelAnimationFrame(positionFrame.current);
-      document.documentElement.style.removeProperty('--activity-tooltip-x');
-      document.documentElement.style.removeProperty('--activity-tooltip-y');
     };
   }, []);
 
@@ -93,8 +92,11 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
     if (positionFrame.current !== null) return;
     positionFrame.current = window.requestAnimationFrame(() => {
       const { x, y } = pendingPosition.current;
-      document.documentElement.style.setProperty('--activity-tooltip-x', `${x}px`);
-      document.documentElement.style.setProperty('--activity-tooltip-y', `${y}px`);
+      const section = sectionRef.current;
+      if (section) {
+        section.style.setProperty('--activity-tooltip-x', `${x}px`);
+        section.style.setProperty('--activity-tooltip-y', `${y}px`);
+      }
       positionFrame.current = null;
     });
   };
@@ -115,6 +117,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
 
   return (
     <section
+      ref={sectionRef}
       className="min-w-0 overflow-hidden rounded-[1.25rem] border border-border/70 bg-card p-3.5 text-card-foreground shadow-[0_16px_38px_rgba(35,31,26,0.1)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] sm:p-4 [@media(max-height:780px)]:p-3"
       data-home-activity-grid
     >

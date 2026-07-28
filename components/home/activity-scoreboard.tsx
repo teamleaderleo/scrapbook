@@ -1,8 +1,21 @@
 'use client';
 
 import { ScrapbookPet } from '@/components/home/scrapbook-pet';
-import { motion, useAnimate, useReducedMotion } from 'framer-motion';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  motion,
+  useAnimate,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+} from 'framer-motion';
+import {
+  type PointerEvent as ReactPointerEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import styles from './activity-scoreboard.module.css';
 
 function countdownToUtcMidnight() {
@@ -239,6 +252,27 @@ export function ActivityScoreboard({
 }) {
   const reduceMotion = useReducedMotion();
   const [countdown, setCountdown] = useState('--:--:--');
+  const pointerX = useMotionValue(0);
+  const pointerY = useMotionValue(0);
+  const lightOpacity = useMotionValue(0);
+  const fibreX = useMotionValue(0);
+  const fibreY = useMotionValue(0);
+  const curlProgress = useMotionValue(0);
+  const smoothPointerX = useSpring(pointerX, { stiffness: 240, damping: 30, mass: 0.55 });
+  const smoothPointerY = useSpring(pointerY, { stiffness: 240, damping: 30, mass: 0.55 });
+  const smoothLightOpacity = useSpring(lightOpacity, {
+    stiffness: 240,
+    damping: 30,
+    mass: 0.5,
+  });
+  const smoothFibreX = useSpring(fibreX, { stiffness: 210, damping: 28, mass: 0.58 });
+  const smoothFibreY = useSpring(fibreY, { stiffness: 210, damping: 28, mass: 0.58 });
+  const smoothCurl = useSpring(curlProgress, { stiffness: 260, damping: 24, mass: 0.48 });
+  const curlOpacity = useTransform(smoothCurl, [0, 0.12, 1], [0, 0.18, 0.96]);
+  const curlScale = useTransform(smoothCurl, [0, 1], [0.74, 1.08]);
+  const curlRotate = useTransform(smoothCurl, [0, 1], [-8, 5]);
+  const curlX = useTransform(smoothCurl, [0, 1], [-8, 0]);
+  const curlY = useTransform(smoothCurl, [0, 1], [8, -1]);
 
   useEffect(() => {
     const update = () => setCountdown(countdownToUtcMidnight());
@@ -246,6 +280,33 @@ export function ActivityScoreboard({
     const interval = window.setInterval(update, 1000);
     return () => window.clearInterval(interval);
   }, []);
+
+  const movePaperLight = (event: ReactPointerEvent<HTMLElement>) => {
+    if (reduceMotion || event.pointerType === 'touch') return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+
+    const x = Math.min(rect.width, Math.max(0, event.clientX - rect.left));
+    const y = Math.min(rect.height, Math.max(0, event.clientY - rect.top));
+    const horizontal = x / rect.width;
+    const vertical = y / rect.height;
+    const curlDistance = Math.hypot(horizontal, 1 - vertical);
+
+    pointerX.set(x);
+    pointerY.set(y);
+    lightOpacity.set(1);
+    fibreX.set((horizontal - 0.5) * 9);
+    fibreY.set((vertical - 0.5) * 6);
+    curlProgress.set(Math.max(0, 1 - curlDistance / 0.85));
+  };
+
+  const settlePaperLight = () => {
+    lightOpacity.set(0);
+    fibreX.set(0);
+    fibreY.set(0);
+    curlProgress.set(0);
+  };
 
   return (
     <motion.section
@@ -262,12 +323,39 @@ export function ActivityScoreboard({
       }
       transition={{ type: 'spring', stiffness: 260, damping: 22, mass: 0.72 }}
       style={{ transformPerspective: 1100, transformOrigin: '50% 55%' }}
-      className="group relative flex h-full min-h-[15.5rem] flex-col overflow-hidden rounded-[1.25rem] border border-border/75 bg-card text-card-foreground shadow-[0_16px_38px_rgba(24,24,26,0.11)] transition-[border-color,box-shadow] duration-300 hover:border-border hover:shadow-[0_24px_52px_rgba(24,24,26,0.17)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_26px_58px_rgba(0,0,0,0.42)] [@media(max-height:780px)]:min-h-[14.5rem]"
+      onPointerMove={movePaperLight}
+      onPointerLeave={settlePaperLight}
+      onPointerCancel={settlePaperLight}
+      className={`${styles.scorecard} group relative flex h-full min-h-[15.5rem] flex-col overflow-hidden rounded-[1.25rem] border border-border/75 bg-card text-card-foreground shadow-[0_16px_38px_rgba(24,24,26,0.11)] transition-[border-color,box-shadow] duration-300 hover:border-border hover:shadow-[0_24px_52px_rgba(24,24,26,0.17)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_26px_58px_rgba(0,0,0,0.42)] [@media(max-height:780px)]:min-h-[14.5rem]`}
       data-activity-scoreboard
+      data-paper-light-motion={reduceMotion ? 'reduced' : 'full'}
     >
-      <span
+      <motion.span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 -left-[45%] z-20 w-[30%] -skew-x-12 bg-gradient-to-r from-transparent via-white/14 to-transparent opacity-0 transition-[left,opacity] duration-700 ease-out group-hover:left-[120%] group-hover:opacity-100 motion-reduce:hidden dark:via-white/[0.07]"
+        className={styles.rakingLightAnchor}
+        style={{ x: smoothPointerX, y: smoothPointerY, opacity: smoothLightOpacity }}
+        data-paper-raking-light
+      >
+        <span className={styles.rakingLight} />
+      </motion.span>
+      <motion.span
+        aria-hidden="true"
+        className={styles.fibreField}
+        style={{ x: smoothFibreX, y: smoothFibreY }}
+        data-paper-fibres
+      />
+      <motion.span
+        aria-hidden="true"
+        className={styles.paperCurl}
+        style={{
+          x: curlX,
+          y: curlY,
+          scale: curlScale,
+          rotateZ: curlRotate,
+          opacity: curlOpacity,
+          transformPerspective: 620,
+        }}
+        data-paper-curl
       />
 
       <div className="relative z-10 border-b border-border/70 bg-muted/70 px-4 py-2.5 transition-colors duration-300 group-hover:bg-muted/85 [@media(max-height:780px)]:py-2">
