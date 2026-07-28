@@ -9,7 +9,7 @@ function result(source: GitHubHomeResult['activity']['source']): GitHubHomeResul
       source,
       generatedAt: '2026-07-27T01:00:00.000Z',
       total: 18,
-      periodLabel: source === 'public-profile' ? 'last year' : 'last 35 days',
+      periodLabel: source === 'public-profile' ? 'last year' : 'last 28 days',
       today: 3,
       weekTotal: 9,
       activeDays: 5,
