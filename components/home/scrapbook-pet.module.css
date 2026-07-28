@@ -21,12 +21,8 @@
   pointer-events: none;
 }
 
-.pet > * {
-  position: relative;
-  z-index: 1;
-}
-
 .figure {
+  z-index: 1;
   isolation: isolate;
 }
 
