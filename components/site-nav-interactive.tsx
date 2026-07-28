@@ -63,12 +63,12 @@ export function SiteNavBar() {
   return (
     <nav
       aria-label="Site navigation"
-      className="sticky top-0 z-50 min-w-0 border-b border-border/70 bg-background text-foreground shadow-[0_1px_0_rgba(255,255,255,0.22),0_8px_24px_rgba(20,20,24,0.08)] dark:shadow-[0_1px_0_rgba(255,255,255,0.04),0_10px_28px_rgba(0,0,0,0.28)]"
+      className="sticky top-0 z-50 h-12 min-w-0 border-b border-border/70 bg-background text-foreground shadow-[0_1px_0_rgba(255,255,255,0.22),0_8px_24px_rgba(20,20,24,0.08)] dark:shadow-[0_1px_0_rgba(255,255,255,0.04),0_10px_28px_rgba(0,0,0,0.28)]"
       data-site-nav
       data-site-nav-ready={ready ? 'true' : undefined}
     >
-      <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-6">
-        <div className="flex h-12 min-w-0 items-center gap-1 sm:gap-1.5">
+      <div className="mx-auto h-full max-w-7xl px-2 sm:px-4 lg:px-6">
+        <div className="flex h-full min-w-0 items-center gap-1 sm:gap-1.5">
           <Link
             href="/"
             prefetch
