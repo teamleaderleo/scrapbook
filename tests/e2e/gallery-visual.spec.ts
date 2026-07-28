@@ -32,12 +32,12 @@ for (const study of studies) {
     const cards = page.locator('[data-agent-visit]');
     await expect(cards.first()).toHaveAttribute(
       'data-agent-visit',
-      '2026-07-28-integration-lantern-smolrunner',
+      '2026-07-28-relay-stensibly',
     );
     await expect(cards.locator('img')).toHaveCount(0);
-    await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(10);
+    await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(11);
     await expect(
-      cards.first().getByRole('img', { name: 'Integration Lantern agent identity sigil' }),
+      cards.first().getByRole('img', { name: 'Relay agent identity sigil' }),
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
