@@ -17,13 +17,6 @@ const CONTRIBUTION_CALENDAR_QUERY = `
         }
       }
     }
-    rateLimit {
-      limit
-      remaining
-      used
-      resetAt
-      resource
-    }
   }
 `;
 
@@ -53,7 +46,6 @@ type GraphqlPayload = {
         };
       };
     } | null;
-    rateLimit?: unknown;
   };
   errors?: Array<{ message?: unknown }>;
 };
@@ -62,22 +54,30 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
-function integerOrNull(value: unknown): number | null {
-  return Number.isInteger(value) ? (value as number) : null;
+function headerInteger(headers: Headers, name: string): number | null {
+  const value = headers.get(name);
+  if (value === null) return null;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
-function stringOrNull(value: unknown): string | null {
-  return typeof value === 'string' ? value : null;
-}
+function parseRateLimitHeaders(headers: Headers): GitHubGraphqlRateLimit | null {
+  const limit = headerInteger(headers, 'x-ratelimit-limit');
+  const remaining = headerInteger(headers, 'x-ratelimit-remaining');
+  const used = headerInteger(headers, 'x-ratelimit-used');
+  const reset = headerInteger(headers, 'x-ratelimit-reset');
+  const resource = headers.get('x-ratelimit-resource');
 
-function parseRateLimit(value: unknown): GitHubGraphqlRateLimit | null {
-  if (!isRecord(value)) return null;
+  if (limit === null && remaining === null && used === null && reset === null && resource === null) {
+    return null;
+  }
+
   return {
-    limit: integerOrNull(value.limit),
-    remaining: integerOrNull(value.remaining),
-    used: integerOrNull(value.used),
-    resetAt: stringOrNull(value.resetAt),
-    resource: stringOrNull(value.resource),
+    limit,
+    remaining,
+    used,
+    resetAt: reset === null ? null : new Date(reset * 1_000).toISOString(),
+    resource,
   };
 }
 
@@ -123,7 +123,7 @@ export function parseGitHubContributionCalendar(
   return {
     counts,
     total: calendar.totalContributions as number,
-    rateLimit: parseRateLimit(typedPayload.data?.rateLimit),
+    rateLimit: null,
   };
 }
 
@@ -147,5 +147,6 @@ export async function fetchGitHubContributionCalendar(
   });
 
   if (!response.ok) throw new Error(`GitHub GraphQL returned ${response.status}`);
-  return parseGitHubContributionCalendar(await response.json());
+  const parsed = parseGitHubContributionCalendar(await response.json());
+  return { ...parsed, rateLimit: parseRateLimitHeaders(response.headers) };
 }
