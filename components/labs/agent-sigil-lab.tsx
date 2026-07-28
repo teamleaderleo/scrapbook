@@ -4,6 +4,12 @@ import {
   createAgentIdentitySigilRecipe,
   type AgentIdentitySigilInput,
 } from '@/lib/agent-identity-sigils';
+import {
+  generation3PaletteCatalogue,
+  type Generation3PaletteFamily,
+  type Generation3PaletteRoles,
+  type Generation3PaletteVariant,
+} from '@/lib/agent-sigil-generation-3-palettes';
 import type { AgentSigilComplexity } from '@/lib/agent-sigils';
 
 const identities: Array<AgentIdentitySigilInput> = [
@@ -105,6 +111,15 @@ const complexityExamples: Array<{ label: string; value: AgentSigilComplexity }> 
   { label: 'Dense', value: 'dense' },
 ];
 
+const paletteSurfaces: Array<{
+  label: string;
+  key: 'light' | 'dark' | 'monochrome';
+}> = [
+  { label: 'Light', key: 'light' },
+  { label: 'Dark', key: 'dark' },
+  { label: 'Mono', key: 'monochrome' },
+];
+
 function IdentityCard({ identity }: { identity: AgentIdentitySigilInput }) {
   const recipe = createAgentIdentitySigilRecipe(identity);
 
@@ -126,6 +141,71 @@ function IdentityCard({ identity }: { identity: AgentIdentitySigilInput }) {
         <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground/75">
           g{recipe.generation} · {recipe.family} · {recipe.paletteName}
         </p>
+      </div>
+    </article>
+  );
+}
+
+function PaletteRoleStrip({
+  label,
+  roles,
+}: {
+  label: string;
+  roles: Generation3PaletteRoles;
+}) {
+  return (
+    <div
+      data-generation-3-palette-surface={label.toLowerCase()}
+      className="grid grid-cols-[3.25rem_minmax(0,1fr)] items-center gap-2"
+    >
+      <span className="font-mono text-[8px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+        {label}
+      </span>
+      <div className="grid h-7 grid-cols-4 overflow-hidden rounded-lg border border-border/65 bg-background">
+        {Object.entries(roles).map(([role, colour]) => (
+          <span
+            key={role}
+            data-generation-3-palette-role={role}
+            title={`${role}: ${colour}`}
+            style={{ backgroundColor: colour }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Generation3PaletteCard({
+  family,
+  variant,
+}: {
+  family: Generation3PaletteFamily;
+  variant: Generation3PaletteVariant;
+}) {
+  return (
+    <article
+      data-generation-3-palette={variant.id}
+      data-generation-3-palette-family={family.id}
+      data-generation-3-palette-mode={family.mode}
+      className="min-w-0 rounded-[1rem] border border-border/65 bg-background p-3"
+    >
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h3 className="truncate text-sm font-medium">{family.label}</h3>
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">{variant.label}</p>
+        </div>
+        <span className="shrink-0 rounded-full border border-border/65 px-2 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+          {family.mode}
+        </span>
+      </div>
+      <div className="mt-3 grid gap-2">
+        {paletteSurfaces.map((surface) => (
+          <PaletteRoleStrip
+            key={surface.key}
+            label={surface.label}
+            roles={variant[surface.key]}
+          />
+        ))}
       </div>
     </article>
   );
@@ -174,6 +254,37 @@ export function AgentSigilLab() {
           {identities.map((identity) => (
             <IdentityCard key={`${identity.scope}:${identity.designation}`} identity={identity} />
           ))}
+        </div>
+      </section>
+
+      <section
+        data-generation-3-palette-shelf
+        className="rounded-[1.4rem] border border-border/70 bg-card/85 p-4 shadow-[0_18px_42px_rgba(28,26,24,0.08)] dark:shadow-[0_18px_42px_rgba(0,0,0,0.24)] sm:p-5"
+      >
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
+              Generation 3 palette foundation
+            </p>
+            <h2 className="mt-1 text-xl font-semibold tracking-tight">
+              Reviewed colour worlds before production geometry
+            </h2>
+          </div>
+          <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
+            Ten stable families each contain two explicit variants across monotone, duotone, tri-colour, material, and luminous modes. Work-note edits never recolour the family.
+          </p>
+        </div>
+
+        <div className="mt-4 grid min-w-0 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {generation3PaletteCatalogue.flatMap((family) =>
+            family.variants.map((variant) => (
+              <Generation3PaletteCard
+                key={variant.id}
+                family={family}
+                variant={variant}
+              />
+            )),
+          )}
         </div>
       </section>
 
