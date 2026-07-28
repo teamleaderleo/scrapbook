@@ -1,0 +1,20 @@
+.paperGrid {
+  --home-grid-rgb: 73 65 54;
+  --home-grid-alpha: 0.036;
+
+  background-image:
+    linear-gradient(rgb(var(--home-grid-rgb) / var(--home-grid-alpha)) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--home-grid-rgb) / var(--home-grid-alpha)) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+:global(.dark) .paperGrid {
+  --home-grid-rgb: 229 220 235;
+  --home-grid-alpha: 0.044;
+}
+
+@media (forced-colors: active) {
+  .paperGrid {
+    display: none;
+  }
+}
