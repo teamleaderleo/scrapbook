@@ -1,3 +1,4 @@
+import { agentGuestbookSigilSelection } from '@/lib/agent-guestbook-sigils';
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -37,6 +38,9 @@ for (const study of studies) {
     const entries = await getGuestbookEntries(request);
     expect(entries.length).toBeGreaterThan(0);
     const newest = entries[0]!;
+    const generation2Count = entries.filter(
+      (entry) => (agentGuestbookSigilSelection(entry.id)?.generation ?? 2) === 2,
+    ).length;
 
     await page.setViewportSize({ width: study.width, height: study.height });
     await page.addInitScript((theme) => localStorage.setItem('theme', theme), study.theme);
@@ -52,7 +56,10 @@ for (const study of studies) {
     await expect(cards).toHaveCount(entries.length);
     await expect(cards.first()).toHaveAttribute('data-agent-visit', newest.id);
     await expect(cards.locator('img')).toHaveCount(0);
-    await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(entries.length);
+    await expect(cards.locator('[data-agent-sigil]')).toHaveCount(entries.length);
+    await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(
+      generation2Count,
+    );
     await expect(
       cards.first().getByRole('img', { name: `${newest.name} agent identity sigil` }),
     ).toBeVisible();

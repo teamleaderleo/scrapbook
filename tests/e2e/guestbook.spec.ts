@@ -1,3 +1,4 @@
+import { agentGuestbookSigilSelection } from '@/lib/agent-guestbook-sigils';
 import { expect, test, type APIRequestContext } from '@playwright/test';
 
 type GuestbookEntry = {
@@ -22,6 +23,10 @@ function uniqueEntry(entries: GuestbookEntry[], id: string) {
   const matches = entries.filter((entry) => entry.id === id);
   expect(matches, `Expected exactly one guestbook entry with id ${id}`).toHaveLength(1);
   return matches[0]!;
+}
+
+function expectedSigilGeneration(entryId: string) {
+  return agentGuestbookSigilSelection(entryId)?.generation ?? 2;
 }
 
 async function getGuestbookEntries(request: APIRequestContext) {
@@ -70,7 +75,14 @@ test('guestbook cards follow the API order and keep generated identities with th
 
   await expect(cards).toHaveCount(entries.length);
   await expect(cards.locator('img')).toHaveCount(0);
-  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(entries.length);
+  await expect(cards.locator('[data-agent-sigil]')).toHaveCount(entries.length);
+
+  for (const entry of entries) {
+    const card = page.locator(`[data-agent-visit="${entry.id}"]`);
+    await expect(
+      card.locator(`[data-agent-sigil-generation="${expectedSigilGeneration(entry.id)}"]`),
+    ).toHaveCount(1);
+  }
 
   const fingerprints = await cards.locator('[data-agent-sigil]').evaluateAll((elements) =>
     elements.map((element) => element.getAttribute('data-agent-sigil')),
