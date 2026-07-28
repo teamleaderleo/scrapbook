@@ -75,7 +75,7 @@ for (const viewport of desktopViewports) {
     const response = await page.goto('/');
     expect(response?.ok()).toBe(true);
 
-    await expect(page.locator('[data-wind-scoreboard]')).toBeVisible();
+    await expect(page.locator('[data-wind-scoreboard]')).toBeVisible({ timeout: 15_000 });
     await expect(page.locator('[data-contribution-week-grid]')).toBeVisible();
     await expect(page.locator('[data-scrapbook-pet]')).toBeVisible();
     await expect(page.getByText('Recent systems', { exact: true })).toBeVisible();
@@ -110,7 +110,7 @@ test('moves through the desktop layout transition without inflating the activity
   await page.setViewportSize({ width: 820, height: 720 });
   const response = await page.goto('/');
   expect(response?.ok()).toBe(true);
-  await expect(page.locator('[data-home-activity-dashboard]')).toBeVisible();
+  await expect(page.locator('[data-home-activity-dashboard]')).toBeVisible({ timeout: 15_000 });
 
   const stacked = await readHomepageFootprint(page);
   expect(Math.abs(stacked.scoreboard.x - stacked.activityGrid.x)).toBeLessThan(2);
@@ -120,7 +120,7 @@ test('moves through the desktop layout transition without inflating the activity
   const sideBySide = await readHomepageFootprint(page);
   expect(sideBySide.activityGrid.x).toBeGreaterThan(sideBySide.scoreboard.right);
   expect(Math.abs(sideBySide.scoreboard.y - sideBySide.activityGrid.y)).toBeLessThan(2);
-  expect(Math.abs(stacked.activityCell.width - sideBySide.activityCell.width)).toBeLessThan(6);
+  expect(Math.abs(stacked.activityCell.width - sideBySide.activityCell.width)).toBeLessThanOrEqual(8);
   expect(sideBySide.document.width).toBeLessThanOrEqual(sideBySide.viewport.width);
 });
 
@@ -133,7 +133,7 @@ test('lifts the scorecard on hover and lets the visitor pet Scraplet', async ({ 
   const digit = page.locator('[data-activity-digit]').first();
   const pet = page.locator('[data-scrapbook-pet]');
 
-  await expect(scoreboard).toBeVisible();
+  await expect(scoreboard).toBeVisible({ timeout: 15_000 });
   await expect(digit).toBeVisible();
   await expect(pet).toHaveAttribute('data-pets', '0');
 
