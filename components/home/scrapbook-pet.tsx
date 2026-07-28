@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useState } from 'react';
+import { PaperCreature } from '@/components/paper-creature';
 
 const petMessages = [
   'Scraplet rustles happily.',
@@ -15,6 +16,7 @@ export function ScrapbookPet({ activity, updating }: { activity: number; updatin
   const [pets, setPets] = useState(0);
   const status = updating ? 'sniffing' : activity > 0 ? 'awake' : 'napping';
   const message = pets === 0 ? 'Scraplet is keeping an eye on the activity feed.' : petMessages[(pets - 1) % petMessages.length];
+  const pose = updating ? 'sniffing' : activity > 0 ? 'idle' : 'napping';
 
   return (
     <motion.button
@@ -30,69 +32,12 @@ export function ScrapbookPet({ activity, updating }: { activity: number; updatin
       <motion.span
         key={pets}
         initial={false}
-        animate={
-          reduceMotion || pets === 0
-            ? undefined
-            : { y: [0, -4, 0], rotate: [0, -2, 2, 0] }
-        }
+        animate={reduceMotion || pets === 0 ? undefined : { y: [0, -4, 0], rotate: [0, -2, 2, 0] }}
         transition={{ duration: 0.38, ease: [0.2, 0.75, 0.2, 1] }}
-        className="relative block h-9 w-11"
+        className="relative block"
         aria-hidden="true"
       >
-        <svg viewBox="0 0 72 48" className="h-full w-full overflow-visible">
-          <motion.path
-            d="M23 28 5 20l12 15 10-1Z"
-            className="fill-[#b7adbf] stroke-[#4d4852] dark:fill-[#696270] dark:stroke-[#ded8e3]"
-            strokeWidth="2"
-            strokeLinejoin="round"
-            animate={
-              reduceMotion
-                ? undefined
-                : updating
-                  ? { rotate: [0, -7, 5, 0] }
-                  : { rotate: [0, -2, 0] }
-            }
-            transition={
-              updating
-                ? { duration: 0.7, repeat: Infinity, ease: 'easeInOut' }
-                : { duration: 2.8, repeat: Infinity, ease: 'easeInOut' }
-            }
-            style={{ transformOrigin: '24px 30px' }}
-          />
-          <path
-            d="M22 17h25c9 0 15 6 15 14v2H20v-6c0-4 1-7 2-10Z"
-            className="fill-[#cec4d6] stroke-[#4d4852] dark:fill-[#918a9b] dark:stroke-[#eeeaf2]"
-            strokeWidth="2"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M42 8h14c6 0 10 4 10 10v10H43l-5-7 4-13Z"
-            className="fill-[#e4dce9] stroke-[#4d4852] dark:fill-[#c9c2d0] dark:stroke-[#eeeaf2]"
-            strokeWidth="2"
-            strokeLinejoin="round"
-          />
-          <path
-            d="m29 17 4-8 5 8 5-8 4 8"
-            className="fill-[#f7f2e9] stroke-[#4d4852] dark:fill-[#eeeaf2] dark:stroke-[#eeeaf2]"
-            strokeWidth="2"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M28 32v8h8v-8M49 32v8h8v-8"
-            className="stroke-[#4d4852] dark:stroke-[#eeeaf2]"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <circle cx="56" cy="17" r="2.2" className="fill-[#262329] dark:fill-[#262329]" />
-          <path
-            d="M57 24c2 1 4 1 6-1"
-            className="stroke-[#4d4852] dark:stroke-[#4d4852]"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-          />
-          <circle cx="51" cy="24" r="2.4" className="fill-[#d6a7ae] opacity-70" />
-        </svg>
+        <PaperCreature pose={pose} size="sm" label="" />
       </motion.span>
 
       <span className="min-w-0 leading-none">
