@@ -1,9 +1,9 @@
 name: Keystone guestbook check-in applicator
 
 on:
-  push:
+  pull_request:
     branches:
-      - keystone/guestbook-check-in
+      - main
     paths:
       - .github/workflows/keystone-guestbook-checkin.yml
 
@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'keystone/guestbook-check-in'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
