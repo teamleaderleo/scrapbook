@@ -82,7 +82,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         id: 'time',
         href: '/time',
         label: 'Time',
-        description: 'Compare time zones and edit conversions directly.',
+        description: 'Compare local time with UTC and other time zones.',
         group: 'tools',
       },
       {
