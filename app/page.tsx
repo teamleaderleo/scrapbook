@@ -1,4 +1,5 @@
 import { ActivityDashboard } from '@/components/home/activity-dashboard';
+import { AntigravityHoverField } from '@/components/home/antigravity-hover-field';
 import { WindLiftCard } from '@/components/home/wind-lift-card';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { getGitHubHomeData } from '@/lib/github-home';
@@ -201,11 +202,12 @@ export default function Page() {
     >
       <div
         aria-hidden="true"
-        className={`${styles.paperGrid} pointer-events-none absolute inset-0`}
+        className={`${styles.paperGrid} pointer-events-none absolute inset-0 z-0`}
         data-home-paper-grid
       />
+      <AntigravityHoverField />
 
-      <div className="relative mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-7xl flex-col justify-start px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+      <div className="relative z-10 mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-7xl flex-col justify-start px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
         <Suspense fallback={<HomeActivityFallback />}>
           <HomeActivityContent />
         </Suspense>
