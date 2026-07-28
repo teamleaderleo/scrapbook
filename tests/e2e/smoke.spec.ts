@@ -37,10 +37,12 @@ async function expectWheelScrollsDocument(page: Page, route: string, selector: s
   const response = await page.goto(route);
   expect(response?.ok()).toBe(true);
 
-  await expect(page.locator(selector).first()).toBeVisible({ timeout: 15_000 });
-  await page.evaluate((targetSelector) => {
-    document.querySelector(targetSelector)?.scrollIntoView({ block: 'center' });
-  }, selector);
+  const target =
+    route === '/'
+      ? hydratedHomeDashboard(page).locator(selector)
+      : page.locator(`${selector}:visible`).last();
+  await expect(target).toBeVisible({ timeout: 15_000 });
+  await target.scrollIntoViewIfNeeded();
 
   const scrollState = await page.evaluate(() => {
     const element = document.scrollingElement;
@@ -51,9 +53,13 @@ async function expectWheelScrollsDocument(page: Page, route: string, selector: s
   });
 
   expect(scrollState.max).toBeGreaterThan(0);
-  const box = await page.locator(selector).first().boundingBox();
-  expect(box).toBeTruthy();
-  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  const box = await target.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  });
+  expect(box.width).toBeGreaterThan(0);
+  expect(box.height).toBeGreaterThan(0);
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.wheel(0, 280);
 
   await expect
