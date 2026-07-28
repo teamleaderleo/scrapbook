@@ -14,13 +14,14 @@ import { useItems } from '@/app/lib/contexts/item-context';
 import { createClient } from '@/utils/supabase/client';
 import { SpaceHeader } from './space-header';
 import { Button } from '@/components/ui/button';
+import { PaperCreature } from '@/components/paper-creature';
 
 const ITEMS_PER_PAGE = 20;
 
 export function SpaceView() {
   const supabase = createClient();
-  const sp = useSearchParams();
-  const tagsParam = sp.get('tags') ?? undefined;
+  const searchParams = useSearchParams();
+  const tagsParam = searchParams.get('tags') ?? undefined;
 
   const {
     items: allItems,
@@ -37,13 +38,13 @@ export function SpaceView() {
   } = useItems();
   const nowMs = useNow(initialNowMs, 30_000);
 
-  const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
+  const query = useMemo(() => parseQuery(tagsParam), [tagsParam]);
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
   const [page, setPage] = useState(1);
 
-  const [prevTagsParam, setPrevTagsParam] = useState(tagsParam);
-  if (prevTagsParam !== tagsParam) {
-    setPrevTagsParam(tagsParam);
+  const [previousTagsParam, setPreviousTagsParam] = useState(tagsParam);
+  if (previousTagsParam !== tagsParam) {
+    setPreviousTagsParam(tagsParam);
     setPage(1);
   }
 
@@ -52,8 +53,8 @@ export function SpaceView() {
       const mutation = mutations[item.id];
       return mutation ? { ...item, review: mutation } : item;
     });
-    return searchItems(withMutations, q, nowMs);
-  }, [allItems, mutations, q, nowMs]);
+    return searchItems(withMutations, query, nowMs);
+  }, [allItems, mutations, query, nowMs]);
 
   const paginatedItems = useMemo(() => {
     const start = (page - 1) * ITEMS_PER_PAGE;
@@ -62,8 +63,8 @@ export function SpaceView() {
 
   const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
   const itemCount = `${items.length}${hasMore ? '+' : ''}`;
-  const headerStatus = tagsParam ? `${itemCount} · ${tagsParam}` : `${itemCount} items`;
-  const visibleHeaderStatus = refreshing ? `${headerStatus} · Updating` : headerStatus;
+  const headerStatus = tagsParam ? `${itemCount} · ${tagsParam}` : `${itemCount} clippings`;
+  const visibleHeaderStatus = refreshing ? `${headerStatus} · sorting` : headerStatus;
 
   useEffect(() => {
     if (page >= totalPages && hasMore && !loadingMore) {
@@ -170,55 +171,85 @@ export function SpaceView() {
         onEditorToggle={() => setEditorOpen(!editorOpen)}
         isEditorOpen={editorOpen}
       />
-      <main className="min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:p-4">
-        {error ? (
-          <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm" role="alert">
-            <span className="min-w-0">{error}</span>
-            <Button variant="outline" size="sm" className="shrink-0" onClick={() => void reload()}>
-              Retry
-            </Button>
-          </div>
-        ) : null}
-
-        <ResultsClient
-          items={paginatedItems}
-          onReview={onReview}
-          onEnroll={onEnroll}
-          nowMs={nowMs}
-          isAdmin={isAdmin}
+      <main className="relative min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:p-5">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-45 dark:opacity-20"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(67,58,46,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(67,58,46,0.035) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}
         />
 
-        {totalPages > 1 && (
-          <div className="mt-6 flex items-center justify-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page === 1}
-              onClick={() => setPage((current) => current - 1)}
-            >
-              Previous
-            </Button>
-            <span className="px-4 py-2 text-sm text-muted-foreground">
-              Page {page} of {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= totalPages}
-              onClick={() => setPage((current) => current + 1)}
-            >
-              Next
-            </Button>
-          </div>
-        )}
+        <div className="relative mx-auto w-full max-w-5xl">
+          <section className="mb-4 flex items-end justify-between gap-4 px-1">
+            <div>
+              <span className="material-label-stamped text-[9px] text-muted-foreground">clipping drawer</span>
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.025em] sm:text-3xl">Notes worth keeping</h1>
+              <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
+                Open a clipping to read it, or use Shift while hovering to unfold one quickly.
+              </p>
+            </div>
+            <PaperCreature
+              pose={refreshing ? 'sniffing' : 'reading'}
+              size="md"
+              className="md:hidden"
+              label={refreshing ? 'Scraplet sorting the clippings' : 'Scraplet reading a clipping'}
+            />
+          </section>
 
-        {hasMore && (
-          <div className="mt-4 flex justify-center">
-            <Button variant="outline" size="sm" disabled={loadingMore} onClick={() => void loadMore()}>
-              {loadingMore ? 'Loading…' : 'Load more items'}
-            </Button>
-          </div>
-        )}
+          {error ? (
+            <div className="material-paper relative mb-4 flex items-center justify-between gap-3 overflow-hidden rounded-xl border px-4 py-3 text-sm" role="alert">
+              <span className="min-w-0">{error}</span>
+              <Button variant="outline" size="sm" className="shrink-0 rounded-lg" onClick={() => void reload()}>
+                Try again
+              </Button>
+            </div>
+          ) : null}
+
+          <ResultsClient
+            items={paginatedItems}
+            onReview={onReview}
+            onEnroll={onEnroll}
+            nowMs={nowMs}
+            isAdmin={isAdmin}
+          />
+
+          {totalPages > 1 ? (
+            <div className="mt-6 flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-lg"
+                disabled={page === 1}
+                onClick={() => setPage((current) => current - 1)}
+              >
+                Previous drawer
+              </Button>
+              <span className="rounded-full border border-border/60 bg-background/65 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                {page} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-lg"
+                disabled={page >= totalPages}
+                onClick={() => setPage((current) => current + 1)}
+              >
+                Next drawer
+              </Button>
+            </div>
+          ) : null}
+
+          {hasMore ? (
+            <div className="mt-4 flex justify-center">
+              <Button variant="outline" size="sm" className="rounded-lg" disabled={loadingMore} onClick={() => void loadMore()}>
+                {loadingMore ? 'Opening drawer…' : 'Open more clippings'}
+              </Button>
+            </div>
+          ) : null}
+        </div>
       </main>
     </div>
   );

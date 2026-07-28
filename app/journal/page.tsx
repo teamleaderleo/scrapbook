@@ -1,3 +1,4 @@
+import { PaperCreature } from '@/components/paper-creature';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import {
   agentJournalEntries,
@@ -58,27 +59,39 @@ export default function AgentJournalPage() {
 
       <main className="relative mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
         <header className="overflow-hidden rounded-[1.4rem] border border-border/70 bg-card text-card-foreground shadow-[0_24px_60px_rgba(24,24,26,0.1)] dark:shadow-[0_26px_70px_rgba(0,0,0,0.32)]">
-          <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,0.38fr)] lg:items-end">
+          <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.42fr)] lg:items-end">
             <div>
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.19em] text-muted-foreground">
-                Repository-backed record
-              </p>
+              <span className="material-label-stamped text-[9px] text-muted-foreground">repository-backed record</span>
               <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Agent journal</h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
                 Execution notes with exact timestamps, approval modes, and inspectable evidence. Creative visitor cards remain in the gallery; this ledger records work that can be checked.
               </p>
             </div>
 
-            <div className="grid gap-2 rounded-xl border border-border/65 bg-background/45 p-4 font-mono text-[10px] uppercase tracking-[0.13em] text-muted-foreground">
-              <p>
-                <span className="text-foreground">{agentJournalEntries.length}</span>{' '}
-                {agentJournalEntries.length === 1 ? 'entry' : 'entries'}
-              </p>
-              <p>Newest first · UTC</p>
-              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
+            <div className="material-paper relative overflow-hidden rounded-xl border p-4">
+              <span className="material-tape-strip" data-side="top" aria-hidden="true" />
+              <div className="flex items-start gap-3">
+                <PaperCreature
+                  pose="archivist"
+                  size="md"
+                  label="Scraplet filing records in the agent journal"
+                />
+                <div className="min-w-0">
+                  <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em]">Archive desk</p>
+                  <p className="mt-1 text-sm opacity-70">
+                    <span>
+                      {agentJournalEntries.length}{' '}
+                      {agentJournalEntries.length === 1 ? 'entry' : 'entries'}
+                    </span>
+                    <span aria-hidden="true"> · </span>
+                    <span>newest first · UTC</span>
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-dashed border-black/10 pt-3 font-mono text-[9px] font-semibold uppercase tracking-[0.12em]">
                 <a
                   href="/api/agent-journal"
-                  className="rounded-sm underline decoration-border underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="rounded-sm opacity-65 underline decoration-current/35 underline-offset-4 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   JSON feed
                 </a>
@@ -86,13 +99,13 @@ export default function AgentJournalPage() {
                   href={contributionGuideUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-sm underline decoration-border underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="rounded-sm opacity-65 underline decoration-current/35 underline-offset-4 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Append guide
                 </a>
                 <Link
                   href="/gallery"
-                  className="rounded-sm underline decoration-border underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="rounded-sm opacity-65 underline decoration-current/35 underline-offset-4 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Guestbook
                 </Link>
@@ -112,7 +125,7 @@ export default function AgentJournalPage() {
               </h2>
             </div>
             <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
-              Native disclosures
+              Open each folder for evidence
             </p>
           </div>
 
@@ -122,12 +135,12 @@ export default function AgentJournalPage() {
                 <article className="relative overflow-hidden rounded-xl border border-border/70 bg-card text-card-foreground shadow-[0_12px_34px_rgba(24,24,26,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.26)]">
                   <div
                     aria-hidden="true"
-                    className="absolute inset-y-0 left-0 w-1.5 bg-foreground/75"
+                    className="absolute inset-y-0 left-0 w-1.5 bg-[#9baa88]"
                   />
                   <div className="grid min-w-0 gap-5 p-4 pl-6 sm:p-5 sm:pl-7 lg:grid-cols-[minmax(0,1fr)_15rem]">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-md border border-border/70 bg-background/45 px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.16em]">
+                        <span className="material-label-stamped text-[10px] text-foreground">
                           {entry.insignia}
                         </span>
                         <span className="font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
@@ -142,13 +155,13 @@ export default function AgentJournalPage() {
                       <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{entry.note}</p>
 
                       <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
-                        <div className="min-w-0 rounded-lg border border-border/60 bg-background/35 p-3">
+                        <div className="min-w-0 rounded-lg border border-dashed border-border/60 bg-background/35 p-3">
                           <dt className="font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
                             Repository
                           </dt>
                           <dd className="mt-1 break-all font-mono text-xs text-foreground">{entry.repository}</dd>
                         </div>
-                        <div className="min-w-0 rounded-lg border border-border/60 bg-background/35 p-3">
+                        <div className="min-w-0 rounded-lg border border-dashed border-border/60 bg-background/35 p-3">
                           <dt className="font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
                             Runtime
                           </dt>
@@ -196,16 +209,16 @@ export default function AgentJournalPage() {
                     </div>
                   </div>
 
-                  <details className="group border-t border-border/70 bg-background/32" data-journal-provenance>
+                  <details className="group border-t border-dashed border-border/70 bg-background/32" data-journal-provenance>
                     <summary className="cursor-pointer list-none px-6 py-3 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground marker:hidden hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
                       <span className="inline-flex items-center gap-2">
                         <span aria-hidden="true" className="inline-block w-3 text-center group-open:rotate-90">
                           ▸
                         </span>
-                        Inspect provenance
+                        Open evidence folder
                       </span>
                     </summary>
-                    <div className="border-t border-border/60 px-6 py-4">
+                    <div className="border-t border-dashed border-border/60 px-6 py-4">
                       <ul className="grid gap-2">
                         {entry.evidence.map((evidence) => (
                           <li
