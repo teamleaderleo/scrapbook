@@ -4,6 +4,7 @@ import ViewportPageShell from '@/components/viewport-page-shell';
 import { getGitHubHomeData } from '@/lib/github-home';
 import { ArrowUpRight } from 'lucide-react';
 import type { Metadata } from 'next';
+import { connection } from 'next/server';
 
 export const metadata: Metadata = {
   title: 'Leo · GitHub activity',
@@ -16,6 +17,7 @@ const repositoryNoteOverrides: Record<string, string> = {
 };
 
 export default async function Page() {
+  await connection();
   const activity = await getGitHubHomeData();
   const days = activity.days.slice(-35);
   const yearTotal = activity.periodLabel === 'last year' ? activity.total : null;
