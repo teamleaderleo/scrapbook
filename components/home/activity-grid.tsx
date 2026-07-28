@@ -115,12 +115,12 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
 
   return (
     <section
-      className="min-w-0 overflow-hidden rounded-[1.25rem] border border-border/70 bg-card p-3.5 text-card-foreground shadow-[0_16px_38px_rgba(35,31,26,0.1)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] sm:p-4"
+      className="min-w-0 overflow-hidden rounded-[1.25rem] border border-border/70 bg-card p-3.5 text-card-foreground shadow-[0_16px_38px_rgba(35,31,26,0.1)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] sm:p-4 [@media(max-height:780px)]:p-3"
       data-home-activity-grid
     >
       <div className="flex items-center justify-between gap-4">
         <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-          5 weeks · UTC
+          35 days · UTC
         </span>
         <div
           className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground"
@@ -136,7 +136,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
         </div>
       </div>
 
-      <div className="mx-auto mt-3 grid w-full max-w-[25rem] grid-cols-[1.65rem_minmax(0,1fr)] gap-2 sm:gap-2.5">
+      <div className="mx-auto mt-3 grid w-full max-w-[25rem] grid-cols-[1.65rem_minmax(0,1fr)] gap-2 sm:gap-2.5 [@media(max-height:780px)]:mt-2 [@media(max-height:780px)]:max-w-[22rem]">
         <div
           className="grid grid-rows-7 gap-1.5 py-px font-mono text-[8px] font-medium text-muted-foreground sm:gap-2"
           aria-hidden="true"
@@ -154,7 +154,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
             gridTemplateColumns: `repeat(${weekCount}, minmax(0, 1fr))`,
             gridTemplateRows: 'repeat(7, minmax(0, 1fr))',
           }}
-          aria-label="GitHub contribution calendar for the last five weeks"
+          aria-label="GitHub contribution calendar for the last 35 days"
           data-contribution-week-grid
         >
           {gridDays.map((day, index) => {
