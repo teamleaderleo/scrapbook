@@ -29,10 +29,31 @@ for (const study of studies) {
     }
 
     const scoreboard = page.locator('[data-activity-scoreboard]');
+    const counter = scoreboard.locator('[data-paper-counter]');
     await expect(scoreboard).toBeVisible();
+    await expect(counter).toBeVisible();
     await expect(scoreboard.locator('[data-activity-digit]')).toHaveCount(4);
+    await expect(counter.locator('[data-paper-digit]')).toHaveCount(4);
     await expect(scoreboard.getByText('7D', { exact: true })).toBeVisible();
     await expect(scoreboard.getByText('YTD', { exact: true })).toBeVisible();
+
+    const paperFaces = await scoreboard.locator('[data-activity-digit]').evaluateAll((digits) =>
+      digits.map((digit) => {
+        const face = digit.querySelector<HTMLElement>('[aria-hidden="true"]');
+        if (!face) throw new Error('Missing paper digit face');
+        const style = getComputedStyle(face);
+        return {
+          backgroundImage: style.backgroundImage,
+          borderStyle: style.borderStyle,
+          transformStyle: getComputedStyle(digit.querySelector<HTMLElement>('[data-paper-digit]')!).transformStyle,
+        };
+      }),
+    );
+    for (const face of paperFaces) {
+      expect(face.backgroundImage).not.toBe('none');
+      expect(face.borderStyle).toBe('solid');
+      expect(face.transformStyle).toBe('preserve-3d');
+    }
 
     const overflow = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,
@@ -60,7 +81,7 @@ for (const study of studies) {
   });
 }
 
-test('keeps the scoreboard calm with reduced motion', async ({ page }) => {
+test('keeps the paper counter calm with reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.addInitScript(() => {
@@ -69,8 +90,10 @@ test('keeps the scoreboard calm with reduced motion', async ({ page }) => {
   await page.goto('/');
 
   const scoreboard = page.locator('[data-activity-scoreboard]');
+  const counter = scoreboard.locator('[data-paper-counter]');
   const digit = scoreboard.locator('[data-activity-digit]').first();
   await expect(digit).toBeVisible();
+  await expect(counter).toHaveAttribute('data-reduced-motion', 'true');
   const before = await digit.evaluate((element) => (element as HTMLElement).style.transform);
   await digit.hover();
   const after = await digit.evaluate((element) => (element as HTMLElement).style.transform);
@@ -78,7 +101,7 @@ test('keeps the scoreboard calm with reduced motion', async ({ page }) => {
   expect(after).toBe(before);
 });
 
-test('keeps split-flap digits readable in forced colours', async ({ page }, testInfo) => {
+test('keeps paper digits readable in forced colours', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Forced-colour emulation is checked in Chromium.');
 
   await page.emulateMedia({ forcedColors: 'active' });
