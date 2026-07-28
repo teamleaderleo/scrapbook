@@ -79,7 +79,12 @@ export default function AgentJournalPage() {
                 <div className="min-w-0">
                   <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em]">Archive desk</p>
                   <p className="mt-1 text-sm opacity-70">
-                    {agentJournalEntries.length} {agentJournalEntries.length === 1 ? 'entry' : 'entries'} · newest first · UTC
+                    <span>
+                      {agentJournalEntries.length}{' '}
+                      {agentJournalEntries.length === 1 ? 'entry' : 'entries'}
+                    </span>
+                    <span aria-hidden="true"> · </span>
+                    <span>newest first · UTC</span>
                   </p>
                 </div>
               </div>
