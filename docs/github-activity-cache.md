@@ -1,15 +1,25 @@
 # GitHub activity refresh
 
-The homepage reads GitHub's public profile contribution calendar through `getGitHubHomeData()`. Live client refreshes use the same coordinated result through `getGitHubHomeResult()` and `/api/github-activity`.
+The homepage reads GitHub's contribution calendar through `getGitHubHomeData()`. Live client refreshes use the same coordinated result through `getGitHubHomeResult()` and `/api/github-activity`.
 
 ## Counting contract
 
-- The scorecard and graph use only the public profile contribution calendar. Public events are not used as a fallback because event counts do not follow GitHub's contribution rules and can disagree with the profile.
-- Daily cells come directly from GitHub's contribution calendar markup.
+- The preferred source is GitHub's supported GraphQL `contributionsCollection.contributionCalendar` field.
+- Set the server-only `GITHUB_PROFILE_TOKEN` environment variable to use the authenticated calendar. The token must be able to call GitHub GraphQL and include the optional `read:user` scope when private and internal contribution counts should match the signed-in profile.
+- When the token is absent or the authenticated request fails, the homepage falls back to the anonymous public profile contribution calendar HTML.
+- The anonymous fallback can differ from the owner's signed-in graph when private or internal contribution counts are not public, when an organisation filter is active in the GitHub UI, or when SSO visibility changes the viewer's graph.
+- Public events are not used as a fallback because event counts do not follow GitHub's contribution rules and can disagree with the profile.
+- Daily cells use GitHub's own `date` and `contributionCount` values. No local time-zone conversion is applied to historical cells.
 - `Today` and `7D` are calculated from those daily profile counts in UTC, matching GitHub's contribution-date convention.
-- `1Y` uses the rolling-year total reported by the GitHub profile calendar. It is not a calendar-year-to-date sum.
+- `1Y` uses the rolling-year total reported by GitHub's contribution calendar. It is not a calendar-year-to-date sum.
 - The homepage and polling route both use the same stale-while-error coordinator, so a failed server render cannot replace a previously successful snapshot with zeroes.
 - The browser ignores an older generated snapshot if a different server instance returns one after a newer snapshot has already rendered.
+
+## Token setup
+
+For a personal deployment, a classic personal access token with only `read:user` is the least ambiguous way to include the account owner's private and internal contribution counts. Give it a short expiry, store it only as the Vercel server environment variable `GITHUB_PROFILE_TOKEN`, and never prefix it with `NEXT_PUBLIC_`.
+
+The public HTML fallback remains available so an expired or revoked token does not blank the homepage. The response header `X-Activity-Source` reports `github-graphql`, `public-profile`, or `unavailable`.
 
 ## Freshness and failure policy
 
@@ -32,11 +42,12 @@ Successful JSON responses include a `diagnostics` object. An unavailable `503` r
 Important fields:
 
 - `cacheStatus`: `miss`, `hit`, or `stale` for the current server-instance coordinator;
-- `upstreamSource`: `public-profile` or `unavailable`;
+- `upstreamSource`: `github-graphql`, `public-profile`, or `unavailable`;
 - `lastUpstreamAttempt` and `lastUpstreamFetch`;
-- `consecutiveFailures` and `nextRetryAt`.
+- `consecutiveFailures` and `nextRetryAt`;
+- `rateLimit`: populated by the authenticated GraphQL source.
 
-The route mirrors the most useful values in `X-Activity-*` headers, including cache status, source, failure count, last attempt, last successful fetch, next retry, and refresh durations. `X-Request-Id` ties a response to server logs.
+The route mirrors the most useful values in `X-Activity-*` headers, including cache status, source, failure count, last attempt, last successful fetch, next retry, rate limit, and refresh durations. `X-Request-Id` ties a response to server logs.
 
 ## Inspection
 
