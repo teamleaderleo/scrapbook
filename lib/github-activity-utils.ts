@@ -84,10 +84,10 @@ export function alignContributionDaysToWeekColumns<T extends ContributionGridDay
 
   const firstWeekday = new Date(`${days[0].date}T00:00:00Z`).getUTCDay();
   const withLeadingDays: Array<T | null> = [
-    ...Array.from<null>({ length: firstWeekday }).fill(null),
+    ...Array.from({ length: firstWeekday }, () => null),
     ...days,
   ];
   const trailingDays = (7 - (withLeadingDays.length % 7)) % 7;
 
-  return [...withLeadingDays, ...Array.from<null>({ length: trailingDays }).fill(null)];
+  return [...withLeadingDays, ...Array.from({ length: trailingDays }, () => null)];
 }
