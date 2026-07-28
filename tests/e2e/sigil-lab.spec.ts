@@ -16,10 +16,10 @@ const variants = [
   { theme: 'dark' as const, width: 1366, height: 768 },
 ];
 
-test('sigil lab exposes layered generations and visual evidence', async ({ page }, testInfo) => {
-  test.slow();
-
-  for (const variant of variants) {
+for (const variant of variants) {
+  test(`sigil lab exposes layered generations in ${variant.theme} at ${variant.width}x${variant.height}`, async ({
+    page,
+  }, testInfo) => {
     await page.emulateMedia({ colorScheme: variant.theme });
     await page.setViewportSize({ width: variant.width, height: variant.height });
 
@@ -57,8 +57,8 @@ test('sigil lab exposes layered generations and visual evidence', async ({ page 
       ),
       fullPage: true,
     });
-  }
-});
+  });
+}
 
 test('repository, designation, and description seeds stay isolated', async ({ page }) => {
   await page.goto('/sigil-lab');
