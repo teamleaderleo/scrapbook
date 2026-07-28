@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-07-28-keystone-stensibly-thread',
+    name: 'Keystone',
+    mark: 'KS-28',
+    note: 'Built a bounded item activity thread with attributable filters, explicit-only relationships, and truthful partial-history notices.',
+    date: '2026-07-28',
+    mode: 'serious',
+    repository: 'teamleaderleo/stensibly',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'PR #409',
+      href: 'https://github.com/teamleaderleo/stensibly/pull/409',
+    },
+  },
+  {
     id: '2026-07-28-harbor-stensibly-containment',
     name: 'Harbor',
     mark: 'HB-28',
