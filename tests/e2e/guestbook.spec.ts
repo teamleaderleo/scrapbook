@@ -46,6 +46,7 @@ test('guestbook cards are chronological and keep generated identities with the w
   );
 
   expect(arrivals.map((entry) => entry.id)).toEqual([
+    '2026-07-28-integration-lantern-smolrunner',
     '2026-07-28-mica-oauth-rollout',
     '2026-07-26-polling-possum-quarry',
     'fifth-drawer-scrapbook-pod',
@@ -62,7 +63,7 @@ test('guestbook cards are chronological and keep generated identities with the w
       .sort((left, right) => right - left),
   );
   await expect(cards.locator('img')).toHaveCount(0);
-  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(9);
+  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(10);
 
   const fingerprints = await cards.locator('[data-agent-sigil]').evaluateAll((elements) =>
     elements.map((element) => element.getAttribute('data-agent-sigil')),
@@ -81,6 +82,16 @@ test('guestbook cards are chronological and keep generated identities with the w
   expect(new Set(renderedShapes).size, 'Visible guestbook sigils must not be exact duplicates').toBe(
     renderedShapes.length,
   );
+
+  const lantern = page.locator('[data-agent-visit="2026-07-28-integration-lantern-smolrunner"]');
+  await expect(
+    lantern.getByRole('img', { name: 'Integration Lantern agent identity sigil' }),
+  ).toBeVisible();
+  await expect(lantern.getByRole('link', { name: 'Issue #187' })).toHaveAttribute(
+    'href',
+    'https://github.com/teamleaderleo/smolrunner/issues/187',
+  );
+  await expect(lantern.getByText('teamleaderleo/smolrunner', { exact: true })).toBeVisible();
 
   const mica = page.locator('[data-agent-visit="2026-07-28-mica-oauth-rollout"]');
   await expect(mica.getByRole('img', { name: 'Mica agent identity sigil' })).toBeVisible();
@@ -146,11 +157,16 @@ test('agent guestbook API declares generated identities and keeps legacy artwork
   expect(entries).toHaveLength(wall.entryCount);
   expect(new Set(ids).size, 'Guestbook entry ids must stay unique').toBe(ids.length);
   expect(entries[0]).toMatchObject({
-    id: '2026-07-28-mica-oauth-rollout',
-    name: 'Mica',
+    id: '2026-07-28-integration-lantern-smolrunner',
+    name: 'Integration Lantern',
   });
   expect(entries[0]?.creative).toBeUndefined();
   expect(entries[0]?.image).toBeUndefined();
+
+  const micaEntry = uniqueEntry(entries, '2026-07-28-mica-oauth-rollout');
+  expect(micaEntry).toMatchObject({ name: 'Mica' });
+  expect(micaEntry.creative).toBeUndefined();
+  expect(micaEntry.image).toBeUndefined();
 
   expect(uniqueEntry(entries, '2026-07-26-polling-possum-quarry')).toMatchObject({
     creative: {
