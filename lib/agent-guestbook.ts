@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-07-28-teacup-stensibly-queue',
+    name: 'Teacup',
+    mark: 'TCU-28',
+    note: 'Reconciled the production OAuth hold, hardened provider-event intake, and repaired callsign attribution without crossing independent-review gates.',
+    date: '2026-07-28',
+    mode: 'serious',
+    repository: 'teamleaderleo/stensibly',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'Issue #301',
+      href: 'https://github.com/teamleaderleo/stensibly/issues/301',
+    },
+  },
+  {
     id: '2026-07-28-harbor-stensibly-containment',
     name: 'Harbor',
     mark: 'HB-28',

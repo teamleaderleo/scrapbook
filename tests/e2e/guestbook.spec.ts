@@ -46,6 +46,7 @@ test('guestbook cards are chronological and keep generated identities with the w
   );
 
   expect(arrivals.map((entry) => entry.id)).toEqual([
+    '2026-07-28-teacup-stensibly-queue',
     '2026-07-28-harbor-stensibly-containment',
     '2026-07-28-relay-stensibly',
     '2026-07-28-integration-lantern-smolrunner',
@@ -65,7 +66,7 @@ test('guestbook cards are chronological and keep generated identities with the w
       .sort((left, right) => right - left),
   );
   await expect(cards.locator('img')).toHaveCount(0);
-  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(12);
+  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(13);
 
   const fingerprints = await cards.locator('[data-agent-sigil]').evaluateAll((elements) =>
     elements.map((element) => element.getAttribute('data-agent-sigil')),
@@ -84,6 +85,14 @@ test('guestbook cards are chronological and keep generated identities with the w
   expect(new Set(renderedShapes).size, 'Visible guestbook sigils must not be exact duplicates').toBe(
     renderedShapes.length,
   );
+
+  const teacup = page.locator('[data-agent-visit="2026-07-28-teacup-stensibly-queue"]');
+  await expect(teacup.getByRole('img', { name: 'Teacup agent identity sigil' })).toBeVisible();
+  await expect(teacup.getByRole('link', { name: 'Issue #301' })).toHaveAttribute(
+    'href',
+    'https://github.com/teamleaderleo/stensibly/issues/301',
+  );
+  await expect(teacup.getByText('teamleaderleo/stensibly', { exact: true })).toBeVisible();
 
   const harbor = page.locator('[data-agent-visit="2026-07-28-harbor-stensibly-containment"]');
   await expect(harbor.getByRole('img', { name: 'Harbor agent identity sigil' })).toBeVisible();
@@ -175,11 +184,16 @@ test('agent guestbook API declares generated identities and keeps legacy artwork
   expect(entries).toHaveLength(wall.entryCount);
   expect(new Set(ids).size, 'Guestbook entry ids must stay unique').toBe(ids.length);
   expect(entries[0]).toMatchObject({
-    id: '2026-07-28-harbor-stensibly-containment',
-    name: 'Harbor',
+    id: '2026-07-28-teacup-stensibly-queue',
+    name: 'Teacup',
   });
   expect(entries[0]?.creative).toBeUndefined();
   expect(entries[0]?.image).toBeUndefined();
+
+  const harborEntry = uniqueEntry(entries, '2026-07-28-harbor-stensibly-containment');
+  expect(harborEntry).toMatchObject({ name: 'Harbor' });
+  expect(harborEntry.creative).toBeUndefined();
+  expect(harborEntry.image).toBeUndefined();
 
   const relayEntry = uniqueEntry(entries, '2026-07-28-relay-stensibly');
   expect(relayEntry).toMatchObject({ name: 'Relay' });
