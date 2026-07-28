@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { Rating } from 'ts-fsrs';
-import { Button } from '@/components/ui/button';
 import type { Item } from '@/app/lib/item-types';
 import { formatInterval, formatDueRelative } from '@/app/lib/interval-format';
 import { useEffect, useState } from 'react';
@@ -180,7 +179,7 @@ function Row({
               {displayTags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full border border-black/10 bg-white/28 px-2 py-0.5 text-[10px] leading-4 opacity-70"
+                  className="rounded-full border border-black/10 bg-white/[0.28] px-2 py-0.5 text-[10px] leading-4 opacity-70"
                 >
                   {tag}
                 </span>
@@ -213,7 +212,7 @@ function Row({
       </div>
 
       {expanded ? (
-        <div className="border-t border-dashed border-[hsl(var(--material-paper-edge)/0.65)] bg-white/14 p-4 dark:bg-black/5">
+        <div className="border-t border-dashed border-[hsl(var(--material-paper-edge)/0.65)] bg-white/[0.14] p-4 dark:bg-black/5">
           {item.versions.length > 1 ? (
             <div className="mb-3 flex flex-wrap gap-2 text-xs">
               {item.versions.map((version, index) => (
@@ -222,7 +221,7 @@ function Row({
                   onMouseEnter={() => setActiveIndex(index)}
                   className={`rounded-md border px-2.5 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.1em] transition-colors ${
                     index === activeIndex
-                      ? 'border-[#7d735f]/50 bg-[#d8cba9]/55 text-[#4f493e]'
+                      ? 'border-[#7d735f]/50 bg-[#d8cba9]/[0.55] text-[#4f493e]'
                       : 'border-black/10 bg-white/20 opacity-65 hover:opacity-100'
                   }`}
                   type="button"
@@ -235,7 +234,7 @@ function Row({
 
           <div className="flex flex-col gap-3 lg:flex-row">
             <div className="min-w-0 flex-1">
-              <div className="overflow-auto rounded-xl border border-black/10 bg-white/38 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] dark:bg-black/8">
+              <div className="overflow-auto rounded-xl border border-black/10 bg-white/[0.38] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] dark:bg-black/[0.08]">
                 <MarkdownContent
                   html={active.contentHtml}
                   className="prose prose-sm max-w-none prose-headings:tracking-tight dark:prose-invert"
@@ -255,7 +254,7 @@ function Row({
         >
           {!item.review ? (
             <button
-              className="rounded-lg border border-[#6e7b61]/35 bg-[#b9c5a8]/28 px-3 py-1.5 text-xs font-medium transition-colors hover:bg-[#b9c5a8]/45"
+              className="rounded-lg border border-[#6e7b61]/[0.35] bg-[#b9c5a8]/[0.28] px-3 py-1.5 text-xs font-medium transition-colors hover:bg-[#b9c5a8]/[0.45]"
               onClick={() => onEnroll(item.id)}
               type="button"
             >
@@ -263,10 +262,26 @@ function Row({
             </button>
           ) : (
             <div className="flex flex-wrap gap-2 text-xs">
-              <ReviewButton label="Again" className="border-[#a96c6c]/35 bg-[#d9aaaa]/24" onClick={() => onReview(item.id, Rating.Again)} />
-              <ReviewButton label="Hard" className="border-[#aa8251]/35 bg-[#ddbd86]/24" onClick={() => onReview(item.id, Rating.Hard)} />
-              <ReviewButton label="Good" className="border-[#6e7b61]/35 bg-[#b9c5a8]/28" onClick={() => onReview(item.id, Rating.Good)} />
-              <ReviewButton label="Easy" className="border-[#756d89]/35 bg-[#c8bfd5]/28" onClick={() => onReview(item.id, Rating.Easy)} />
+              <ReviewButton
+                label="Again"
+                className="border-[#a96c6c]/[0.35] bg-[#d9aaaa]/[0.24]"
+                onClick={() => onReview(item.id, Rating.Again)}
+              />
+              <ReviewButton
+                label="Hard"
+                className="border-[#aa8251]/[0.35] bg-[#ddbd86]/[0.24]"
+                onClick={() => onReview(item.id, Rating.Hard)}
+              />
+              <ReviewButton
+                label="Good"
+                className="border-[#6e7b61]/[0.35] bg-[#b9c5a8]/[0.28]"
+                onClick={() => onReview(item.id, Rating.Good)}
+              />
+              <ReviewButton
+                label="Easy"
+                className="border-[#756d89]/[0.35] bg-[#c8bfd5]/[0.28]"
+                onClick={() => onReview(item.id, Rating.Easy)}
+              />
             </div>
           )}
         </div>
