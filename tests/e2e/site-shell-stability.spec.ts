@@ -18,14 +18,19 @@ test('the bordered site nav is exactly 48px at desktop and phone widths', async 
     const geometry = await nav.evaluate((element) => {
       const firstWrapper = element.firstElementChild;
       const row = firstWrapper?.firstElementChild;
+      const style = getComputedStyle(element);
       return {
         outer: element.getBoundingClientRect().height,
+        borderBottom: Number.parseFloat(style.borderBottomWidth),
         wrapper: firstWrapper?.getBoundingClientRect().height ?? 0,
         row: row?.getBoundingClientRect().height ?? 0,
       };
     });
 
-    expect(geometry).toEqual({ outer: 48, wrapper: 48, row: 48 });
+    expect(geometry.outer).toBe(48);
+    expect(geometry.borderBottom).toBe(1);
+    expect(geometry.wrapper).toBe(geometry.outer - geometry.borderBottom);
+    expect(geometry.row).toBe(geometry.outer - geometry.borderBottom);
   }
 });
 
