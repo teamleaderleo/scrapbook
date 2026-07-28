@@ -58,13 +58,14 @@ export default function CurrentTimeDisplay({ onJumpToTime }: CurrentTimeDisplayP
 
   return (
     <div>
+      <p className="material-label-stamped mb-2 text-[9px] text-muted-foreground">time machine</p>
       <div className="mb-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
         <h1 className="text-3xl font-semibold tracking-tight">Current time</h1>
         <button
           type="button"
           onClick={() => onJumpToTime(currentTime)}
-          className="cursor-pointer rounded-xl border border-border/65 bg-background/42 px-2.5 py-1 font-mono text-3xl font-semibold tabular-nums shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_7px_18px_rgba(20,20,24,0.08)] backdrop-blur-xl transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-background/62 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.38),0_10px_22px_rgba(20,20,24,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          title="Jump the scrubber to the current time"
+          className="material-paper cursor-pointer rounded-xl border px-2.5 py-1 font-mono text-3xl font-semibold tabular-nums transition-[border-color,box-shadow] hover:border-[hsl(var(--material-paper-edge))] hover:shadow-[0_10px_22px_rgba(40,34,27,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          title="Jump the slider to the current time"
         >
           {formatTime(currentTime)}
         </button>
@@ -77,11 +78,7 @@ export default function CurrentTimeDisplay({ onJumpToTime }: CurrentTimeDisplayP
             <span>{utcOffset}</span>
           </>
         ) : null}
-        {isDST ? (
-          <span className="rounded bg-amber-500/20 px-1.5 py-0.5 font-sans text-[9px] font-semibold text-amber-700 dark:text-amber-400">
-            DST
-          </span>
-        ) : null}
+        {isDST ? <span className="material-label-stamped text-[9px] text-amber-700 dark:text-amber-400">DST</span> : null}
       </p>
     </div>
   );

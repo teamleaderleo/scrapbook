@@ -6,6 +6,7 @@ import { GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS } from '@/lib/github-activity-po
 import { useEffect, useRef, useState } from 'react';
 
 const REFRESH_INTERVAL_MS = GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS * 1_000;
+const REQUEST_TIMEOUT_MS = 10_000;
 const MAX_FAILURE_BACKOFF_MS = 5 * 60_000;
 
 type ActivitySnapshot = {
@@ -18,7 +19,7 @@ type ActivitySnapshot = {
 };
 
 type LiveActivityResponse = {
-  source: 'public-profile' | 'public-events';
+  source: 'public-profile';
   today: number;
   weekTotal: number;
   yearTotal: number | null;
@@ -32,10 +33,12 @@ function timestampOrNow(value: string) {
 }
 
 export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
+  const initialSnapshotAt = timestampOrNow(initial.generatedAt);
   const [activity, setActivity] = useState(initial);
   const [updating, setUpdating] = useState(false);
   const inFlight = useRef<AbortController | null>(null);
-  const nextAllowedAt = useRef(timestampOrNow(initial.generatedAt) + REFRESH_INTERVAL_MS);
+  const newestSnapshotAt = useRef(initialSnapshotAt);
+  const nextAllowedAt = useRef(initialSnapshotAt + REFRESH_INTERVAL_MS);
   const consecutiveFailures = useRef(0);
 
   useEffect(() => {
@@ -47,6 +50,11 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
       if (Date.now() < nextAllowedAt.current) return;
 
       const controller = new AbortController();
+      let timeoutExpired = false;
+      const requestTimeout = window.setTimeout(() => {
+        timeoutExpired = true;
+        controller.abort();
+      }, REQUEST_TIMEOUT_MS);
       inFlight.current = controller;
       setUpdating(true);
 
@@ -59,14 +67,20 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
 
         const next = (await response.json()) as LiveActivityResponse;
         if (!mounted) return;
+
         consecutiveFailures.current = 0;
         nextAllowedAt.current = Date.now() + REFRESH_INTERVAL_MS;
+
+        const nextGeneratedAt = timestampOrNow(next.generatedAt);
+        if (nextGeneratedAt < newestSnapshotAt.current) return;
+
+        newestSnapshotAt.current = nextGeneratedAt;
         setActivity({
           ...next,
-          unit: next.source === 'public-events' ? 'public actions' : 'contributions',
+          unit: 'contributions',
         });
       } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') return;
+        if (error instanceof DOMException && error.name === 'AbortError' && !timeoutExpired) return;
         consecutiveFailures.current += 1;
         const backoff = Math.min(
           REFRESH_INTERVAL_MS * 2 ** (consecutiveFailures.current - 1),
@@ -75,6 +89,7 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
         nextAllowedAt.current = Date.now() + backoff;
         console.error('Unable to update GitHub activity', error);
       } finally {
+        window.clearTimeout(requestTimeout);
         if (inFlight.current === controller) inFlight.current = null;
         if (mounted) setUpdating(false);
       }

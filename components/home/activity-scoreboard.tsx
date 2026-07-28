@@ -114,7 +114,8 @@ function ScoreDigits({ value }: { value: number }) {
         <div
           key={index}
           data-activity-digit
-          className="relative aspect-[0.78] min-w-0 flex-1 overflow-hidden rounded-[0.55rem] border border-white/12 bg-[#17181b] px-1 font-mono text-[clamp(2rem,5vw,4.25rem)] font-semibold leading-none text-[#f3f0e9] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-10px_18px_rgba(0,0,0,0.3),0_7px_18px_rgba(0,0,0,0.2)]"
+          className={`relative aspect-[0.78] min-w-0 flex-1 overflow-hidden rounded-[0.55rem] border border-white/12 bg-[#17181b] px-1 font-mono text-[clamp(2rem,5vw,4.25rem)] font-semibold leading-none text-[#f3f0e9] shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-10px_18px_rgba(0,0,0,0.3),0_7px_18px_rgba(0,0,0,0.2)] transition-[transform,box-shadow] duration-300 ease-out group-hover:-translate-y-1 group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),inset_0_-12px_20px_rgba(0,0,0,0.34),0_14px_26px_rgba(0,0,0,0.28)] motion-reduce:transition-none ${index % 2 === 0 ? 'group-hover:-rotate-[0.7deg]' : 'group-hover:rotate-[0.7deg]'}`}
+          style={{ transitionDelay: `${index * 24}ms` }}
         >
           <SplitFlapDigit digit={digit} index={index} />
         </div>
@@ -126,7 +127,7 @@ function ScoreDigits({ value }: { value: number }) {
 function Metric({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
     <span
-      className="grid min-h-[3.25rem] content-center gap-1 rounded-xl border border-border/65 bg-background/40 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]"
+      className="grid min-h-[3.25rem] content-center gap-1 rounded-xl border border-border/65 bg-background/40 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] transition-[transform,border-color,background-color] duration-300 group-hover:translate-x-0.5 group-hover:border-border group-hover:bg-background/55 motion-reduce:transition-none"
       title={title}
     >
       <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -150,6 +151,7 @@ export function ActivityScoreboard({
   yearTotal: number | null;
   updating: boolean;
 }) {
+  const reduceMotion = useReducedMotion();
   const [countdown, setCountdown] = useState('--:--:--');
 
   useEffect(() => {
@@ -160,29 +162,47 @@ export function ActivityScoreboard({
   }, []);
 
   return (
-    <section
-      className="flex h-full min-h-[15.5rem] flex-col overflow-hidden rounded-[1.25rem] border border-border/75 bg-card text-card-foreground shadow-[0_16px_38px_rgba(24,24,26,0.11)] transition-[border-color,box-shadow] duration-200 hover:border-border dark:shadow-[0_16px_38px_rgba(0,0,0,0.3)] [@media(max-height:780px)]:min-h-[14.5rem]"
+    <motion.section
+      initial={false}
+      whileHover={
+        reduceMotion
+          ? undefined
+          : {
+              y: -5,
+              rotateX: 0.7,
+              rotateY: -0.65,
+              scale: 1.008,
+            }
+      }
+      transition={{ type: 'spring', stiffness: 260, damping: 22, mass: 0.72 }}
+      style={{ transformPerspective: 1100, transformOrigin: '50% 55%' }}
+      className="group relative flex h-full min-h-[15.5rem] flex-col overflow-hidden rounded-[1.25rem] border border-border/75 bg-card text-card-foreground shadow-[0_16px_38px_rgba(24,24,26,0.11)] transition-[border-color,box-shadow] duration-300 hover:border-border hover:shadow-[0_24px_52px_rgba(24,24,26,0.17)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_26px_58px_rgba(0,0,0,0.42)] [@media(max-height:780px)]:min-h-[14.5rem]"
       data-activity-scoreboard
     >
-      <div className="border-b border-border/70 bg-muted/70 px-4 py-2.5 [@media(max-height:780px)]:py-2">
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 -left-[45%] z-20 w-[30%] -skew-x-12 bg-gradient-to-r from-transparent via-white/14 to-transparent opacity-0 transition-[left,opacity] duration-700 ease-out group-hover:left-[120%] group-hover:opacity-100 motion-reduce:hidden dark:via-white/[0.07]"
+      />
+
+      <div className="relative z-10 border-b border-border/70 bg-muted/70 px-4 py-2.5 transition-colors duration-300 group-hover:bg-muted/85 [@media(max-height:780px)]:py-2">
         <div className="flex items-center justify-between gap-3 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           <span>Today</span>
           <span className="tabular-nums">UTC reset {countdown}</span>
         </div>
       </div>
 
-      <div className="grid flex-1 grid-cols-[minmax(0,1fr)_minmax(5.75rem,0.36fr)] items-center gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(6.75rem,0.34fr)] sm:gap-4 sm:p-5 [@media(max-height:780px)]:gap-2.5 [@media(max-height:780px)]:p-3.5">
+      <div className="relative z-10 grid flex-1 grid-cols-[minmax(0,1fr)_minmax(5.75rem,0.36fr)] items-center gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(6.75rem,0.34fr)] sm:gap-4 sm:p-5 [@media(max-height:780px)]:gap-2.5 [@media(max-height:780px)]:p-3.5">
         <ScoreDigits value={today} />
         <div className="grid content-center gap-2">
           <Metric label="7D" value={weekTotal.toLocaleString('en-GB')} />
           <Metric
-            label="YTD"
+            label="1Y"
             value={yearTotal?.toLocaleString('en-GB') ?? '—'}
-            title="Calendar year to date, measured in UTC"
+            title="Rolling-year total reported by GitHub's contribution calendar"
           />
           <ScrapbookPet activity={today} updating={updating} />
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

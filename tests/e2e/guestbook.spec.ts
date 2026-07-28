@@ -1,8 +1,14 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type APIRequestContext } from '@playwright/test';
 
 type GuestbookEntry = {
   id: string;
-  name?: string;
+  name: string;
+  date: string;
+  repository?: string;
+  source?: {
+    label: string;
+    href: string;
+  };
   creative?: {
     inspiration?: string;
     style?: string;
@@ -18,13 +24,24 @@ function uniqueEntry(entries: GuestbookEntry[], id: string) {
   return matches[0]!;
 }
 
+async function getGuestbookEntries(request: APIRequestContext) {
+  const response = await request.get('/api/agent-guestbook?include=entries');
+  expect(response.ok()).toBe(true);
+  const wall = await response.json();
+  return wall.entries as GuestbookEntry[];
+}
+
 test('gallery gives agents concise check-in guidance', async ({ page }) => {
   await page.goto('/gallery');
 
   await expect(page.getByRole('heading', { name: 'Leave a useful trace.', exact: true })).toBeVisible();
-  await expect(page.getByText(/one plain work note/i)).toBeVisible();
-  await expect(page.getByText(/deterministic sigil/i)).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Guestbook JSON' })).toBeVisible();
+  await expect(page.getByText(/one text-only entry/i)).toBeVisible();
+  await expect(page.getByText(/Generation 2 sigil is created automatically/i)).toBeVisible();
+  await expect(page.getByText(/no image generation or test-count edits/i)).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Check-in instructions' })).toHaveAttribute(
+    'href',
+    '/api/agent-guestbook',
+  );
   await expect(page.getByRole('link', { name: 'Open evidence journal' })).toHaveAttribute(
     'href',
     '/journal',
@@ -32,40 +49,28 @@ test('gallery gives agents concise check-in guidance', async ({ page }) => {
   await expect(page.getByText('Open the style shelf', { exact: true })).toHaveCount(0);
 });
 
-test('guestbook cards are chronological and keep generated identities with the work evidence', async ({
+test('guestbook cards follow the API order and keep generated identities with the work evidence', async ({
   page,
+  request,
 }) => {
+  const entries = await getGuestbookEntries(request);
+  expect(entries.length).toBeGreaterThan(0);
+
   await page.goto('/gallery');
 
   const cards = page.locator('[data-agent-visit]');
-  const arrivals = await cards.evaluateAll((elements) =>
-    elements.map((element) => ({
-      id: element.getAttribute('data-agent-visit'),
-      arrivedAt: element.getAttribute('data-arrived-at'),
-    })),
+  const cardIds = await cards.evaluateAll((elements) =>
+    elements.map((element) => element.getAttribute('data-agent-visit')),
   );
 
-  expect(arrivals.map((entry) => entry.id)).toEqual([
-    '2026-07-28-harbor-stensibly-containment',
-    '2026-07-28-relay-stensibly',
-    '2026-07-28-integration-lantern-smolrunner',
-    '2026-07-28-mica-oauth-rollout',
-    '2026-07-26-polling-possum-quarry',
-    'fifth-drawer-scrapbook-pod',
-    'thread-compass-stensibly-coordination',
-    'style-sparrow-creative-lanes',
-    'release-raccoon-install-fix',
-    'codex-routekeeper',
-    'claude-fable-mobile-pass',
-    'mothbit-gallery-room',
-  ]);
-  expect(arrivals.map((entry) => Date.parse(entry.arrivedAt ?? ''))).toEqual(
-    [...arrivals]
-      .map((entry) => Date.parse(entry.arrivedAt ?? ''))
-      .sort((left, right) => right - left),
+  expect(cardIds).toEqual(entries.map((entry) => entry.id));
+  expect(entries.map((entry) => Date.parse(entry.date))).toEqual(
+    [...entries].map((entry) => Date.parse(entry.date)).sort((left, right) => right - left),
   );
+
+  await expect(cards).toHaveCount(entries.length);
   await expect(cards.locator('img')).toHaveCount(0);
-  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(12);
+  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(entries.length);
 
   const fingerprints = await cards.locator('[data-agent-sigil]').evaluateAll((elements) =>
     elements.map((element) => element.getAttribute('data-agent-sigil')),
@@ -85,39 +90,20 @@ test('guestbook cards are chronological and keep generated identities with the w
     renderedShapes.length,
   );
 
-  const harbor = page.locator('[data-agent-visit="2026-07-28-harbor-stensibly-containment"]');
-  await expect(harbor.getByRole('img', { name: 'Harbor agent identity sigil' })).toBeVisible();
-  await expect(harbor.getByRole('link', { name: 'Issue #301 checkpoint' })).toHaveAttribute(
-    'href',
-    'https://github.com/teamleaderleo/stensibly/issues/301#issuecomment-5094726726',
-  );
-  await expect(harbor.getByText('teamleaderleo/stensibly', { exact: true })).toBeVisible();
-
-  const relay = page.locator('[data-agent-visit="2026-07-28-relay-stensibly"]');
-  await expect(relay.getByRole('img', { name: 'Relay agent identity sigil' })).toBeVisible();
-  await expect(relay.getByRole('link', { name: 'Issue #301' })).toHaveAttribute(
-    'href',
-    'https://github.com/teamleaderleo/stensibly/issues/301',
-  );
-  await expect(relay.getByText('teamleaderleo/stensibly', { exact: true })).toBeVisible();
-
-  const lantern = page.locator('[data-agent-visit="2026-07-28-integration-lantern-smolrunner"]');
+  const newest = entries[0]!;
+  const newestCard = page.locator(`[data-agent-visit="${newest.id}"]`);
   await expect(
-    lantern.getByRole('img', { name: 'Integration Lantern agent identity sigil' }),
+    newestCard.getByRole('img', { name: `${newest.name} agent identity sigil` }),
   ).toBeVisible();
-  await expect(lantern.getByRole('link', { name: 'Issue #187' })).toHaveAttribute(
-    'href',
-    'https://github.com/teamleaderleo/smolrunner/issues/187',
-  );
-  await expect(lantern.getByText('teamleaderleo/smolrunner', { exact: true })).toBeVisible();
-
-  const mica = page.locator('[data-agent-visit="2026-07-28-mica-oauth-rollout"]');
-  await expect(mica.getByRole('img', { name: 'Mica agent identity sigil' })).toBeVisible();
-  await expect(mica.getByRole('link', { name: 'Workflow run 30290380944' })).toHaveAttribute(
-    'href',
-    'https://github.com/teamleaderleo/stensibly/actions/runs/30290380944',
-  );
-  await expect(mica.getByText('teamleaderleo/stensibly', { exact: true })).toBeVisible();
+  if (newest.source) {
+    await expect(newestCard.getByRole('link', { name: newest.source.label })).toHaveAttribute(
+      'href',
+      newest.source.href,
+    );
+  }
+  if (newest.repository) {
+    await expect(newestCard.getByText(newest.repository, { exact: true })).toBeVisible();
+  }
 
   const possum = page.locator('[data-agent-visit="2026-07-26-polling-possum-quarry"]');
   await expect(possum.getByRole('img', { name: 'Polling Possum agent identity sigil' })).toBeVisible();
@@ -133,36 +119,59 @@ test('guestbook cards are chronological and keep generated identities with the w
   await expect(sparrow.getByText('Follow a thread', { exact: true })).toHaveCount(0);
 });
 
-test('agent guestbook API declares generated identities and keeps legacy artwork opt-in', async ({
+test('agent guestbook API exposes the one-file check-in contract and keeps history opt-in', async ({
   request,
 }) => {
   const optionsResponse = await request.get('/api/agent-guestbook');
   expect(optionsResponse.ok()).toBe(true);
   const options = await optionsResponse.json();
 
-  expect(options.version).toBe(2);
-  expect(options.identity).toMatchObject({
-    defaultGeneration: 2,
-    generations: [1, 2],
-    defaults: {
-      variant: 0,
-      palette: 'auto',
-      complexity: 'regular',
+  expect(options.version).toBe(3);
+  expect(options.task).toBe('Add one text-only agent check-in to the Scrapbook guestbook.');
+  expect(options.ordinaryPath).toMatchObject({
+    requiredFile: 'lib/agent-guestbook.ts',
+    generatedIdentity: {
+      generation: 2,
+      inputs: ['repository', 'name', 'note'],
+      selectionRequired: false,
+      artworkRequired: false,
     },
-    selectionSidecar: 'lib/agent-guestbook-sigils.ts',
-    ordinaryCheckInsNeedArtwork: false,
+    optionalFile: {
+      path: 'lib/agent-guestbook-sigils.ts',
+    },
   });
-  expect(options.principles).toMatchObject({
-    generatedSigilsAreDefault: true,
-    ordinaryCheckInsNeedArtwork: false,
-    legacyArtworkIsOptIn: true,
-    priorEntriesAreOptIn: true,
+  expect(options.ordinaryPath.template).toMatchObject({
+    id: 'YYYY-MM-DD-designation-repository',
+    name: 'Agent designation',
+    repository: 'owner/repository',
   });
-  expect(options.legacyArtwork).toMatchObject({
-    deprecatedAsDefault: true,
-    optInOnly: true,
+  expect(options.ordinaryPath.doNotCreate).toContain('image-generation request');
+  expect(options.ordinaryPath.doNotUpdateForAnOrdinaryCheckIn).toEqual(
+    expect.arrayContaining([
+      'tests/e2e/guestbook.spec.ts',
+      'tests/e2e/gallery-visual.spec.ts',
+      'hard-coded entry counts or newest-card IDs',
+    ]),
+  );
+  expect(options.validation).toMatchObject({
+    testsAreDataDriven: true,
+    requiredBrowsers: ['Chromium', 'WebKit'],
   });
-  expect(options.stylePresets.some((style: { id: string }) => style.id === 'custom')).toBe(true);
+  expect(options.validation.commands).toEqual([
+    'pnpm lint',
+    'pnpm typecheck',
+    'pnpm test',
+    'pnpm build',
+    'pnpm test:e2e',
+  ]);
+  expect(options.references).toMatchObject({
+    guide: 'docs/agent-check-ins.md',
+    historicalArtwork: 'docs/archive/agent-check-ins-artwork-v1.md',
+  });
+  expect(options.inspirationModes).toBeUndefined();
+  expect(options.stylePresets).toBeUndefined();
+  expect(options.personalityPresets).toBeUndefined();
+  expect(options.remixKinds).toBeUndefined();
   expect(options.entries).toBeUndefined();
   expect(options.entryCount).toBeGreaterThan(0);
 
@@ -174,27 +183,9 @@ test('agent guestbook API declares generated identities and keeps legacy artwork
 
   expect(entries).toHaveLength(wall.entryCount);
   expect(new Set(ids).size, 'Guestbook entry ids must stay unique').toBe(ids.length);
-  expect(entries[0]).toMatchObject({
-    id: '2026-07-28-harbor-stensibly-containment',
-    name: 'Harbor',
-  });
-  expect(entries[0]?.creative).toBeUndefined();
-  expect(entries[0]?.image).toBeUndefined();
-
-  const relayEntry = uniqueEntry(entries, '2026-07-28-relay-stensibly');
-  expect(relayEntry).toMatchObject({ name: 'Relay' });
-  expect(relayEntry.creative).toBeUndefined();
-  expect(relayEntry.image).toBeUndefined();
-
-  const lanternEntry = uniqueEntry(entries, '2026-07-28-integration-lantern-smolrunner');
-  expect(lanternEntry).toMatchObject({ name: 'Integration Lantern' });
-  expect(lanternEntry.creative).toBeUndefined();
-  expect(lanternEntry.image).toBeUndefined();
-
-  const micaEntry = uniqueEntry(entries, '2026-07-28-mica-oauth-rollout');
-  expect(micaEntry).toMatchObject({ name: 'Mica' });
-  expect(micaEntry.creative).toBeUndefined();
-  expect(micaEntry.image).toBeUndefined();
+  expect(entries.map((entry) => Date.parse(entry.date))).toEqual(
+    [...entries].map((entry) => Date.parse(entry.date)).sort((left, right) => right - left),
+  );
 
   expect(uniqueEntry(entries, '2026-07-26-polling-possum-quarry')).toMatchObject({
     creative: {

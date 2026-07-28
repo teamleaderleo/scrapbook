@@ -26,6 +26,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { GoogleIcon } from '@/components/icons/google-icon';
 import { GitHubIcon } from '@/components/icons/github-icon';
 import { SpaceLinkHint } from '@/components/space/space-link-hint';
+import { PaperCreature } from '@/components/paper-creature';
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -117,29 +118,36 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="flex h-dvh max-h-dvh max-w-[calc(100vw-0.75rem)] flex-col pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] md:h-svh md:max-h-svh md:pb-0 md:pt-0">
-      <SidebarHeader className="m-0 h-12 shrink-0 border-b bg-background p-0 text-foreground">
+    <Sidebar className="flex h-dvh max-h-dvh max-w-[calc(100vw-0.75rem)] flex-col border-r border-border/70 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] md:h-svh md:max-h-svh md:pb-0 md:pt-0">
+      <SidebarHeader className="m-0 h-14 shrink-0 border-b border-border/70 bg-background/85 p-0 text-foreground backdrop-blur-sm">
         <div className="flex h-full items-center justify-between px-4">
-          <Link href="/" onClick={closeMobile} className="text-lg font-bold leading-none">
-            teamleaderleo
+          <Link href="/" onClick={closeMobile} className="group min-w-0 leading-none">
+            <span className="block truncate text-base font-semibold tracking-[-0.025em] group-hover:underline group-hover:decoration-border group-hover:underline-offset-4">
+              teamleaderleo
+            </span>
+            <span className="mt-1 block font-mono text-[8px] uppercase tracking-[0.18em] text-muted-foreground">
+              scrapbook room
+            </span>
           </Link>
           <ThemeToggle />
         </div>
       </SidebarHeader>
 
-      <div className="shrink-0 border-b p-3">
+      <div className="shrink-0 border-b border-dashed border-border/70 p-3">
         <button
           onClick={triggerSearch}
-          className="flex w-full items-center gap-2 rounded-md bg-muted/50 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted"
+          className="material-paper flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-[transform,box-shadow] hover:-rotate-[0.25deg] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           type="button"
         >
           <Search className="h-4 w-4" />
-          <span className="flex-1 text-left">Search</span>
+          <span className="flex-1 text-left">Search the clippings</span>
           <span className="hidden gap-1 sm:flex">
-            <kbd className="rounded border bg-background px-1.5 py-0.5 text-xs font-semibold">
+            <kbd className="rounded border border-black/15 bg-white/35 px-1.5 py-0.5 font-mono text-[10px] font-semibold">
               {isMac ? '⌘' : 'Ctrl'}
             </kbd>
-            <kbd className="rounded border bg-background px-1.5 py-0.5 text-xs font-semibold">K</kbd>
+            <kbd className="rounded border border-black/15 bg-white/35 px-1.5 py-0.5 font-mono text-[10px] font-semibold">
+              K
+            </kbd>
           </span>
         </button>
       </div>
@@ -148,14 +156,16 @@ export function AppSidebar() {
         <SidebarContent className="py-3">
           {isAdmin ? (
             <SidebarGroup>
-              <SidebarGroupLabel className="px-4">Actions</SidebarGroupLabel>
+              <SidebarGroupLabel className="px-4 font-mono text-[9px] font-semibold uppercase tracking-[0.17em]">
+                Workbench
+              </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
-                    <SidebarMenuButton className="px-4 pl-6" asChild>
+                    <SidebarMenuButton className="mx-2 rounded-lg px-3" asChild>
                       <Link href="/space/add" onClick={closeMobile} className="flex items-center gap-2">
                         <Plus className="h-4 w-4 shrink-0" />
-                        <span className="min-w-0 flex-1 truncate">Add item</span>
+                        <span className="min-w-0 flex-1 truncate">Add a clipping</span>
                         <SpaceLinkHint />
                       </Link>
                     </SidebarMenuButton>
@@ -166,11 +176,13 @@ export function AppSidebar() {
           ) : null}
 
           <SidebarGroup>
-            <SidebarGroupLabel className="px-4">View</SidebarGroupLabel>
+            <SidebarGroupLabel className="px-4 font-mono text-[9px] font-semibold uppercase tracking-[0.17em]">
+              Browse
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton className="px-4 pl-6" asChild>
+                  <SidebarMenuButton className="mx-2 rounded-lg px-3" asChild>
                     <Link href={toggleViewHref} onClick={closeMobile} className="flex items-center gap-2">
                       {isReviewLike ? (
                         <ArrowLeft className="h-4 w-4 shrink-0" />
@@ -178,7 +190,7 @@ export function AppSidebar() {
                         <ArrowRight className="h-4 w-4 shrink-0" />
                       )}
                       <span className="min-w-0 flex-1 truncate">
-                        {isReviewLike ? 'List' : 'Review'}
+                        {isReviewLike ? 'Back to clippings' : 'Review drawer'}
                       </span>
                       <SpaceLinkHint />
                     </Link>
@@ -189,7 +201,9 @@ export function AppSidebar() {
           </SidebarGroup>
 
           <SidebarGroup>
-            <SidebarGroupLabel className="px-4">Shortcuts</SidebarGroupLabel>
+            <SidebarGroupLabel className="px-4 font-mono text-[9px] font-semibold uppercase tracking-[0.17em]">
+              Labels
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {shortcuts.map((shortcut) => {
@@ -198,7 +212,7 @@ export function AppSidebar() {
                     : shortcut.href;
                   return (
                     <SidebarMenuItem key={shortcut.label}>
-                      <SidebarMenuButton asChild className="justify-start gap-2 px-4 pl-6">
+                      <SidebarMenuButton asChild className="mx-2 justify-start gap-2 rounded-lg px-3">
                         <Link href={href} onClick={closeMobile} className="flex items-center gap-2">
                           <span className="min-w-0 flex-1 truncate">{shortcut.label}</span>
                           <SpaceLinkHint />
@@ -213,13 +227,30 @@ export function AppSidebar() {
         </SidebarContent>
       </ScrollArea>
 
-      <SidebarFooter className="shrink-0 space-y-2 border-t p-3">
+      <SidebarFooter className="shrink-0 space-y-2 border-t border-dashed border-border/70 p-3">
+        <div className="material-paper relative overflow-hidden rounded-xl border p-2.5">
+          <span className="material-tape-strip" data-side="top" aria-hidden="true" />
+          <div className="flex items-center gap-2.5">
+            <PaperCreature
+              pose={loading ? 'sniffing' : user ? 'reading' : 'idle'}
+              size="sm"
+              label="Scraplet sitting on a little paper shelf"
+            />
+            <div className="min-w-0">
+              <p className="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">Scraplet&apos;s shelf</p>
+              <p className="mt-1 text-[11px] leading-4 opacity-70">
+                {user ? 'Keeping your notes company.' : 'Saving a seat at the workbench.'}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {user ? (
           <>
-            <div className="truncate px-2 text-sm text-muted-foreground" title={user.email}>
+            <div className="truncate px-2 text-xs text-muted-foreground" title={user.email}>
               {user.email}
             </div>
-            <Button variant="outline" size="sm" onClick={handleSignOut} className="w-full">
+            <Button variant="outline" size="sm" onClick={handleSignOut} className="w-full rounded-lg">
               <LogOut className="mr-2 h-4 w-4" />
               Sign out
             </Button>
@@ -231,7 +262,7 @@ export function AppSidebar() {
               size="sm"
               onClick={() => handleOAuthSignIn('google')}
               disabled={loading}
-              className="w-full"
+              className="w-full rounded-lg"
             >
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
               Google
@@ -241,7 +272,7 @@ export function AppSidebar() {
               size="sm"
               onClick={() => handleOAuthSignIn('github')}
               disabled={loading}
-              className="w-full"
+              className="w-full rounded-lg"
             >
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GitHubIcon className="mr-2 h-4 w-4" />}
               GitHub
