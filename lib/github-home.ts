@@ -34,6 +34,7 @@ const FEATURED_REPOSITORIES = [
 ] as const;
 
 const HOME_WINDOW_DAYS = 35;
+const UPSTREAM_TIMEOUT_MS = 8_000;
 
 export type ContributionDay = {
   date: string;
@@ -144,6 +145,7 @@ async function fetchPublicProfileCounts(): Promise<{
 }> {
   const response = await fetch(`https://github.com/users/${GITHUB_USERNAME}/contributions`, {
     cache: 'no-store',
+    signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     headers: {
       Accept: 'text/html',
       'User-Agent': 'teamleaderleo-scrapbook',
