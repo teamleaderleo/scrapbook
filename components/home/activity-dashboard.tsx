@@ -18,7 +18,7 @@ type ActivitySnapshot = {
 };
 
 type LiveActivityResponse = {
-  source: 'public-profile' | 'public-events';
+  source: 'public-profile';
   today: number;
   weekTotal: number;
   yearTotal: number | null;
@@ -35,7 +35,8 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
   const [activity, setActivity] = useState(initial);
   const [updating, setUpdating] = useState(false);
   const inFlight = useRef<AbortController | null>(null);
-  const nextAllowedAt = useRef(timestampOrNow(initial.generatedAt) + REFRESH_INTERVAL_MS);
+  const newestSnapshotAt = useRef(timestampOrNow(initial.generatedAt));
+  const nextAllowedAt = useRef(newestSnapshotAt.current + REFRESH_INTERVAL_MS);
   const consecutiveFailures = useRef(0);
 
   useEffect(() => {
@@ -59,11 +60,17 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
 
         const next = (await response.json()) as LiveActivityResponse;
         if (!mounted) return;
+
         consecutiveFailures.current = 0;
         nextAllowedAt.current = Date.now() + REFRESH_INTERVAL_MS;
+
+        const nextGeneratedAt = timestampOrNow(next.generatedAt);
+        if (nextGeneratedAt < newestSnapshotAt.current) return;
+
+        newestSnapshotAt.current = nextGeneratedAt;
         setActivity({
           ...next,
-          unit: next.source === 'public-events' ? 'public actions' : 'contributions',
+          unit: 'contributions',
         });
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') return;
