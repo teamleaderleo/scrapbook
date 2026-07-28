@@ -24,6 +24,9 @@ test('sigil lab exposes layered generations and visual evidence', async ({ page 
     const response = await page.goto('/sigil-lab');
     expect(response?.ok()).toBe(true);
     await expect(page.getByRole('heading', { name: 'Generative sigils for agents' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Kumiko-informed construction graphs' }),
+    ).toBeVisible();
 
     const cards = page.locator('[data-sigil-card]');
     await expect(cards).toHaveCount(18);
@@ -42,7 +45,8 @@ test('sigil lab exposes layered generations and visual evidence', async ({ page 
 
     await expect(page.locator('[data-sigil-layer-example]')).toHaveCount(3);
     await expect(page.locator('[data-sigil-generation-example]')).toHaveCount(2);
-    await expect(page.locator('[data-agent-sigil]')).toHaveCount(38);
+    await expect(page.locator('[data-agent-sigil]')).toHaveCount(44);
+    await expect(page.locator('[data-agent-kumiko]')).toHaveCount(41);
     await expectNoHorizontalOverflow(page);
 
     await page.screenshot({
@@ -75,20 +79,95 @@ test('repository, designation, and description seeds stay isolated', async ({ pa
   expect(layers[2]?.accents).not.toBe(layers[0]?.accents);
 });
 
-test('small layered sigils remain measurable and accessible', async ({ page }) => {
+test('Kumiko population stays graph-distinct and occupancy-separated', async ({ page }) => {
   await page.goto('/sigil-lab');
 
-  const sigils = page.locator('[data-sigil-small-sizes] [data-agent-sigil]');
-  await expect(sigils).toHaveCount(4);
+  const contactSheet = page.locator('[data-kumiko-contact-sheet]');
+  await expect(contactSheet).toBeVisible();
+  const minimumDistance = Number(
+    await contactSheet.getAttribute('data-kumiko-minimum-distance'),
+  );
+  expect(minimumDistance).toBeGreaterThanOrEqual(8);
 
-  const sizes = await sigils.evaluateAll((elements) =>
+  const cards = page.locator('[data-kumiko-contact-card]');
+  await expect(cards).toHaveCount(18);
+  const descriptors = await cards.evaluateAll((elements) =>
+    elements.map((element) => ({
+      family: element.getAttribute('data-kumiko-family'),
+      graph: element.getAttribute('data-kumiko-graph'),
+      occupancy: element.getAttribute('data-kumiko-occupancy'),
+    })),
+  );
+
+  expect(descriptors.every((descriptor) => descriptor.graph && descriptor.occupancy)).toBe(true);
+  expect(new Set(descriptors.map((descriptor) => descriptor.graph)).size).toBe(
+    descriptors.length,
+  );
+  expect(new Set(descriptors.map((descriptor) => descriptor.occupancy)).size).toBe(
+    descriptors.length,
+  );
+  expect(new Set(descriptors.map((descriptor) => descriptor.family)).size).toBe(8);
+
+  const familyCards = page.locator('[data-kumiko-family-card]');
+  await expect(familyCards).toHaveCount(8);
+  const families = await familyCards.evaluateAll((elements) =>
+    elements.map((element) => element.getAttribute('data-kumiko-family')),
+  );
+  expect(new Set(families).size).toBe(8);
+});
+
+test('Kumiko description edits change accents without changing the graph', async ({ page }) => {
+  await page.goto('/sigil-lab');
+
+  const examples = page.locator('[data-kumiko-layer-example] [data-agent-kumiko]');
+  await expect(examples).toHaveCount(3);
+  const layers = await examples.evaluateAll((elements) =>
+    elements.map((element) => ({
+      graph: element.getAttribute('data-agent-kumiko-graph'),
+      occupancy: element.getAttribute('data-agent-kumiko-occupancy'),
+      lattice: element.getAttribute('data-agent-kumiko-lattice'),
+      infill: element.getAttribute('data-agent-kumiko-infill'),
+      accents: element.getAttribute('data-agent-kumiko-accents'),
+      palette: element.getAttribute('data-agent-kumiko-palette'),
+    })),
+  );
+
+  expect(new Set(layers.map((layer) => layer.graph)).size).toBe(1);
+  expect(new Set(layers.map((layer) => layer.occupancy)).size).toBe(1);
+  expect(new Set(layers.map((layer) => layer.lattice)).size).toBe(1);
+  expect(new Set(layers.map((layer) => layer.infill)).size).toBe(1);
+  expect(new Set(layers.map((layer) => layer.palette)).size).toBe(1);
+  expect(new Set(layers.map((layer) => layer.accents)).size).toBe(3);
+
+  await expect(page.locator('[data-kumiko-debug-node]')).not.toHaveCount(0);
+});
+
+test('small layered and lattice sigils remain measurable and accessible', async ({ page }) => {
+  await page.goto('/sigil-lab');
+
+  const layered = page.locator('[data-sigil-small-sizes] [data-agent-sigil]');
+  await expect(layered).toHaveCount(4);
+  const layeredSizes = await layered.evaluateAll((elements) =>
     elements.map((element) => {
       const box = element.getBoundingClientRect();
       return { width: box.width, height: box.height, label: element.getAttribute('aria-label') };
     }),
   );
 
-  expect(sizes.map((size) => Math.round(size.width))).toEqual([24, 32, 48, 72]);
-  expect(sizes.every((size) => size.width === size.height)).toBe(true);
-  expect(sizes.every((size) => size.label?.includes('agent identity sigil'))).toBe(true);
+  expect(layeredSizes.map((size) => Math.round(size.width))).toEqual([24, 32, 48, 72]);
+  expect(layeredSizes.every((size) => size.width === size.height)).toBe(true);
+  expect(layeredSizes.every((size) => size.label?.includes('agent identity sigil'))).toBe(true);
+
+  const kumiko = page.locator('[data-kumiko-small-sizes] [data-agent-kumiko]');
+  await expect(kumiko).toHaveCount(5);
+  const kumikoSizes = await kumiko.evaluateAll((elements) =>
+    elements.map((element) => {
+      const box = element.getBoundingClientRect();
+      return { width: box.width, height: box.height, label: element.getAttribute('aria-label') };
+    }),
+  );
+
+  expect(kumikoSizes.map((size) => Math.round(size.width))).toEqual([16, 24, 32, 48, 72]);
+  expect(kumikoSizes.every((size) => size.width === size.height)).toBe(true);
+  expect(kumikoSizes.every((size) => size.label?.includes('Kumiko-informed'))).toBe(true);
 });
