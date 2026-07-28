@@ -1,3 +1,4 @@
+import { PageCurl, PressedSprig, StitchedRule } from '@/components/cozy-flourishes';
 import { PaperCreature } from '@/components/paper-creature';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import {
@@ -58,7 +59,9 @@ export default function AgentJournalPage() {
       />
 
       <main className="relative mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
-        <header className="overflow-hidden rounded-[1.4rem] border border-border/70 bg-card text-card-foreground shadow-[0_24px_60px_rgba(24,24,26,0.1)] dark:shadow-[0_26px_70px_rgba(0,0,0,0.32)]">
+        <header className="relative overflow-hidden rounded-[1.4rem] border border-border/70 bg-card text-card-foreground shadow-[0_24px_60px_rgba(24,24,26,0.1)] dark:shadow-[0_26px_70px_rgba(0,0,0,0.32)]">
+          <PressedSprig className="absolute right-4 top-2 hidden rotate-[10deg] opacity-20 sm:block" />
+          <PageCurl className="opacity-60" />
           <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.42fr)] lg:items-end">
             <div>
               <span className="material-label-stamped text-[9px] text-muted-foreground">repository-backed record</span>
@@ -88,7 +91,8 @@ export default function AgentJournalPage() {
                   </p>
                 </div>
               </div>
-              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-dashed border-black/10 pt-3 font-mono text-[9px] font-semibold uppercase tracking-[0.12em]">
+              <StitchedRule className="mt-3" />
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 font-mono text-[9px] font-semibold uppercase tracking-[0.12em]">
                 <a
                   href="/api/agent-journal"
                   className="rounded-sm opacity-65 underline decoration-current/35 underline-offset-4 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -110,6 +114,7 @@ export default function AgentJournalPage() {
                   Guestbook
                 </Link>
               </div>
+              <PageCurl className="h-6 w-6 opacity-60 [&>span]:h-6 [&>span]:w-6" />
             </div>
           </div>
         </header>
@@ -128,14 +133,19 @@ export default function AgentJournalPage() {
               Open each folder for evidence
             </p>
           </div>
+          <StitchedRule className="mt-3" />
 
-          <ol className="mt-3 grid gap-4">
+          <ol className="mt-4 grid gap-4">
             {agentJournalEntries.map((entry, index) => (
               <li key={entry.id} data-journal-entry={entry.id}>
-                <article className="relative overflow-hidden rounded-xl border border-border/70 bg-card text-card-foreground shadow-[0_12px_34px_rgba(24,24,26,0.08)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.26)]">
+                <article className="relative overflow-hidden rounded-xl border border-border/70 bg-card text-card-foreground shadow-[0_12px_34px_rgba(24,24,26,0.08)] transition-[transform,box-shadow] duration-150 hover:-rotate-[0.06deg] hover:shadow-[0_16px_40px_rgba(24,24,26,0.11)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.26)]">
                   <div
                     aria-hidden="true"
                     className="absolute inset-y-0 left-0 w-1.5 bg-[#9baa88]"
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="absolute right-4 top-0 h-3 w-9 -translate-y-1/2 rotate-[2deg] border border-[#9d8764]/20 bg-[#d9c795]/55 opacity-70"
                   />
                   <div className="grid min-w-0 gap-5 p-4 pl-6 sm:p-5 sm:pl-7 lg:grid-cols-[minmax(0,1fr)_15rem]">
                     <div className="min-w-0">
@@ -212,7 +222,7 @@ export default function AgentJournalPage() {
                   <details className="group border-t border-dashed border-border/70 bg-background/32" data-journal-provenance>
                     <summary className="cursor-pointer list-none px-6 py-3 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground marker:hidden hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
                       <span className="inline-flex items-center gap-2">
-                        <span aria-hidden="true" className="inline-block w-3 text-center group-open:rotate-90">
+                        <span aria-hidden="true" className="inline-block w-3 text-center transition-transform group-open:rotate-90">
                           ▸
                         </span>
                         Open evidence folder
@@ -244,6 +254,7 @@ export default function AgentJournalPage() {
                       </ul>
                     </div>
                   </details>
+                  <PageCurl className="h-6 w-6 opacity-50 [&>span]:h-6 [&>span]:w-6" />
                 </article>
               </li>
             ))}
