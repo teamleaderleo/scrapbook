@@ -22,17 +22,18 @@ async function expectOpaqueSurface(locator: Locator) {
   expect(style.webkitBackdropFilter === 'none' || style.webkitBackdropFilter === '').toBe(true);
 }
 
-test('navigation and mobile menu use opaque surfaces', async ({ page }) => {
+test('navigation and mobile site atlas use opaque surfaces', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/');
   await expectOpaqueSurface(page.locator('nav'));
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  await page.getByText('menu', { exact: true }).click();
-  const menu = page.locator('details[open] > div').first();
-  await expect(menu).toBeVisible();
-  await expectOpaqueSurface(menu);
+  await expect(page.locator('[data-site-nav]')).toHaveAttribute('data-site-nav-ready', 'true');
+  await page.locator('[data-site-atlas-trigger]').click();
+  const atlas = page.locator('[data-site-atlas]');
+  await expect(atlas).toBeVisible();
+  await expectOpaqueSurface(atlas);
 });
 
 test('time picker omits recent-zone chrome and stays opaque', async ({ page }) => {
