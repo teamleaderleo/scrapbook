@@ -10,6 +10,7 @@ import { useSearchParams } from 'next/navigation';
 import { CodeDisplay } from './code-display';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { PaperCreature } from '@/components/paper-creature';
+import { PageCurl, PressedSprig, StitchedRule } from '@/components/cozy-flourishes';
 
 export function ResultsClient({
   items,
@@ -55,6 +56,7 @@ export function ResultsClient({
     return (
       <section className="material-paper relative mx-auto mt-8 max-w-xl overflow-hidden rounded-2xl border px-6 py-10 text-center">
         <span className="material-tape-strip" data-side="top" aria-hidden="true" />
+        <PressedSprig className="absolute right-5 top-5 rotate-[8deg] opacity-25" />
         <PaperCreature
           pose="carrying"
           size="lg"
@@ -65,6 +67,9 @@ export function ResultsClient({
         <p className="mx-auto mt-2 max-w-sm text-sm leading-6 opacity-70">
           Try another label or search. Scraplet will keep looking through the paper scraps.
         </p>
+        <StitchedRule className="mx-auto mt-5 max-w-44" />
+        <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.14em] opacity-45">drawer checked twice</p>
+        <PageCurl className="opacity-65" />
       </section>
     );
   }
@@ -131,6 +136,10 @@ function Row({
       <span
         aria-hidden="true"
         className="absolute left-0 top-4 h-11 w-1.5 rounded-r-full bg-[#9baa88] shadow-[inset_-1px_0_rgba(75,82,67,0.22)]"
+      />
+      <span
+        aria-hidden="true"
+        className="absolute right-5 top-0 h-2.5 w-8 -translate-y-1/2 rotate-[2deg] border border-[#9d8764]/20 bg-[#d9c795]/50 opacity-0 transition-opacity group-hover:opacity-70"
       />
 
       <div
@@ -213,6 +222,7 @@ function Row({
 
       {expanded ? (
         <div className="border-t border-dashed border-[hsl(var(--material-paper-edge)/0.65)] bg-white/[0.14] p-4 dark:bg-black/5">
+          <StitchedRule className="mb-3" />
           {item.versions.length > 1 ? (
             <div className="mb-3 flex flex-wrap gap-2 text-xs">
               {item.versions.map((version, index) => (
@@ -287,6 +297,7 @@ function Row({
         </div>
       ) : null}
 
+      <PageCurl className="h-6 w-6 opacity-55 [&>span]:h-6 [&>span]:w-6" />
       <span className="material-paper-edge" aria-hidden="true" />
     </li>
   );
