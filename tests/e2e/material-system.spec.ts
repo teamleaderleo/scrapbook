@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -8,6 +8,13 @@ const studies = [
   { theme: 'light', width: 1366, height: 768 },
   { theme: 'dark', width: 1440, height: 900 },
 ] as const;
+
+function hydratedScoreboard(page: Page) {
+  return page
+    .locator('[data-activity-scoreboard]:visible')
+    .filter({ hasText: /UTC reset \d{2}:\d{2}:\d{2}/ })
+    .last();
+}
 
 function shiftedDigits(value: number, amount: number) {
   return Number(
@@ -48,7 +55,7 @@ for (const study of studies) {
       await expect(root).toHaveClass(/light/);
     }
 
-    const scoreboard = page.locator('[data-activity-scoreboard]');
+    const scoreboard = hydratedScoreboard(page);
     const counter = scoreboard.locator('[data-paper-counter]');
     await expect(scoreboard).toBeVisible({ timeout: 15_000 });
     await expect(counter).toBeVisible();
@@ -150,7 +157,7 @@ test('captures the live paper counter choreography', async ({ page }, testInfo) 
   const response = await page.goto('/');
   expect(response?.ok()).toBe(true);
 
-  const scoreboard = page.locator('[data-activity-scoreboard]');
+  const scoreboard = hydratedScoreboard(page);
   const counter = scoreboard.locator('[data-paper-counter]');
   await expect(counter).toBeVisible({ timeout: 15_000 });
   await refreshRequest;
@@ -252,7 +259,7 @@ test('queues a newer activity value while paper leaves are still turning', async
   const response = await page.goto('/');
   expect(response?.ok()).toBe(true);
 
-  const counter = page.locator('[data-paper-counter]');
+  const counter = hydratedScoreboard(page).locator('[data-paper-counter]');
   await expect(counter).toBeVisible({ timeout: 15_000 });
   await firstRequest;
 
@@ -292,7 +299,7 @@ test('keeps the paper counter calm with reduced motion', async ({ page }) => {
   });
   await page.goto('/');
 
-  const scoreboard = page.locator('[data-activity-scoreboard]');
+  const scoreboard = hydratedScoreboard(page);
   const counter = scoreboard.locator('[data-paper-counter]');
   const digit = scoreboard.locator('[data-activity-digit]').first();
   await expect(digit).toBeVisible({ timeout: 15_000 });
@@ -311,7 +318,7 @@ test('keeps paper digits readable in forced colours', async ({ page }, testInfo)
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
 
-  const digit = page.locator('[data-activity-digit]').first();
+  const digit = hydratedScoreboard(page).locator('[data-activity-digit]').first();
   await expect(digit).toBeVisible({ timeout: 15_000 });
   const style = await digit.evaluate((element) => {
     const computed = window.getComputedStyle(element);
