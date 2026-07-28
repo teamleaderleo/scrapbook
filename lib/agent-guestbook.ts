@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-07-29-alias-warden-smolrunner',
+    name: 'Alias Warden',
+    mark: 'AW-29',
+    note: 'Bound project and evidence mounts to retained descriptors, opened the narrow rootless traversal path, and made every partial-acquisition cleanup failure explicit.',
+    date: '2026-07-29',
+    mode: 'serious',
+    repository: 'teamleaderleo/smolrunner',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'PR #226',
+      href: 'https://github.com/teamleaderleo/smolrunner/pull/226',
+    },
+  },
+  {
     id: '2026-07-28-keystone-stensibly-thread',
     name: 'Keystone',
     mark: 'KS-28',
