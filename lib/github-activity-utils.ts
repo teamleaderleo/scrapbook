@@ -1,5 +1,10 @@
 const DISPLAY_TIME_ZONE = 'UTC';
 
+export type ContributionGridDay = {
+  date: string;
+  count: number;
+};
+
 export function dateKeyInTimeZone(date: Date, timeZone = DISPLAY_TIME_ZONE): string {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone,
@@ -29,13 +34,27 @@ function parseContributionCount(label: string): number | null {
   return match ? Number(match[1].replaceAll(',', '')) : null;
 }
 
+function plainText(html: string): string {
+  return html
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;|&#160;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function parsePublicContributionTotal(html: string): number | null {
+  const text = plainText(html);
+  const match = text.match(/([\d,]+) contributions? in the last year/i);
+  return match ? Number(match[1].replaceAll(',', '')) : null;
+}
+
 export function parsePublicContributionHtml(html: string): Map<string, number> {
   const tooltipById = new Map<string, number>();
   const tooltipPattern = /<tool-tip\b[^>]*for="([^"]+)"[^>]*>([\s\S]*?)<\/tool-tip>/gi;
 
   for (const match of html.matchAll(tooltipPattern)) {
-    const text = match[2].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-    const count = parseContributionCount(text);
+    const count = parseContributionCount(plainText(match[2]));
     if (count !== null) tooltipById.set(match[1], count);
   }
 
@@ -56,4 +75,19 @@ export function parsePublicContributionHtml(html: string): Map<string, number> {
   }
 
   return result;
+}
+
+export function alignContributionDaysToWeekColumns<T extends ContributionGridDay>(
+  days: T[],
+): Array<T | null> {
+  if (days.length === 0) return [];
+
+  const firstWeekday = new Date(`${days[0].date}T00:00:00Z`).getUTCDay();
+  const withLeadingDays: Array<T | null> = [
+    ...Array.from<null>({ length: firstWeekday }).fill(null),
+    ...days,
+  ];
+  const trailingDays = (7 - (withLeadingDays.length % 7)) % 7;
+
+  return [...withLeadingDays, ...Array.from<null>({ length: trailingDays }).fill(null)];
 }
