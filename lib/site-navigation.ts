@@ -116,6 +116,14 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         group: 'experiments',
         badge: 'Lab',
       },
+      {
+        id: 'snow-globe',
+        href: '/snow-globe',
+        label: 'Snow globe',
+        description: 'Tilt, drag, and shake a pocket globe with physical snow.',
+        group: 'experiments',
+        badge: 'Lab',
+      },
     ],
   },
   {
