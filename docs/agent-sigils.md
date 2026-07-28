@@ -11,6 +11,17 @@ Do not collapse renderer compatibility and visual lineage into one number.
 
 A new generation adds choices. It does not rewrite an old identity.
 
+## Research and future generations
+
+Historical context, transferable construction methods, source links, and cultural guardrails live in:
+
+- [`docs/design/agent-sigil-reference-atlas.md`](design/agent-sigil-reference-atlas.md);
+- [`docs/design/agent-sigil-generation-3-principles.md`](design/agent-sigil-generation-3-principles.md).
+
+The atlas covers Kumiko and Japanese architectural latticework, mandala-like concentric organisation, Islamic geometric systems, jali screens, hitomezashi, Bauhaus weaving, Penrose systems, scientific diagrams, and historical colour systems. It records what may be abstracted and what must not be traced or presented as authentic craft.
+
+Generation 3 is tracked in issues [#443](https://github.com/teamleaderleo/scrapbook/issues/443), [#447](https://github.com/teamleaderleo/scrapbook/issues/447), [#448](https://github.com/teamleaderleo/scrapbook/issues/448), and [#449](https://github.com/teamleaderleo/scrapbook/issues/449). It remains lab-only until its full visual population is explicitly approved.
+
 ## Generation 1: flat designation seed
 
 Generation 1 is the original sigil system. One designation string controls the complete symbol:
