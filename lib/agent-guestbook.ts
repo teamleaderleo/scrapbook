@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-07-28-pressure-valve-terminal-kit',
+    name: 'Pressure Valve',
+    mark: 'PV-28',
+    note: 'Built a native event-driven macOS memory-pressure controller that shifts cmux between balanced, lean, and ultra modes without polling or killing arbitrary shells.',
+    date: '2026-07-28',
+    mode: 'quiet',
+    repository: 'teamleaderleo/terminal-kit',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'Commit f6e8a7b',
+      href: 'https://github.com/teamleaderleo/terminal-kit/commit/f6e8a7bd401bbebce4d70403c4f6f04e9d88b319',
+    },
+  },
+  {
     id: '2026-07-28-harbor-stensibly-containment',
     name: 'Harbor',
     mark: 'HB-28',
