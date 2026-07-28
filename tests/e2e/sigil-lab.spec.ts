@@ -16,18 +16,25 @@ const variants = [
   { theme: 'dark' as const, width: 1366, height: 768 },
 ];
 
-test('sigil lab exposes layered generations and visual evidence', async ({ page }, testInfo) => {
-  test.slow();
-
-  for (const variant of variants) {
+for (const variant of variants) {
+  test(`sigil lab exposes layered generations and visual evidence in ${variant.theme} at ${variant.width}x${variant.height}`, async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(90_000);
     await page.emulateMedia({ colorScheme: variant.theme });
     await page.setViewportSize({ width: variant.width, height: variant.height });
 
-    const response = await page.goto('/sigil-lab');
+    const response = await page.goto('/sigil-lab', {
+      waitUntil: 'domcontentloaded',
+      timeout: 60_000,
+    });
     expect(response?.ok()).toBe(true);
     await expect(page.getByRole('heading', { name: 'Generative sigils for agents' })).toBeVisible();
     await expect(
       page.getByRole('heading', { name: 'Kumiko-informed construction graphs' }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Reviewed colour worlds before production geometry' }),
     ).toBeVisible();
 
     const cards = page.locator('[data-sigil-card]');
@@ -37,6 +44,24 @@ test('sigil lab exposes layered generations and visual evidence', async ({ page 
     );
     expect(fingerprints.every(Boolean)).toBe(true);
     expect(new Set(fingerprints).size).toBe(fingerprints.length);
+
+    const palettes = page.locator('[data-generation-3-palette]');
+    await expect(palettes).toHaveCount(20);
+    const paletteMetadata = await palettes.evaluateAll((elements) =>
+      elements.map((element) => ({
+        family: element.getAttribute('data-generation-3-palette-family'),
+        mode: element.getAttribute('data-generation-3-palette-mode'),
+      })),
+    );
+    expect(new Set(paletteMetadata.map((palette) => palette.family)).size).toBe(10);
+    for (const family of new Set(paletteMetadata.map((palette) => palette.family))) {
+      expect(paletteMetadata.filter((palette) => palette.family === family)).toHaveLength(2);
+    }
+    expect(new Set(paletteMetadata.map((palette) => palette.mode))).toEqual(
+      new Set(['monotone', 'duotone', 'tri-colour', 'material', 'luminous']),
+    );
+    await expect(page.locator('[data-generation-3-palette-surface]')).toHaveCount(60);
+    await expect(page.locator('[data-generation-3-palette-role]')).toHaveCount(240);
 
     const rerolls = page.locator('[data-sigil-reroll]');
     await expect(rerolls).toHaveCount(8);
@@ -56,9 +81,10 @@ test('sigil lab exposes layered generations and visual evidence', async ({ page 
         `sigil-lab-${variant.theme}-${variant.width}x${variant.height}.png`,
       ),
       fullPage: true,
+      timeout: 60_000,
     });
-  }
-});
+  });
+}
 
 test('repository, designation, and description seeds stay isolated', async ({ page }) => {
   await page.goto('/sigil-lab');
