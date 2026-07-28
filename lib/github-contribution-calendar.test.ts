@@ -21,13 +21,6 @@ const payload = {
         },
       },
     },
-    rateLimit: {
-      limit: 5000,
-      remaining: 4998,
-      used: 2,
-      resetAt: '2026-07-28T17:00:00Z',
-      resource: 'graphql',
-    },
   },
 };
 
@@ -40,13 +33,7 @@ describe('parseGitHubContributionCalendar', () => {
       ['2026-07-28', 11],
     ]);
     expect(result.total).toBe(18);
-    expect(result.rateLimit).toEqual({
-      limit: 5000,
-      remaining: 4998,
-      used: 2,
-      resetAt: '2026-07-28T17:00:00Z',
-      resource: 'graphql',
-    });
+    expect(result.rateLimit).toBeNull();
   });
 
   it('rejects partial or malformed calendars instead of publishing zeroes', () => {
@@ -75,7 +62,14 @@ describe('fetchGitHubContributionCalendar', () => {
     const fetchImpl = vi.fn(async () =>
       new Response(JSON.stringify(payload), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-RateLimit-Limit': '5000',
+          'X-RateLimit-Remaining': '4998',
+          'X-RateLimit-Used': '2',
+          'X-RateLimit-Reset': '1785258000',
+          'X-RateLimit-Resource': 'graphql',
+        },
       }),
     );
 
@@ -86,6 +80,13 @@ describe('fetchGitHubContributionCalendar', () => {
     );
 
     expect(result.total).toBe(18);
+    expect(result.rateLimit).toEqual({
+      limit: 5000,
+      remaining: 4998,
+      used: 2,
+      resetAt: '2026-07-28T17:00:00.000Z',
+      resource: 'graphql',
+    });
     expect(fetchImpl).toHaveBeenCalledTimes(1);
     const [url, init] = fetchImpl.mock.calls[0];
     expect(url).toBe('https://api.github.com/graphql');
