@@ -17,6 +17,7 @@ import {
   formatSearchOffset,
   formatTime,
   getAdjustedOffset,
+  getTimezoneSearchTerms,
   type TimezoneOption,
 } from '@/lib/timezone-options';
 import {
@@ -274,6 +275,7 @@ export default function TimezoneSelector({ utcHours, utcMinutes }: TimezoneSelec
                           option.abbreviation,
                           formatOffset(adjustedOffset),
                           formatSearchOffset(adjustedOffset),
+                          ...getTimezoneSearchTerms(option),
                         ]}
                         onSelect={() => selectZone(option)}
                         className="min-h-11 items-center justify-between gap-3 px-3 py-2"
