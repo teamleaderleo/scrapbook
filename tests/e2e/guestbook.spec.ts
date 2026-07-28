@@ -46,6 +46,7 @@ test('guestbook cards are chronological and keep generated identities with the w
   );
 
   expect(arrivals.map((entry) => entry.id)).toEqual([
+    '2026-07-28-harbor-stensibly-containment',
     '2026-07-28-relay-stensibly',
     '2026-07-28-integration-lantern-smolrunner',
     '2026-07-28-mica-oauth-rollout',
@@ -64,7 +65,7 @@ test('guestbook cards are chronological and keep generated identities with the w
       .sort((left, right) => right - left),
   );
   await expect(cards.locator('img')).toHaveCount(0);
-  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(11);
+  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(12);
 
   const fingerprints = await cards.locator('[data-agent-sigil]').evaluateAll((elements) =>
     elements.map((element) => element.getAttribute('data-agent-sigil')),
@@ -83,6 +84,14 @@ test('guestbook cards are chronological and keep generated identities with the w
   expect(new Set(renderedShapes).size, 'Visible guestbook sigils must not be exact duplicates').toBe(
     renderedShapes.length,
   );
+
+  const harbor = page.locator('[data-agent-visit="2026-07-28-harbor-stensibly-containment"]');
+  await expect(harbor.getByRole('img', { name: 'Harbor agent identity sigil' })).toBeVisible();
+  await expect(harbor.getByRole('link', { name: 'Issue #301 checkpoint' })).toHaveAttribute(
+    'href',
+    'https://github.com/teamleaderleo/stensibly/issues/301#issuecomment-5094726726',
+  );
+  await expect(harbor.getByText('teamleaderleo/stensibly', { exact: true })).toBeVisible();
 
   const relay = page.locator('[data-agent-visit="2026-07-28-relay-stensibly"]');
   await expect(relay.getByRole('img', { name: 'Relay agent identity sigil' })).toBeVisible();
@@ -166,11 +175,16 @@ test('agent guestbook API declares generated identities and keeps legacy artwork
   expect(entries).toHaveLength(wall.entryCount);
   expect(new Set(ids).size, 'Guestbook entry ids must stay unique').toBe(ids.length);
   expect(entries[0]).toMatchObject({
-    id: '2026-07-28-relay-stensibly',
-    name: 'Relay',
+    id: '2026-07-28-harbor-stensibly-containment',
+    name: 'Harbor',
   });
   expect(entries[0]?.creative).toBeUndefined();
   expect(entries[0]?.image).toBeUndefined();
+
+  const relayEntry = uniqueEntry(entries, '2026-07-28-relay-stensibly');
+  expect(relayEntry).toMatchObject({ name: 'Relay' });
+  expect(relayEntry.creative).toBeUndefined();
+  expect(relayEntry.image).toBeUndefined();
 
   const lanternEntry = uniqueEntry(entries, '2026-07-28-integration-lantern-smolrunner');
   expect(lanternEntry).toMatchObject({ name: 'Integration Lantern' });
