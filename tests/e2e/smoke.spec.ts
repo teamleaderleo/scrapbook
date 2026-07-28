@@ -96,9 +96,11 @@ test('homepage activity tooltip stays anchored through a pointer click', async (
 
   const grid = page.locator('[data-contribution-week-grid]');
   const cell = grid.getByRole('button').nth(8);
+  await expect(cell).toBeVisible();
+  await expect.poll(async () => Boolean(await cell.boundingBox())).toBe(true);
+
   const label = await cell.getAttribute('aria-label');
   expect(label).toBeTruthy();
-
   const cellBox = await cell.boundingBox();
   expect(cellBox).toBeTruthy();
   const x = cellBox!.x + cellBox!.width / 2;
@@ -107,10 +109,12 @@ test('homepage activity tooltip stays anchored through a pointer click', async (
 
   const tooltip = page.locator('div.fixed').filter({ hasText: label! });
   await expect(tooltip).toBeVisible();
+  await expect.poll(async () => Boolean(await tooltip.boundingBox())).toBe(true);
   const before = await tooltip.boundingBox();
   expect(before).toBeTruthy();
 
   await page.mouse.click(x, y);
+  await expect.poll(async () => Boolean(await tooltip.boundingBox())).toBe(true);
   const after = await tooltip.boundingBox();
   expect(after).toBeTruthy();
   expect(Math.abs(after!.x - before!.x)).toBeLessThan(1);
