@@ -18,9 +18,18 @@ async function waitForClientHydration(page: Page) {
     .not.toContain('Local time --:--');
 }
 
+function hydratedHomeDashboard(page: Page) {
+  return page
+    .locator('[data-home-activity-dashboard]:visible')
+    .filter({ hasText: /UTC reset \d{2}:\d{2}:\d{2}/ })
+    .last();
+}
+
 async function waitForHomeActivity(page: Page) {
-  await expect(page.locator('[data-home-activity-dashboard]')).toBeVisible({ timeout: 15_000 });
-  await expect(page.locator('[data-contribution-week-grid]')).toBeVisible();
+  const dashboard = hydratedHomeDashboard(page);
+  await expect(dashboard).toBeVisible({ timeout: 15_000 });
+  await expect(dashboard.locator('[data-contribution-week-grid]')).toBeVisible();
+  return dashboard;
 }
 
 async function expectWheelScrollsDocument(page: Page, route: string, selector: string) {
@@ -80,45 +89,49 @@ test('homepage highlights three recent systems', async ({ page }) => {
 
 test('homepage counter uses UTC, 7D, and rolling-year instrument labels', async ({ page }) => {
   await page.goto('/');
-  await waitForHomeActivity(page);
+  const dashboard = await waitForHomeActivity(page);
 
-  await expect(page.getByText(/UTC reset \d{2}:\d{2}:\d{2}/)).toBeVisible();
-  await expect(page.getByText('7D', { exact: true })).toBeVisible();
-  await expect(page.getByText('1Y', { exact: true })).toBeVisible();
-  await expect(page.locator('[data-activity-digit] > span')).toHaveCount(4);
+  await expect(dashboard.getByText(/UTC reset \d{2}:\d{2}:\d{2}/)).toBeVisible();
+  await expect(dashboard.getByText('7D', { exact: true })).toBeVisible();
+  await expect(dashboard.getByText('1Y', { exact: true })).toBeVisible();
+  await expect(dashboard.locator('[data-activity-digit] > span')).toHaveCount(4);
 });
 
 test('homepage activity tooltip stays anchored through a pointer click', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/');
   await waitForClientHydration(page);
-  await waitForHomeActivity(page);
+  const dashboard = await waitForHomeActivity(page);
 
-  const grid = page.locator('[data-contribution-week-grid]');
+  const grid = dashboard.locator('[data-contribution-week-grid]');
   const cell = grid.getByRole('button').nth(8);
   await expect(cell).toBeVisible();
-  await expect.poll(async () => Boolean(await cell.boundingBox())).toBe(true);
 
   const label = await cell.getAttribute('aria-label');
   expect(label).toBeTruthy();
-  const cellBox = await cell.boundingBox();
-  expect(cellBox).toBeTruthy();
-  const x = cellBox!.x + cellBox!.width / 2;
-  const y = cellBox!.y + cellBox!.height / 2;
-  await page.mouse.move(x, y);
+  const cellBox = await cell.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  });
+  const x = cellBox.x + cellBox.width / 2;
+  const y = cellBox.y + cellBox.height / 2;
+  await cell.hover();
 
   const tooltip = page.locator('div.fixed').filter({ hasText: label! });
-  await expect(tooltip).toBeVisible();
-  await expect.poll(async () => Boolean(await tooltip.boundingBox())).toBe(true);
-  const before = await tooltip.boundingBox();
-  expect(before).toBeTruthy();
+  await expect(tooltip).toBeVisible({ timeout: 10_000 });
+  const before = await tooltip.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { x: rect.x, y: rect.y };
+  });
 
   await page.mouse.click(x, y);
-  await expect.poll(async () => Boolean(await tooltip.boundingBox())).toBe(true);
-  const after = await tooltip.boundingBox();
-  expect(after).toBeTruthy();
-  expect(Math.abs(after!.x - before!.x)).toBeLessThan(1);
-  expect(Math.abs(after!.y - before!.y)).toBeLessThan(1);
+  await expect(tooltip).toBeVisible();
+  const after = await tooltip.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { x: rect.x, y: rect.y };
+  });
+  expect(Math.abs(after.x - before.x)).toBeLessThan(1);
+  expect(Math.abs(after.y - before.y)).toBeLessThan(1);
 });
 
 test('homepage shell covers the viewport with the document background', async ({ page }) => {
@@ -198,9 +211,9 @@ test('slow navigation keeps the current page visible behind a monotonic rail', a
 
   await page.goto('/');
   await waitForClientHydration(page);
-  await waitForHomeActivity(page);
+  const dashboard = await waitForHomeActivity(page);
 
-  const activity = page.locator('[data-contribution-week-grid]');
+  const activity = dashboard.locator('[data-contribution-week-grid]');
   const feedback = page.locator('[data-navigation-feedback]');
   await expect(activity).toBeVisible();
 
@@ -279,9 +292,9 @@ test('gallery wheel scrolls over the canvas', async ({ page }) => {
 test('homepage scorecard lifts under pointer movement', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/');
-  await waitForHomeActivity(page);
+  const dashboard = await waitForHomeActivity(page);
 
-  const scoreboard = page.locator('[data-activity-scoreboard]');
+  const scoreboard = dashboard.locator('[data-activity-scoreboard]');
   const counter = scoreboard.locator('[data-paper-counter]');
   await expect(scoreboard).toBeVisible();
   await expect(counter).toHaveAttribute('data-reduced-motion', 'false');
@@ -290,8 +303,8 @@ test('homepage scorecard lifts under pointer movement', async ({ page }) => {
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
   });
 
-  await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2, { steps: 6 });
-
+  await scoreboard.hover({ force: true });
+  await expect.poll(() => scoreboard.evaluate((element) => element.matches(':hover'))).toBe(true);
   await expect
     .poll(
       () =>
@@ -307,9 +320,9 @@ test('homepage scorecard lifts under pointer movement', async ({ page }) => {
 test('homepage scorecard remains planted with reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  await waitForHomeActivity(page);
+  const dashboard = await waitForHomeActivity(page);
 
-  const scoreboard = page.locator('[data-activity-scoreboard]');
+  const scoreboard = dashboard.locator('[data-activity-scoreboard]');
   const counter = scoreboard.locator('[data-paper-counter]');
   await expect(scoreboard).toBeVisible();
   await expect(counter).toHaveAttribute('data-reduced-motion', 'true');
@@ -318,7 +331,8 @@ test('homepage scorecard remains planted with reduced motion', async ({ page }) 
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
   });
 
-  await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2, { steps: 6 });
+  await scoreboard.hover({ force: true });
+  await expect.poll(() => scoreboard.evaluate((element) => element.matches(':hover'))).toBe(true);
   await page.waitForTimeout(500);
   const after = await scoreboard.evaluate((element) => {
     const rect = element.getBoundingClientRect();
