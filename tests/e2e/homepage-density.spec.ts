@@ -152,3 +152,41 @@ test('keeps hover surfaces planted and lets the visitor pet Scraplet', async ({ 
   await pet.click();
   await expect(pet).toHaveAttribute('data-pets', '1');
 });
+
+test('keeps the paper grid legible and Scraplet cosy in both themes', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+
+  for (const study of [
+    { theme: 'light', alpha: 0.036 },
+    { theme: 'dark', alpha: 0.044 },
+  ] as const) {
+    await page.goto('/');
+    await page.evaluate((theme) => window.localStorage.setItem('theme', theme), study.theme);
+    await page.reload();
+
+    await expect(page.locator('html')).toHaveClass(new RegExp(study.theme));
+
+    const grid = page.locator('[data-home-paper-grid]');
+    const pet = page.locator('[data-scrapbook-pet]');
+    await expect(grid).toBeVisible();
+    await expect(pet).toBeVisible();
+
+    const appearance = await page.evaluate(() => {
+      const gridElement = document.querySelector<HTMLElement>('[data-home-paper-grid]');
+      const petElement = document.querySelector<HTMLElement>('[data-scrapbook-pet]');
+      if (!gridElement || !petElement) throw new Error('Missing paper homepage cue');
+
+      const gridStyle = getComputedStyle(gridElement);
+      const petStyle = getComputedStyle(petElement);
+      return {
+        gridAlpha: Number.parseFloat(gridStyle.getPropertyValue('--home-grid-alpha')),
+        gridImage: gridStyle.backgroundImage,
+        petImage: petStyle.backgroundImage,
+      };
+    });
+
+    expect(appearance.gridAlpha).toBeCloseTo(study.alpha, 3);
+    expect(appearance.gridImage).not.toBe('none');
+    expect(appearance.petImage).not.toBe('none');
+  }
+});
