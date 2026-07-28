@@ -1,4 +1,5 @@
 import { AgentSigilLab } from '@/components/labs/agent-sigil-lab';
+import { Generation3SigilLab } from '@/components/labs/generation-3-sigil-lab';
 import { KumikoSigilLab } from '@/components/labs/kumiko-sigil-lab';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { ArrowLeft } from 'lucide-react';
@@ -37,13 +38,13 @@ export default function AgentSigilLabPage() {
             Back to gallery
           </Link>
           <p className="mt-6 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            Issues #435 and #447 · identity generation reference
+            Issues #435, #443, #447, and #448 · identity generation reference
           </p>
           <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
             Generative sigils for agents
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-            The lab compares the current layered identity system with quieter construction-graph experiments. Stable inputs and explicit variants always produce the same SVG; experimental lineages stay here until their full populations are reviewed.
+            The lab compares the current layered identity system with quieter construction graphs, reviewed colour worlds, and their combined Generation 3 population. Stable inputs and explicit variants always produce the same SVG; experimental lineages stay here until their full populations are approved.
           </p>
         </header>
 
@@ -55,12 +56,16 @@ export default function AgentSigilLabPage() {
           <KumikoSigilLab />
         </div>
 
+        <div className="mt-5">
+          <Generation3SigilLab />
+        </div>
+
         <aside className="mx-auto mt-5 max-w-4xl rounded-[1.25rem] border border-border/70 bg-card p-4 text-sm leading-relaxed text-muted-foreground shadow-[0_16px_38px_rgba(35,31,26,0.08)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.24)] sm:p-5">
           <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-foreground">
             Generation contract
           </p>
           <p className="mt-2">
-            The guestbook still uses Generation 2. The Kumiko-informed lattice is a separate Generation 3 experiment with no production integration, and it must pass population-level monochrome, small-size, light/dark, and cross-browser review before becoming selectable.
+            The guestbook still uses Generation 2. Generation 3 geometry, palettes, and the combined renderer remain isolated experiments. They must pass population-level monochrome, colour-density, compact-size, light/dark, and cross-browser review before becoming selectable.
           </p>
         </aside>
       </main>
