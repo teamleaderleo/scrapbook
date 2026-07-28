@@ -32,11 +32,12 @@ function timestampOrNow(value: string) {
 }
 
 export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
+  const initialSnapshotAt = timestampOrNow(initial.generatedAt);
   const [activity, setActivity] = useState(initial);
   const [updating, setUpdating] = useState(false);
   const inFlight = useRef<AbortController | null>(null);
-  const newestSnapshotAt = useRef(timestampOrNow(initial.generatedAt));
-  const nextAllowedAt = useRef(newestSnapshotAt.current + REFRESH_INTERVAL_MS);
+  const newestSnapshotAt = useRef(initialSnapshotAt);
+  const nextAllowedAt = useRef(initialSnapshotAt + REFRESH_INTERVAL_MS);
   const consecutiveFailures = useRef(0);
 
   useEffect(() => {
