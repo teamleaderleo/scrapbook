@@ -60,10 +60,10 @@ describe('getRecentDateKeys', () => {
     expect(getRecentDateKeys(new Date('2026-07-25T00:00:01Z')).at(-1)).toBe('2026-07-25');
   });
 
-  it('supports the 35-day homepage window', () => {
-    const days = getRecentDateKeys(new Date('2026-07-25T07:30:00Z'), 35);
-    expect(days).toHaveLength(35);
-    expect(days[0]).toBe('2026-06-21');
+  it('supports the 28-day homepage window', () => {
+    const days = getRecentDateKeys(new Date('2026-07-25T07:30:00Z'), 28);
+    expect(days).toHaveLength(28);
+    expect(days[0]).toBe('2026-06-28');
     expect(days.at(-1)).toBe('2026-07-25');
   });
 });
