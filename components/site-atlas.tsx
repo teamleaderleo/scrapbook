@@ -7,11 +7,13 @@ import {
   getActiveNavigationItem,
   isNavigationItemActive,
   siteNavigationGroups,
+  siteNavigationItems,
   type SiteNavigationItem,
 } from '@/lib/site-navigation';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
   Activity,
+  ArrowRight,
   Brain,
   Clock3,
   Compass,
@@ -36,6 +38,24 @@ import { toast } from 'sonner';
 
 const triggerBase =
   'inline-flex h-11 min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-full border border-border/70 bg-card px-3 text-xs font-semibold text-foreground shadow-[0_3px_10px_rgba(20,20,24,0.08)] transition-[background-color,box-shadow] hover:bg-muted hover:shadow-[0_6px_14px_rgba(20,20,24,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none dark:shadow-[0_4px_12px_rgba(0,0,0,0.28)]';
+
+const nextStopByItemId: Record<string, string> = {
+  home: 'space',
+  space: 'journal',
+  journal: 'gallery',
+  gallery: 'atelier',
+  blog: 'journal',
+  atelier: 'activity-lab',
+  time: 'space',
+  proxy: 'home',
+  'activity-lab': 'sigil-lab',
+  'sigil-lab': 'gallery',
+};
+
+function recommendedNextStop(activeItem?: SiteNavigationItem) {
+  const nextId = activeItem ? nextStopByItemId[activeItem.id] : 'home';
+  return siteNavigationItems.find((item) => item.id === nextId && !item.external);
+}
 
 function ItemIcon({ id }: { id: string }) {
   const className = 'h-4 w-4';
@@ -92,13 +112,13 @@ function AtlasLink({
       aria-current={active ? 'page' : undefined}
       data-site-atlas-link={item.id}
       data-active={active ? 'true' : undefined}
-      className={`group relative flex min-h-[92px] min-w-0 items-start gap-3 overflow-hidden rounded-[1rem] border p-3 text-left transition-[background-color,border-color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none ${
+      className={`group relative flex min-h-[82px] min-w-0 items-start gap-2.5 overflow-hidden rounded-[1rem] border p-2.5 text-left transition-[background-color,border-color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none sm:min-h-[92px] sm:gap-3 sm:p-3 ${
         active
           ? 'border-foreground/30 bg-foreground/[0.075] shadow-[inset_3px_0_0_currentColor]'
           : 'border-border/70 bg-background/55 hover:border-foreground/25 hover:bg-muted/70'
       }`}
     >
-      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-card text-foreground shadow-sm">
+      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-card text-foreground shadow-sm sm:h-9 sm:w-9">
         <ItemIcon id={item.id} />
       </span>
       <span className="min-w-0 flex-1">
@@ -113,7 +133,7 @@ function AtlasLink({
             <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
           ) : null}
         </span>
-        <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+        <span className="mt-1 block text-xs leading-snug text-muted-foreground sm:leading-relaxed">
           {item.description}
         </span>
         {item.external ? <span className="sr-only"> Opens in a new tab.</span> : null}
@@ -191,6 +211,7 @@ export function SiteAtlas({
 }) {
   const pathname = usePathname() || '/';
   const activeItem = getActiveNavigationItem(pathname);
+  const nextStop = recommendedNextStop(activeItem);
 
   return (
     <Dialog.Root>
@@ -216,7 +237,7 @@ export function SiteAtlas({
           className="fixed inset-0 z-[80] flex min-w-0 flex-col overflow-hidden bg-background text-foreground shadow-2xl outline-none data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 motion-reduce:animate-none sm:inset-4 sm:mx-auto sm:max-w-5xl sm:rounded-[1.5rem] sm:border sm:border-border/70"
           data-site-atlas
         >
-          <header className="flex shrink-0 items-start gap-4 border-b border-border/70 bg-card/90 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:pt-4">
+          <header className="flex shrink-0 items-start gap-3 border-b border-border/70 bg-card/90 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] sm:gap-4 sm:px-6 sm:pt-4">
             <div className="min-w-0 flex-1">
               <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Current place · {activeItem?.label ?? 'Unmapped route'}
@@ -228,6 +249,25 @@ export function SiteAtlas({
                 Navigate the main places, focused tools, inspectable experiments, and external
                 connections without guessing what is hidden in a menu.
               </Dialog.Description>
+              {nextStop ? (
+                <Dialog.Close asChild>
+                  <Link
+                    href={nextStop.href}
+                    prefetch
+                    data-site-atlas-next-stop={nextStop.id}
+                    className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-border/70 bg-background/65 px-3 py-2 text-left transition-[background-color,border-color] hover:border-foreground/20 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                    <span className="min-w-0 truncate text-xs">
+                      <span className="font-mono text-[8px] font-semibold uppercase tracking-[0.13em] text-muted-foreground">
+                        Suggested next
+                      </span>{' '}
+                      <span className="font-semibold text-foreground">{nextStop.label}</span>
+                    </span>
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                  </Link>
+                </Dialog.Close>
+              ) : null}
             </div>
             <Dialog.Close asChild>
               <button
@@ -245,7 +285,7 @@ export function SiteAtlas({
             className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-6"
             data-site-atlas-scroll
           >
-            <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
+            <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
               {siteNavigationGroups.map((group) => (
                 <section
                   key={group.id}
