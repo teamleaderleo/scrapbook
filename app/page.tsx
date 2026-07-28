@@ -4,6 +4,7 @@ import ViewportPageShell from '@/components/viewport-page-shell';
 import { getGitHubHomeData } from '@/lib/github-home';
 import { ArrowUpRight } from 'lucide-react';
 import type { Metadata } from 'next';
+import styles from './page.module.css';
 
 export const metadata: Metadata = {
   title: 'Leo · GitHub activity',
@@ -28,12 +29,8 @@ export default async function Page() {
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-30 dark:opacity-12"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(30,30,34,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(30,30,34,0.04) 1px, transparent 1px)',
-          backgroundSize: '28px 28px',
-        }}
+        className={`${styles.paperGrid} pointer-events-none absolute inset-0`}
+        data-home-paper-grid
       />
 
       <div className="relative mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-7xl flex-col justify-start px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
