@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useState } from 'react';
+import styles from './scrapbook-pet.module.css';
 
 const petMessages = [
   'Scraplet rustles happily.',
@@ -14,7 +15,10 @@ export function ScrapbookPet({ activity, updating }: { activity: number; updatin
   const reduceMotion = useReducedMotion();
   const [pets, setPets] = useState(0);
   const status = updating ? 'sniffing' : activity > 0 ? 'awake' : 'napping';
-  const message = pets === 0 ? 'Scraplet is keeping an eye on the activity feed.' : petMessages[(pets - 1) % petMessages.length];
+  const message =
+    pets === 0
+      ? 'Scraplet is keeping an eye on the activity feed.'
+      : petMessages[(pets - 1) % petMessages.length];
 
   return (
     <motion.button
@@ -25,7 +29,7 @@ export function ScrapbookPet({ activity, updating }: { activity: number; updatin
       title={`Pet Scraplet · ${status}`}
       whileTap={reduceMotion ? undefined : { scale: 0.96 }}
       onClick={() => setPets((count) => count + 1)}
-      className="group/pet relative grid min-h-[3.35rem] w-full grid-cols-[2.65rem_minmax(0,1fr)] items-center gap-1 overflow-hidden rounded-xl border border-border/65 bg-background/45 px-1.5 py-1 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] transition-[background-color,border-color,box-shadow] duration-150 hover:border-border hover:bg-background/70 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_5px_14px_rgba(35,31,26,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_6px_16px_rgba(0,0,0,0.24)]"
+      className={`${styles.pet} group/pet relative grid min-h-[3.35rem] w-full grid-cols-[2.65rem_minmax(0,1fr)] items-center gap-1 overflow-hidden rounded-xl border border-border/65 px-1.5 py-1 text-left transition-[background-color,border-color,box-shadow] duration-150 hover:border-border hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_5px_14px_rgba(35,31,26,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_6px_16px_rgba(0,0,0,0.24)]`}
     >
       <motion.span
         key={pets}
@@ -36,10 +40,13 @@ export function ScrapbookPet({ activity, updating }: { activity: number; updatin
             : { y: [0, -4, 0], rotate: [0, -2, 2, 0] }
         }
         transition={{ duration: 0.38, ease: [0.2, 0.75, 0.2, 1] }}
-        className="relative block h-9 w-11"
+        className={`${styles.figure} relative block h-9 w-11`}
         aria-hidden="true"
       >
-        <svg viewBox="0 0 72 48" className="h-full w-full overflow-visible">
+        <svg
+          viewBox="0 0 72 48"
+          className={`${styles.art} h-full w-full overflow-visible`}
+        >
           <motion.path
             d="M23 28 5 20l12 15 10-1Z"
             className="fill-[#b7adbf] stroke-[#4d4852] dark:fill-[#696270] dark:stroke-[#ded8e3]"
