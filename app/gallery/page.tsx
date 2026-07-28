@@ -115,7 +115,11 @@ export default function GalleryPage() {
             <div className="material-paper relative min-w-0 overflow-hidden rounded-xl border p-4">
               <span className="material-tape-strip" data-side="top" aria-hidden="true" />
               <div className="flex items-start gap-3">
-                <PaperCritter kind="dinosaur" label="Scraplet curating the gallery" />
+                <PaperCritter
+                  kind="dinosaur"
+                  className="h-14 w-20"
+                  label="Scraplet curating the gallery"
+                />
                 <div className="min-w-0">
                   <p className="font-semibold">Scraplet&apos;s curator note</p>
                   <p className="mt-1 text-sm leading-relaxed opacity-70">
@@ -164,12 +168,14 @@ export default function GalleryPage() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-3">
-                      <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-black/10 bg-white/25">
-                        <PaperCritter kind={critter} label={`${visit.name} paper visitor`} />
+                      <span className="flex h-36 w-full shrink-0 items-center justify-center rounded-xl border border-black/10 bg-white/25">
+                        <PaperCritter
+                          kind={critter}
+                          className="h-28 w-40 max-w-[80%]"
+                          label={`${visit.name} paper visitor`}
+                        />
                       </span>
-                      <span className="truncate font-mono text-[9px] font-semibold uppercase tracking-[0.16em] opacity-60">
-                        {visit.mark}
-                      </span>
+                      <span className="sr-only">{visit.mark}</span>
                     </div>
                     <time
                       dateTime={arrivedAt(visit)}
@@ -179,7 +185,10 @@ export default function GalleryPage() {
                     </time>
                   </div>
 
-                  <h3 className="mt-5 text-lg font-semibold">{visit.name}</h3>
+                  <p className="mt-2 truncate font-mono text-[9px] font-semibold uppercase tracking-[0.16em] opacity-60">
+                    {visit.mark}
+                  </p>
+                  <h3 className="mt-3 text-lg font-semibold">{visit.name}</h3>
                   <p className="mt-2 text-sm leading-relaxed opacity-70">{displayNote}</p>
 
                   {visit.repository ? (
@@ -189,7 +198,7 @@ export default function GalleryPage() {
                   ) : null}
 
                   <div className="mt-4 flex items-center gap-2 border-t border-dashed border-black/10 pt-3">
-                    <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-black/10 bg-white/25">
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-black/10 bg-white/25">
                       <AgentIdentitySigil
                         scope={visit.repository ?? 'teamleaderleo/scrapbook'}
                         designation={visit.name}
