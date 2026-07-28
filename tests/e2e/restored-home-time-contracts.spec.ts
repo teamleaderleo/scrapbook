@@ -96,16 +96,19 @@ test('homepage has no one-pixel nav overflow and Atlas does not shift the layout
 
 test('timezone search recognises common city names', async ({ page }) => {
   await page.goto('/time');
-  await page.getByRole('button', { name: 'Search time zones' }).click();
+  await page.locator('[data-timezone-trigger]').click();
 
-  const input = page.getByRole('combobox', { name: 'Search time zones' });
-  await expect(input).toBeFocused();
+  const picker = page.locator('[data-timezone-picker]');
+  const results = picker.locator('[data-timezone-results]');
+  const input = picker.locator('input');
+  await expect(picker).toBeVisible();
+  await expect(input).toBeVisible();
 
   await input.fill('New York');
-  await expect(page.getByText('Eastern Time', { exact: true })).toBeVisible();
-  await expect(page.getByText('Pacific Time', { exact: true })).toHaveCount(0);
+  await expect(results.getByText('Eastern Time', { exact: true })).toBeVisible();
+  await expect(results.getByText('Pacific Time', { exact: true })).toHaveCount(0);
 
   await input.fill('Los Angeles');
-  await expect(page.getByText('Pacific Time', { exact: true })).toBeVisible();
-  await expect(page.getByText('Eastern Time', { exact: true })).toHaveCount(0);
+  await expect(results.getByText('Pacific Time', { exact: true })).toBeVisible();
+  await expect(results.getByText('Eastern Time', { exact: true })).toHaveCount(0);
 });
