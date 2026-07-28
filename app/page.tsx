@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Leo · GitHub activity',
-  description: 'Recent public GitHub activity from teamleaderleo.',
+  description: 'Recent GitHub profile contributions from teamleaderleo.',
   alternates: { canonical: '/' },
 };
 
@@ -17,9 +17,8 @@ const repositoryNoteOverrides: Record<string, string> = {
 
 export default async function Page() {
   const activity = await getGitHubHomeData();
-  const unit = activity.source === 'public-events' ? 'public actions' : 'contributions';
-  const days = activity.days.slice(-28);
-  const yearTotal = activity.periodLabel === 'this year' ? activity.total : null;
+  const days = activity.days.slice(-35);
+  const yearTotal = activity.periodLabel === 'last year' ? activity.total : null;
 
   return (
     <ViewportPageShell
@@ -44,7 +43,7 @@ export default async function Page() {
               weekTotal: activity.weekTotal,
               yearTotal,
               days,
-              unit,
+              unit: 'contributions',
               generatedAt: activity.generatedAt,
             }}
           />
