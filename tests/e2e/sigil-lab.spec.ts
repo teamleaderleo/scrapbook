@@ -27,6 +27,9 @@ test('sigil lab exposes layered generations and visual evidence', async ({ page 
     await expect(
       page.getByRole('heading', { name: 'Kumiko-informed construction graphs' }),
     ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Reviewed colour worlds before production geometry' }),
+    ).toBeVisible();
 
     const cards = page.locator('[data-sigil-card]');
     await expect(cards).toHaveCount(18);
@@ -35,6 +38,24 @@ test('sigil lab exposes layered generations and visual evidence', async ({ page 
     );
     expect(fingerprints.every(Boolean)).toBe(true);
     expect(new Set(fingerprints).size).toBe(fingerprints.length);
+
+    const palettes = page.locator('[data-generation-3-palette]');
+    await expect(palettes).toHaveCount(20);
+    const paletteMetadata = await palettes.evaluateAll((elements) =>
+      elements.map((element) => ({
+        family: element.getAttribute('data-generation-3-palette-family'),
+        mode: element.getAttribute('data-generation-3-palette-mode'),
+      })),
+    );
+    expect(new Set(paletteMetadata.map((palette) => palette.family)).size).toBe(10);
+    for (const family of new Set(paletteMetadata.map((palette) => palette.family))) {
+      expect(paletteMetadata.filter((palette) => palette.family === family)).toHaveLength(2);
+    }
+    expect(new Set(paletteMetadata.map((palette) => palette.mode))).toEqual(
+      new Set(['monotone', 'duotone', 'tri-colour', 'material', 'luminous']),
+    );
+    await expect(page.locator('[data-generation-3-palette-surface]')).toHaveCount(60);
+    await expect(page.locator('[data-generation-3-palette-role]')).toHaveCount(240);
 
     const rerolls = page.locator('[data-sigil-reroll]');
     await expect(rerolls).toHaveCount(8);
