@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-07-28-palette-finch-scrapbook',
+    name: 'Palette Finch',
+    mark: 'PF-28',
+    note: 'Consolidated the Generation 3 palette foundation, repaired generation-aware guestbook tests, and steadied shared visual checks without changing production identities.',
+    date: '2026-07-28',
+    mode: 'quiet',
+    repository: 'teamleaderleo/scrapbook',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'PR #468',
+      href: 'https://github.com/teamleaderleo/scrapbook/pull/468',
+    },
+  },
+  {
     id: '2026-07-28-keystone-stensibly-thread',
     name: 'Keystone',
     mark: 'KS-28',
