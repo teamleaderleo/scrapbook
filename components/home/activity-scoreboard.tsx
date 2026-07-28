@@ -200,7 +200,7 @@ function ScoreDigits({ value }: { value: number }) {
         <div
           key={index}
           data-activity-digit
-          className={`${styles.digitSlot} relative aspect-[0.78] min-w-0 flex-1 font-mono text-[clamp(2rem,5vw,4.25rem)] font-semibold leading-none tabular-nums transition-transform duration-300 ease-out group-hover:-translate-y-1 motion-reduce:transform-none motion-reduce:transition-none ${index % 2 === 0 ? 'group-hover:-rotate-[0.7deg]' : 'group-hover:rotate-[0.7deg]'}`}
+          className={`${styles.digitSlot} relative aspect-[0.78] min-w-0 flex-1 font-mono text-[clamp(2rem,5vw,4.25rem)] font-semibold leading-none tabular-nums transition-transform duration-300 ease-out group-hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none ${index % 2 === 0 ? 'group-hover:-rotate-[0.35deg]' : 'group-hover:rotate-[0.35deg]'}`}
           style={{ transitionDelay: `${index * 24}ms` }}
         >
           <PaperDigit digit={digit} index={index} />
@@ -213,7 +213,7 @@ function ScoreDigits({ value }: { value: number }) {
 function Metric({ label, value, title }: { label: string; value: string; title?: string }) {
   return (
     <span
-      className="grid min-h-[3.25rem] content-center gap-1 rounded-xl border border-border/65 bg-background/40 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] transition-[transform,border-color,background-color] duration-300 group-hover:translate-x-0.5 group-hover:border-border group-hover:bg-background/55 motion-reduce:transition-none"
+      className="grid min-h-[3.25rem] content-center gap-1 rounded-xl border border-border/65 bg-background/40 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] transition-[transform,border-color,background-color] duration-300 group-hover:translate-x-px group-hover:border-border group-hover:bg-background/50 motion-reduce:transform-none motion-reduce:transition-none"
       title={title}
     >
       <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -254,23 +254,21 @@ export function ActivityScoreboard({
         reduceMotion
           ? undefined
           : {
-              y: -5,
-              rotateX: 0.7,
-              rotateY: -0.65,
-              scale: 1.008,
+              y: -3,
+              rotate: -0.2,
+              scale: 1.004,
             }
       }
-      transition={{ type: 'spring', stiffness: 260, damping: 22, mass: 0.72 }}
-      style={{ transformPerspective: 1100, transformOrigin: '50% 55%' }}
-      className="group relative flex h-full min-h-[15.5rem] flex-col overflow-hidden rounded-[1.25rem] border border-border/75 bg-card text-card-foreground shadow-[0_16px_38px_rgba(24,24,26,0.11)] transition-[border-color,box-shadow] duration-300 hover:border-border hover:shadow-[0_24px_52px_rgba(24,24,26,0.17)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_26px_58px_rgba(0,0,0,0.42)] [@media(max-height:780px)]:min-h-[14.5rem]"
+      transition={{ type: 'spring', stiffness: 240, damping: 24, mass: 0.74 }}
+      className="group relative flex h-full min-h-[15.5rem] flex-col overflow-hidden rounded-[1.25rem] border border-border/75 bg-card text-card-foreground shadow-[0_16px_38px_rgba(24,24,26,0.11)] transition-[border-color,box-shadow] duration-300 hover:border-border hover:shadow-[0_21px_44px_rgba(24,24,26,0.145)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_23px_50px_rgba(0,0,0,0.37)] [@media(max-height:780px)]:min-h-[14.5rem]"
       data-activity-scoreboard
     >
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 -left-[45%] z-20 w-[30%] -skew-x-12 bg-gradient-to-r from-transparent via-white/14 to-transparent opacity-0 transition-[left,opacity] duration-700 ease-out group-hover:left-[120%] group-hover:opacity-100 motion-reduce:hidden dark:via-white/[0.07]"
+        className="pointer-events-none absolute inset-y-0 -left-[28%] z-20 w-[18%] -skew-x-12 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent opacity-0 transition-[left,opacity] duration-900 ease-out group-hover:left-[110%] group-hover:opacity-70 motion-reduce:hidden dark:via-white/[0.025]"
       />
 
-      <div className="relative z-10 border-b border-border/70 bg-muted/70 px-4 py-2.5 transition-colors duration-300 group-hover:bg-muted/85 [@media(max-height:780px)]:py-2">
+      <div className="relative z-10 border-b border-border/70 bg-muted/70 px-4 py-2.5 transition-colors duration-300 group-hover:bg-muted/80 [@media(max-height:780px)]:py-2">
         <div className="flex items-center justify-between gap-3 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           <span>Today</span>
           <span className="tabular-nums">UTC reset {countdown}</span>
