@@ -6,6 +6,7 @@ The homepage reads GitHub's public profile contribution calendar through `getGit
 
 - The scorecard and graph use only the public profile contribution calendar. Public events are not used as a fallback because event counts do not follow GitHub's contribution rules and can disagree with the profile.
 - Daily cells come directly from GitHub's contribution calendar markup.
+- The homepage displays the most recent 28 contribution days in GitHub's week-column, weekday-row calendar format, preserving partial weeks at both edges.
 - `Today` and `7D` are calculated from those daily profile counts in UTC, matching GitHub's contribution-date convention.
 - `1Y` uses the rolling-year total reported by the GitHub profile calendar. It is not a calendar-year-to-date sum.
 - The homepage and polling route both use the same stale-while-error coordinator, so a failed server render cannot replace a previously successful snapshot with zeroes.
