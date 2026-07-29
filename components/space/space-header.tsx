@@ -40,7 +40,7 @@ export function SpaceHeader({
     ? `/space${tagsParam ? `?tags=${tagsParam}` : ''}`
     : `/space/review${tagsParam ? `?tags=${tagsParam}` : ''}`;
 
-  const defaultCenterContent = (
+  const defaultReviewControl = (
     <Link
       href={toggleHref}
       prefetch
@@ -48,7 +48,7 @@ export function SpaceHeader({
       aria-label={isReviewLike ? 'Back to list' : 'Open review'}
     >
       {isReviewLike ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
-      <span className="hidden sm:inline">{isReviewLike ? 'Clippings' : 'Review drawer'}</span>
+      <span className="hidden sm:inline">{isReviewLike ? 'Clippings' : 'Review'}</span>
       <SpaceLinkHint />
     </Link>
   );
@@ -66,34 +66,33 @@ export function SpaceHeader({
         <PanelLeft className="h-4 w-4" />
       </Button>
 
-      <SiteAtlas variant="icon" className="rounded-lg" />
+      {centerContent ?? defaultReviewControl}
+
+      {onEditorToggle ? (
+        <button
+          onClick={onEditorToggle}
+          className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+            isEditorOpen
+              ? 'border-border bg-muted text-foreground'
+              : 'border-transparent text-muted-foreground hover:border-border/60 hover:bg-muted/65 hover:text-foreground'
+          }`}
+          title={`Toggle editor (${isMac ? '⌘' : 'Ctrl'} + I)`}
+          aria-label="Toggle editor"
+          aria-pressed={isEditorOpen}
+          type="button"
+        >
+          <Code className="h-4 w-4" />
+          <span className="hidden sm:inline">Editor</span>
+        </button>
+      ) : null}
 
       <p className="min-w-0 flex-1 truncate px-1 font-mono text-[9px] font-semibold uppercase tracking-[0.13em] text-muted-foreground sm:text-[10px]">
         {leftContent}
       </p>
 
       <div className="flex shrink-0 items-center gap-1">
-        {centerContent ?? defaultCenterContent}
-
-        {onEditorToggle ? (
-          <button
-            onClick={onEditorToggle}
-            className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-              isEditorOpen
-                ? 'border-border bg-muted text-foreground'
-                : 'border-transparent text-muted-foreground hover:border-border/60 hover:bg-muted/65 hover:text-foreground'
-            }`}
-            title={`Toggle editor (${isMac ? '⌘' : 'Ctrl'} + I)`}
-            aria-label="Toggle editor"
-            aria-pressed={isEditorOpen}
-            type="button"
-          >
-            <Code className="h-4 w-4" />
-            <span className="hidden sm:inline">Editor</span>
-          </button>
-        ) : null}
-
         {rightContent}
+        <SiteAtlas variant="icon" className="rounded-lg" />
       </div>
     </header>
   );

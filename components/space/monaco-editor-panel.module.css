@@ -1,0 +1,27 @@
+.panel {
+  position: fixed;
+  inset: 3.5rem 0.5rem 0.5rem;
+  height: auto;
+}
+
+@media (min-width: 768px) {
+  .panel {
+    left: var(--editor-left);
+    right: 0.75rem;
+    top: 4rem;
+    bottom: 0.75rem;
+    width: auto;
+    height: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .panel {
+    left: var(--editor-left);
+    right: auto;
+    top: 6rem;
+    bottom: auto;
+    width: var(--editor-width);
+    height: var(--editor-height);
+  }
+}

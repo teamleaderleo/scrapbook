@@ -4,16 +4,13 @@ import { DiscordIcon } from '@/components/icons/discord-icon';
 import { GitHubIcon } from '@/components/icons/github-icon';
 import { RedditIcon } from '@/components/icons/reddit-icon';
 import {
-  getActiveNavigationItem,
   isNavigationItemActive,
   siteNavigationGroups,
-  siteNavigationItems,
   type SiteNavigationItem,
 } from '@/lib/site-navigation';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
   Activity,
-  ArrowRight,
   Brain,
   Clock3,
   Compass,
@@ -23,9 +20,9 @@ import {
   Images,
   Moon,
   Newspaper,
-  NotebookText,
   Palette,
   Shapes,
+  Snowflake,
   Sparkles,
   Sun,
   Twitter,
@@ -39,24 +36,6 @@ import { toast } from 'sonner';
 const triggerBase =
   'inline-flex h-11 min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-full border border-border/70 bg-card px-3 text-xs font-semibold text-foreground shadow-[0_3px_10px_rgba(20,20,24,0.08)] transition-[background-color,box-shadow] hover:bg-muted hover:shadow-[0_6px_14px_rgba(20,20,24,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none dark:shadow-[0_4px_12px_rgba(0,0,0,0.28)]';
 
-const nextStopByItemId: Record<string, string> = {
-  home: 'space',
-  space: 'journal',
-  journal: 'gallery',
-  gallery: 'atelier',
-  blog: 'journal',
-  atelier: 'activity-lab',
-  time: 'space',
-  proxy: 'home',
-  'activity-lab': 'sigil-lab',
-  'sigil-lab': 'gallery',
-};
-
-function recommendedNextStop(activeItem?: SiteNavigationItem) {
-  const nextId = activeItem ? nextStopByItemId[activeItem.id] : 'home';
-  return siteNavigationItems.find((item) => item.id === nextId && !item.external);
-}
-
 function ItemIcon({ id }: { id: string }) {
   const className = 'h-4 w-4';
   switch (id) {
@@ -64,8 +43,6 @@ function ItemIcon({ id }: { id: string }) {
       return <Home className={className} aria-hidden="true" />;
     case 'space':
       return <Brain className={className} aria-hidden="true" />;
-    case 'journal':
-      return <NotebookText className={className} aria-hidden="true" />;
     case 'gallery':
       return <Images className={className} aria-hidden="true" />;
     case 'blog':
@@ -76,6 +53,8 @@ function ItemIcon({ id }: { id: string }) {
       return <Clock3 className={className} aria-hidden="true" />;
     case 'proxy':
       return <Activity className={className} aria-hidden="true" />;
+    case 'snow-globe':
+      return <Snowflake className={className} aria-hidden="true" />;
     case 'activity-lab':
       return <FlaskConical className={className} aria-hidden="true" />;
     case 'sigil-lab':
@@ -93,15 +72,7 @@ function ItemIcon({ id }: { id: string }) {
   }
 }
 
-function AtlasLink({
-  item,
-  index,
-  pathname,
-}: {
-  item: SiteNavigationItem;
-  index: number;
-  pathname: string;
-}) {
+function AtlasLink({ item, pathname }: { item: SiteNavigationItem; pathname: string }) {
   const active = isNavigationItemActive(pathname, item);
   const link = (
     <Link
@@ -112,38 +83,27 @@ function AtlasLink({
       aria-current={active ? 'page' : undefined}
       data-site-atlas-link={item.id}
       data-active={active ? 'true' : undefined}
-      className={`group relative flex min-h-[82px] min-w-0 items-start gap-2.5 overflow-hidden rounded-[1rem] border p-2.5 text-left transition-[background-color,border-color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none sm:min-h-[92px] sm:gap-3 sm:p-3 ${
+      className={`group flex min-h-12 min-w-0 items-center gap-3 rounded-xl border px-3 py-2 text-left transition-[background-color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
         active
-          ? 'border-foreground/30 bg-foreground/[0.075] shadow-[inset_3px_0_0_currentColor]'
+          ? 'border-foreground/30 bg-foreground/[0.075]'
           : 'border-border/70 bg-background/55 hover:border-foreground/25 hover:bg-muted/70'
       }`}
     >
-      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-card text-foreground shadow-sm sm:h-9 sm:w-9">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-card text-foreground">
         <ItemIcon id={item.id} />
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex min-w-0 items-center gap-2">
-          <span className="truncate text-sm font-semibold text-foreground">{item.label}</span>
-          {item.badge ? (
-            <span className="shrink-0 rounded-full border border-border/70 px-1.5 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              {item.badge}
-            </span>
-          ) : null}
-          {item.external ? (
-            <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-          ) : null}
-        </span>
-        <span className="mt-1 block text-xs leading-snug text-muted-foreground sm:leading-relaxed">
-          {item.description}
-        </span>
-        {item.external ? <span className="sr-only"> Opens in a new tab.</span> : null}
+      <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
+        {item.label}
       </span>
-      <span
-        className="absolute right-2 top-2 font-mono text-[8px] tabular-nums text-muted-foreground/45"
-        aria-hidden="true"
-      >
-        {String(index + 1).padStart(2, '0')}
-      </span>
+      {item.badge ? (
+        <span className="shrink-0 rounded-full border border-border/70 px-1.5 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+          {item.badge}
+        </span>
+      ) : null}
+      {item.external ? (
+        <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+      ) : null}
+      {item.external ? <span className="sr-only"> Opens in a new tab.</span> : null}
     </Link>
   );
 
@@ -160,16 +120,13 @@ function AppearanceAction() {
         setTheme(isDark ? 'light' : 'dark');
       }}
       data-site-atlas-appearance
-      className="flex min-h-[44px] min-w-[44px] w-full items-center gap-3 rounded-xl border border-border/70 bg-background/55 px-3 py-2 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="flex min-h-12 w-full items-center gap-3 rounded-xl border border-border/70 bg-background/55 px-3 py-2 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-card">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-card">
         <Sun className="h-4 w-4 dark:hidden" aria-hidden="true" />
         <Moon className="hidden h-4 w-4 dark:block" aria-hidden="true" />
       </span>
-      <span className="min-w-0">
-        <span className="block text-sm font-semibold">Appearance</span>
-        <span className="block text-xs text-muted-foreground">Switch light and dark mode</span>
-      </span>
+      <span className="truncate text-sm font-semibold">Appearance</span>
     </button>
   );
 }
@@ -189,15 +146,12 @@ function DiscordAction() {
       type="button"
       onClick={() => void copyDiscord()}
       data-site-atlas-discord
-      className="flex min-h-[44px] min-w-[44px] w-full items-center gap-3 rounded-xl border border-border/70 bg-background/55 px-3 py-2 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="flex min-h-12 w-full items-center gap-3 rounded-xl border border-border/70 bg-background/55 px-3 py-2 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-card">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-card">
         <DiscordIcon className="h-4 w-4" aria-hidden="true" />
       </span>
-      <span className="min-w-0">
-        <span className="block text-sm font-semibold">Discord</span>
-        <span className="block text-xs text-muted-foreground">Copy the username teamleaderleo</span>
-      </span>
+      <span className="truncate text-sm font-semibold">Discord</span>
     </button>
   );
 }
@@ -210,8 +164,6 @@ export function SiteAtlas({
   className?: string;
 }) {
   const pathname = usePathname() || '/';
-  const activeItem = getActiveNavigationItem(pathname);
-  const nextStop = recommendedNextStop(activeItem);
 
   return (
     <Dialog.Root>
@@ -234,41 +186,14 @@ export function SiteAtlas({
           data-site-atlas-overlay
         />
         <Dialog.Content
-          className="fixed inset-0 z-[80] flex min-w-0 flex-col overflow-hidden bg-background text-foreground shadow-2xl outline-none data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 motion-reduce:animate-none sm:inset-4 sm:mx-auto sm:max-w-5xl sm:rounded-[1.5rem] sm:border sm:border-border/70"
+          className="fixed inset-0 z-[80] flex min-w-0 flex-col overflow-hidden bg-background text-foreground shadow-2xl outline-none data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 motion-reduce:animate-none sm:inset-4 sm:mx-auto sm:max-w-4xl sm:rounded-[1.5rem] sm:border sm:border-border/70"
           data-site-atlas
         >
-          <header className="flex shrink-0 items-start gap-3 border-b border-border/70 bg-card/90 px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] sm:gap-4 sm:px-6 sm:pt-4">
-            <div className="min-w-0 flex-1">
-              <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Current place · {activeItem?.label ?? 'Unmapped route'}
-              </p>
-              <Dialog.Title className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
-                Site Atlas
-              </Dialog.Title>
-              <Dialog.Description className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                Navigate the main places, focused tools, inspectable experiments, and external
-                connections without guessing what is hidden in a menu.
-              </Dialog.Description>
-              {nextStop ? (
-                <Dialog.Close asChild>
-                  <Link
-                    href={nextStop.href}
-                    prefetch
-                    data-site-atlas-next-stop={nextStop.id}
-                    className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-border/70 bg-background/65 px-3 py-2 text-left transition-[background-color,border-color] hover:border-foreground/20 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <Sparkles className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-                    <span className="min-w-0 truncate text-xs">
-                      <span className="font-mono text-[8px] font-semibold uppercase tracking-[0.13em] text-muted-foreground">
-                        Suggested next
-                      </span>{' '}
-                      <span className="font-semibold text-foreground">{nextStop.label}</span>
-                    </span>
-                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-                  </Link>
-                </Dialog.Close>
-              ) : null}
-            </div>
+          <header className="flex shrink-0 items-center gap-3 border-b border-border/70 bg-card/90 px-4 py-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:py-4">
+            <Dialog.Title className="min-w-0 flex-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+              Site Atlas
+            </Dialog.Title>
+            <Dialog.Description className="sr-only">Site navigation</Dialog.Description>
             <Dialog.Close asChild>
               <button
                 type="button"
@@ -285,40 +210,26 @@ export function SiteAtlas({
             className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-6"
             data-site-atlas-scroll
           >
-            <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
+            <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
               {siteNavigationGroups.map((group) => (
-                <section
-                  key={group.id}
-                  aria-labelledby={`site-atlas-${group.id}`}
-                  className="min-w-0"
-                >
-                  <div className="mb-2 flex items-end justify-between gap-3">
-                    <div className="min-w-0">
-                      <h2
-                        id={`site-atlas-${group.id}`}
-                        className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground"
-                      >
-                        {group.label}
-                      </h2>
-                      <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                        {group.description}
-                      </p>
-                    </div>
-                    <span className="shrink-0 font-mono text-[9px] tabular-nums text-muted-foreground/55">
-                      {group.items.length}
-                    </span>
-                  </div>
+                <section key={group.id} aria-labelledby={`site-atlas-${group.id}`} className="min-w-0">
+                  <h2
+                    id={`site-atlas-${group.id}`}
+                    className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
+                  >
+                    {group.label}
+                  </h2>
                   <div className="grid gap-2 sm:grid-cols-2">
-                    {group.items.map((item, index) => (
-                      <AtlasLink key={item.id} item={item} index={index} pathname={pathname} />
+                    {group.items.map((item) => (
+                      <AtlasLink key={item.id} item={item} pathname={pathname} />
                     ))}
+                    {group.id === 'connections' ? (
+                      <>
+                        <DiscordAction />
+                        <AppearanceAction />
+                      </>
+                    ) : null}
                   </div>
-                  {group.id === 'connections' ? (
-                    <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                      <DiscordAction />
-                      <AppearanceAction />
-                    </div>
-                  ) : null}
                 </section>
               ))}
             </div>

@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useTheme } from 'next-themes';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useItems } from '@/app/lib/contexts/item-context';
+import styles from './monaco-editor-panel.module.css';
 
 export function MonacoEditorPanel() {
   const { editorOpen, setEditorOpen } = useItems();
@@ -153,17 +154,20 @@ export function MonacoEditorPanel() {
 
   return (
     <div
-      className="fixed top-24 z-50 overflow-hidden rounded-lg border border-border shadow-2xl transition-[left,width] duration-200 ease-linear"
-      style={{
-        left: `calc(${sidebarWidth} + 1rem)`,
-        width: 'calc((100vw - var(--sidebar-width) - 2rem) / 2 - 0.375rem)',
-        height: `${editorHeight}px`,
-      }}
+      className={`${styles.panel} z-50 overflow-hidden rounded-lg border border-border bg-background shadow-2xl transition-[left,width] duration-200 ease-linear`}
+      style={
+        {
+          '--editor-left': `calc(${sidebarWidth} + 1rem)`,
+          '--editor-width': `calc((100vw - ${sidebarWidth} - 2rem) / 2 - 0.375rem)`,
+          '--editor-height': `${editorHeight}px`,
+        } as CSSProperties
+      }
+      data-space-editor-panel
     >
       {isInitializing ? (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#f4f1ea] px-6 text-center dark:bg-[#202126]">
           <p className="animate-pulse text-sm text-[#383a42] dark:text-[#cad3f5]">
-            Opening a clean workbench…
+            Opening editor…
           </p>
         </div>
       ) : null}
