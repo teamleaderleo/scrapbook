@@ -4,10 +4,10 @@ const publicDestinations = [
   ['home', '/'],
   ['space', '/space'],
   ['blog', '/blog'],
-  ['journal', '/journal'],
   ['gallery', '/gallery'],
   ['time', '/time'],
   ['atelier', '/atelier'],
+  ['snow-globe', '/snow-globe'],
 ] as const;
 
 async function expectNoHorizontalOverflow(page: import('@playwright/test').Page) {
@@ -20,9 +20,9 @@ async function expectNoHorizontalOverflow(page: import('@playwright/test').Page)
   expect(metrics.bodyWidth).toBeLessThanOrEqual(metrics.viewport + 1);
 }
 
-test('site atlas exposes public places, tools, experiments, and connections', async ({ page }, testInfo) => {
+test('site atlas exposes visible places, tools, experiments, and connections', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/journal');
+  await page.goto('/');
   await page.locator('[data-site-atlas-trigger]').click();
 
   const atlas = page.locator('[data-site-atlas]');
@@ -35,6 +35,7 @@ test('site atlas exposes public places, tools, experiments, and connections', as
   for (const [id, href] of publicDestinations) {
     await expect(atlas.locator(`[data-site-atlas-link="${id}"]`)).toHaveAttribute('href', href);
   }
+  await expect(atlas.locator('[data-site-atlas-link="journal"]')).toHaveCount(0);
 
   for (const id of ['proxy', 'activity-lab', 'sigil-lab']) {
     await expect(atlas.locator(`[data-site-atlas-link="${id}"]`)).toBeVisible();
@@ -52,12 +53,12 @@ test('site atlas exposes public places, tools, experiments, and connections', as
   });
 });
 
-test('nested routes identify their current place in both navigation layers', async ({ page }) => {
+test('nested routes mark their active destination without a duplicate current-place label', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/blog/about');
 
   await expect(page.locator('[data-site-primary-link="blog"]')).toHaveAttribute('aria-current', 'page');
-  await expect(page.locator('[data-site-current-place]')).toContainText('The Bot Desk');
+  await expect(page.locator('[data-site-current-place]')).toHaveCount(0);
 
   await page.locator('[data-site-atlas-trigger]').click();
   const blog = page.locator('[data-site-atlas-link="blog"]');
@@ -66,7 +67,7 @@ test('nested routes identify their current place in both navigation layers', asy
 });
 
 test('Escape closes the atlas and restores focus to its trigger', async ({ page }) => {
-  await page.goto('/journal');
+  await page.goto('/');
   const trigger = page.locator('[data-site-atlas-trigger]');
   await trigger.focus();
   await trigger.click();
@@ -83,7 +84,7 @@ for (const viewport of [
 ]) {
   test(`mobile ${viewport.name} atlas keeps touch targets and natural overflow`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
-    await page.goto('/journal');
+    await page.goto('/');
     await expectNoHorizontalOverflow(page);
 
     await page.locator('[data-site-atlas-trigger]').click();

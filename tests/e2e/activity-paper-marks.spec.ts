@@ -31,7 +31,7 @@ for (const theme of ['light', 'dark'] as const) {
     const mark = marks.nth(8);
     const resting = await mark.evaluate((element) => {
       const rect = element.getBoundingClientRect();
-      return { y: rect.y, width: rect.width, height: rect.height };
+      return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
     });
     expect(resting.width).toBeGreaterThan(20);
     expect(resting.height).toBeGreaterThan(20);
@@ -46,9 +46,14 @@ for (const theme of ['light', 'dark'] as const) {
 
     await mark.hover();
     await expect(mark).toHaveAttribute('aria-pressed', 'false');
-    const lift = await mark.evaluate((element, restingY) => restingY - element.getBoundingClientRect().y, resting.y);
-    expect(lift).toBeGreaterThan(0.25);
-    expect(lift).toBeLessThan(2);
+    const hovered = await mark.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+    });
+    expect(Math.abs(hovered.x - resting.x)).toBeLessThan(0.75);
+    expect(Math.abs(hovered.y - resting.y)).toBeLessThan(0.75);
+    expect(Math.abs(hovered.width - resting.width)).toBeLessThan(0.75);
+    expect(Math.abs(hovered.height - resting.height)).toBeLessThan(0.75);
 
     const directory = path.join(
       'test-results',

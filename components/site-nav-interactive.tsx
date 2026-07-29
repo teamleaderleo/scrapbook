@@ -38,7 +38,7 @@ function TimeLink({ active }: { active: boolean }) {
           : 'border-border/70 bg-card text-foreground'
       }`}
       title="Open time"
-      aria-label={`Open time. Local time ${time}`}
+      aria-label={`Open the time converter. Local time ${time}`}
     >
       <Clock3 size={13} aria-hidden="true" />
       <span className="font-mono tabular-nums">{time}</span>
