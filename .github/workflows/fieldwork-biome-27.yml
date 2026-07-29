@@ -74,18 +74,45 @@ jobs:
           echo $? > fieldwork-results/post-fix-test.status
           set -e
 
-          rm -rf /tmp/biome-prettier-27
-          mkdir -p /tmp/biome-prettier-27
-          cp package.json /tmp/biome-prettier-27/package.json
-          for file in .prettierrc .prettierrc.json .prettierrc.js .prettierrc.mjs prettier.config.js prettier.config.mjs; do
-            if [ -f "$file" ]; then cp "$file" /tmp/biome-prettier-27/; fi
-          done
+          rm -rf .fieldwork-biome-migrate-27
+          mkdir -p .fieldwork-biome-migrate-27
+          cp prettier.config.js .fieldwork-biome-migrate-27/
+          cat > .fieldwork-biome-migrate-27/package.json <<'JSON'
+          { "private": true }
+          JSON
           set +e
-          (cd /tmp/biome-prettier-27 && pnpm dlx @biomejs/biome@2.5.6 migrate prettier --write) > fieldwork-results/migrate-prettier.txt 2>&1
+          (cd .fieldwork-biome-migrate-27 && pnpm dlx @biomejs/biome@2.5.6 init) > fieldwork-results/migrate-init.txt 2>&1
+          echo $? > fieldwork-results/migrate-init.status
+          (cd .fieldwork-biome-migrate-27 && pnpm dlx @biomejs/biome@2.5.6 migrate prettier --write) > fieldwork-results/migrate-prettier.txt 2>&1
           echo $? > fieldwork-results/migrate-prettier.status
           set -e
-          if [ -f /tmp/biome-prettier-27/biome.json ]; then cp /tmp/biome-prettier-27/biome.json fieldwork-results/migrated-biome.json; fi
-          if [ -f /tmp/biome-prettier-27/biome.jsonc ]; then cp /tmp/biome-prettier-27/biome.jsonc fieldwork-results/migrated-biome.jsonc; fi
+          if [ -f .fieldwork-biome-migrate-27/biome.json ]; then cp .fieldwork-biome-migrate-27/biome.json fieldwork-results/migrated-biome.json; fi
+          if [ -f .fieldwork-biome-migrate-27/biome.jsonc ]; then cp .fieldwork-biome-migrate-27/biome.jsonc fieldwork-results/migrated-biome.jsonc; fi
+          rm -rf .fieldwork-biome-migrate-27
+
+          rm -rf /tmp/biome-tailwind-27
+          mkdir -p /tmp/biome-tailwind-27
+          cp app/globals.css /tmp/biome-tailwind-27/globals.css
+          cp app/globals.css /tmp/biome-tailwind-27/globals.original.css
+          set +e
+          (cd /tmp/biome-tailwind-27 && pnpm dlx @biomejs/biome@2.5.6 format globals.css --write) > fieldwork-results/tailwind-default.txt 2>&1
+          echo $? > fieldwork-results/tailwind-default.status
+          set -e
+          cp /tmp/biome-tailwind-27/globals.original.css /tmp/biome-tailwind-27/globals.css
+          cat > /tmp/biome-tailwind-27/biome.json <<'JSON'
+          {
+            "css": {
+              "parser": {
+                "tailwindDirectives": true
+              }
+            }
+          }
+          JSON
+          set +e
+          (cd /tmp/biome-tailwind-27 && pnpm dlx @biomejs/biome@2.5.6 format globals.css --write) > fieldwork-results/tailwind-enabled.txt 2>&1
+          echo $? > fieldwork-results/tailwind-enabled.status
+          set -e
+          cp /tmp/biome-tailwind-27/globals.css fieldwork-results/tailwind-enabled.formatted.css
 
           rm -rf /tmp/biome-config-27
           mkdir -p /tmp/biome-config-27/packages/example
@@ -98,13 +125,17 @@ jobs:
           cat > /tmp/biome-config-27/packages/example/sample.js <<'JS'
           export const values = ["alpha", "beta", "gamma", "delta", "epsilon"];
           JS
-          (cd /tmp/biome-config-27 && pnpm dlx @biomejs/biome@2.5.6 format packages/example/sample.js) > fieldwork-results/config-root.out 2> fieldwork-results/config-root.err || true
-          (cd /tmp/biome-config-27/packages/example && pnpm dlx @biomejs/biome@2.5.6 format sample.js) > fieldwork-results/config-nested.out 2> fieldwork-results/config-nested.err || true
-          if cmp -s fieldwork-results/config-root.out fieldwork-results/config-nested.out; then
+          cp /tmp/biome-config-27/packages/example/sample.js /tmp/biome-config-27/sample.original.js
+          (cd /tmp/biome-config-27 && pnpm dlx @biomejs/biome@2.5.6 format packages/example/sample.js --write) > fieldwork-results/config-root.out 2> fieldwork-results/config-root.err || true
+          cp /tmp/biome-config-27/packages/example/sample.js fieldwork-results/config-root.formatted.js
+          cp /tmp/biome-config-27/sample.original.js /tmp/biome-config-27/packages/example/sample.js
+          (cd /tmp/biome-config-27/packages/example && pnpm dlx @biomejs/biome@2.5.6 format sample.js --write) > fieldwork-results/config-nested.out 2> fieldwork-results/config-nested.err || true
+          cp /tmp/biome-config-27/packages/example/sample.js fieldwork-results/config-nested.formatted.js
+          if cmp -s fieldwork-results/config-root.formatted.js fieldwork-results/config-nested.formatted.js; then
             echo consistent > fieldwork-results/config-discovery.txt
           else
             echo divergent > fieldwork-results/config-discovery.txt
-            diff -u fieldwork-results/config-root.out fieldwork-results/config-nested.out > fieldwork-results/config-discovery.diff || true
+            diff -u fieldwork-results/config-root.formatted.js fieldwork-results/config-nested.formatted.js > fieldwork-results/config-discovery.diff || true
           fi
 
           printf '\n=== summary ===\n'
@@ -116,10 +147,11 @@ jobs:
           printf 'safe-fix='; cat fieldwork-results/safe-fix.status
           printf 'post-fix-typecheck='; cat fieldwork-results/post-fix-typecheck.status
           printf 'post-fix-test='; cat fieldwork-results/post-fix-test.status
+          printf 'migrate-init='; cat fieldwork-results/migrate-init.status
           printf 'migrate-prettier='; cat fieldwork-results/migrate-prettier.status
+          printf 'tailwind-default='; cat fieldwork-results/tailwind-default.status
+          printf 'tailwind-enabled='; cat fieldwork-results/tailwind-enabled.status
           printf 'config-discovery='; cat fieldwork-results/config-discovery.txt
-          cat fieldwork-results/format-first.stat
-          cat fieldwork-results/safe-fix.stat
       - name: Upload trial evidence
         if: always()
         uses: actions/upload-artifact@v4
