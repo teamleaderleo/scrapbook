@@ -1,6 +1,7 @@
-"use client";
+'use client';
 
 import type { ProxyHealthPayload, ProxyHealthSample, StoredProxyHealth } from '@/app/lib/proxy-health-store';
+import { getUsageWeekWindow } from '@/lib/proxy-usage-window';
 import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 
@@ -41,7 +42,8 @@ type Activity = {
   week: number;
   day: number;
   lastDelta: number;
-  source: 'provider' | 'local';
+  weekLabel: '7 days' | 'Since reset';
+  weekDayCount: number;
 };
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -79,12 +81,12 @@ function formatRelativeTime(value: string | null | undefined) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
   const diffMs = Date.now() - date.getTime();
-  const absMs = Math.abs(diffMs);
+  const absolute = Math.abs(diffMs);
   const suffix = diffMs >= 0 ? 'ago' : 'from now';
-  if (absMs < 60 * 1000) return 'just now';
-  if (absMs < HOUR_MS) return `${Math.round(absMs / (60 * 1000))}m ${suffix}`;
-  if (absMs < DAY_MS) return `${Math.round(absMs / HOUR_MS)}h ${suffix}`;
-  return `${Math.round(absMs / DAY_MS)}d ${suffix}`;
+  if (absolute < 60_000) return 'just now';
+  if (absolute < HOUR_MS) return `${Math.round(absolute / 60_000)}m ${suffix}`;
+  if (absolute < DAY_MS) return `${Math.round(absolute / HOUR_MS)}h ${suffix}`;
+  return `${Math.round(absolute / DAY_MS)}d ${suffix}`;
 }
 
 function formatDate(value: string | null | undefined) {
@@ -123,7 +125,10 @@ function dayKey(date: Date) {
 }
 
 function dayLabel(date: Date, short = false) {
-  return date.toLocaleDateString('en-US', short ? { day: 'numeric', timeZone: 'UTC' } : { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  return date.toLocaleDateString(
+    'en-US',
+    short ? { day: 'numeric', timeZone: 'UTC' } : { month: 'short', day: 'numeric', timeZone: 'UTC' },
+  );
 }
 
 function hourLabel(date: Date) {
@@ -151,7 +156,7 @@ function providerRows(value: unknown): ProviderBucket[] {
       return { checkedAt: date.toISOString(), bytes: row.bytes };
     })
     .filter((item): item is ProviderBucket => item !== null)
-    .sort((a, b) => new Date(a.checkedAt).getTime() - new Date(b.checkedAt).getTime());
+    .sort((left, right) => Date.parse(left.checkedAt) - Date.parse(right.checkedAt));
 }
 
 function providerUsage(payload: ProxyHealthPayload | undefined): ProviderUsage | null {
@@ -185,7 +190,7 @@ function providerAttention(provider: ProviderUsage | null) {
 
 function dailyRoom(provider: ProviderUsage | null) {
   if (!provider || !isFiniteNumber(provider.usedBytes) || !isFiniteNumber(provider.limitBytes) || !provider.resetAt) return null;
-  const reset = new Date(provider.resetAt).getTime();
+  const reset = Date.parse(provider.resetAt);
   if (!Number.isFinite(reset)) return null;
   const daysLeft = Math.max(1, Math.ceil((reset - Date.now()) / DAY_MS));
   return Math.max(0, provider.limitBytes - provider.usedBytes) / daysLeft;
@@ -197,7 +202,9 @@ function sampleTotal(sample: ProxyHealthSample) {
 }
 
 function averageLatency(points: LatencyPoint[], latestDate: Date, windowMs: number) {
-  const values = points.filter((point) => point.date.getTime() >= latestDate.getTime() - windowMs).map((point) => point.value);
+  const values = points
+    .filter((point) => point.date.getTime() >= latestDate.getTime() - windowMs)
+    .map((point) => point.value);
   if (values.length === 0) return null;
   return values.reduce((total, value) => total + value, 0) / values.length;
 }
@@ -206,7 +213,7 @@ function buildLatencyPoints(samples: ProxyHealthSample[], getValue: (sample: Pro
   return samples
     .map((sample) => ({ date: new Date(sample.checkedAt), value: getValue(sample) }))
     .filter((point): point is LatencyPoint => isFiniteNumber(point.value) && !Number.isNaN(point.date.getTime()))
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+    .sort((left, right) => left.date.getTime() - right.date.getTime());
 }
 
 function latestDateFrom(...groups: LatencyPoint[][]) {
@@ -218,7 +225,7 @@ function buildLocalUsage(samples: ProxyHealthSample[]): LocalUsage {
   const counters = samples
     .map((sample) => ({ date: new Date(sample.checkedAt), total: sampleTotal(sample), mode: sample.mode }))
     .filter((point): point is { date: Date; total: number; mode: string | null } => isFiniteNumber(point.total) && !Number.isNaN(point.date.getTime()))
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+    .sort((left, right) => left.date.getTime() - right.date.getTime());
 
   const primaryPoints = buildLatencyPoints(samples, (sample) => sample.shanghaiBandwagonMs);
   const relayPoints = buildLatencyPoints(samples, (sample) => sample.wgLatencyMs);
@@ -230,8 +237,15 @@ function buildLocalUsage(samples: ProxyHealthSample[]): LocalUsage {
 
   const month = new Map<string, Bucket>();
   const week = new Map<string, Bucket>();
-  const dayBuckets = Array.from({ length: 24 }, (_, index) => ({ label: hourLabel(new Date(hourStart.getTime() + index * HOUR_MS)), bytes: 0 }));
-  const latencyRaw = Array.from({ length: 24 }, (_, index) => ({ label: hourLabel(new Date(hourStart.getTime() + index * HOUR_MS)), total: 0, count: 0 }));
+  const dayBuckets = Array.from({ length: 24 }, (_, index) => ({
+    label: hourLabel(new Date(hourStart.getTime() + index * HOUR_MS)),
+    bytes: 0,
+  }));
+  const latencyRaw = Array.from({ length: 24 }, (_, index) => ({
+    label: hourLabel(new Date(hourStart.getTime() + index * HOUR_MS)),
+    total: 0,
+    count: 0,
+  }));
 
   for (let index = 0; index < 30; index += 1) {
     const date = new Date(monthStart.getTime() + index * DAY_MS);
@@ -281,13 +295,24 @@ function buildLocalUsage(samples: ProxyHealthSample[]): LocalUsage {
     totalLatency: sumMs(primary, relay),
     primary24h: averageLatency(primaryPoints, latest, DAY_MS),
     totalLatency24h: averageLatency(totalPoints, latest, DAY_MS),
-    latencyBuckets: latencyRaw.map((bucket) => ({ label: bucket.label, value: bucket.count > 0 ? bucket.total / bucket.count : null })),
+    latencyBuckets: latencyRaw.map((bucket) => ({
+      label: bucket.label,
+      value: bucket.count > 0 ? bucket.total / bucket.count : null,
+    })),
   };
 }
 
-function providerDailyBuckets(provider: ProviderUsage | null, count: number, longLabels: boolean) {
+function providerDailyBuckets(
+  provider: ProviderUsage | null,
+  count: number,
+  longLabels: boolean,
+  start?: Date,
+) {
   if (!provider || provider.daily.length === 0) return [];
-  return provider.daily.slice(-count).map((bucket) => {
+  const rows = start
+    ? provider.daily.filter((bucket) => Date.parse(bucket.checkedAt) >= start.getTime())
+    : provider.daily;
+  return rows.slice(-count).map((bucket) => {
     const date = new Date(bucket.checkedAt);
     return { label: dayLabel(date, !longLabels), bytes: bucket.bytes };
   });
@@ -295,16 +320,22 @@ function providerDailyBuckets(provider: ProviderUsage | null, count: number, lon
 
 function providerHourlyBuckets(provider: ProviderUsage | null) {
   if (!provider || provider.hourly.length === 0) return [];
-  return provider.hourly.slice(-24).map((bucket) => ({ label: hourLabel(new Date(bucket.checkedAt)), bytes: bucket.bytes }));
+  return provider.hourly.slice(-24).map((bucket) => ({
+    label: hourLabel(new Date(bucket.checkedAt)),
+    bytes: bucket.bytes,
+  }));
 }
 
 function buildActivity(local: LocalUsage, provider: ProviderUsage | null): Activity {
   const month = providerDailyBuckets(provider, 30, false);
-  const week = providerDailyBuckets(provider, 7, true);
+  const latestProviderAt = provider?.daily.at(-1)?.checkedAt ?? provider?.lastRawAt ?? local.latestCheckedAt;
+  const weekWindow = getUsageWeekWindow(provider?.resetAt, latestProviderAt);
+  const week = providerDailyBuckets(provider, 7, true, weekWindow.start);
   const day = providerHourlyBuckets(provider);
   const monthBuckets = month.length > 0 ? month : local.monthBuckets;
   const weekBuckets = week.length > 0 ? week : local.weekBuckets;
   const dayBuckets = day.length > 0 ? day : local.dayBuckets;
+  const providerWeekActive = week.length > 0;
 
   return {
     monthBuckets,
@@ -314,13 +345,14 @@ function buildActivity(local: LocalUsage, provider: ProviderUsage | null): Activ
     week: sum(weekBuckets),
     day: sum(dayBuckets),
     lastDelta: dayBuckets.at(-1)?.bytes ?? local.lastDelta,
-    source: month.length > 0 || week.length > 0 || day.length > 0 ? 'provider' : 'local',
+    weekLabel: providerWeekActive ? weekWindow.label : '7 days',
+    weekDayCount: providerWeekActive ? weekWindow.dayCount : 7,
   };
 }
 
-function paceLabel(room: number | null, weeklyAverage: number) {
+function paceLabel(room: number | null, average: number) {
   if (!isFiniteNumber(room) || room <= 0) return 'pace unknown';
-  if (weeklyAverage > room * 1.15) return 'pace warm';
+  if (average > room * 1.15) return 'pace warm';
   return 'pace safe';
 }
 
@@ -343,7 +375,7 @@ function PinnedValue({ value }: { value: string | null }) {
 
 function Bars({ buckets, height = 'h-28', labelEvery = 1, minBarPercent = 14 }: { buckets: Bucket[]; height?: string; labelEvery?: number; minBarPercent?: number }) {
   const [selected, setSelected] = useState<string | null>(null);
-  const max = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
+  const maximum = Math.max(1, ...buckets.map((bucket) => bucket.bytes));
 
   return (
     <div className={`relative grid ${height} grid-rows-[minmax(0,1fr)_auto] gap-1 rounded-lg border bg-muted/30 p-2`}>
@@ -352,20 +384,19 @@ function Bars({ buckets, height = 'h-28', labelEvery = 1, minBarPercent = 14 }: 
         {buckets.map((bucket, index) => {
           const hasValue = bucket.bytes > 0;
           const tooltip = `${bucket.label}: ${formatBytes(bucket.bytes)}`;
-          const heightValue = hasValue ? `${Math.max(minBarPercent, (bucket.bytes / max) * 100)}%` : '2px';
+          const barHeight = hasValue ? `${Math.max(minBarPercent, (bucket.bytes / maximum) * 100)}%` : '2px';
           return (
             <button
               key={`${bucket.label}-${index}`}
               type="button"
               className="group relative flex h-full min-w-0 flex-1 items-end justify-center rounded-md px-0.5 transition-colors hover:bg-[#b8b5ff]/10 focus:bg-[#b8b5ff]/10 focus:outline-none focus:ring-1 focus:ring-[#cbc8ff]"
-              onClick={() => setSelected((current) => current === tooltip ? null : tooltip)}
+              onClick={() => setSelected((current) => (current === tooltip ? null : tooltip))}
               title={tooltip}
               aria-label={tooltip}
             >
-              <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded-md border bg-background px-2 py-1 text-[11px] shadow-sm group-hover:block group-focus:block">{tooltip}</div>
               <span
-                className={`block w-full max-w-10 rounded-t transition-all duration-150 ${hasValue ? 'bg-[#b8b5ff] shadow-[0_0_14px_rgba(184,181,255,0.26)] group-hover:bg-[#cbc8ff]' : 'bg-[#b8b5ff]/25 group-hover:bg-[#b8b5ff]/40'}`}
-                style={{ height: heightValue }}
+                className={`block w-full max-w-10 rounded-t transition-all duration-150 ${hasValue ? 'bg-[#b8b5ff] shadow-[0_0_14px_rgba(184,181,255,0.26)] group-hover:bg-[#cbc8ff]' : 'bg-[#b8b5ff]/25'}`}
+                style={{ height: barHeight }}
               />
             </button>
           );
@@ -386,12 +417,12 @@ function MetricBars({ buckets }: { buckets: MetricBucket[] }) {
   const values = buckets.map((bucket) => bucket.value).filter(isFiniteNumber);
   if (values.length === 0) return <div className="flex h-24 items-center justify-center rounded-lg border bg-muted/30 text-xs text-muted-foreground">no data</div>;
 
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const spread = max - min;
-  const padding = spread > 0 ? Math.max(spread * 0.15, 0.2) : Math.max(max * 0.002, 0.5);
-  const lower = min - padding;
-  const upper = max + padding;
+  const minimum = Math.min(...values);
+  const maximum = Math.max(...values);
+  const spread = maximum - minimum;
+  const padding = spread > 0 ? Math.max(spread * 0.15, 0.2) : Math.max(maximum * 0.002, 0.5);
+  const lower = minimum - padding;
+  const upper = maximum + padding;
   const range = Math.max(0.1, upper - lower);
 
   return (
@@ -408,11 +439,10 @@ function MetricBars({ buckets }: { buckets: MetricBucket[] }) {
               key={`${bucket.label}-${index}`}
               type="button"
               className="group relative flex h-full min-w-0 flex-1 items-end justify-center rounded-md px-0.5 transition-colors hover:bg-[#b8b5ff]/10 focus:bg-[#b8b5ff]/10 focus:outline-none focus:ring-1 focus:ring-[#cbc8ff]"
-              onClick={() => setSelected((current) => current === tooltip ? null : tooltip)}
+              onClick={() => setSelected((current) => (current === tooltip ? null : tooltip))}
               title={tooltip}
               aria-label={tooltip}
             >
-              <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded-md border bg-background px-2 py-1 text-[11px] shadow-sm group-hover:block group-focus:block">{tooltip}</div>
               <span
                 className={`block w-full max-w-10 rounded-t transition-all duration-150 ${hasValue ? 'bg-[#b8b5ff] shadow-[0_0_14px_rgba(184,181,255,0.26)] group-hover:bg-[#cbc8ff]' : 'bg-[#b8b5ff]/25'}`}
                 style={{ height: hasValue ? `${Math.max(14, normalized * 100)}%` : '2px' }}
@@ -437,15 +467,6 @@ function StatusPill({ mode, errors }: { mode: string | null; errors: string[] })
   return <span className={`rounded-full border px-2.5 py-1 text-xs font-medium text-foreground ${className}`}>{label}</span>;
 }
 
-function mood(mode: string | null, errors: string[], activity: Activity, latency: number | null) {
-  if (errors.length > 0 || mode === 'degraded' || mode === 'unknown') return 'fussy';
-  if (mode === 'fallback') return 'backup';
-  if (isFiniteNumber(latency) && latency > 220) return 'slow';
-  if (activity.day > Math.max(activity.week / 7, 1) * 2.5) return 'busy';
-  if (activity.day < 1024 * 1024) return 'sleepy';
-  return 'calm';
-}
-
 function ProviderRing({ provider }: { provider: ProviderUsage | null }) {
   const percent = providerPercent(provider) ?? 0;
   const radius = 44;
@@ -467,8 +488,7 @@ function Hero({ status, local, activity, provider }: { status?: StoredProxyHealt
   const errors = safeErrors(payload);
   const mode = payload?.mode ?? local.latestMode;
   const room = dailyRoom(provider);
-  const weeklyAverage = activity.week / 7;
-  const attention = providerAttention(provider);
+  const average = activity.week / Math.max(1, activity.weekDayCount);
   const checkedAt = provider?.lastRawAt ?? status?.updatedAt ?? local.latestCheckedAt;
 
   return (
@@ -476,8 +496,7 @@ function Hero({ status, local, activity, provider }: { status?: StoredProxyHealt
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <StatusPill mode={mode ?? null} errors={errors} />
-          <span className="text-xs font-medium text-muted-foreground">{mood(mode ?? null, errors, activity, local.totalLatency)}</span>
-          {attention ? <span className="rounded-full border border-red-400/50 bg-red-400/15 px-2 py-0.5 text-xs text-foreground">attention</span> : null}
+          {providerAttention(provider) ? <span className="rounded-full border border-red-400/50 bg-red-400/15 px-2 py-0.5 text-xs text-foreground">attention</span> : null}
         </div>
         <div className="text-xs text-muted-foreground">checked <span className="font-medium text-foreground">{formatRelativeTime(checkedAt)}</span></div>
       </div>
@@ -501,7 +520,7 @@ function Hero({ status, local, activity, provider }: { status?: StoredProxyHealt
           <div className="rounded-xl border bg-muted/30 px-3 py-3">
             <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Room / day</div>
             <div className="mt-1 text-2xl font-semibold tracking-tight">{formatBytes(room)}</div>
-            <div className="mt-0.5 text-xs text-muted-foreground">7d avg {formatBytes(weeklyAverage)} · {paceLabel(room, weeklyAverage)}</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">{activity.weekLabel.toLowerCase()} avg {formatBytes(average)} · {paceLabel(room, average)}</div>
           </div>
           <div className="rounded-xl border bg-muted/30 px-3 py-3">
             <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Latency</div>
@@ -518,7 +537,7 @@ function BandwidthCard({ activity }: { activity: Activity }) {
   const [range, setRange] = useState<RangeKey>('30d');
   const options: Array<{ key: RangeKey; label: string; buckets: Bucket[]; value: number; labelEvery: number; minBarPercent: number }> = [
     { key: '24h', label: '24 hours', buckets: activity.dayBuckets, value: activity.day, labelEvery: 4, minBarPercent: 18 },
-    { key: '7d', label: '7 days', buckets: activity.weekBuckets, value: activity.week, labelEvery: 1, minBarPercent: 14 },
+    { key: '7d', label: activity.weekLabel, buckets: activity.weekBuckets, value: activity.week, labelEvery: 1, minBarPercent: 14 },
     { key: '30d', label: '30 days', buckets: activity.monthBuckets, value: activity.month, labelEvery: 5, minBarPercent: 18 },
   ];
   const selected = options.find((option) => option.key === range) ?? options[2];

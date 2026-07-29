@@ -64,7 +64,12 @@ export default function AtelierPage() {
                     target={item.external ? '_blank' : undefined}
                     rel={item.external ? 'noopener noreferrer' : undefined}
                     className="atelier-wheel-link group absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-xl border border-black/16 bg-[#f7f1df] px-2 py-2 text-center text-[#242328] shadow-[0_5px_12px_rgba(55,47,37,0.12)] transition-[border-color,background-color,box-shadow] hover:border-black/32 hover:bg-[#fffaf0] hover:shadow-[0_8px_18px_rgba(55,47,37,0.16)] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:border-white/14 dark:bg-[#2a2928] dark:text-[#eeeae3] dark:hover:border-white/30 dark:hover:bg-[#33312f]"
-                    style={{ '--wheel-angle': `${item.angle}deg` } as CSSProperties}
+                    style={
+                      {
+                        '--wheel-angle': `${item.angle}deg`,
+                        '--wheel-counter-angle': `${-item.angle}deg`,
+                      } as CSSProperties
+                    }
                   >
                     <span className="text-xs font-semibold tracking-tight sm:text-sm">{item.label}</span>
                     <span className="mt-0.5 hidden text-[11px] leading-tight opacity-60 sm:block">
@@ -97,7 +102,7 @@ export default function AtelierPage() {
         <style>{`
           .atelier-wheel-link {
             width: 5.75rem;
-            transform: translate(-50%, -50%) rotate(var(--wheel-angle)) translateY(-6.6rem) rotate(calc(var(--wheel-angle) * -1));
+            transform: translate(-50%, -50%) rotate(var(--wheel-angle)) translateY(-6.6rem) rotate(var(--wheel-counter-angle));
           }
           .atelier-cube-scene { perspective: 700px; }
           .atelier-cube {
@@ -127,7 +132,7 @@ export default function AtelierPage() {
           @media (min-width: 640px) {
             .atelier-wheel-link {
               width: 8rem;
-              transform: translate(-50%, -50%) rotate(var(--wheel-angle)) translateY(-10.5rem) rotate(calc(var(--wheel-angle) * -1));
+              transform: translate(-50%, -50%) rotate(var(--wheel-angle)) translateY(-10.5rem) rotate(var(--wheel-counter-angle));
             }
             .atelier-cube-front { transform: translateZ(3.5rem); }
             .atelier-cube-back { transform: rotateY(180deg) translateZ(3.5rem); }

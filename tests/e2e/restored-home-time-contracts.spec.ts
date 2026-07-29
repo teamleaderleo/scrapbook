@@ -8,33 +8,33 @@ async function waitForHydratedHomepage(page: Page) {
   return dashboard;
 }
 
-test('homepage keeps the requested 28-day activity window', async ({ page }) => {
+test('homepage keeps the requested 21-day activity window', async ({ page }) => {
   await page.goto('/');
   const dashboard = await waitForHydratedHomepage(page);
 
-  await expect(dashboard.getByText('28 days · UTC', { exact: true })).toBeVisible();
-  await expect(dashboard.locator('[data-contribution-date]')).toHaveCount(28);
+  await expect(dashboard.getByText('21 days · UTC', { exact: true })).toBeVisible();
+  await expect(dashboard.locator('[data-contribution-date]')).toHaveCount(21);
   await expect(dashboard.locator('[data-contribution-week-grid]')).toHaveAttribute(
     'aria-label',
-    'GitHub contribution calendar for the last 28 days',
+    'GitHub contribution calendar for the last 21 days',
   );
 });
 
-test('Scraplet uses the purple paper palette in light mode', async ({ page }) => {
-  await page.addInitScript(() => window.localStorage.setItem('theme', 'light'));
+test('Time Machine uses the intended monospaced controls', async ({ page }) => {
   await page.goto('/time');
 
-  const scraplet = page.locator('[data-paper-creature]').first();
-  await expect(scraplet).toBeVisible({ timeout: 15_000 });
-  const bodyFill = await scraplet.locator('svg > path').nth(1).evaluate((element) =>
-    getComputedStyle(element).fill,
-  );
-  const headFill = await scraplet.locator('svg > path').nth(2).evaluate((element) =>
-    getComputedStyle(element).fill,
-  );
+  const heading = page.getByRole('heading', { name: 'Current time', level: 1 });
+  const trigger = page.locator('[data-timezone-trigger]');
+  await expect(heading).toBeVisible({ timeout: 15_000 });
+  await expect(heading).toHaveClass(/font-mono/);
+  await expect(trigger).toBeVisible();
 
-  expect(bodyFill).toBe('rgb(206, 196, 214)');
-  expect(headFill).toBe('rgb(228, 220, 233)');
+  const triggerStyle = await trigger.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { fontFamily: style.fontFamily, height: element.getBoundingClientRect().height };
+  });
+  expect(triggerStyle.fontFamily.toLowerCase()).toContain('mono');
+  expect(triggerStyle.height).toBeGreaterThanOrEqual(48);
 });
 
 test('homepage has no one-pixel nav overflow and Atlas does not shift the layout', async ({ page }) => {

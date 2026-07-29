@@ -11,7 +11,7 @@ function hydratedActivitySection(page: Page) {
 }
 
 for (const theme of ['light', 'dark'] as const) {
-  test(`activity days behave like paper marks in ${theme} mode`, async ({ page }, testInfo) => {
+  test(`activity days stay quiet in ${theme} mode`, async ({ page }, testInfo) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.setViewportSize({ width: 1280, height: 760 });
     await page.addInitScript((selectedTheme) => {
@@ -26,31 +26,29 @@ for (const theme of ['light', 'dark'] as const) {
     const marks = grid.locator('[data-paper-activity-mark]');
     await expect(section).toBeVisible({ timeout: 15_000 });
     await expect(grid).toBeVisible();
-    await expect(marks).toHaveCount(28);
+    await expect(marks).toHaveCount(21);
 
     const mark = marks.nth(8);
     const resting = await mark.evaluate((element) => {
       const rect = element.getBoundingClientRect();
-      return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+      return { y: rect.y, width: rect.width, height: rect.height };
     });
     expect(resting.width).toBeGreaterThan(20);
     expect(resting.height).toBeGreaterThan(20);
+    await expect(mark).toHaveAttribute('aria-pressed', 'false');
+
+    const textures = await mark.evaluate((element) => ({
+      before: getComputedStyle(element, '::before').backgroundImage,
+      after: getComputedStyle(element, '::after').backgroundImage,
+    }));
+    expect(textures.before).toBe('none');
+    expect(textures.after).toBe('none');
 
     await mark.hover();
-    await expect(mark).toHaveAttribute('aria-pressed', 'true');
-    await expect
-      .poll(() =>
-        mark.evaluate((element) => Number(getComputedStyle(element, '::after').opacity)),
-      )
-      .toBeGreaterThan(0.2);
-    await expect
-      .poll(() =>
-        mark.evaluate((element, restingY) => {
-          const rect = element.getBoundingClientRect();
-          return restingY - rect.y;
-        }, resting.y),
-      )
-      .toBeGreaterThan(1.5);
+    await expect(mark).toHaveAttribute('aria-pressed', 'false');
+    const lift = await mark.evaluate((element, restingY) => restingY - element.getBoundingClientRect().y, resting.y);
+    expect(lift).toBeGreaterThan(0.25);
+    expect(lift).toBeLessThan(2);
 
     const directory = path.join(
       'test-results',
@@ -67,7 +65,7 @@ for (const theme of ['light', 'dark'] as const) {
   });
 }
 
-test('activity paper marks stay planted with reduced motion', async ({ page }) => {
+test('activity marks stay planted with reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.addInitScript(() => {
@@ -99,7 +97,7 @@ test('activity paper marks stay planted with reduced motion', async ({ page }) =
     .toBe('0s');
 });
 
-test('forced colours removes paper mark decoration', async ({ page }, testInfo) => {
+test('forced colours preserves a clear activity mark boundary', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'Forced-colour emulation is checked in Chromium.');
 
   await page.emulateMedia({ forcedColors: 'active' });
@@ -110,12 +108,10 @@ test('forced colours removes paper mark decoration', async ({ page }, testInfo) 
   const mark = section.locator('[data-paper-activity-mark]').nth(8);
   await expect(mark).toBeVisible({ timeout: 15_000 });
   const decoration = await mark.evaluate((element) => ({
-    before: getComputedStyle(element, '::before').display,
-    after: getComputedStyle(element, '::after').display,
+    backgroundImage: getComputedStyle(element).backgroundImage,
     border: getComputedStyle(element).borderStyle,
   }));
 
-  expect(decoration.before).toBe('none');
-  expect(decoration.after).toBe('none');
+  expect(decoration.backgroundImage).toBe('none');
   expect(decoration.border).not.toBe('none');
 });
