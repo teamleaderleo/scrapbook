@@ -2,11 +2,7 @@
 
 import { SiteAtlas } from '@/components/site-atlas';
 import { ThemeToggle } from '@/components/theme-toggle';
-import {
-  getActiveNavigationItem,
-  isNavigationItemActive,
-  primaryNavigationItems,
-} from '@/lib/site-navigation';
+import { isNavigationItemActive, primaryNavigationItems } from '@/lib/site-navigation';
 import { Clock3 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -41,7 +37,7 @@ function TimeLink({ active }: { active: boolean }) {
           ? 'border-foreground/30 bg-foreground/[0.075] text-foreground'
           : 'border-border/70 bg-card text-foreground'
       }`}
-      title="Open the time converter"
+      title="Open time"
       aria-label={`Open the time converter. Local time ${time}`}
     >
       <Clock3 size={13} aria-hidden="true" />
@@ -52,7 +48,6 @@ function TimeLink({ active }: { active: boolean }) {
 
 export function SiteNavBar() {
   const pathname = usePathname() || '/';
-  const activeItem = getActiveNavigationItem(pathname);
   const directItems = primaryNavigationItems.filter((item) => item.id !== 'home');
   const [ready, setReady] = useState(false);
 
@@ -80,13 +75,6 @@ export function SiteNavBar() {
           </Link>
 
           <TimeLink active={pathname === '/time' || pathname.startsWith('/time/')} />
-
-          <span
-            className="hidden min-h-8 min-w-0 max-w-[8rem] items-center truncate rounded-full border border-border/60 bg-card/70 px-2.5 font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:inline-flex xl:hidden"
-            data-site-current-place
-          >
-            {activeItem?.label ?? 'Scrapbook'}
-          </span>
 
           <div className="ml-2 hidden min-w-0 flex-1 items-center justify-center gap-1 xl:flex">
             {directItems.map((item) => {

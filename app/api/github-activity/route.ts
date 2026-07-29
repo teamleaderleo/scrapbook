@@ -32,7 +32,7 @@ export async function GET() {
         today: activity.today,
         weekTotal: activity.weekTotal,
         yearTotal: activity.periodLabel === 'last year' ? activity.total : null,
-        days: activity.days.slice(-28),
+        days: activity.days.slice(-21),
         diagnostics,
       },
       { headers },

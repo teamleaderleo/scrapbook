@@ -60,7 +60,7 @@ export default function CurrentTimeDisplay({ onJumpToTime }: CurrentTimeDisplayP
     <div>
       <p className="material-label-stamped mb-2 text-[9px] text-muted-foreground">time machine</p>
       <div className="mb-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-        <h1 className="text-3xl font-semibold tracking-tight">Current time</h1>
+        <h1 className="font-mono text-3xl font-semibold tracking-[-0.035em]">Current time</h1>
         <button
           type="button"
           onClick={() => onJumpToTime(currentTime)}
