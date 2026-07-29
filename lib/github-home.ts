@@ -1,4 +1,5 @@
 import { unstable_cache } from 'next/cache';
+import { captureCacheLoad, unwrapCacheLoad } from './cache-load-result';
 import { fetchGitHubContributionCalendar } from './github-contribution-calendar';
 import {
   dateKeyInTimeZone,
@@ -250,13 +251,17 @@ async function loadGitHubHomeData(): Promise<UpstreamActivity> {
 }
 
 const getCachedUpstreamActivity = unstable_cache(
-  loadGitHubHomeData,
-  ['github-homepage-v9'],
+  () => captureCacheLoad(loadGitHubHomeData),
+  ['github-homepage-v10'],
   { revalidate: GITHUB_ACTIVITY_UPSTREAM_FRESH_SECONDS },
 );
 
+async function loadCachedUpstreamActivity(): Promise<UpstreamActivity> {
+  return unwrapCacheLoad(await getCachedUpstreamActivity());
+}
+
 const githubHomeCache = createStaleWhileErrorCache<UpstreamActivity>({
-  load: getCachedUpstreamActivity,
+  load: loadCachedUpstreamActivity,
   freshForMs: GITHUB_ACTIVITY_INSTANCE_FRESH_MS,
   staleForMs: GITHUB_ACTIVITY_STALE_SECONDS * 1_000,
   retryBaseMs: GITHUB_ACTIVITY_RETRY_BASE_MS,
