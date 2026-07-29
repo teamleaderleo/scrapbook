@@ -1,0 +1,130 @@
+name: Fieldwork Biome issue 27
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  biome-trial:
+    if: github.head_ref == 'fieldwork/biome/issue-27'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: test-anon-key
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install project dependencies
+        run: pnpm install --frozen-lockfile --reporter=silent
+      - name: Exercise Biome
+        shell: bash
+        run: |
+          set -u
+          mkdir -p fieldwork-results
+          printf 'repository=teamleaderleo/scrapbook\nrevision=%s\n' "$(git rev-parse HEAD)" > fieldwork-results/metadata.txt
+          pnpm dlx @biomejs/biome@2.5.6 --version 2>&1 | tee fieldwork-results/biome-version.txt
+
+          set +e
+          pnpm dlx @biomejs/biome@2.5.6 check . --max-diagnostics=1000 > fieldwork-results/check.txt 2>&1
+          echo $? > fieldwork-results/check.status
+          set -e
+
+          git reset --hard HEAD
+          set +e
+          pnpm dlx @biomejs/biome@2.5.6 format . --write > fieldwork-results/format-first.txt 2>&1
+          echo $? > fieldwork-results/format-first.status
+          set -e
+          git diff -- . ':(exclude).github/workflows/fieldwork-biome-27.yml' > fieldwork-results/format-first.patch
+          git diff --stat -- . ':(exclude).github/workflows/fieldwork-biome-27.yml' > fieldwork-results/format-first.stat
+          git diff --name-only -- . ':(exclude).github/workflows/fieldwork-biome-27.yml' > fieldwork-results/format-first.files
+          set +e
+          pnpm dlx @biomejs/biome@2.5.6 format . --write > fieldwork-results/format-second.txt 2>&1
+          echo $? > fieldwork-results/format-second.status
+          set -e
+          git diff -- . ':(exclude).github/workflows/fieldwork-biome-27.yml' > fieldwork-results/format-second.patch
+          if cmp -s fieldwork-results/format-first.patch fieldwork-results/format-second.patch; then
+            echo stable > fieldwork-results/format-idempotence.txt
+          else
+            echo unstable > fieldwork-results/format-idempotence.txt
+            diff -u fieldwork-results/format-first.patch fieldwork-results/format-second.patch > fieldwork-results/format-idempotence.diff || true
+          fi
+
+          git reset --hard HEAD
+          set +e
+          pnpm dlx @biomejs/biome@2.5.6 check . --write --max-diagnostics=1000 > fieldwork-results/safe-fix.txt 2>&1
+          echo $? > fieldwork-results/safe-fix.status
+          set -e
+          git diff -- . ':(exclude).github/workflows/fieldwork-biome-27.yml' > fieldwork-results/safe-fix.patch
+          git diff --stat -- . ':(exclude).github/workflows/fieldwork-biome-27.yml' > fieldwork-results/safe-fix.stat
+          git diff --name-only -- . ':(exclude).github/workflows/fieldwork-biome-27.yml' > fieldwork-results/safe-fix.files
+
+          set +e
+          pnpm typecheck > fieldwork-results/post-fix-typecheck.txt 2>&1
+          echo $? > fieldwork-results/post-fix-typecheck.status
+          pnpm test > fieldwork-results/post-fix-test.txt 2>&1
+          echo $? > fieldwork-results/post-fix-test.status
+          set -e
+
+          rm -rf /tmp/biome-prettier-27
+          mkdir -p /tmp/biome-prettier-27
+          cp package.json /tmp/biome-prettier-27/package.json
+          for file in .prettierrc .prettierrc.json .prettierrc.js .prettierrc.mjs prettier.config.js prettier.config.mjs; do
+            if [ -f "$file" ]; then cp "$file" /tmp/biome-prettier-27/; fi
+          done
+          set +e
+          (cd /tmp/biome-prettier-27 && pnpm dlx @biomejs/biome@2.5.6 migrate prettier --write) > fieldwork-results/migrate-prettier.txt 2>&1
+          echo $? > fieldwork-results/migrate-prettier.status
+          set -e
+          if [ -f /tmp/biome-prettier-27/biome.json ]; then cp /tmp/biome-prettier-27/biome.json fieldwork-results/migrated-biome.json; fi
+          if [ -f /tmp/biome-prettier-27/biome.jsonc ]; then cp /tmp/biome-prettier-27/biome.jsonc fieldwork-results/migrated-biome.jsonc; fi
+
+          rm -rf /tmp/biome-config-27
+          mkdir -p /tmp/biome-config-27/packages/example
+          cat > /tmp/biome-config-27/biome.json <<'JSON'
+          {
+            "formatter": { "enabled": true, "lineWidth": 40 },
+            "linter": { "enabled": false }
+          }
+          JSON
+          cat > /tmp/biome-config-27/packages/example/sample.js <<'JS'
+          export const values = ["alpha", "beta", "gamma", "delta", "epsilon"];
+          JS
+          (cd /tmp/biome-config-27 && pnpm dlx @biomejs/biome@2.5.6 format packages/example/sample.js) > fieldwork-results/config-root.out 2> fieldwork-results/config-root.err || true
+          (cd /tmp/biome-config-27/packages/example && pnpm dlx @biomejs/biome@2.5.6 format sample.js) > fieldwork-results/config-nested.out 2> fieldwork-results/config-nested.err || true
+          if cmp -s fieldwork-results/config-root.out fieldwork-results/config-nested.out; then
+            echo consistent > fieldwork-results/config-discovery.txt
+          else
+            echo divergent > fieldwork-results/config-discovery.txt
+            diff -u fieldwork-results/config-root.out fieldwork-results/config-nested.out > fieldwork-results/config-discovery.diff || true
+          fi
+
+          printf '\n=== summary ===\n'
+          cat fieldwork-results/biome-version.txt
+          printf 'check='; cat fieldwork-results/check.status
+          printf 'format-first='; cat fieldwork-results/format-first.status
+          printf 'format-second='; cat fieldwork-results/format-second.status
+          printf 'idempotence='; cat fieldwork-results/format-idempotence.txt
+          printf 'safe-fix='; cat fieldwork-results/safe-fix.status
+          printf 'post-fix-typecheck='; cat fieldwork-results/post-fix-typecheck.status
+          printf 'post-fix-test='; cat fieldwork-results/post-fix-test.status
+          printf 'migrate-prettier='; cat fieldwork-results/migrate-prettier.status
+          printf 'config-discovery='; cat fieldwork-results/config-discovery.txt
+          cat fieldwork-results/format-first.stat
+          cat fieldwork-results/safe-fix.stat
+      - name: Upload trial evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fieldwork-biome-27-scrapbook
+          path: fieldwork-results
+          if-no-files-found: error
+          retention-days: 7
