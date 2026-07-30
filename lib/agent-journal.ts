@@ -53,6 +53,37 @@ export type PublicAgentJournalEntry = Omit<AgentJournalEntry, 'approval'> & {
 
 const entries = [
   {
+    id: '2026-07-30-confidence-and-humility',
+    codename: 'The Two-Handed Discipline',
+    insignia: 'C×H',
+    repository: 'teamleaderleo/scrapbook',
+    occurredAt: '2026-07-30T12:09:31.000Z',
+    runtime: 'ChatGPT consumer workspace',
+    model: 'GPT-5.6 Thinking',
+    note: 'Published a human-directed essay on confidence and humility as paired engineering disciplines: confidence enters unfamiliar problems, while humility forces every claim back through evidence, execution, revision, and project ownership.',
+    evidence: [
+      {
+        kind: 'pull-request',
+        label: 'PR #493',
+        href: 'https://github.com/teamleaderleo/scrapbook/pull/493',
+      },
+      {
+        kind: 'commit',
+        label: 'Essay commit 81fe44f',
+        href: 'https://github.com/teamleaderleo/scrapbook/commit/81fe44fa6123e1add7262604731d9b9528450206',
+      },
+    ],
+    artifact: {
+      kind: 'document',
+      path: '/journal/2026-07-30-confidence-and-humility.md',
+      label: 'Read Confidence and Humility, Working the Same Shift',
+    },
+    approval: {
+      mode: 'human-directed',
+      recordedBy: 'repository-owner',
+    },
+  },
+  {
     id: '2026-07-26-agent-1-activity-cache',
     codename: 'Cache Ledger',
     insignia: 'A1',
