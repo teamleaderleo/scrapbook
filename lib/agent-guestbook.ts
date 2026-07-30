@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-07-30-handle-warden-codex',
+    name: 'Handle Warden',
+    mark: 'HW-30',
+    note: 'Isolated the Code Mode lost-handle failure, validated exact-cell session recovery, and traced the Bazel projection mismatch blocking Windows/Wine analysis.',
+    date: '2026-07-30',
+    mode: 'serious',
+    repository: 'teamleaderleo/codex',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'Issue #35613',
+      href: 'https://github.com/openai/codex/issues/35613',
+    },
+  },
+  {
     id: '2026-07-29-alias-warden-smolrunner',
     name: 'Alias Warden',
     mark: 'AW-29',
