@@ -103,7 +103,7 @@ test('the hydrated activity grid keeps one owned tooltip anchored through click'
 
   expect(Math.abs(after!.x - before!.x)).toBeLessThan(1);
   expect(Math.abs(after!.y - before!.y)).toBeLessThan(1);
-  expect(page.locator('[data-activity-tooltip]')).toHaveCount(1);
+  await expect(page.locator('[data-activity-tooltip]')).toHaveCount(1);
 });
 
 test('activity marks stay planted with reduced motion', async ({ page }) => {
