@@ -226,6 +226,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
             transform:
               'translate3d(var(--activity-tooltip-x, 12px), var(--activity-tooltip-y, 12px), 0)',
           }}
+          data-activity-tooltip
         >
           {tooltipLabel}
         </div>
