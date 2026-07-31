@@ -3,7 +3,6 @@ import { expect, test } from '@playwright/test';
 const publicDestinations = [
   ['home', '/'],
   ['space', '/space'],
-  ['blog', '/blog'],
   ['gallery', '/gallery'],
   ['time', '/time'],
   ['atelier', '/atelier'],
@@ -35,7 +34,9 @@ test('site atlas exposes visible places, tools, experiments, and connections', a
   for (const [id, href] of publicDestinations) {
     await expect(atlas.locator(`[data-site-atlas-link="${id}"]`)).toHaveAttribute('href', href);
   }
-  await expect(atlas.locator('[data-site-atlas-link="journal"]')).toHaveCount(0);
+  for (const retiredId of ['blog', 'journal']) {
+    await expect(atlas.locator(`[data-site-atlas-link="${retiredId}"]`)).toHaveCount(0);
+  }
 
   for (const id of ['proxy', 'activity-lab', 'sigil-lab']) {
     await expect(atlas.locator(`[data-site-atlas-link="${id}"]`)).toBeVisible();
@@ -53,17 +54,16 @@ test('site atlas exposes visible places, tools, experiments, and connections', a
   });
 });
 
-test('nested routes mark their active destination without a duplicate current-place label', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/blog/about');
+test('retired blog routes are not public navigation destinations', async ({ page }) => {
+  for (const path of ['/blog', '/blog/about']) {
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(404);
+  }
 
-  await expect(page.locator('[data-site-primary-link="blog"]')).toHaveAttribute('aria-current', 'page');
-  await expect(page.locator('[data-site-current-place]')).toHaveCount(0);
-
+  await page.goto('/');
+  await expect(page.locator('[data-site-primary-link="blog"]')).toHaveCount(0);
   await page.locator('[data-site-atlas-trigger]').click();
-  const blog = page.locator('[data-site-atlas-link="blog"]');
-  await expect(blog).toHaveAttribute('aria-current', 'page');
-  await expect(blog).toHaveAttribute('data-active', 'true');
+  await expect(page.locator('[data-site-atlas-link="blog"]')).toHaveCount(0);
 });
 
 test('Escape closes the atlas and restores focus to its trigger', async ({ page }) => {

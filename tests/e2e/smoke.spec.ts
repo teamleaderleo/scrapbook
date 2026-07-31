@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const publicRoutes = ['/', '/time', '/blog', '/gallery', '/atelier'];
+const publicRoutes = ['/', '/time', '/gallery', '/atelier'];
 
 async function expectNoHorizontalOverflow(page: Page) {
   const dimensions = await page.evaluate(() => ({
@@ -79,6 +79,14 @@ for (const route of publicRoutes) {
     await expectNoHorizontalOverflow(page);
   });
 }
+
+test('former blog routes return not found', async ({ page }) => {
+  for (const route of ['/blog', '/blog/about', '/blog/first-post']) {
+    const response = await page.goto(route);
+    expect(response?.status()).toBe(404);
+    await expect(page.locator('body')).toBeVisible();
+  }
+});
 
 test('homepage highlights three recent systems', async ({ page }) => {
   await page.goto('/');
