@@ -64,7 +64,6 @@ jobs:
           path: build.log
 
   e2e:
-    name: Chromium browser regressions
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
