@@ -7,6 +7,30 @@ import type { GitHubHomeResult } from './github-home';
 
 export { GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS } from './github-activity-policy';
 
+export type PublicGitHubActivityDiagnostics = Pick<
+  GitHubHomeResult['diagnostics'],
+  | 'cacheStatus'
+  | 'upstreamSource'
+  | 'lastUpstreamAttempt'
+  | 'lastUpstreamFetch'
+  | 'consecutiveFailures'
+  | 'nextRetryAt'
+>;
+
+export function publicGitHubActivityDiagnostics(
+  result: GitHubHomeResult,
+): PublicGitHubActivityDiagnostics {
+  const { diagnostics } = result;
+  return {
+    cacheStatus: diagnostics.cacheStatus,
+    upstreamSource: diagnostics.upstreamSource,
+    lastUpstreamAttempt: diagnostics.lastUpstreamAttempt,
+    lastUpstreamFetch: diagnostics.lastUpstreamFetch,
+    consecutiveFailures: diagnostics.consecutiveFailures,
+    nextRetryAt: diagnostics.nextRetryAt,
+  };
+}
+
 export function createGitHubActivityHeaders(result: GitHubHomeResult, requestId: string) {
   const { activity, diagnostics } = result;
   const headers = new Headers({
@@ -33,24 +57,6 @@ export function createGitHubActivityHeaders(result: GitHubHomeResult, requestId:
   }
   if (diagnostics.nextRetryAt) {
     headers.set('X-Activity-Next-Retry-At', diagnostics.nextRetryAt);
-  }
-  if (diagnostics.rateLimit?.limit !== null && diagnostics.rateLimit?.limit !== undefined) {
-    headers.set('X-Activity-RateLimit-Limit', String(diagnostics.rateLimit.limit));
-  }
-  if (
-    diagnostics.rateLimit?.remaining !== null &&
-    diagnostics.rateLimit?.remaining !== undefined
-  ) {
-    headers.set('X-Activity-RateLimit-Remaining', String(diagnostics.rateLimit.remaining));
-  }
-  if (diagnostics.rateLimit?.used !== null && diagnostics.rateLimit?.used !== undefined) {
-    headers.set('X-Activity-RateLimit-Used', String(diagnostics.rateLimit.used));
-  }
-  if (diagnostics.rateLimit?.resetAt) {
-    headers.set('X-Activity-RateLimit-Reset', diagnostics.rateLimit.resetAt);
-  }
-  if (diagnostics.rateLimit?.resource) {
-    headers.set('X-Activity-RateLimit-Resource', diagnostics.rateLimit.resource);
   }
 
   return headers;

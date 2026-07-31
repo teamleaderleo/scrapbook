@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { createGitHubActivityHeaders } from './github-activity-response';
+import {
+  createGitHubActivityHeaders,
+  publicGitHubActivityDiagnostics,
+} from './github-activity-response';
 import type { GitHubHomeResult } from './github-home';
 
 function result(source: GitHubHomeResult['activity']['source']): GitHubHomeResult {
@@ -24,13 +27,19 @@ function result(source: GitHubHomeResult['activity']['source']): GitHubHomeResul
       lastUpstreamFetch: '2026-07-27T01:00:00.000Z',
       consecutiveFailures: 2,
       nextRetryAt: '2026-07-27T01:07:00.000Z',
-      rateLimit: null,
+      rateLimit: {
+        limit: 5000,
+        remaining: 4998,
+        used: 2,
+        resetAt: '2026-07-27T02:00:00.000Z',
+        resource: 'graphql',
+      },
     },
   };
 }
 
 describe('createGitHubActivityHeaders', () => {
-  it('keeps live polling out of browser and CDN caches while exposing diagnostics', () => {
+  it('keeps live polling out of browser and CDN caches while exposing bounded diagnostics', () => {
     const headers = createGitHubActivityHeaders(result('public-profile'), 'request-123');
 
     expect(headers.get('cache-control')).toBe('private, no-store, max-age=0');
@@ -46,13 +55,33 @@ describe('createGitHubActivityHeaders', () => {
     expect(headers.get('x-activity-last-upstream-fetch')).toBe('2026-07-27T01:00:00.000Z');
     expect(headers.get('x-activity-next-retry-at')).toBe('2026-07-27T01:07:00.000Z');
     expect(headers.get('x-activity-failures')).toBe('2');
-    expect(headers.has('x-activity-ratelimit-limit')).toBe(false);
     expect(headers.get('x-request-id')).toBe('request-123');
   });
 
-  it('identifies the supported authenticated contribution source', () => {
-    const headers = createGitHubActivityHeaders(result('github-graphql'), 'request-graphql');
+  it('keeps authenticated GitHub rate-limit telemetry out of headers and JSON projections', () => {
+    const privateResult = result('github-graphql');
+    const headers = createGitHubActivityHeaders(privateResult, 'request-graphql');
+    const diagnostics = publicGitHubActivityDiagnostics(privateResult);
+
     expect(headers.get('x-activity-source')).toBe('github-graphql');
+    for (const name of [
+      'x-activity-ratelimit-limit',
+      'x-activity-ratelimit-remaining',
+      'x-activity-ratelimit-used',
+      'x-activity-ratelimit-reset',
+      'x-activity-ratelimit-resource',
+    ]) {
+      expect(headers.has(name)).toBe(false);
+    }
+    expect(diagnostics).toEqual({
+      cacheStatus: 'stale',
+      upstreamSource: 'github-graphql',
+      lastUpstreamAttempt: '2026-07-27T01:05:00.000Z',
+      lastUpstreamFetch: '2026-07-27T01:00:00.000Z',
+      consecutiveFailures: 2,
+      nextRetryAt: '2026-07-27T01:07:00.000Z',
+    });
+    expect('rateLimit' in diagnostics).toBe(false);
   });
 
   it('does not label an unavailable placeholder as generated activity', () => {
