@@ -36,7 +36,7 @@ describe('createRssFeed', () => {
       }),
     ]);
 
-    expect(xml).toStartWith('<?xml version="1.0" encoding="UTF-8"?>');
+    expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
     expect(xml).toContain('<title>teamleaderleo &amp; notes</title>');
     expect(xml).toContain('<description>Posts &lt; journal entries</description>');
     expect(xml).toContain('Newer &lt;post&gt; &amp; &quot;notes&quot;');
