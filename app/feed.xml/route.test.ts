@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const getBlogPosts = vi.fn();
+const { getBlogPosts } = vi.hoisted(() => ({ getBlogPosts: vi.fn() }));
 
 vi.mock('@/app/lib/blog-utils', () => ({ getBlogPosts }));
 vi.mock('@/lib/agent-journal', () => ({
