@@ -57,6 +57,7 @@ export type NavigationProgressAction =
       label: string;
       kind: NavigationKind;
       estimateMs: number;
+      startProgress?: number;
       now: number;
     }
   | { type: 'tick'; now: number }
@@ -219,7 +220,7 @@ export function estimatedNavigationProgress(
     NAVIGATION_INITIAL_PROGRESS +
     (NAVIGATION_PROGRESS_CAP - NAVIGATION_INITIAL_PROGRESS) * (1 - Math.exp(-2.2 * ratio));
 
-  return Math.min(NAVIGATION_PROGRESS_CAP, Math.max(previousProgress, estimated));
+  return Math.max(previousProgress, Math.min(NAVIGATION_PROGRESS_CAP, estimated));
 }
 
 export function transitionNavigationProgress(
@@ -228,15 +229,15 @@ export function transitionNavigationProgress(
 ): NavigationProgressState {
   switch (action.type) {
     case 'start': {
-      const replacesActiveNavigation = state.phase === 'running' || state.phase === 'slow';
+      const inheritedProgress =
+        action.startProgress ??
+        (state.phase === 'idle' ? NAVIGATION_INITIAL_PROGRESS : state.progress);
       return {
         phase: 'running',
         href: action.href,
         label: action.label,
         kind: action.kind,
-        progress: replacesActiveNavigation
-          ? Math.max(state.progress, NAVIGATION_INITIAL_PROGRESS)
-          : NAVIGATION_INITIAL_PROGRESS,
+        progress: Math.min(1, Math.max(NAVIGATION_INITIAL_PROGRESS, inheritedProgress)),
         estimateMs: clampDuration(action.estimateMs),
         startedAt: action.now,
         minVisibleUntil: action.now + NAVIGATION_MIN_VISIBLE_MS,

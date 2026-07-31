@@ -19,6 +19,7 @@
 .navigation-rail {
   height: 2px;
   overflow: hidden;
+  contain: paint;
   background: linear-gradient(90deg, rgb(0 0 0 / 0.04), rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.04));
 }
 
@@ -30,12 +31,16 @@
   height: 100%;
   width: 100%;
   transform-origin: left center;
-  transition: transform 140ms cubic-bezier(0.22, 0.72, 0.28, 1);
   will-change: transform;
   background: linear-gradient(90deg, #595161, #83788f 72%, #b3a8bd);
   box-shadow:
     0 0 8px rgb(111 104 120 / 0.42),
     0 1px 0 rgb(255 255 255 / 0.32) inset;
+}
+
+.navigation-feedback:is([data-navigation-state='completing'], [data-navigation-state='failed'])
+  .navigation-progress {
+  transition: transform 120ms cubic-bezier(0.22, 0.72, 0.28, 1);
 }
 
 .dark .navigation-progress {
@@ -73,6 +78,15 @@
   .navigation-feedback,
   .navigation-progress {
     transition-duration: 1ms;
+  }
+
+  .navigation-feedback:is(
+      [data-navigation-state='running'],
+      [data-navigation-state='slow'],
+      [data-navigation-state='settling']
+    )
+    .navigation-progress {
+    transform: scaleX(0.18) !important;
   }
 
   .navigation-progress {

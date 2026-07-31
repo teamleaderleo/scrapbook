@@ -22,6 +22,7 @@ function startNavigation(
     label: string;
     kind: 'link' | 'programmatic' | 'history';
     estimateMs: number;
+    startProgress: number;
   }> = {},
 ) {
   return transitionNavigationProgress(idleNavigationProgressState, {
@@ -30,17 +31,23 @@ function startNavigation(
     label: overrides.label ?? 'time',
     kind: overrides.kind ?? 'link',
     estimateMs: overrides.estimateMs ?? 900,
+    startProgress: overrides.startProgress,
     now,
   });
 }
 
-function restartNavigation(state: ReturnType<typeof startNavigation>, now = 2_000) {
+function restartNavigation(
+  state: ReturnType<typeof startNavigation>,
+  now = 2_000,
+  startProgress?: number,
+) {
   return transitionNavigationProgress(state, {
     type: 'start',
     href: '/gallery',
     label: 'gallery',
     kind: 'link',
     estimateMs: 900,
+    startProgress,
     now,
   });
 }
@@ -62,30 +69,42 @@ describe('adaptive navigation progress', () => {
     expect(completed.progress).toBe(1);
   });
 
-  it('starts fresh when a second navigation begins during the completion hold', () => {
+  it('preserves the rendered origin when a second navigation begins while settling', () => {
+    const started = startNavigation();
+    const settled = transitionNavigationProgress(started, { type: 'settle', now: 1_080 });
+    const restarted = restartNavigation(settled, 2_000, 0.61);
+    const advanced = transitionNavigationProgress(restarted, { type: 'tick', now: 2_100 });
+
+    expect(settled.phase).toBe('settling');
+    expect(restarted.phase).toBe('running');
+    expect(restarted.progress).toBe(0.61);
+    expect(advanced.progress).toBeGreaterThanOrEqual(restarted.progress);
+  });
+
+  it('preserves the rendered origin during the completion hold', () => {
     const started = startNavigation();
     const completed = transitionNavigationProgress(started, { type: 'settle', now: 1_300 });
-    const restarted = restartNavigation(completed);
+    const restarted = restartNavigation(completed, 2_000, 0.84);
     const advanced = transitionNavigationProgress(restarted, { type: 'tick', now: 2_100 });
 
     expect(completed.phase).toBe('completing');
     expect(completed.progress).toBe(1);
     expect(restarted.phase).toBe('running');
-    expect(restarted.progress).toBe(NAVIGATION_INITIAL_PROGRESS);
+    expect(restarted.progress).toBe(0.84);
     expect(advanced.progress).toBeGreaterThanOrEqual(restarted.progress);
   });
 
-  it('starts fresh when a second navigation begins during the fade', () => {
+  it('preserves the rendered origin during the fade', () => {
     const started = startNavigation();
     const completed = transitionNavigationProgress(started, { type: 'settle', now: 1_300 });
     const fading = transitionNavigationProgress(completed, { type: 'fade' });
-    const restarted = restartNavigation(fading);
+    const restarted = restartNavigation(fading, 2_000, 0.96);
     const advanced = transitionNavigationProgress(restarted, { type: 'tick', now: 2_100 });
 
     expect(fading.phase).toBe('fading');
     expect(fading.progress).toBe(1);
     expect(restarted.phase).toBe('running');
-    expect(restarted.progress).toBe(NAVIGATION_INITIAL_PROGRESS);
+    expect(restarted.progress).toBe(0.96);
     expect(advanced.progress).toBeGreaterThanOrEqual(restarted.progress);
   });
 
@@ -95,6 +114,14 @@ describe('adaptive navigation progress', () => {
     const restarted = restartNavigation(advanced);
 
     expect(restarted.progress).toBe(advanced.progress);
+  });
+
+  it('does not tick backwards when a replacement begins above the normal running cap', () => {
+    const restarted = startNavigation(2_000, { startProgress: 1 });
+    const advanced = transitionNavigationProgress(restarted, { type: 'tick', now: 2_100 });
+
+    expect(restarted.progress).toBe(1);
+    expect(advanced.progress).toBe(1);
   });
 
   it('advances a medium navigation monotonically from its duration estimate', () => {
