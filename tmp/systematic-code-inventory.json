@@ -1,0 +1,1659 @@
+{
+  "summary": {
+    "source_files": 243,
+    "direct_dependencies": 79,
+    "zero_inbound_candidates": 34,
+    "direct_dependencies_without_detected_reference": 15,
+    "unresolved_internal_specifiers": 16,
+    "unlisted_package_specifiers": 13
+  },
+  "direct_dependencies_without_detected_reference": [
+    "@radix-ui/react-tabs",
+    "@radix-ui/react-toast",
+    "@tailwindcss/forms",
+    "@tiptap/pm",
+    "@types/node",
+    "@types/react",
+    "@types/react-dom",
+    "@types/sanitize-html",
+    "@types/three",
+    "babel-plugin-react-compiler",
+    "cross-env",
+    "fuse.js",
+    "next-mdx-remote",
+    "ts-node",
+    "zod"
+  ],
+  "direct_dependency_usage": [
+    {
+      "name": "@next/bundle-analyzer",
+      "version": "^16.0.0",
+      "import_references": [
+        "next.config.mjs"
+      ],
+      "literal_mentions": [
+        "next.config.mjs"
+      ]
+    },
+    {
+      "name": "@playwright/test",
+      "version": "^1.56.1",
+      "import_references": [
+        "playwright.config.ts",
+        "tests/e2e/activity-field-lab.spec.ts",
+        "tests/e2e/activity-paper-marks.spec.ts",
+        "tests/e2e/agent-journal.spec.ts",
+        "tests/e2e/gallery-visual.spec.ts",
+        "tests/e2e/guestbook.spec.ts",
+        "tests/e2e/homepage-density.spec.ts",
+        "tests/e2e/legacy-login-retirement.spec.ts",
+        "tests/e2e/material-system.spec.ts",
+        "tests/e2e/navigation-feedback.spec.ts",
+        "tests/e2e/paper-raking-light.spec.ts",
+        "tests/e2e/restored-home-time-contracts.spec.ts",
+        "tests/e2e/resume-retirement.spec.ts",
+        "tests/e2e/retired-claude.spec.ts",
+        "tests/e2e/retired-dashboard.spec.ts",
+        "tests/e2e/sigil-lab.spec.ts",
+        "tests/e2e/site-navigation.spec.ts",
+        "tests/e2e/smoke.spec.ts",
+        "tests/e2e/snow-globe.spec.ts",
+        "tests/e2e/time-picker.spec.ts",
+        "tests/e2e/visual-shell.spec.ts"
+      ],
+      "literal_mentions": [
+        "playwright.config.ts",
+        "tests/e2e/activity-field-lab.spec.ts",
+        "tests/e2e/activity-paper-marks.spec.ts",
+        "tests/e2e/agent-journal.spec.ts",
+        "tests/e2e/gallery-visual.spec.ts",
+        "tests/e2e/guestbook.spec.ts",
+        "tests/e2e/homepage-density.spec.ts",
+        "tests/e2e/legacy-login-retirement.spec.ts",
+        "tests/e2e/material-system.spec.ts",
+        "tests/e2e/navigation-feedback.spec.ts",
+        "tests/e2e/paper-raking-light.spec.ts",
+        "tests/e2e/restored-home-time-contracts.spec.ts",
+        "tests/e2e/resume-retirement.spec.ts",
+        "tests/e2e/retired-claude.spec.ts",
+        "tests/e2e/retired-dashboard.spec.ts",
+        "tests/e2e/sigil-lab.spec.ts",
+        "tests/e2e/site-navigation.spec.ts",
+        "tests/e2e/smoke.spec.ts",
+        "tests/e2e/snow-globe.spec.ts",
+        "tests/e2e/time-picker.spec.ts",
+        "tests/e2e/visual-shell.spec.ts"
+      ]
+    },
+    {
+      "name": "@radix-ui/react-avatar",
+      "version": "^1.1.10",
+      "import_references": [
+        "components/ui/assets/avatar.tsx"
+      ],
+      "literal_mentions": [
+        "components/ui/assets/avatar.tsx"
+      ]
+    },
+    {
+      "name": "@radix-ui/react-checkbox",
+      "version": "^1.3.3",
+      "import_references": [
+        "components/ui/checkbox.tsx"
+      ],
+      "literal_mentions": [
+        "components/ui/checkbox.tsx"
+      ]
+    },
+    {
+      "name": "@radix-ui/react-dialog",
+      "version": "^1.1.15",
+      "import_references": [
+        "components/site-atlas.tsx",
+        "components/ui/command.tsx",
+        "components/ui/dialog.tsx",
+        "components/ui/sheet.tsx"
+      ],
+      "literal_mentions": [
+        "components/site-atlas.tsx",
+        "components/ui/command.tsx",
+        "components/ui/dialog.tsx",
+        "components/ui/sheet.tsx"
+      ]
+    },
+    {
+      "name": "@radix-ui/react-dropdown-menu",
+      "version": "^2.1.16",
+      "import_references": [
+        "components/ui/dropdown-menu.tsx"
+      ],
+      "literal_mentions": [
+        "components/ui/dropdown-menu.tsx"
+      ]
+    },
+    {
+      "name": "@radix-ui/react-popover",
+      "version": "^1.1.15",
+      "import_references": [
+        "components/ui/popover.tsx"
+      ],
+      "literal_mentions": [
+        "components/ui/popover.tsx"
+      ]
+    },
+    {
+      "name": "@radix-ui/react-scroll-area",
+      "version": "^1.2.10",
+      "import_references": [
+        "components/ui/scroll-area.tsx"
+      ],
+      "literal_mentions": [
+        "components/ui/scroll-area.tsx"
+      ]
+    },
+    {
+      "name": "@radix-ui/react-select",
+      "version": "^2.2.6",
+      "import_references": [
+        "components/ui/select.tsx"
+      ],
+      "literal_mentions": [
+        "components/ui/select.tsx"
+      ]
+    },
+    {
+      "name": "@radix-ui/react-separator",
+      "version": "^1.1.7",
+      "import_references": [
+        "components/ui/separator.tsx"
+      ],
+      "literal_mentions": [
+        "components/ui/separator.tsx"
+      ]
+    },
+    {
+      "name": "@radix-ui/react-slot",
+      "version": "^1.2.3",
+      "import_references": [
+        "components/ui/button.tsx",
+        "components/ui/sidebar.tsx"
+      ],
+      "literal_mentions": [
+        "components/ui/button.tsx",
+        "components/ui/sidebar.tsx"
+      ]
+    },
+    {
+      "name": "@radix-ui/react-switch",
+      "version": "^1.2.6",
+      "import_references": [
+        "components/ui/switch.tsx"
+      ],
+      "literal_mentions": [
+        "components/ui/switch.tsx"
+      ]
+    },
+    {
+      "name": "@radix-ui/react-tabs",
+      "version": "^1.1.13",
+      "import_references": [],
+      "literal_mentions": []
+    },
+    {
+      "name": "@radix-ui/react-toast",
+      "version": "^1.2.15",
+      "import_references": [],
+      "literal_mentions": []
+    },
+    {
+      "name": "@radix-ui/react-tooltip",
+      "version": "^1.2.8",
+      "import_references": [
+        "components/ui/tooltip.tsx"
+      ],
+      "literal_mentions": [
+        "components/ui/tooltip.tsx"
+      ]
+    },
+    {
+      "name": "@radix-ui/react-visually-hidden",
+      "version": "^1.2.3",
+      "import_references": [
+        "components/space/search-command.tsx"
+      ],
+      "literal_mentions": [
+        "components/space/search-command.tsx"
+      ]
+    },
+    {
+      "name": "@react-three/drei",
+      "version": "^10.7.6",
+      "import_references": [
+        "components/three-carousel/DragPreventer.tsx",
+        "components/three-carousel/WrapFixer.tsx",
+        "components/three-carousel/three-carousel.tsx"
+      ],
+      "literal_mentions": [
+        "components/three-carousel/DragPreventer.tsx",
+        "components/three-carousel/WrapFixer.tsx",
+        "components/three-carousel/three-carousel.tsx"
+      ]
+    },
+    {
+      "name": "@react-three/fiber",
+      "version": "^9.4.0",
+      "import_references": [
+        "components/three-carousel/scene-3d.tsx",
+        "components/three-carousel/three-carousel.tsx"
+      ],
+      "literal_mentions": [
+        "components/three-carousel/scene-3d.tsx",
+        "components/three-carousel/three-carousel.tsx"
+      ]
+    },
+    {
+      "name": "@shikijs/monaco",
+      "version": "^3.13.0",
+      "import_references": [
+        "components/space/monaco-editor-panel.tsx"
+      ],
+      "literal_mentions": [
+        "components/space/monaco-editor-panel.tsx"
+      ]
+    },
+    {
+      "name": "@supabase/ssr",
+      "version": "^0.7.0",
+      "import_references": [
+        "utils/supabase/client.ts",
+        "utils/supabase/middleware.ts",
+        "utils/supabase/server.ts"
+      ],
+      "literal_mentions": [
+        "utils/supabase/client.ts",
+        "utils/supabase/middleware.ts",
+        "utils/supabase/server.ts"
+      ]
+    },
+    {
+      "name": "@supabase/supabase-js",
+      "version": "^2.76.1",
+      "import_references": [
+        "app/lib/auth/admin.ts",
+        "app/lib/contexts/item-context.tsx",
+        "app/lib/db/supabase.ts",
+        "app/lib/hooks/useAuth.ts"
+      ],
+      "literal_mentions": [
+        "app/lib/auth/admin.ts",
+        "app/lib/contexts/item-context.tsx",
+        "app/lib/db/supabase.ts",
+        "app/lib/hooks/useAuth.ts"
+      ]
+    },
+    {
+      "name": "@tailwindcss/forms",
+      "version": "^0.5.10",
+      "import_references": [],
+      "literal_mentions": []
+    },
+    {
+      "name": "@tailwindcss/typography",
+      "version": "^0.5.19",
+      "import_references": [
+        "tailwind.config.ts"
+      ],
+      "literal_mentions": [
+        "tailwind.config.ts"
+      ]
+    },
+    {
+      "name": "@tiptap/extension-placeholder",
+      "version": "^2.26.3",
+      "import_references": [
+        "components/dashboard/footer-tiptap-editor.tsx"
+      ],
+      "literal_mentions": [
+        "components/dashboard/footer-tiptap-editor.tsx"
+      ]
+    },
+    {
+      "name": "@tiptap/pm",
+      "version": "^2.26.3",
+      "import_references": [],
+      "literal_mentions": []
+    },
+    {
+      "name": "@tiptap/react",
+      "version": "^2.26.3",
+      "import_references": [
+        "components/dashboard/footer-tiptap-editor.tsx",
+        "components/editor/content-preview.tsx",
+        "components/projects/components/tiptap-editor-project-blocks.tsx"
+      ],
+      "literal_mentions": [
+        "components/dashboard/footer-tiptap-editor.tsx",
+        "components/editor/content-preview.tsx",
+        "components/projects/components/tiptap-editor-project-blocks.tsx"
+      ]
+    },
+    {
+      "name": "@tiptap/starter-kit",
+      "version": "^2.26.3",
+      "import_references": [
+        "components/dashboard/footer-tiptap-editor.tsx",
+        "components/editor/content-preview.tsx",
+        "components/projects/components/tiptap-editor-project-blocks.tsx"
+      ],
+      "literal_mentions": [
+        "components/dashboard/footer-tiptap-editor.tsx",
+        "components/editor/content-preview.tsx",
+        "components/projects/components/tiptap-editor-project-blocks.tsx"
+      ]
+    },
+    {
+      "name": "@types/node",
+      "version": "24.6.2",
+      "import_references": [],
+      "literal_mentions": []
+    },
+    {
+      "name": "@types/react",
+      "version": "19.2.7",
+      "import_references": [],
+      "literal_mentions": []
+    },
+    {
+      "name": "@types/react-dom",
+      "version": "19.2.3",
+      "import_references": [],
+      "literal_mentions": []
+    },
+    {
+      "name": "@types/sanitize-html",
+      "version": "^2.16.0",
+      "import_references": [],
+      "literal_mentions": []
+    },
+    {
+      "name": "@types/three",
+      "version": "^0.176.0",
+      "import_references": [],
+      "literal_mentions": []
+    },
+    {
+      "name": "@vercel/analytics",
+      "version": "^1.5.0",
+      "import_references": [
+        "app/layout.tsx"
+      ],
+      "literal_mentions": [
+        "app/layout.tsx"
+      ]
+    },
+    {
+      "name": "@vercel/speed-insights",
+      "version": "^1.2.0",
+      "import_references": [
+        "app/layout.tsx"
+      ],
+      "literal_mentions": [
+        "app/layout.tsx",
+        "pnpm-workspace.yaml"
+      ]
+    },
+    {
+      "name": "autoprefixer",
+      "version": "10.4.15",
+      "import_references": [],
+      "literal_mentions": [
+        "postcss.config.js"
+      ]
+    },
+    {
+      "name": "babel-plugin-react-compiler",
+      "version": "^1.0.0",
+      "import_references": [],
+      "literal_mentions": []
+    },
+    {
+      "name": "class-variance-authority",
+      "version": "^0.7.1",
+      "import_references": [
+        "components/ui/alert.tsx",
+        "components/ui/badge.tsx",
+        "components/ui/button.tsx",
+        "components/ui/sheet.tsx",
+        "components/ui/sidebar.tsx"
+      ],
+      "literal_mentions": [
+        "components/ui/alert.tsx",
+        "components/ui/badge.tsx",
+        "components/ui/button.tsx",
+        "components/ui/sheet.tsx",
+        "components/ui/sidebar.tsx"
+      ]
+    },
+    {
+      "name": "clsx",
+      "version": "^2.1.1",
+      "import_references": [
+        "lib/utils.ts"
+      ],
+      "literal_mentions": [
+        "lib/utils.ts"
+      ]
+    },
+    {
+      "name": "cmdk",
+      "version": "^1.1.1",
+      "import_references": [
+        "components/ui/command.tsx"
+      ],
+      "literal_mentions": [
+        "components/timezone-selector.tsx",
+        "components/ui/command.tsx",
+        "tests/e2e/time-picker.spec.ts"
+      ]
+    },
+    {
+      "name": "cross-env",
+      "version": "^10.1.0",
+      "import_references": [],
+      "literal_mentions": []
+    },
+    {
+      "name": "dotenv",
+      "version": "^16.6.1",
+      "import_references": [
+        "app/lib/db/db.ts",
+        "drizzle.config.ts"
+      ],
+      "literal_mentions": [
+        "app/lib/db/db.ts",
+        "drizzle.config.ts"
+      ]
+    },
+    {
+      "name": "drizzle-kit",
+      "version": "^0.31.5",
+      "import_references": [
+        "drizzle.config.ts"
+      ],
+      "literal_mentions": [
+        "drizzle.config.ts"
+      ]
+    },
+    {
+      "name": "drizzle-orm",
+      "version": "^0.44.6",
+      "import_references": [
+        "app/lib/db/db.ts",
+        "app/lib/db/schema.ts"
+      ],
+      "literal_mentions": [
+        "app/lib/db/db.ts",
+        "app/lib/db/schema.ts"
+      ]
+    },
+    {
+      "name": "eslint",
+      "version": "^9.39.4",
+      "import_references": [],
+      "literal_mentions": [
+        ".github/workflows/systematic-code-inventory.yml",
+        "components/three-carousel/three-carousel.tsx",
+        "eslint.config.mjs"
+      ]
+    },
+    {
+      "name": "eslint-config-next",
+      "version": "16.0.7",
+      "import_references": [
+        "eslint.config.mjs"
+      ],
+      "literal_mentions": [
+        "eslint.config.mjs"
+      ]
+    },
+    {
+      "name": "file-type",
+      "version": "^19.6.0",
+      "import_references": [
+        "scripts/import-gallery-asset.mjs"
+      ],
+      "literal_mentions": [
+        "scripts/import-gallery-asset.mjs"
+      ]
+    },
+    {
+      "name": "framer-motion",
+      "version": "^12.23.24",
+      "import_references": [
+        "components/home/activity-scoreboard.tsx",
+        "components/home/scrapbook-pet.tsx",
+        "components/paper-creature.tsx"
+      ],
+      "literal_mentions": [
+        "components/home/activity-scoreboard.tsx",
+        "components/home/scrapbook-pet.tsx",
+        "components/paper-creature.tsx"
+      ]
+    },
+    {
+      "name": "fuse.js",
+      "version": "^7.1.0",
+      "import_references": [],
+      "literal_mentions": []
+    },
+    {
+      "name": "gray-matter",
+      "version": "^4.0.3",
+      "import_references": [
+        "app/lib/utils/cards.ts"
+      ],
+      "literal_mentions": [
+        "app/lib/utils/cards.ts"
+      ]
+    },
+    {
+      "name": "lucide-react",
+      "version": "^0.399.0",
+      "import_references": [
+        "app/activity-lab/page.tsx",
+        "app/atelier/page.tsx",
+        "app/page.tsx",
+        "app/sigil-lab/page.tsx",
+        "components/hardcoded-sticky-note.tsx",
+        "components/projects/components/tag-manager.tsx",
+        "components/simple-auth-modal.tsx",
+        "components/site-atlas.tsx",
+        "components/site-nav-interactive.tsx",
+        "components/snow-globe/snow-globe.tsx",
+        "components/space/app-sidebar.tsx",
+        "components/space/code-display.tsx",
+        "components/space/item-form.tsx",
+        "components/space/metadata-json-editor.tsx",
+        "components/space/search-command.tsx",
+        "components/space/space-header.tsx",
+        "components/space/space-results-client.tsx",
+        "components/space/version-tabs.tsx",
+        "components/theme-toggle.tsx",
+        "components/timezone-selector.tsx",
+        "components/ui/checkbox.tsx",
+        "components/ui/command.tsx",
+        "components/ui/dialog.tsx",
+        "components/ui/dropdown-menu.tsx",
+        "components/ui/pagination.tsx",
+        "components/ui/select.tsx",
+        "components/ui/sheet.tsx",
+        "components/ui/sidebar.tsx"
+      ],
+      "literal_mentions": [
+        "app/activity-lab/page.tsx",
+        "app/atelier/page.tsx",
+        "app/page.tsx",
+        "app/sigil-lab/page.tsx",
+        "components/hardcoded-sticky-note.tsx",
+        "components/projects/components/tag-manager.tsx",
+        "components/simple-auth-modal.tsx",
+        "components/site-atlas.tsx",
+        "components/site-nav-interactive.tsx",
+        "components/snow-globe/snow-globe.tsx",
+        "components/space/app-sidebar.tsx",
+        "components/space/code-display.tsx",
+        "components/space/item-form.tsx",
+        "components/space/metadata-json-editor.tsx",
+        "components/space/search-command.tsx",
+        "components/space/space-header.tsx",
+        "components/space/space-results-client.tsx",
+        "components/space/version-tabs.tsx",
+        "components/theme-toggle.tsx",
+        "components/timezone-selector.tsx",
+        "components/ui/checkbox.tsx",
+        "components/ui/command.tsx",
+        "components/ui/dialog.tsx",
+        "components/ui/dropdown-menu.tsx",
+        "components/ui/pagination.tsx",
+        "components/ui/select.tsx",
+        "components/ui/sheet.tsx",
+        "components/ui/sidebar.tsx",
+        "next.config.mjs"
+      ]
+    },
+    {
+      "name": "maath",
+      "version": "^0.10.8",
+      "import_references": [
+        "components/three-carousel/three-carousel.tsx"
+      ],
+      "literal_mentions": [
+        "components/three-carousel/three-carousel.tsx"
+      ]
+    },
+    {
+      "name": "marked",
+      "version": "^16.4.1",
+      "import_references": [
+        "app/lib/utils/markdown.ts"
+      ],
+      "literal_mentions": [
+        ".github/workflows/vercel-preview-opt-in.yml",
+        "app/lib/utils/markdown.ts",
+        "docs/deployment-workflow.md"
+      ]
+    },
+    {
+      "name": "monaco-editor",
+      "version": "^0.54.0",
+      "import_references": [
+        "components/space/monaco-editor-panel.tsx"
+      ],
+      "literal_mentions": [
+        "app/space/layout.tsx",
+        "components/space/monaco-editor-panel.tsx"
+      ]
+    },
+    {
+      "name": "next",
+      "version": "16.0.7",
+      "import_references": [
+        "app/activity-lab/page.tsx",
+        "app/api/github-activity/route.ts",
+        "app/api/proxy-health/diagnostic/route.ts",
+        "app/api/proxy-health/ingest/route.ts",
+        "app/api/proxy-health/latest/route.ts",
+        "app/atelier/page.tsx",
+        "app/auth/callback/route.ts",
+        "app/error.tsx",
+        "app/gallery/page.tsx",
+        "app/journal/page.tsx",
+        "app/layout.tsx",
+        "app/lib/hooks/useKeyNav.ts",
+        "app/page.tsx",
+        "app/proxy-dashboard/page.tsx",
+        "app/robots.ts",
+        "app/sigil-lab/page.tsx",
+        "app/sitemap.ts",
+        "app/snow-globe/page.tsx",
+        "app/space/actions.ts",
+        "app/space/edit/[slug]/page.tsx",
+        "app/space/layout.tsx",
+        "app/time/page.tsx",
+        "components/gallery-scene.tsx",
+        "components/minimal-site-nav.tsx",
+        "components/navigation-feedback.tsx",
+        "components/proxy/check-in-status.tsx",
+        "components/proxy/proxy-live-refresh.tsx",
+        "components/proxy/usage-dashboard-container.tsx",
+        "components/search-params-handler.tsx",
+        "components/site-atlas.tsx",
+        "components/site-nav-interactive.tsx",
+        "components/space/app-sidebar.tsx",
+        "components/space/item-form.tsx",
+        "components/space/review-gallery.tsx",
+        "components/space/search-command.tsx",
+        "components/space/space-header.tsx",
+        "components/space/space-link-hint.tsx",
+        "components/space/space-results-client.tsx",
+        "components/space/space-view.tsx",
+        "components/ui/assets/fonts.ts",
+        "lib/github-home.ts",
+        "next.config.mjs",
+        "proxy.ts",
+        "utils/supabase/middleware.ts",
+        "utils/supabase/server.ts"
+      ],
+      "literal_mentions": [
+        ".github/workflows/systematic-code-inventory.yml",
+        "README.md",
+        "app/activity-lab/page.tsx",
+        "app/api/github-activity/route.ts",
+        "app/api/proxy-health/diagnostic/route.ts",
+        "app/api/proxy-health/ingest/route.ts",
+        "app/api/proxy-health/latest/route.ts",
+        "app/atelier/page.tsx",
+        "app/auth/callback/route.ts",
+        "app/error.tsx",
+        "app/gallery/page.tsx",
+        "app/journal/page.tsx",
+        "app/layout.tsx",
+        "app/lib/definitions/space.ts",
+        "app/lib/fsrs-adapter.test.ts",
+        "app/lib/hooks/useKeyNav.ts",
+        "app/lib/review-overrides.ts",
+        "app/lib/review-types.ts",
+        "app/page.tsx",
+        "app/proxy-dashboard/page.tsx",
+        "app/robots.ts",
+        "app/sigil-lab/page.tsx",
+        "app/sitemap.ts",
+        "app/snow-globe/page.tsx",
+        "app/space/actions.ts",
+        "app/space/edit/[slug]/page.tsx",
+        "app/space/layout.tsx",
+        "app/time/page.tsx",
+        "components/gallery-scene.tsx",
+        "components/hardcoded-sticky-note.tsx",
+        "components/home/activity-dashboard.tsx",
+        "components/labs/activity-field-lab.tsx",
+        "components/labs/agent-sigil-lab.tsx",
+        "components/labs/kumiko-sigil-lab.tsx",
+        "components/minimal-site-nav.tsx",
+        "components/navigation-feedback.tsx",
+        "components/proxy/check-in-status.tsx",
+        "components/proxy/proxy-live-refresh.tsx",
+        "components/proxy/usage-dashboard-container.tsx",
+        "components/search-params-handler.tsx",
+        "components/site-atlas.tsx",
+        "components/site-nav-interactive.tsx",
+        "components/snow-globe/snow-globe.tsx",
+        "components/space/app-sidebar.tsx",
+        "components/space/code-editor.tsx",
+        "components/space/item-form.tsx",
+        "components/space/monaco-editor-panel.tsx",
+        "components/space/review-gallery.tsx",
+        "components/space/search-command.tsx",
+        "components/space/space-header.tsx",
+        "components/space/space-link-hint.tsx",
+        "components/space/space-results-client.tsx",
+        "components/space/space-view.tsx",
+        "components/theme-provider.tsx",
+        "components/theme-toggle.tsx",
+        "components/three-carousel/three-carousel.tsx",
+        "components/ui/assets/fonts.ts",
+        "components/ui/pagination.tsx",
+        "components/ui/sonner.tsx",
+        "docs/agent-check-ins.md",
+        "docs/archive/agent-check-in-orchestration-artwork-v1.md",
+        "docs/archive/agent-check-ins-artwork-v1.md",
+        "docs/bundle-analysis.md",
+        "docs/github-activity-cache.md",
+        "eslint.config.mjs",
+        "lib/agent-guestbook.ts",
+        "lib/agent-kumiko-sigils.ts",
+        "lib/github-activity-response.test.ts",
+        "lib/github-activity-response.ts",
+        "lib/github-home.ts",
+        "lib/proxy-usage-window.ts",
+        "lib/stale-while-error-cache.test.ts",
+        "lib/stale-while-error-cache.ts",
+        "lib/visual-viewport-restoration.test.ts",
+        "next.config.mjs",
+        "proxy.ts",
+        "public/journal/2026-07-30-confidence-and-humility.md",
+        "scripts/patch-react-dom-class-compare.js",
+        "tests/e2e/homepage-density.spec.ts",
+        "tests/e2e/time-picker.spec.ts",
+        "tsconfig.json",
+        "utils/supabase/middleware.ts",
+        "utils/supabase/server.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "name": "next-mdx-remote",
+      "version": "^6.0.0",
+      "import_references": [],
+      "literal_mentions": []
+    },
+    {
+      "name": "next-themes",
+      "version": "^0.4.6",
+      "import_references": [
+        "components/site-atlas.tsx",
+        "components/space/code-editor.tsx",
+        "components/space/monaco-editor-panel.tsx",
+        "components/theme-provider.tsx",
+        "components/theme-toggle.tsx",
+        "components/ui/sonner.tsx"
+      ],
+      "literal_mentions": [
+        "components/site-atlas.tsx",
+        "components/space/code-editor.tsx",
+        "components/space/monaco-editor-panel.tsx",
+        "components/theme-provider.tsx",
+        "components/theme-toggle.tsx",
+        "components/ui/sonner.tsx"
+      ]
+    },
+    {
+      "name": "playwright",
+      "version": "^1.56.1",
+      "import_references": [],
+      "literal_mentions": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/systematic-code-inventory.yml",
+        ".github/workflows/webkit-compatibility.yml",
+        "README.md",
+        "docs/archive/agent-check-ins-artwork-v1.md",
+        "docs/gallery-artwork.md",
+        "playwright.config.ts",
+        "tests/e2e/activity-field-lab.spec.ts",
+        "tests/e2e/activity-paper-marks.spec.ts",
+        "tests/e2e/agent-journal.spec.ts",
+        "tests/e2e/gallery-visual.spec.ts",
+        "tests/e2e/guestbook.spec.ts",
+        "tests/e2e/homepage-density.spec.ts",
+        "tests/e2e/legacy-login-retirement.spec.ts",
+        "tests/e2e/material-system.spec.ts",
+        "tests/e2e/navigation-feedback.spec.ts",
+        "tests/e2e/paper-raking-light.spec.ts",
+        "tests/e2e/restored-home-time-contracts.spec.ts",
+        "tests/e2e/resume-retirement.spec.ts",
+        "tests/e2e/retired-claude.spec.ts",
+        "tests/e2e/retired-dashboard.spec.ts",
+        "tests/e2e/sigil-lab.spec.ts",
+        "tests/e2e/site-navigation.spec.ts",
+        "tests/e2e/smoke.spec.ts",
+        "tests/e2e/snow-globe.spec.ts",
+        "tests/e2e/time-picker.spec.ts",
+        "tests/e2e/visual-shell.spec.ts"
+      ]
+    },
+    {
+      "name": "postcss",
+      "version": "8.4.31",
+      "import_references": [],
+      "literal_mentions": [
+        ".github/workflows/systematic-code-inventory.yml"
+      ]
+    },
+    {
+      "name": "postgres",
+      "version": "^3.4.7",
+      "import_references": [
+        "app/lib/db/db.ts"
+      ],
+      "literal_mentions": [
+        "app/lib/db/db.ts",
+        "docs/proxy-health-dashboard.md",
+        "drizzle.config.ts",
+        "drizzle/meta/_journal.json"
+      ]
+    },
+    {
+      "name": "prettier",
+      "version": "^3.6.2",
+      "import_references": [],
+      "literal_mentions": [
+        "README.md",
+        "prettier.config.js"
+      ]
+    },
+    {
+      "name": "prettier-plugin-tailwindcss",
+      "version": "0.5.4",
+      "import_references": [],
+      "literal_mentions": [
+        "prettier.config.js"
+      ]
+    },
+    {
+      "name": "random-words",
+      "version": "^2.0.1",
+      "import_references": [
+        "components/three-carousel/three-carousel.tsx"
+      ],
+      "literal_mentions": [
+        "components/three-carousel/three-carousel.tsx"
+      ]
+    },
+    {
+      "name": "react",
+      "version": "19.2.1",
+      "import_references": [
+        "app/atelier/page.tsx",
+        "app/error.tsx",
+        "app/layout.tsx",
+        "app/lib/contexts/item-context.tsx",
+        "app/lib/hooks/useAuth.ts",
+        "app/lib/hooks/useKeyNav.ts",
+        "app/lib/hooks/useNow.ts",
+        "app/page.tsx",
+        "app/service-worker-cleanup.tsx",
+        "app/space/edit/[slug]/page.tsx",
+        "app/space/layout.tsx",
+        "components/cozy-flourishes.tsx",
+        "components/current-time-display.tsx",
+        "components/dashboard/footer-tiptap-editor.tsx",
+        "components/editor/content-preview.tsx",
+        "components/hardcoded-sticky-note.tsx",
+        "components/home/activity-dashboard.tsx",
+        "components/home/activity-grid.tsx",
+        "components/home/activity-scoreboard.tsx",
+        "components/home/scrapbook-pet.tsx",
+        "components/home/wind-lift-card.tsx",
+        "components/icons/discord-icon.tsx",
+        "components/icons/github-icon.tsx",
+        "components/icons/google-icon.tsx",
+        "components/icons/reddit-icon.tsx",
+        "components/labs/activity-field-lab.tsx",
+        "components/material/material-primitives.tsx",
+        "components/navigation-feedback.tsx",
+        "components/projects/components/tag-manager.tsx",
+        "components/projects/components/tiptap-editor-project-blocks.tsx",
+        "components/projects/error.tsx",
+        "components/proxy/proxy-live-refresh.tsx",
+        "components/proxy/usage-dashboard.tsx",
+        "components/proxy/usage-page.tsx",
+        "components/search-params-handler.tsx",
+        "components/simple-auth-modal.tsx",
+        "components/site-nav-interactive.tsx",
+        "components/snow-globe/snow-globe.tsx",
+        "components/space/app-sidebar.tsx",
+        "components/space/code-display.tsx",
+        "components/space/code-editor.tsx",
+        "components/space/item-form.tsx",
+        "components/space/metadata-json-editor.tsx",
+        "components/space/monaco-editor-panel.tsx",
+        "components/space/review-gallery.tsx",
+        "components/space/search-command.tsx",
+        "components/space/space-header.tsx",
+        "components/space/space-results-client.tsx",
+        "components/space/space-view.tsx",
+        "components/theme-provider.tsx",
+        "components/three-carousel/DragPreventer.tsx",
+        "components/three-carousel/WrapFixer.tsx",
+        "components/three-carousel/scene-3d.tsx",
+        "components/three-carousel/three-carousel.tsx",
+        "components/time-conversion-visualizer.tsx",
+        "components/timezone-selector.tsx",
+        "components/ui/alert.tsx",
+        "components/ui/assets/avatar.tsx",
+        "components/ui/badge.tsx",
+        "components/ui/button.tsx",
+        "components/ui/card.tsx",
+        "components/ui/checkbox.tsx",
+        "components/ui/command.tsx",
+        "components/ui/dialog.tsx",
+        "components/ui/dropdown-menu.tsx",
+        "components/ui/input.tsx",
+        "components/ui/pagination.tsx",
+        "components/ui/popover.tsx",
+        "components/ui/scroll-area.tsx",
+        "components/ui/select.tsx",
+        "components/ui/separator.tsx",
+        "components/ui/sheet.tsx",
+        "components/ui/sidebar.tsx",
+        "components/ui/switch.tsx",
+        "components/ui/table.tsx",
+        "components/ui/textarea.tsx",
+        "components/ui/tooltip.tsx",
+        "components/viewport-page-shell.tsx",
+        "hooks/use-mobile.tsx"
+      ],
+      "literal_mentions": [
+        "app/activity-lab/page.tsx",
+        "app/atelier/page.tsx",
+        "app/error.tsx",
+        "app/layout.tsx",
+        "app/lib/contexts/item-context.tsx",
+        "app/lib/hooks/useAuth.ts",
+        "app/lib/hooks/useKeyNav.ts",
+        "app/lib/hooks/useNow.ts",
+        "app/page.tsx",
+        "app/service-worker-cleanup.tsx",
+        "app/sigil-lab/page.tsx",
+        "app/space/edit/[slug]/page.tsx",
+        "app/space/layout.tsx",
+        "components/cozy-flourishes.tsx",
+        "components/current-time-display.tsx",
+        "components/dashboard/footer-tiptap-editor.tsx",
+        "components/editor/content-preview.tsx",
+        "components/hardcoded-sticky-note.tsx",
+        "components/home/activity-dashboard.tsx",
+        "components/home/activity-grid.tsx",
+        "components/home/activity-scoreboard.tsx",
+        "components/home/scrapbook-pet.tsx",
+        "components/home/wind-lift-card.tsx",
+        "components/icons/discord-icon.tsx",
+        "components/icons/github-icon.tsx",
+        "components/icons/google-icon.tsx",
+        "components/icons/reddit-icon.tsx",
+        "components/labs/activity-field-lab.tsx",
+        "components/material/material-primitives.tsx",
+        "components/navigation-feedback.tsx",
+        "components/projects/components/tag-manager.tsx",
+        "components/projects/components/tiptap-editor-project-blocks.tsx",
+        "components/projects/error.tsx",
+        "components/proxy/proxy-live-refresh.tsx",
+        "components/proxy/usage-dashboard.tsx",
+        "components/proxy/usage-page.tsx",
+        "components/search-params-handler.tsx",
+        "components/simple-auth-modal.tsx",
+        "components/site-atlas.tsx",
+        "components/site-nav-interactive.tsx",
+        "components/snow-globe/snow-globe.tsx",
+        "components/space/app-sidebar.tsx",
+        "components/space/code-display.tsx",
+        "components/space/code-editor.tsx",
+        "components/space/item-form.tsx",
+        "components/space/metadata-json-editor.tsx",
+        "components/space/monaco-editor-panel.tsx",
+        "components/space/review-gallery.tsx",
+        "components/space/search-command.tsx",
+        "components/space/space-header.tsx",
+        "components/space/space-results-client.tsx",
+        "components/space/space-view.tsx",
+        "components/space/version-tabs.tsx",
+        "components/theme-provider.tsx",
+        "components/theme-toggle.tsx",
+        "components/three-carousel/DragPreventer.tsx",
+        "components/three-carousel/WrapFixer.tsx",
+        "components/three-carousel/scene-3d.tsx",
+        "components/three-carousel/three-carousel.tsx",
+        "components/time-conversion-visualizer.tsx",
+        "components/timezone-selector.tsx",
+        "components/ui/alert.tsx",
+        "components/ui/assets/avatar.tsx",
+        "components/ui/badge.tsx",
+        "components/ui/button.tsx",
+        "components/ui/card.tsx",
+        "components/ui/checkbox.tsx",
+        "components/ui/command.tsx",
+        "components/ui/dialog.tsx",
+        "components/ui/dropdown-menu.tsx",
+        "components/ui/input.tsx",
+        "components/ui/pagination.tsx",
+        "components/ui/popover.tsx",
+        "components/ui/scroll-area.tsx",
+        "components/ui/select.tsx",
+        "components/ui/separator.tsx",
+        "components/ui/sheet.tsx",
+        "components/ui/sidebar.tsx",
+        "components/ui/switch.tsx",
+        "components/ui/table.tsx",
+        "components/ui/textarea.tsx",
+        "components/ui/tooltip.tsx",
+        "components/viewport-page-shell.tsx",
+        "docs/agent-sigils.md",
+        "eslint.config.mjs",
+        "hooks/use-mobile.tsx",
+        "next.config.mjs",
+        "scripts/patch-react-dom-class-compare.js",
+        "tsconfig.json"
+      ]
+    },
+    {
+      "name": "react-dom",
+      "version": "19.2.1",
+      "import_references": [],
+      "literal_mentions": [
+        "scripts/patch-react-dom-class-compare.js"
+      ]
+    },
+    {
+      "name": "react-markdown",
+      "version": "^9.1.0",
+      "import_references": [],
+      "literal_mentions": [
+        "next.config.mjs"
+      ]
+    },
+    {
+      "name": "sanitize-html",
+      "version": "^2.17.0",
+      "import_references": [
+        "app/lib/utils/markdown.ts"
+      ],
+      "literal_mentions": [
+        "app/lib/utils/markdown.ts"
+      ]
+    },
+    {
+      "name": "sharp",
+      "version": "^0.33.5",
+      "import_references": [
+        "scripts/import-gallery-asset.mjs",
+        "tests/gallery-asset-importer.test.ts"
+      ],
+      "literal_mentions": [
+        "scripts/import-gallery-asset.mjs",
+        "tests/gallery-asset-importer.test.ts"
+      ]
+    },
+    {
+      "name": "shiki",
+      "version": "^3.13.0",
+      "import_references": [
+        "app/lib/utils/markdown.ts",
+        "components/space/code-editor.tsx",
+        "components/space/monaco-editor-panel.tsx"
+      ],
+      "literal_mentions": [
+        "app/globals.css",
+        "app/lib/utils/markdown.ts",
+        "components/space/code-editor.tsx",
+        "components/space/monaco-editor-panel.tsx"
+      ]
+    },
+    {
+      "name": "sonner",
+      "version": "^2.0.7",
+      "import_references": [
+        "components/site-atlas.tsx",
+        "components/ui/sonner.tsx"
+      ],
+      "literal_mentions": [
+        "app/layout.tsx",
+        "components/site-atlas.tsx",
+        "components/ui/sonner.tsx"
+      ]
+    },
+    {
+      "name": "suspend-react",
+      "version": "^0.1.3",
+      "import_references": [
+        "components/three-carousel/three-carousel.tsx"
+      ],
+      "literal_mentions": [
+        "components/three-carousel/three-carousel.tsx"
+      ]
+    },
+    {
+      "name": "tailwind-merge",
+      "version": "^2.6.0",
+      "import_references": [
+        "lib/utils.ts"
+      ],
+      "literal_mentions": [
+        "lib/utils.ts"
+      ]
+    },
+    {
+      "name": "tailwindcss",
+      "version": "3.3.3",
+      "import_references": [
+        "tailwind.config.ts"
+      ],
+      "literal_mentions": [
+        "postcss.config.js",
+        "prettier.config.js",
+        "tailwind.config.ts"
+      ]
+    },
+    {
+      "name": "tailwindcss-animate",
+      "version": "^1.0.7",
+      "import_references": [
+        "tailwind.config.ts"
+      ],
+      "literal_mentions": [
+        "tailwind.config.ts"
+      ]
+    },
+    {
+      "name": "three",
+      "version": "^0.176.0",
+      "import_references": [
+        "components/three-carousel/scene-3d.tsx",
+        "components/three-carousel/three-carousel.tsx"
+      ],
+      "literal_mentions": [
+        "app/activity-lab/page.tsx",
+        "components/gallery-scene.tsx",
+        "components/home/activity-grid.tsx",
+        "components/labs/agent-sigil-lab.tsx",
+        "components/labs/kumiko-sigil-lab.tsx",
+        "components/three-carousel/DragPreventer.tsx",
+        "components/three-carousel/WrapFixer.tsx",
+        "components/three-carousel/scene-3d.tsx",
+        "components/three-carousel/three-carousel.css",
+        "components/three-carousel/three-carousel.tsx",
+        "docs/agent-check-ins.md",
+        "docs/agent-sigils.md",
+        "docs/archive/agent-check-in-orchestration-artwork-v1.md",
+        "docs/archive/agent-check-ins-artwork-v1.md",
+        "docs/deployment-workflow.md",
+        "docs/design/agent-sigil-generation-3-principles.md",
+        "docs/design/agent-sigil-reference-atlas.md",
+        "docs/interface-memory/2026-07-26-tactile-workshop.md",
+        "docs/interface-memory/2026-07-27-present-first-activity-field.md",
+        "lib/agent-guestbook.ts",
+        "lib/agent-identity-sigils.test.ts",
+        "lib/agent-kumiko-sigils.test.ts",
+        "lib/agent-sigil-generation-3-palettes.test.ts",
+        "lib/github-home.test.ts",
+        "public/journal/2026-07-30-confidence-and-humility.md",
+        "tests/e2e/restored-home-time-contracts.spec.ts",
+        "tests/e2e/smoke.spec.ts"
+      ]
+    },
+    {
+      "name": "ts-fsrs",
+      "version": "^5.2.3",
+      "import_references": [
+        "app/lib/fsrs-adapter.test.ts",
+        "app/lib/fsrs-adapter.ts",
+        "app/lib/review-overrides.test.ts",
+        "app/lib/review-types.ts",
+        "app/lib/seed-review.ts",
+        "components/space/review-gallery.tsx",
+        "components/space/space-results-client.tsx",
+        "components/space/space-view.tsx"
+      ],
+      "literal_mentions": [
+        "app/lib/fsrs-adapter.test.ts",
+        "app/lib/fsrs-adapter.ts",
+        "app/lib/review-overrides.test.ts",
+        "app/lib/review-types.ts",
+        "app/lib/seed-review.ts",
+        "components/space/review-gallery.tsx",
+        "components/space/space-results-client.tsx",
+        "components/space/space-view.tsx"
+      ]
+    },
+    {
+      "name": "ts-node",
+      "version": "^10.9.2",
+      "import_references": [],
+      "literal_mentions": []
+    },
+    {
+      "name": "typescript",
+      "version": "5.2.2",
+      "import_references": [],
+      "literal_mentions": [
+        "app/lib/utils/markdown.ts",
+        "components/space/code-editor.tsx",
+        "eslint.config.mjs"
+      ]
+    },
+    {
+      "name": "vitest",
+      "version": "^3.2.4",
+      "import_references": [
+        "app/api/agent-journal/route.test.ts",
+        "app/feed.xml/route.test.ts",
+        "app/lib/fsrs-adapter.test.ts",
+        "app/lib/proxy-health-store.test.ts",
+        "app/lib/review-overrides.test.ts",
+        "lib/agent-guestbook-creative.test.ts",
+        "lib/agent-identity-sigils.test.ts",
+        "lib/agent-journal-projection.test.ts",
+        "lib/agent-journal.test.ts",
+        "lib/agent-kumiko-sigils.test.ts",
+        "lib/agent-sigil-generation-3-palettes-canonical.test.ts",
+        "lib/agent-sigil-generation-3-palettes.test.ts",
+        "lib/agent-sigils.test.ts",
+        "lib/cache-load-result.test.ts",
+        "lib/deprecation-boundaries.test.ts",
+        "lib/github-activity-response.test.ts",
+        "lib/github-contribution-calendar.test.ts",
+        "lib/github-home.test.ts",
+        "lib/navigation-progress.test.ts",
+        "lib/proxy-usage-window.test.ts",
+        "lib/rss-feed.test.ts",
+        "lib/site-navigation.test.ts",
+        "lib/space-routes.test.ts",
+        "lib/stale-while-error-cache.test.ts",
+        "lib/timezone-options.test.ts",
+        "lib/visual-viewport-restoration.test.ts",
+        "tests/gallery-asset-importer.test.ts",
+        "tests/vercel-preview-policy.test.ts",
+        "vitest.config.ts"
+      ],
+      "literal_mentions": [
+        ".github/workflows/systematic-code-inventory.yml",
+        "app/api/agent-journal/route.test.ts",
+        "app/feed.xml/route.test.ts",
+        "app/lib/fsrs-adapter.test.ts",
+        "app/lib/proxy-health-store.test.ts",
+        "app/lib/review-overrides.test.ts",
+        "lib/agent-guestbook-creative.test.ts",
+        "lib/agent-identity-sigils.test.ts",
+        "lib/agent-journal-projection.test.ts",
+        "lib/agent-journal.test.ts",
+        "lib/agent-kumiko-sigils.test.ts",
+        "lib/agent-sigil-generation-3-palettes-canonical.test.ts",
+        "lib/agent-sigil-generation-3-palettes.test.ts",
+        "lib/agent-sigils.test.ts",
+        "lib/cache-load-result.test.ts",
+        "lib/github-activity-response.test.ts",
+        "lib/github-contribution-calendar.test.ts",
+        "lib/github-home.test.ts",
+        "lib/navigation-progress.test.ts",
+        "lib/proxy-usage-window.test.ts",
+        "lib/rss-feed.test.ts",
+        "lib/site-navigation.test.ts",
+        "lib/space-routes.test.ts",
+        "lib/stale-while-error-cache.test.ts",
+        "lib/timezone-options.test.ts",
+        "lib/visual-viewport-restoration.test.ts",
+        "tests/gallery-asset-importer.test.ts",
+        "tests/vercel-preview-policy.test.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "name": "zod",
+      "version": "^3.25.76",
+      "import_references": [],
+      "literal_mentions": []
+    }
+  ],
+  "zero_inbound_source_candidates": [
+    {
+      "path": "components/three-carousel/three-carousel.tsx",
+      "lines": 233
+    },
+    {
+      "path": "components/ui/dropdown-menu.tsx",
+      "lines": 200
+    },
+    {
+      "path": "components/ui/select.tsx",
+      "lines": 160
+    },
+    {
+      "path": "components/projects/components/tag-manager.tsx",
+      "lines": 144
+    },
+    {
+      "path": "components/dashboard/footer-tiptap-editor.tsx",
+      "lines": 133
+    },
+    {
+      "path": "components/space/space-skeleton.tsx",
+      "lines": 132
+    },
+    {
+      "path": "components/ui/pagination.tsx",
+      "lines": 117
+    },
+    {
+      "path": "components/ui/table.tsx",
+      "lines": 117
+    },
+    {
+      "path": "components/simple-auth-modal.tsx",
+      "lines": 103
+    },
+    {
+      "path": "components/paper-critter.tsx",
+      "lines": 95
+    },
+    {
+      "path": "components/material/material-primitives.tsx",
+      "lines": 89
+    },
+    {
+      "path": "components/projects/components/tiptap-editor-project-blocks.tsx",
+      "lines": 82
+    },
+    {
+      "path": "app/lib/leetcode-search.ts",
+      "lines": 78
+    },
+    {
+      "path": "components/ui/alert.tsx",
+      "lines": 59
+    },
+    {
+      "path": "components/ui/assets/avatar.tsx",
+      "lines": 50
+    },
+    {
+      "path": "components/editor/content-preview.tsx",
+      "lines": 45
+    },
+    {
+      "path": "components/proxy/check-in-status.tsx",
+      "lines": 44
+    },
+    {
+      "path": "app/lib/hooks/useKeyNav.ts",
+      "lines": 42
+    },
+    {
+      "path": "components/hardcoded-sticky-note.tsx",
+      "lines": 37
+    },
+    {
+      "path": "components/ui/badge.tsx",
+      "lines": 36
+    },
+    {
+      "path": "app/lib/hooks/useToastMessages.ts",
+      "lines": 33
+    },
+    {
+      "path": "components/projects/error.tsx",
+      "lines": 31
+    },
+    {
+      "path": "components/ui/checkbox.tsx",
+      "lines": 30
+    },
+    {
+      "path": "components/ui/switch.tsx",
+      "lines": 29
+    },
+    {
+      "path": "components/ui/kbd.tsx",
+      "lines": 28
+    },
+    {
+      "path": "dist/socket-server.js",
+      "lines": 26
+    },
+    {
+      "path": "lib/agent-journal-feed.ts",
+      "lines": 25
+    },
+    {
+      "path": "components/search-params-handler.tsx",
+      "lines": 22
+    },
+    {
+      "path": "app/lib/seed-review.ts",
+      "lines": 21
+    },
+    {
+      "path": "components/minimal-site-nav.tsx",
+      "lines": 17
+    },
+    {
+      "path": "app/lib/utils/index.ts",
+      "lines": 13
+    },
+    {
+      "path": "drizzle.config.ts",
+      "lines": 13
+    },
+    {
+      "path": "proxy.ts",
+      "lines": 12
+    },
+    {
+      "path": "prettier.config.js",
+      "lines": 6
+    }
+  ],
+  "unresolved_internal_specifiers": {
+    "../../../lib/agent-journal-feed": [
+      "app/api/agent-journal/route.test.ts",
+      "app/api/agent-journal/route.ts"
+    ],
+    "../db/supabase": [
+      "app/lib/utils/database.ts"
+    ],
+    "../lib/contexts/item-context": [
+      "app/space/layout.tsx"
+    ],
+    "../review-types": [
+      "app/lib/db/supabase.ts"
+    ],
+    "../scripts/vercel-preview-policy.mjs": [
+      "tests/vercel-preview-policy.test.ts"
+    ],
+    "./activity-grid.module.css": [
+      "components/home/activity-grid.tsx"
+    ],
+    "./activity-scoreboard.module.css": [
+      "components/home/activity-scoreboard.tsx"
+    ],
+    "./monaco-editor-panel.module.css": [
+      "components/space/monaco-editor-panel.tsx"
+    ],
+    "./page.module.css": [
+      "app/page.tsx"
+    ],
+    "@/app/dialog-scroll-lock.css": [
+      "app/layout.tsx"
+    ],
+    "@/app/globals.css": [
+      "app/layout.tsx"
+    ],
+    "@/app/lib/hooks/useTags": [
+      "components/projects/components/tag-manager.tsx"
+    ],
+    "@/app/materials-accessibility.css": [
+      "app/layout.tsx"
+    ],
+    "@/app/materials.css": [
+      "app/layout.tsx"
+    ],
+    "@/app/navigation-feedback.css": [
+      "app/layout.tsx"
+    ],
+    "@/components/ui/use-toast": [
+      "app/lib/hooks/useToastMessages.ts"
+    ]
+  },
+  "unlisted_package_specifiers": {
+    "@vercel/style-guide": [
+      "prettier.config.js"
+    ],
+    "fs": [
+      "app/lib/utils/cards.ts",
+      "lib/agent-guestbook.ts",
+      "scripts/patch-react-dom-class-compare.js"
+    ],
+    "http": [
+      "dist/socket-server.js"
+    ],
+    "node:child_process": [
+      "tests/gallery-asset-importer.test.ts"
+    ],
+    "node:crypto": [
+      "app/api/proxy-health/diagnostic/route.ts",
+      "app/api/proxy-health/ingest/route.ts",
+      "app/lib/proxy-health-store.ts"
+    ],
+    "node:fs": [
+      "lib/deprecation-boundaries.test.ts",
+      "scripts/import-gallery-asset.mjs",
+      "tests/e2e/activity-paper-marks.spec.ts",
+      "tests/e2e/gallery-visual.spec.ts",
+      "tests/e2e/homepage-density.spec.ts",
+      "tests/e2e/material-system.spec.ts",
+      "tests/e2e/paper-raking-light.spec.ts",
+      "tests/gallery-asset-importer.test.ts"
+    ],
+    "node:os": [
+      "tests/gallery-asset-importer.test.ts"
+    ],
+    "node:path": [
+      "lib/deprecation-boundaries.test.ts",
+      "scripts/import-gallery-asset.mjs",
+      "scripts/vercel-preview-policy.mjs",
+      "tests/e2e/activity-paper-marks.spec.ts",
+      "tests/e2e/gallery-visual.spec.ts",
+      "tests/e2e/homepage-density.spec.ts",
+      "tests/e2e/material-system.spec.ts",
+      "tests/e2e/paper-raking-light.spec.ts",
+      "tests/gallery-asset-importer.test.ts"
+    ],
+    "node:process": [
+      "scripts/import-gallery-asset.mjs"
+    ],
+    "node:url": [
+      "scripts/vercel-preview-policy.mjs",
+      "vitest.config.ts"
+    ],
+    "path": [
+      "app/lib/utils/cards.ts",
+      "lib/agent-guestbook.ts",
+      "scripts/patch-react-dom-class-compare.js"
+    ],
+    "server-only": [
+      "app/lib/auth/admin.ts",
+      "lib/agent-guestbook.ts"
+    ],
+    "ws": [
+      "dist/socket-server.js"
+    ]
+  },
+  "directory_stats": {
+    "app": {
+      "files": 62,
+      "lines": 3775
+    },
+    "components": {
+      "files": 95,
+      "lines": 12242
+    },
+    "dist": {
+      "files": 1,
+      "lines": 26
+    },
+    "drizzle.config.ts": {
+      "files": 1,
+      "lines": 13
+    },
+    "eslint.config.mjs": {
+      "files": 1,
+      "lines": 46
+    },
+    "hooks": {
+      "files": 1,
+      "lines": 19
+    },
+    "lib": {
+      "files": 46,
+      "lines": 7379
+    },
+    "next.config.mjs": {
+      "files": 1,
+      "lines": 50
+    },
+    "playwright.config.ts": {
+      "files": 1,
+      "lines": 30
+    },
+    "postcss.config.js": {
+      "files": 1,
+      "lines": 6
+    },
+    "prettier.config.js": {
+      "files": 1,
+      "lines": 6
+    },
+    "proxy.ts": {
+      "files": 1,
+      "lines": 12
+    },
+    "scripts": {
+      "files": 3,
+      "lines": 299
+    },
+    "tailwind.config.ts": {
+      "files": 1,
+      "lines": 107
+    },
+    "tests": {
+      "files": 23,
+      "lines": 3026
+    },
+    "utils": {
+      "files": 3,
+      "lines": 79
+    },
+    "vitest.config.ts": {
+      "files": 1,
+      "lines": 16
+    }
+  }
+}
