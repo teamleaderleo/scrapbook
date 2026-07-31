@@ -4,7 +4,6 @@ import { describe, expect, it } from 'vitest';
 
 const retiredPaths = [
   'app/lib/constants.ts',
-  'app/lib/db/db.ts',
   'app/lib/definitions/definitions.ts',
   'app/lib/external/s3-operations.ts',
   'app/lib/external/s3-resource-tracker.ts',
@@ -14,6 +13,7 @@ const retiredPaths = [
 ] as const;
 
 const preservedDatabasePaths = [
+  'app/lib/db/db.ts',
   'app/lib/db/schema.ts',
   'drizzle.config.ts',
   'drizzle/0008_proxy_health.sql',
