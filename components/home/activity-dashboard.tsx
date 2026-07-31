@@ -9,12 +9,13 @@ const REFRESH_INTERVAL_MS = GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS * 1_000;
 const REQUEST_TIMEOUT_MS = 10_000;
 const MAX_FAILURE_BACKOFF_MS = 5 * 60_000;
 const STORED_SNAPSHOT_KEY = 'scrapbook:github-activity:last-success:v1';
+const MAX_STORED_SNAPSHOT_AGE_MS = 24 * 60 * 60_000;
 
 type ActivitySource = 'github-graphql' | 'public-profile' | 'unavailable';
 type SuccessfulActivitySource = Exclude<ActivitySource, 'unavailable'>;
 
-type ActivitySnapshot = {
-  source: ActivitySource;
+type SuccessfulActivitySnapshot = {
+  source: SuccessfulActivitySource;
   today: number;
   weekTotal: number;
   yearTotal: number | null;
@@ -23,9 +24,18 @@ type ActivitySnapshot = {
   generatedAt: string;
 };
 
-type StoredActivitySnapshot = ActivitySnapshot & {
-  source: SuccessfulActivitySource;
+type UnavailableActivitySnapshot = {
+  source: 'unavailable';
+  today: null;
+  weekTotal: null;
+  yearTotal: null;
+  days: [];
+  unit: string;
+  generatedAt: string;
 };
+
+type ActivitySnapshot = SuccessfulActivitySnapshot | UnavailableActivitySnapshot;
+type StoredActivitySnapshot = SuccessfulActivitySnapshot;
 
 type LiveActivityResponse = {
   source: SuccessfulActivitySource;
@@ -73,9 +83,11 @@ function readStoredSnapshot(): StoredActivitySnapshot | null {
       return null;
     }
     if (!Array.isArray(parsed.days) || !parsed.days.every(isActivityGridDay)) return null;
-    if (typeof parsed.generatedAt !== 'string' || !Number.isFinite(Date.parse(parsed.generatedAt))) {
-      return null;
-    }
+    if (typeof parsed.generatedAt !== 'string') return null;
+    const generatedAt = Date.parse(parsed.generatedAt);
+    if (!Number.isFinite(generatedAt)) return null;
+    if (generatedAt > Date.now() + 5 * 60_000) return null;
+    if (Date.now() - generatedAt > MAX_STORED_SNAPSHOT_AGE_MS) return null;
 
     return {
       source: parsed.source,
@@ -151,7 +163,7 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
       return;
     }
 
-    writeStoredSnapshot(initial as StoredActivitySnapshot);
+    writeStoredSnapshot(initial);
   }, [initial]);
 
   useEffect(() => {
@@ -247,7 +259,8 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
     };
   }, []);
 
-  const hasSuccessfulSnapshot = activity.source !== 'unavailable' && activity.days.length > 0;
+  const successfulActivity =
+    activity.source === 'unavailable' || activity.days.length === 0 ? null : activity;
 
   return (
     <div
@@ -272,11 +285,11 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
         </p>
       ) : null}
 
-      {hasSuccessfulSnapshot ? (
+      {successfulActivity ? (
         <ActivityScoreboard
-          today={activity.today}
-          weekTotal={activity.weekTotal}
-          yearTotal={activity.yearTotal}
+          today={successfulActivity.today}
+          weekTotal={successfulActivity.weekTotal}
+          yearTotal={successfulActivity.yearTotal}
           updating={updating}
         />
       ) : (
@@ -284,7 +297,7 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
       )}
 
       <ActivityGrid
-        days={hasSuccessfulSnapshot ? activity.days : []}
+        days={successfulActivity?.days ?? []}
         unit={activity.unit}
         generatedAt={calendarGeneratedAt}
         unavailableMessage="GitHub activity is temporarily unavailable."
