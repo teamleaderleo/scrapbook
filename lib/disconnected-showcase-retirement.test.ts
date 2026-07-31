@@ -13,17 +13,14 @@ const retiredPaths = [
   'components/projects/components/project-block-item.tsx',
   'components/projects/forms/project-form.tsx',
   'components/scrapbook/code-preview.tsx',
+  'components/scrapbook/fold-comments-data.ts',
+  'components/scrapbook/git-inline-data.ts',
   'components/scrapbook/image-preview.tsx',
+  'components/scrapbook/potato-compressor-data.ts',
   'components/scrapbook/scrapbook-board.tsx',
   'components/scrapbook/scrapbook-data.ts',
   'components/scrapbook/scrapbook-entry.tsx',
   'components/ui/components/pagination.tsx',
-] as const;
-
-const preservedProjectDataPaths = [
-  'components/scrapbook/fold-comments-data.ts',
-  'components/scrapbook/git-inline-data.ts',
-  'components/scrapbook/potato-compressor-data.ts',
 ] as const;
 
 describe('disconnected legacy showcase boundary', () => {
@@ -31,7 +28,7 @@ describe('disconnected legacy showcase boundary', () => {
     expect(existsSync(resolve(process.cwd(), path))).toBe(false);
   });
 
-  it.each(preservedProjectDataPaths)('%s remains available', (path) => {
-    expect(existsSync(resolve(process.cwd(), path))).toBe(true);
+  it('removes the retired Scrapbook showcase component directory', () => {
+    expect(existsSync(resolve(process.cwd(), 'components/scrapbook'))).toBe(false);
   });
 });
