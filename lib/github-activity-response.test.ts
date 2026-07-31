@@ -6,20 +6,37 @@ import {
 import type { GitHubHomeResult } from './github-home';
 
 function result(source: GitHubHomeResult['activity']['source']): GitHubHomeResult {
+  const activity: GitHubHomeResult['activity'] =
+    source === 'unavailable'
+      ? {
+          username: 'teamleaderleo',
+          source,
+          generatedAt: '2026-07-27T01:00:00.000Z',
+          total: null,
+          periodLabel: 'last 35 days',
+          today: null,
+          weekTotal: null,
+          activeDays: null,
+          currentStreak: null,
+          days: [],
+          repositories: [],
+        }
+      : {
+          username: 'teamleaderleo',
+          source,
+          generatedAt: '2026-07-27T01:00:00.000Z',
+          total: 18,
+          periodLabel: 'last year',
+          today: 3,
+          weekTotal: 9,
+          activeDays: 5,
+          currentStreak: 2,
+          days: [],
+          repositories: [],
+        };
+
   return {
-    activity: {
-      username: 'teamleaderleo',
-      source,
-      generatedAt: '2026-07-27T01:00:00.000Z',
-      total: 18,
-      periodLabel: source === 'unavailable' ? 'last 35 days' : 'last year',
-      today: 3,
-      weekTotal: 9,
-      activeDays: 5,
-      currentStreak: 2,
-      days: [],
-      repositories: [],
-    },
+    activity,
     diagnostics: {
       cacheStatus: 'stale',
       upstreamSource: source,

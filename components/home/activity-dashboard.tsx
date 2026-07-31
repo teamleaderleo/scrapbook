@@ -9,7 +9,8 @@ const REFRESH_INTERVAL_MS = GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS * 1_000;
 const REQUEST_TIMEOUT_MS = 10_000;
 const MAX_FAILURE_BACKOFF_MS = 5 * 60_000;
 
-type ActivitySnapshot = {
+type SuccessfulActivitySnapshot = {
+  source: 'github-graphql' | 'public-profile';
   today: number;
   weekTotal: number;
   yearTotal: number | null;
@@ -18,27 +19,57 @@ type ActivitySnapshot = {
   generatedAt: string;
 };
 
-type LiveActivityResponse = {
-  source: 'github-graphql' | 'public-profile';
-  today: number;
-  weekTotal: number;
-  yearTotal: number | null;
-  days: ActivityGridDay[];
+type UnavailableActivitySnapshot = {
+  source: 'unavailable';
+  today: null;
+  weekTotal: null;
+  yearTotal: null;
+  days: [];
+  unit: string;
   generatedAt: string;
 };
+
+type ActivitySnapshot = SuccessfulActivitySnapshot | UnavailableActivitySnapshot;
+
+type LiveActivityResponse = Omit<SuccessfulActivitySnapshot, 'unit'>;
 
 function timestampOrNow(value: string) {
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp) ? timestamp : Date.now();
 }
 
+function UnavailableActivity() {
+  return (
+    <section
+      className="col-span-full flex min-h-[15.5rem] flex-col justify-center rounded-[1.25rem] border border-border/70 bg-card p-5 text-card-foreground shadow-[0_16px_38px_rgba(24,24,26,0.08)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] sm:p-6 [@media(max-height:780px)]:min-h-[14.5rem]"
+      aria-labelledby="github-activity-unavailable-title"
+      data-home-activity-unavailable
+    >
+      <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        GitHub activity
+      </p>
+      <h2
+        id="github-activity-unavailable-title"
+        className="mt-2 text-xl font-semibold tracking-tight"
+      >
+        Activity is temporarily unavailable
+      </h2>
+      <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+        The page will retry while it remains open. Contribution totals and calendar cells appear only after GitHub supplies a valid snapshot.
+      </p>
+    </section>
+  );
+}
+
 export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
   const initialSnapshotAt = timestampOrNow(initial.generatedAt);
-  const [activity, setActivity] = useState(initial);
+  const [activity, setActivity] = useState<ActivitySnapshot>(initial);
   const [updating, setUpdating] = useState(false);
   const inFlight = useRef<AbortController | null>(null);
-  const newestSnapshotAt = useRef(initialSnapshotAt);
-  const nextAllowedAt = useRef(initialSnapshotAt + REFRESH_INTERVAL_MS);
+  const newestSnapshotAt = useRef(initial.source === 'unavailable' ? 0 : initialSnapshotAt);
+  const nextAllowedAt = useRef(
+    initial.source === 'unavailable' ? 0 : initialSnapshotAt + REFRESH_INTERVAL_MS,
+  );
   const consecutiveFailures = useRef(0);
 
   useEffect(() => {
@@ -134,6 +165,7 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
     <div
       className="relative grid min-w-0 items-stretch gap-3.5 sm:gap-4"
       data-home-activity-dashboard
+      data-home-activity-source={activity.source}
       style={{
         gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 24rem), 1fr))',
       }}
@@ -141,13 +173,20 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
       <span className="sr-only" aria-live="polite">
         {updating ? 'Updating GitHub activity' : ''}
       </span>
-      <ActivityScoreboard
-        today={activity.today}
-        weekTotal={activity.weekTotal}
-        yearTotal={activity.yearTotal}
-        updating={updating}
-      />
-      <ActivityGrid days={activity.days} unit={activity.unit} />
+
+      {activity.source === 'unavailable' ? (
+        <UnavailableActivity />
+      ) : (
+        <>
+          <ActivityScoreboard
+            today={activity.today}
+            weekTotal={activity.weekTotal}
+            yearTotal={activity.yearTotal}
+            updating={updating}
+          />
+          <ActivityGrid days={activity.days} unit={activity.unit} />
+        </>
+      )}
     </div>
   );
 }
