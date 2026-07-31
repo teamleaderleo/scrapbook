@@ -13,6 +13,8 @@ jobs:
     if: github.head_ref == 'cleanup/prune-orphan-ui-dependencies'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      PNPM_CONFIG_IGNORE_SCRIPTS: 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -56,7 +58,6 @@ jobs:
           uuid
           ws
           zustand
-          --ignore-scripts
           --reporter=silent
       - name: Show generated changes
         run: git diff --check && git diff --stat -- package.json pnpm-lock.yaml
