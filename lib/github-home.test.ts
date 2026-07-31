@@ -5,7 +5,7 @@ import {
   parsePublicContributionHtml,
   parsePublicContributionTotal,
 } from './github-activity-utils';
-import { parseGitHubRateLimit } from './github-home';
+import { createUnavailableGitHubHomeData, parseGitHubRateLimit } from './github-home';
 
 describe('parsePublicContributionHtml', () => {
   it('reads direct data-count attributes', () => {
@@ -85,6 +85,21 @@ describe('alignContributionDaysToWeekColumns', () => {
     expect(cells[6]).toEqual(days[3]);
     expect(cells[7]).toEqual(days[4]);
     expect(cells.slice(8)).toEqual([null, null, null, null, null, null]);
+  });
+});
+
+describe('unavailable GitHub activity', () => {
+  it('carries no numeric summaries or synthetic contribution days', () => {
+    expect(createUnavailableGitHubHomeData(new Date('2026-07-31T00:00:00Z'))).toMatchObject({
+      source: 'unavailable',
+      generatedAt: '2026-07-31T00:00:00.000Z',
+      total: null,
+      today: null,
+      weekTotal: null,
+      activeDays: null,
+      currentStreak: null,
+      days: [],
+    });
   });
 });
 
