@@ -49,6 +49,13 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         primary: true,
       },
       {
+        id: 'resume',
+        href: '/resume',
+        label: 'Resume',
+        description: 'Selected engineering work and open-source projects.',
+        group: 'places',
+      },
+      {
         id: 'atelier',
         href: '/atelier',
         label: 'Atelier',
@@ -117,7 +124,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         id: 'glossless',
         href: 'https://glossless.app/',
         label: 'Glossless',
-        description: 'Writing tool.',
+        description: 'AI-assisted 3D pose-reference tool.',
         group: 'connections',
         external: true,
       },

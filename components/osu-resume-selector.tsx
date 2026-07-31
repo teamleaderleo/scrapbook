@@ -1,145 +1,117 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import SiteNav from "@/components/site-nav";
-
-interface ResumeItem {
-  bullet: string;
-  note?: string;
-}
-
-interface ResumeSection {
-  title: string;
-  meta: string;
-  items: ResumeItem[];
-}
+import type { ResumeColumns } from "@/app/lib/resume-data";
 
 interface OsuResumeSelectorProps {
-  resumeColumns: ResumeSection[][];
+  resumeColumns: ResumeColumns;
+}
+
+function getSectionOffset(index: number, selectedIndex: number): number {
+  const distance = Math.abs(index - selectedIndex);
+  if (distance === 0) return 12;
+  if (distance === 1) return 6;
+  if (distance === 2) return 3;
+  return 0;
 }
 
 export default function OsuResumeSelector({ resumeColumns }: OsuResumeSelectorProps) {
-  // Flatten the columns into a single array
   const resumeSections = resumeColumns.flat();
-  
-  const [hoveredIndex, setHoveredIndex] = useState(0);
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-  useEffect(() => {
-    // Load anime.js
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js';
-    script.async = true;
-    document.body.appendChild(script);
+  if (resumeSections.length === 0) {
+    return (
+      <main className="flex min-h-screen flex-col bg-sidebar-background">
+        <SiteNav />
+        <p className="m-auto p-6 text-sm text-muted-foreground">No resume sections are available.</p>
+      </main>
+    );
+  }
 
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
-
-  const handleMouseEnter = (index: number) => {
-    setHoveredIndex(index);
-    
-    if (!(window as any).anime) return;
-
-    // Animate list items
-    itemRefs.current.forEach((item, i) => {
-      if (!item) return;
-      
-      const distance = Math.abs(i - index);
-      const isHovered = i === index;
-      
-      (window as any).anime({
-        targets: item,
-        translateX: isHovered ? 15 : distance <= 2 ? 8 - (distance * 3) : 0,
-        duration: 250,
-        easing: 'easeOutCubic',
-      });
-    });
-  };
-
-  const currentSection = resumeSections[hoveredIndex];
+  const safeSelectedIndex = Math.min(selectedIndex, resumeSections.length - 1);
+  const currentSection = resumeSections[safeSelectedIndex];
 
   return (
-    <main className="flex flex-col h-screen bg-sidebar-background" style={{ scrollbarGutter: 'stable' }}>
+    <main className="flex min-h-screen flex-col bg-sidebar-background lg:h-screen lg:overflow-hidden">
       <SiteNav />
-      
-      <div className="flex flex-1 overflow-hidden min-h-0">
-        {/* Left side - List */}
-        <div className="w-1/2 border-r border-sidebar-border flex flex-col overflow-y-auto">
-          <div className="flex-1 pl-6 pr-6 pt-3">
+
+      <div className="grid flex-1 lg:min-h-0 lg:grid-cols-[minmax(20rem,0.9fr)_minmax(0,1.1fr)]">
+        <nav
+          aria-label="Resume sections"
+          className="border-b border-sidebar-border lg:overflow-y-auto lg:border-b-0 lg:border-r"
+        >
+          <div className="space-y-1 p-3 sm:p-5">
             {resumeSections.map((section, index) => {
-              const isHovered = hoveredIndex === index;
-              
+              const isSelected = safeSelectedIndex === index;
+              const offset = getSectionOffset(index, safeSelectedIndex);
+
               return (
-                <div
-                  key={index}
-                  ref={(el) => { itemRefs.current[index] = el; }}
-                  className="relative"
-                  onMouseEnter={() => handleMouseEnter(index)}
-                  style={{ zIndex: isHovered ? 10 : 1 }}
+                <button
+                  key={`${section.title}-${section.meta}`}
+                  type="button"
+                  aria-pressed={isSelected}
+                  aria-controls="resume-detail"
+                  data-resume-section={index}
+                  className={`w-full cursor-pointer rounded border-l-4 p-4 text-left transition-[background-color,border-color,color,transform] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar-background ${
+                    isSelected
+                      ? "border-l-primary-foreground bg-accent text-primary-foreground dark:border-l-sidebar-primary-foreground dark:bg-sidebar-accent dark:text-sidebar-primary-foreground"
+                      : "border-l-transparent border-b border-border text-foreground hover:bg-muted/50 dark:border-sidebar-border dark:text-sidebar-foreground dark:hover:bg-sidebar-accent/50"
+                  }`}
+                  style={{ transform: `translateX(${offset}px)` }}
+                  onMouseEnter={() => setSelectedIndex(index)}
+                  onFocus={() => setSelectedIndex(index)}
+                  onClick={() => setSelectedIndex(index)}
                 >
-                  <div
-                    className={`
-                      p-4 cursor-pointer transition-all duration-200
-                      ${isHovered ? 'bg-accent dark:bg-sidebar-accent rounded border-l-4 border-l-primary-foreground dark:border-l-sidebar-primary-foreground' : 'border-b border-border dark:border-sidebar-border hover:bg-muted/50 dark:hover:bg-sidebar-accent/50'}
-                    `}
-                  >
-                    <div className="flex items-baseline justify-between gap-4">
-                      <h2 className={`text-base font-semibold transition-colors duration-200 ${
-                        isHovered ? 'text-primary-foreground dark:text-sidebar-primary-foreground' : 'text-foreground dark:text-sidebar-foreground'
-                      }`}>
-                        {section.title}
-                      </h2>
-                      <span className="text-muted-foreground text-xs whitespace-nowrap">
-                        {section.meta}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                  <span className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+                    <span className="text-sm font-semibold sm:text-base">{section.title}</span>
+                    <span className="text-xs text-muted-foreground sm:whitespace-nowrap">
+                      {section.meta}
+                    </span>
+                  </span>
+                </button>
               );
             })}
           </div>
-        </div>
+        </nav>
 
-        {/* Right side - Details */}
-        <div className="w-1/2 p-6 overflow-y-auto">
-          <div>
-            {/* Section header */}
-            <div className="mb-6 pb-4 border-b-2 border-primary dark:border-sidebar-primary">
-              <h2 className="text-xl font-bold text-foreground dark:text-sidebar-foreground mb-1.5">
-                {currentSection.title}
-              </h2>
-              <p className="text-muted-foreground text-sm">{currentSection.meta}</p>
-            </div>
+        <section
+          id="resume-detail"
+          aria-live="polite"
+          className="p-4 sm:p-6 lg:overflow-y-auto lg:p-8"
+        >
+          <header className="mb-6 border-b-2 border-primary pb-4 dark:border-sidebar-primary">
+            <h1
+              data-resume-detail-title
+              className="mb-1.5 text-xl font-bold text-foreground dark:text-sidebar-foreground sm:text-2xl"
+            >
+              {currentSection.title}
+            </h1>
+            <p className="text-sm text-muted-foreground">{currentSection.meta}</p>
+          </header>
 
-            {/* Section content */}
-            <div className="space-y-4">
-              {currentSection.items.map((item, i) => (
-                <div 
-                  key={i}
-                  className="text-sm"
-                >
-                  <div className="flex items-start gap-2.5">
-                    <span className="text-foreground dark:text-sidebar-foreground mt-1">•</span>
-                    <div className="flex-1">
-                      <div className="text-foreground dark:text-sidebar-foreground leading-relaxed">
-                        {item.bullet}
-                      </div>
-                      {item.note && (
-                        <div className="mt-2.5 pl-4 border-l-2 border-muted text-sm text-foreground dark:text-sidebar-foreground leading-relaxed">
-                          {item.note}
-                        </div>
-                      )}
-                    </div>
+          <div className="space-y-5">
+            {currentSection.items.map((item) => (
+              <article key={item.bullet} className="text-sm">
+                <div className="flex items-start gap-2.5">
+                  <span aria-hidden="true" className="mt-1 text-foreground dark:text-sidebar-foreground">
+                    •
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="leading-relaxed text-foreground dark:text-sidebar-foreground">
+                      {item.bullet}
+                    </p>
+                    {item.note ? (
+                      <p className="mt-2.5 border-l-2 border-muted pl-4 leading-relaxed text-muted-foreground">
+                        {item.note}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
-              ))}
-            </div>
+              </article>
+            ))}
           </div>
-        </div>
+        </section>
       </div>
     </main>
   );
