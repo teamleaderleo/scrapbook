@@ -99,6 +99,20 @@ The cleanup removed:
 
 No Space content, journal records, authentication, database rows, credentials, or deployment controls were changed. Git history is the recovery path for any retired post or editorial file.
 
+### Removed: disconnected legacy login surface
+
+Issue #507 established that `/login` was a decorative Acme-style panel with no navigation, redirect, callback, middleware, or protected-route caller. The current Space sign-in flow uses Supabase directly from `components/space/app-sidebar.tsx` and returns through `/auth/callback`.
+
+The cleanup removed:
+
+- `app/login/page.tsx`;
+- the commented-only `components/auth-modal.tsx` prototype;
+- `components/ui/components/old-button.tsx`, which had no remaining caller;
+- `components/ui/assets/acme-logo.tsx`, which was used only by the retired page;
+- the nonexistent `/login/` path from robots metadata.
+
+Focused browser coverage confirms `/login` returns an ordinary not-found response and `/space` does not redirect to it. No Supabase credentials, provider options, callbacks, user data, database accounts, admin detection, or authorization policy changed. Git history is the recovery path.
+
 ### Superseded or archived pull requests
 
 - #381 — oversized private check-in plugin prototype archived; issue #378 retains the capability decision and decomposition boundary.
@@ -125,7 +139,6 @@ No Space content, journal records, authentication, database rows, credentials, o
 - #410 — shortcut centralisation remains useful, but must be designed against current Space handlers.
 - #411 — tactile interaction lab remains optional research rather than a queued implementation.
 - #414 — mobile Space actions/editor behavior remains a current-product decision independent of the archived dependency branch.
-- #507 — disconnected `/login` and old auth UI retirement remains separate from current Supabase authentication.
 
 ## Recovery
 
