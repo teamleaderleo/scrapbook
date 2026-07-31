@@ -49,6 +49,7 @@ export default function RootLayout({
             color-scheme: dark;
           }
         `}</style>
+        <link rel="alternate" type="application/rss+xml" title="teamleaderleo RSS feed" href="/feed.xml" />
         <link rel="preconnect" href="https://vitals.vercel-insights.com" />
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
       </head>
