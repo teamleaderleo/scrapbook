@@ -1,7 +1,7 @@
 import { ActivityDashboard } from '@/components/home/activity-dashboard';
 import { WindLiftCard } from '@/components/home/wind-lift-card';
 import ViewportPageShell from '@/components/viewport-page-shell';
-import { getGitHubHomeData } from '@/lib/github-home';
+import { getGitHubHomeResult } from '@/lib/github-home';
 import { ArrowRight, ArrowUpRight, Brain, Images, Palette, Snowflake } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -56,14 +56,15 @@ function HomeActivityFallback() {
 
 async function HomeActivityContent() {
   await connection();
-  const activity = await getGitHubHomeData();
-  const days = activity.days.slice(-21);
+  const { activity } = await getGitHubHomeResult();
+  const days = activity.source === 'unavailable' ? [] : activity.days;
   const yearTotal = activity.periodLabel === 'last year' ? activity.total : null;
 
   return (
     <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
       <ActivityDashboard
         initial={{
+          source: activity.source,
           today: activity.today,
           weekTotal: activity.weekTotal,
           yearTotal,
@@ -142,7 +143,10 @@ async function HomeActivityContent() {
                 </span>
                 <span className="flex items-center justify-between gap-2 font-semibold">
                   {destination.label}
-                  <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                  <ArrowRight
+                    className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+                    aria-hidden="true"
+                  />
                 </span>
               </Link>
             );
