@@ -64,8 +64,9 @@ Executable legacy project/block actions, data functions, schema, and routes are 
 
 ### Removed: additional commented-only source
 
-A second independent pass removed seven files whose entire contents were comments and which exposed no runtime export:
+A second independent pass removed eight files whose entire contents were comments and which exposed no runtime export:
 
+- `app/lib/hooks/useWebSocket.ts`
 - `components/blog/blog-layout.tsx`
 - `components/connection-status.tsx`
 - `components/ui/components/search.tsx`
