@@ -124,7 +124,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         id: 'glossless',
         href: 'https://glossless.app/',
         label: 'Glossless',
-        description: 'Writing tool.',
+        description: 'AI-assisted 3D pose-reference tool.',
         group: 'connections',
         external: true,
       },
