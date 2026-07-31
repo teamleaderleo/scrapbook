@@ -1,4 +1,7 @@
-import { createGitHubActivityHeaders } from '@/lib/github-activity-response';
+import {
+  createGitHubActivityHeaders,
+  publicGitHubActivityDiagnostics,
+} from '@/lib/github-activity-response';
 import { getGitHubHomeResult } from '@/lib/github-home';
 import { connection } from 'next/server';
 import { NextResponse } from 'next/server';
@@ -9,7 +12,8 @@ export async function GET() {
 
   try {
     const result = await getGitHubHomeResult();
-    const { activity, diagnostics } = result;
+    const { activity } = result;
+    const diagnostics = publicGitHubActivityDiagnostics(result);
     const headers = createGitHubActivityHeaders(result, requestId);
 
     if (activity.source === 'unavailable') {
