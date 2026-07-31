@@ -57,21 +57,30 @@ function HomeActivityFallback() {
 async function HomeActivityContent() {
   await connection();
   const activity = await getGitHubHomeData();
-  const days = activity.days.slice(-21);
-  const yearTotal = activity.periodLabel === 'last year' ? activity.total : null;
+  const initialActivity =
+    activity.source === 'unavailable'
+      ? {
+          source: activity.source,
+          today: activity.today,
+          weekTotal: activity.weekTotal,
+          yearTotal: activity.total,
+          days: activity.days,
+          unit: 'contributions',
+          generatedAt: activity.generatedAt,
+        }
+      : {
+          source: activity.source,
+          today: activity.today,
+          weekTotal: activity.weekTotal,
+          yearTotal: activity.total,
+          days: activity.days.slice(-21),
+          unit: 'contributions',
+          generatedAt: activity.generatedAt,
+        };
 
   return (
     <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
-      <ActivityDashboard
-        initial={{
-          today: activity.today,
-          weekTotal: activity.weekTotal,
-          yearTotal,
-          days,
-          unit: 'contributions',
-          generatedAt: activity.generatedAt,
-        }}
-      />
+      <ActivityDashboard initial={initialActivity} />
 
       <section aria-label="Recent systems" className="min-w-0" data-recent-systems>
         <div className="flex items-center justify-between gap-4 px-0.5">
@@ -142,7 +151,10 @@ async function HomeActivityContent() {
                 </span>
                 <span className="flex items-center justify-between gap-2 font-semibold">
                   {destination.label}
-                  <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                  <ArrowRight
+                    className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+                    aria-hidden="true"
+                  />
                 </span>
               </Link>
             );
