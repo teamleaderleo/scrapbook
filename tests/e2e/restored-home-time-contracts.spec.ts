@@ -8,16 +8,26 @@ async function waitForHydratedHomepage(page: Page) {
   return dashboard;
 }
 
-test('homepage keeps the requested 21-day activity window', async ({ page }) => {
+test('homepage keeps the exact four-week Monday-Sunday activity field', async ({ page }) => {
   await page.goto('/');
   const dashboard = await waitForHydratedHomepage(page);
+  const grid = dashboard.locator('[data-contribution-week-grid]');
 
-  await expect(dashboard.getByText('21 days · UTC', { exact: true })).toBeVisible();
-  await expect(dashboard.locator('[data-contribution-date]')).toHaveCount(21);
-  await expect(dashboard.locator('[data-contribution-week-grid]')).toHaveAttribute(
+  await expect(dashboard.getByText('4 weeks · UTC', { exact: true })).toBeVisible();
+  await expect(grid.locator('[data-contribution-cell]')).toHaveCount(28);
+  await expect(grid).toHaveAttribute('data-calendar-weeks', '4');
+  await expect(grid).toHaveAttribute(
     'aria-label',
-    'GitHub contribution calendar for the last 21 days',
+    'GitHub contribution calendar for three completed weeks and the current week',
   );
+
+  const upcoming = grid.locator('[data-contribution-upcoming]');
+  const upcomingCount = await upcoming.count();
+  expect(upcomingCount).toBeGreaterThanOrEqual(0);
+  expect(upcomingCount).toBeLessThanOrEqual(6);
+  if (upcomingCount > 0) {
+    await expect(upcoming.first()).toHaveAttribute('aria-label', /— upcoming\.$/);
+  }
 });
 
 test('Time Machine uses the intended monospaced controls', async ({ page }) => {
