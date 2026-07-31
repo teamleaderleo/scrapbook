@@ -1,4 +1,3 @@
-import { getBlogPosts } from '@/app/lib/blog-utils';
 import { agentJournalEntries } from '@/lib/agent-journal';
 import { createRssFeed, type RssFeedItem } from '@/lib/rss-feed';
 
@@ -14,19 +13,6 @@ function siteUrl(pathname: string): string {
 }
 
 export async function GET() {
-  const posts = await getBlogPosts();
-  const blogItems: RssFeedItem[] = posts.map((post) => {
-    const link = siteUrl(`/blog/${encodeURIComponent(post.slug)}`);
-    return {
-      id: link,
-      title: post.title,
-      summary: post.blurb,
-      publishedAt: post.dateIso,
-      link,
-      author: post.author,
-    };
-  });
-
   const journalItems: RssFeedItem[] = agentJournalEntries.flatMap((entry) => {
     if (entry.artifact?.kind !== 'document') return [];
     const link = siteUrl(entry.artifact.path);
@@ -43,11 +29,11 @@ export async function GET() {
   });
 
   const body = createRssFeed({
-    title: 'teamleaderleo — posts and journal',
-    description: 'Public writing, engineering notes, and selected journal entries from Leo Li.',
+    title: 'teamleaderleo — journal',
+    description: 'Selected public journal entries from Scrapbook.',
     siteUrl: SITE_URL,
     feedUrl: FEED_URL,
-    items: [...blogItems, ...journalItems],
+    items: journalItems,
   });
 
   return new Response(body, {

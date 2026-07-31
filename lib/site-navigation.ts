@@ -49,14 +49,6 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         primary: true,
       },
       {
-        id: 'blog',
-        href: '/blog',
-        label: 'The Bot Desk',
-        description: 'Essays, field notes, and research dispatches.',
-        group: 'places',
-        primary: true,
-      },
-      {
         id: 'atelier',
         href: '/atelier',
         label: 'Atelier',

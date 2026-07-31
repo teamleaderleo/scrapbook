@@ -60,8 +60,6 @@ The following files contained no executable statements. Their complete contents 
 
 No runtime behavior, route, schema, migration, action, database record, or deployment configuration was changed. Git history is the recovery path.
 
-Executable legacy project/block actions, data functions, schema, and routes are deliberately retained pending the reachability, authorization, and data-retention decision in #269.
-
 ### Removed: additional commented-only source
 
 A second independent pass removed eight files whose entire contents were comments and which exposed no runtime export:
@@ -75,7 +73,31 @@ A second independent pass removed eight files whose entire contents were comment
 - `components/portfolio/block-display.tsx`
 - `components/blocks/components/block-tags.tsx`
 
-The executable `/login` page, dashboard redirect, dashboard route stubs, pagination component, project/block actions, data modules, schema, and migrations remain untouched. Empty or redirected routes require the broader #269 decision rather than deletion by proximity.
+The executable `/login` page, pagination component, project/block actions, data modules, schema, and migrations remained untouched in those mechanical passes.
+
+### Removed: legacy dashboard route tree
+
+PR #511 removed the unreachable `/dashboard` route tree and its robots exclusion. Focused Chromium and WebKit coverage confirms former dashboard URLs return ordinary 404 responses while `/space` remains active.
+
+Project/block actions, data modules, schema, historical migrations, and any production data remain retained under #269. No database deletion was authorized.
+
+### Removed: public blog and editorial corpus
+
+The owner confirmed that the public blog contained no useful, usable, or interesting data worth retaining. Issue #508 records the retirement decision.
+
+The cleanup removed:
+
+- all `/blog` routes, metadata, category pages, article rendering, and editorial-policy UI;
+- blog parsing, types, list/byline/layout components, revision reader, editorial diff/version runtime, and their tests;
+- eleven files under `content/posts`;
+- the `content/editorial` notes, revision manifest, and stored draft;
+- the blog destination from primary navigation and Site Atlas;
+- `/blog` from the sitemap;
+- blog entries from `/feed.xml`.
+
+`/feed.xml` remains available as a journal-only feed containing public document-backed journal entries. Internal journal receipts remain excluded.
+
+No Space content, journal records, authentication, database rows, credentials, or deployment controls were changed. Git history is the recovery path for any retired post or editorial file.
 
 ### Superseded or archived pull requests
 
@@ -89,7 +111,7 @@ The executable `/login` page, dashboard redirect, dashboard route stubs, paginat
 - #454 — historical Teacup visit proposal; not current Scrapbook work.
 - #457 — superseded by the shorter production-accurate time-tool copy already on `main`.
 - #462 — snow-globe work already landed; the separate homepage Antigravity effect is archived as an optional experiment.
-- #465 — stale navigation implementation archived; issue #463 remains the active requirement.
+- #465 — stale navigation implementation archived; the requirement was delivered from current `main` by #510.
 - #467 — historical Pressure Valve visit proposal; not current Scrapbook work.
 - #468 — generation-aware guestbook test idea archived until a non-Generation-2 entry is deliberately supported.
 - #473 — stale combined Generation 3 lab branch; underlying research remains in #443, #447, and #448.
@@ -98,12 +120,12 @@ The executable `/login` page, dashboard redirect, dashboard route stubs, paginat
 
 ### Retained / blocked
 
-- #269 — executable legacy project/block data layer remains until reachability, authorization, production-data retention, and removal/rebuild decisions are evidenced.
+- #269 — executable legacy project/block actions and data layer remain until reachability, authorization, production-data retention, and repository-only removal decisions are evidenced. Schema and historical migrations remain retained.
 - #378 — private ChatGPT check-in capability remains a product decision. Any implementation must start from current `main` as narrow ingress/auth, read-only, fixed-write, and deployed-acceptance slices.
 - #410 — shortcut centralisation remains useful, but must be designed against current Space handlers.
 - #411 — tactile interaction lab remains optional research rather than a queued implementation.
 - #414 — mobile Space actions/editor behavior remains a current-product decision independent of the archived dependency branch.
-- #463 — continuous navigation feedback remains a valid requirement even though stale PR #465 was closed.
+- #507 — disconnected `/login` and old auth UI retirement remains separate from current Supabase authentication.
 
 ## Recovery
 

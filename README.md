@@ -41,12 +41,12 @@ Setup details live in [`docs/proxy-health-dashboard.md`](docs/proxy-health-dashb
 
 The repo also contains:
 
-- the earlier authenticated scrapbook/project dashboard
-- blog and resume pages
+- a repository-backed public journal and journal-only RSS feed
+- resume pages
 - lab and atelier experiments
 - image processing, storage, AI-assisted tagging, and other ongoing prototypes
 
-Some routes are polished public surfaces. Others are active experiments or older iterations kept because they still contain useful ideas and code.
+Some routes are polished public surfaces. Others are isolated experiments. Retired implementations are recorded in [`docs/deprecation-ledger.md`](docs/deprecation-ledger.md) and Git history rather than kept as active product code.
 
 ## Current direction
 
@@ -94,6 +94,6 @@ The public homepage can render without database credentials or a GitHub token. A
 
 ## Status
 
-This is an active personal project. The public utilities and `/space` receive the most attention right now, while the older dashboard remains part of the repo's history and may continue to feed ideas into the newer workspace.
+This is an active personal project. The public utilities and `/space` receive the most attention right now. The former project/block dashboard and public blog are retired; their history remains available through Git.
 
 <!-- production deployment retry: 2026-07-25 17:33 UTC -->
