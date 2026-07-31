@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/dashboard/', '/proxy-dashboard/', '/login/'],
+      disallow: ['/proxy-dashboard/', '/login/'],
     },
     sitemap: 'https://teamleaderleo.com/sitemap.xml',
   };
