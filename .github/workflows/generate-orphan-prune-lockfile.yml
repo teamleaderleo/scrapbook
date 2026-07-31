@@ -1,15 +1,16 @@
 name: Generate orphan dependency prune
 
 on:
-  push:
+  pull_request:
     branches:
-      - cleanup/prune-orphan-ui-dependencies
+      - main
 
 permissions:
   contents: read
 
 jobs:
   generate:
+    if: github.head_ref == 'cleanup/prune-orphan-ui-dependencies'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
