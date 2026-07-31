@@ -13,6 +13,7 @@ import { Rating } from 'ts-fsrs';
 import { reviewOnce } from '@/app/lib/fsrs-adapter';
 import { createClient } from '@/utils/supabase/client';
 import type { ReviewState } from '@/app/lib/review-types';
+import { duplicateItemHref } from '@/lib/space-routes';
 import { SpaceHeader } from './space-header';
 import { CodeDisplay } from './code-display';
 
@@ -178,7 +179,7 @@ export function ReviewGallery() {
                 <Link href={`/space/edit/${current.slug}`} prefetch>edit</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href={`/space/add?duplicate=${current.slug}`} prefetch>duplicate</Link>
+                <Link href={duplicateItemHref(current.id)} prefetch>duplicate</Link>
               </Button>
             </>
           ) : undefined
