@@ -12,6 +12,7 @@ const retiredPaths = [
   'components/portfolio/project-display.tsx',
   'components/projects/components/project-block-item.tsx',
   'components/projects/forms/project-form.tsx',
+  'components/query-client-provider.tsx',
   'components/scrapbook/code-preview.tsx',
   'components/scrapbook/fold-comments-data.ts',
   'components/scrapbook/git-inline-data.ts',
