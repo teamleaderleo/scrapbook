@@ -3,20 +3,37 @@ import { createGitHubActivityHeaders } from './github-activity-response';
 import type { GitHubHomeResult } from './github-home';
 
 function result(source: GitHubHomeResult['activity']['source']): GitHubHomeResult {
+  const common = {
+    username: 'teamleaderleo',
+    generatedAt: '2026-07-27T01:00:00.000Z',
+    repositories: [],
+  };
+
   return {
-    activity: {
-      username: 'teamleaderleo',
-      source,
-      generatedAt: '2026-07-27T01:00:00.000Z',
-      total: 18,
-      periodLabel: source === 'unavailable' ? 'last 35 days' : 'last year',
-      today: 3,
-      weekTotal: 9,
-      activeDays: 5,
-      currentStreak: 2,
-      days: [],
-      repositories: [],
-    },
+    activity:
+      source === 'unavailable'
+        ? {
+            ...common,
+            source,
+            total: null,
+            periodLabel: 'last 35 days',
+            today: null,
+            weekTotal: null,
+            activeDays: null,
+            currentStreak: null,
+            days: [],
+          }
+        : {
+            ...common,
+            source,
+            total: 18,
+            periodLabel: 'last year',
+            today: 3,
+            weekTotal: 9,
+            activeDays: 5,
+            currentStreak: 2,
+            days: [],
+          },
     diagnostics: {
       cacheStatus: 'stale',
       upstreamSource: source,
