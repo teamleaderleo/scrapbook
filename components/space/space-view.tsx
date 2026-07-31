@@ -6,10 +6,11 @@ import { parseQuery } from '@/app/lib/searchlang';
 import { searchItems } from '@/app/lib/item-search';
 import type { Item } from '@/app/lib/item-types';
 import type { ReviewState } from '@/app/lib/review-types';
+import { rollbackFailedReview } from '@/app/lib/review-overrides';
 import { ResultsClient } from './space-results-client';
 import { Rating } from 'ts-fsrs';
 import { useNow } from '@/app/lib/hooks/useNow';
-import { reviewOnce, debugCard } from '@/app/lib/fsrs-adapter';
+import { reviewOnce } from '@/app/lib/fsrs-adapter';
 import { useItems } from '@/app/lib/contexts/item-context';
 import { createClient } from '@/utils/supabase/client';
 import { SpaceHeader } from './space-header';
@@ -40,6 +41,7 @@ export function SpaceView() {
 
   const query = useMemo(() => parseQuery(tagsParam), [tagsParam]);
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
+  const [mutationError, setMutationError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
   const [previousTagsParam, setPreviousTagsParam] = useState(tagsParam);
@@ -138,10 +140,11 @@ export function SpaceView() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      const current = mutations[id] ?? allItems.find((item) => item.id === id)?.review;
-      debugCard(current, 'BEFORE');
+      const previousOverride = mutations[id];
+      const current = previousOverride ?? allItems.find((item) => item.id === id)?.review;
       const next = reviewOnce(current, rating, nowMs);
-      debugCard(next, 'AFTER');
+
+      setMutationError(null);
       setMutations((previous) => ({ ...previous, [id]: next }));
 
       const { error: reviewError } = await supabase.from('reviews').upsert({
@@ -159,7 +162,11 @@ export function SpaceView() {
         suspended: next.suspended || false,
       });
 
-      if (reviewError) console.error('Failed to save review:', reviewError);
+      if (reviewError) {
+        console.error('Failed to save review:', reviewError);
+        setMutations((previous) => rollbackFailedReview(previous, id, next, previousOverride));
+        setMutationError("That review wasn't saved. The previous schedule has been restored.");
+      }
     },
     [allItems, mutations, nowMs, supabase],
   );
@@ -200,10 +207,25 @@ export function SpaceView() {
           </section>
 
           {error ? (
-            <div className="material-paper relative mb-4 flex items-center justify-between gap-3 overflow-hidden rounded-xl border px-4 py-3 text-sm" role="alert">
+            <div
+              className="material-paper relative mb-4 flex items-center justify-between gap-3 overflow-hidden rounded-xl border px-4 py-3 text-sm"
+              role="alert"
+            >
               <span className="min-w-0">{error}</span>
               <Button variant="outline" size="sm" className="shrink-0 rounded-lg" onClick={() => void reload()}>
                 Try again
+              </Button>
+            </div>
+          ) : null}
+
+          {mutationError ? (
+            <div
+              className="material-paper relative mb-4 flex items-center justify-between gap-3 overflow-hidden rounded-xl border px-4 py-3 text-sm"
+              role="alert"
+            >
+              <span className="min-w-0">{mutationError}</span>
+              <Button variant="outline" size="sm" className="shrink-0 rounded-lg" onClick={() => setMutationError(null)}>
+                Dismiss
               </Button>
             </div>
           ) : null}
@@ -244,7 +266,13 @@ export function SpaceView() {
 
           {hasMore ? (
             <div className="mt-4 flex justify-center">
-              <Button variant="outline" size="sm" className="rounded-lg" disabled={loadingMore} onClick={() => void loadMore()}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-lg"
+                disabled={loadingMore}
+                onClick={() => void loadMore()}
+              >
                 {loadingMore ? 'Opening drawer…' : 'Open more clippings'}
               </Button>
             </div>
