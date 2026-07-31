@@ -49,6 +49,13 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         primary: true,
       },
       {
+        id: 'resume',
+        href: '/resume',
+        label: 'Resume',
+        description: 'Selected engineering work and open-source projects.',
+        group: 'places',
+      },
+      {
         id: 'atelier',
         href: '/atelier',
         label: 'Atelier',
