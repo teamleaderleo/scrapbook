@@ -24,4 +24,8 @@ describe('disconnected legacy showcase boundary', () => {
   it.each(retiredPaths)('%s stays out of the active source tree', (path) => {
     expect(existsSync(resolve(process.cwd(), path))).toBe(false);
   });
+
+  it('removes the retired Scrapbook showcase component directory', () => {
+    expect(existsSync(resolve(process.cwd(), 'components/scrapbook'))).toBe(false);
+  });
 });
