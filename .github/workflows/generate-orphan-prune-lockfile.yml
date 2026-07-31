@@ -1,0 +1,69 @@
+name: Generate orphan dependency prune
+
+on:
+  push:
+    branches:
+      - cleanup/prune-orphan-ui-dependencies
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Remove proven orphan dependencies
+        run: >-
+          pnpm remove
+          @anthropic-ai/sdk
+          @aws-sdk/client-cloudfront
+          @aws-sdk/client-s3
+          @heroicons/react
+          @hookform/resolvers
+          @radix-ui/react-label
+          @radix-ui/themes
+          @tanstack/react-query
+          @vercel/postgres
+          @virtuoso.dev/message-list
+          @types/bcrypt
+          @types/pg
+          @types/react-beautiful-dnd
+          @types/react-syntax-highlighter
+          @types/uuid
+          @types/ws
+          bcryptjs
+          drizzle-zod
+          mitt
+          modern-monaco
+          node-vibrant
+          pg
+          react-hook-form
+          react-icons
+          react-syntax-highlighter
+          react-virtuoso
+          swr
+          use-debounce
+          uuid
+          ws
+          zustand
+          --ignore-scripts
+          --reporter=silent
+      - name: Show generated changes
+        run: git diff --check && git diff --stat -- package.json pnpm-lock.yaml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: orphan-prune-manifest
+          path: |
+            package.json
+            pnpm-lock.yaml
+          if-no-files-found: error
+          retention-days: 1
