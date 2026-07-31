@@ -82,7 +82,13 @@ function readStoredSnapshot(): StoredActivitySnapshot | null {
     if (parsed.yearTotal !== null && (!isFiniteNumber(parsed.yearTotal) || parsed.yearTotal < 0)) {
       return null;
     }
-    if (!Array.isArray(parsed.days) || !parsed.days.every(isActivityGridDay)) return null;
+    if (
+      !Array.isArray(parsed.days) ||
+      parsed.days.length === 0 ||
+      !parsed.days.every(isActivityGridDay)
+    ) {
+      return null;
+    }
     if (typeof parsed.generatedAt !== 'string') return null;
     const generatedAt = Date.parse(parsed.generatedAt);
     if (!Number.isFinite(generatedAt)) return null;
@@ -153,6 +159,8 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
   const consecutiveFailures = useRef(0);
 
   useEffect(() => {
+    setCalendarGeneratedAt(new Date().toISOString());
+
     if (initial.source === 'unavailable') {
       const stored = readStoredSnapshot();
       if (!stored) return;
@@ -163,7 +171,7 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
       return;
     }
 
-    writeStoredSnapshot(initial);
+    if (initial.days.length > 0) writeStoredSnapshot(initial);
   }, [initial]);
 
   useEffect(() => {
