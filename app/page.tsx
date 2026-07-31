@@ -57,21 +57,31 @@ function HomeActivityFallback() {
 async function HomeActivityContent() {
   await connection();
   const { activity } = await getGitHubHomeResult();
-  const days = activity.source === 'unavailable' ? [] : activity.days;
-  const yearTotal = activity.periodLabel === 'last year' ? activity.total : null;
 
   return (
     <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
       <ActivityDashboard
-        initial={{
-          source: activity.source,
-          today: activity.today,
-          weekTotal: activity.weekTotal,
-          yearTotal,
-          days,
-          unit: 'contributions',
-          generatedAt: activity.generatedAt,
-        }}
+        initial={
+          activity.source === 'unavailable'
+            ? {
+                source: 'unavailable',
+                today: null,
+                weekTotal: null,
+                yearTotal: null,
+                days: [],
+                unit: 'contributions',
+                generatedAt: activity.generatedAt,
+              }
+            : {
+                source: activity.source,
+                today: activity.today,
+                weekTotal: activity.weekTotal,
+                yearTotal: activity.total,
+                days: activity.days,
+                unit: 'contributions',
+                generatedAt: activity.generatedAt,
+              }
+        }
       />
 
       <section aria-label="Recent systems" className="min-w-0" data-recent-systems>
