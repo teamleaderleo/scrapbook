@@ -65,7 +65,7 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: test-anon-key
@@ -79,51 +79,16 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile --reporter=silent
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium webkit
-      - name: Browser regressions
-        run: pnpm test:e2e > playwright.log 2>&1
-      - name: Upload homepage density screenshots
-        if: always()
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Chromium regressions
+        run: pnpm exec playwright test --project=chromium > playwright.log 2>&1
+      - name: Upload browser failure diagnostics
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: homepage-density-screenshots
-          path: test-results/homepage-density
-          if-no-files-found: ignore
-      - name: Upload scoreboard appearance screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: scoreboard-appearance-screenshots
-          path: test-results/scoreboard-appearance
-          if-no-files-found: ignore
-      - name: Upload gallery repair screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gallery-repair-screenshots
-          path: test-results/gallery-repair
-          if-no-files-found: ignore
-      - name: Upload agent sigil lab screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: agent-sigil-lab-screenshots
-          path: test-results/**/sigil-lab-*.png
-          if-no-files-found: ignore
-      - name: Upload site atlas screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: site-atlas-screenshots
-          path: test-results/**/site-atlas-*.png
-          if-no-files-found: ignore
-      - name: Upload browser diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-log
+          name: chromium-failure-diagnostics
           path: |
             playwright.log
-            test-results/**/activity-field-*.png
+            test-results
           if-no-files-found: ignore

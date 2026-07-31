@@ -1,77 +1,75 @@
 # teamleaderleo.com / scrapbook
 
-This repository powers [teamleaderleo.com](https://teamleaderleo.com/): a personal site, web lab, and home for the scrapbook project.
+This repository powers [teamleaderleo.com](https://teamleaderleo.com/): a personal site, software lab, and private knowledge workspace.
 
-The repo began as a visual project-management app built around projects, blocks, tags, images, and rich text. It has since grown into a collection of tools and experiments, with the personal knowledge workspace at its center.
+Scrapbook began as a project-management application built around projects, blocks, tags, images, and rich text. That product is retired. The current repository keeps the useful public tools and experiments, the Supabase-backed Space workspace, and the operational code that still earns its complexity.
 
-## What is live now
+## Live surfaces
 
 ### Home — GitHub activity
 
-The homepage is a scoreboard-style view of today's public GitHub contributions, with a local-midnight rollover clock, a 28-day activity field, seven-day and year totals, and links to the current public projects. It reads GitHub's public contribution graph, falls back to public events when needed, and caches the result for five minutes.
+The homepage renders an exact four-week Monday–Sunday contribution calendar, current activity totals, rollover timing, and links to current public repositories.
 
-### Time machine — time-zone visualizer
+When a profile token is available, activity comes from GitHub's GraphQL contribution calendar. Otherwise the server reads the public contribution page. The integration uses short-lived caching, stale-data fallback, bounded retries, and an explicit unavailable state rather than inventing zero activity when GitHub cannot be reached.
 
-`/time` is an interactive time converter for comparing UTC, Eastern, Pacific, local time, and a selectable time zone across a full day. The range control uses a day-to-night gradient, and the current local time also appears as a link in the site navigation.
+### Space — notes and review
 
-### Space — personal reference and learning workspace
+`/space` is the private working area for notes, links, code, references, and material worth revisiting.
 
-`/space` is a searchable library for notes, links, code, references, and things worth revisiting.
+It includes:
 
-It currently includes:
+- tag-based search and filtering;
+- multiple text and code versions per item;
+- inline editing for authenticated admin use;
+- paginated and incremental loading;
+- Supabase-backed persistence and authentication;
+- FSRS-based spaced-repetition reviews with optimistic updates and failure rollback.
 
-- tag-based queries and filtering
-- multiple text and code versions per item
-- inline editing for admin users
-- paginated and incremental item loading
-- Supabase-backed persistence and authentication
-- FSRS-based spaced-repetition reviews
+### Time
 
-### Cube — agent room and guestbook
+`/time` is an interactive time-zone comparison tool covering UTC, Eastern, Pacific, local time, and a selectable zone across a full day.
 
-`/gallery` is a small React Three Fiber room plus a repository-backed guestbook. Agents with repository access can leave a name, mark, note, date, and mode by editing `lib/agent-guestbook.ts`. The 3D scene supports direct dragging while keeping vertical page scrolling available.
+### Gallery
+
+`/gallery` contains a small React Three Fiber room and a repository-backed agent guestbook. The scene supports direct dragging without trapping vertical page scrolling.
 
 ### Proxy dashboard
 
-`/proxy-dashboard` is a read-only operations dashboard for the Bandwagon-to-Linode proxy path. It displays service health, route mode, egress details, WireGuard transfer and handshake data, provider usage, fallback readiness, and ingestion errors.
+`/proxy-dashboard` is a read-only operational view for the Bandwagon-to-Linode proxy path. It reports service health, route mode, WireGuard state, provider usage, fallback readiness, and ingestion failures.
 
 Setup details live in [`docs/proxy-health-dashboard.md`](docs/proxy-health-dashboard.md).
 
-### Other areas
+### Journal, feed, and experiments
 
-The repo also contains:
+The repository also contains:
 
-- a repository-backed public journal and journal-only RSS feed
-- resume pages
-- lab and atelier experiments
-- image processing, storage, AI-assisted tagging, and other ongoing prototypes
+- a repository-backed public journal;
+- a journal-only RSS feed at `/feed.xml`;
+- the Site Atlas navigation registry;
+- atelier and interaction experiments;
+- the snow globe, activity-geometry lab, and sigil lab.
 
-Some routes are polished public surfaces. Others are isolated experiments. Retired implementations are recorded in [`docs/deprecation-ledger.md`](docs/deprecation-ledger.md) and Git history rather than kept as active product code.
+## Retired surfaces
 
-## Current direction
+The old project/block/tag dashboard, public blog, decorative login route, standalone resume, public Claude endpoint, WebSocket presence server, and disconnected S3/image-processing prototypes are retired.
 
-The main goal is a personal, searchable place for collecting references, writing notes, saving code, and reviewing ideas without an algorithmic feed deciding what appears next.
+Their history remains available through Git and [`docs/deprecation-ledger.md`](docs/deprecation-ledger.md). Obsolete implementations are not kept as commented source files.
 
-The original inspiration came from using a private Discord server as an archive: quick capture, channels as categories, rich previews, and easy access from desktop or phone. Scrapbook keeps those strengths while adding ownership, stronger search, richer editing, and deliberate review.
+## Active stack
 
-## Stack
-
-- Next.js 16 App Router, React 19, and TypeScript
-- Tailwind CSS, Radix UI, Framer Motion, and Lucide
-- Supabase/Postgres with Drizzle ORM
-- TanStack Query and SWR
-- React Three Fiber, Drei, and Three.js
-- Tiptap, Monaco, Shiki, and Markdown/MDX tooling
-- Anthropic API integrations
-- AWS S3 and CloudFront integrations
-- Vitest, Playwright, ESLint, and Prettier
+- Next.js 16 App Router, React 19, and TypeScript;
+- Tailwind CSS, Radix UI, Framer Motion, and Lucide;
+- Supabase/Postgres with Drizzle ORM;
+- React Three Fiber, Drei, and Three.js;
+- Tiptap, Monaco, Shiki, Markdown, and MDX tooling;
+- Vitest, Playwright, ESLint, and Prettier.
 
 ## Local development
 
 Requirements:
 
-- Node.js 22
-- pnpm
+- Node.js 22;
+- pnpm.
 
 ```bash
 pnpm install
@@ -88,12 +86,23 @@ pnpm typecheck
 pnpm test
 pnpm prettier:check
 pnpm build
+pnpm exec playwright test --project=chromium
 ```
 
-The public homepage can render without database credentials or a GitHub token. Authentication, saved content, proxy reporting, AI features, and storage integrations require their corresponding environment variables and services.
+The public homepage can render without database credentials or a GitHub token. Authentication, saved Space content, and proxy reporting require their corresponding environment variables and services.
 
-## Status
+## Browser policy
 
-This is an active personal project. The public utilities and `/space` receive the most attention right now. The former project/block dashboard and public blog are retired; their history remains available through Git.
+Chromium is the normal pull-request browser gate. It runs with two workers to use the available CI cores. WebKit compatibility runs weekly and can also be triggered manually through GitHub Actions:
 
-<!-- production deployment retry: 2026-07-25 17:33 UTC -->
+```bash
+pnpm exec playwright test --project=webkit
+```
+
+Browser traces and screenshots are uploaded only when a browser job fails instead of creating large artifact bundles for every successful run.
+
+## Current direction
+
+The main goal is a personal, searchable place for collecting references, writing notes, saving code, and deliberately reviewing ideas without an algorithmic feed deciding what appears next.
+
+Public tools stay small and presentable. Experiments remain isolated. Code that no longer has a route, caller, data responsibility, or operational purpose is retired with evidence and recoverable through Git history.

@@ -7,19 +7,19 @@ import {
 } from './site-navigation';
 
 describe('site navigation registry', () => {
-  it('exposes the visible destinations and keeps retired writing surfaces hidden', () => {
+  it('exposes the visible destinations and keeps retired surfaces hidden', () => {
     const hrefs = siteNavigationItems.map((item) => item.href);
     expect(hrefs).toEqual(
-      expect.arrayContaining(['/', '/space', '/time', '/gallery', '/resume', '/atelier', '/snow-globe']),
+      expect.arrayContaining(['/', '/space', '/time', '/gallery', '/atelier', '/snow-globe']),
     );
     expect(hrefs).not.toContain('/blog');
     expect(hrefs).not.toContain('/journal');
+    expect(hrefs).not.toContain('/resume');
   });
 
   it('keeps tools, secondary places, and labs out of the primary row', () => {
     const primaryIds = primaryNavigationItems.map((item) => item.id);
     expect(primaryIds).toEqual(['home', 'space', 'gallery']);
-    expect(primaryIds).not.toContain('resume');
     expect(primaryIds).not.toContain('proxy');
     expect(primaryIds).not.toContain('snow-globe');
     expect(primaryIds).not.toContain('activity-lab');
@@ -46,8 +46,8 @@ describe('site navigation registry', () => {
   it('returns the active place for registered routes', () => {
     expect(getActiveNavigationItem('/space/review')?.id).toBe('space');
     expect(getActiveNavigationItem('/gallery')?.id).toBe('gallery');
-    expect(getActiveNavigationItem('/resume')?.id).toBe('resume');
     expect(getActiveNavigationItem('/snow-globe')?.id).toBe('snow-globe');
+    expect(getActiveNavigationItem('/resume')).toBeUndefined();
     expect(getActiveNavigationItem('/blog/about')).toBeUndefined();
     expect(getActiveNavigationItem('/unknown')).toBeUndefined();
   });
