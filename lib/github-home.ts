@@ -51,23 +51,39 @@ export type GitHubRateLimit = {
   resource: string | null;
 };
 
-export type GitHubHomeData = {
+type GitHubHomeCommon = {
   username: string;
-  source: 'github-graphql' | 'public-profile' | 'unavailable';
   generatedAt: string;
-  total: number | null;
-  periodLabel: 'last year' | 'last 35 days';
-  today: number;
-  weekTotal: number;
-  activeDays: number;
-  currentStreak: number;
-  days: ContributionDay[];
   repositories: Array<{
     name: string;
     url: string;
     note: string;
   }>;
 };
+
+type GitHubAvailableHomeData = GitHubHomeCommon & {
+  source: 'github-graphql' | 'public-profile';
+  total: number | null;
+  periodLabel: 'last year';
+  today: number;
+  weekTotal: number;
+  activeDays: number;
+  currentStreak: number;
+  days: ContributionDay[];
+};
+
+type GitHubUnavailableHomeData = GitHubHomeCommon & {
+  source: 'unavailable';
+  total: null;
+  periodLabel: 'last 35 days';
+  today: null;
+  weekTotal: null;
+  activeDays: null;
+  currentStreak: null;
+  days: [];
+};
+
+export type GitHubHomeData = GitHubAvailableHomeData | GitHubUnavailableHomeData;
 
 export type GitHubActivityDiagnostics = {
   cacheStatus: 'hit' | 'miss' | 'stale';
@@ -86,11 +102,11 @@ export type GitHubHomeResult = {
 
 type ActivitySource = GitHubHomeData['source'];
 type ActivitySummary = Pick<
-  GitHubHomeData,
+  GitHubAvailableHomeData,
   'total' | 'periodLabel' | 'today' | 'weekTotal' | 'activeDays' | 'currentStreak' | 'days'
 >;
 type UpstreamActivity = {
-  activity: GitHubHomeData;
+  activity: GitHubAvailableHomeData;
   rateLimit: GitHubRateLimit | null;
 };
 
@@ -115,25 +131,18 @@ function countCurrentStreak(days: ContributionDay[]): number {
 
 function summarizeCounts(
   counts: Map<string, number>,
-  source: ActivitySource,
   now = new Date(),
   reportedTotal: number | null = null,
 ): ActivitySummary {
   const days = daysFromCounts(counts, now);
   const today = dateKeyInTimeZone(now);
-  const hasRollingYearCalendar = source !== 'unavailable';
-  const periodLabel: GitHubHomeData['periodLabel'] = hasRollingYearCalendar
-    ? 'last year'
-    : 'last 35 days';
-  const periodEntries = hasRollingYearCalendar
-    ? [...counts.entries()].filter(([date]) => date <= today)
-    : days.map((day) => [day.date, day.count] as const);
-  const streakDays = hasRollingYearCalendar ? daysFromCounts(counts, now, 366) : days;
+  const periodEntries = [...counts.entries()].filter(([date]) => date <= today);
+  const streakDays = daysFromCounts(counts, now, 366);
   const calculatedTotal = periodEntries.reduce((sum, [, count]) => sum + count, 0);
 
   return {
-    total: hasRollingYearCalendar && reportedTotal !== null ? reportedTotal : calculatedTotal,
-    periodLabel,
+    total: reportedTotal ?? calculatedTotal,
+    periodLabel: 'last year',
     today: days.at(-1)?.count ?? 0,
     weekTotal: days.slice(-7).reduce((sum, day) => sum + day.count, 0),
     activeDays: periodEntries.filter(([, count]) => count > 0).length,
@@ -198,14 +207,18 @@ function featuredRepositories(): GitHubHomeData['repositories'] {
   return FEATURED_REPOSITORIES.map((repository) => ({ ...repository }));
 }
 
-function unavailableHomeData(now = new Date()): GitHubHomeData {
-  const summary = summarizeCounts(new Map(), 'unavailable', now);
+export function createUnavailableGitHubHomeData(now = new Date()): GitHubUnavailableHomeData {
   return {
     username: GITHUB_USERNAME,
     source: 'unavailable',
     generatedAt: now.toISOString(),
-    ...summary,
     total: null,
+    periodLabel: 'last 35 days',
+    today: null,
+    weekTotal: null,
+    activeDays: null,
+    currentStreak: null,
+    days: [],
     repositories: featuredRepositories(),
   };
 }
@@ -217,7 +230,7 @@ function createUpstreamActivity(
   rateLimit: GitHubRateLimit | null,
   now = new Date(),
 ): UpstreamActivity {
-  const summary = summarizeCounts(counts, source, now, total);
+  const summary = summarizeCounts(counts, now, total);
   return {
     activity: {
       username: GITHUB_USERNAME,
@@ -270,7 +283,7 @@ const githubHomeCache = createStaleWhileErrorCache<UpstreamActivity>({
 
 export async function getGitHubHomeResult(): Promise<GitHubHomeResult> {
   const cached = await githubHomeCache.get();
-  const activity = cached.value?.activity ?? unavailableHomeData();
+  const activity = cached.value?.activity ?? createUnavailableGitHubHomeData();
 
   return {
     activity,
