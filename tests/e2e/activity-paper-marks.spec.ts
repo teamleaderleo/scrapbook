@@ -70,6 +70,42 @@ for (const theme of ['light', 'dark'] as const) {
   });
 }
 
+test('the hydrated activity grid keeps one owned tooltip anchored through click', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.setViewportSize({ width: 1280, height: 760 });
+  const response = await page.goto('/');
+  expect(response?.ok()).toBe(true);
+
+  const section = hydratedActivitySection(page);
+  await expect(section).toBeVisible({ timeout: 15_000 });
+  await expect(section).toHaveAttribute('data-fine-pointer', 'true');
+
+  const mark = section.locator('[data-paper-activity-mark]').nth(8);
+  const label = await mark.getAttribute('aria-label');
+  expect(label).toBeTruthy();
+  await expect(mark).toHaveAttribute('aria-pressed', 'false');
+
+  await mark.hover();
+  const tooltip = section.locator('[data-activity-tooltip]');
+  await expect(tooltip).toHaveCount(1);
+  await expect(tooltip).toBeVisible();
+  await expect(tooltip).toHaveText(label!);
+  const before = await tooltip.boundingBox();
+  expect(before).not.toBeNull();
+
+  await mark.click();
+  await expect(mark).toHaveAttribute('aria-pressed', 'true');
+  await expect(tooltip).toHaveCount(1);
+  await expect(tooltip).toBeVisible();
+  await expect(tooltip).toHaveText(label!);
+  const after = await tooltip.boundingBox();
+  expect(after).not.toBeNull();
+
+  expect(Math.abs(after!.x - before!.x)).toBeLessThan(1);
+  expect(Math.abs(after!.y - before!.y)).toBeLessThan(1);
+  await expect(page.locator('[data-activity-tooltip]')).toHaveCount(1);
+});
+
 test('activity marks stay planted with reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' });
   await page.setViewportSize({ width: 390, height: 844 });
