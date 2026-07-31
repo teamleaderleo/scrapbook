@@ -20,12 +20,18 @@ const retiredPaths = [
   'components/ui/components/pagination.tsx',
 ] as const;
 
+const preservedProjectDataPaths = [
+  'components/scrapbook/fold-comments-data.ts',
+  'components/scrapbook/git-inline-data.ts',
+  'components/scrapbook/potato-compressor-data.ts',
+] as const;
+
 describe('disconnected legacy showcase boundary', () => {
   it.each(retiredPaths)('%s stays out of the active source tree', (path) => {
     expect(existsSync(resolve(process.cwd(), path))).toBe(false);
   });
 
-  it('removes the retired Scrapbook showcase component directory', () => {
-    expect(existsSync(resolve(process.cwd(), 'components/scrapbook'))).toBe(false);
+  it.each(preservedProjectDataPaths)('%s remains available', (path) => {
+    expect(existsSync(resolve(process.cwd(), path))).toBe(true);
   });
 });
