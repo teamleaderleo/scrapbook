@@ -1,6 +1,10 @@
 'use client';
 
-import { alignContributionDaysToWeekColumns } from '@/lib/github-activity-utils';
+import {
+  buildFourWeekContributionCells,
+  dateKeyInTimeZone,
+  type FourWeekContributionCell,
+} from '@/lib/github-activity-utils';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './activity-grid.module.css';
 
@@ -9,15 +13,37 @@ export type ActivityGridDay = {
   count: number;
 };
 
-const WEEKDAY_LABELS = ['Sun', '', 'Tue', '', 'Thu', '', 'Sat'] as const;
+const WEEKDAY_LABELS = ['Mon', '', 'Wed', '', 'Fri', '', 'Sun'] as const;
+const WEEK_COUNT = 4;
+
+function dateFromKey(date: string): Date {
+  return new Date(`${date}T00:00:00Z`);
+}
 
 function formatDay(date: string): string {
-  return new Intl.DateTimeFormat('en-GB', {
-    weekday: 'short',
-    month: 'short',
+  return new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    month: 'long',
     day: 'numeric',
     timeZone: 'UTC',
-  }).format(new Date(`${date}T00:00:00Z`));
+  }).format(dateFromKey(date));
+}
+
+function formatMonth(date: string): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    month: 'short',
+    timeZone: 'UTC',
+  }).format(dateFromKey(date));
+}
+
+function weekMonthLabel(cells: FourWeekContributionCell<ActivityGridDay>[]): string {
+  const first = cells[0]?.date;
+  const last = cells.at(-1)?.date;
+  if (!first || !last) return '';
+
+  const firstMonth = formatMonth(first);
+  const lastMonth = formatMonth(last);
+  return firstMonth === lastMonth ? firstMonth : `${firstMonth} / ${lastMonth}`;
 }
 
 function activityClass(count: number, maximum: number): string {
@@ -36,16 +62,46 @@ function labelForDay(day: ActivityGridDay, unit: string) {
   return `${formatDay(day.date)} · ${day.count.toLocaleString('en-GB')} ${unit}`;
 }
 
-export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: string }) {
-  const maximum = Math.max(...days.map((day) => day.count), 0);
-  const gridDays = useMemo(() => alignContributionDaysToWeekColumns(days), [days]);
-  const weekCount = Math.max(1, gridDays.length / 7);
-  const calendarMaxWidthRem = 2.3 + weekCount * 3.15;
-  const [selectedDate, setSelectedDate] = useState(days.at(-1)?.date ?? '');
+function referenceDate(value: string): Date {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? new Date() : date;
+}
+
+export function ActivityGrid({
+  days,
+  unit,
+  generatedAt,
+  unavailableMessage = 'GitHub activity is temporarily unavailable.',
+}: {
+  days: ActivityGridDay[];
+  unit: string;
+  generatedAt: string;
+  unavailableMessage?: string;
+}) {
+  const calendarDate = useMemo(() => referenceDate(generatedAt), [generatedAt]);
+  const today = dateKeyInTimeZone(calendarDate);
+  const cells = useMemo(
+    () => buildFourWeekContributionCells(days, calendarDate),
+    [calendarDate, days],
+  );
+  const recordedDays = useMemo(
+    () => cells.flatMap((cell) => (cell.state === 'recorded' ? [cell.day] : [])),
+    [cells],
+  );
+  const maximum = Math.max(...recordedDays.map((day) => day.count), 0);
+  const weekLabels = useMemo(
+    () =>
+      Array.from({ length: WEEK_COUNT }, (_, index) =>
+        weekMonthLabel(cells.slice(index * 7, index * 7 + 7)),
+      ),
+    [cells],
+  );
+  const latestRecordedDate = recordedDays.at(-1)?.date ?? '';
+  const [selectedDate, setSelectedDate] = useState(latestRecordedDate);
   const [tooltipDate, setTooltipDate] = useState<string | null>(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [finePointer, setFinePointer] = useState(false);
-  const previousLatest = useRef(days.at(-1)?.date ?? '');
+  const previousLatest = useRef(latestRecordedDate);
   const sectionRef = useRef<HTMLElement | null>(null);
   const hideTimer = useRef<number | null>(null);
   const positionFrame = useRef<number | null>(null);
@@ -67,21 +123,24 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
   }, []);
 
   useEffect(() => {
-    const latest = days.at(-1)?.date ?? '';
     setSelectedDate((current) => {
-      if (!current || current === previousLatest.current || !days.some((day) => day.date === current)) {
-        return latest;
+      if (
+        !current ||
+        current === previousLatest.current ||
+        !recordedDays.some((day) => day.date === current)
+      ) {
+        return latestRecordedDate;
       }
       return current;
     });
-    previousLatest.current = latest;
-  }, [days]);
+    previousLatest.current = latestRecordedDate;
+  }, [latestRecordedDate, recordedDays]);
 
-  const selected = days.find((day) => day.date === selectedDate);
-  const tooltipDay = days.find((day) => day.date === tooltipDate);
+  const selected = recordedDays.find((day) => day.date === selectedDate);
+  const tooltipDay = recordedDays.find((day) => day.date === tooltipDate);
   const selectedLabel = useMemo(
-    () => (selected ? labelForDay(selected, unit) : ''),
-    [selected, unit],
+    () => (selected ? labelForDay(selected, unit) : unavailableMessage),
+    [selected, unit, unavailableMessage],
   );
   const tooltipLabel = tooltipDay ? labelForDay(tooltipDay, unit) : '';
 
@@ -126,7 +185,7 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
     >
       <div className="flex items-center justify-between gap-4">
         <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-          21 days · UTC
+          4 weeks · UTC
         </span>
         <div
           className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground"
@@ -142,10 +201,20 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
         </div>
       </div>
 
-      <div
-        className="mx-auto mt-3 grid w-full grid-cols-[1.65rem_minmax(0,1fr)] gap-2 sm:gap-2.5 [@media(max-height:780px)]:mt-2"
-        style={{ maxWidth: `min(100%, ${calendarMaxWidthRem}rem)` }}
-      >
+      <div className="mx-auto mt-3 grid w-full max-w-[15rem] grid-cols-[1.65rem_minmax(0,1fr)] gap-x-2 gap-y-1.5 sm:max-w-[17rem] sm:gap-x-2.5 [@media(max-height:780px)]:mt-2">
+        <span aria-hidden="true" />
+        <div
+          className="grid grid-cols-4 gap-1.5 px-px font-mono text-[8px] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:gap-2"
+          aria-hidden="true"
+          data-contribution-month-labels
+        >
+          {weekLabels.map((label, index) => (
+            <span key={`${label}-${index}`} className="truncate text-center">
+              {label}
+            </span>
+          ))}
+        </div>
+
         <div
           className="grid grid-rows-7 gap-1.5 py-px font-mono text-[8px] font-medium text-muted-foreground sm:gap-2"
           aria-hidden="true"
@@ -160,41 +229,67 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
         <div
           className="grid min-w-0 gap-1.5 sm:gap-2"
           style={{
-            gridTemplateColumns: `repeat(${weekCount}, minmax(0, 1fr))`,
+            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
             gridTemplateRows: 'repeat(7, minmax(0, 1fr))',
           }}
-          aria-label="GitHub contribution calendar for the last 21 days"
+          aria-label="GitHub contribution calendar for three completed weeks and the current week"
+          data-calendar-weeks="4"
           data-contribution-week-grid
           data-paper-activity-grid
         >
-          {gridDays.map((day, index) => {
+          {cells.map((cell, index) => {
             const gridColumn = Math.floor(index / 7) + 1;
             const gridRow = (index % 7) + 1;
+            const sharedStyle = { gridColumn, gridRow };
 
-            if (!day) {
+            if (cell.state === 'upcoming') {
               return (
                 <span
-                  key={`empty-${index}`}
-                  aria-hidden="true"
-                  className="aspect-square min-w-0 rounded-[0.38rem]"
-                  style={{ gridColumn, gridRow }}
+                  key={cell.date}
+                  role="img"
+                  aria-label={`${formatDay(cell.date)} — upcoming.`}
+                  className={`${styles.etchedMark} ${styles.upcomingMark} aspect-square min-w-0 rounded-[0.38rem]`}
+                  style={sharedStyle}
+                  data-contribution-cell
+                  data-contribution-date={cell.date}
+                  data-contribution-state="upcoming"
+                  data-contribution-upcoming
                 />
               );
             }
 
+            if (cell.state === 'unavailable') {
+              return (
+                <span
+                  key={cell.date}
+                  role="img"
+                  aria-label={`${formatDay(cell.date)} — activity unavailable.`}
+                  className={`${styles.etchedMark} ${styles.unavailableMark} aspect-square min-w-0 rounded-[0.38rem]`}
+                  style={sharedStyle}
+                  data-contribution-cell
+                  data-contribution-date={cell.date}
+                  data-contribution-state="unavailable"
+                  data-contribution-unavailable
+                />
+              );
+            }
+
+            const day = cell.day;
             const label = labelForDay(day, unit);
             const isSelected = day.date === selected?.date;
-            const isLatest = day.date === days.at(-1)?.date;
+            const isToday = day.date === today;
 
             return (
               <button
                 key={day.date}
                 type="button"
-                className={`${styles.paperMark} aspect-square min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activityClass(day.count, maximum)} ${isLatest ? 'outline outline-2 outline-offset-2 outline-foreground/20' : ''} ${isSelected ? 'brightness-[1.04] dark:brightness-110' : ''}`}
-                style={{ gridColumn, gridRow }}
+                className={`${styles.paperMark} aspect-square min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activityClass(day.count, maximum)} ${isToday ? 'outline outline-2 outline-offset-2 outline-foreground/20' : ''} ${isSelected ? 'brightness-[1.04] dark:brightness-110' : ''}`}
+                style={sharedStyle}
                 aria-label={label}
                 aria-pressed={isSelected}
+                data-contribution-cell
                 data-contribution-date={day.date}
+                data-contribution-state="recorded"
                 data-paper-activity-mark
                 onPointerEnter={(event) => showTooltip(day.date, event.clientX, event.clientY)}
                 onPointerMove={(event) => {
@@ -215,7 +310,10 @@ export function ActivityGrid({ days, unit }: { days: ActivityGridDay[]; unit: st
         </div>
       </div>
 
-      <div className="mt-2 flex min-h-8 items-center justify-center rounded-lg border border-border/70 bg-background/55 px-3 py-1.5 text-center font-mono text-[10px] font-medium text-muted-foreground md:hidden" aria-live="polite">
+      <div
+        className="mt-2 flex min-h-8 items-center justify-center rounded-lg border border-border/70 bg-background/55 px-3 py-1.5 text-center font-mono text-[10px] font-medium text-muted-foreground md:hidden"
+        aria-live="polite"
+      >
         {selectedLabel}
       </div>
 

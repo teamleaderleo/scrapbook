@@ -73,7 +73,7 @@ async function HomeActivityContent() {
           today: activity.today,
           weekTotal: activity.weekTotal,
           yearTotal: activity.total,
-          days: activity.days.slice(-21),
+          days: activity.days,
           unit: 'contributions',
           generatedAt: activity.generatedAt,
         };

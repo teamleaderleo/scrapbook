@@ -5,7 +5,6 @@ import {
   motion,
   useAnimate,
   useMotionValue,
-  useReducedMotion,
   useSpring,
   useTransform,
 } from 'framer-motion';
@@ -17,6 +16,22 @@ import {
   useState,
 } from 'react';
 import styles from './activity-scoreboard.module.css';
+
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+
+function useReducedMotionPreference(): boolean {
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(REDUCED_MOTION_QUERY);
+    const update = () => setReduceMotion(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  return reduceMotion;
+}
 
 function countdownToUtcMidnight() {
   const now = new Date();
@@ -43,7 +58,7 @@ type DigitTurn = {
 };
 
 function PaperDigit({ digit, index }: { digit: string; index: number }) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReducedMotionPreference();
   const [displayed, setDisplayed] = useState(digit);
   const [turn, setTurn] = useState<DigitTurn | null>(null);
   const sequence = useRef(0);
@@ -162,7 +177,7 @@ function ScoreDigits({ value }: { value: number }) {
     () => String(Math.max(0, Math.floor(value))).slice(-4).padStart(4, '0').split(''),
     [value],
   );
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReducedMotionPreference();
   const previousValue = useRef(value);
   const [scope, animate] = useAnimate();
 
@@ -250,7 +265,7 @@ export function ActivityScoreboard({
   yearTotal: number | null;
   updating: boolean;
 }) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReducedMotionPreference();
   const [countdown, setCountdown] = useState('--:--:--');
   const pointerX = useMotionValue(0);
   const pointerY = useMotionValue(0);

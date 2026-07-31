@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   alignContributionDaysToWeekColumns,
+  buildFourWeekContributionCells,
+  getFourWeekDateKeys,
   getRecentDateKeys,
   parsePublicContributionHtml,
   parsePublicContributionTotal,
@@ -68,6 +70,40 @@ describe('getRecentDateKeys', () => {
   });
 });
 
+describe('four-week contribution field', () => {
+  const now = new Date('2026-07-31T08:00:00Z');
+
+  it('renders three completed Monday-Sunday weeks plus the current week', () => {
+    const dates = getFourWeekDateKeys(now);
+
+    expect(dates).toHaveLength(28);
+    expect(dates[0]).toBe('2026-07-06');
+    expect(dates[20]).toBe('2026-07-26');
+    expect(dates[21]).toBe('2026-07-27');
+    expect(dates.at(-1)).toBe('2026-08-02');
+  });
+
+  it('keeps future dates upcoming and missing past data unavailable', () => {
+    const cells = buildFourWeekContributionCells([], now);
+
+    expect(cells.slice(0, 26).every((cell) => cell.state === 'unavailable')).toBe(true);
+    expect(cells.slice(26).map((cell) => cell.state)).toEqual(['upcoming', 'upcoming']);
+  });
+
+  it('preserves a recorded zero without using zero for missing data', () => {
+    const cells = buildFourWeekContributionCells([{ date: '2026-07-31', count: 0 }], now);
+    const today = cells.find((cell) => cell.date === '2026-07-31');
+    const yesterday = cells.find((cell) => cell.date === '2026-07-30');
+
+    expect(today).toEqual({
+      date: '2026-07-31',
+      state: 'recorded',
+      day: { date: '2026-07-31', count: 0 },
+    });
+    expect(yesterday).toEqual({ date: '2026-07-30', state: 'unavailable' });
+  });
+});
+
 describe('alignContributionDaysToWeekColumns', () => {
   it('pads the first and last weeks so columns run Sunday through Saturday', () => {
     const days = [
@@ -88,11 +124,12 @@ describe('alignContributionDaysToWeekColumns', () => {
   });
 });
 
-describe('unavailable GitHub activity', () => {
-  it('carries no numeric summaries or synthetic contribution days', () => {
-    expect(createUnavailableGitHubHomeData(new Date('2026-07-31T00:00:00Z'))).toMatchObject({
+describe('createUnavailableGitHubHomeData', () => {
+  it('keeps a cold-cache upstream failure free of manufactured zero activity', () => {
+    const activity = createUnavailableGitHubHomeData(new Date('2026-07-31T08:00:00Z'));
+
+    expect(activity).toMatchObject({
       source: 'unavailable',
-      generatedAt: '2026-07-31T00:00:00.000Z',
       total: null,
       today: null,
       weekTotal: null,
