@@ -64,6 +64,7 @@ Executable legacy project/block actions, data functions, schema, and routes are 
 
 ### Superseded or archived pull requests
 
+- #381 — oversized private check-in plugin prototype archived; issue #378 retains the capability decision and decomposition boundary.
 - #457 — superseded by the shorter production-accurate time-tool copy already on `main`.
 - #462 — snow-globe work already landed; the separate homepage Antigravity effect is archived as an optional experiment.
 - #465 — stale navigation implementation archived; issue #463 remains the active requirement.
@@ -76,8 +77,7 @@ Executable legacy project/block actions, data functions, schema, and routes are 
 ### Retained / blocked
 
 - #269 — executable legacy project/block data layer remains until reachability, authorization, production-data retention, and removal/rebuild decisions are evidenced.
-- #378 — private ChatGPT check-in capability remains a product decision.
-- #381 — its large stale implementation should not be merged wholesale; close or decompose it separately while retaining #378 if the capability is still wanted.
+- #378 — private ChatGPT check-in capability remains a product decision. Any implementation must start from current `main` as narrow ingress/auth, read-only, fixed-write, and deployed-acceptance slices.
 - #463 — continuous navigation feedback remains a valid requirement even though stale PR #465 was closed.
 
 ## Recovery
