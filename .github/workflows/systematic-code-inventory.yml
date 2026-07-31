@@ -1,0 +1,216 @@
+name: Systematic code inventory
+
+on:
+  push:
+    branches:
+      - audit/systematic-code-inventory
+
+permissions:
+  contents: write
+
+jobs:
+  inventory:
+    if: github.event.head_commit.message != 'Generate systematic code inventory'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/systematic-code-inventory
+      - name: Generate inventory
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from collections import defaultdict
+          from pathlib import Path
+
+          root = Path('.').resolve()
+          skipped_parts = {
+              '.git', '.next', '.turbo', 'coverage', 'node_modules',
+              'playwright-report', 'test-results', 'tmp'
+          }
+          source_extensions = {'.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'}
+          resolvable_extensions = source_extensions | {'.json'}
+          text_extensions = source_extensions | {
+              '.json', '.css', '.md', '.mdx', '.yaml', '.yml', '.toml'
+          }
+
+          def is_skipped(path: Path) -> bool:
+              return any(part in skipped_parts for part in path.parts)
+
+          all_files = [
+              path for path in Path('.').rglob('*')
+              if path.is_file() and not is_skipped(path)
+          ]
+          source_files = sorted(path for path in all_files if path.suffix in source_extensions)
+          source_set = {path.as_posix() for path in source_files}
+
+          package_json = json.loads(Path('package.json').read_text(encoding='utf-8'))
+          dependencies = {
+              **package_json.get('dependencies', {}),
+              **package_json.get('devDependencies', {}),
+          }
+
+          specifier_patterns = [
+              re.compile(r'''(?:import|export)\s+(?:[^"']*?\s+from\s+)?["']([^"']+)["']'''),
+              re.compile(r'''import\s*\(\s*["']([^"']+)["']\s*\)'''),
+              re.compile(r'''require\s*\(\s*["']([^"']+)["']\s*\)'''),
+          ]
+
+          def package_name(specifier: str):
+              if specifier.startswith(('.', '/', '@/')):
+                  return None
+              if specifier.startswith('@'):
+                  parts = specifier.split('/')
+                  return '/'.join(parts[:2]) if len(parts) >= 2 else specifier
+              return specifier.split('/')[0]
+
+          def resolve_internal(importer: Path, specifier: str):
+              if specifier.startswith('@/'):
+                  base = Path(specifier[2:])
+              elif specifier.startswith('.'):
+                  base = importer.parent / specifier
+              else:
+                  return None
+
+              candidates = [base]
+              if base.suffix not in resolvable_extensions:
+                  candidates.extend(Path(f'{base}{extension}') for extension in resolvable_extensions)
+                  candidates.extend(base / f'index{extension}' for extension in resolvable_extensions)
+
+              for candidate in candidates:
+                  normalized = Path(candidate).as_posix()
+                  if normalized.startswith('./'):
+                      normalized = normalized[2:]
+                  if normalized in source_set:
+                      return normalized
+              return None
+
+          package_references = defaultdict(set)
+          unresolved_package_specifiers = defaultdict(set)
+          inbound = defaultdict(set)
+          unresolved_internal = defaultdict(set)
+
+          for path in source_files:
+              text = path.read_text(encoding='utf-8', errors='ignore')
+              specifiers = set()
+              for pattern in specifier_patterns:
+                  specifiers.update(pattern.findall(text))
+
+              for specifier in specifiers:
+                  direct_name = package_name(specifier)
+                  if direct_name:
+                      if direct_name in dependencies:
+                          package_references[direct_name].add(path.as_posix())
+                      else:
+                          unresolved_package_specifiers[direct_name].add(path.as_posix())
+                      continue
+
+                  resolved = resolve_internal(path, specifier)
+                  if resolved:
+                      inbound[resolved].add(path.as_posix())
+                  elif specifier.startswith(('.', '@/')):
+                      unresolved_internal[specifier].add(path.as_posix())
+
+          ignored_literal_files = {
+              'package.json', 'pnpm-lock.yaml', 'lib/deprecation-boundaries.test.ts'
+          }
+          literal_mentions = defaultdict(set)
+          for path in all_files:
+              relative = path.as_posix()
+              if relative in ignored_literal_files or path.suffix not in text_extensions:
+                  continue
+              text = path.read_text(encoding='utf-8', errors='ignore')
+              for name in dependencies:
+                  if name in text:
+                      literal_mentions[name].add(relative)
+
+          special_app_names = {
+              'page', 'layout', 'route', 'loading', 'error', 'global-error',
+              'not-found', 'template', 'default', 'sitemap', 'robots',
+              'manifest', 'icon', 'apple-icon', 'opengraph-image', 'twitter-image'
+          }
+          special_root_stems = {
+              'eslint.config', 'next.config', 'playwright.config', 'postcss.config',
+              'tailwind.config', 'vitest.config', 'instrumentation', 'middleware'
+          }
+
+          def is_entrypoint(path: Path) -> bool:
+              posix = path.as_posix()
+              if any(part in {'tests', 'scripts', '.github'} for part in path.parts):
+                  return True
+              if '.test.' in path.name or '.spec.' in path.name:
+                  return True
+              if path.parts and path.parts[0] == 'app' and path.stem in special_app_names:
+                  return True
+              if any(path.name.startswith(stem) for stem in special_root_stems):
+                  return True
+              if posix.startswith('content/'):
+                  return True
+              return False
+
+          zero_inbound = []
+          for path in source_files:
+              relative = path.as_posix()
+              if inbound.get(relative) or is_entrypoint(path):
+                  continue
+              line_count = len(path.read_text(encoding='utf-8', errors='ignore').splitlines())
+              zero_inbound.append({'path': relative, 'lines': line_count})
+
+          direct_dependency_usage = []
+          for name in sorted(dependencies):
+              direct_dependency_usage.append({
+                  'name': name,
+                  'version': dependencies[name],
+                  'import_references': sorted(package_references.get(name, set())),
+                  'literal_mentions': sorted(literal_mentions.get(name, set())),
+              })
+
+          no_detected_reference = [
+              item['name'] for item in direct_dependency_usage
+              if not item['import_references'] and not item['literal_mentions']
+          ]
+
+          directory_stats = defaultdict(lambda: {'files': 0, 'lines': 0})
+          for path in source_files:
+              top = path.parts[0] if path.parts else '.'
+              directory_stats[top]['files'] += 1
+              directory_stats[top]['lines'] += len(
+                  path.read_text(encoding='utf-8', errors='ignore').splitlines()
+              )
+
+          report = {
+              'summary': {
+                  'source_files': len(source_files),
+                  'direct_dependencies': len(dependencies),
+                  'zero_inbound_candidates': len(zero_inbound),
+                  'direct_dependencies_without_detected_reference': len(no_detected_reference),
+                  'unresolved_internal_specifiers': len(unresolved_internal),
+                  'unlisted_package_specifiers': len(unresolved_package_specifiers),
+              },
+              'direct_dependencies_without_detected_reference': no_detected_reference,
+              'direct_dependency_usage': direct_dependency_usage,
+              'zero_inbound_source_candidates': sorted(
+                  zero_inbound, key=lambda item: (-item['lines'], item['path'])
+              ),
+              'unresolved_internal_specifiers': {
+                  key: sorted(value) for key, value in sorted(unresolved_internal.items())
+              },
+              'unlisted_package_specifiers': {
+                  key: sorted(value) for key, value in sorted(unresolved_package_specifiers.items())
+              },
+              'directory_stats': dict(sorted(directory_stats.items())),
+          }
+
+          output = Path('tmp/systematic-code-inventory.json')
+          output.parent.mkdir(exist_ok=True)
+          output.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          PY
+      - name: Commit report
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tmp/systematic-code-inventory.json
+          git commit -m 'Generate systematic code inventory'
+          git push origin HEAD:audit/systematic-code-inventory
