@@ -62,6 +62,20 @@ No runtime behavior, route, schema, migration, action, database record, or deplo
 
 Executable legacy project/block actions, data functions, schema, and routes are deliberately retained pending the reachability, authorization, and data-retention decision in #269.
 
+### Removed: additional commented-only source
+
+A second independent pass removed seven files whose entire contents were comments and which exposed no runtime export:
+
+- `components/blog/blog-layout.tsx`
+- `components/connection-status.tsx`
+- `components/ui/components/search.tsx`
+- `components/ui/components/login-form.tsx`
+- `components/dashboard/latest-projects.tsx`
+- `components/portfolio/block-display.tsx`
+- `components/blocks/components/block-tags.tsx`
+
+The executable `/login` page, dashboard redirect, dashboard route stubs, pagination component, project/block actions, data modules, schema, and migrations remain untouched. Empty or redirected routes require the broader #269 decision rather than deletion by proximity.
+
 ### Superseded or archived pull requests
 
 - #381 — oversized private check-in plugin prototype archived; issue #378 retains the capability decision and decomposition boundary.
@@ -92,4 +106,4 @@ Executable legacy project/block actions, data functions, schema, and routes are 
 
 ## Recovery
 
-For deleted files, use the parent commit of the cleanup merge or retrieve the exact path from Git history. Restore only into a fresh branch with a current caller and current authorization model; do not restore the old cluster by default.
+For deleted files, use the parent commit of the relevant cleanup merge or retrieve the exact path from Git history. Restore only into a fresh branch with a current caller and current authorization model; do not restore a retired cluster by default.
