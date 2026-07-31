@@ -184,7 +184,11 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
             yearTotal={activity.yearTotal}
             updating={updating}
           />
-          <ActivityGrid days={activity.days} unit={activity.unit} />
+          <ActivityGrid
+            days={activity.days}
+            unit={activity.unit}
+            generatedAt={activity.generatedAt}
+          />
         </>
       )}
     </div>

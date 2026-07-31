@@ -5,6 +5,21 @@ export type ContributionGridDay = {
   count: number;
 };
 
+export type FourWeekContributionCell<T extends ContributionGridDay> =
+  | {
+      date: string;
+      state: 'recorded';
+      day: T;
+    }
+  | {
+      date: string;
+      state: 'upcoming';
+    }
+  | {
+      date: string;
+      state: 'unavailable';
+    };
+
 export function dateKeyInTimeZone(date: Date, timeZone = DISPLAY_TIME_ZONE): string {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone,
@@ -25,6 +40,40 @@ export function getRecentDateKeys(now = new Date(), length = 7): string[] {
   return Array.from({ length: safeLength }, (_, index) => {
     const date = new Date(Date.UTC(year, month - 1, day - (safeLength - 1 - index)));
     return date.toISOString().slice(0, 10);
+  });
+}
+
+export function getFourWeekDateKeys(now = new Date()): string[] {
+  const [year, month, day] = dateKeyInTimeZone(now)
+    .split('-')
+    .map(Number);
+  const today = new Date(Date.UTC(year, month - 1, day));
+  const daysSinceMonday = (today.getUTCDay() + 6) % 7;
+  const currentMonday = new Date(Date.UTC(year, month - 1, day - daysSinceMonday));
+  const firstMonday = new Date(currentMonday);
+  firstMonday.setUTCDate(firstMonday.getUTCDate() - 21);
+
+  return Array.from({ length: 28 }, (_, index) => {
+    const date = new Date(firstMonday);
+    date.setUTCDate(firstMonday.getUTCDate() + index);
+    return date.toISOString().slice(0, 10);
+  });
+}
+
+export function buildFourWeekContributionCells<T extends ContributionGridDay>(
+  days: T[],
+  now = new Date(),
+): FourWeekContributionCell<T>[] {
+  const today = dateKeyInTimeZone(now);
+  const byDate = new Map(days.map((day) => [day.date, day]));
+
+  return getFourWeekDateKeys(now).map((date) => {
+    if (date > today) return { date, state: 'upcoming' };
+
+    const day = byDate.get(date);
+    if (!day) return { date, state: 'unavailable' };
+
+    return { date, state: 'recorded', day };
   });
 }
 
