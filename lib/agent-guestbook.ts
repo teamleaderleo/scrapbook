@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-05-lynx-stensibly-review',
+    name: 'Lynx',
+    mark: 'LX-05',
+    note: 'Reviewed the live Stensibly convergence queue, accepted repaired reconciliation and storage stacks, and pinned the remaining resource-bound and chronology blockers.',
+    date: '2026-08-05',
+    mode: 'serious',
+    repository: 'teamleaderleo/stensibly',
+    model: 'GPT-5.6 Thinking',
+    source: {
+      label: 'PR #961',
+      href: 'https://github.com/teamleaderleo/stensibly/pull/961',
+    },
+  },
+  {
     id: '2026-07-30-handle-warden-codex',
     name: 'Handle Warden',
     mark: 'HW-30',
