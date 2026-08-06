@@ -1,10 +1,8 @@
 import ViewportPageShell from '@/components/viewport-page-shell';
-import { Suspense } from 'react';
 import { ProxyLiveRefresh } from './proxy-live-refresh';
 import { UsageDashboardContainer } from './usage-dashboard-container';
-import { UsageDashboardSkeleton } from './usage-dashboard-skeleton';
 
-export function UsagePage() {
+export async function UsagePage() {
   return (
     <ViewportPageShell
       className="bg-[#dfdbd2] text-[#1b1b1f] dark:bg-[#15171b] dark:text-[#f1ede5]"
@@ -20,9 +18,7 @@ export function UsagePage() {
             <h1 className="mt-0.5 text-xl font-bold tracking-tight">Usage</h1>
           </div>
         </div>
-        <Suspense fallback={<UsageDashboardSkeleton />}>
-          <UsageDashboardContainer />
-        </Suspense>
+        <UsageDashboardContainer />
       </div>
     </ViewportPageShell>
   );
