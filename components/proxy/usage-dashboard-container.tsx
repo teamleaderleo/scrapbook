@@ -1,6 +1,7 @@
 import type { ProxyHealthPayload, ProxyHealthSample } from '@/app/lib/proxy-health-store';
 import { readProxyHealth } from '@/app/lib/proxy-health-store';
 import { unstable_cache } from 'next/cache';
+import { connection } from 'next/server';
 import { UsageDashboard } from './usage-dashboard';
 
 const readCachedProxyHealth = unstable_cache(
@@ -48,6 +49,7 @@ function StateCard({ title, body, requestId }: { title: string; body: string; re
 }
 
 export async function UsageDashboardContainer() {
+  await connection();
   const result = await readCachedProxyHealth();
 
   if (result.status === 'configuration-error') {
