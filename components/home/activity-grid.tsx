@@ -71,12 +71,16 @@ export function ActivityGrid({
   days,
   unit,
   generatedAt,
-  unavailableMessage = 'GitHub activity is temporarily unavailable.',
+  selectedDate,
+  onSelectedDateChange,
+  onPreviewDateChange,
 }: {
   days: ActivityGridDay[];
   unit: string;
   generatedAt: string;
-  unavailableMessage?: string;
+  selectedDate: string;
+  onSelectedDateChange: (date: string) => void;
+  onPreviewDateChange: (date: string | null) => void;
 }) {
   const calendarDate = useMemo(() => referenceDate(generatedAt), [generatedAt]);
   const today = dateKeyInTimeZone(calendarDate);
@@ -89,6 +93,13 @@ export function ActivityGrid({
     [cells],
   );
   const maximum = Math.max(...recordedDays.map((day) => day.count), 0);
+  const [tooltipDate, setTooltipDate] = useState<string | null>(null);
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [finePointer, setFinePointer] = useState(false);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const hideTimer = useRef<number | null>(null);
+  const positionFrame = useRef<number | null>(null);
+  const pendingPosition = useRef({ x: 12, y: 12 });
   const weekLabels = useMemo(
     () =>
       Array.from({ length: WEEK_COUNT }, (_, index) =>
@@ -96,16 +107,8 @@ export function ActivityGrid({
       ),
     [cells],
   );
-  const latestRecordedDate = recordedDays.at(-1)?.date ?? '';
-  const [selectedDate, setSelectedDate] = useState(latestRecordedDate);
-  const [tooltipDate, setTooltipDate] = useState<string | null>(null);
-  const [tooltipVisible, setTooltipVisible] = useState(false);
-  const [finePointer, setFinePointer] = useState(false);
-  const previousLatest = useRef(latestRecordedDate);
-  const sectionRef = useRef<HTMLElement | null>(null);
-  const hideTimer = useRef<number | null>(null);
-  const positionFrame = useRef<number | null>(null);
-  const pendingPosition = useRef({ x: 12, y: 12 });
+  const tooltipDay = recordedDays.find((day) => day.date === tooltipDate);
+  const tooltipLabel = tooltipDay ? labelForDay(tooltipDay, unit) : '';
 
   useEffect(() => {
     const media = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -121,28 +124,6 @@ export function ActivityGrid({
       if (positionFrame.current !== null) window.cancelAnimationFrame(positionFrame.current);
     };
   }, []);
-
-  useEffect(() => {
-    setSelectedDate((current) => {
-      if (
-        !current ||
-        current === previousLatest.current ||
-        !recordedDays.some((day) => day.date === current)
-      ) {
-        return latestRecordedDate;
-      }
-      return current;
-    });
-    previousLatest.current = latestRecordedDate;
-  }, [latestRecordedDate, recordedDays]);
-
-  const selected = recordedDays.find((day) => day.date === selectedDate);
-  const tooltipDay = recordedDays.find((day) => day.date === tooltipDate);
-  const selectedLabel = useMemo(
-    () => (selected ? labelForDay(selected, unit) : unavailableMessage),
-    [selected, unit, unavailableMessage],
-  );
-  const tooltipLabel = tooltipDay ? labelForDay(tooltipDay, unit) : '';
 
   const placeTooltip = (clientX: number, clientY: number) => {
     pendingPosition.current = {
@@ -185,7 +166,7 @@ export function ActivityGrid({
     >
       <div className="flex items-center justify-between gap-4">
         <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-          4 weeks · UTC
+          4 weeks · pick a day
         </span>
         <div
           className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground"
@@ -276,45 +257,49 @@ export function ActivityGrid({
 
             const day = cell.day;
             const label = labelForDay(day, unit);
-            const isSelected = day.date === selected?.date;
+            const isSelected = day.date === selectedDate;
             const isToday = day.date === today;
 
             return (
               <button
                 key={day.date}
                 type="button"
-                className={`${styles.paperMark} aspect-square min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activityClass(day.count, maximum)} ${isToday ? 'outline outline-2 outline-offset-2 outline-foreground/20' : ''} ${isSelected ? 'brightness-[1.04] dark:brightness-110' : ''}`}
+                className={`${styles.paperMark} aspect-square min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activityClass(day.count, maximum)} ${isToday ? 'outline outline-1 outline-offset-2 outline-foreground/15' : ''} ${isSelected ? 'outline outline-2 outline-offset-2 outline-foreground/45 brightness-[1.04] dark:brightness-110' : ''}`}
                 style={sharedStyle}
                 aria-label={label}
                 aria-pressed={isSelected}
+                aria-controls="github-activity-scoreboard"
                 data-contribution-cell
                 data-contribution-date={day.date}
                 data-contribution-state="recorded"
+                data-contribution-selected={isSelected ? 'true' : 'false'}
                 data-paper-activity-mark
-                onPointerEnter={(event) => showTooltip(day.date, event.clientX, event.clientY)}
+                onPointerEnter={(event) => {
+                  onPreviewDateChange(day.date);
+                  showTooltip(day.date, event.clientX, event.clientY);
+                }}
                 onPointerMove={(event) => {
                   if (finePointer) placeTooltip(event.clientX, event.clientY);
                 }}
-                onPointerLeave={hideTooltip}
+                onPointerLeave={() => {
+                  onPreviewDateChange(null);
+                  hideTooltip();
+                }}
                 onFocus={(event) => {
-                  setSelectedDate(day.date);
+                  onPreviewDateChange(day.date);
                   if (!event.currentTarget.matches(':focus-visible')) return;
                   const rect = event.currentTarget.getBoundingClientRect();
                   showTooltip(day.date, rect.left + rect.width / 2, rect.bottom);
                 }}
-                onBlur={hideTooltip}
-                onClick={() => setSelectedDate(day.date)}
+                onBlur={() => {
+                  onPreviewDateChange(null);
+                  hideTooltip();
+                }}
+                onClick={() => onSelectedDateChange(day.date)}
               />
             );
           })}
         </div>
-      </div>
-
-      <div
-        className="mt-2 flex min-h-8 items-center justify-center rounded-lg border border-border/70 bg-background/55 px-3 py-1.5 text-center font-mono text-[10px] font-medium text-muted-foreground md:hidden"
-        aria-live="polite"
-      >
-        {selectedLabel}
       </div>
 
       {finePointer && tooltipLabel ? (
