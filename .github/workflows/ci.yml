@@ -83,6 +83,13 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Chromium regressions
         run: pnpm exec playwright test --project=chromium > playwright.log 2>&1
+      - name: Upload homepage visual review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: homepage-visual-review
+          path: test-results/homepage-density/after
+          if-no-files-found: ignore
       - name: Upload browser failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
