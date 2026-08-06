@@ -7,8 +7,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import styles from './page.module.css';
 
-export const revalidate = 30;
-
 export const metadata: Metadata = {
   title: 'Leo · GitHub activity',
   description: 'Recent GitHub profile contributions from teamleaderleo.',
