@@ -8,13 +8,16 @@ test('the contribution calendar previews and locks days on the scoreboard', asyn
   const dashboard = page.locator('[data-home-activity-dashboard]:visible').last();
   const scoreboard = dashboard.locator('[data-activity-scoreboard]');
   const cells = dashboard.locator('[data-contribution-week-grid] button');
+  const previewCell = dashboard
+    .locator('[data-contribution-week-grid] button:not([data-contribution-selected="true"])')
+    .first();
 
   await expect(scoreboard).toBeVisible({ timeout: 15_000 });
   await expect(cells.first()).toBeVisible();
+  await expect(previewCell).toBeVisible();
   await expect(page.locator('[data-home-activity-loading]')).toHaveCount(0);
 
   const initialDate = await scoreboard.getAttribute('data-activity-score-date');
-  const previewCell = cells.filter({ hasNot: page.locator('[data-contribution-selected="true"]') }).first();
   const previewDate = await previewCell.getAttribute('data-contribution-date');
 
   expect(initialDate).toBeTruthy();
