@@ -5,9 +5,9 @@ import { getGitHubHomeData } from '@/lib/github-home';
 import { ArrowRight, ArrowUpRight, Brain, Images, Palette, Snowflake } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { connection } from 'next/server';
-import { Suspense } from 'react';
 import styles from './page.module.css';
+
+export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: 'Leo · GitHub activity',
@@ -26,36 +26,7 @@ const scrapbookDestinations = [
   { id: 'snow-globe', href: '/snow-globe', label: 'Snow globe', icon: Snowflake },
 ] as const;
 
-function HomeActivityFallback() {
-  return (
-    <div
-      className="flex min-w-0 flex-col gap-4 sm:gap-5"
-      aria-label="Loading GitHub activity"
-      data-home-activity-loading
-    >
-      <div
-        className="grid min-w-0 items-stretch gap-3.5 sm:gap-4"
-        style={{
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 24rem), 1fr))',
-        }}
-      >
-        <div className="min-h-[15.5rem] rounded-[1.25rem] border border-border/70 bg-card shadow-[0_16px_38px_rgba(24,24,26,0.08)] [@media(max-height:780px)]:min-h-[14.5rem]" />
-        <div className="min-h-[15.5rem] rounded-[1.25rem] border border-border/70 bg-card shadow-[0_16px_38px_rgba(24,24,26,0.08)] [@media(max-height:780px)]:min-h-[14.5rem]" />
-      </div>
-      <div className="grid grid-cols-1 gap-2.5 md:grid-cols-3" aria-hidden="true">
-        {Array.from({ length: 3 }, (_, index) => (
-          <div
-            key={index}
-            className="min-h-28 rounded-[1.1rem] border border-border/65 bg-card/75"
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 async function HomeActivityContent() {
-  await connection();
   const activity = await getGitHubHomeData();
   const initialActivity =
     activity.source === 'unavailable'
@@ -165,7 +136,9 @@ async function HomeActivityContent() {
   );
 }
 
-export default function Page() {
+export default async function Page() {
+  const homeActivity = await HomeActivityContent();
+
   return (
     <ViewportPageShell
       className="relative bg-background text-foreground"
@@ -178,9 +151,7 @@ export default function Page() {
       />
 
       <div className="relative mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-7xl flex-col justify-start px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
-        <Suspense fallback={<HomeActivityFallback />}>
-          <HomeActivityContent />
-        </Suspense>
+        {homeActivity}
       </div>
     </ViewportPageShell>
   );

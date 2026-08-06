@@ -172,7 +172,7 @@ function PaperDigit({ digit, index }: { digit: string; index: number }) {
   );
 }
 
-function ScoreDigits({ value }: { value: number }) {
+function ScoreDigits({ value, label }: { value: number; label: string }) {
   const digits = useMemo(
     () => String(Math.max(0, Math.floor(value))).slice(-4).padStart(4, '0').split(''),
     [value],
@@ -214,16 +214,12 @@ function ScoreDigits({ value }: { value: number }) {
     <div
       ref={scope}
       className={`${styles.counter} flex min-w-0 gap-1.5 sm:gap-2`}
-      aria-label={`${value} contributions today`}
+      aria-label={`${value} contributions on ${label}`}
       data-paper-counter
       data-reduced-motion={reduceMotion ? 'true' : 'false'}
       data-wind-scoreboard
     >
-      <span
-        aria-hidden="true"
-        className={styles.counterShadow}
-        data-paper-counter-shadow
-      />
+      <span aria-hidden="true" className={styles.counterShadow} data-paper-counter-shadow />
       {digits.map((digit, index) => (
         <div
           key={index}
@@ -255,12 +251,20 @@ function Metric({ label, value, title }: { label: string; value: string; title?:
 }
 
 export function ActivityScoreboard({
-  today,
+  score,
+  scoreDate,
+  scoreLabel,
+  scoreIsToday,
+  todayActivity,
   weekTotal,
   yearTotal,
   updating,
 }: {
-  today: number;
+  score: number;
+  scoreDate: string;
+  scoreLabel: string;
+  scoreIsToday: boolean;
+  todayActivity: number;
   weekTotal: number;
   yearTotal: number | null;
   updating: boolean;
@@ -325,6 +329,7 @@ export function ActivityScoreboard({
 
   return (
     <motion.section
+      id="github-activity-scoreboard"
       initial={false}
       whileHover={
         reduceMotion
@@ -343,6 +348,7 @@ export function ActivityScoreboard({
       onPointerCancel={settlePaperLight}
       className={`${styles.scorecard} group relative flex h-full min-h-[15.5rem] flex-col overflow-hidden rounded-[1.25rem] border border-border/75 bg-card text-card-foreground shadow-[0_16px_38px_rgba(24,24,26,0.11)] transition-[border-color,box-shadow] duration-300 hover:border-border hover:shadow-[0_24px_52px_rgba(24,24,26,0.17)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_26px_58px_rgba(0,0,0,0.42)] [@media(max-height:780px)]:min-h-[14.5rem]`}
       data-activity-scoreboard
+      data-activity-score-date={scoreDate}
       data-paper-light-motion={reduceMotion ? 'reduced' : 'full'}
     >
       <motion.span
@@ -375,13 +381,17 @@ export function ActivityScoreboard({
 
       <div className="relative z-10 border-b border-border/70 bg-muted/70 px-4 py-2.5 transition-colors duration-300 group-hover:bg-muted/85 [@media(max-height:780px)]:py-2">
         <div className="flex items-center justify-between gap-3 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-          <span>Today</span>
-          <span className="tabular-nums">UTC reset {countdown}</span>
+          <span className="truncate" aria-live="polite">
+            {scoreLabel}
+          </span>
+          <span className="shrink-0 tabular-nums">
+            {scoreIsToday ? `UTC reset ${countdown}` : 'UTC total'}
+          </span>
         </div>
       </div>
 
       <div className="relative z-10 grid flex-1 grid-cols-[minmax(0,1fr)_minmax(5.75rem,0.36fr)] items-center gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(6.75rem,0.34fr)] sm:gap-4 sm:p-5 [@media(max-height:780px)]:gap-2.5 [@media(max-height:780px)]:p-3.5">
-        <ScoreDigits value={today} />
+        <ScoreDigits value={score} label={scoreLabel} />
         <div className="grid content-center gap-2">
           <Metric label="7D" value={weekTotal.toLocaleString('en-GB')} />
           <Metric
@@ -389,7 +399,7 @@ export function ActivityScoreboard({
             value={yearTotal?.toLocaleString('en-GB') ?? '—'}
             title="Rolling-year total reported by GitHub's contribution calendar"
           />
-          <ScrapbookPet activity={today} updating={updating} />
+          <ScrapbookPet activity={todayActivity} updating={updating} />
         </div>
       </div>
     </motion.section>

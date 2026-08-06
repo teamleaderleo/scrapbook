@@ -1,8 +1,14 @@
-import { connection } from 'next/server';
-
 import type { ProxyHealthPayload, ProxyHealthSample } from '@/app/lib/proxy-health-store';
 import { readProxyHealth } from '@/app/lib/proxy-health-store';
+import { unstable_cache } from 'next/cache';
+import { connection } from 'next/server';
 import { UsageDashboard } from './usage-dashboard';
+
+const readCachedProxyHealth = unstable_cache(
+  () => readProxyHealth('bandwagon-la', 35),
+  ['proxy-dashboard-bandwagon-la-v2'],
+  { revalidate: 60 },
+);
 
 function usageLimitBytes() {
   const gb = Number(process.env.PROXY_USAGE_30D_LIMIT_GB ?? '1024');
@@ -35,26 +41,40 @@ function StateCard({ title, body, requestId }: { title: string; body: string; re
     <section className="rounded-2xl border bg-background p-5 shadow-sm" role="status">
       <h2 className="text-xl font-bold">{title}</h2>
       <p className="mt-2 text-sm text-muted-foreground">{body}</p>
-      {requestId ? <p className="mt-3 font-mono text-xs text-muted-foreground">Request {requestId}</p> : null}
+      {requestId ? (
+        <p className="mt-3 font-mono text-xs text-muted-foreground">Request {requestId}</p>
+      ) : null}
     </section>
   );
 }
 
 export async function UsageDashboardContainer() {
   await connection();
-
-  const result = await readProxyHealth('bandwagon-la', 35);
+  const result = await readCachedProxyHealth();
 
   if (result.status === 'configuration-error') {
-    return <StateCard title="Proxy configuration missing" body={result.message} requestId={result.requestId} />;
+    return (
+      <StateCard
+        title="Proxy configuration missing"
+        body={result.message}
+        requestId={result.requestId}
+      />
+    );
   }
 
   if (result.status === 'error') {
-    return <StateCard title="Proxy data unavailable" body={result.message} requestId={result.requestId} />;
+    return (
+      <StateCard title="Proxy data unavailable" body={result.message} requestId={result.requestId} />
+    );
   }
 
   if (result.status === 'empty') {
-    return <StateCard title="No report has arrived" body="The database connection succeeded, but this host has no stored report yet." />;
+    return (
+      <StateCard
+        title="No report has arrived"
+        body="The database connection succeeded, but this host has no stored report yet."
+      />
+    );
   }
 
   const { report, samples } = result;

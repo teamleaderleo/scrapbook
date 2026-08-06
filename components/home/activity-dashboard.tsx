@@ -38,6 +38,21 @@ function timestampOrNow(value: string) {
   return Number.isFinite(timestamp) ? timestamp : Date.now();
 }
 
+function latestRecordedDate(activity: ActivitySnapshot) {
+  return activity.source === 'unavailable' ? '' : (activity.days.at(-1)?.date ?? '');
+}
+
+function formatScoreDate(date: string, current: boolean) {
+  const parsed = new Date(`${date}T00:00:00Z`);
+  const formatted = new Intl.DateTimeFormat('en-US', {
+    weekday: current ? undefined : 'short',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  }).format(parsed);
+  return current ? `Today · ${formatted}` : formatted;
+}
+
 function UnavailableActivity() {
   return (
     <section
@@ -55,7 +70,7 @@ function UnavailableActivity() {
         Activity is temporarily unavailable
       </h2>
       <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-        The page will retry while it remains open. Contribution totals and calendar cells appear only after GitHub supplies a valid snapshot.
+        The page will retry while it remains open. Contribution totals and calendar cells appear after GitHub supplies a valid snapshot.
       </p>
     </section>
   );
@@ -63,14 +78,18 @@ function UnavailableActivity() {
 
 export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
   const initialSnapshotAt = timestampOrNow(initial.generatedAt);
+  const initialLatestDate = latestRecordedDate(initial);
   const [activity, setActivity] = useState<ActivitySnapshot>(initial);
   const [updating, setUpdating] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(initialLatestDate);
+  const [previewDate, setPreviewDate] = useState<string | null>(null);
   const inFlight = useRef<AbortController | null>(null);
   const newestSnapshotAt = useRef(initial.source === 'unavailable' ? 0 : initialSnapshotAt);
   const nextAllowedAt = useRef(
     initial.source === 'unavailable' ? 0 : initialSnapshotAt + REFRESH_INTERVAL_MS,
   );
   const consecutiveFailures = useRef(0);
+  const previousLatestDate = useRef(initialLatestDate);
 
   useEffect(() => {
     let mounted = true;
@@ -161,6 +180,28 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
     };
   }, []);
 
+  useEffect(() => {
+    const latestDate = latestRecordedDate(activity);
+    setPreviewDate(null);
+    setSelectedDate((current) => {
+      if (!latestDate || activity.source === 'unavailable') return '';
+      const currentStillExists = activity.days.some((day) => day.date === current);
+      if (!current || current === previousLatestDate.current || !currentStillExists) {
+        return latestDate;
+      }
+      return current;
+    });
+    previousLatestDate.current = latestDate;
+  }, [activity]);
+
+  const latestDate = latestRecordedDate(activity);
+  const displayDate = previewDate ?? selectedDate ?? latestDate;
+  const displayDay =
+    activity.source === 'unavailable'
+      ? undefined
+      : (activity.days.find((day) => day.date === displayDate) ?? activity.days.at(-1));
+  const displayIsToday = Boolean(displayDay && displayDay.date === latestDate);
+
   return (
     <div
       className="relative grid min-w-0 items-stretch gap-3.5 sm:gap-4"
@@ -174,12 +215,16 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
         {updating ? 'Updating GitHub activity' : ''}
       </span>
 
-      {activity.source === 'unavailable' ? (
+      {activity.source === 'unavailable' || !displayDay ? (
         <UnavailableActivity />
       ) : (
         <>
           <ActivityScoreboard
-            today={activity.today}
+            score={displayDay.count}
+            scoreDate={displayDay.date}
+            scoreLabel={formatScoreDate(displayDay.date, displayIsToday)}
+            scoreIsToday={displayIsToday}
+            todayActivity={activity.today}
             weekTotal={activity.weekTotal}
             yearTotal={activity.yearTotal}
             updating={updating}
@@ -188,6 +233,9 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
             days={activity.days}
             unit={activity.unit}
             generatedAt={activity.generatedAt}
+            selectedDate={selectedDate}
+            onSelectedDateChange={setSelectedDate}
+            onPreviewDateChange={setPreviewDate}
           />
         </>
       )}
