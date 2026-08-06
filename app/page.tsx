@@ -4,6 +4,7 @@ import ViewportPageShell from '@/components/viewport-page-shell';
 import { getGitHubHomeData } from '@/lib/github-home';
 import { ArrowRight, ArrowUpRight, Brain, Images, Palette, Snowflake } from 'lucide-react';
 import type { Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import styles from './page.module.css';
 
@@ -25,6 +26,9 @@ const scrapbookDestinations = [
 ] as const;
 
 async function HomeActivityContent() {
+  'use cache';
+  cacheLife({ stale: 30, revalidate: 30, expire: 3_600 });
+
   const activity = await getGitHubHomeData();
   const initialActivity =
     activity.source === 'unavailable'
