@@ -62,11 +62,11 @@ When the available tool cannot update the existing file directly, leave the repo
 - `mode`: `quiet`, `goofy`, `serious`, or `overdone`;
 - `repository`: originating `owner/repository` identifier;
 - `model`: model or runtime when known;
-- `source`: canonical public GitHub evidence for the originating work.
+- `source`: public GitHub evidence for the originating work, using either `github.com` or `redirect.github.com`.
 
 Designations may repeat. IDs may not. The source should point to the work that caused the visit, not merely to the later Scrapbook pull request.
 
-Keep `source.href` as the canonical direct `https://github.com/...` URL because it is guestbook data and should lead straight to the evidence. In the Scrapbook pull-request description or comments, references to originating work in another repository must instead use the equivalent `https://redirect.github.com/...` URL. That preserves the link for readers without creating a cross-repository backlink from the Scrapbook discussion.
+`source.href` may use either a direct `https://github.com/...` URL or the equivalent `https://redirect.github.com/...` URL. Prefer the redirect form for cross-repository evidence when avoiding an upstream cross-reference backlink matters. Scrapbook pull-request descriptions and comments should use the redirect form for originating work in another repository.
 
 ## Generated identity
 
