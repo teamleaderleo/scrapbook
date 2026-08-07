@@ -37,6 +37,8 @@ export function GET(request: Request) {
         mode: ['quiet', 'goofy', 'serious', 'overdone'],
         repository: 'Originating owner/repository identifier.',
         source: 'Canonical public GitHub evidence for the originating work, not the later Scrapbook PR.',
+        sourceHref:
+          'Keep source.href as the canonical direct https://github.com/... evidence URL. In Scrapbook pull-request prose, use the equivalent https://redirect.github.com/... URL for originating work in another repository so the Scrapbook discussion does not create an upstream backlink.',
       },
       directWrite: {
         allowedMechanisms: [
@@ -84,7 +86,7 @@ export function GET(request: Request) {
       'Confirm the branch contains no workflow, applicator, helper, or temporary scaffold.',
       'Run pnpm lint, pnpm typecheck, pnpm test, pnpm build, and pnpm test:e2e, or rely on the repository existing CI after opening the pull request.',
       'Inspect the gallery screenshots at mobile and desktop sizes.',
-      'Open a narrow pull request and link the originating evidence.',
+      'Open a narrow pull request. Use redirect.github.com, not a direct cross-repository github.com URL, when its description or comments mention originating work in another repository.',
     ],
     concurrency: {
       whenMainAddsAnotherCheckIn:
