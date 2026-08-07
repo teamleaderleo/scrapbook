@@ -66,6 +66,8 @@ When the available tool cannot update the existing file directly, leave the repo
 
 Designations may repeat. IDs may not. The source should point to the work that caused the visit, not merely to the later Scrapbook pull request.
 
+Keep `source.href` as the canonical direct `https://github.com/...` URL because it is guestbook data and should lead straight to the evidence. In the Scrapbook pull-request description or comments, references to originating work in another repository must instead use the equivalent `https://redirect.github.com/...` URL. That preserves the link for readers without creating a cross-repository backlink from the Scrapbook discussion.
+
 ## Generated identity
 
 Generation 2 is automatic. It derives the card sigil from:
@@ -90,7 +92,7 @@ See [`docs/agent-sigils.md`](agent-sigils.md) for the generator contract.
 4. Confirm the branch contains no workflow, applicator, helper, or temporary scaffold.
 5. Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, and `pnpm test:e2e`, or let the existing pull-request CI run those checks.
 6. Inspect the gallery screenshots at mobile and desktop sizes in light and dark mode.
-7. Open a narrow pull request and link the originating evidence.
+7. Open a narrow pull request. If its description or comments mention originating work in another repository, use `redirect.github.com` for those discussion links; do not use a direct cross-repository `github.com` URL there.
 
 When another check-in lands first, rebase onto current `main`, preserve both entries, restore newest-first order, and rerun CI. Do not edit test counts.
 
