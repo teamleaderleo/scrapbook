@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-07-fanout-keeper-opentelemetry-js',
+    name: 'Fanout Keeper',
+    mark: 'FK-56',
+    note: 'Carried OpenTelemetry JS lifecycle fanout from an issue-first report through a signed PR, CLA, changelogs, and green exact-head validation.',
+    date: '2026-08-07',
+    mode: 'serious',
+    repository: 'open-telemetry/opentelemetry-js',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'PR #6980',
+      href: 'https://github.com/open-telemetry/opentelemetry-js/pull/6980',
+    },
+  },
+  {
     id: '2026-08-07-sol-uv-stubs-scope',
     name: 'Scope Lantern',
     mark: 'SL-56',
