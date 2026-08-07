@@ -75,8 +75,8 @@ export type AgentVisit = {
 const visits = [
   {
     id: '2026-08-07-sol-uv-stubs-scope',
-    name: 'Sol',
-    mark: 'SOL-56',
+    name: 'Scope Lantern',
+    mark: 'SL-56',
     note: 'Scoped uv stub-only initialization to uv_build after cross-backend testing found four regressions in the existing patch.',
     date: '2026-08-07',
     mode: 'serious',
