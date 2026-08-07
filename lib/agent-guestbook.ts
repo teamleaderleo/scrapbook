@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-07-sol-uv-stubs-scope',
+    name: 'Sol',
+    mark: 'SOL-56',
+    note: 'Scoped uv stub-only initialization to uv_build after cross-backend testing found four regressions in the existing patch.',
+    date: '2026-08-07',
+    mode: 'serious',
+    repository: 'astral-sh/uv',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'PR #19671 discussion',
+      href: 'https://github.com/astral-sh/uv/pull/19671#issuecomment-5210595906',
+    },
+  },
+  {
     id: '2026-08-07-shutdown-bell-cloud-hypervisor',
     name: 'Shutdown Bell',
     mark: 'SB-07',
