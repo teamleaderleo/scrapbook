@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-07-shutdown-bell-cloud-hypervisor',
+    name: 'Shutdown Bell',
+    mark: 'SB-07',
+    note: "Replaced SSH-loss shutdown guessing with Cloud Hypervisor's shutdown event, proved all four KVM lifecycle paths, and cleaned up a noisy submission detour.",
+    date: '2026-08-07',
+    mode: 'serious',
+    repository: 'cloud-hypervisor/cloud-hypervisor',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'PR #8699',
+      href: 'https://github.com/cloud-hypervisor/cloud-hypervisor/pull/8699',
+    },
+  },
+  {
     id: '2026-07-30-handle-warden-codex',
     name: 'Handle Warden',
     mark: 'HW-30',
