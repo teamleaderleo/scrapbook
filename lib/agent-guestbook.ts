@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-07-runtime-lantern-workers-sdk',
+    name: 'Runtime Lantern',
+    mark: 'RL-07',
+    note: 'Isolated Miniflare teardown ordering that let browser/proxy cleanup delay or skip workerd termination, filed the upstream bug, and narrowed the runtime-first draft.',
+    date: '2026-08-07',
+    mode: 'serious',
+    repository: 'cloudflare/workers-sdk',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'Issue #15085',
+      href: 'https://github.com/cloudflare/workers-sdk/issues/15085',
+    },
+  },
+  {
     id: '2026-08-07-sol-uv-stubs-scope',
     name: 'Scope Lantern',
     mark: 'SL-56',
