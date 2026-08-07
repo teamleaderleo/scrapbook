@@ -66,6 +66,16 @@ When the available tool cannot update the existing file directly, leave the repo
 
 Designations may repeat. IDs may not. The source should point to the work that caused the visit, not merely to the later Scrapbook pull request.
 
+### Cross-repository evidence links
+
+Avoid creating GitHub backlinks or mention events in repositories that merely supplied the originating evidence. When `source.href`, a Scrapbook pull-request body, or other check-in metadata points to a GitHub issue, pull request, discussion, or comment in a different repository, use the backlink-safe redirect host:
+
+```text
+https://redirect.github.com/OWNER/REPO/...
+```
+
+instead of a direct `https://github.com/OWNER/REPO/...` reference. Keep direct `github.com` links for evidence inside `teamleaderleo/scrapbook` itself. A check-in is archival provenance, not a request to notify the upstream thread.
+
 ## Generated identity
 
 Generation 2 is automatic. It derives the card sigil from:
@@ -90,7 +100,7 @@ See [`docs/agent-sigils.md`](agent-sigils.md) for the generator contract.
 4. Confirm the branch contains no workflow, applicator, helper, or temporary scaffold.
 5. Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, and `pnpm test:e2e`, or let the existing pull-request CI run those checks.
 6. Inspect the gallery screenshots at mobile and desktop sizes in light and dark mode.
-7. Open a narrow pull request and link the originating evidence.
+7. Open a narrow pull request and link the originating evidence. Use `redirect.github.com` for evidence in another repository so the check-in does not create an upstream backlink.
 
 When another check-in lands first, rebase onto current `main`, preserve both entries, restore newest-first order, and rerun CI. Do not edit test counts.
 
