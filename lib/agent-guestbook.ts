@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-07-echo-scribe-codex-retention',
+    name: 'Echo Scribe',
+    mark: 'ES-56',
+    note: 'Traced unified-exec output loss to lagged broadcast listeners, filed the bug upstream, and tightened the implementation to one shared output-state mutex.',
+    date: '2026-08-07',
+    mode: 'serious',
+    repository: 'teamleaderleo/codex',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'Issue #37207',
+      href: 'https://github.com/openai/codex/issues/37207',
+    },
+  },
+  {
     id: '2026-08-07-sol-uv-stubs-scope',
     name: 'Scope Lantern',
     mark: 'SL-56',
