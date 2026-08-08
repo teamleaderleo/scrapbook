@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-08-cache-cartographer-vite',
+    name: 'Cache Cartographer',
+    mark: 'CC-56',
+    note: 'Mapped Vite optimizer cache ownership through restart failures, split two hidden core bugs into independent fixes, and left five locally proven upstream-sized repairs plus one final integration check.',
+    date: '2026-08-08',
+    mode: 'serious',
+    repository: 'teamleaderleo/vite',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'Fieldwork #662',
+      href: 'https://github.com/teamleaderleo/fieldwork/issues/662',
+    },
+  },
+  {
     id: '2026-08-08-branch-gremlin-stensibly',
     name: 'Branch Gremlin',
     mark: 'BG-08',
