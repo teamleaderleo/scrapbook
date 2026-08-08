@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Sidebar,
   SidebarContent,
@@ -34,6 +34,7 @@ import { GoogleIcon } from '@/components/icons/google-icon';
 import { GitHubIcon } from '@/components/icons/github-icon';
 import { SpaceLinkHint } from '@/components/space/space-link-hint';
 import { PaperCreature } from '@/components/paper-creature';
+import { useIsMacPlatform } from '@/hooks/use-is-mac-platform';
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -50,13 +51,7 @@ export function AppSidebar() {
   const listHref = `/space${currentQuery ? `?tags=${currentQuery}` : ''}`;
   const reviewHref = `/space/review${currentQuery ? `?tags=${currentQuery}` : ''}`;
   const toggleViewHref = isReviewLike ? listHref : reviewHref;
-  const isMac = useMemo(
-    () =>
-      typeof navigator !== 'undefined' &&
-      (navigator.platform.includes('Mac') ||
-        /iPhone|iPad/i.test(navigator.platform)),
-    []
-  );
+  const isMac = useIsMacPlatform();
 
   const closeMobile = () => {
     if (isMobile) setOpenMobile(false);

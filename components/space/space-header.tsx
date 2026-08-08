@@ -2,12 +2,12 @@
 
 import { SiteAtlas } from '@/components/site-atlas';
 import Link from 'next/link';
-import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useSidebar } from '@/components/ui/sidebar';
 import { ArrowLeft, ArrowRight, Code, PanelLeft } from 'lucide-react';
 import { SpaceLinkHint } from '@/components/space/space-link-hint';
+import { useIsMacPlatform } from '@/hooks/use-is-mac-platform';
 
 interface SpaceHeaderProps {
   leftContent: React.ReactNode;
@@ -32,12 +32,7 @@ export function SpaceHeader({
     pathname === '/space/review' ||
     pathname?.startsWith('/space/add') ||
     pathname?.startsWith('/space/edit');
-  const isMac = useMemo(
-    () =>
-      typeof navigator !== 'undefined' &&
-      /Mac|iPhone|iPad/i.test(navigator.platform),
-    []
-  );
+  const isMac = useIsMacPlatform();
   const toggleHref = isReviewLike
     ? `/space${tagsParam ? `?tags=${tagsParam}` : ''}`
     : `/space/review${tagsParam ? `?tags=${tagsParam}` : ''}`;
