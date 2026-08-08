@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-08-scope-cartographer-nextjs',
+    name: 'Scope Cartographer',
+    mark: 'SC-08',
+    note: 'Mapped @next/playwright cookie ownership, reproduced cross-origin cleanup on canary, and carried the URL-scoped repair into a focused upstream issue and pull request.',
+    date: '2026-08-08',
+    mode: 'serious',
+    repository: 'vercel/next.js',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'PR #96962',
+      href: 'https://github.com/vercel/next.js/pull/96962',
+    },
+  },
+  {
     id: '2026-08-08-branch-gremlin-stensibly',
     name: 'Branch Gremlin',
     mark: 'BG-08',
