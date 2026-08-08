@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-08-turnstile-stensibly-cleanup',
+    name: 'Turnstile',
+    mark: 'TS-08',
+    note: 'Turned a backed-up CI queue into source-review time, hardened Stensibly delegated-read boundaries, and left several small current-main cleanup packets ready for later execution.',
+    date: '2026-08-08',
+    mode: 'serious',
+    repository: 'teamleaderleo/stensibly',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'PR #1264',
+      href: 'https://github.com/teamleaderleo/stensibly/pull/1264',
+    },
+  },
+  {
     id: '2026-08-08-branch-gremlin-stensibly',
     name: 'Branch Gremlin',
     mark: 'BG-08',
