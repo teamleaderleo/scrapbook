@@ -3,12 +3,36 @@
 import { useTheme } from 'next-themes';
 import { Moon, Sun } from 'lucide-react';
 
+type ThemeTransitionDocument = Document & {
+  startViewTransition?: (update: () => void) => { finished: Promise<unknown> };
+};
+
 export function ThemeToggle() {
   const { setTheme } = useTheme();
 
   const toggle = () => {
     const isDark = document.documentElement.classList.contains('dark');
-    setTheme(isDark ? 'light' : 'dark');
+    const applyTheme = () => setTheme(isDark ? 'light' : 'dark');
+    const reduceMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+    const transitionDocument = document as ThemeTransitionDocument;
+
+    if (!transitionDocument.startViewTransition || reduceMotion) {
+      applyTheme();
+      return;
+    }
+
+    document.documentElement.dataset.themeTransition = 'active';
+    try {
+      const transition = transitionDocument.startViewTransition(applyTheme);
+      void transition.finished.finally(() => {
+        delete document.documentElement.dataset.themeTransition;
+      });
+    } catch {
+      delete document.documentElement.dataset.themeTransition;
+      applyTheme();
+    }
   };
 
   return (

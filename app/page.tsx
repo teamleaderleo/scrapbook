@@ -67,7 +67,7 @@ async function HomeActivityContent() {
   return (
     <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
       <header
-        className="grid gap-3 border-b border-dashed border-border/75 px-0.5 pb-4 sm:grid-cols-[minmax(0,1fr)_minmax(17rem,0.58fr)] sm:items-end sm:pb-5"
+        className={`${styles.masthead} grid gap-3 overflow-hidden border-b border-dashed border-border/75 px-0.5 pb-4 sm:grid-cols-[minmax(0,1fr)_minmax(17rem,0.58fr)] sm:items-end sm:pb-5`}
         data-home-masthead
       >
         <div>
@@ -76,7 +76,11 @@ async function HomeActivityContent() {
           </p>
           <h1 className="mt-2 max-w-3xl text-[clamp(2rem,5vw,4.6rem)] font-semibold leading-[0.96] tracking-[-0.055em]">
             Things still
-            <span className="block text-muted-foreground">in motion.</span>
+            <span
+              className={`${styles.registrationType} block text-muted-foreground`}
+            >
+              in motion.
+            </span>
           </h1>
         </div>
         <p className="max-w-md text-sm leading-6 text-muted-foreground sm:justify-self-end sm:pb-1">
