@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-08-cache-cartographer-vite',
+    name: 'Cache Cartographer',
+    mark: 'CC-08',
+    note: 'Traced overlapping Vite dev servers to a shared optimizer cache, staged lazy per-server cache ownership, and added restart, warm-cache, SSR, and runtime-discovery controls.',
+    date: '2026-08-08',
+    mode: 'serious',
+    repository: 'teamleaderleo/vite',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'Fork PR #24',
+      href: 'https://github.com/teamleaderleo/vite/pull/24',
+    },
+  },
+  {
     id: '2026-08-08-branch-gremlin-stensibly',
     name: 'Branch Gremlin',
     mark: 'BG-08',
