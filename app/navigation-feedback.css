@@ -28,14 +28,53 @@
 }
 
 .navigation-progress {
+  position: relative;
   height: 100%;
   width: 100%;
+  overflow: visible;
   transform-origin: left center;
   will-change: transform;
-  background: linear-gradient(90deg, #595161, #83788f 72%, #b3a8bd);
+  background: linear-gradient(90deg, #514b59, #7d7488 74%, #d8d1de 96%, #fff);
   box-shadow:
-    0 0 8px rgb(111 104 120 / 0.42),
+    0 0 7px rgb(111 104 120 / 0.34),
     0 1px 0 rgb(255 255 255 / 0.32) inset;
+}
+
+.navigation-progress::before,
+.navigation-progress::after {
+  position: absolute;
+  top: 50%;
+  right: -1px;
+  content: '';
+  pointer-events: none;
+}
+
+.navigation-progress::after {
+  width: 18px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.94));
+  filter: drop-shadow(0 0 3px rgb(255 255 255 / 0.58));
+  transform: translateY(-50%);
+}
+
+.navigation-progress::before {
+  width: 24px;
+  height: 12px;
+  background:
+    linear-gradient(166deg, transparent 0 43%, rgb(255 255 255 / 0.5) 44% 47%, transparent 48%) 2px 0 / 13px 6px no-repeat,
+    linear-gradient(194deg, transparent 0 45%, rgb(255 255 255 / 0.32) 46% 49%, transparent 50%) 7px 7px / 17px 5px no-repeat,
+    linear-gradient(176deg, transparent 0 45%, rgb(255 255 255 / 0.24) 46% 49%, transparent 50%) 0 5px / 10px 3px no-repeat;
+  opacity: 0;
+  transform: translate(8px, -50%);
+}
+
+.navigation-feedback:is(
+    [data-navigation-state='running'],
+    [data-navigation-state='slow'],
+    [data-navigation-state='settling']
+  )
+  .navigation-progress::before {
+  animation: navigation-tracer 520ms steps(2, end) infinite;
 }
 
 .navigation-feedback:is([data-navigation-state='completing'], [data-navigation-state='failed'])
@@ -44,10 +83,23 @@
 }
 
 .dark .navigation-progress {
-  background: linear-gradient(90deg, #aaa0b4, #d0c8d7 72%, #eee8f2);
+  background: linear-gradient(90deg, #9c93a7, #cbc2d1 74%, #f4eef7 96%, #fff);
   box-shadow:
     0 0 10px rgb(208 200 215 / 0.34),
     0 1px 0 rgb(255 255 255 / 0.38) inset;
+}
+
+@keyframes navigation-tracer {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: translate(8px, -50%) scaleX(0.92);
+  }
+
+  50% {
+    opacity: 0.72;
+    transform: translate(11px, -50%) scaleX(1.08);
+  }
 }
 
 .navigation-status {
@@ -92,5 +144,9 @@
   .navigation-progress {
     will-change: auto;
     box-shadow: 0 1px 0 rgb(255 255 255 / 0.25) inset;
+  }
+
+  .navigation-progress::before {
+    display: none;
   }
 }

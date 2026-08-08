@@ -152,16 +152,16 @@ export function KumikoSigilLab() {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
-              Issue #447 · isolated lattice experiment
+              Lattice studies
             </p>
             <h2 className="mt-1 text-xl font-semibold tracking-tight">
-              Kumiko-informed construction graphs
+              Marks built from joints and open space
             </h2>
           </div>
           <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
-            Thin struts, visible joints, selected infill, and protected voids replace the
-            usual stack of rings and decorative satellites. This is a procedural study of
-            construction logic, not a claim of authentic Kumiko craft.
+            Thin struts, visible joints, and protected gaps replace the usual
+            rings and orbiting pieces. These borrow a construction idea from
+            lattice work without pretending to reproduce the craft.
           </p>
         </div>
 
@@ -195,16 +195,16 @@ export function KumikoSigilLab() {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
-              Labels-hidden monochrome review
+              Without labels or colour
             </p>
             <h2 className="mt-1 text-lg font-semibold tracking-tight">
-              Geometry has to carry the identity before colour
+              The shape has to do the work first
             </h2>
           </div>
           <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
-            The population helper rerolls reproducible variants until canonical graphs are
-            unique and coarse 12×12 occupancy descriptors remain separated. Minimum observed
-            distance: {Number.isFinite(minimumPopulationDistance) ? minimumPopulationDistance : 0}.
+            Each mark must remain recognisably separate even as a tiny black
+            shape. Closest measured separation:{' '}
+            {Number.isFinite(minimumPopulationDistance) ? minimumPopulationDistance : 0}.
           </p>
         </div>
 

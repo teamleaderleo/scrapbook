@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Snow globe · Leo',
-  description: 'A pocket snow globe driven by touch, device tilt, and motion.',
+  description: 'A small dimensional winter scene with an automatic orbit and simulated snow.',
   alternates: { canonical: '/snow-globe' },
 };
 

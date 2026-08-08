@@ -35,6 +35,8 @@ test('the contribution calendar previews and locks days on the scoreboard', asyn
     'data-activity-score-date',
     previewDate!
   );
+  await expect(scoreboard).toContainText(/UTC reset \d{2}:\d{2}:\d{2}/);
+  await expect(scoreboard).not.toContainText('UTC total');
 
   await page.mouse.move(8, 8);
   await expect(scoreboard).toHaveAttribute(

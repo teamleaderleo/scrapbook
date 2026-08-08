@@ -239,14 +239,15 @@ export function AgentSigilLab() {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
-              Generation 2 identity set
+              Current marks
             </p>
             <h2 className="mt-1 text-xl font-semibold tracking-tight">
-              Repository frame, designation glyph, assignment accents
+              Place, name, and note each leave a trace
             </h2>
           </div>
           <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
-            Each layer has its own stable seed. Changing a work note can alter small accents without replacing the repository frame or the agent&apos;s primary silhouette.
+            The large shape belongs to the place and name. A changing work
+            note only nudges the smaller details.
           </p>
         </div>
 
@@ -264,14 +265,15 @@ export function AgentSigilLab() {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
-              Generation 3 palette foundation
+              Colour studies
             </p>
             <h2 className="mt-1 text-xl font-semibold tracking-tight">
-              Reviewed colour worlds before production geometry
+              Pick the atmosphere before redrawing the mark
             </h2>
           </div>
           <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
-            Ten stable families each contain two explicit variants across monotone, duotone, tri-colour, material, and luminous modes. Work-note edits never recolour the family.
+            Ten small palettes test quiet, bright, material, and luminous
+            moods. The chosen family stays put when the note changes.
           </p>
         </div>
 
@@ -291,13 +293,14 @@ export function AgentSigilLab() {
       <section className="grid min-w-0 gap-5 lg:grid-cols-2">
         <div className="rounded-[1.4rem] border border-border/70 bg-card/85 p-4 sm:p-5">
           <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
-            Explicit variants
+            Variations
           </p>
           <h2 className="mt-1 text-lg font-semibold tracking-tight">
-            Same identity, deliberate reproducible choice
+            Same seed, chosen variation
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Persisting generation and variant pins a favourite. Another variant is a visible reroll, not a silent rewrite.
+            A favourite can be pinned. Trying another variation never quietly
+            replaces the one already in use.
           </p>
           <div className="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-8">
             {Array.from({ length: 8 }, (_, variant) => {
@@ -327,13 +330,14 @@ export function AgentSigilLab() {
 
         <div className="rounded-[1.4rem] border border-border/70 bg-card/85 p-4 sm:p-5">
           <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
-            Complexity grammar
+            Detail
           </p>
           <h2 className="mt-1 text-lg font-semibold tracking-tight">
-            Density changes detail, not identity inputs
+            More detail, same seed
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Quiet marks remain legible in dense lists. Regular and dense modes retain the same repository, designation, and description seeds.
+            Quiet marks stay clear in a list; denser ones can carry more texture
+            without becoming a different identity.
           </p>
           <div className="mt-4 grid grid-cols-3 gap-2.5">
             {complexityExamples.map((example) => {

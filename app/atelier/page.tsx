@@ -93,7 +93,7 @@ export default function AtelierPage() {
               </span>
               <span>
                 <span className="block text-2xl font-semibold tracking-tight">Snow globe</span>
-                <span className="mt-1 block text-sm opacity-65">Drag, tilt, and shake.</span>
+                <span className="mt-1 block text-sm opacity-65">A tiny scene that turns by itself.</span>
               </span>
             </Link>
           </aside>

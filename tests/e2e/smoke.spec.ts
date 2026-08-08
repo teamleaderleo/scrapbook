@@ -92,11 +92,11 @@ test('former blog routes return not found', async ({ page }) => {
   }
 });
 
-test('homepage highlights three recent systems', async ({ page }) => {
+test('homepage keeps three recent project links without a promotional heading', async ({ page }) => {
   await page.goto('/');
   await waitForHomeActivity(page);
 
-  await expect(page.getByText('Recent systems', { exact: true })).toBeVisible();
+  await expect(page.getByText('Recent systems', { exact: true })).toHaveCount(0);
   await expect(
     page.getByText('Tools that remember their boundaries')
   ).toHaveCount(0);

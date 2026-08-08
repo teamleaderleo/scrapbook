@@ -57,6 +57,13 @@ type DigitTurn = {
   to: string;
 };
 
+function scoreDigits(value: number) {
+  return String(Math.max(0, Math.floor(value)))
+    .slice(-4)
+    .padStart(4, '0')
+    .split('');
+}
+
 function PaperDigit({ digit, index }: { digit: string; index: number }) {
   const reduceMotion = useReducedMotionPreference();
   const [displayed, setDisplayed] = useState(digit);
@@ -78,7 +85,10 @@ function PaperDigit({ digit, index }: { digit: string; index: number }) {
     setTurn({ id: sequence.current, from: displayed, to: digit });
   }, [digit, displayed, reduceMotion, turn]);
 
-  const delay = (3 - index) * 0.055;
+  // A selected day is an atomic snapshot, not an odometer count. Changed
+  // columns therefore turn together so the rack never implies intermediate
+  // contribution totals that did not exist.
+  const delay = 0.045;
 
   return (
     <motion.span
@@ -178,11 +188,7 @@ function PaperDigit({ digit, index }: { digit: string; index: number }) {
 
 function ScoreDigits({ value, label }: { value: number; label: string }) {
   const digits = useMemo(
-    () =>
-      String(Math.max(0, Math.floor(value)))
-        .slice(-4)
-        .padStart(4, '0')
-        .split(''),
+    () => scoreDigits(value),
     [value]
   );
   const reduceMotion = useReducedMotionPreference();
@@ -190,7 +196,15 @@ function ScoreDigits({ value, label }: { value: number; label: string }) {
   const [scope, animate] = useAnimate();
 
   useEffect(() => {
-    if (previousValue.current === value) return;
+    const previous = previousValue.current;
+    if (previous === value) return;
+    const previousDigits = scoreDigits(previous);
+    const changedColumns = digits.reduce(
+      (total, digit, index) => total + Number(digit !== previousDigits[index]),
+      0
+    );
+    const direction = value > previous ? -1 : 1;
+    const travel = 1.1 + changedColumns * 0.42;
     previousValue.current = value;
     if (reduceMotion || !scope.current) return;
 
@@ -198,8 +212,8 @@ function ScoreDigits({ value, label }: { value: number; label: string }) {
       animate(
         scope.current,
         {
-          y: [0, -2.5, 1, 0],
-          rotateZ: [0, -0.32, 0.14, 0],
+          y: [0, direction * travel, direction * -0.35, 0],
+          rotateZ: [0, direction * changedColumns * 0.07, direction * -0.08, 0],
         },
         { duration: 0.72, times: [0, 0.32, 0.72, 1], ease: [0.2, 0.8, 0.2, 1] }
       ),
@@ -216,7 +230,7 @@ function ScoreDigits({ value, label }: { value: number; label: string }) {
     ];
 
     return () => controls.forEach(control => control.stop());
-  }, [animate, reduceMotion, scope, value]);
+  }, [animate, digits, reduceMotion, scope, value]);
 
   return (
     <div
@@ -273,7 +287,6 @@ export function ActivityScoreboard({
   score,
   scoreDate,
   scoreLabel,
-  scoreIsToday,
   todayActivity,
   weekTotal,
   yearTotal,
@@ -282,7 +295,6 @@ export function ActivityScoreboard({
   score: number;
   scoreDate: string;
   scoreLabel: string;
-  scoreIsToday: boolean;
   todayActivity: number;
   weekTotal: number;
   yearTotal: number | null;
@@ -316,7 +328,7 @@ export function ActivityScoreboard({
             {scoreLabel}
           </span>
           <span className="shrink-0 tabular-nums">
-            {scoreIsToday ? `UTC reset ${countdown}` : 'UTC total'}
+            UTC reset {countdown}
           </span>
         </div>
       </div>

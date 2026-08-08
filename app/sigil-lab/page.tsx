@@ -6,8 +6,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Agent sigil lab · Scrapbook',
-  description: 'A reference surface for deterministic generated identities for agents.',
+  title: 'Mark studies · Scrapbook',
+  description: 'Repeatable emblems grown from names, places, and work notes.',
   robots: { index: false, follow: false },
 };
 
@@ -37,13 +37,15 @@ export default function AgentSigilLabPage() {
             Back to gallery
           </Link>
           <p className="mt-6 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            Issues #435 and #447 · identity generation reference
+            Mark studies
           </p>
           <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-            Generative sigils for agents
+            One seed, many marks
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-            The lab compares the current layered identity system with quieter construction-graph experiments. Stable inputs and explicit variants always produce the same SVG; experimental lineages stay here until their full populations are reviewed.
+            A name, a place, and a work note become a repeatable emblem. Keep
+            the inputs and the same mark returns; change one and you can see
+            exactly which part moves.
           </p>
         </header>
 
@@ -57,10 +59,12 @@ export default function AgentSigilLabPage() {
 
         <aside className="mx-auto mt-5 max-w-4xl rounded-[1.25rem] border border-border/70 bg-card p-4 text-sm leading-relaxed text-muted-foreground shadow-[0_16px_38px_rgba(35,31,26,0.08)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.24)] sm:p-5">
           <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-foreground">
-            Generation contract
+            How to read them
           </p>
           <p className="mt-2">
-            The guestbook still uses Generation 2. The Kumiko-informed lattice is a separate Generation 3 experiment with no production integration, and it must pass population-level monochrome, small-size, light/dark, and cross-browser review before becoming selectable.
+            The guestbook uses the fuller layered marks. The quieter lattice
+            family is still a study: it stays here until it works just as well
+            small, monochrome, light, and dark.
           </p>
         </aside>
       </main>

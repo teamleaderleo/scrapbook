@@ -66,46 +66,15 @@ async function HomeActivityContent() {
 
   return (
     <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
-      <header
-        className={`${styles.masthead} grid gap-3 overflow-hidden border-b border-dashed border-border/75 px-0.5 pb-4 sm:grid-cols-[minmax(0,1fr)_minmax(17rem,0.58fr)] sm:items-end sm:pb-5`}
-        data-home-masthead
-      >
-        <div>
-          <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Leo&apos;s public field desk
-          </p>
-          <h1 className="mt-2 max-w-3xl text-[clamp(2rem,5vw,4.6rem)] font-semibold leading-[0.96] tracking-[-0.055em]">
-            Things still
-            <span
-              className={`${styles.registrationType} block text-muted-foreground`}
-            >
-              in motion.
-            </span>
-          </h1>
-        </div>
-        <p className="max-w-md text-sm leading-6 text-muted-foreground sm:justify-self-end sm:pb-1">
-          Systems, field notes, learning trails, and one paper dinosaur keeping
-          watch.
-        </p>
-      </header>
-
+      <h1 className="sr-only">teamleaderleo scrapbook</h1>
       <ActivityDashboard initial={initialActivity} />
 
       <section
-        aria-label="Recent systems"
+        aria-label="Recent work"
         className="min-w-0"
         data-recent-systems
       >
-        <div className="flex items-center justify-between gap-4 px-0.5">
-          <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
-            Recent systems
-          </p>
-          <span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
-            {activity.repositories.length} projects
-          </span>
-        </div>
-
-        <div className="mt-2.5 grid min-w-0 grid-cols-1 gap-2.5 md:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
+        <div className="grid min-w-0 grid-cols-1 gap-2.5 md:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
           {activity.repositories.map((repository, index) => (
             <WindLiftCard
               key={repository.name}

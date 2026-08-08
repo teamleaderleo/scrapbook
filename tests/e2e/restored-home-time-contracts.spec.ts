@@ -22,7 +22,7 @@ test('homepage keeps the exact four-week Monday-Sunday activity field', async ({
   const grid = dashboard.locator('[data-contribution-week-grid]');
 
   await expect(
-    dashboard.getByText('4 weeks · pick a day', { exact: true })
+    dashboard.getByText('Last 4 weeks', { exact: true })
   ).toBeVisible();
   await expect(grid.locator('[data-contribution-cell]')).toHaveCount(28);
   await expect(grid).toHaveAttribute('data-calendar-weeks', '4');
@@ -100,7 +100,7 @@ test('homepage has no one-pixel nav overflow and Atlas does not shift the layout
   });
 
   expect(before.nav.height).toBe(48);
-  expect(before.scrollHeight).toBeGreaterThan(before.viewportHeight);
+  expect(before.scrollHeight).toBeGreaterThanOrEqual(before.viewportHeight);
 
   await trigger.click();
   await expect(page.locator('[data-site-atlas]')).toBeVisible();

@@ -29,12 +29,12 @@ for (const variant of variants) {
       timeout: 60_000,
     });
     expect(response?.ok()).toBe(true);
-    await expect(page.getByRole('heading', { name: 'Generative sigils for agents' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'One seed, many marks' })).toBeVisible();
     await expect(
-      page.getByRole('heading', { name: 'Kumiko-informed construction graphs' }),
+      page.getByRole('heading', { name: 'Marks built from joints and open space' }),
     ).toBeVisible();
     await expect(
-      page.getByRole('heading', { name: 'Reviewed colour worlds before production geometry' }),
+      page.getByRole('heading', { name: 'Pick the atmosphere before redrawing the mark' }),
     ).toBeVisible();
 
     const cards = page.locator('[data-sigil-card]');

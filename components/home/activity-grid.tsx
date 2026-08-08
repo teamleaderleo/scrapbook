@@ -175,7 +175,7 @@ export function ActivityGrid({
     >
       <div className="flex items-center justify-between gap-4">
         <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-          4 weeks · pick a day
+          Last 4 weeks
         </span>
         <div
           className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground"

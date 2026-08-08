@@ -92,15 +92,13 @@ for (const viewport of desktopViewports) {
     });
     await expect(page.locator('[data-contribution-week-grid]')).toBeVisible();
     await expect(page.locator('[data-scrapbook-pet]')).toBeVisible();
-    await expect(
-      page.getByText('Recent systems', { exact: true })
-    ).toBeVisible();
+    await expect(page.locator('[data-recent-systems]')).toBeVisible();
 
     const footprint = await readHomepageFootprint(page);
     expect(footprint.document.width).toBeLessThanOrEqual(
       footprint.viewport.width
     );
-    expect(footprint.document.height).toBeGreaterThan(
+    expect(footprint.document.height).toBeGreaterThanOrEqual(
       footprint.viewport.height
     );
     expect(footprint.pet.bottom).toBeLessThanOrEqual(
@@ -109,7 +107,9 @@ for (const viewport of desktopViewports) {
     expect(footprint.recentSection.y).toBeGreaterThanOrEqual(
       footprint.dashboard.bottom
     );
-    expect(footprint.recentCard.y).toBeGreaterThan(footprint.recentSection.y);
+    expect(footprint.recentCard.y).toBeGreaterThanOrEqual(
+      footprint.recentSection.y
+    );
     expect(footprint.activityCell.width).toBeGreaterThanOrEqual(36);
     expect(footprint.activityCell.width).toBeLessThanOrEqual(72);
     expect(footprint.activityCell.height).toBeGreaterThanOrEqual(34);

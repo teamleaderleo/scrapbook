@@ -233,7 +233,6 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
             score={displayDay.count}
             scoreDate={displayDay.date}
             scoreLabel={formatScoreDate(displayDay.date, displayIsToday)}
-            scoreIsToday={displayIsToday}
             todayActivity={activity.today}
             weekTotal={activity.weekTotal}
             yearTotal={activity.yearTotal}

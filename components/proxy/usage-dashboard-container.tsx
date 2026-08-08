@@ -1,7 +1,6 @@
 import type { ProxyHealthPayload, ProxyHealthSample } from '@/app/lib/proxy-health-store';
 import { readProxyHealth } from '@/app/lib/proxy-health-store';
 import { unstable_cache } from 'next/cache';
-import { Suspense } from 'react';
 import { UsageDashboard } from './usage-dashboard';
 
 const readCachedProxyHealth = unstable_cache(
@@ -80,9 +79,5 @@ export async function UsageDashboardContainer() {
   const fallbackSample = latestStatusSample(report.payload);
   const visibleSamples = samples.length > 0 || !fallbackSample ? samples : [fallbackSample];
 
-  return (
-    <Suspense fallback={null}>
-      <UsageDashboard samples={visibleSamples} status={report} limitBytes={usageLimitBytes()} />
-    </Suspense>
-  );
+  return <UsageDashboard samples={visibleSamples} status={report} limitBytes={usageLimitBytes()} />;
 }
