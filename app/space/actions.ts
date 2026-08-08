@@ -1,88 +1,118 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createClient } from '@/utils/supabase/server';
+import { Rating } from 'ts-fsrs';
 import { parseMarkdown, highlightCode } from '@/app/lib/utils/markdown';
+import { reviewOnce } from '@/app/lib/fsrs-adapter';
+import type { ReviewState } from '@/app/lib/review-types';
+import { createClient } from '@/utils/supabase/server';
+import { requireSpaceAdmin } from './authorization';
+import {
+  addItemSchema,
+  itemIdSchema,
+  reviewRatingSchema,
+  updateItemSchema,
+  type AddItemInput,
+  type UpdateItemInput,
+} from './validation';
 
-export async function addItemAction(payload: {
-  slug: string;
-  title: string;
-  url?: string | null;
-  tags?: string[];
-  category?: string | null;
-  defaultIndex?: number;
-  versions: Array<{
-    label: string;
-    content: string;
-    code: string | null;
-  }>;
-  score?: number | null;
-}) {
-  const supabase = await createClient();
+const REVIEW_SELECT = [
+  'due',
+  'stability',
+  'difficulty',
+  'scheduled_days',
+  'learning_steps',
+  'reps',
+  'lapses',
+  'state',
+  'last_review',
+  'suspended',
+].join(',');
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+function toReviewState(value: Record<string, unknown>): ReviewState {
+  return {
+    due: Number(value.due),
+    stability: Number(value.stability ?? 0),
+    difficulty: Number(value.difficulty ?? 0),
+    scheduled_days: Number(value.scheduled_days ?? 0),
+    learning_steps: Number(value.learning_steps ?? 0),
+    reps: Number(value.reps ?? 0),
+    lapses: Number(value.lapses ?? 0),
+    state: Number(value.state) as ReviewState['state'],
+    last_review: value.last_review == null ? null : Number(value.last_review),
+    suspended: Boolean(value.suspended),
+  };
+}
 
-  // Parse all versions
-  const parsedVersions = await Promise.all(
-    payload.versions.map(async (v) => ({
-      label: v.label,
-      content: v.content,
-      content_html: await parseMarkdown(v.content),
-      code: v.code,
-      code_html: await highlightCode(v.code ?? null, 'python'),
+function reviewWrite(userId: string, review: ReviewState) {
+  return {
+    user_id: userId,
+    state: review.state,
+    due: review.due,
+    last_review: review.last_review ?? null,
+    stability: review.stability,
+    difficulty: review.difficulty,
+    scheduled_days: review.scheduled_days,
+    learning_steps: review.learning_steps,
+    reps: review.reps,
+    lapses: review.lapses,
+    suspended: review.suspended ?? false,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+async function parseVersions(versions: AddItemInput['versions']) {
+  return Promise.all(
+    versions.map(async version => ({
+      label: version.label,
+      content: version.content,
+      content_html: await parseMarkdown(version.content),
+      code: version.code,
+      code_html: await highlightCode(version.code, 'python'),
     }))
   );
+}
 
-  const { error } = await supabase.from('items').insert({
-    slug: payload.slug,
-    user_id: user?.id ?? null,
-    title: payload.title,
-    url: payload.url ?? null,
-    tags: payload.tags ?? [],
-    category: payload.category ?? 'general',
-    default_index: payload.defaultIndex ?? 0,
-    versions: parsedVersions,
-    score: payload.score ?? null,
-  });
+export async function addItemAction(input: AddItemInput) {
+  const payload = addItemSchema.parse(input);
+  const supabase = await createClient();
+  const user = await requireSpaceAdmin(supabase);
+  const versions = await parseVersions(payload.versions);
 
-  if (error) throw new Error(error.message);
+  const { data, error } = await supabase
+    .from('items')
+    .insert({
+      slug: payload.slug,
+      user_id: user.id,
+      title: payload.title,
+      url: payload.url ?? null,
+      tags: payload.tags ?? [],
+      category: payload.category ?? 'general',
+      default_index: payload.defaultIndex ?? 0,
+      versions,
+      score: payload.score ?? null,
+    })
+    .select('id')
+    .single();
 
-  // Make /space fresh for the next read
+  if (error || !data) throw new Error('Space could not save that item.');
+
   revalidatePath('/space');
 }
 
-export async function updateItemAction(id: string, updates: {
-  slug?: string;
-  title?: string;
-  url?: string | null;
-  tags?: string[];
-  category?: string | null;
-  defaultIndex?: number;
-  versions?: Array<{
-    label: string;
-    content: string;
-    code: string | null;
-  }>;
-  score?: number | null;
-}) {
+export async function updateItemAction(
+  idInput: string,
+  input: UpdateItemInput
+) {
+  const id = itemIdSchema.parse(idInput);
+  const updates = updateItemSchema.parse(input);
   const supabase = await createClient();
-
-  // Parse versions if they're being updated
-  const parsedVersions = updates.versions
-    ? await Promise.all(
-        updates.versions.map(async (v) => ({
-          label: v.label,
-          content: v.content,
-          content_html: await parseMarkdown(v.content),
-          code: v.code,
-          code_html: await highlightCode(v.code ?? null, 'python'),
-        }))
-      )
+  await requireSpaceAdmin(supabase);
+  const versions = updates.versions
+    ? await parseVersions(updates.versions)
     : undefined;
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('items')
     .update({
       ...(updates.slug !== undefined && { slug: updates.slug }),
@@ -90,14 +120,114 @@ export async function updateItemAction(id: string, updates: {
       ...(updates.url !== undefined && { url: updates.url }),
       ...(updates.tags !== undefined && { tags: updates.tags }),
       ...(updates.category !== undefined && { category: updates.category }),
-      ...(updates.defaultIndex !== undefined && { default_index: updates.defaultIndex }),
-      ...(parsedVersions && { versions: parsedVersions }),
+      ...(updates.defaultIndex !== undefined && {
+        default_index: updates.defaultIndex,
+      }),
+      ...(versions && { versions }),
       ...(updates.score !== undefined && { score: updates.score }),
       updated_at: new Date().toISOString(),
     })
-    .eq('id', id);
+    .eq('id', id)
+    .select('id')
+    .maybeSingle();
 
-  if (error) throw new Error(error.message);
+  if (error) throw new Error('Space could not save those changes.');
+  if (!data)
+    throw new Error('That Space item no longer exists or is not writable.');
 
   revalidatePath('/space');
+}
+
+export async function enrollItemForReviewAction(
+  idInput: string
+): Promise<ReviewState> {
+  const id = itemIdSchema.parse(idInput);
+  const supabase = await createClient();
+  const user = await requireSpaceAdmin(supabase);
+
+  const { data: item, error: itemError } = await supabase
+    .from('items')
+    .select('id')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (itemError) throw new Error('Space could not verify that item.');
+  if (!item) throw new Error('That Space item no longer exists.');
+
+  const { data: existing, error: existingError } = await supabase
+    .from('reviews')
+    .select(REVIEW_SELECT)
+    .eq('item_id', id)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (existingError)
+    throw new Error('Space could not check the review drawer.');
+  if (existing)
+    return toReviewState(existing as unknown as Record<string, unknown>);
+
+  const initialReview: ReviewState = {
+    state: 0,
+    due: Date.now(),
+    last_review: null,
+    stability: 0,
+    difficulty: 0,
+    scheduled_days: 0,
+    learning_steps: 0,
+    reps: 0,
+    lapses: 0,
+    suspended: false,
+  };
+
+  const { data, error } = await supabase
+    .from('reviews')
+    .insert({ item_id: id, ...reviewWrite(user.id, initialReview) })
+    .select(REVIEW_SELECT)
+    .single();
+
+  if (error || !data)
+    throw new Error('Space could not add that item to the review drawer.');
+
+  revalidatePath('/space');
+  return toReviewState(data as unknown as Record<string, unknown>);
+}
+
+export async function reviewItemAction(
+  idInput: string,
+  ratingInput: Rating
+): Promise<ReviewState> {
+  const id = itemIdSchema.parse(idInput);
+  const rating = reviewRatingSchema.parse(ratingInput) as Rating;
+  const supabase = await createClient();
+  const user = await requireSpaceAdmin(supabase);
+
+  const { data: current, error: readError } = await supabase
+    .from('reviews')
+    .select(REVIEW_SELECT)
+    .eq('item_id', id)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (readError) throw new Error('Space could not load that review.');
+  if (!current) throw new Error('That item is not in the review drawer.');
+
+  const next = reviewOnce(
+    toReviewState(current as unknown as Record<string, unknown>),
+    rating,
+    Date.now()
+  );
+  const { data, error } = await supabase
+    .from('reviews')
+    .update(reviewWrite(user.id, next))
+    .eq('item_id', id)
+    .select('item_id');
+
+  if (error) throw new Error('Space could not save that review.');
+  if (!data?.length)
+    throw new Error('That review no longer exists or is not writable.');
+
+  revalidatePath('/space');
+  return next;
 }

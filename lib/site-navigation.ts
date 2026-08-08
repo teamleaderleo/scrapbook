@@ -1,4 +1,20 @@
-export type SiteNavigationGroupId = 'places' | 'tools' | 'experiments' | 'connections';
+export type SiteNavigationGroupId =
+  | 'places'
+  | 'tools'
+  | 'experiments'
+  | 'connections';
+
+export type SiteSurface =
+  | 'public'
+  | 'private'
+  | 'experimental'
+  | 'operational'
+  | 'external';
+
+export type SiteSitemapEntry = {
+  changeFrequency: 'weekly' | 'monthly';
+  priority: number;
+};
 
 export type SiteNavigationItem = {
   id: string;
@@ -6,9 +22,12 @@ export type SiteNavigationItem = {
   label: string;
   description: string;
   group: SiteNavigationGroupId;
+  surface: SiteSurface;
   external?: boolean;
   primary?: boolean;
+  homeShelf?: boolean;
   badge?: string;
+  sitemap?: SiteSitemapEntry;
 };
 
 export type SiteNavigationGroup = {
@@ -30,15 +49,20 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         label: 'Home',
         description: 'Recent activity and public work.',
         group: 'places',
+        surface: 'public',
         primary: true,
+        sitemap: { changeFrequency: 'weekly', priority: 1 },
       },
       {
         id: 'space',
         href: '/space',
         label: 'Space',
-        description: 'Notes, review queues, references, and code.',
+        description: 'A public learning garden of notes, questions, and code.',
         group: 'places',
+        surface: 'public',
         primary: true,
+        homeShelf: true,
+        sitemap: { changeFrequency: 'weekly', priority: 0.8 },
       },
       {
         id: 'gallery',
@@ -46,7 +70,21 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         label: 'Gallery',
         description: 'Visual objects and the agent guestbook.',
         group: 'places',
+        surface: 'public',
         primary: true,
+        homeShelf: true,
+        sitemap: { changeFrequency: 'monthly', priority: 0.5 },
+      },
+      {
+        id: 'journal',
+        href: '/journal',
+        label: 'Journal',
+        description: 'Public field notes and agent work records.',
+        group: 'places',
+        surface: 'public',
+        primary: true,
+        homeShelf: true,
+        sitemap: { changeFrequency: 'weekly', priority: 0.5 },
       },
       {
         id: 'atelier',
@@ -54,6 +92,9 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         label: 'Atelier',
         description: 'Interface sketches and experiments.',
         group: 'places',
+        surface: 'experimental',
+        homeShelf: true,
+        badge: 'Workshop',
       },
     ],
   },
@@ -68,6 +109,8 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         label: 'Time',
         description: 'Local time and time zones.',
         group: 'tools',
+        surface: 'public',
+        sitemap: { changeFrequency: 'monthly', priority: 0.7 },
       },
       {
         id: 'proxy',
@@ -75,6 +118,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         label: 'Signal',
         description: 'Proxy health and usage.',
         group: 'tools',
+        surface: 'operational',
       },
     ],
   },
@@ -89,6 +133,8 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         label: 'Snow globe',
         description: 'A motion-driven pocket snow globe.',
         group: 'experiments',
+        surface: 'experimental',
+        homeShelf: true,
       },
       {
         id: 'activity-lab',
@@ -96,6 +142,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         label: 'Activity geometry',
         description: 'Activity-field comparisons.',
         group: 'experiments',
+        surface: 'experimental',
         badge: 'Lab',
       },
       {
@@ -104,6 +151,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         label: 'Sigil lab',
         description: 'Generative identity studies.',
         group: 'experiments',
+        surface: 'experimental',
         badge: 'Lab',
       },
     ],
@@ -119,6 +167,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         label: 'Glossless',
         description: 'AI-assisted 3D pose-reference tool.',
         group: 'connections',
+        surface: 'external',
         external: true,
       },
       {
@@ -127,6 +176,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         label: 'GitHub',
         description: 'Repositories and public development history.',
         group: 'connections',
+        surface: 'external',
         external: true,
       },
       {
@@ -135,6 +185,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         label: 'Twitter',
         description: 'Public updates.',
         group: 'connections',
+        surface: 'external',
         external: true,
       },
       {
@@ -143,21 +194,39 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         label: 'Reddit',
         description: 'Public posts and comments.',
         group: 'connections',
+        surface: 'external',
         external: true,
       },
     ],
   },
 ];
 
-export const siteNavigationItems = siteNavigationGroups.flatMap((group) => group.items);
-export const primaryNavigationItems = siteNavigationItems.filter((item) => item.primary);
+export const siteNavigationItems = siteNavigationGroups.flatMap(
+  group => group.items
+);
+export const primaryNavigationItems = siteNavigationItems.filter(
+  item => item.primary
+);
+export const homeRoomNavigationItems = siteNavigationItems.filter(
+  item => item.homeShelf
+);
+export const indexedNavigationItems = siteNavigationItems.filter(
+  (item): item is SiteNavigationItem & { sitemap: SiteSitemapEntry } =>
+    Boolean(item.sitemap)
+);
+export const nonPublicNavigationItems = siteNavigationItems.filter(
+  item => item.surface === 'private' || item.surface === 'operational'
+);
 
 function normalisePathname(pathname: string): string {
   if (!pathname || pathname === '/') return '/';
   return pathname.replace(/\/+$/, '') || '/';
 }
 
-export function isNavigationItemActive(pathname: string, item: SiteNavigationItem): boolean {
+export function isNavigationItemActive(
+  pathname: string,
+  item: SiteNavigationItem
+): boolean {
   if (item.external) return false;
 
   const current = normalisePathname(pathname);
@@ -166,8 +235,10 @@ export function isNavigationItemActive(pathname: string, item: SiteNavigationIte
   return current === href || current.startsWith(`${href}/`);
 }
 
-export function getActiveNavigationItem(pathname: string): SiteNavigationItem | undefined {
+export function getActiveNavigationItem(
+  pathname: string
+): SiteNavigationItem | undefined {
   return [...siteNavigationItems]
-    .filter((item) => isNavigationItemActive(pathname, item))
+    .filter(item => isNavigationItemActive(pathname, item))
     .sort((left, right) => right.href.length - left.href.length)[0];
 }

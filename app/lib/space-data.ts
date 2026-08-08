@@ -2,7 +2,6 @@ export const SPACE_PAGE_SIZE = 100;
 
 export const SPACE_ITEM_SELECT = [
   'id',
-  'user_id',
   'title',
   'slug',
   'url',

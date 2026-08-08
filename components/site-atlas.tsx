@@ -18,8 +18,8 @@ import {
   FlaskConical,
   Home,
   Images,
+  NotebookPen,
   Moon,
-  Newspaper,
   Palette,
   Shapes,
   Snowflake,
@@ -45,8 +45,8 @@ function ItemIcon({ id }: { id: string }) {
       return <Brain className={className} aria-hidden="true" />;
     case 'gallery':
       return <Images className={className} aria-hidden="true" />;
-    case 'blog':
-      return <Newspaper className={className} aria-hidden="true" />;
+    case 'journal':
+      return <NotebookPen className={className} aria-hidden="true" />;
     case 'atelier':
       return <Palette className={className} aria-hidden="true" />;
     case 'time':
@@ -72,7 +72,13 @@ function ItemIcon({ id }: { id: string }) {
   }
 }
 
-function AtlasLink({ item, pathname }: { item: SiteNavigationItem; pathname: string }) {
+function AtlasLink({
+  item,
+  pathname,
+}: {
+  item: SiteNavigationItem;
+  pathname: string;
+}) {
   const active = isNavigationItemActive(pathname, item);
   const link = (
     <Link
@@ -101,9 +107,14 @@ function AtlasLink({ item, pathname }: { item: SiteNavigationItem; pathname: str
         </span>
       ) : null}
       {item.external ? (
-        <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <ExternalLink
+          className="h-3.5 w-3.5 shrink-0 text-muted-foreground"
+          aria-hidden="true"
+        />
       ) : null}
-      {item.external ? <span className="sr-only"> Opens in a new tab.</span> : null}
+      {item.external ? (
+        <span className="sr-only"> Opens in a new tab.</span>
+      ) : null}
     </Link>
   );
 
@@ -136,7 +147,9 @@ async function copyDiscord() {
     await navigator.clipboard.writeText('teamleaderleo');
     toast.success('Discord username copied', { description: 'teamleaderleo' });
   } catch {
-    toast.error('Could not copy the Discord username', { description: 'teamleaderleo' });
+    toast.error('Could not copy the Discord username', {
+      description: 'teamleaderleo',
+    });
   }
 }
 
@@ -176,24 +189,28 @@ export function SiteAtlas({
           data-site-atlas-trigger
         >
           <Compass className="h-4 w-4" aria-hidden="true" />
-          {variant === 'label' ? <span className="hidden min-[420px]:inline">Atlas</span> : null}
+          {variant === 'label' ? (
+            <span className="hidden min-[420px]:inline">Atlas</span>
+          ) : null}
         </button>
       </Dialog.Trigger>
 
       <Dialog.Portal>
         <Dialog.Overlay
-          className="fixed inset-0 z-[70] bg-black/55 backdrop-blur-sm data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 motion-reduce:animate-none"
+          className="fixed inset-0 z-[70] bg-black/60 data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 motion-reduce:animate-none"
           data-site-atlas-overlay
         />
         <Dialog.Content
-          className="fixed inset-0 z-[80] flex min-w-0 flex-col overflow-hidden bg-background text-foreground shadow-2xl outline-none data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 motion-reduce:animate-none sm:inset-4 sm:mx-auto sm:max-w-4xl sm:rounded-[1.5rem] sm:border sm:border-border/70"
+          className="fixed inset-0 z-[80] flex min-w-0 flex-col overflow-hidden bg-background text-foreground shadow-2xl outline-none [contain:layout_paint] data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 motion-reduce:animate-none sm:inset-4 sm:mx-auto sm:max-w-4xl sm:rounded-[1.5rem] sm:border sm:border-border/70"
           data-site-atlas
         >
           <header className="flex shrink-0 items-center gap-3 border-b border-border/70 bg-card/90 px-4 py-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:py-4">
             <Dialog.Title className="min-w-0 flex-1 text-2xl font-semibold tracking-tight sm:text-3xl">
               Site Atlas
             </Dialog.Title>
-            <Dialog.Description className="sr-only">Site navigation</Dialog.Description>
+            <Dialog.Description className="sr-only">
+              Site navigation
+            </Dialog.Description>
             <Dialog.Close asChild>
               <button
                 type="button"
@@ -211,8 +228,12 @@ export function SiteAtlas({
             data-site-atlas-scroll
           >
             <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
-              {siteNavigationGroups.map((group) => (
-                <section key={group.id} aria-labelledby={`site-atlas-${group.id}`} className="min-w-0">
+              {siteNavigationGroups.map(group => (
+                <section
+                  key={group.id}
+                  aria-labelledby={`site-atlas-${group.id}`}
+                  className="min-w-0"
+                >
                   <h2
                     id={`site-atlas-${group.id}`}
                     className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
@@ -220,8 +241,12 @@ export function SiteAtlas({
                     {group.label}
                   </h2>
                   <div className="grid gap-2 sm:grid-cols-2">
-                    {group.items.map((item) => (
-                      <AtlasLink key={item.id} item={item} pathname={pathname} />
+                    {group.items.map(item => (
+                      <AtlasLink
+                        key={item.id}
+                        item={item}
+                        pathname={pathname}
+                      />
                     ))}
                     {group.id === 'connections' ? (
                       <>

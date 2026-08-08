@@ -1,17 +1,17 @@
-import { createClient } from '@supabase/supabase-js'
-import type { ReviewState } from '../review-types'
+import { createClient } from '@supabase/supabase-js';
+import type { ReviewState } from '../review-types';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Database row types
 export type DbItem = {
-  id: string;  // UUID
-  user_id: string | null;
+  id: string; // UUID
+  user_id?: string | null;
   title: string;
-  slug: string;  // User-defined text identifier
+  slug: string; // User-defined text identifier
   url: string | null;
   default_index: number;
   versions: Array<{
@@ -26,10 +26,10 @@ export type DbItem = {
   score: number | null;
   created_at: string;
   updated_at: string;
-}
+};
 
 export type DbReview = ReviewState & {
   item_id: string;
   user_id: string | null;
   updated_at: string;
-}
+};

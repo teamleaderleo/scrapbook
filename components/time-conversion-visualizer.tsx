@@ -70,11 +70,11 @@ export default function UTCTimeVisualizer() {
           <div className="mb-3 flex items-center justify-between gap-3">
             <label
               htmlFor="time-of-day"
-              className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
+              className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground"
             >
               Slide through the day
             </label>
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               {timeOfDay}
             </span>
           </div>
@@ -85,13 +85,14 @@ export default function UTCTimeVisualizer() {
             max="1439"
             step="1"
             value={localTime}
-            onChange={(event) => setLocalTime(Number.parseInt(event.target.value, 10))}
-            aria-label="Local time of day"
+            onChange={event =>
+              setLocalTime(Number.parseInt(event.target.value, 10))
+            }
             aria-valuetext={`${formatTime(localHours, localMinutes)} ${timeOfDay}`}
             className="time-day-slider h-14 w-full cursor-pointer rounded-full"
             style={{ background: DAY_GRADIENT }}
           />
-          <div className="mt-2 flex justify-between font-mono text-[10px] tabular-nums text-muted-foreground">
+          <div className="mt-2 flex justify-between font-mono text-[11px] tabular-nums text-muted-foreground">
             <span>00:00</span>
             <span>06:00</span>
             <span>12:00</span>
@@ -102,14 +103,19 @@ export default function UTCTimeVisualizer() {
 
         <section
           aria-label="Time comparisons"
-          className="mt-6 grid grid-cols-2 gap-3 sm:mt-7 sm:grid-cols-4"
+          data-time-comparison-grid
+          className="mt-6 grid grid-cols-1 gap-3 sm:mt-7 sm:grid-cols-4"
         >
           <TimeCard
             label="Local"
             time={formatTime(localHours, localMinutes)}
             offset={`${formatTime12Hour(localHours, localMinutes)} ${period} · ${formatOffset(localOffsetMinutes)}`}
           />
-          <TimeCard label="UTC" time={formatTime(utcHours, utcMinutes)} offset="UTC±00:00" />
+          <TimeCard
+            label="UTC"
+            time={formatTime(utcHours, utcMinutes)}
+            offset="UTC±00:00"
+          />
           <TimeCard
             label="Eastern"
             time={formatTime((utcHours + easternOffset + 24) % 24, utcMinutes)}
@@ -133,18 +139,67 @@ export default function UTCTimeVisualizer() {
             font-weight: 650;
             letter-spacing: -0.01em;
           }
+
+          @media (min-width: 22rem) and (max-width: 39.999rem) {
+            [data-time-comparison-grid] {
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+          }
+
+          @media (max-width: 19rem) {
+            [data-timezone-trigger-hint] {
+              display: none;
+            }
+
+            [data-timezone-option] {
+              align-items: flex-start;
+              flex-direction: column;
+            }
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            [data-current-time-button],
+            [data-timezone-trigger] {
+              transition: none;
+            }
+
+            .time-day-slider::-webkit-slider-thumb {
+              transition: none;
+            }
+
+            .time-day-slider:active::-webkit-slider-thumb {
+              transform: none;
+            }
+          }
         `}</style>
       </div>
     </div>
   );
 }
 
-function TimeCard({ label, time, offset }: { label: string; time: string; offset: string }) {
+function TimeCard({
+  label,
+  time,
+  offset,
+}: {
+  label: string;
+  time: string;
+  offset: string;
+}) {
   return (
     <div className="rounded-xl border border-border/70 bg-background/55 p-3">
-      <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{label}</p>
-      <p className="mt-1 font-mono text-2xl font-semibold tabular-nums">{time}</p>
-      <p className="mt-1 font-mono text-[10px] tabular-nums text-muted-foreground">{offset}</p>
+      <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+        {label}
+      </p>
+      <time
+        dateTime={time}
+        className="mt-1 block font-mono text-2xl font-semibold tabular-nums"
+      >
+        {time}
+      </time>
+      <p className="mt-1 break-words font-mono text-[11px] tabular-nums text-muted-foreground">
+        {offset}
+      </p>
     </div>
   );
 }

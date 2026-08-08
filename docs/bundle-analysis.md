@@ -41,7 +41,7 @@ unexpected client-side server dependencies
 dynamically isolated editors, simulations, and labs
 ```
 
-Prioritize ordinary routes such as the homepage, blog, timezone tool, and gallery before optional laboratory or editor surfaces.
+Prioritize ordinary routes such as the homepage, journal, timezone tool, and gallery before optional laboratory or editor surfaces.
 
 Large packages are not automatically defects. Monaco, Shiki, Tiptap, Three.js, React Three Fiber, Framer Motion, Markdown renderers, icon packages, AWS clients, database clients, and agent SDKs should be judged by whether they are present on routes that need them.
 

@@ -1,20 +1,8 @@
 'use client';
 
 import { ScrapbookPet } from '@/components/home/scrapbook-pet';
-import {
-  motion,
-  useAnimate,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from 'framer-motion';
-import {
-  type PointerEvent as ReactPointerEvent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { motion, useAnimate } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './activity-scoreboard.module.css';
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
@@ -35,15 +23,27 @@ function useReducedMotionPreference(): boolean {
 
 function countdownToUtcMidnight() {
   const now = new Date();
-  const midnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
+  const midnight = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate() + 1
+  );
   const seconds = Math.max(0, Math.floor((midnight - now.getTime()) / 1000));
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainder = seconds % 60;
-  return [hours, minutes, remainder].map((part) => String(part).padStart(2, '0')).join(':');
+  return [hours, minutes, remainder]
+    .map(part => String(part).padStart(2, '0'))
+    .join(':');
 }
 
-function PaperFace({ digit, className = '' }: { digit: string; className?: string }) {
+function PaperFace({
+  digit,
+  className = '',
+}: {
+  digit: string;
+  className?: string;
+}) {
   return (
     <span aria-hidden="true" className={`${styles.face} ${className}`}>
       <span className={styles.number}>{digit}</span>
@@ -66,9 +66,11 @@ function PaperDigit({ digit, index }: { digit: string; index: number }) {
 
   useEffect(() => {
     if (reduceMotion || document.visibilityState !== 'visible') {
-      setDisplayed(digit);
-      setTurn(null);
-      return;
+      const frame = window.requestAnimationFrame(() => {
+        setDisplayed(digit);
+        setTurn(null);
+      });
+      return () => window.cancelAnimationFrame(frame);
     }
 
     if (turn || digit === displayed) return;
@@ -113,12 +115,11 @@ function PaperDigit({ digit, index }: { digit: string; index: number }) {
             key={`depart-${turn.id}`}
             aria-hidden="true"
             className={`${styles.sheet} ${styles.departing}`}
-            initial={{ rotateX: 0, y: 0, opacity: 1, filter: 'blur(0px)' }}
+            initial={{ rotateX: 0, y: 0, opacity: 1 }}
             animate={{
               rotateX: [0, -24, -103],
               y: [0, -2, -12],
               opacity: [1, 1, 0],
-              filter: ['blur(0px)', 'blur(0px)', 'blur(1.4px)'],
             }}
             transition={{
               duration: 0.46,
@@ -154,8 +155,11 @@ function PaperDigit({ digit, index }: { digit: string; index: number }) {
           >
             <motion.span
               className={styles.number}
-              initial={{ opacity: 0.35, scale: 1.2, filter: 'blur(2px)' }}
-              animate={{ opacity: 1, scale: [1.2, 0.96, 1], filter: 'blur(0px)' }}
+              initial={{ opacity: 0.35, scale: 1.12 }}
+              animate={{
+                opacity: 1,
+                scale: [1.12, 0.97, 1],
+              }}
               transition={{
                 duration: 0.34,
                 delay: delay + 0.34,
@@ -174,8 +178,12 @@ function PaperDigit({ digit, index }: { digit: string; index: number }) {
 
 function ScoreDigits({ value, label }: { value: number; label: string }) {
   const digits = useMemo(
-    () => String(Math.max(0, Math.floor(value))).slice(-4).padStart(4, '0').split(''),
-    [value],
+    () =>
+      String(Math.max(0, Math.floor(value)))
+        .slice(-4)
+        .padStart(4, '0')
+        .split(''),
+    [value]
   );
   const reduceMotion = useReducedMotionPreference();
   const previousValue = useRef(value);
@@ -193,21 +201,21 @@ function ScoreDigits({ value, label }: { value: number; label: string }) {
           y: [0, -2.5, 1, 0],
           rotateZ: [0, -0.32, 0.14, 0],
         },
-        { duration: 0.72, times: [0, 0.32, 0.72, 1], ease: [0.2, 0.8, 0.2, 1] },
+        { duration: 0.72, times: [0, 0.32, 0.72, 1], ease: [0.2, 0.8, 0.2, 1] }
       ),
       animate(
         '[data-paper-counter-binding]',
         { scaleX: [1, 1.055, 0.985, 1] },
-        { duration: 0.68, ease: [0.2, 0.8, 0.2, 1] },
+        { duration: 0.68, ease: [0.2, 0.8, 0.2, 1] }
       ),
       animate(
         '[data-paper-counter-shadow]',
         { scaleX: [1, 1.025, 0.99, 1], y: [0, 1, -0.5, 0] },
-        { duration: 0.72, ease: [0.2, 0.8, 0.2, 1] },
+        { duration: 0.72, ease: [0.2, 0.8, 0.2, 1] }
       ),
     ];
 
-    return () => controls.forEach((control) => control.stop());
+    return () => controls.forEach(control => control.stop());
   }, [animate, reduceMotion, scope, value]);
 
   return (
@@ -219,13 +227,16 @@ function ScoreDigits({ value, label }: { value: number; label: string }) {
       data-reduced-motion={reduceMotion ? 'true' : 'false'}
       data-wind-scoreboard
     >
-      <span aria-hidden="true" className={styles.counterShadow} data-paper-counter-shadow />
+      <span
+        aria-hidden="true"
+        className={styles.counterShadow}
+        data-paper-counter-shadow
+      />
       {digits.map((digit, index) => (
         <div
           key={index}
           data-activity-digit
-          className={`${styles.digitSlot} relative aspect-[0.78] min-w-0 flex-1 font-mono text-[clamp(2rem,5vw,4.25rem)] font-semibold leading-none tabular-nums transition-transform duration-300 ease-out group-hover:-translate-y-1 motion-reduce:transform-none motion-reduce:transition-none ${index % 2 === 0 ? 'group-hover:-rotate-[0.7deg]' : 'group-hover:rotate-[0.7deg]'}`}
-          style={{ transitionDelay: `${index * 24}ms` }}
+          className={`${styles.digitSlot} relative aspect-[0.78] min-w-0 flex-1 font-mono text-[clamp(2rem,5vw,4.25rem)] font-semibold leading-none tabular-nums`}
         >
           <PaperDigit digit={digit} index={index} />
         </div>
@@ -234,10 +245,18 @@ function ScoreDigits({ value, label }: { value: number; label: string }) {
   );
 }
 
-function Metric({ label, value, title }: { label: string; value: string; title?: string }) {
+function Metric({
+  label,
+  value,
+  title,
+}: {
+  label: string;
+  value: string;
+  title?: string;
+}) {
   return (
     <span
-      className="grid min-h-[3.25rem] content-center gap-1 rounded-xl border border-border/65 bg-background/40 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] transition-[transform,border-color,background-color] duration-300 group-hover:translate-x-0.5 group-hover:border-border group-hover:bg-background/55 motion-reduce:transition-none"
+      className="grid min-h-[3.25rem] content-center gap-1 rounded-xl border border-border/65 bg-background/40 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]"
       title={title}
     >
       <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -271,27 +290,6 @@ export function ActivityScoreboard({
 }) {
   const reduceMotion = useReducedMotionPreference();
   const [countdown, setCountdown] = useState('--:--:--');
-  const pointerX = useMotionValue(0);
-  const pointerY = useMotionValue(0);
-  const lightOpacity = useMotionValue(0);
-  const fibreX = useMotionValue(0);
-  const fibreY = useMotionValue(0);
-  const curlProgress = useMotionValue(0);
-  const smoothPointerX = useSpring(pointerX, { stiffness: 240, damping: 30, mass: 0.55 });
-  const smoothPointerY = useSpring(pointerY, { stiffness: 240, damping: 30, mass: 0.55 });
-  const smoothLightOpacity = useSpring(lightOpacity, {
-    stiffness: 240,
-    damping: 30,
-    mass: 0.5,
-  });
-  const smoothFibreX = useSpring(fibreX, { stiffness: 210, damping: 28, mass: 0.58 });
-  const smoothFibreY = useSpring(fibreY, { stiffness: 210, damping: 28, mass: 0.58 });
-  const smoothCurl = useSpring(curlProgress, { stiffness: 260, damping: 24, mass: 0.48 });
-  const curlOpacity = useTransform(smoothCurl, [0, 0.12, 1], [0, 0.18, 0.96]);
-  const curlScale = useTransform(smoothCurl, [0, 1], [0.74, 1.08]);
-  const curlRotate = useTransform(smoothCurl, [0, 1], [-8, 5]);
-  const curlX = useTransform(smoothCurl, [0, 1], [-8, 0]);
-  const curlY = useTransform(smoothCurl, [0, 1], [8, -1]);
 
   useEffect(() => {
     const update = () => setCountdown(countdownToUtcMidnight());
@@ -300,86 +298,19 @@ export function ActivityScoreboard({
     return () => window.clearInterval(interval);
   }, []);
 
-  const movePaperLight = (event: ReactPointerEvent<HTMLElement>) => {
-    if (reduceMotion || event.pointerType === 'touch') return;
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return;
-
-    const x = Math.min(rect.width, Math.max(0, event.clientX - rect.left));
-    const y = Math.min(rect.height, Math.max(0, event.clientY - rect.top));
-    const horizontal = x / rect.width;
-    const vertical = y / rect.height;
-    const curlDistance = Math.hypot(horizontal, 1 - vertical);
-
-    pointerX.set(x);
-    pointerY.set(y);
-    lightOpacity.set(1);
-    fibreX.set((horizontal - 0.5) * 9);
-    fibreY.set((vertical - 0.5) * 6);
-    curlProgress.set(Math.max(0, 1 - curlDistance / 0.85));
-  };
-
-  const settlePaperLight = () => {
-    lightOpacity.set(0);
-    fibreX.set(0);
-    fibreY.set(0);
-    curlProgress.set(0);
-  };
-
   return (
-    <motion.section
+    <section
       id="github-activity-scoreboard"
-      initial={false}
-      whileHover={
-        reduceMotion
-          ? undefined
-          : {
-              y: -5,
-              rotateX: 0.7,
-              rotateY: -0.65,
-              scale: 1.008,
-            }
-      }
-      transition={{ type: 'spring', stiffness: 260, damping: 22, mass: 0.72 }}
-      style={{ transformPerspective: 1100, transformOrigin: '50% 55%' }}
-      onPointerMove={movePaperLight}
-      onPointerLeave={settlePaperLight}
-      onPointerCancel={settlePaperLight}
-      className={`${styles.scorecard} group relative flex h-full min-h-[15.5rem] flex-col overflow-hidden rounded-[1.25rem] border border-border/75 bg-card text-card-foreground shadow-[0_16px_38px_rgba(24,24,26,0.11)] transition-[border-color,box-shadow] duration-300 hover:border-border hover:shadow-[0_24px_52px_rgba(24,24,26,0.17)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.3)] dark:hover:shadow-[0_26px_58px_rgba(0,0,0,0.42)] [@media(max-height:780px)]:min-h-[14.5rem]`}
+      className={`${styles.scorecard} relative flex h-full min-h-[24rem] flex-col overflow-hidden rounded-[1.25rem] border border-border/75 bg-card text-card-foreground shadow-[0_14px_32px_rgba(24,24,26,0.09)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)]`}
       data-activity-scoreboard
       data-activity-score-date={scoreDate}
-      data-paper-light-motion={reduceMotion ? 'reduced' : 'full'}
+      data-activity-score-value={score}
+      data-activity-scoreboard-ready={
+        countdown === '--:--:--' ? 'false' : 'true'
+      }
+      data-activity-motion={reduceMotion ? 'reduced' : 'calm'}
     >
-      <motion.span
-        aria-hidden="true"
-        className={styles.rakingLightAnchor}
-        style={{ x: smoothPointerX, y: smoothPointerY, opacity: smoothLightOpacity }}
-        data-paper-raking-light
-      >
-        <span className={styles.rakingLight} />
-      </motion.span>
-      <motion.span
-        aria-hidden="true"
-        className={styles.fibreField}
-        style={{ x: smoothFibreX, y: smoothFibreY }}
-        data-paper-fibres
-      />
-      <motion.span
-        aria-hidden="true"
-        className={styles.paperCurl}
-        style={{
-          x: curlX,
-          y: curlY,
-          scale: curlScale,
-          rotateZ: curlRotate,
-          opacity: curlOpacity,
-          transformPerspective: 620,
-        }}
-        data-paper-curl
-      />
-
-      <div className="relative z-10 border-b border-border/70 bg-muted/70 px-4 py-2.5 transition-colors duration-300 group-hover:bg-muted/85 [@media(max-height:780px)]:py-2">
+      <div className="relative z-10 border-b border-border/70 bg-muted/70 px-4 py-2.5">
         <div className="flex items-center justify-between gap-3 font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           <span className="truncate" aria-live="polite">
             {scoreLabel}
@@ -390,18 +321,25 @@ export function ActivityScoreboard({
         </div>
       </div>
 
-      <div className="relative z-10 grid flex-1 grid-cols-[minmax(0,1fr)_minmax(5.75rem,0.36fr)] items-center gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(6.75rem,0.34fr)] sm:gap-4 sm:p-5 [@media(max-height:780px)]:gap-2.5 [@media(max-height:780px)]:p-3.5">
-        <ScoreDigits value={score} label={scoreLabel} />
-        <div className="grid content-center gap-2">
-          <Metric label="7D" value={weekTotal.toLocaleString('en-GB')} />
-          <Metric
-            label="1Y"
-            value={yearTotal?.toLocaleString('en-GB') ?? '—'}
-            title="Rolling-year total reported by GitHub's contribution calendar"
-          />
-          <ScrapbookPet activity={todayActivity} updating={updating} />
+      <div className="relative z-10 grid flex-1 gap-4 p-4 sm:p-5 md:grid-cols-[minmax(0,1fr)_minmax(15rem,0.72fr)] md:items-stretch">
+        <div className="flex min-w-0 flex-col justify-center gap-4">
+          <div>
+            <p className="mb-2 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Activity on the desk
+            </p>
+            <ScoreDigits value={score} label={scoreLabel} />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Metric label="7D" value={weekTotal.toLocaleString('en-GB')} />
+            <Metric
+              label="1Y"
+              value={yearTotal?.toLocaleString('en-GB') ?? '—'}
+              title="Rolling-year total reported by GitHub's contribution calendar"
+            />
+          </div>
         </div>
+        <ScrapbookPet activity={todayActivity} updating={updating} />
       </div>
-    </motion.section>
+    </section>
   );
 }

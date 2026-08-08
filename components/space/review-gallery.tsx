@@ -11,14 +11,14 @@ import { useNow } from '@/app/lib/hooks/useNow';
 import { MarkdownContent } from './markdown-content';
 import { Rating } from 'ts-fsrs';
 import { reviewOnce } from '@/app/lib/fsrs-adapter';
-import { createClient } from '@/utils/supabase/client';
 import type { ReviewState } from '@/app/lib/review-types';
+import { rollbackFailedReview } from '@/app/lib/review-overrides';
+import { reviewItemAction } from '@/app/space/actions';
 import { duplicateItemHref } from '@/lib/space-routes';
 import { SpaceHeader } from './space-header';
 import { CodeDisplay } from './code-display';
 
 export function ReviewGallery() {
-  const supabase = createClient();
   const {
     items: allItems,
     isAdmin,
@@ -42,11 +42,12 @@ export function ReviewGallery() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showContent, setShowContent] = useState(true);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [mutationError, setMutationError] = useState<string | null>(null);
 
   const q = useMemo(() => parseQuery(tagsParam), [tagsParam]);
 
   const items = useMemo(() => {
-    const withMutations = allItems.map((item) => {
+    const withMutations = allItems.map(item => {
       const mutation = mutations[item.id];
       return mutation ? { ...item, review: mutation } : item;
     });
@@ -66,7 +67,7 @@ export function ReviewGallery() {
 
   useEffect(() => {
     if (itemParam && items.length > 0) {
-      const index = items.findIndex((item) => item.id === itemParam);
+      const index = items.findIndex(item => item.id === itemParam);
       if (index !== -1) setCurrentIndex(index);
     }
   }, [itemParam, items]);
@@ -82,21 +83,28 @@ export function ReviewGallery() {
         target?.getAttribute('contenteditable') === 'true' ||
         role === 'textbox';
 
-      if (isTyping || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+      if (
+        isTyping ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        event.shiftKey
+      )
+        return;
 
       if (event.key === 'ArrowRight' || event.key === 'j') {
         event.preventDefault();
-        setCurrentIndex((index) => Math.min(index + 1, items.length - 1));
+        setCurrentIndex(index => Math.min(index + 1, items.length - 1));
         setShowContent(true);
       }
       if (event.key === 'ArrowLeft' || event.key === 'k') {
         event.preventDefault();
-        setCurrentIndex((index) => Math.max(index - 1, 0));
+        setCurrentIndex(index => Math.max(index - 1, 0));
         setShowContent(true);
       }
       if (event.key === ' ') {
         event.preventDefault();
-        setShowContent((visible) => !visible);
+        setShowContent(visible => !visible);
       }
       if (event.key === 'Escape') {
         router.push(`/space${tagsParam ? `?tags=${tagsParam}` : ''}`);
@@ -110,30 +118,27 @@ export function ReviewGallery() {
   const onReview = async (rating: Rating) => {
     if (!current) return;
 
+    const previousOverride = mutations[current.id];
     const next = reviewOnce(current.review, rating, Date.now());
-    setMutations((previous) => ({ ...previous, [current.id]: next }));
+    setMutationError(null);
+    setMutations(previous => ({ ...previous, [current.id]: next }));
 
-    const { error: reviewError } = await supabase.from('reviews').upsert({
-      item_id: current.id,
-      state: next.state,
-      due: next.due,
-      last_review: next.last_review,
-      stability: next.stability,
-      difficulty: next.difficulty,
-      scheduled_days: next.scheduled_days,
-      learning_steps: next.learning_steps,
-      reps: next.reps,
-      lapses: next.lapses,
-      suspended: next.suspended || false,
-    });
-
-    if (reviewError) {
+    try {
+      const savedReview = await reviewItemAction(current.id, rating);
+      setMutations(previous => ({ ...previous, [current.id]: savedReview }));
+    } catch (reviewError) {
       console.error('Failed to save review:', reviewError);
+      setMutations(previous =>
+        rollbackFailedReview(previous, current.id, next, previousOverride)
+      );
+      setMutationError(
+        "That review wasn't saved. The previous schedule has been restored."
+      );
       return;
     }
 
     if (currentIndex < items.length - 1) {
-      setCurrentIndex((index) => index + 1);
+      setCurrentIndex(index => index + 1);
       setShowContent(true);
     }
   };
@@ -142,13 +147,18 @@ export function ReviewGallery() {
     return (
       <div className="flex h-full min-h-0 flex-col">
         <SpaceHeader
-          leftContent={refreshing || loadingMore ? 'Updating items…' : 'No items'}
+          leftContent={
+            refreshing || loadingMore ? 'Updating items…' : 'No items'
+          }
           onEditorToggle={() => setEditorOpen(!editorOpen)}
           isEditorOpen={editorOpen}
         />
         <div className="p-4 text-muted-foreground">
           {error ? (
-            <div className="flex max-w-xl items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm text-foreground" role="alert">
+            <div
+              className="flex max-w-xl items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm text-foreground"
+              role="alert"
+            >
               <span>{error}</span>
               <Button variant="outline" size="sm" onClick={() => void reload()}>
                 Retry
@@ -176,10 +186,14 @@ export function ReviewGallery() {
           isAdmin ? (
             <>
               <Button asChild variant="outline" size="sm">
-                <Link href={`/space/edit/${current.slug}`} prefetch>edit</Link>
+                <Link href={`/space/edit/${current.slug}`} prefetch>
+                  edit
+                </Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href={duplicateItemHref(current.id)} prefetch>duplicate</Link>
+                <Link href={duplicateItemHref(current.id)} prefetch>
+                  duplicate
+                </Link>
               </Button>
             </>
           ) : undefined
@@ -188,15 +202,42 @@ export function ReviewGallery() {
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-3 sm:p-6">
         {error ? (
-          <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm" role="alert">
+          <div
+            className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm"
+            role="alert"
+          >
             <span className="min-w-0">{error}</span>
-            <Button variant="outline" size="sm" className="shrink-0" onClick={() => void reload()}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0"
+              onClick={() => void reload()}
+            >
               Retry
             </Button>
           </div>
         ) : null}
 
-        <h1 className="mb-4 text-2xl font-bold text-foreground">{current.title}</h1>
+        {mutationError ? (
+          <div
+            className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm"
+            role="alert"
+          >
+            <span className="min-w-0">{mutationError}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0"
+              onClick={() => setMutationError(null)}
+            >
+              Dismiss
+            </Button>
+          </div>
+        ) : null}
+
+        <h1 className="mb-4 text-2xl font-bold text-foreground">
+          {current.title}
+        </h1>
 
         {current.versions.length > 1 && (
           <div className="mb-4 flex flex-wrap gap-2 text-sm">
@@ -229,13 +270,16 @@ export function ReviewGallery() {
                 />
               </div>
             </div>
-            {active.code && <CodeDisplay code={active.code} codeHtml={active.codeHtml} />}
+            {active.code && (
+              <CodeDisplay code={active.code} codeHtml={active.codeHtml} />
+            )}
           </div>
         )}
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm text-muted-foreground">
-            ← → or j/k to navigate · Space to {showContent ? 'hide' : 'show'} content
+            ← → or j/k to navigate · Space to {showContent ? 'hide' : 'show'}{' '}
+            content
           </div>
 
           {isAdmin && current.review && (

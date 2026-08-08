@@ -1,6 +1,9 @@
 'use client';
 
-import { ActivityGrid, type ActivityGridDay } from '@/components/home/activity-grid';
+import {
+  ActivityGrid,
+  type ActivityGridDay,
+} from '@/components/home/activity-grid';
 import { ActivityScoreboard } from '@/components/home/activity-scoreboard';
 import { GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS } from '@/lib/github-activity-policy';
 import { useEffect, useRef, useState } from 'react';
@@ -29,7 +32,9 @@ type UnavailableActivitySnapshot = {
   generatedAt: string;
 };
 
-type ActivitySnapshot = SuccessfulActivitySnapshot | UnavailableActivitySnapshot;
+type ActivitySnapshot =
+  | SuccessfulActivitySnapshot
+  | UnavailableActivitySnapshot;
 
 type LiveActivityResponse = Omit<SuccessfulActivitySnapshot, 'unit'>;
 
@@ -39,7 +44,9 @@ function timestampOrNow(value: string) {
 }
 
 function latestRecordedDate(activity: ActivitySnapshot) {
-  return activity.source === 'unavailable' ? '' : (activity.days.at(-1)?.date ?? '');
+  return activity.source === 'unavailable'
+    ? ''
+    : (activity.days.at(-1)?.date ?? '');
 }
 
 function formatScoreDate(date: string, current: boolean) {
@@ -70,7 +77,8 @@ function UnavailableActivity() {
         Activity is temporarily unavailable
       </h2>
       <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-        The page will retry while it remains open. Contribution totals and calendar cells appear after GitHub supplies a valid snapshot.
+        The page will retry while it remains open. Contribution totals and
+        calendar cells appear after GitHub supplies a valid snapshot.
       </p>
     </section>
   );
@@ -78,18 +86,20 @@ function UnavailableActivity() {
 
 export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
   const initialSnapshotAt = timestampOrNow(initial.generatedAt);
-  const initialLatestDate = latestRecordedDate(initial);
   const [activity, setActivity] = useState<ActivitySnapshot>(initial);
   const [updating, setUpdating] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(initialLatestDate);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [previewDate, setPreviewDate] = useState<string | null>(null);
   const inFlight = useRef<AbortController | null>(null);
-  const newestSnapshotAt = useRef(initial.source === 'unavailable' ? 0 : initialSnapshotAt);
+  const newestSnapshotAt = useRef(
+    initial.source === 'unavailable' ? 0 : initialSnapshotAt
+  );
   const nextAllowedAt = useRef(
-    initial.source === 'unavailable' ? 0 : initialSnapshotAt + REFRESH_INTERVAL_MS,
+    initial.source === 'unavailable'
+      ? 0
+      : initialSnapshotAt + REFRESH_INTERVAL_MS
   );
   const consecutiveFailures = useRef(0);
-  const previousLatestDate = useRef(initialLatestDate);
 
   useEffect(() => {
     let mounted = true;
@@ -113,7 +123,8 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
           cache: 'no-store',
           signal: controller.signal,
         });
-        if (!response.ok) throw new Error(`GitHub activity returned ${response.status}`);
+        if (!response.ok)
+          throw new Error(`GitHub activity returned ${response.status}`);
 
         const next = (await response.json()) as LiveActivityResponse;
         if (!mounted) return;
@@ -130,11 +141,16 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
           unit: 'contributions',
         });
       } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError' && !timeoutExpired) return;
+        if (
+          error instanceof DOMException &&
+          error.name === 'AbortError' &&
+          !timeoutExpired
+        )
+          return;
         consecutiveFailures.current += 1;
         const backoff = Math.min(
           REFRESH_INTERVAL_MS * 2 ** (consecutiveFailures.current - 1),
-          MAX_FAILURE_BACKOFF_MS,
+          MAX_FAILURE_BACKOFF_MS
         );
         nextAllowedAt.current = Date.now() + backoff;
         console.error('Unable to update GitHub activity', error);
@@ -180,36 +196,30 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
     };
   }, []);
 
-  useEffect(() => {
-    const latestDate = latestRecordedDate(activity);
-    setPreviewDate(null);
-    setSelectedDate((current) => {
-      if (!latestDate || activity.source === 'unavailable') return '';
-      const currentStillExists = activity.days.some((day) => day.date === current);
-      if (!current || current === previousLatestDate.current || !currentStillExists) {
-        return latestDate;
-      }
-      return current;
-    });
-    previousLatestDate.current = latestDate;
-  }, [activity]);
-
   const latestDate = latestRecordedDate(activity);
-  const displayDate = previewDate ?? selectedDate ?? latestDate;
+  const dateStillExists = (date: string | null) =>
+    Boolean(
+      date &&
+        activity.source !== 'unavailable' &&
+        activity.days.some(day => day.date === date)
+    );
+  const resolvedSelectedDate = dateStillExists(selectedDate)
+    ? selectedDate!
+    : latestDate;
+  const resolvedPreviewDate = dateStillExists(previewDate) ? previewDate : null;
+  const displayDate = resolvedPreviewDate ?? resolvedSelectedDate;
   const displayDay =
     activity.source === 'unavailable'
       ? undefined
-      : (activity.days.find((day) => day.date === displayDate) ?? activity.days.at(-1));
+      : (activity.days.find(day => day.date === displayDate) ??
+        activity.days.at(-1));
   const displayIsToday = Boolean(displayDay && displayDay.date === latestDate);
 
   return (
     <div
-      className="relative grid min-w-0 items-stretch gap-3.5 sm:gap-4"
+      className="relative grid min-w-0 items-stretch gap-3.5 sm:gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(21rem,0.65fr)]"
       data-home-activity-dashboard
       data-home-activity-source={activity.source}
-      style={{
-        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 24rem), 1fr))',
-      }}
     >
       <span className="sr-only" aria-live="polite">
         {updating ? 'Updating GitHub activity' : ''}
@@ -233,7 +243,7 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
             days={activity.days}
             unit={activity.unit}
             generatedAt={activity.generatedAt}
-            selectedDate={selectedDate}
+            selectedDate={resolvedSelectedDate}
             onSelectedDateChange={setSelectedDate}
             onPreviewDateChange={setPreviewDate}
           />

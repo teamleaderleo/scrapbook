@@ -33,8 +33,10 @@ export function SpaceHeader({
     pathname?.startsWith('/space/add') ||
     pathname?.startsWith('/space/edit');
   const isMac = useMemo(
-    () => typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform),
-    [],
+    () =>
+      typeof navigator !== 'undefined' &&
+      /Mac|iPhone|iPad/i.test(navigator.platform),
+    []
   );
   const toggleHref = isReviewLike
     ? `/space${tagsParam ? `?tags=${tagsParam}` : ''}`
@@ -45,10 +47,18 @@ export function SpaceHeader({
       href={toggleHref}
       prefetch
       className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-transparent px-2 text-sm font-medium text-muted-foreground transition hover:border-border/60 hover:bg-muted/65 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      aria-label={isReviewLike ? 'Back to list' : 'Open review'}
+      aria-label={
+        isReviewLike ? 'Back to learning garden' : 'Open reading mode'
+      }
     >
-      {isReviewLike ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
-      <span className="hidden sm:inline">{isReviewLike ? 'Clippings' : 'Review'}</span>
+      {isReviewLike ? (
+        <ArrowLeft className="h-4 w-4" />
+      ) : (
+        <ArrowRight className="h-4 w-4" />
+      )}
+      <span className="hidden sm:inline">
+        {isReviewLike ? 'Garden' : 'Read'}
+      </span>
       <SpaceLinkHint />
     </Link>
   );

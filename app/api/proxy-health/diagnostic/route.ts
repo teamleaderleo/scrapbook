@@ -1,11 +1,13 @@
 import { randomUUID } from 'node:crypto';
 
 import { client } from '@/app/lib/db/db';
+import { timingSafeTokenEqual } from '@/app/lib/server/token-auth';
 import { NextRequest, NextResponse } from 'next/server';
 
 function bearerToken(request: NextRequest) {
   const authorization = request.headers.get('authorization');
-  if (authorization?.startsWith('Bearer ')) return authorization.slice('Bearer '.length).trim();
+  if (authorization?.startsWith('Bearer '))
+    return authorization.slice('Bearer '.length).trim();
   return request.headers.get('x-proxy-health-token')?.trim() ?? '';
 }
 
@@ -24,13 +26,20 @@ export async function GET(request: NextRequest) {
 
   if (!expected) {
     return NextResponse.json(
-      { ok: false, error: 'Diagnostic credentials are not configured', request_id: requestId },
-      { status: 503 },
+      {
+        ok: false,
+        error: 'Diagnostic credentials are not configured',
+        request_id: requestId,
+      },
+      { status: 503 }
     );
   }
 
-  if (bearerToken(request) !== expected) {
-    return NextResponse.json({ ok: false, error: 'unauthorized', request_id: requestId }, { status: 401 });
+  if (!timingSafeTokenEqual(bearerToken(request), expected)) {
+    return NextResponse.json(
+      { ok: false, error: 'unauthorized', request_id: requestId },
+      { status: 401 }
+    );
   }
 
   if (!process.env.DATABASE_URL) {
@@ -40,22 +49,30 @@ export async function GET(request: NextRequest) {
         request_id: requestId,
         database_connected: false,
         database_configured: false,
-        ingestion_configured: Boolean(process.env.PROXY_HEALTH_INGEST_SECRET ?? process.env.PROXY_HEALTH_TOKEN),
+        ingestion_configured: Boolean(
+          process.env.PROXY_HEALTH_INGEST_SECRET ??
+            process.env.PROXY_HEALTH_TOKEN
+        ),
       },
-      { status: 503 },
+      { status: 503 }
     );
   }
 
   try {
-    const tableRows = await client<{
-      status_exists: boolean;
-      samples_exists: boolean;
-    }[]>`
+    const tableRows = await client<
+      {
+        status_exists: boolean;
+        samples_exists: boolean;
+      }[]
+    >`
       SELECT
         to_regclass('public.proxy_health_status') IS NOT NULL AS status_exists,
         to_regclass('public.proxy_health_samples') IS NOT NULL AS samples_exists
     `;
-    const tables = tableRows[0] ?? { status_exists: false, samples_exists: false };
+    const tables = tableRows[0] ?? {
+      status_exists: false,
+      samples_exists: false,
+    };
 
     let latestCheckedAt: string | null = null;
     let recentSamples = 0;
@@ -91,7 +108,9 @@ export async function GET(request: NextRequest) {
       },
       latest_checked_at: latestCheckedAt,
       recent_samples_24h: recentSamples,
-      ingestion_configured: Boolean(process.env.PROXY_HEALTH_INGEST_SECRET ?? process.env.PROXY_HEALTH_TOKEN),
+      ingestion_configured: Boolean(
+        process.env.PROXY_HEALTH_INGEST_SECRET ?? process.env.PROXY_HEALTH_TOKEN
+      ),
     });
   } catch (error) {
     console.error('Proxy diagnostic failed', { requestId, error });
@@ -102,9 +121,12 @@ export async function GET(request: NextRequest) {
         request_id: requestId,
         database_connected: false,
         database_configured: true,
-        ingestion_configured: Boolean(process.env.PROXY_HEALTH_INGEST_SECRET ?? process.env.PROXY_HEALTH_TOKEN),
+        ingestion_configured: Boolean(
+          process.env.PROXY_HEALTH_INGEST_SECRET ??
+            process.env.PROXY_HEALTH_TOKEN
+        ),
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

@@ -5,16 +5,17 @@ import path from 'node:path';
 function hydratedActivitySection(page: Page) {
   return page
     .locator('[data-home-activity-dashboard]:visible')
-    .filter({ hasText: /UTC reset \d{2}:\d{2}:\d{2}/ })
     .last()
     .locator('[data-home-activity-grid]');
 }
 
 for (const theme of ['light', 'dark'] as const) {
-  test(`activity days stay quiet in ${theme} mode`, async ({ page }, testInfo) => {
+  test(`activity days stay quiet in ${theme} mode`, async ({
+    page,
+  }, testInfo) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.setViewportSize({ width: 1280, height: 760 });
-    await page.addInitScript((selectedTheme) => {
+    await page.addInitScript(selectedTheme => {
       window.localStorage.setItem('theme', selectedTheme);
     }, theme);
 
@@ -32,7 +33,7 @@ for (const theme of ['light', 'dark'] as const) {
     expect(recordedCount).toBeLessThanOrEqual(28);
 
     const mark = marks.nth(8);
-    const resting = await mark.evaluate((element) => {
+    const resting = await mark.evaluate(element => {
       const rect = element.getBoundingClientRect();
       return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
     });
@@ -40,7 +41,7 @@ for (const theme of ['light', 'dark'] as const) {
     expect(resting.height).toBeGreaterThan(20);
     await expect(mark).toHaveAttribute('aria-pressed', 'false');
 
-    const textures = await mark.evaluate((element) => ({
+    const textures = await mark.evaluate(element => ({
       before: getComputedStyle(element, '::before').backgroundImage,
       after: getComputedStyle(element, '::after').backgroundImage,
     }));
@@ -49,7 +50,7 @@ for (const theme of ['light', 'dark'] as const) {
 
     await mark.hover();
     await expect(mark).toHaveAttribute('aria-pressed', 'false');
-    const hovered = await mark.evaluate((element) => {
+    const hovered = await mark.evaluate(element => {
       const rect = element.getBoundingClientRect();
       return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
     });
@@ -63,7 +64,7 @@ for (const theme of ['light', 'dark'] as const) {
       'homepage-density',
       'activity-paper-marks',
       theme,
-      testInfo.project.name,
+      testInfo.project.name
     );
     await mkdir(directory, { recursive: true });
     await section.screenshot({
@@ -73,7 +74,9 @@ for (const theme of ['light', 'dark'] as const) {
   });
 }
 
-test('the hydrated activity grid keeps one owned tooltip anchored through click', async ({ page }) => {
+test('the hydrated activity grid keeps one owned tooltip anchored through click', async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.setViewportSize({ width: 1280, height: 760 });
   const response = await page.goto('/');
@@ -120,16 +123,26 @@ test('activity marks stay planted with reduced motion', async ({ page }) => {
   const section = hydratedActivitySection(page);
   const mark = section.locator('[data-paper-activity-mark]').nth(8);
   await expect(mark).toBeVisible({ timeout: 15_000 });
-  const before = await mark.evaluate((element) => {
+  const before = await mark.evaluate(element => {
     const rect = element.getBoundingClientRect();
-    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+    return {
+      x: rect.x + window.scrollX,
+      y: rect.y + window.scrollY,
+      width: rect.width,
+      height: rect.height,
+    };
   });
 
   await mark.hover({ force: true });
   await page.waitForTimeout(250);
-  const after = await mark.evaluate((element) => {
+  const after = await mark.evaluate(element => {
     const rect = element.getBoundingClientRect();
-    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+    return {
+      x: rect.x + window.scrollX,
+      y: rect.y + window.scrollY,
+      width: rect.width,
+      height: rect.height,
+    };
   });
 
   expect(Math.abs(after.x - before.x)).toBeLessThan(0.75);
@@ -137,12 +150,19 @@ test('activity marks stay planted with reduced motion', async ({ page }) => {
   expect(Math.abs(after.width - before.width)).toBeLessThan(0.75);
   expect(Math.abs(after.height - before.height)).toBeLessThan(0.75);
   await expect
-    .poll(() => mark.evaluate((element) => getComputedStyle(element).transitionDuration))
+    .poll(() =>
+      mark.evaluate(element => getComputedStyle(element).transitionDuration)
+    )
     .toBe('0s');
 });
 
-test('forced colours preserves a clear activity mark boundary', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'chromium', 'Forced-colour emulation is checked in Chromium.');
+test('forced colours preserves a clear activity mark boundary', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== 'chromium',
+    'Forced-colour emulation is checked in Chromium.'
+  );
 
   await page.emulateMedia({ forcedColors: 'active' });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -151,7 +171,7 @@ test('forced colours preserves a clear activity mark boundary', async ({ page },
   const section = hydratedActivitySection(page);
   const mark = section.locator('[data-paper-activity-mark]').nth(8);
   await expect(mark).toBeVisible({ timeout: 15_000 });
-  const decoration = await mark.evaluate((element) => ({
+  const decoration = await mark.evaluate(element => ({
     backgroundImage: getComputedStyle(element).backgroundImage,
     border: getComputedStyle(element).borderStyle,
   }));

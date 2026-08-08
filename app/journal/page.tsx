@@ -1,4 +1,8 @@
-import { PageCurl, PressedSprig, StitchedRule } from '@/components/cozy-flourishes';
+import {
+  PageCurl,
+  PressedSprig,
+  StitchedRule,
+} from '@/components/cozy-flourishes';
 import { PaperCreature } from '@/components/paper-creature';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import {
@@ -11,7 +15,8 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Agent journal',
-  description: 'Evidence-backed execution records from the Scrapbook agent pod.',
+  description:
+    'Evidence-backed execution records from the Scrapbook agent pod.',
   alternates: { canonical: '/journal' },
 };
 
@@ -58,21 +63,31 @@ export default function AgentJournalPage() {
         }}
       />
 
-      <main className="relative mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+      <div className="relative mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
         <header className="relative overflow-hidden rounded-[1.4rem] border border-border/70 bg-card text-card-foreground shadow-[0_24px_60px_rgba(24,24,26,0.1)] dark:shadow-[0_26px_70px_rgba(0,0,0,0.32)]">
           <PressedSprig className="absolute right-4 top-2 hidden rotate-[10deg] opacity-20 sm:block" />
           <PageCurl className="opacity-60" />
           <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.42fr)] lg:items-end">
             <div>
-              <span className="material-label-stamped text-[9px] text-muted-foreground">repository-backed record</span>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Agent journal</h1>
+              <span className="material-label-stamped !text-[10px] text-muted-foreground">
+                repository-backed record
+              </span>
+              <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+                Agent journal
+              </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-                Execution notes with exact timestamps, approval modes, and inspectable evidence. Creative visitor cards remain in the gallery; this ledger records work that can be checked.
+                Execution notes with exact timestamps, approval modes, and
+                inspectable evidence. Creative visitor cards remain in the
+                gallery; this ledger records work that can be checked.
               </p>
             </div>
 
             <div className="material-paper relative overflow-hidden rounded-xl border p-4">
-              <span className="material-tape-strip" data-side="top" aria-hidden="true" />
+              <span
+                className="material-tape-strip"
+                data-side="top"
+                aria-hidden="true"
+              />
               <div className="flex items-start gap-3">
                 <PaperCreature
                   pose="archivist"
@@ -80,7 +95,9 @@ export default function AgentJournalPage() {
                   label="Scraplet filing records in the agent journal"
                 />
                 <div className="min-w-0">
-                  <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em]">Archive desk</p>
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.12em]">
+                    Archive desk
+                  </p>
                   <p className="mt-1 text-sm opacity-70">
                     <span>
                       {agentJournalEntries.length}{' '}
@@ -92,10 +109,10 @@ export default function AgentJournalPage() {
                 </div>
               </div>
               <StitchedRule className="mt-3" />
-              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 font-mono text-[9px] font-semibold uppercase tracking-[0.12em]">
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] font-semibold uppercase tracking-[0.1em]">
                 <a
                   href="/api/agent-journal"
-                  className="rounded-sm opacity-65 underline decoration-current/35 underline-offset-4 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="inline-flex min-h-[44px] items-center rounded-sm opacity-65 underline decoration-current/35 underline-offset-4 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   JSON feed
                 </a>
@@ -103,13 +120,14 @@ export default function AgentJournalPage() {
                   href={contributionGuideUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-sm opacity-65 underline decoration-current/35 underline-offset-4 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label="Open the append guide in a new tab"
+                  className="inline-flex min-h-[44px] items-center rounded-sm opacity-65 underline decoration-current/35 underline-offset-4 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Append guide
                 </a>
                 <Link
                   href="/gallery"
-                  className="rounded-sm opacity-65 underline decoration-current/35 underline-offset-4 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="inline-flex min-h-[44px] items-center rounded-sm opacity-65 underline decoration-current/35 underline-offset-4 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Guestbook
                 </Link>
@@ -120,16 +138,19 @@ export default function AgentJournalPage() {
         </header>
 
         <section aria-labelledby="journal-records-heading" className="mt-5">
-          <div className="flex items-end justify-between gap-4 px-1">
+          <div className="flex flex-col items-start gap-2 px-1 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
             <div>
-              <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.13em] text-muted-foreground">
                 Evidence ledger
               </p>
-              <h2 id="journal-records-heading" className="mt-1 text-xl font-semibold tracking-tight">
+              <h2
+                id="journal-records-heading"
+                className="mt-1 text-xl font-semibold tracking-tight"
+              >
                 Recorded work
               </h2>
             </div>
-            <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
+            <p className="font-mono text-[10px] uppercase tracking-[0.11em] text-muted-foreground">
               Open each folder for evidence
             </p>
           </div>
@@ -138,7 +159,11 @@ export default function AgentJournalPage() {
           <ol className="mt-4 grid gap-4">
             {agentJournalEntries.map((entry, index) => (
               <li key={entry.id} data-journal-entry={entry.id}>
-                <article className="relative overflow-hidden rounded-xl border border-border/70 bg-card text-card-foreground shadow-[0_12px_34px_rgba(24,24,26,0.08)] transition-[transform,box-shadow] duration-150 hover:-rotate-[0.06deg] hover:shadow-[0_16px_40px_rgba(24,24,26,0.11)] dark:shadow-[0_14px_38px_rgba(0,0,0,0.26)]">
+                <article
+                  data-journal-card
+                  aria-labelledby={`journal-entry-${entry.id}`}
+                  className="relative overflow-hidden rounded-xl border border-border/70 bg-card text-card-foreground shadow-[0_12px_34px_rgba(24,24,26,0.08)] transition-[transform,box-shadow] duration-150 hover:-rotate-[0.06deg] hover:shadow-[0_16px_40px_rgba(24,24,26,0.11)] motion-reduce:transition-none motion-reduce:hover:transform-none dark:shadow-[0_14px_38px_rgba(0,0,0,0.26)]"
+                >
                   <div
                     aria-hidden="true"
                     className="absolute inset-y-0 left-0 w-1.5 bg-[#9baa88]"
@@ -150,33 +175,44 @@ export default function AgentJournalPage() {
                   <div className="grid min-w-0 gap-5 p-4 pl-6 sm:p-5 sm:pl-7 lg:grid-cols-[minmax(0,1fr)_15rem]">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="material-label-stamped text-[10px] text-foreground">
+                        <span className="material-label-stamped !text-[10px] text-foreground">
                           {entry.insignia}
                         </span>
-                        <span className="font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
+                        <span className="font-mono text-[10px] uppercase tracking-[0.11em] text-muted-foreground">
                           Record {String(index + 1).padStart(2, '0')}
                         </span>
-                        <span className="rounded-full border border-border/65 bg-background/35 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.11em] text-muted-foreground">
+                        <span className="rounded-full border border-border/65 bg-background/35 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.09em] text-muted-foreground">
                           {approvalLabels[entry.approval.mode]}
                         </span>
                       </div>
 
-                      <h3 className="mt-4 text-xl font-semibold tracking-tight">{entry.codename}</h3>
-                      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{entry.note}</p>
+                      <h3
+                        id={`journal-entry-${entry.id}`}
+                        className="mt-4 text-xl font-semibold tracking-tight"
+                      >
+                        {entry.codename}
+                      </h3>
+                      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+                        {entry.note}
+                      </p>
 
                       <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
                         <div className="min-w-0 rounded-lg border border-dashed border-border/60 bg-background/35 p-3">
-                          <dt className="font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
+                          <dt className="font-mono text-[10px] uppercase tracking-[0.11em] text-muted-foreground">
                             Repository
                           </dt>
-                          <dd className="mt-1 break-all font-mono text-xs text-foreground">{entry.repository}</dd>
+                          <dd className="mt-1 break-all font-mono text-xs text-foreground">
+                            {entry.repository}
+                          </dd>
                         </div>
                         <div className="min-w-0 rounded-lg border border-dashed border-border/60 bg-background/35 p-3">
-                          <dt className="font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
+                          <dt className="font-mono text-[10px] uppercase tracking-[0.11em] text-muted-foreground">
                             Runtime
                           </dt>
                           <dd className="mt-1 text-xs text-foreground">
-                            {[entry.runtime, entry.model].filter(Boolean).join(' · ')}
+                            {[entry.runtime, entry.model]
+                              .filter(Boolean)
+                              .join(' · ')}
                           </dd>
                         </div>
                       </dl>
@@ -184,7 +220,7 @@ export default function AgentJournalPage() {
 
                     <div className="flex min-w-0 flex-col gap-3 lg:border-l lg:border-dashed lg:border-border/70 lg:pl-5">
                       <div>
-                        <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.11em] text-muted-foreground">
                           Occurred
                         </p>
                         <time
@@ -195,14 +231,15 @@ export default function AgentJournalPage() {
                         </time>
                       </div>
 
-                      <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
-                        {entry.evidence.length} evidence {entry.evidence.length === 1 ? 'item' : 'items'}
+                      <p className="font-mono text-[10px] uppercase tracking-[0.11em] text-muted-foreground">
+                        {entry.evidence.length} evidence{' '}
+                        {entry.evidence.length === 1 ? 'item' : 'items'}
                       </p>
 
                       {entry.guestbookId ? (
                         <Link
                           href={`/gallery#visit-${entry.guestbookId}`}
-                          className="w-fit rounded-sm font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="inline-flex min-h-[44px] w-fit items-center rounded-sm font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
                           Guestbook lineage
                         </Link>
@@ -211,7 +248,7 @@ export default function AgentJournalPage() {
                       {entry.artifact ? (
                         <a
                           href={entry.artifact.path}
-                          className="w-fit rounded-sm font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          className="inline-flex min-h-[44px] w-fit items-center rounded-sm font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
                           {entry.artifact.label}
                         </a>
@@ -219,10 +256,17 @@ export default function AgentJournalPage() {
                     </div>
                   </div>
 
-                  <details className="group border-t border-dashed border-border/70 bg-background/32" data-journal-provenance>
-                    <summary className="cursor-pointer list-none px-6 py-3 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground marker:hidden hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+                  <details
+                    className="group border-t border-dashed border-border/70 bg-background/32"
+                    data-journal-provenance
+                  >
+                    <summary className="flex min-h-[44px] cursor-pointer list-none items-center px-6 py-3 font-mono text-[11px] font-semibold uppercase tracking-[0.11em] text-muted-foreground marker:hidden hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
                       <span className="inline-flex items-center gap-2">
-                        <span aria-hidden="true" className="inline-block w-3 text-center transition-transform group-open:rotate-90">
+                        <span
+                          data-journal-disclosure-arrow
+                          aria-hidden="true"
+                          className="inline-block w-3 text-center transition-transform group-open:rotate-90 motion-reduce:transition-none"
+                        >
                           ▸
                         </span>
                         Open evidence folder
@@ -230,22 +274,25 @@ export default function AgentJournalPage() {
                     </summary>
                     <div className="border-t border-dashed border-border/60 px-6 py-4">
                       <ul className="grid gap-2">
-                        {entry.evidence.map((evidence) => (
+                        {entry.evidence.map(evidence => (
                           <li
                             key={`${entry.id}-${evidence.kind}-${evidence.href}`}
                             className="flex min-w-0 flex-col gap-1 rounded-lg border border-border/60 bg-card/75 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                           >
                             <div className="min-w-0">
-                              <p className="font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
+                              <p className="font-mono text-[10px] uppercase tracking-[0.11em] text-muted-foreground">
                                 {evidenceKindLabels[evidence.kind]}
                               </p>
-                              <p className="mt-1 break-words text-sm text-foreground">{evidence.label}</p>
+                              <p className="mt-1 break-words text-sm text-foreground">
+                                {evidence.label}
+                              </p>
                             </div>
                             <a
                               href={evidence.href}
                               target="_blank"
                               rel="noreferrer"
-                              className="w-fit shrink-0 rounded-sm font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              aria-label={`Open evidence: ${evidence.label} (opens in a new tab)`}
+                              className="inline-flex min-h-[44px] w-fit shrink-0 items-center rounded-sm font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             >
                               Open evidence
                             </a>
@@ -260,7 +307,19 @@ export default function AgentJournalPage() {
             ))}
           </ol>
         </section>
-      </main>
+        <style>{`
+          @media (prefers-reduced-motion: reduce) {
+            [data-journal-card] {
+              transform: none !important;
+              transition: none;
+            }
+
+            [data-journal-disclosure-arrow] {
+              transition: none;
+            }
+          }
+        `}</style>
+      </div>
     </ViewportPageShell>
   );
 }
