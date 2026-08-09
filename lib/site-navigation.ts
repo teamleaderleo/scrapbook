@@ -42,13 +42,13 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
   {
     id: 'places',
     label: 'Places',
-    description: 'The main rooms of the scrapbook.',
+    description: 'Public routes.',
     items: [
       {
         id: 'home',
         href: '/',
         label: 'Home',
-        description: 'Recent activity and public work.',
+        description: 'Activity and repositories.',
         group: 'places',
         surface: 'public',
         primary: true,
@@ -58,7 +58,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         id: 'space',
         href: '/space',
         label: 'Space',
-        description: 'A public learning garden of notes, questions, and code.',
+        description: 'Public notes, questions, and code.',
         group: 'places',
         surface: 'public',
         primary: true,
@@ -69,7 +69,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         id: 'gallery',
         href: '/gallery',
         label: 'Gallery',
-        description: 'Visual objects and the agent guestbook.',
+        description: 'Artwork and the agent guestbook.',
         group: 'places',
         surface: 'public',
         primary: true,
@@ -80,7 +80,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         id: 'journal',
         href: '/journal',
         label: 'Journal',
-        description: 'Public field notes and agent work records.',
+        description: 'Field notes and agent records.',
         group: 'places',
         surface: 'public',
         primary: true,
@@ -91,7 +91,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         id: 'atelier',
         href: '/atelier',
         label: 'Atelier',
-        description: 'Interface sketches and experiments.',
+        description: 'Interface experiments.',
         group: 'places',
         surface: 'experimental',
         homeShelf: true,
@@ -102,7 +102,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
   {
     id: 'tools',
     label: 'Tools',
-    description: 'Focused utilities and operational views.',
+    description: 'Utilities and status.',
     items: [
       {
         id: 'time',
@@ -126,13 +126,13 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
   {
     id: 'experiments',
     label: 'Experiments',
-    description: 'Interactive prototypes.',
+    description: 'Prototypes.',
     items: [
       {
         id: 'snow-globe',
         href: '/snow-globe',
         label: 'Snow globe',
-        description: 'A motion-driven pocket snow globe.',
+        description: 'Interactive 3D scene.',
         group: 'experiments',
         surface: 'experimental',
         homeShelf: true,
@@ -141,7 +141,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         id: 'activity-lab',
         href: '/activity-lab',
         label: 'Activity geometry',
-        description: 'Activity-field comparisons.',
+        description: 'Calendar layout studies.',
         group: 'experiments',
         surface: 'experimental',
         badge: 'Lab',
@@ -150,7 +150,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         id: 'sigil-lab',
         href: '/sigil-lab',
         label: 'Sigil lab',
-        description: 'Generative identity studies.',
+        description: 'Generated identity studies.',
         group: 'experiments',
         surface: 'experimental',
         badge: 'Lab',
@@ -160,14 +160,13 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
   {
     id: 'repositories',
     label: 'Repositories',
-    description: 'Codebases that feed the notes and experiments here.',
+    description: 'Source repositories.',
     items: [
       {
         id: 'scrapbook-repository',
         href: 'https://github.com/teamleaderleo/scrapbook',
         label: 'Scrapbook',
-        description:
-          'This site, its public rooms, and the experiments between them.',
+        description: 'Source for this site.',
         group: 'repositories',
         surface: 'external',
         external: true,
@@ -176,7 +175,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         id: 'fieldwork-repository',
         href: 'https://github.com/teamleaderleo/fieldwork',
         label: 'Fieldwork',
-        description: 'Close readings and contributions in working codebases.',
+        description: 'Codebase investigations and contributions.',
         group: 'repositories',
         surface: 'external',
         external: true,
@@ -185,8 +184,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         id: 'linux-fieldwork-repository',
         href: 'https://github.com/teamleaderleo/linux-fieldwork',
         label: 'Linux fieldwork',
-        description:
-          'Kernel-oriented investigations, patches, and study trails.',
+        description: 'Linux and kernel studies.',
         group: 'repositories',
         surface: 'external',
         external: true,
@@ -195,8 +193,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         id: 'smolrunner-repository',
         href: 'https://github.com/teamleaderleo/smolrunner',
         label: 'Smolrunner',
-        description:
-          'A careful host-work runner built around inspectable plans.',
+        description: 'Host-work runner.',
         group: 'repositories',
         surface: 'external',
         external: true,
@@ -206,7 +203,7 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
   {
     id: 'connections',
     label: 'Connections',
-    description: 'External projects and public profiles.',
+    description: 'Profiles and external work.',
     items: [
       {
         id: 'glossless',

@@ -76,7 +76,7 @@ export function SiteNavBar() {
             prefetch
             aria-current={pathname === '/' ? 'page' : undefined}
             data-site-home
-            className="inline-flex h-12 min-w-0 max-w-[8.5rem] shrink items-center truncate border-r border-border/60 px-3 text-sm font-bold tracking-tight transition-colors hover:bg-muted/55 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:max-w-none sm:px-4 sm:text-base"
+            className="inline-flex h-12 min-w-0 flex-1 items-center truncate border-r border-border/60 px-3 text-sm font-bold tracking-tight transition-colors hover:bg-muted/55 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:max-w-none sm:flex-none sm:px-4 sm:text-base"
           >
             teamleaderleo
           </Link>
@@ -85,7 +85,7 @@ export function SiteNavBar() {
             active={pathname === '/time' || pathname.startsWith('/time/')}
           />
 
-          <div className="hidden h-full min-w-0 flex-1 items-stretch justify-center xl:flex">
+          <div className="hidden h-full min-w-0 flex-1 items-stretch justify-center sm:flex">
             {directItems.map(item => {
               const active = isNavigationItemActive(pathname, item);
               return (
@@ -95,7 +95,7 @@ export function SiteNavBar() {
                   prefetch
                   aria-current={active ? 'page' : undefined}
                   data-site-primary-link={item.id}
-                  className={`relative inline-flex h-12 flex-1 items-center justify-center border-r border-border/45 px-4 text-sm font-medium transition-colors first:border-l focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
+                  className={`relative inline-flex h-12 min-w-0 flex-1 items-center justify-center border-r border-border/45 px-2 text-xs font-medium transition-colors first:border-l focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring lg:px-4 lg:text-sm ${
                     active
                       ? 'bg-foreground/[0.07] text-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-foreground'
                       : 'text-muted-foreground hover:bg-muted/65 hover:text-foreground'
