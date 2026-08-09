@@ -169,7 +169,7 @@ export function ActivityGrid({
   return (
     <section
       ref={sectionRef}
-      className="min-w-0 overflow-hidden rounded-[1.25rem] border border-border/70 bg-card p-3.5 text-card-foreground shadow-[0_12px_28px_rgba(35,31,26,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.25)] sm:p-4 [@media(max-height:780px)]:p-3"
+      className="flex min-w-0 flex-col overflow-hidden rounded-[1.25rem] border border-border/70 bg-card p-3.5 text-card-foreground shadow-[0_12px_28px_rgba(35,31,26,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.25)] sm:p-4 [@media(max-height:780px)]:p-3"
       data-home-activity-grid
       data-fine-pointer={finePointer ? 'true' : 'false'}
     >
@@ -191,7 +191,7 @@ export function ActivityGrid({
         </div>
       </div>
 
-      <div className="mx-auto mt-3 grid w-full max-w-[15rem] grid-cols-[1.65rem_minmax(0,1fr)] gap-x-2 gap-y-1.5 sm:max-w-[17rem] sm:gap-x-2.5 [@media(max-height:780px)]:mt-2">
+      <div className="mx-auto my-auto grid w-full max-w-[13.5rem] grid-cols-[1.65rem_minmax(0,1fr)] gap-x-2 gap-y-1.5 py-3 sm:max-w-[14rem] sm:gap-x-2.5 sm:py-4 [@media(max-height:780px)]:py-2">
         <span aria-hidden="true" />
         <div
           className="grid grid-cols-4 gap-1.5 px-px font-mono text-[8px] font-semibold uppercase tracking-[0.1em] text-muted-foreground sm:gap-2"

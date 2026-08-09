@@ -108,11 +108,43 @@ export function PaperCreature({
           data-paper-creature-tail-fold
         />
 
+        <g data-paper-creature-back-plates>
+          <path
+            d="M22.5 18 27.5 11.5 32 18Z"
+            className="fill-[#f7f2e9] stroke-[#4d4852] dark:fill-[#ded8e3] dark:stroke-[#eeeaf2]"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M29.5 18 35.5 7.5 41 18Z"
+            className="fill-[#eee7f1] stroke-[#4d4852] dark:fill-[#c9c2d0] dark:stroke-[#eeeaf2]"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M37.5 18 43 10.5 48 18Z"
+            className="fill-[#e4dce9] stroke-[#4d4852] dark:fill-[#918a9b] dark:stroke-[#eeeaf2]"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+        </g>
+        <g
+          className="fill-none stroke-[#6b6470]/70 dark:stroke-[#c9c2d0]/70"
+          strokeWidth="0.85"
+          strokeLinecap="round"
+          data-paper-creature-back-folds
+        >
+          <path d="m27.5 11.5.5 6.5" />
+          <path d="m35.5 7.5 1 10.5" />
+          <path d="m43 10.5.5 7.5" />
+        </g>
+
         <path
           d="M22 17h25c9 0 15 6 15 14v2H20v-6c0-4 1-7 2-10Z"
           className="fill-[#cec4d6] stroke-[#4d4852] dark:fill-[#918a9b] dark:stroke-[#eeeaf2]"
           strokeWidth="2"
           strokeLinejoin="round"
+          data-paper-creature-torso
         />
         <path
           d="M42 8h14c6 0 10 4 10 10v10H43l-5-7 4-13Z"
@@ -120,21 +152,6 @@ export function PaperCreature({
           strokeWidth="2"
           strokeLinejoin="round"
         />
-        <g data-paper-creature-back-plates>
-          <path
-            d="m24 17 4.5-7 4.5 7Z"
-            className="fill-[#f7f2e9] stroke-[#4d4852] dark:fill-[#ded8e3] dark:stroke-[#eeeaf2]"
-            strokeWidth="1.8"
-            strokeLinejoin="round"
-          />
-          <path
-            d="m32 17 4.5-9.5 4.5 9.5Z"
-            className="fill-[#eee7f1] stroke-[#4d4852] dark:fill-[#c9c2d0] dark:stroke-[#eeeaf2]"
-            strokeWidth="1.8"
-            strokeLinejoin="round"
-          />
-        </g>
-
         {!sleeping ? (
           <path
             d="M28 32v8h8v-8M49 32v8h8v-8"

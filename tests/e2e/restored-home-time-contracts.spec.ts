@@ -146,6 +146,48 @@ test('homepage has no one-pixel nav overflow and Atlas does not shift the layout
   expect(after.bodyPaddingRight).toBe(after.removedScrollbarSize);
 });
 
+test('navigation fills a phone rail and exposes room links when they fit', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await waitForHydratedHomepage(page);
+
+  const phone = await page.evaluate(() => {
+    const selectors = [
+      '[data-site-home]',
+      '[data-site-time]',
+      '[data-theme-toggle]',
+      '[data-site-atlas-trigger]',
+    ];
+    return selectors.map(selector => {
+      const element = document.querySelector<HTMLElement>(selector);
+      if (!element) throw new Error(`Missing ${selector}`);
+      const rect = element.getBoundingClientRect();
+      return { left: rect.left, right: rect.right, width: rect.width };
+    });
+  });
+
+  expect(phone[0]!.left).toBeLessThanOrEqual(1);
+  for (let index = 1; index < phone.length; index += 1) {
+    expect(Math.abs(phone[index]!.left - phone[index - 1]!.right)).toBeLessThan(
+      1
+    );
+  }
+  expect(phone.at(-1)!.right).toBeGreaterThanOrEqual(389);
+
+  await page.setViewportSize({ width: 740, height: 844 });
+  const roomLinks = page.locator('[data-site-primary-link]');
+  await expect(roomLinks).toHaveCount(3);
+  for (const link of await roomLinks.all()) {
+    await expect(link).toBeVisible();
+    const box = await link.boundingBox();
+    expect(box).toBeTruthy();
+    expect(box!.height).toBe(48);
+    expect(box!.width).toBeGreaterThanOrEqual(72);
+  }
+});
+
 test('timezone search recognises common city names', async ({ page }) => {
   await page.goto('/time');
   await page.locator('[data-timezone-trigger]').click();

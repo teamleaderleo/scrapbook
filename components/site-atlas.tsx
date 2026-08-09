@@ -97,7 +97,7 @@ function AtlasLink({
       aria-current={active ? 'page' : undefined}
       data-site-atlas-link={item.id}
       data-active={active ? 'true' : undefined}
-      className={`group flex min-h-[4.5rem] min-w-0 items-start gap-3 rounded-[1rem] border px-3 py-3 text-left transition-[background-color,border-color,transform] hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transform-none ${
+      className={`group flex min-h-16 min-w-0 items-start gap-2.5 rounded-[0.9rem] border px-3 py-2.5 text-left transition-[background-color,border-color,transform] hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transform-none ${
         active
           ? 'border-foreground/30 bg-foreground/[0.075]'
           : 'border-border/70 bg-background/55 hover:border-foreground/25 hover:bg-muted/70'
@@ -107,10 +107,10 @@ function AtlasLink({
         <ItemIcon id={item.id} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[1.05rem] font-semibold leading-tight text-foreground">
+        <span className="block text-base font-semibold leading-tight text-foreground">
           {item.label}
         </span>
-        <span className="mt-1 block text-xs leading-[1.35rem] text-muted-foreground">
+        <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
           {item.description}
         </span>
       </span>
@@ -144,18 +144,18 @@ function AppearanceAction() {
         setTheme(isDark ? 'light' : 'dark');
       }}
       data-site-atlas-appearance
-      className="flex min-h-[4.5rem] w-full items-start gap-3 rounded-[1rem] border border-border/70 bg-background/55 px-3 py-3 text-left transition-[background-color,transform] hover:-translate-y-px hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transform-none"
+      className="flex min-h-16 w-full items-start gap-2.5 rounded-[0.9rem] border border-border/70 bg-background/55 px-3 py-2.5 text-left transition-[background-color,transform] hover:-translate-y-px hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transform-none"
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-card">
         <Sun className="h-4 w-4 dark:hidden" aria-hidden="true" />
         <Moon className="hidden h-4 w-4 dark:block" aria-hidden="true" />
       </span>
       <span className="min-w-0">
-        <span className="block text-[1.05rem] font-semibold leading-tight">
+        <span className="block text-base font-semibold leading-tight">
           Appearance
         </span>
-        <span className="mt-1 block text-xs leading-[1.35rem] text-muted-foreground">
-          Turn the paper and ink between day and night.
+        <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
+          Switch light or dark theme.
         </span>
       </span>
     </button>
@@ -179,17 +179,17 @@ function DiscordAction() {
       type="button"
       onClick={() => void copyDiscord()}
       data-site-atlas-discord
-      className="flex min-h-[4.5rem] w-full items-start gap-3 rounded-[1rem] border border-border/70 bg-background/55 px-3 py-3 text-left transition-[background-color,transform] hover:-translate-y-px hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transform-none"
+      className="flex min-h-16 w-full items-start gap-2.5 rounded-[0.9rem] border border-border/70 bg-background/55 px-3 py-2.5 text-left transition-[background-color,transform] hover:-translate-y-px hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transform-none"
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-card">
         <DiscordIcon className="h-4 w-4" aria-hidden="true" />
       </span>
       <span className="min-w-0">
-        <span className="block text-[1.05rem] font-semibold leading-tight">
+        <span className="block text-base font-semibold leading-tight">
           Discord
         </span>
-        <span className="mt-1 block text-xs leading-[1.35rem] text-muted-foreground">
-          Copy the handle for a quieter conversation.
+        <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
+          Copy teamleaderleo.
         </span>
       </span>
     </button>
@@ -237,12 +237,11 @@ export function SiteAtlas({
         >
           <header className="flex shrink-0 items-start gap-4 border-b border-border/70 bg-card/90 px-4 py-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:py-5">
             <div className="min-w-0 flex-1">
-              <Dialog.Title className="text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">
-                Site Atlas
+              <Dialog.Title className="text-3xl font-semibold tracking-[-0.03em]">
+                Atlas
               </Dialog.Title>
-              <Dialog.Description className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-                Rooms, instruments, repositories, and a few paths leading
-                outward.
+              <Dialog.Description className="mt-1 max-w-2xl text-sm leading-5 text-muted-foreground">
+                Routes, repositories, and external profiles.
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>
@@ -261,7 +260,7 @@ export function SiteAtlas({
             className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-6"
             data-site-atlas-scroll
           >
-            <div className="grid gap-6 lg:grid-cols-2 lg:gap-7">
+            <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
               {siteNavigationGroups.map(group => (
                 <section
                   key={group.id}
@@ -270,11 +269,11 @@ export function SiteAtlas({
                 >
                   <h2
                     id={`site-atlas-${group.id}`}
-                    className="mb-1 text-xl font-semibold tracking-[-0.02em] text-foreground"
+                    className="mb-0.5 text-lg font-semibold tracking-[-0.02em] text-foreground"
                   >
                     {group.label}
                   </h2>
-                  <p className="mb-3 text-xs leading-5 text-muted-foreground">
+                  <p className="mb-2.5 text-xs leading-5 text-muted-foreground">
                     {group.description}
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2">

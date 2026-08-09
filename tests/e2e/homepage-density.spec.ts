@@ -111,7 +111,7 @@ for (const viewport of desktopViewports) {
       footprint.recentSection.y
     );
     expect(footprint.activityCell.width).toBeGreaterThanOrEqual(36);
-    expect(footprint.activityCell.width).toBeLessThanOrEqual(72);
+    expect(footprint.activityCell.width).toBeLessThanOrEqual(44);
     expect(footprint.activityCell.height).toBeGreaterThanOrEqual(34);
     expect(footprint.activityCell.height).toBeLessThanOrEqual(72);
     expect(
@@ -179,7 +179,22 @@ test('keeps the scorecard planted and lets the visitor pet Scraplet', async ({
   await expect(pet.locator('[data-paper-creature-tail-fold]')).toHaveCount(1);
   await expect(
     pet.locator('[data-paper-creature-back-plates] path')
-  ).toHaveCount(2);
+  ).toHaveCount(3);
+  await expect(
+    pet.locator('[data-paper-creature-back-folds] path')
+  ).toHaveCount(3);
+  expect(
+    await pet.evaluate(element => {
+      const plates = element.querySelector('[data-paper-creature-back-plates]');
+      const torso = element.querySelector('[data-paper-creature-torso]');
+      return Boolean(
+        plates &&
+          torso &&
+          plates.compareDocumentPosition(torso) &
+            Node.DOCUMENT_POSITION_FOLLOWING
+      );
+    })
+  ).toBe(true);
 
   const scoreboardBefore = await scoreboard.boundingBox();
   expect(scoreboardBefore).not.toBeNull();
