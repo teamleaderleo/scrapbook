@@ -1,6 +1,9 @@
 export const shortcuts = [
-  { label: "Recently Updated", href: "/space?tags=leetcode+order:recent" },
-  { label: "Due for Review", href: "/space?tags=is:due+order:fsrs" },
-  { label: "Easy Arrays", href: "/space?tags=leetcode+topic:array+diff:easy" },
-  { label: "Google Hard", href: "/space?tags=leetcode+company:google+diff:hard" },
+  { label: 'Recently updated', href: '/space?tags=order:recent' },
+  { label: 'Due (optional)', href: '/space?tags=is:due+order:fsrs' },
+  { label: 'Easy arrays', href: '/space?tags=leetcode+topic:array+diff:easy' },
+  {
+    label: 'Google hard',
+    href: '/space?tags=leetcode+company:google+diff:hard',
+  },
 ];

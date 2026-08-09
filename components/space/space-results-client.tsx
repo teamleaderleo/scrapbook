@@ -10,7 +10,6 @@ import { MarkdownContent } from './markdown-content';
 import { useSearchParams } from 'next/navigation';
 import { CodeDisplay } from './code-display';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { PaperCreature } from '@/components/paper-creature';
 import {
   PageCurl,
   PressedSprig,
@@ -23,12 +22,18 @@ export function ResultsClient({
   onEnroll,
   nowMs,
   isAdmin,
+  lane,
+  emptyTitle = 'No items',
+  emptyDescription = 'No published items match this view.',
 }: {
   items: Item[];
   onReview: (id: string, rating: Rating) => void;
   onEnroll: (id: string) => void;
   nowMs: number;
   isAdmin: boolean;
+  lane?: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
 }) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
@@ -75,22 +80,11 @@ export function ResultsClient({
           aria-hidden="true"
         />
         <PressedSprig className="absolute right-5 top-5 rotate-[8deg] opacity-25" />
-        <PaperCreature
-          pose="carrying"
-          size="lg"
-          className="mx-auto"
-          label="Scraplet carrying a pencil and looking for a clipping"
-        />
         <h2 className="mt-4 text-xl font-semibold tracking-tight">
-          This drawer is empty
+          {emptyTitle}
         </h2>
         <p className="mx-auto mt-2 max-w-sm text-sm leading-6 opacity-70">
-          Try another label or search. Scraplet will keep looking through the
-          paper scraps.
-        </p>
-        <StitchedRule className="mx-auto mt-5 max-w-44" />
-        <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.14em] opacity-45">
-          drawer checked twice
+          {emptyDescription}
         </p>
         <PageCurl className="opacity-65" />
       </section>
@@ -115,6 +109,7 @@ export function ResultsClient({
             onEnroll={onEnroll}
             nowMs={nowMs}
             isAdmin={isAdmin}
+            lane={lane}
             expanded={expanded}
             onToggle={onToggle}
             onHoverChange={isHovering =>
@@ -135,6 +130,7 @@ function Row({
   onEnroll,
   nowMs,
   isAdmin,
+  lane,
   expanded,
   onToggle,
   onHoverChange,
@@ -144,6 +140,7 @@ function Row({
   onEnroll: (id: string) => void;
   nowMs: number;
   isAdmin: boolean;
+  lane?: string;
   expanded: boolean;
   onToggle: () => void;
   onHoverChange: (hovering: boolean) => void;
@@ -207,12 +204,12 @@ function Row({
               ) : null}
 
               <Link
-                href={reviewItemHref(item.id, tagsParam)}
+                href={reviewItemHref(item.id, tagsParam, lane)}
                 prefetch
                 onClick={event => event.stopPropagation()}
                 className="material-label-stamped text-[9px] text-[#5f6f55] transition-opacity hover:opacity-70"
               >
-                study
+                read
               </Link>
             </div>
 

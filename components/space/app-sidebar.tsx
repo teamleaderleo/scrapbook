@@ -33,8 +33,8 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { GoogleIcon } from '@/components/icons/google-icon';
 import { GitHubIcon } from '@/components/icons/github-icon';
 import { SpaceLinkHint } from '@/components/space/space-link-hint';
-import { PaperCreature } from '@/components/paper-creature';
 import { useIsMacPlatform } from '@/hooks/use-is-mac-platform';
+import { isSpaceLaneId, SPACE_LANES } from '@/lib/space-lanes';
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -42,14 +42,24 @@ export function AppSidebar() {
   const router = useRouter();
   const { isMobile, setOpenMobile } = useSidebar();
   const currentQuery = searchParams.get('tags') || '';
+  const laneParam = searchParams.get('lane');
+  const currentLane = isSpaceLaneId(laneParam)
+    ? laneParam
+    : currentQuery
+      ? 'archive'
+      : 'open';
   const isReviewLike =
     pathname === '/space/review' ||
     pathname?.startsWith('/space/add') ||
     pathname?.startsWith('/space/edit');
   const { user, isAdmin, signOut } = useItems();
   const [loading, setLoading] = useState(false);
-  const listHref = `/space${currentQuery ? `?tags=${currentQuery}` : ''}`;
-  const reviewHref = `/space/review${currentQuery ? `?tags=${currentQuery}` : ''}`;
+  const currentParams = new URLSearchParams();
+  if (currentQuery) currentParams.set('tags', currentQuery);
+  if (laneParam) currentParams.set('lane', laneParam);
+  const currentSearch = currentParams.toString();
+  const listHref = `/space${currentSearch ? `?${currentSearch}` : ''}`;
+  const reviewHref = `/space/review${currentSearch ? `?${currentSearch}` : ''}`;
   const toggleViewHref = isReviewLike ? listHref : reviewHref;
   const isMac = useIsMacPlatform();
 
@@ -147,7 +157,7 @@ export function AppSidebar() {
               teamleaderleo
             </span>
             <span className="mt-1 block font-mono text-[8px] uppercase tracking-[0.18em] text-muted-foreground">
-              scrapbook room
+              space
             </span>
           </Link>
           <ThemeToggle />
@@ -161,7 +171,7 @@ export function AppSidebar() {
           type="button"
         >
           <Search className="h-4 w-4" />
-          <span className="flex-1 text-left">Search the learning garden</span>
+          <span className="flex-1 text-left">Search items</span>
           <span className="hidden gap-1 sm:flex">
             <kbd className="rounded border border-black/15 bg-white/35 px-1.5 py-0.5 font-mono text-[10px] font-semibold">
               {isMac ? '⌘' : 'Ctrl'}
@@ -191,7 +201,7 @@ export function AppSidebar() {
                       >
                         <Plus className="h-4 w-4 shrink-0" />
                         <span className="min-w-0 flex-1 truncate">
-                          Add a clipping
+                          Add item
                         </span>
                         <SpaceLinkHint />
                       </Link>
@@ -208,6 +218,26 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
+                {SPACE_LANES.map(lane => (
+                  <SidebarMenuItem key={lane.id}>
+                    <SidebarMenuButton
+                      className="mx-2 rounded-lg px-3"
+                      isActive={!isReviewLike && currentLane === lane.id}
+                      asChild
+                    >
+                      <Link
+                        href={`/space?lane=${lane.id}`}
+                        onClick={closeMobile}
+                        className="flex items-center gap-2"
+                      >
+                        <span className="min-w-0 flex-1 truncate">
+                          {lane.label}
+                        </span>
+                        <SpaceLinkHint />
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
                 <SidebarMenuItem>
                   <SidebarMenuButton className="mx-2 rounded-lg px-3" asChild>
                     <Link
@@ -221,7 +251,7 @@ export function AppSidebar() {
                         <ArrowRight className="h-4 w-4 shrink-0" />
                       )}
                       <span className="min-w-0 flex-1 truncate">
-                        {isReviewLike ? 'Back to the garden' : 'Reading mode'}
+                        {isReviewLike ? 'Back to list' : 'Reader'}
                       </span>
                       <SpaceLinkHint />
                     </Link>
@@ -233,7 +263,7 @@ export function AppSidebar() {
 
           <SidebarGroup>
             <SidebarGroupLabel className="px-4 font-mono text-[9px] font-semibold uppercase tracking-[0.17em]">
-              Labels
+              Filters
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -268,31 +298,6 @@ export function AppSidebar() {
       </ScrollArea>
 
       <SidebarFooter className="shrink-0 space-y-2 border-t border-dashed border-border/70 p-3">
-        <div className="material-paper relative overflow-hidden rounded-xl border p-2.5">
-          <span
-            className="material-tape-strip"
-            data-side="top"
-            aria-hidden="true"
-          />
-          <div className="flex items-center gap-2.5">
-            <PaperCreature
-              pose={loading ? 'sniffing' : user ? 'reading' : 'idle'}
-              size="sm"
-              label="Scraplet sitting on a little paper shelf"
-            />
-            <div className="min-w-0">
-              <p className="font-mono text-[9px] font-bold uppercase tracking-[0.15em]">
-                Scraplet&apos;s shelf
-              </p>
-              <p className="mt-1 text-[11px] leading-4 opacity-70">
-                {user
-                  ? 'Keeping your notes company.'
-                  : 'Saving a seat at the workbench.'}
-              </p>
-            </div>
-          </div>
-        </div>
-
         {user ? (
           <>
             <div

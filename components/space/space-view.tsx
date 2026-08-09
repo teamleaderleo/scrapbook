@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { parseQuery } from '@/app/lib/searchlang';
 import { searchItems } from '@/app/lib/item-search';
 import type { Item } from '@/app/lib/item-types';
@@ -18,13 +19,22 @@ import {
 } from '@/app/space/actions';
 import { SpaceHeader } from './space-header';
 import { Button } from '@/components/ui/button';
-import { PaperCreature } from '@/components/paper-creature';
+import {
+  countItemsBySpaceLane,
+  filterItemsBySpaceLane,
+  resolveSpaceLane,
+  SPACE_LANES,
+} from '@/lib/space-lanes';
 
 const ITEMS_PER_PAGE = 20;
 
 export function SpaceView() {
   const searchParams = useSearchParams();
   const tagsParam = searchParams.get('tags') ?? undefined;
+  const laneParam = searchParams.get('lane');
+  const activeLane = resolveSpaceLane(laneParam, {
+    hasQuery: Boolean(tagsParam),
+  });
 
   const {
     items: allItems,
@@ -46,19 +56,29 @@ export function SpaceView() {
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
-  const [previousTagsParam, setPreviousTagsParam] = useState(tagsParam);
-  if (previousTagsParam !== tagsParam) {
-    setPreviousTagsParam(tagsParam);
+  const viewKey = `${activeLane}:${tagsParam ?? ''}`;
+  const [previousViewKey, setPreviousViewKey] = useState(viewKey);
+  if (previousViewKey !== viewKey) {
+    setPreviousViewKey(viewKey);
     setPage(1);
   }
 
-  const items = useMemo<Item[]>(() => {
-    const withMutations = allItems.map(item => {
+  const itemsWithMutations = useMemo<Item[]>(() => {
+    return allItems.map(item => {
       const mutation = mutations[item.id];
       return mutation ? { ...item, review: mutation } : item;
     });
-    return searchItems(withMutations, query, nowMs);
-  }, [allItems, mutations, query, nowMs]);
+  }, [allItems, mutations]);
+
+  const laneCounts = useMemo(
+    () => countItemsBySpaceLane(itemsWithMutations),
+    [itemsWithMutations]
+  );
+
+  const items = useMemo<Item[]>(() => {
+    const laneItems = filterItemsBySpaceLane(itemsWithMutations, activeLane);
+    return searchItems(laneItems, query, nowMs);
+  }, [activeLane, itemsWithMutations, query, nowMs]);
 
   const paginatedItems = useMemo(() => {
     const start = (page - 1) * ITEMS_PER_PAGE;
@@ -69,16 +89,23 @@ export function SpaceView() {
   const itemCount = `${items.length}${hasMore ? '+' : ''}`;
   const headerStatus = tagsParam
     ? `${itemCount} · ${tagsParam}`
-    : `${itemCount} clippings`;
+    : `${itemCount} · ${activeLane}`;
   const visibleHeaderStatus = refreshing
-    ? `${headerStatus} · sorting`
+    ? `${headerStatus} · updating`
     : headerStatus;
+  const activeLaneDefinition =
+    SPACE_LANES.find(lane => lane.id === activeLane) ?? SPACE_LANES[0];
 
   useEffect(() => {
-    if (page >= totalPages && hasMore && !loadingMore) {
+    if (
+      items.length >= ITEMS_PER_PAGE &&
+      page >= totalPages &&
+      hasMore &&
+      !loadingMore
+    ) {
       void loadMore();
     }
-  }, [hasMore, loadMore, loadingMore, page, totalPages]);
+  }, [hasMore, items.length, loadMore, loadingMore, page, totalPages]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -178,31 +205,48 @@ export function SpaceView() {
         />
 
         <div className="relative mx-auto w-full max-w-5xl">
-          <section className="mb-4 flex items-end justify-between gap-4 px-1">
-            <div>
-              <span className="material-label-stamped text-[9px] text-muted-foreground">
-                public learning garden
-              </span>
-              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.025em] sm:text-3xl">
-                Follow a thought somewhere
-              </h1>
-              <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
-                Living notes, questions, explanations, and code studies. Open
-                one, follow a connection, or use Shift while hovering to unfold
-                it quickly.
-              </p>
-            </div>
-            <PaperCreature
-              pose={refreshing ? 'sniffing' : 'reading'}
-              size="md"
-              className="md:hidden"
-              label={
-                refreshing
-                  ? 'Scraplet sorting the clippings'
-                  : 'Scraplet reading a clipping'
-              }
-            />
+          <section className="mb-4 px-1">
+            <h1 className="text-xl font-semibold tracking-[-0.025em] sm:text-2xl">
+              Space
+            </h1>
           </section>
+
+          <nav
+            aria-label="Space sections"
+            className="-mx-3 mb-5 grid snap-x snap-mandatory grid-flow-col auto-cols-[min(76vw,15rem)] gap-2 overflow-x-auto px-3 pb-2 sm:mx-0 sm:grid-flow-row sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4"
+            data-space-lanes
+          >
+            {SPACE_LANES.map(lane => {
+              const active = lane.id === activeLane;
+              return (
+                <Link
+                  key={lane.id}
+                  href={`/space?lane=${lane.id}`}
+                  prefetch
+                  aria-current={active ? 'page' : undefined}
+                  data-space-lane={lane.id}
+                  className={`group min-h-28 snap-start rounded-xl border p-3 transition-[border-color,background-color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    active
+                      ? 'border-foreground/35 bg-card shadow-[0_8px_20px_rgb(45_39_30/0.08)] dark:shadow-[0_8px_20px_rgb(0_0_0/0.24)]'
+                      : 'border-border/65 bg-background/60 hover:border-foreground/25 hover:bg-card/75'
+                  }`}
+                >
+                  <span className="flex items-baseline justify-between gap-3">
+                    <span className="font-semibold tracking-tight">
+                      {lane.label}
+                    </span>
+                    <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+                      {laneCounts[lane.id]}
+                      {hasMore ? '+' : ''}
+                    </span>
+                  </span>
+                  <span className="mt-3 block text-xs leading-5 text-muted-foreground">
+                    {lane.description}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
 
           {error ? (
             <div
@@ -244,6 +288,25 @@ export function SpaceView() {
             onEnroll={onEnroll}
             nowMs={nowMs}
             isAdmin={isAdmin}
+            lane={activeLane}
+            emptyTitle={
+              loadingMore
+                ? `Loading ${activeLaneDefinition.label}…`
+                : hasMore
+                  ? `No ${activeLaneDefinition.label} items loaded`
+                  : `No ${activeLaneDefinition.label} items`
+            }
+            emptyDescription={
+              loadingMore
+                ? 'Checking the remaining archive.'
+                : hasMore
+                  ? 'Load more to check the remaining archive.'
+                  : activeLane === 'fieldwork'
+                    ? 'Items tagged source:fieldwork or source:linux-fieldwork will appear here.'
+                    : tagsParam
+                      ? 'No published items match this filter.'
+                      : 'No published items are assigned to this section.'
+            }
           />
 
           {totalPages > 1 ? (
@@ -255,7 +318,7 @@ export function SpaceView() {
                 disabled={page === 1}
                 onClick={() => setPage(current => current - 1)}
               >
-                Previous drawer
+                Previous
               </Button>
               <span className="rounded-full border border-border/60 bg-background/65 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
                 {page} of {totalPages}
@@ -267,7 +330,7 @@ export function SpaceView() {
                 disabled={page >= totalPages}
                 onClick={() => setPage(current => current + 1)}
               >
-                Next drawer
+                Next
               </Button>
             </div>
           ) : null}
@@ -281,7 +344,7 @@ export function SpaceView() {
                 disabled={loadingMore}
                 onClick={() => void loadMore()}
               >
-                {loadingMore ? 'Opening drawer…' : 'Open more clippings'}
+                {loadingMore ? 'Loading…' : 'Load more'}
               </Button>
             </div>
           ) : null}
