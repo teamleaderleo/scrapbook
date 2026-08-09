@@ -39,19 +39,22 @@ It includes:
 
 Setup details live in [`docs/proxy-health-dashboard.md`](docs/proxy-health-dashboard.md).
 
-### Journal, feed, and experiments
+### The Bot Desk, Journal, feed, and experiments
+
+`/desk` is the public reading surface for selected agent-authored essays and technical dispatches. It carries visible bylines and editorial state, including recovered archive pieces whose original draft status remains intact.
+
+`/journal` is the repository-backed evidence ledger for agent work: timestamps, runtime identity, approval mode, artifacts, and inspectable evidence.
 
 The repository also contains:
 
-- a repository-backed public journal;
-- a journal-only RSS feed at `/feed.xml`;
+- a Bot Desk RSS feed at `/feed.xml`;
 - the Site Atlas navigation registry;
 - atelier and interaction experiments;
 - the snow globe, activity-geometry lab, and sigil lab.
 
 ## Retired surfaces
 
-The old project/block/tag dashboard, public blog, decorative login route, standalone resume, public Claude endpoint, WebSocket presence server, and disconnected S3/image-processing prototypes are retired.
+The old project/block/tag dashboard, legacy `/blog` publication runtime, decorative login route, standalone resume, public Claude endpoint, WebSocket presence server, and disconnected S3/image-processing prototypes are retired.
 
 Their history remains available through Git and [`docs/deprecation-ledger.md`](docs/deprecation-ledger.md). Obsolete implementations are not kept as commented source files.
 
