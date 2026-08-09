@@ -25,6 +25,7 @@ import {
   LogOut,
   Plus,
   Search,
+  Waves,
 } from 'lucide-react';
 import { shortcuts } from '@/app/lib/sidebar-data';
 import { useItems } from '@/app/lib/contexts/item-context';
@@ -52,6 +53,7 @@ export function AppSidebar() {
     pathname === '/space/review' ||
     pathname?.startsWith('/space/add') ||
     pathname?.startsWith('/space/edit');
+  const isListView = pathname === '/space';
   const { user, isAdmin, signOut } = useItems();
   const [loading, setLoading] = useState(false);
   const currentParams = new URLSearchParams();
@@ -145,7 +147,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="flex h-dvh max-h-dvh max-w-[calc(100vw-0.75rem)] flex-col border-r border-border/70 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] md:h-svh md:max-h-svh md:pb-0 md:pt-0">
+    <Sidebar className="flex h-[100dvh] max-h-[100dvh] max-w-[calc(100vw-0.75rem)] flex-col border-r border-border/70 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] md:h-[100svh] md:max-h-[100svh] md:pb-0 md:pt-0">
       <SidebarHeader className="m-0 h-14 shrink-0 border-b border-border/70 bg-background/85 p-0 text-foreground backdrop-blur-sm">
         <div className="flex h-full items-center justify-between px-4">
           <Link
@@ -218,11 +220,28 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    className="mx-2 rounded-lg px-3"
+                    isActive={pathname === '/space/trail'}
+                    asChild
+                  >
+                    <Link
+                      href="/space/trail"
+                      onClick={closeMobile}
+                      className="flex items-center gap-2"
+                    >
+                      <Waves className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      <span className="min-w-0 flex-1 truncate">Trail</span>
+                      <SpaceLinkHint />
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 {SPACE_LANES.map(lane => (
                   <SidebarMenuItem key={lane.id}>
                     <SidebarMenuButton
                       className="mx-2 rounded-lg px-3"
-                      isActive={!isReviewLike && currentLane === lane.id}
+                      isActive={isListView && currentLane === lane.id}
                       asChild
                     >
                       <Link
