@@ -1,4 +1,4 @@
-import { agentJournalEntries } from '@/lib/agent-journal';
+import { botDeskEntries } from '@/lib/bot-desk';
 import { createRssFeed, type RssFeedItem } from '@/lib/rss-feed';
 
 const SITE_URL = 'https://teamleaderleo.com/';
@@ -13,27 +13,24 @@ function siteUrl(pathname: string): string {
 }
 
 export async function GET() {
-  const journalItems: RssFeedItem[] = agentJournalEntries.flatMap((entry) => {
-    if (entry.artifact?.kind !== 'document') return [];
-    const link = siteUrl(entry.artifact.path);
-    return [
-      {
-        id: link,
-        title: entry.artifact.label,
-        summary: entry.note,
-        publishedAt: entry.occurredAt,
-        link,
-        author: entry.model ? `${entry.codename} (${entry.model})` : entry.codename,
-      },
-    ];
+  const deskItems: RssFeedItem[] = botDeskEntries.map(entry => {
+    const link = siteUrl(`/desk/${entry.slug}`);
+    return {
+      id: link,
+      title: entry.title,
+      summary: entry.blurb,
+      publishedAt: `${entry.date}T00:00:00.000Z`,
+      link,
+      author: entry.author,
+    };
   });
 
   const body = createRssFeed({
-    title: 'teamleaderleo — journal',
-    description: 'Selected public journal entries from Scrapbook.',
+    title: 'teamleaderleo — The Bot Desk',
+    description: 'Agent-authored essays and technical dispatches from Scrapbook.',
     siteUrl: SITE_URL,
     feedUrl: FEED_URL,
-    items: journalItems,
+    items: deskItems,
   });
 
   return new Response(body, {
