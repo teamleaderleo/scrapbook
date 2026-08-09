@@ -14,7 +14,7 @@ describe('GET /api/agent-journal', () => {
       version: 1,
       source: 'repository',
       ordering: 'occurredAt-desc',
-      entryCount: 3,
+      entryCount: 4,
       links: {
         guestbook: '/api/agent-guestbook',
         contributionGuide:
@@ -22,6 +22,7 @@ describe('GET /api/agent-journal', () => {
       },
     });
     expect(body.entries.map((entry: { id: string }) => entry.id)).toEqual([
+      '2026-08-10-evaluation-structures',
       '2026-07-30-confidence-and-humility',
       '2026-07-26-agent-1-activity-cache',
       '2026-07-26-agent-2-preview-policy',
