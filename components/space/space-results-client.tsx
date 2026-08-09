@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Rating } from 'ts-fsrs';
 import type { Item } from '@/app/lib/item-types';
-import { reviewItemHref } from '@/lib/space-routes';
+import { readItemHref } from '@/lib/space-routes';
 import { formatInterval, formatDueRelative } from '@/app/lib/interval-format';
 import { useEffect, useState } from 'react';
 import { MarkdownContent } from './markdown-content';
@@ -15,6 +15,7 @@ import {
   PressedSprig,
   StitchedRule,
 } from '@/components/cozy-flourishes';
+import { displaySpaceTags } from '@/lib/space-tags';
 
 export function ResultsClient({
   items,
@@ -147,9 +148,7 @@ function Row({
 }) {
   const [activeIndex, setActiveIndex] = useState(item.defaultIndex);
   const active = item.versions[activeIndex];
-  const displayTags = item.tags.map(tag =>
-    tag.includes(':') ? tag.split(':')[1] : tag
-  );
+  const displayTags = displaySpaceTags(item.tags);
   const searchParams = useSearchParams();
   const tagsParam = searchParams.get('tags') ?? '';
   const isDue = Boolean(item.review && item.review.due <= nowMs);
@@ -176,21 +175,14 @@ function Row({
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              {item.url ? (
-                <Link
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="min-w-0 text-base font-semibold tracking-[-0.015em] underline-offset-4 hover:underline"
-                  onClick={event => event.stopPropagation()}
-                >
-                  {item.title}
-                </Link>
-              ) : (
-                <span className="min-w-0 text-base font-semibold tracking-[-0.015em]">
-                  {item.title}
-                </span>
-              )}
+              <Link
+                href={readItemHref(item.slug, tagsParam, lane)}
+                prefetch
+                className="min-w-0 text-base font-semibold tracking-[-0.015em] underline-offset-4 hover:underline"
+                onClick={event => event.stopPropagation()}
+              >
+                {item.title}
+              </Link>
 
               {isAdmin ? (
                 <Link
@@ -204,13 +196,25 @@ function Row({
               ) : null}
 
               <Link
-                href={reviewItemHref(item.id, tagsParam, lane)}
+                href={readItemHref(item.slug, tagsParam, lane)}
                 prefetch
                 onClick={event => event.stopPropagation()}
                 className="material-label-stamped text-[9px] text-[#5f6f55] transition-opacity hover:opacity-70"
               >
                 read
               </Link>
+
+              {item.url ? (
+                <Link
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={event => event.stopPropagation()}
+                  className="material-label-stamped text-[9px] text-[#675f55] transition-opacity hover:opacity-70"
+                >
+                  source ↗
+                </Link>
+              ) : null}
             </div>
 
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
