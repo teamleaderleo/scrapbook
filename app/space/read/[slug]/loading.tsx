@@ -68,6 +68,20 @@ export default function ReadingSheetLoading() {
               <ReadingLines short />
             </section>
           </div>
+
+          <section className="border-t border-dashed border-[hsl(var(--material-paper-edge)/0.65)] px-4 py-6 sm:px-9 sm:py-9">
+            <Skeleton className="h-2.5 w-24" />
+            <Skeleton className="mt-3 h-7 w-44" />
+            <Skeleton className="mt-3 h-3 w-4/5" />
+            <div className="mt-5 overflow-hidden rounded-[1.35rem] border border-[hsl(var(--material-paper-edge)/0.7)] p-4">
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="mt-4 h-36 w-full rounded-xl" />
+              <div className="mt-4 flex items-center justify-between gap-3 border-t border-[hsl(var(--material-paper-edge)/0.55)] pt-3">
+                <Skeleton className="h-11 w-48 rounded-xl" />
+                <Skeleton className="h-11 w-24 rounded-xl" />
+              </div>
+            </div>
+          </section>
         </article>
       </div>
     </main>

@@ -47,6 +47,21 @@ for (const study of [
     await expect(
       page.getByRole('link', { name: 'Back to fieldwork' })
     ).toHaveAttribute('href', '/space?lane=fieldwork');
+    const practice = page.locator('[data-reading-practice]');
+    await expect(
+      practice.getByRole('heading', { name: 'Continue the thread' })
+    ).toBeVisible();
+    await expect(
+      practice.getByRole('group', { name: 'Practice mode' }).getByRole('button')
+    ).toHaveCount(3);
+    await expect(practice.getByLabel('Question notes')).toBeVisible();
+    const practiceModeHeights = await practice
+      .getByRole('group', { name: 'Practice mode' })
+      .getByRole('button')
+      .evaluateAll(buttons =>
+        buttons.map(button => button.getBoundingClientRect().height)
+      );
+    expect(practiceModeHeights.every(height => height >= 44)).toBe(true);
 
     const backLink = page.getByRole('link', { name: 'Back to fieldwork' });
     const backHeight = await backLink.evaluate(
