@@ -1,15 +1,16 @@
 import { expect, test } from '@playwright/test';
 
-test('Signal is a public read-only surface with a useful first paint', async ({
+test('Signal renders the dashboard without promotional framing', async ({
   page,
 }) => {
   const response = await page.goto('/proxy-dashboard');
   expect(response?.ok()).toBe(true);
 
-  await expect(
-    page.getByRole('heading', { name: 'Network pulse', level: 1 })
-  ).toBeVisible();
-  await expect(page.getByText('Signal', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Bandwidth' })).toBeVisible();
+  await expect(page.locator('body')).not.toContainText('Network pulse');
+  await expect(page.locator('body')).not.toContainText(
+    'One small path, reduced to the few numbers worth noticing.'
+  );
   await expect(page.locator('body')).not.toContainText(
     'Proxy dashboard access token'
   );

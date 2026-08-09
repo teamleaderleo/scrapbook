@@ -11,6 +11,7 @@ import {
 import * as Dialog from '@radix-ui/react-dialog';
 import {
   Activity,
+  BookOpenText,
   Brain,
   Clock3,
   Compass,
@@ -18,6 +19,7 @@ import {
   FlaskConical,
   Home,
   Images,
+  LibraryBig,
   NotebookPen,
   Moon,
   Palette,
@@ -61,6 +63,12 @@ function ItemIcon({ id }: { id: string }) {
       return <Shapes className={className} aria-hidden="true" />;
     case 'glossless':
       return <Sparkles className={className} aria-hidden="true" />;
+    case 'scrapbook-repository':
+      return <LibraryBig className={className} aria-hidden="true" />;
+    case 'fieldwork-repository':
+    case 'linux-fieldwork-repository':
+    case 'smolrunner-repository':
+      return <BookOpenText className={className} aria-hidden="true" />;
     case 'github':
       return <GitHubIcon className={className} aria-hidden="true" />;
     case 'twitter':
@@ -89,7 +97,7 @@ function AtlasLink({
       aria-current={active ? 'page' : undefined}
       data-site-atlas-link={item.id}
       data-active={active ? 'true' : undefined}
-      className={`group flex min-h-12 min-w-0 items-center gap-3 rounded-xl border px-3 py-2 text-left transition-[background-color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+      className={`group flex min-h-[4.5rem] min-w-0 items-start gap-3 rounded-[1rem] border px-3 py-3 text-left transition-[background-color,border-color,transform] hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transform-none ${
         active
           ? 'border-foreground/30 bg-foreground/[0.075]'
           : 'border-border/70 bg-background/55 hover:border-foreground/25 hover:bg-muted/70'
@@ -98,8 +106,13 @@ function AtlasLink({
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-card text-foreground">
         <ItemIcon id={item.id} />
       </span>
-      <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
-        {item.label}
+      <span className="min-w-0 flex-1">
+        <span className="block text-[1.05rem] font-semibold leading-tight text-foreground">
+          {item.label}
+        </span>
+        <span className="mt-1 block text-xs leading-[1.35rem] text-muted-foreground">
+          {item.description}
+        </span>
       </span>
       {item.badge ? (
         <span className="shrink-0 rounded-full border border-border/70 px-1.5 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
@@ -131,13 +144,20 @@ function AppearanceAction() {
         setTheme(isDark ? 'light' : 'dark');
       }}
       data-site-atlas-appearance
-      className="flex min-h-12 w-full items-center gap-3 rounded-xl border border-border/70 bg-background/55 px-3 py-2 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="flex min-h-[4.5rem] w-full items-start gap-3 rounded-[1rem] border border-border/70 bg-background/55 px-3 py-3 text-left transition-[background-color,transform] hover:-translate-y-px hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transform-none"
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-card">
         <Sun className="h-4 w-4 dark:hidden" aria-hidden="true" />
         <Moon className="hidden h-4 w-4 dark:block" aria-hidden="true" />
       </span>
-      <span className="truncate text-sm font-semibold">Appearance</span>
+      <span className="min-w-0">
+        <span className="block text-[1.05rem] font-semibold leading-tight">
+          Appearance
+        </span>
+        <span className="mt-1 block text-xs leading-[1.35rem] text-muted-foreground">
+          Turn the paper and ink between day and night.
+        </span>
+      </span>
     </button>
   );
 }
@@ -159,12 +179,19 @@ function DiscordAction() {
       type="button"
       onClick={() => void copyDiscord()}
       data-site-atlas-discord
-      className="flex min-h-12 w-full items-center gap-3 rounded-xl border border-border/70 bg-background/55 px-3 py-2 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="flex min-h-[4.5rem] w-full items-start gap-3 rounded-[1rem] border border-border/70 bg-background/55 px-3 py-3 text-left transition-[background-color,transform] hover:-translate-y-px hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transform-none"
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-card">
         <DiscordIcon className="h-4 w-4" aria-hidden="true" />
       </span>
-      <span className="truncate text-sm font-semibold">Discord</span>
+      <span className="min-w-0">
+        <span className="block text-[1.05rem] font-semibold leading-tight">
+          Discord
+        </span>
+        <span className="mt-1 block text-xs leading-[1.35rem] text-muted-foreground">
+          Copy the handle for a quieter conversation.
+        </span>
+      </span>
     </button>
   );
 }
@@ -173,7 +200,7 @@ export function SiteAtlas({
   variant = 'label',
   className = '',
 }: {
-  variant?: 'label' | 'icon';
+  variant?: 'label' | 'icon' | 'rail';
   className?: string;
 }) {
   const pathname = usePathname() || '/';
@@ -183,13 +210,17 @@ export function SiteAtlas({
       <Dialog.Trigger asChild>
         <button
           type="button"
-          className={`${triggerBase} ${variant === 'icon' ? 'w-11 px-0' : ''} ${className}`}
+          className={`${
+            variant === 'rail'
+              ? 'inline-flex h-12 min-w-[44px] shrink-0 items-center justify-center gap-1.5 border-l border-border/60 bg-transparent px-3 text-xs font-semibold text-foreground transition-colors hover:bg-muted/75 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none'
+              : triggerBase
+          } ${variant === 'icon' ? 'w-11 px-0' : ''} ${className}`}
           aria-label="Open site atlas"
           title="Open site atlas"
           data-site-atlas-trigger
         >
           <Compass className="h-4 w-4" aria-hidden="true" />
-          {variant === 'label' ? (
+          {variant !== 'icon' ? (
             <span className="hidden min-[420px]:inline">Atlas</span>
           ) : null}
         </button>
@@ -201,16 +232,19 @@ export function SiteAtlas({
           data-site-atlas-overlay
         />
         <Dialog.Content
-          className="fixed inset-0 z-[80] flex min-w-0 flex-col overflow-hidden bg-background text-foreground shadow-2xl outline-none [contain:layout_paint] data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 motion-reduce:animate-none sm:inset-4 sm:mx-auto sm:max-w-4xl sm:rounded-[1.5rem] sm:border sm:border-border/70"
+          className="fixed inset-0 z-[80] flex min-w-0 flex-col overflow-hidden bg-background text-foreground shadow-2xl outline-none [contain:layout_paint] [font-family:ui-serif,Georgia,Cambria,'Times_New_Roman',serif] data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 motion-reduce:animate-none sm:inset-4 sm:mx-auto sm:max-w-6xl sm:rounded-[1.5rem] sm:border sm:border-border/70 lg:inset-y-6"
           data-site-atlas
         >
-          <header className="flex shrink-0 items-center gap-3 border-b border-border/70 bg-card/90 px-4 py-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:py-4">
-            <Dialog.Title className="min-w-0 flex-1 text-2xl font-semibold tracking-tight sm:text-3xl">
-              Site Atlas
-            </Dialog.Title>
-            <Dialog.Description className="sr-only">
-              Site navigation
-            </Dialog.Description>
+          <header className="flex shrink-0 items-start gap-4 border-b border-border/70 bg-card/90 px-4 py-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:py-5">
+            <div className="min-w-0 flex-1">
+              <Dialog.Title className="text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">
+                Site Atlas
+              </Dialog.Title>
+              <Dialog.Description className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+                Rooms, instruments, repositories, and a few paths leading
+                outward.
+              </Dialog.Description>
+            </div>
             <Dialog.Close asChild>
               <button
                 type="button"
@@ -227,7 +261,7 @@ export function SiteAtlas({
             className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-6"
             data-site-atlas-scroll
           >
-            <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-7">
               {siteNavigationGroups.map(group => (
                 <section
                   key={group.id}
@@ -236,10 +270,13 @@ export function SiteAtlas({
                 >
                   <h2
                     id={`site-atlas-${group.id}`}
-                    className="mb-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
+                    className="mb-1 text-xl font-semibold tracking-[-0.02em] text-foreground"
                   >
                     {group.label}
                   </h2>
+                  <p className="mb-3 text-xs leading-5 text-muted-foreground">
+                    {group.description}
+                  </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     {group.items.map(item => (
                       <AtlasLink

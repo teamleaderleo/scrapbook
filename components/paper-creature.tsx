@@ -75,10 +75,11 @@ export function PaperCreature({
         aria-hidden="true"
       >
         <motion.path
-          d="M23 28 5 20l12 15 10-1Z"
+          d="M24 23 4 26l17 8 7-4Z"
           className="fill-[#b7adbf] stroke-[#4d4852] dark:fill-[#696270] dark:stroke-[#ded8e3]"
           strokeWidth="2"
           strokeLinejoin="round"
+          data-paper-creature-tail
           animate={
             reduceMotion
               ? undefined
@@ -99,6 +100,13 @@ export function PaperCreature({
           }
           style={{ transformOrigin: '24px 30px' }}
         />
+        <path
+          d="m7 26 15 3"
+          className="fill-none stroke-[#6b6470]/70 dark:stroke-[#c9c2d0]/70"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          data-paper-creature-tail-fold
+        />
 
         <path
           d="M22 17h25c9 0 15 6 15 14v2H20v-6c0-4 1-7 2-10Z"
@@ -112,12 +120,20 @@ export function PaperCreature({
           strokeWidth="2"
           strokeLinejoin="round"
         />
-        <path
-          d="m29 17 4-8 5 8 5-8 4 8"
-          className="fill-[#f7f2e9] stroke-[#4d4852] dark:fill-[#eeeaf2] dark:stroke-[#eeeaf2]"
-          strokeWidth="2"
-          strokeLinejoin="round"
-        />
+        <g data-paper-creature-back-plates>
+          <path
+            d="m24 17 4.5-7 4.5 7Z"
+            className="fill-[#f7f2e9] stroke-[#4d4852] dark:fill-[#ded8e3] dark:stroke-[#eeeaf2]"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+          <path
+            d="m32 17 4.5-9.5 4.5 9.5Z"
+            className="fill-[#eee7f1] stroke-[#4d4852] dark:fill-[#c9c2d0] dark:stroke-[#eeeaf2]"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+        </g>
 
         {!sleeping ? (
           <path

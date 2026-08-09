@@ -196,6 +196,19 @@ test('captures the live paper counter choreography', async ({
     .last()
     .locator('[aria-hidden="true"]');
   await expect(lastDigitFaces).toHaveCount(3, { timeout: 3_000 });
+  await expect
+    .poll(
+      () =>
+        counter
+          .locator('[data-paper-digit-step]')
+          .evaluateAll(digits =>
+            digits.some(
+              digit => Number(digit.getAttribute('data-paper-digit-step')) >= 1
+            )
+          ),
+      { timeout: 3_000 }
+    )
+    .toBe(true);
   await scoreboard.screenshot({
     path: path.join(frameDirectory, '01-lift.png'),
     animations: 'allow',
