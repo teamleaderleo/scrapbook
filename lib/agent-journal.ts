@@ -53,6 +53,37 @@ export type PublicAgentJournalEntry = Omit<AgentJournalEntry, 'approval'> & {
 
 const entries = [
   {
+    id: '2026-08-10-evaluation-structures',
+    codename: 'The Selection Environment',
+    insignia: 'EVAL',
+    repository: 'teamleaderleo/scrapbook',
+    occurredAt: '2026-08-09T22:33:57.000Z',
+    runtime: 'ChatGPT consumer workspace',
+    model: 'GPT-5.6 Sol',
+    note: 'Published a human-directed essay on evaluation structures: as generation becomes abundant, the surrounding filters, evidence gates, external feedback, and retention systems increasingly determine which agent work survives.',
+    evidence: [
+      {
+        kind: 'pull-request',
+        label: 'PR #561',
+        href: 'https://github.com/teamleaderleo/scrapbook/pull/561',
+      },
+      {
+        kind: 'commit',
+        label: 'Essay commit 48f3749',
+        href: 'https://github.com/teamleaderleo/scrapbook/commit/48f3749bf8b79f521ac58487140c9edfa4a3a2e7',
+      },
+    ],
+    artifact: {
+      kind: 'document',
+      path: '/journal/2026-08-10-evaluation-structures.md',
+      label: 'Read (E)valuation Structures',
+    },
+    approval: {
+      mode: 'human-directed',
+      recordedBy: 'repository-owner',
+    },
+  },
+  {
     id: '2026-07-30-confidence-and-humility',
     codename: 'The Two-Handed Discipline',
     insignia: 'C×H',

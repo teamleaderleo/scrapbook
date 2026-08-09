@@ -28,7 +28,7 @@ test('journal exposes one main landmark and readable, touch-sized records at 320
 
   const firstEntry = page.locator('[data-journal-entry]').first();
   const entryHeading = firstEntry.getByRole('heading', {
-    name: 'The Two-Handed Discipline',
+    name: 'The Selection Environment',
     exact: true,
   });
   const headingId = await entryHeading.getAttribute('id');
@@ -43,7 +43,7 @@ test('journal exposes one main landmark and readable, touch-sized records at 320
   await disclosure.click();
   await expectMinimumTargetSize(
     firstEntry.getByRole('link', {
-      name: /Open evidence: PR #493/i,
+      name: /Open evidence: PR #561/i,
     })
   );
 

@@ -4,36 +4,40 @@ test('agent journal renders repository records newest first with inspectable pro
   await page.goto('/journal');
 
   await expect(page.getByRole('heading', { name: 'Agent journal', exact: true })).toBeVisible();
-  await expect(page.getByText('3 entries', { exact: true })).toBeVisible();
+  await expect(page.getByText('4 entries', { exact: true })).toBeVisible();
 
   const entries = page.locator('[data-journal-entry]');
-  await expect(entries).toHaveCount(3);
+  await expect(entries).toHaveCount(4);
   await expect(entries.nth(0)).toHaveAttribute(
     'data-journal-entry',
-    '2026-07-30-confidence-and-humility',
+    '2026-08-10-evaluation-structures',
   );
   await expect(entries.nth(1)).toHaveAttribute(
     'data-journal-entry',
-    '2026-07-26-agent-1-activity-cache',
+    '2026-07-30-confidence-and-humility',
   );
   await expect(entries.nth(2)).toHaveAttribute(
+    'data-journal-entry',
+    '2026-07-26-agent-1-activity-cache',
+  );
+  await expect(entries.nth(3)).toHaveAttribute(
     'data-journal-entry',
     '2026-07-26-agent-2-preview-policy',
   );
 
   const first = entries.first();
   await expect(
-    first.getByRole('heading', { name: 'The Two-Handed Discipline', exact: true }),
+    first.getByRole('heading', { name: 'The Selection Environment', exact: true }),
   ).toBeVisible();
   await expect(first.getByText('Human directed', { exact: true })).toBeVisible();
-  await expect(first.getByText('30 Jul 2026, 12:09 UTC', { exact: true })).toBeVisible();
+  await expect(first.getByText('9 Aug 2026, 22:33 UTC', { exact: true })).toBeVisible();
   await expect(first.getByText('2 evidence items', { exact: true })).toBeVisible();
   await expect(
     first.getByRole('link', {
-      name: 'Read Confidence and Humility, Working the Same Shift',
+      name: 'Read (E)valuation Structures',
       exact: true,
     }),
-  ).toHaveAttribute('href', '/journal/2026-07-30-confidence-and-humility.md');
+  ).toHaveAttribute('href', '/journal/2026-08-10-evaluation-structures.md');
 
   const disclosure = first.locator('details[data-journal-provenance]');
   await expect(disclosure).not.toHaveAttribute('open', '');
@@ -44,7 +48,7 @@ test('agent journal renders repository records newest first with inspectable pro
   await expect(evidenceLinks).toHaveCount(2);
   await expect(evidenceLinks.nth(0)).toHaveAttribute(
     'href',
-    'https://github.com/teamleaderleo/scrapbook/pull/493',
+    'https://github.com/teamleaderleo/scrapbook/pull/561',
   );
   await expect(evidenceLinks.nth(0)).toHaveAttribute('target', '_blank');
   await expect(evidenceLinks.nth(0)).toHaveAttribute('rel', /noreferrer/);
