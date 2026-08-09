@@ -1,4 +1,5 @@
 import { ActivityDashboard } from '@/components/home/activity-dashboard';
+import { Skeleton } from '@/components/ui/skeleton';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { getGitHubHomeData } from '@/lib/github-home';
 import { homeRoomNavigationItems } from '@/lib/site-navigation';
@@ -16,6 +17,7 @@ import {
 import type { Metadata } from 'next';
 import { cacheLife } from 'next/cache';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
@@ -161,9 +163,61 @@ async function HomeActivityContent() {
   );
 }
 
-export default async function Page() {
-  const homeActivity = await HomeActivityContent();
+function HomeActivitySkeleton() {
+  return (
+    <div
+      className="flex min-w-0 flex-col gap-4 sm:gap-5"
+      aria-label="Loading homepage activity"
+      role="status"
+      data-home-activity-skeleton
+    >
+      <div className="grid min-w-0 gap-3.5 sm:gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(21rem,0.65fr)]">
+        <section className="min-h-[30.5rem] rounded-[1.25rem] border border-border/70 bg-card p-5 shadow-[0_16px_38px_rgba(24,24,26,0.08)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] lg:min-h-[28rem]">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="mt-5 h-16 w-3/5 rounded-xl" />
+          <Skeleton className="mt-4 h-28 w-full rounded-2xl" />
+        </section>
+        <section className="min-h-[27.25rem] rounded-[1.25rem] border border-border/70 bg-card p-4 shadow-[0_12px_28px_rgba(35,31,26,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.25)]">
+          <div className="flex items-center justify-between gap-4">
+            <Skeleton className="h-2.5 w-20" />
+            <Skeleton className="h-2.5 w-28" />
+          </div>
+          <div className="mx-auto mt-4 grid max-w-[12.75rem] grid-cols-4 gap-1.5 sm:gap-2">
+            {Array.from({ length: 28 }, (_, index) => (
+              <Skeleton
+                key={index}
+                className="aspect-square rounded-[0.38rem]"
+              />
+            ))}
+          </div>
+        </section>
+      </div>
 
+      <section className="min-w-0">
+        <div className="mb-2 flex items-center justify-between px-0.5">
+          <Skeleton className="h-2.5 w-20" />
+          <Skeleton className="h-3 w-10" />
+        </div>
+        <div className="grid overflow-hidden rounded-xl border border-border/65 bg-card/70 sm:grid-cols-2">
+          {Array.from({ length: 4 }, (_, index) => (
+            <div
+              key={index}
+              className="flex min-h-16 items-center gap-3 border-border/55 px-3 py-2.5 [&:nth-child(n+2)]:border-t sm:[&:nth-child(2)]:border-t-0 sm:[&:nth-child(even)]:border-l"
+            >
+              <Skeleton className="h-3 w-5" />
+              <span className="min-w-0 flex-1">
+                <Skeleton className="h-4 w-2/5" />
+                <Skeleton className="mt-2 h-3 w-3/4" />
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+export default function Page() {
   return (
     <ViewportPageShell
       className="relative bg-background text-foreground"
@@ -176,7 +230,9 @@ export default async function Page() {
       />
 
       <div className="relative mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-7xl flex-col justify-start px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
-        {homeActivity}
+        <Suspense fallback={<HomeActivitySkeleton />}>
+          <HomeActivityContent />
+        </Suspense>
       </div>
     </ViewportPageShell>
   );

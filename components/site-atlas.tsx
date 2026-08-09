@@ -232,7 +232,7 @@ export function SiteAtlas({
           data-site-atlas-overlay
         />
         <Dialog.Content
-          className="fixed inset-0 z-[80] flex min-w-0 flex-col overflow-hidden bg-background text-foreground shadow-2xl outline-none [contain:layout_paint] [font-family:ui-serif,Georgia,Cambria,'Times_New_Roman',serif] data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 motion-reduce:animate-none sm:inset-4 sm:mx-auto sm:max-w-6xl sm:rounded-[1.5rem] sm:border sm:border-border/70 lg:inset-y-6"
+          className="fixed inset-0 z-[80] flex min-w-0 flex-col overflow-hidden bg-background text-foreground shadow-2xl outline-none [contain:layout_paint] data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 motion-reduce:animate-none sm:inset-4 sm:mx-auto sm:max-w-6xl sm:rounded-[1.5rem] sm:border sm:border-border/70 lg:inset-y-6"
           data-site-atlas
         >
           <header className="flex shrink-0 items-start gap-4 border-b border-border/70 bg-card/90 px-4 py-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:py-5">

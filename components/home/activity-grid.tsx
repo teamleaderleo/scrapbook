@@ -223,7 +223,6 @@ export function ActivityGrid({
           className="grid min-w-0 gap-1.5 sm:gap-2"
           style={{
             gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-            gridTemplateRows: 'repeat(7, minmax(0, 1fr))',
           }}
           aria-label="GitHub contribution calendar for three completed weeks and the current week"
           data-calendar-weeks="4"
@@ -241,7 +240,7 @@ export function ActivityGrid({
                   key={cell.date}
                   role="img"
                   aria-label={`${formatDay(cell.date)} — upcoming.`}
-                  className={`${styles.etchedMark} ${styles.upcomingMark} aspect-[1.18] min-w-0 rounded-[0.38rem] sm:aspect-[1.35] lg:aspect-[1.12] xl:aspect-[1.35]`}
+                  className={`${styles.etchedMark} ${styles.upcomingMark} aspect-square min-w-0 rounded-[0.38rem]`}
                   style={sharedStyle}
                   data-contribution-cell
                   data-contribution-date={cell.date}
@@ -257,7 +256,7 @@ export function ActivityGrid({
                   key={cell.date}
                   role="img"
                   aria-label={`${formatDay(cell.date)} — activity unavailable.`}
-                  className={`${styles.etchedMark} ${styles.unavailableMark} aspect-[1.18] min-w-0 rounded-[0.38rem] sm:aspect-[1.35] lg:aspect-[1.12] xl:aspect-[1.35]`}
+                  className={`${styles.etchedMark} ${styles.unavailableMark} aspect-square min-w-0 rounded-[0.38rem]`}
                   style={sharedStyle}
                   data-contribution-cell
                   data-contribution-date={cell.date}
@@ -276,7 +275,7 @@ export function ActivityGrid({
               <button
                 key={day.date}
                 type="button"
-                className={`${styles.paperMark} aspect-[1.18] min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:aspect-[1.35] lg:aspect-[1.12] xl:aspect-[1.35] ${activityClass(day.count, maximum)} ${isToday ? 'outline outline-1 outline-offset-2 outline-foreground/15' : ''} ${isSelected ? 'outline outline-2 outline-offset-2 outline-foreground/45 brightness-[1.04] dark:brightness-110' : ''}`}
+                className={`${styles.paperMark} aspect-square min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${activityClass(day.count, maximum)} ${isToday ? 'outline outline-1 outline-offset-2 outline-foreground/15' : ''} ${isSelected ? 'outline outline-2 outline-offset-2 outline-foreground/45 brightness-[1.04] dark:brightness-110' : ''}`}
                 style={sharedStyle}
                 aria-label={label}
                 aria-pressed={isSelected}
