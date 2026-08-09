@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { duplicateItemHref, reviewItemHref } from './space-routes';
+import {
+  duplicateItemHref,
+  readItemHref,
+  reviewItemHref,
+} from './space-routes';
 
 describe('duplicateItemHref', () => {
   it('places the database item id in the duplicate query parameter', () => {
@@ -30,5 +34,24 @@ describe('reviewItemHref', () => {
       '/space/review?item=item%2Fid&tags=topic%3Asecurity&lane=fieldwork'
     );
     expect(() => reviewItemHref('   ')).toThrow('Review item id is required');
+  });
+});
+
+describe('readItemHref', () => {
+  it('uses the public slug and keeps the originating Space view', () => {
+    expect(
+      readItemHref(
+        'cache-files-are-published-atomically',
+        ' domain:reliability ',
+        ' fieldwork '
+      )
+    ).toBe(
+      '/space/read/cache-files-are-published-atomically?tags=domain%3Areliability&lane=fieldwork'
+    );
+  });
+
+  it('does not add an empty query string', () => {
+    expect(readItemHref('a-living-lesson')).toBe('/space/read/a-living-lesson');
+    expect(() => readItemHref('   ')).toThrow('Reading sheet slug is required');
   });
 });

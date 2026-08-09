@@ -18,6 +18,8 @@ import { searchItems } from '@/app/lib/item-search';
 import type { Item } from '@/app/lib/item-types';
 import { Download, Plus, Search } from 'lucide-react';
 import { startNavigationFeedback } from '@/components/navigation-feedback';
+import { readItemHref } from '@/lib/space-routes';
+import { displaySpaceTags } from '@/lib/space-tags';
 
 function filterItems(allItems: Item[], search: string, nowMs: number): Item[] {
   if (!search) return allItems.slice(0, 50);
@@ -72,10 +74,10 @@ export function SearchCommand() {
   const filteredItems = filterItems(items, search, nowMs);
 
   const handleSelect = (item: Item) => {
-    const href = `/space/review?item=${item.id}`;
+    const href = readItemHref(item.slug);
     setOpen(false);
     setSearch('');
-    startNavigationFeedback(href, 'review');
+    startNavigationFeedback(href, 'reading sheet');
     router.push(href);
   };
 
@@ -110,9 +112,7 @@ export function SearchCommand() {
                   <span className="text-xs capitalize text-muted-foreground">{item.category}</span>
                 </div>
                 <div className="mt-1 text-xs text-muted-foreground">
-                  {item.tags
-                    .map((tag) => (tag.includes(':') ? tag.split(':')[1] : tag))
-                    .join(', ')}
+                  {displaySpaceTags(item.tags).join(', ')}
                 </div>
               </div>
             </CommandItem>
