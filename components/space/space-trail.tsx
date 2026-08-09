@@ -15,6 +15,7 @@ import {
 import { useItems } from '@/app/lib/contexts/item-context';
 import { SpaceHeader } from '@/components/space/space-header';
 import { displaySpaceTags } from '@/lib/space-tags';
+import { buildSpaceNextMove } from '@/lib/space-practice';
 import {
   EMPTY_SPACE_TRAIL_MEMORY,
   markSpaceTrailOpened,
@@ -95,6 +96,18 @@ function TrailCard({
   const { item, estimatedMinutes, excerpt, reasons } = recommendation;
   const tags = displaySpaceTags(item.tags).slice(0, 5);
   const isStoppingPoint = (index + 1) % 12 === 0;
+  const nextMove = buildSpaceNextMove(item, {
+    familiar: reaction !== undefined,
+    learned: reaction === 'learned',
+  });
+  const nextMoveStage =
+    reaction === 'learned' ? 'learned' : reaction ? 'familiar' : undefined;
+  const readingHref = new URLSearchParams({
+    lane: 'archive',
+    from: 'trail',
+    practice: nextMove.mode,
+  });
+  if (nextMoveStage) readingHref.set('stage', nextMoveStage);
 
   return (
     <section
@@ -121,7 +134,7 @@ function TrailCard({
           </h2>
 
           {excerpt ? (
-            <p className="mt-5 max-w-[62ch] text-[15px] leading-7 text-[hsl(var(--material-paper-ink)/0.7)] sm:text-base">
+            <p className="mt-5 line-clamp-6 max-w-[62ch] text-[15px] leading-7 text-[hsl(var(--material-paper-ink)/0.7)] sm:line-clamp-none sm:text-base">
               {excerpt}
             </p>
           ) : null}
@@ -139,7 +152,17 @@ function TrailCard({
             </div>
           ) : null}
 
-          <details className="group mt-6 rounded-xl border border-[hsl(var(--material-paper-edge)/0.62)] bg-[hsl(var(--material-paper-ink)/0.025)] px-3.5 py-3 text-xs text-[hsl(var(--material-paper-ink)/0.62)]">
+          <div className="mt-6 rounded-2xl border border-[hsl(var(--material-paper-edge)/0.68)] bg-[hsl(var(--material-paper-ink)/0.035)] px-4 py-3.5">
+            <div className="flex items-center justify-between gap-3 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--material-paper-ink)/0.48)]">
+              <span>Next move · 2 min</span>
+              <span>{nextMove.label}</span>
+            </div>
+            <p className="mt-2 text-[13px] leading-5 text-[hsl(var(--material-paper-ink)/0.72)] sm:text-sm sm:leading-6">
+              {nextMove.prompt}
+            </p>
+          </div>
+
+          <details className="group mt-3 rounded-xl border border-[hsl(var(--material-paper-edge)/0.62)] bg-[hsl(var(--material-paper-ink)/0.025)] px-3.5 py-3 text-xs text-[hsl(var(--material-paper-ink)/0.62)]">
             <summary className="cursor-pointer list-none font-medium text-[hsl(var(--material-paper-ink)/0.72)] focus-visible:outline-none group-open:mb-2">
               Why this?
             </summary>
@@ -175,7 +198,7 @@ function TrailCard({
           </div>
 
           <Link
-            href={`/space/read/${encodeURIComponent(item.slug)}?lane=archive&from=trail`}
+            href={`/space/read/${encodeURIComponent(item.slug)}?${readingHref.toString()}`}
             prefetch
             onClick={onOpen}
             className="mt-3 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--material-paper-ink))] px-4 text-sm font-semibold text-[hsl(var(--material-paper-face))] transition-[transform,box-shadow] hover:-translate-y-px hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--material-paper-ink)/0.4)] active:translate-y-0"

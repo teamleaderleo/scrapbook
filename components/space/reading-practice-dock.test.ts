@@ -20,4 +20,19 @@ describe('ReadingPracticeDock', () => {
     expect(html).toContain('Saved on this device');
     expect(html).not.toContain('Assistant');
   });
+
+  it('opens on a contextual next move when Trail supplies one', () => {
+    const html = renderToStaticMarkup(
+      createElement(ReadingPracticeDock, {
+        slug: 'atomic-cache-publication',
+        title: 'Atomic cache publication',
+        initialMode: 'trace',
+        promptOverride: 'Predict the first observable write.',
+      })
+    );
+
+    expect(html).toContain('Predict the first observable write.');
+    expect(html).toContain('Trace notes');
+    expect(html).toContain('aria-pressed="true"');
+  });
 });

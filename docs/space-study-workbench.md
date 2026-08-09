@@ -136,6 +136,55 @@ screen. A reset control clears the profile. Before any server-side learner
 model, define the event lifecycle, retention, export/delete behavior, and a
 learning-oriented success measure.
 
+### Next moves and optional generation
+
+Every Trail card now offers one small active-learning move—trace, review,
+stress, explain, interrogate, or transfer—selected from the study's category,
+tags, code presence, and the learner's explicit state. This first layer is a
+deterministic triage function, not generated prose. It runs instantly, works
+offline after the archive loads, and can only ask the reader to inspect or
+reason about the attached study; it cannot invent a claim about the source.
+Opening the study carries the selected mode into its private practice bench.
+
+Keep ranking and content generation separate. Ranking is a small decision
+problem and can graduate from understandable rules to a contextual bandit once
+there are enough meaningful outcomes. It does not need a language model.
+Generation is an editorial supply problem and should happen asynchronously:
+
+1. select a published study and its pinned source;
+2. ask a small model for structured candidate moves such as predict, trace,
+   compare, alter, or review;
+3. require source quotes or exact code pointers for factual premises;
+4. reject malformed, duplicative, or unsupported candidates;
+5. save the survivors as private drafts;
+6. let the owner edit, publish, revise, or discard them.
+
+Do not generate a new card synchronously during a swipe, and do not auto-publish
+model output. A tiny local embedding or classifier model may later improve
+topic relations and triage. A browser LLM is a poor default for the phone path:
+WebGPU support remains uneven outside Chromium and the model download competes
+with the instant, low-friction experience. If richer drafts earn their keep, a
+small server-side model can run in a background import/publishing job; the UI
+should continue to consume ordinary reviewed data even when that model is
+unavailable.
+
+Current implementation options and constraints:
+
+- [Transformers.js WebGPU](https://huggingface.co/docs/transformers.js/guides/webgpu)
+  can run embeddings and classifiers entirely in the browser, but its own guide
+  warns that WebGPU is still experimental, especially outside Chromium.
+- [WebLLM](https://github.com/mlc-ai/web-llm) supports private in-browser LLM
+  inference and structured JSON through WebGPU; keep it as an opt-in desktop
+  experiment rather than a required phone bundle.
+- [Chrome's Prompt API](https://developer.chrome.com/docs/ai/prompt-api) can use
+  a browser-provided model, but its current availability and device requirements
+  make it unsuitable as Space's universal generation layer.
+- [Cloudflare Workers AI pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/)
+  currently includes a daily free allocation and a 1B-class instruct model,
+  which is enough for a low-volume draft worker without placing model weights
+  on the phone. It would still require explicit retention, provenance, and
+  editorial-review rules before integration.
+
 ## Publishing boundary
 
 Current Space items are public unless tagged `visibility:private`. The public
