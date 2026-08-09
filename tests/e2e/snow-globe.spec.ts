@@ -11,18 +11,31 @@ test('opens the snow globe from the site atlas', async ({ page }) => {
   await link.click();
 
   await expect(page).toHaveURL(/\/snow-globe$/);
-  await expect(page.getByRole('heading', { name: 'Snow globe', level: 1 })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Snow globe', level: 1 })
+  ).toBeVisible();
   await expect(page.locator('[data-snow-globe-stage]')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Rattle the globe' })).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Rattle the globe' })
+  ).toBeVisible();
 });
 
-test('renders an automatic dimensional scene with a deliberate rattle control', async ({ page }) => {
+test('renders an automatic dimensional scene with a deliberate rattle control', async ({
+  page,
+}) => {
   const response = await page.goto('/snow-globe');
   expect(response?.ok()).toBe(true);
 
   const stage = page.locator('[data-snow-globe-stage]');
   await expect(stage.locator('canvas')).toBeVisible();
-  await expect(stage).toHaveAttribute('aria-label', /dimensional snow globe/i);
+  await expect(stage.locator('[data-snow-globe-scene]')).toHaveAttribute(
+    'aria-label',
+    /A-frame reading cabin.*frozen pond/i
+  );
+  await expect(stage).not.toContainText('Winter reading room');
+  await expect(stage).not.toContainText(
+    'The cabin slowly turns through the glass.'
+  );
+  await expect(stage).not.toContainText('Auto turning');
   await page.getByRole('button', { name: 'Rattle the globe' }).click();
-  await expect(page.getByText('Auto orbit', { exact: true })).toBeVisible();
 });

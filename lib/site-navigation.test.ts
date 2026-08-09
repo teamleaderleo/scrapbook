@@ -20,6 +20,8 @@ describe('site navigation registry', () => {
         '/gallery',
         '/atelier',
         '/snow-globe',
+        'https://github.com/teamleaderleo/fieldwork',
+        'https://github.com/teamleaderleo/linux-fieldwork',
       ])
     );
     expect(hrefs).not.toContain('/blog');

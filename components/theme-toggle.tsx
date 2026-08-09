@@ -7,7 +7,11 @@ type ThemeTransitionDocument = Document & {
   startViewTransition?: (update: () => void) => { finished: Promise<unknown> };
 };
 
-export function ThemeToggle() {
+export function ThemeToggle({
+  variant = 'pill',
+}: {
+  variant?: 'pill' | 'rail';
+}) {
   const { setTheme } = useTheme();
 
   const toggle = () => {
@@ -39,7 +43,11 @@ export function ThemeToggle() {
     <button
       data-theme-toggle
       onClick={toggle}
-      className="group relative inline-flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border/70 bg-card text-foreground shadow-[0_3px_10px_rgba(20,20,24,0.09)] transition-[background-color,color,transform,box-shadow] duration-300 hover:-translate-y-px hover:bg-muted hover:shadow-[0_6px_15px_rgba(20,20,24,0.13)] active:translate-y-0 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] motion-reduce:transition-none"
+      className={
+        variant === 'rail'
+          ? 'group relative inline-flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden border-l border-border/60 bg-transparent text-foreground transition-colors duration-200 hover:bg-muted/75 active:bg-muted focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none'
+          : 'group relative inline-flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border/70 bg-card text-foreground shadow-[0_3px_10px_rgba(20,20,24,0.09)] transition-[background-color,color,transform,box-shadow] duration-300 hover:-translate-y-px hover:bg-muted hover:shadow-[0_6px_15px_rgba(20,20,24,0.13)] active:translate-y-0 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:shadow-[0_4px_12px_rgba(0,0,0,0.3)] motion-reduce:transition-none'
+      }
       aria-label="Toggle light and dark mode"
       type="button"
     >

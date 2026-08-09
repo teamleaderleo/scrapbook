@@ -2,6 +2,7 @@ export type SiteNavigationGroupId =
   | 'places'
   | 'tools'
   | 'experiments'
+  | 'repositories'
   | 'connections';
 
 export type SiteSurface =
@@ -153,6 +154,52 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         group: 'experiments',
         surface: 'experimental',
         badge: 'Lab',
+      },
+    ],
+  },
+  {
+    id: 'repositories',
+    label: 'Repositories',
+    description: 'Codebases that feed the notes and experiments here.',
+    items: [
+      {
+        id: 'scrapbook-repository',
+        href: 'https://github.com/teamleaderleo/scrapbook',
+        label: 'Scrapbook',
+        description:
+          'This site, its public rooms, and the experiments between them.',
+        group: 'repositories',
+        surface: 'external',
+        external: true,
+      },
+      {
+        id: 'fieldwork-repository',
+        href: 'https://github.com/teamleaderleo/fieldwork',
+        label: 'Fieldwork',
+        description: 'Close readings and contributions in working codebases.',
+        group: 'repositories',
+        surface: 'external',
+        external: true,
+      },
+      {
+        id: 'linux-fieldwork-repository',
+        href: 'https://github.com/teamleaderleo/linux-fieldwork',
+        label: 'Linux fieldwork',
+        description:
+          'Kernel-oriented investigations, patches, and study trails.',
+        group: 'repositories',
+        surface: 'external',
+        external: true,
+      },
+      {
+        id: 'smolrunner-repository',
+        href: 'https://github.com/teamleaderleo/smolrunner',
+        label: 'Smolrunner',
+        description:
+          'A careful host-work runner built around inspectable plans.',
+        group: 'repositories',
+        surface: 'external',
+        external: true,
       },
     ],
   },

@@ -172,6 +172,11 @@ test('keeps the scorecard planted and lets the visitor pet Scraplet', async ({
 
   await expect(scoreboard).toBeVisible({ timeout: 15_000 });
   await expect(pet).toHaveAttribute('data-pets', '0');
+  await expect(pet.locator('[data-paper-creature-tail]')).toHaveCount(1);
+  await expect(pet.locator('[data-paper-creature-tail-fold]')).toHaveCount(1);
+  await expect(
+    pet.locator('[data-paper-creature-back-plates] path')
+  ).toHaveCount(2);
 
   const scoreboardBefore = await scoreboard.boundingBox();
   expect(scoreboardBefore).not.toBeNull();

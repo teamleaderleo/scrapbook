@@ -22,7 +22,7 @@ async function expectNoHorizontalOverflow(
   expect(metrics.bodyWidth).toBeLessThanOrEqual(metrics.viewport + 1);
 }
 
-test('site atlas exposes visible places, tools, experiments, and connections', async ({
+test('site atlas exposes rooms, repositories, experiments, and connections', async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -35,6 +35,9 @@ test('site atlas exposes visible places, tools, experiments, and connections', a
   await expect(atlas.getByRole('heading', { name: 'Tools' })).toBeVisible();
   await expect(
     atlas.getByRole('heading', { name: 'Experiments' })
+  ).toBeVisible();
+  await expect(
+    atlas.getByRole('heading', { name: 'Repositories' })
   ).toBeVisible();
   await expect(
     atlas.getByRole('heading', { name: 'Connections' })
@@ -56,6 +59,19 @@ test('site atlas exposes visible places, tools, experiments, and connections', a
   await expect(github).toHaveAttribute('rel', /noopener/);
   await expect(atlas.locator('[data-site-atlas-discord]')).toBeVisible();
   await expect(atlas.locator('[data-site-atlas-appearance]')).toBeVisible();
+
+  for (const [id, href] of [
+    ['scrapbook-repository', 'https://github.com/teamleaderleo/scrapbook'],
+    ['fieldwork-repository', 'https://github.com/teamleaderleo/fieldwork'],
+    [
+      'linux-fieldwork-repository',
+      'https://github.com/teamleaderleo/linux-fieldwork',
+    ],
+  ] as const) {
+    await expect(
+      atlas.locator(`[data-site-atlas-link="${id}"]`)
+    ).toHaveAttribute('href', href);
+  }
 
   await page.screenshot({
     path: testInfo.outputPath(

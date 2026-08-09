@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Signal · Leo',
-  description: 'A cached, read-only view of one small network path.',
+  description: 'Proxy bandwidth and latency dashboard.',
   alternates: { canonical: '/proxy-dashboard' },
   robots: { index: false, follow: false },
 };

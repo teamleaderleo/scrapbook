@@ -2,11 +2,18 @@
 
 import { SiteAtlas } from '@/components/site-atlas';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { isNavigationItemActive, primaryNavigationItems } from '@/lib/site-navigation';
+import {
+  isNavigationItemActive,
+  primaryNavigationItems,
+} from '@/lib/site-navigation';
 import { Clock3 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
+
+const subscribeToHydration = () => () => {};
+const getHydratedSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 function TimeLink({ active }: { active: boolean }) {
   const [time, setTime] = useState('--:--');
@@ -17,7 +24,7 @@ function TimeLink({ active }: { active: boolean }) {
         new Intl.DateTimeFormat(undefined, {
           hour: '2-digit',
           minute: '2-digit',
-        }).format(new Date()),
+        }).format(new Date())
       );
     };
 
@@ -32,10 +39,10 @@ function TimeLink({ active }: { active: boolean }) {
       prefetch
       aria-current={active ? 'page' : undefined}
       data-site-time
-      className={`group inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold shadow-[0_3px_10px_rgba(20,20,24,0.08)] transition-[background-color,box-shadow] hover:bg-muted hover:shadow-[0_6px_14px_rgba(20,20,24,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none dark:shadow-[0_4px_12px_rgba(0,0,0,0.28)] ${
+      className={`group inline-flex h-12 shrink-0 items-center gap-1.5 border-r border-border/60 px-3 text-xs font-semibold transition-colors hover:bg-muted/75 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none ${
         active
-          ? 'border-foreground/30 bg-foreground/[0.075] text-foreground'
-          : 'border-border/70 bg-card text-foreground'
+          ? 'bg-foreground/[0.075] text-foreground'
+          : 'bg-transparent text-muted-foreground hover:text-foreground'
       }`}
       title="Open time"
       aria-label={`Open the time converter. Local time ${time}`}
@@ -48,36 +55,38 @@ function TimeLink({ active }: { active: boolean }) {
 
 export function SiteNavBar() {
   const pathname = usePathname() || '/';
-  const directItems = primaryNavigationItems.filter((item) => item.id !== 'home');
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    setReady(true);
-  }, []);
+  const directItems = primaryNavigationItems.filter(item => item.id !== 'home');
+  const ready = useSyncExternalStore(
+    subscribeToHydration,
+    getHydratedSnapshot,
+    getServerSnapshot
+  );
 
   return (
     <nav
       aria-label="Site navigation"
-      className="sticky top-0 z-50 h-12 min-w-0 border-b border-border/70 bg-background text-foreground shadow-[0_1px_0_rgba(255,255,255,0.22),0_8px_24px_rgba(20,20,24,0.08)] dark:shadow-[0_1px_0_rgba(255,255,255,0.04),0_10px_28px_rgba(0,0,0,0.28)]"
+      className="sticky top-0 z-50 h-12 min-w-0 border-b border-border/70 bg-background text-foreground shadow-[0_8px_24px_rgba(20,20,24,0.06)] dark:shadow-[0_10px_28px_rgba(0,0,0,0.22)]"
       data-site-nav
       data-site-nav-ready={ready ? 'true' : undefined}
     >
-      <div className="mx-auto h-full max-w-7xl px-2 sm:px-4 lg:px-6">
-        <div className="flex h-full min-w-0 items-center gap-1 sm:gap-1.5">
+      <div className="mx-auto h-full max-w-7xl border-x border-border/50">
+        <div className="flex h-full min-w-0 items-center">
           <Link
             href="/"
             prefetch
             aria-current={pathname === '/' ? 'page' : undefined}
             data-site-home
-            className="inline-flex h-11 min-w-0 max-w-[8.5rem] shrink items-center truncate rounded-md px-1.5 text-sm font-bold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:max-w-none sm:text-base"
+            className="inline-flex h-12 min-w-0 max-w-[8.5rem] shrink items-center truncate border-r border-border/60 px-3 text-sm font-bold tracking-tight transition-colors hover:bg-muted/55 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:max-w-none sm:px-4 sm:text-base"
           >
             teamleaderleo
           </Link>
 
-          <TimeLink active={pathname === '/time' || pathname.startsWith('/time/')} />
+          <TimeLink
+            active={pathname === '/time' || pathname.startsWith('/time/')}
+          />
 
-          <div className="ml-2 hidden min-w-0 flex-1 items-center justify-center gap-1 xl:flex">
-            {directItems.map((item) => {
+          <div className="hidden h-full min-w-0 flex-1 items-stretch justify-center xl:flex">
+            {directItems.map(item => {
               const active = isNavigationItemActive(pathname, item);
               return (
                 <Link
@@ -86,10 +95,10 @@ export function SiteNavBar() {
                   prefetch
                   aria-current={active ? 'page' : undefined}
                   data-site-primary-link={item.id}
-                  className={`inline-flex h-11 items-center rounded-full px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                  className={`relative inline-flex h-12 flex-1 items-center justify-center border-r border-border/45 px-4 text-sm font-medium transition-colors first:border-l focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
                     active
-                      ? 'bg-foreground text-background'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      ? 'bg-foreground/[0.07] text-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-foreground'
+                      : 'text-muted-foreground hover:bg-muted/65 hover:text-foreground'
                   }`}
                 >
                   {item.label}
@@ -98,9 +107,9 @@ export function SiteNavBar() {
             })}
           </div>
 
-          <div className="ml-auto flex shrink-0 items-center gap-1">
-            <ThemeToggle />
-            <SiteAtlas />
+          <div className="ml-auto flex h-full shrink-0 items-stretch">
+            <ThemeToggle variant="rail" />
+            <SiteAtlas variant="rail" />
           </div>
         </div>
       </div>
