@@ -7,12 +7,23 @@ import { MarkdownContent } from '@/components/space/markdown-content';
 import { ReadingPracticeDock } from '@/components/space/reading-practice-dock';
 import { PageCurl, StitchedRule } from '@/components/cozy-flourishes';
 import { resolveSpaceLane } from '@/lib/space-lanes';
+import {
+  buildSpaceNextMove,
+  parseSpaceNextMoveStage,
+  parseSpacePracticeMode,
+} from '@/lib/space-practice';
 import { displaySpaceTags } from '@/lib/space-tags';
 import { loadReadingSheet } from '../data';
 
 type ReadingSheetPageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ lane?: string; tags?: string; from?: string }>;
+  searchParams: Promise<{
+    lane?: string;
+    tags?: string;
+    from?: string;
+    practice?: string;
+    stage?: string;
+  }>;
 };
 
 function sectionId(label: string, index: number) {
@@ -86,6 +97,14 @@ export default async function ReadingSheetPage({
   const primary = versions[item.defaultIndex] ?? versions[0];
   const rest = versions.filter(version => version !== primary);
   const orderedVersions = primary ? [primary, ...rest] : [];
+  const requestedPracticeMode = parseSpacePracticeMode(query.practice);
+  const nextMoveStage = parseSpaceNextMoveStage(query.stage);
+  const suggestedMove = requestedPracticeMode
+    ? buildSpaceNextMove(item, {
+        familiar: nextMoveStage !== undefined,
+        learned: nextMoveStage === 'learned',
+      })
+    : undefined;
 
   return (
     <main className="min-h-screen bg-background px-3 py-3 text-foreground sm:px-6 sm:py-6">
@@ -197,9 +216,16 @@ export default async function ReadingSheetPage({
           </div>
 
           <ReadingPracticeDock
+            key={`${item.slug}:${requestedPracticeMode ?? 'question'}`}
             slug={item.slug}
             title={item.title}
             sourceUrl={item.url}
+            initialMode={requestedPracticeMode}
+            promptOverride={
+              suggestedMove?.mode === requestedPracticeMode
+                ? suggestedMove?.prompt
+                : undefined
+            }
           />
 
           <PageCurl className="h-10 w-10 opacity-70 [&>span]:h-10 [&>span]:w-10" />

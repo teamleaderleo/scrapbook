@@ -60,12 +60,16 @@ export function ReadingPracticeDock({
   slug,
   title,
   sourceUrl,
+  initialMode = 'question',
+  promptOverride,
 }: {
   slug: string;
   title: string;
   sourceUrl?: string | null;
+  initialMode?: SpacePracticeMode;
+  promptOverride?: string;
 }) {
-  const [mode, setMode] = useState<SpacePracticeMode>('question');
+  const [mode, setMode] = useState<SpacePracticeMode>(initialMode);
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>(
     'idle'
   );
@@ -74,6 +78,10 @@ export function ReadingPracticeDock({
   const modeDefinition =
     SPACE_PRACTICE_MODES.find(item => item.id === mode) ??
     SPACE_PRACTICE_MODES[0];
+  const activePrompt =
+    mode === initialMode && promptOverride?.trim()
+      ? promptOverride
+      : modeDefinition.prompt;
 
   const chooseMode = (nextMode: SpacePracticeMode) => {
     setMode(nextMode);
@@ -88,6 +96,7 @@ export function ReadingPracticeDock({
           title,
           sourceUrl,
           draft,
+          prompt: activePrompt,
         })
       );
       setCopyState('copied');
@@ -123,9 +132,7 @@ export function ReadingPracticeDock({
             <span className="grid h-7 w-7 place-items-center rounded-full bg-[hsl(var(--material-paper-ink)/0.08)] font-mono text-[9px] font-semibold uppercase tracking-[0.08em]">
               You
             </span>
-            <p className="text-sm font-medium leading-6">
-              {modeDefinition.prompt}
-            </p>
+            <p className="text-sm font-medium leading-6">{activePrompt}</p>
           </div>
         </div>
 
