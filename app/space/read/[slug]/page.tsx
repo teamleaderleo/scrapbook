@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { CodeDisplay } from '@/components/space/code-display';
 import { MarkdownContent } from '@/components/space/markdown-content';
+import { ReadingPracticeDock } from '@/components/space/reading-practice-dock';
 import { PageCurl, StitchedRule } from '@/components/cozy-flourishes';
 import { resolveSpaceLane } from '@/lib/space-lanes';
 import { displaySpaceTags } from '@/lib/space-tags';
@@ -191,6 +192,12 @@ export default async function ReadingSheetPage({
               </section>
             ))}
           </div>
+
+          <ReadingPracticeDock
+            slug={item.slug}
+            title={item.title}
+            sourceUrl={item.url}
+          />
 
           <PageCurl className="h-10 w-10 opacity-70 [&>span]:h-10 [&>span]:w-10" />
           <span className="material-paper-edge" aria-hidden="true" />
