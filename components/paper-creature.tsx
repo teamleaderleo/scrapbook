@@ -14,7 +14,7 @@ export type PaperCreaturePose =
 
 interface PaperCreatureProps {
   pose?: PaperCreaturePose;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'hero';
   className?: string;
   label?: string;
   animateKey?: string | number;
@@ -24,6 +24,7 @@ const sizeClasses = {
   sm: 'h-8 w-12',
   md: 'h-12 w-[4.5rem]',
   lg: 'h-20 w-[7.5rem]',
+  hero: 'h-28 w-44 sm:h-36 sm:w-56',
 } as const;
 
 export function PaperCreature({
@@ -55,12 +56,24 @@ export function PaperCreature({
       transition={
         pose === 'celebrating'
           ? { duration: 0.42, ease: [0.2, 0.75, 0.2, 1] }
-          : { duration: sleeping ? 3.6 : 2.8, repeat: Infinity, ease: 'easeInOut' }
+          : {
+              duration: sleeping ? 3.6 : 2.8,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }
       }
-      className={cn('relative inline-block shrink-0', sizeClasses[size], className)}
+      className={cn(
+        'relative inline-block shrink-0',
+        sizeClasses[size],
+        className
+      )}
       data-paper-creature
     >
-      <svg viewBox="0 0 72 48" className="h-full w-full overflow-visible" aria-hidden="true">
+      <svg
+        viewBox="0 0 72 48"
+        className="h-full w-full overflow-visible"
+        aria-hidden="true"
+      >
         <motion.path
           d="M23 28 5 20l12 15 10-1Z"
           className="fill-[#b7adbf] stroke-[#4d4852] dark:fill-[#696270] dark:stroke-[#ded8e3]"
@@ -78,7 +91,11 @@ export function PaperCreature({
           transition={
             busy
               ? { duration: 0.7, repeat: Infinity, ease: 'easeInOut' }
-              : { duration: sleeping ? 3.8 : 2.8, repeat: Infinity, ease: 'easeInOut' }
+              : {
+                  duration: sleeping ? 3.8 : 2.8,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }
           }
           style={{ transformOrigin: '24px 30px' }}
         />
@@ -139,31 +156,82 @@ export function PaperCreature({
 
         {pose === 'reading' ? (
           <g>
-            <path d="M34 25h18v15H34z" className="fill-[#f6efd9] stroke-[#6a6254] dark:fill-[#d8ccb3]" strokeWidth="1.5" />
-            <path d="M43 26v13M37 30h4M45 30h4M37 34h4M45 34h4" className="stroke-[#9a816a]" strokeWidth="1" strokeLinecap="round" />
+            <path
+              d="M34 25h18v15H34z"
+              className="fill-[#f6efd9] stroke-[#6a6254] dark:fill-[#d8ccb3]"
+              strokeWidth="1.5"
+            />
+            <path
+              d="M43 26v13M37 30h4M45 30h4M37 34h4M45 34h4"
+              className="stroke-[#9a816a]"
+              strokeWidth="1"
+              strokeLinecap="round"
+            />
           </g>
         ) : null}
 
         {pose === 'carrying' ? (
           <g transform="rotate(-8 40 31)">
-            <path d="M22 29h35v5H22z" className="fill-[#d6a25f] stroke-[#66523d]" strokeWidth="1.5" />
-            <path d="M57 29l7 2.5-7 2.5Z" className="fill-[#eee5cf] stroke-[#66523d]" strokeWidth="1.5" />
-            <path d="M22 29h5v5h-5z" className="fill-[#c8878f] stroke-[#66523d]" strokeWidth="1.5" />
+            <path
+              d="M22 29h35v5H22z"
+              className="fill-[#d6a25f] stroke-[#66523d]"
+              strokeWidth="1.5"
+            />
+            <path
+              d="M57 29l7 2.5-7 2.5Z"
+              className="fill-[#eee5cf] stroke-[#66523d]"
+              strokeWidth="1.5"
+            />
+            <path
+              d="M22 29h5v5h-5z"
+              className="fill-[#c8878f] stroke-[#66523d]"
+              strokeWidth="1.5"
+            />
           </g>
         ) : null}
 
         {pose === 'archivist' ? (
           <g>
-            <circle cx="52.5" cy="17" r="4" className="fill-none stroke-[#554f49]" strokeWidth="1.3" />
-            <circle cx="61" cy="17" r="4" className="fill-none stroke-[#554f49]" strokeWidth="1.3" />
-            <path d="M56.5 17h.5M47 16l-4-1" className="stroke-[#554f49]" strokeWidth="1.3" strokeLinecap="round" />
-            <path d="M30 27h17v13H30z" className="fill-[#b58b76] stroke-[#5e4b42]" strokeWidth="1.4" />
-            <path d="M34 30h9M34 33h7" className="stroke-[#f1dfcb]" strokeWidth="1" strokeLinecap="round" />
+            <circle
+              cx="52.5"
+              cy="17"
+              r="4"
+              className="fill-none stroke-[#554f49]"
+              strokeWidth="1.3"
+            />
+            <circle
+              cx="61"
+              cy="17"
+              r="4"
+              className="fill-none stroke-[#554f49]"
+              strokeWidth="1.3"
+            />
+            <path
+              d="M56.5 17h.5M47 16l-4-1"
+              className="stroke-[#554f49]"
+              strokeWidth="1.3"
+              strokeLinecap="round"
+            />
+            <path
+              d="M30 27h17v13H30z"
+              className="fill-[#b58b76] stroke-[#5e4b42]"
+              strokeWidth="1.4"
+            />
+            <path
+              d="M34 30h9M34 33h7"
+              className="stroke-[#f1dfcb]"
+              strokeWidth="1"
+              strokeLinecap="round"
+            />
           </g>
         ) : null}
 
         {pose === 'sniffing' ? (
-          <g className="stroke-[#8f7b65]" strokeWidth="1.4" strokeLinecap="round">
+          <g
+            className="stroke-[#8f7b65]"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+          >
             <path d="M66 21h4" />
             <path d="M65 18l3-2" />
           </g>
@@ -171,8 +239,12 @@ export function PaperCreature({
 
         {pose === 'napping' ? (
           <g className="fill-[#817568] font-mono text-[7px] font-bold">
-            <text x="62" y="11">z</text>
-            <text x="66" y="6">z</text>
+            <text x="62" y="11">
+              z
+            </text>
+            <text x="66" y="6">
+              z
+            </text>
           </g>
         ) : null}
 

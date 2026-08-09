@@ -10,17 +10,18 @@ Set these on the Next.js host:
 DATABASE_URL="postgresql://..."
 PROXY_HEALTH_INGEST_SECRET="a-long-random-secret"
 PROXY_HEALTH_DIAGNOSTIC_SECRET="another-long-random-secret"
-PROXY_DASHBOARD_TOKEN="optional-read-token"
+PROXY_DASHBOARD_TOKEN="a-separate-dashboard-access-token"
 ```
 
 `PROXY_HEALTH_INGEST_SECRET` is the preferred credential for Bandwagon health reports. The older `PROXY_HEALTH_TOKEN` name remains supported for compatibility.
 
 `PROXY_HEALTH_DIAGNOSTIC_SECRET` protects the database diagnostic endpoint. When omitted, the diagnostic endpoint falls back to the ingest credential.
 
-`PROXY_DASHBOARD_TOKEN` is optional. If set, open the dashboard with:
+`PROXY_DASHBOARD_TOKEN` is required in production. Open the access form and
+submit it once to exchange the token for a seven-day HttpOnly access cookie:
 
 ```text
-/proxy-dashboard?token=optional-read-token
+/proxy-dashboard/access
 ```
 
 ## Paths
@@ -40,6 +41,12 @@ proxy_health_samples(id bigserial primary key, host text, checked_at timestamptz
 ```
 
 The schema is created by `drizzle/0008_proxy_health.sql`. Apply migrations before deploying a new environment; dashboard reads and ingest requests do not run DDL.
+
+Ingestion accepts JSON reports up to 64 KiB. The route validates an explicit
+allowlist of reporter fields, bounds nested history and error collections, and
+discards unknown fields before writing the report. Authentication tokens are
+compared in constant time. These limits keep accidental or compromised clients
+from turning the JSONB payload into an unbounded storage channel.
 
 The diagnostic endpoint requires a bearer token or `x-proxy-health-token` header. It reports whether the database is reachable, whether both tables exist, the newest report timestamp, and the number of samples received in the previous 24 hours.
 
@@ -120,7 +127,7 @@ set +a
 A good response looks like:
 
 ```json
-{"ok":true,"host":"bandwagon-la","checked_at":"...","request_id":"..."}
+{ "ok": true, "host": "bandwagon-la", "checked_at": "...", "request_id": "..." }
 ```
 
 Then open:
@@ -129,8 +136,14 @@ Then open:
 https://teamleaderleo.com/proxy-dashboard
 ```
 
-or, if `PROXY_DASHBOARD_TOKEN` is set:
+After configuring `PROXY_DASHBOARD_TOKEN`, open:
 
 ```text
-https://teamleaderleo.com/proxy-dashboard?token=your-read-token
+https://teamleaderleo.com/proxy-dashboard/access
 ```
+
+Enter the read token in the password field. The form sends it in the POST body
+instead of putting it in browser history, access logs, or referrers. The
+exchange redirects to `/proxy-dashboard`. Production returns an ordinary
+not-found response when the dashboard token is missing or the access cookie is
+invalid. Local development remains available without a token.

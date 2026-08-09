@@ -1,114 +1,5 @@
 .scorecard {
-  --paper-raking-light: 255 252 244;
-  --paper-raking-shadow: 72 57 38;
-  --paper-fibre-ink: 78 65 48;
-}
-
-.rakingLightAnchor {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-  will-change: transform, opacity;
-}
-
-.rakingLight {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: min(34rem, 82vw);
-  aspect-ratio: 2.35 / 1;
-  border-radius: 50%;
-  background:
-    radial-gradient(
-      ellipse at center,
-      rgb(var(--paper-raking-light) / 0.24) 0,
-      rgb(var(--paper-raking-light) / 0.1) 28%,
-      transparent 72%
-    ),
-    radial-gradient(
-      ellipse at 48% 52%,
-      transparent 0 48%,
-      rgb(var(--paper-raking-shadow) / 0.025) 72%,
-      transparent 80%
-    );
-  filter: blur(10px);
-  mix-blend-mode: soft-light;
-  transform: translate(-50%, -50%) rotate(-12deg);
-}
-
-.fibreField {
-  position: absolute;
-  z-index: 2;
-  inset: -5%;
-  background:
-    repeating-linear-gradient(
-      103deg,
-      transparent 0 17px,
-      rgb(var(--paper-fibre-ink) / 0.028) 17px 18px,
-      transparent 18px 31px
-    ),
-    radial-gradient(
-      circle at 18% 22%,
-      rgb(var(--paper-fibre-ink) / 0.05) 0 0.65px,
-      transparent 0.9px
-    ),
-    radial-gradient(
-      circle at 71% 64%,
-      rgb(var(--paper-fibre-ink) / 0.04) 0 0.6px,
-      transparent 0.86px
-    );
-  background-size: auto, 17px 19px, 23px 27px;
-  -webkit-mask-image: radial-gradient(circle at 50% 48%, black 0 33%, transparent 74%);
-  mask-image: radial-gradient(circle at 50% 48%, black 0 33%, transparent 74%);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 180ms ease-out;
-  will-change: transform, opacity;
-}
-
-.scorecard:hover .fibreField {
-  opacity: 0.72;
-}
-
-.paperCurl {
-  position: absolute;
-  z-index: 8;
-  bottom: -0.06rem;
-  left: -0.06rem;
-  width: 3rem;
-  height: 3rem;
-  clip-path: polygon(0 50%, 50% 100%, 0 100%);
-  background:
-    linear-gradient(
-      36deg,
-      rgb(var(--paper-raking-shadow) / 0.12) 0 5%,
-      rgb(var(--paper-raking-light) / 0.78) 18%,
-      rgb(var(--paper-raking-light) / 0.36) 50%,
-      transparent 51%
-    );
-  filter: drop-shadow(3px -3px 5px rgb(var(--paper-raking-shadow) / 0.09));
-  opacity: 0;
-  pointer-events: none;
-  transform-origin: 0 100%;
-  transform-style: preserve-3d;
-  will-change: transform, opacity;
-}
-
-.paperCurl::after {
-  content: '';
-  position: absolute;
-  bottom: 0.16rem;
-  left: 0.14rem;
-  width: 58%;
-  height: 1px;
-  background: rgb(var(--paper-fibre-ink) / 0.11);
-  box-shadow: 0 -0.32rem 0 rgb(var(--paper-fibre-ink) / 0.035);
-  transform: rotate(35deg);
-  transform-origin: left center;
+  contain: layout paint;
 }
 
 .counter {
@@ -227,7 +118,9 @@
       hsl(var(--foreground) / 0.025) 0 0.65px,
       transparent 0.85px
     );
-  background-size: 15px 17px, 19px 21px;
+  background-size:
+    15px 17px,
+    19px 21px;
   opacity: 0.55;
   pointer-events: none;
 }
@@ -297,36 +190,13 @@
 .departing {
   z-index: 4;
   transform-origin: 50% 0.45rem;
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
 }
 
 .arriving {
   z-index: 5;
   transform-origin: 50% 0.45rem;
   will-change: transform, opacity;
-}
-
-:global(.dark) .scorecard {
-  --paper-raking-light: 230 224 238;
-  --paper-raking-shadow: 0 0 0;
-  --paper-fibre-ink: 222 215 230;
-}
-
-:global(.dark) .rakingLight {
-  mix-blend-mode: screen;
-  opacity: 0.5;
-}
-
-:global(.dark) .paperCurl {
-  background:
-    linear-gradient(
-      36deg,
-      rgb(0 0 0 / 0.18) 0 6%,
-      rgb(var(--paper-raking-light) / 0.12) 19%,
-      rgb(var(--paper-raking-light) / 0.05) 50%,
-      transparent 51%
-    );
-  filter: drop-shadow(3px -3px 6px rgb(0 0 0 / 0.2));
 }
 
 :global(.dark) .counter::before {
@@ -369,26 +239,7 @@
     0 2px 5px rgb(0 0 0 / 0.28);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .rakingLightAnchor,
-  .paperCurl {
-    display: none;
-  }
-
-  .fibreField {
-    opacity: 0.08;
-    transition: none;
-  }
-
-  .scorecard:hover .fibreField {
-    opacity: 0.08;
-  }
-}
-
 @media (forced-colors: active) {
-  .rakingLightAnchor,
-  .fibreField,
-  .paperCurl,
   .counter::before,
   .counterShadow,
   .digit::before,

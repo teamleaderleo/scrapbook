@@ -21,7 +21,7 @@ import {
   type NavigationKind,
 } from '@/lib/navigation-progress';
 
-const IDLE_PREFETCH_ROUTES = ['/', '/time', '/gallery', '/blog', '/atelier'];
+const IDLE_PREFETCH_ROUTES = ['/', '/time', '/gallery', '/journal', '/atelier'];
 const NAVIGATION_START_EVENT = 'scrapbook:navigation-start';
 const NAVIGATION_CANCEL_EVENT = 'scrapbook:navigation-cancel';
 const NAVIGATION_ERROR_EVENT = 'scrapbook:navigation-error';

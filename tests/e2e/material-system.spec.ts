@@ -10,10 +10,7 @@ const studies = [
 ] as const;
 
 function hydratedScoreboard(page: Page) {
-  return page
-    .locator('[data-activity-scoreboard]:visible')
-    .filter({ hasText: /UTC reset \d{2}:\d{2}:\d{2}/ })
-    .last();
+  return page.locator('[data-activity-scoreboard]:visible').last();
 }
 
 function shiftedDigits(value: number, amount: number) {
@@ -22,17 +19,22 @@ function shiftedDigits(value: number, amount: number) {
       .slice(-4)
       .padStart(4, '0')
       .split('')
-      .map((digit) => (Number(digit) + amount) % 10)
-      .join(''),
+      .map(digit => (Number(digit) + amount) % 10)
+      .join('')
   );
 }
 
-function activityDays() {
-  const start = Date.UTC(2026, 5, 24);
+function activityDays(today: number = 6, generatedAt: Date = new Date()) {
   const dayMilliseconds = 24 * 60 * 60 * 1_000;
+  const end = Date.UTC(
+    generatedAt.getUTCFullYear(),
+    generatedAt.getUTCMonth(),
+    generatedAt.getUTCDate()
+  );
+  const start = end - 34 * dayMilliseconds;
   return Array.from({ length: 35 }, (_, index) => ({
     date: new Date(start + index * dayMilliseconds).toISOString().slice(0, 10),
-    count: index % 7,
+    count: index === 34 ? today : index % 7,
   }));
 }
 
@@ -41,7 +43,7 @@ for (const study of studies) {
     page,
   }, testInfo) => {
     await page.setViewportSize({ width: study.width, height: study.height });
-    await page.addInitScript((theme) => {
+    await page.addInitScript(theme => {
       window.localStorage.setItem('theme', theme);
     }, study.theme);
 
@@ -67,10 +69,13 @@ for (const study of studies) {
     await expect
       .poll(
         () =>
-          scoreboard.locator('[data-activity-digit]').evaluateAll((digits) =>
-            digits.every((digit) => {
-              const face = digit.querySelector<HTMLElement>('[aria-hidden="true"]');
-              const paperDigit = digit.querySelector<HTMLElement>('[data-paper-digit]');
+          scoreboard.locator('[data-activity-digit]').evaluateAll(digits =>
+            digits.every(digit => {
+              const face = digit.querySelector<HTMLElement>(
+                '[aria-hidden="true"]'
+              );
+              const paperDigit =
+                digit.querySelector<HTMLElement>('[data-paper-digit]');
               if (!face || !paperDigit) return false;
               const faceStyle = getComputedStyle(face);
               return (
@@ -78,9 +83,9 @@ for (const study of studies) {
                 faceStyle.borderStyle === 'solid' &&
                 getComputedStyle(paperDigit).transformStyle === 'preserve-3d'
               );
-            }),
+            })
           ),
-        { timeout: 10_000 },
+        { timeout: 10_000 }
       )
       .toBe(true);
 
@@ -99,12 +104,13 @@ for (const study of studies) {
               const rect = element.getBoundingClientRect();
               return {
                 heightReady: rect.height >= constraints.minimumHeight,
-                widthContained: rect.width > 0 && rect.width <= constraints.viewportWidth,
+                widthContained:
+                  rect.width > 0 && rect.width <= constraints.viewportWidth,
               };
             },
-            { minimumHeight, viewportWidth: study.width },
+            { minimumHeight, viewportWidth: study.width }
           ),
-        { timeout: 10_000 },
+        { timeout: 10_000 }
       )
       .toEqual({ heightReady: true, widthContained: true });
 
@@ -113,15 +119,20 @@ for (const study of studies) {
       'scoreboard-appearance',
       study.theme,
       testInfo.project.name,
-      `${study.width}x${study.height}.png`,
+      `${study.width}x${study.height}.png`
     );
     await mkdir(path.dirname(screenshotPath), { recursive: true });
     await page.screenshot({ path: screenshotPath, animations: 'disabled' });
   });
 }
 
-test('captures the live paper counter choreography', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'chromium', 'Motion frames are captured once in Chromium.');
+test('captures the live paper counter choreography', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== 'chromium',
+    'Motion frames are captured once in Chromium.'
+  );
 
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.addInitScript(() => {
@@ -131,13 +142,14 @@ test('captures the live paper counter choreography', async ({ page }, testInfo) 
   });
 
   let releaseResponse!: () => void;
-  const responseGate = new Promise<void>((resolve) => {
+  const responseGate = new Promise<void>(resolve => {
     releaseResponse = resolve;
   });
   let targetToday = 0;
 
-  await page.route('**/api/github-activity', async (route) => {
+  await page.route('**/api/github-activity', async route => {
     await responseGate;
+    const generatedAt = new Date();
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
@@ -145,14 +157,14 @@ test('captures the live paper counter choreography', async ({ page }, testInfo) 
         today: targetToday,
         weekTotal: 321,
         yearTotal: 4_321,
-        days: activityDays(),
-        generatedAt: new Date().toISOString(),
+        days: activityDays(targetToday, generatedAt),
+        generatedAt: generatedAt.toISOString(),
       }),
     });
   });
 
   const refreshRequest = page.waitForRequest(
-    (request) => new URL(request.url()).pathname === '/api/github-activity',
+    request => new URL(request.url()).pathname === '/api/github-activity'
   );
   const response = await page.goto('/');
   expect(response?.ok()).toBe(true);
@@ -170,7 +182,7 @@ test('captures the live paper counter choreography', async ({ page }, testInfo) 
     'test-results',
     'scoreboard-appearance',
     'motion',
-    testInfo.project.name,
+    testInfo.project.name
   );
   await mkdir(frameDirectory, { recursive: true });
   await scoreboard.screenshot({
@@ -201,9 +213,13 @@ test('captures the live paper counter choreography', async ({ page }, testInfo) 
     animations: 'allow',
   });
 
+  await expect(scoreboard).toHaveAttribute(
+    'data-activity-score-value',
+    String(targetToday)
+  );
   await expect(counter).toHaveAttribute(
     'aria-label',
-    `${targetToday} contributions today`,
+    new RegExp(`^${targetToday} contributions on Today · `)
   );
   await expect(lastDigitFaces).toHaveCount(1, { timeout: 5_000 });
   await scoreboard.screenshot({
@@ -212,13 +228,15 @@ test('captures the live paper counter choreography', async ({ page }, testInfo) 
   });
 });
 
-test('queues a newer activity value while paper leaves are still turning', async ({ page }) => {
+test('queues a newer activity value while paper leaves are still turning', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.addInitScript(() => {
     const actualNow = Date.now.bind(Date);
     let offset = 60 * 60 * 1_000;
     Date.now = () => actualNow() + offset;
-    window.__advanceActivityClock = (milliseconds) => {
+    window.__advanceActivityClock = milliseconds => {
       offset += milliseconds;
     };
   });
@@ -226,20 +244,21 @@ test('queues a newer activity value while paper leaves are still turning', async
   let releaseFirst!: () => void;
   let releaseSecond!: () => void;
   const gates = [
-    new Promise<void>((resolve) => {
+    new Promise<void>(resolve => {
       releaseFirst = resolve;
     }),
-    new Promise<void>((resolve) => {
+    new Promise<void>(resolve => {
       releaseSecond = resolve;
     }),
   ];
   let requestIndex = 0;
   let targets = [0, 0];
 
-  await page.route('**/api/github-activity', async (route) => {
+  await page.route('**/api/github-activity', async route => {
     const index = Math.min(requestIndex, 1);
     requestIndex += 1;
     await gates[index];
+    const generatedAt = new Date(Date.now() + index * 1_000);
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
@@ -247,14 +266,14 @@ test('queues a newer activity value while paper leaves are still turning', async
         today: targets[index],
         weekTotal: 654,
         yearTotal: 7_654,
-        days: activityDays(),
-        generatedAt: new Date(Date.now() + index * 1_000).toISOString(),
+        days: activityDays(targets[index], generatedAt),
+        generatedAt: generatedAt.toISOString(),
       }),
     });
   });
 
   const firstRequest = page.waitForRequest(
-    (request) => new URL(request.url()).pathname === '/api/github-activity',
+    request => new URL(request.url()).pathname === '/api/github-activity'
   );
   const response = await page.goto('/');
   expect(response?.ok()).toBe(true);
@@ -268,7 +287,15 @@ test('queues a newer activity value while paper leaves are still turning', async
   targets = [shiftedDigits(initialToday, 4), shiftedDigits(initialToday, 7)];
   releaseFirst();
 
-  await expect(counter).toHaveAttribute('aria-label', `${targets[0]} contributions today`);
+  const scoreboard = hydratedScoreboard(page);
+  await expect(scoreboard).toHaveAttribute(
+    'data-activity-score-value',
+    String(targets[0])
+  );
+  await expect(counter).toHaveAttribute(
+    'aria-label',
+    new RegExp(`^${targets[0]} contributions on Today · `)
+  );
   const lastDigitFaces = counter
     .locator('[data-paper-digit]')
     .last()
@@ -276,7 +303,7 @@ test('queues a newer activity value while paper leaves are still turning', async
   await expect(lastDigitFaces).toHaveCount(3, { timeout: 3_000 });
 
   const secondRequest = page.waitForRequest(
-    (request) => new URL(request.url()).pathname === '/api/github-activity',
+    request => new URL(request.url()).pathname === '/api/github-activity'
   );
   await page.evaluate(() => {
     window.__advanceActivityClock(31_000);
@@ -285,8 +312,17 @@ test('queues a newer activity value while paper leaves are still turning', async
   await secondRequest;
   releaseSecond();
 
-  await expect(counter).toHaveAttribute('aria-label', `${targets[1]} contributions today`);
-  await expect(counter.locator('[data-paper-digit] [aria-hidden="true"]')).toHaveCount(4, {
+  await expect(scoreboard).toHaveAttribute(
+    'data-activity-score-value',
+    String(targets[1])
+  );
+  await expect(counter).toHaveAttribute(
+    'aria-label',
+    new RegExp(`^${targets[1]} contributions on Today · `)
+  );
+  await expect(
+    counter.locator('[data-paper-digit] [aria-hidden="true"]')
+  ).toHaveCount(4, {
     timeout: 15_000,
   });
 });
@@ -304,23 +340,34 @@ test('keeps the paper counter calm with reduced motion', async ({ page }) => {
   const digit = scoreboard.locator('[data-activity-digit]').first();
   await expect(digit).toBeVisible({ timeout: 15_000 });
   await expect(counter).toHaveAttribute('data-reduced-motion', 'true');
-  const before = await scoreboard.evaluate((element) => getComputedStyle(element).transform);
+  const before = await scoreboard.evaluate(
+    element => getComputedStyle(element).transform
+  );
   await scoreboard.hover();
-  const after = await scoreboard.evaluate((element) => getComputedStyle(element).transform);
+  const after = await scoreboard.evaluate(
+    element => getComputedStyle(element).transform
+  );
 
   expect(after).toBe(before);
 });
 
-test('keeps paper digits readable in forced colours', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'chromium', 'Forced-colour emulation is checked in Chromium.');
+test('keeps paper digits readable in forced colours', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== 'chromium',
+    'Forced-colour emulation is checked in Chromium.'
+  );
 
   await page.emulateMedia({ forcedColors: 'active' });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
 
-  const digit = hydratedScoreboard(page).locator('[data-activity-digit]').first();
+  const digit = hydratedScoreboard(page)
+    .locator('[data-activity-digit]')
+    .first();
   await expect(digit).toBeVisible({ timeout: 15_000 });
-  const style = await digit.evaluate((element) => {
+  const style = await digit.evaluate(element => {
     const computed = window.getComputedStyle(element);
     return {
       color: computed.color,

@@ -12,7 +12,10 @@ import { Rating } from 'ts-fsrs';
 import { useNow } from '@/app/lib/hooks/useNow';
 import { reviewOnce } from '@/app/lib/fsrs-adapter';
 import { useItems } from '@/app/lib/contexts/item-context';
-import { createClient } from '@/utils/supabase/client';
+import {
+  enrollItemForReviewAction,
+  reviewItemAction,
+} from '@/app/space/actions';
 import { SpaceHeader } from './space-header';
 import { Button } from '@/components/ui/button';
 import { PaperCreature } from '@/components/paper-creature';
@@ -20,7 +23,6 @@ import { PaperCreature } from '@/components/paper-creature';
 const ITEMS_PER_PAGE = 20;
 
 export function SpaceView() {
-  const supabase = createClient();
   const searchParams = useSearchParams();
   const tagsParam = searchParams.get('tags') ?? undefined;
 
@@ -51,7 +53,7 @@ export function SpaceView() {
   }
 
   const items = useMemo<Item[]>(() => {
-    const withMutations = allItems.map((item) => {
+    const withMutations = allItems.map(item => {
       const mutation = mutations[item.id];
       return mutation ? { ...item, review: mutation } : item;
     });
@@ -65,8 +67,12 @@ export function SpaceView() {
 
   const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
   const itemCount = `${items.length}${hasMore ? '+' : ''}`;
-  const headerStatus = tagsParam ? `${itemCount} · ${tagsParam}` : `${itemCount} clippings`;
-  const visibleHeaderStatus = refreshing ? `${headerStatus} · sorting` : headerStatus;
+  const headerStatus = tagsParam
+    ? `${itemCount} · ${tagsParam}`
+    : `${itemCount} clippings`;
+  const visibleHeaderStatus = refreshing
+    ? `${headerStatus} · sorting`
+    : headerStatus;
 
   useEffect(() => {
     if (page >= totalPages && hasMore && !loadingMore) {
@@ -97,78 +103,60 @@ export function SpaceView() {
     return () => window.removeEventListener('keydown', onKey);
   }, [editorOpen, setEditorOpen]);
 
-  const onEnroll = useCallback(
-    async (id: string) => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  const onEnroll = useCallback(async (id: string) => {
+    const initialReview: ReviewState = {
+      state: 0,
+      due: Date.now(),
+      last_review: null,
+      stability: 0,
+      difficulty: 0,
+      scheduled_days: 0,
+      learning_steps: 0,
+      reps: 0,
+      lapses: 0,
+      suspended: false,
+    };
 
-      const initialReview: ReviewState = {
-        state: 0,
-        due: nowMs,
-        last_review: null,
-        stability: 0,
-        difficulty: 0,
-        scheduled_days: 0,
-        learning_steps: 0,
-        reps: 0,
-        lapses: 0,
-        suspended: false,
-      };
+    setMutationError(null);
+    setMutations(previous => ({ ...previous, [id]: initialReview }));
 
-      setMutations((previous) => ({ ...previous, [id]: initialReview }));
-
-      const { error: enrollError } = await supabase.from('reviews').insert({
-        item_id: id,
-        user_id: user?.id || null,
-        ...initialReview,
+    try {
+      const savedReview = await enrollItemForReviewAction(id);
+      setMutations(previous => ({ ...previous, [id]: savedReview }));
+    } catch (enrollError) {
+      console.error('Failed to enroll:', enrollError);
+      setMutations(previous => {
+        const { [id]: _removed, ...rest } = previous;
+        return rest;
       });
-
-      if (enrollError) {
-        console.error('Failed to enroll:', enrollError);
-        setMutations((previous) => {
-          const { [id]: _removed, ...rest } = previous;
-          return rest;
-        });
-      }
-    },
-    [nowMs, supabase],
-  );
+      setMutationError("That clipping wasn't added to the review drawer.");
+    }
+  }, []);
 
   const onReview = useCallback(
     async (id: string, rating: Rating) => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
       const previousOverride = mutations[id];
-      const current = previousOverride ?? allItems.find((item) => item.id === id)?.review;
+      const current =
+        previousOverride ?? allItems.find(item => item.id === id)?.review;
       const next = reviewOnce(current, rating, nowMs);
 
       setMutationError(null);
-      setMutations((previous) => ({ ...previous, [id]: next }));
+      setMutations(previous => ({ ...previous, [id]: next }));
 
-      const { error: reviewError } = await supabase.from('reviews').upsert({
-        item_id: id,
-        user_id: user?.id || null,
-        state: next.state,
-        due: next.due,
-        last_review: next.last_review,
-        stability: next.stability,
-        difficulty: next.difficulty,
-        scheduled_days: next.scheduled_days,
-        learning_steps: next.learning_steps,
-        reps: next.reps,
-        lapses: next.lapses,
-        suspended: next.suspended || false,
-      });
-
-      if (reviewError) {
+      try {
+        const savedReview = await reviewItemAction(id, rating);
+        setMutations(previous => ({ ...previous, [id]: savedReview }));
+      } catch (reviewError) {
         console.error('Failed to save review:', reviewError);
-        setMutations((previous) => rollbackFailedReview(previous, id, next, previousOverride));
-        setMutationError("That review wasn't saved. The previous schedule has been restored.");
+        setMutations(previous =>
+          rollbackFailedReview(previous, id, next, previousOverride)
+        );
+        setMutationError(
+          "That review wasn't saved. The previous schedule has been restored."
+        );
       }
     },
-    [allItems, mutations, nowMs, supabase],
+    [allItems, mutations, nowMs]
   );
 
   return (
@@ -192,17 +180,27 @@ export function SpaceView() {
         <div className="relative mx-auto w-full max-w-5xl">
           <section className="mb-4 flex items-end justify-between gap-4 px-1">
             <div>
-              <span className="material-label-stamped text-[9px] text-muted-foreground">clipping drawer</span>
-              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.025em] sm:text-3xl">Notes worth keeping</h1>
+              <span className="material-label-stamped text-[9px] text-muted-foreground">
+                public learning garden
+              </span>
+              <h1 className="mt-2 text-2xl font-semibold tracking-[-0.025em] sm:text-3xl">
+                Follow a thought somewhere
+              </h1>
               <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
-                Open a clipping to read it, or use Shift while hovering to unfold one quickly.
+                Living notes, questions, explanations, and code studies. Open
+                one, follow a connection, or use Shift while hovering to unfold
+                it quickly.
               </p>
             </div>
             <PaperCreature
               pose={refreshing ? 'sniffing' : 'reading'}
               size="md"
               className="md:hidden"
-              label={refreshing ? 'Scraplet sorting the clippings' : 'Scraplet reading a clipping'}
+              label={
+                refreshing
+                  ? 'Scraplet sorting the clippings'
+                  : 'Scraplet reading a clipping'
+              }
             />
           </section>
 
@@ -212,7 +210,12 @@ export function SpaceView() {
               role="alert"
             >
               <span className="min-w-0">{error}</span>
-              <Button variant="outline" size="sm" className="shrink-0 rounded-lg" onClick={() => void reload()}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0 rounded-lg"
+                onClick={() => void reload()}
+              >
                 Try again
               </Button>
             </div>
@@ -224,7 +227,12 @@ export function SpaceView() {
               role="alert"
             >
               <span className="min-w-0">{mutationError}</span>
-              <Button variant="outline" size="sm" className="shrink-0 rounded-lg" onClick={() => setMutationError(null)}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0 rounded-lg"
+                onClick={() => setMutationError(null)}
+              >
                 Dismiss
               </Button>
             </div>
@@ -245,7 +253,7 @@ export function SpaceView() {
                 size="sm"
                 className="rounded-lg"
                 disabled={page === 1}
-                onClick={() => setPage((current) => current - 1)}
+                onClick={() => setPage(current => current - 1)}
               >
                 Previous drawer
               </Button>
@@ -257,7 +265,7 @@ export function SpaceView() {
                 size="sm"
                 className="rounded-lg"
                 disabled={page >= totalPages}
-                onClick={() => setPage((current) => current + 1)}
+                onClick={() => setPage(current => current + 1)}
               >
                 Next drawer
               </Button>

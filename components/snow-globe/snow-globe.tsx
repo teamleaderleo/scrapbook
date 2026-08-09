@@ -1,403 +1,334 @@
 'use client';
 
-import { RotateCcw, Smartphone } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { RotateCcw } from 'lucide-react';
+import { useReducedMotion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import * as THREE from 'three';
 
-type Flake = {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  radius: number;
-  opacity: number;
-};
+const SNOW_COUNT = 180;
+const GLOBE_CENTRE_Y = 0.25;
+const GLOBE_RADIUS = 2.3;
+const SNOW_FLOOR = -0.96;
 
-type PermissionState = 'idle' | 'requesting' | 'enabled' | 'denied' | 'unavailable';
+function seededRandom(seed: number) {
+  let value = seed >>> 0;
+  return () => {
+    value += 0x6d2b79f5;
+    let next = value;
+    next = Math.imul(next ^ (next >>> 15), next | 1);
+    next ^= next + Math.imul(next ^ (next >>> 7), next | 61);
+    return ((next ^ (next >>> 14)) >>> 0) / 4_294_967_296;
+  };
+}
 
-type PermissionCapableConstructor = {
-  requestPermission?: () => Promise<'granted' | 'denied'>;
-};
+function createSnowParticles() {
+  const random = seededRandom(0x5a0f10be);
+  const positions = new Float32Array(SNOW_COUNT * 3);
+  const velocities = new Float32Array(SNOW_COUNT * 3);
 
-const clamp = (value: number, minimum: number, maximum: number) =>
-  Math.min(maximum, Math.max(minimum, value));
+  for (let index = 0; index < SNOW_COUNT; index += 1) {
+    const offset = index * 3;
+    const angle = random() * Math.PI * 2;
+    const distance = Math.sqrt(random()) * 1.95;
+    positions[offset] = Math.cos(angle) * distance;
+    positions[offset + 1] = SNOW_FLOOR + random() * 3.15;
+    positions[offset + 2] = Math.sin(angle) * distance;
+    velocities[offset] = (random() - 0.5) * 0.08;
+    velocities[offset + 1] = -random() * 0.08;
+    velocities[offset + 2] = (random() - 0.5) * 0.08;
+  }
 
-function createFlakes(centreX: number, centreY: number, globeRadius: number, count: number) {
-  return Array.from({ length: count }, () => {
-    const angle = Math.random() * Math.PI * 2;
-    const distance = Math.sqrt(Math.random()) * globeRadius * 0.88;
-    return {
-      x: centreX + Math.cos(angle) * distance,
-      y: centreY + Math.sin(angle) * distance,
-      vx: (Math.random() - 0.5) * 0.5,
-      vy: (Math.random() - 0.5) * 0.5,
-      radius: 1 + Math.random() * 2.4,
-      opacity: 0.45 + Math.random() * 0.5,
-    } satisfies Flake;
+  return { positions, velocities };
+}
+
+function Snowfall({
+  shakeSignal,
+  reducedMotion,
+}: {
+  shakeSignal: number;
+  reducedMotion: boolean;
+}) {
+  const geometry = useRef<THREE.BufferGeometry>(null);
+  const particles = useRef<ReturnType<typeof createSnowParticles> | null>(null);
+  const invalidate = useThree(state => state.invalidate);
+
+  useEffect(() => {
+    const current = geometry.current;
+    if (!current) return;
+    const particleState = createSnowParticles();
+    particles.current = particleState;
+    current.setAttribute(
+      'position',
+      new THREE.BufferAttribute(particleState.positions, 3)
+    );
+    current.computeBoundingSphere();
+    invalidate();
+  }, [invalidate]);
+
+  useEffect(() => {
+    if (shakeSignal === 0 || reducedMotion) return;
+    const particleState = particles.current;
+    if (!particleState) return;
+    const random = seededRandom(0x77e21 + shakeSignal * 9_973);
+
+    for (let index = 0; index < SNOW_COUNT; index += 1) {
+      const offset = index * 3;
+      const angle = random() * Math.PI * 2;
+      const force = 1.6 + random() * 2.3;
+      particleState.velocities[offset] += Math.cos(angle) * force;
+      particleState.velocities[offset + 1] = 2.4 + random() * 3.2;
+      particleState.velocities[offset + 2] += Math.sin(angle) * force;
+      if (particleState.positions[offset + 1] < -0.72) {
+        particleState.positions[offset + 1] = -0.72 + random() * 0.35;
+      }
+    }
+
+    const position = geometry.current?.getAttribute('position');
+    if (position) position.needsUpdate = true;
+    invalidate();
+  }, [invalidate, reducedMotion, shakeSignal]);
+
+  useFrame((_, rawDelta) => {
+    if (reducedMotion) return;
+    const delta = Math.min(rawDelta, 1 / 30);
+    const particleState = particles.current;
+    if (!particleState) return;
+    const { positions, velocities } = particleState;
+
+    for (let index = 0; index < SNOW_COUNT; index += 1) {
+      const offset = index * 3;
+      velocities[offset + 1] -= 1.55 * delta;
+      const drag = Math.pow(0.988, delta * 60);
+      velocities[offset] *= drag;
+      velocities[offset + 1] *= Math.pow(0.996, delta * 60);
+      velocities[offset + 2] *= drag;
+
+      positions[offset] += velocities[offset] * delta;
+      positions[offset + 1] += velocities[offset + 1] * delta;
+      positions[offset + 2] += velocities[offset + 2] * delta;
+
+      if (positions[offset + 1] < SNOW_FLOOR) {
+        positions[offset + 1] = SNOW_FLOOR;
+        velocities[offset] *= 0.76;
+        velocities[offset + 1] *= -0.16;
+        velocities[offset + 2] *= 0.76;
+      }
+
+      const dx = positions[offset];
+      const dy = positions[offset + 1] - GLOBE_CENTRE_Y;
+      const dz = positions[offset + 2];
+      const distance = Math.hypot(dx, dy, dz);
+      const limit = GLOBE_RADIUS - 0.07;
+
+      if (distance > limit) {
+        const scale = limit / Math.max(distance, 0.001);
+        positions[offset] = dx * scale;
+        positions[offset + 1] = GLOBE_CENTRE_Y + dy * scale;
+        positions[offset + 2] = dz * scale;
+        const nx = dx / distance;
+        const ny = dy / distance;
+        const nz = dz / distance;
+        const outward =
+          velocities[offset] * nx +
+          velocities[offset + 1] * ny +
+          velocities[offset + 2] * nz;
+        if (outward > 0) {
+          velocities[offset] -= nx * outward * 1.35;
+          velocities[offset + 1] -= ny * outward * 1.35;
+          velocities[offset + 2] -= nz * outward * 1.35;
+        }
+      }
+    }
+
+    const position = geometry.current?.getAttribute('position');
+    if (position) position.needsUpdate = true;
   });
+
+  return (
+    <points frustumCulled={false}>
+      <bufferGeometry ref={geometry} />
+      <pointsMaterial
+        color="#fffdf5"
+        size={0.055}
+        sizeAttenuation
+        transparent
+        opacity={0.9}
+        depthWrite={false}
+      />
+    </points>
+  );
+}
+
+function Pine({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) {
+  return (
+    <group position={position} scale={scale}>
+      <mesh position={[0, -0.15, 0]}>
+        <cylinderGeometry args={[0.09, 0.12, 0.7, 8]} />
+        <meshStandardMaterial color="#594233" roughness={0.92} />
+      </mesh>
+      <mesh position={[0, 0.18, 0]}>
+        <coneGeometry args={[0.54, 1.05, 10]} />
+        <meshStandardMaterial color="#31594e" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 0.58, 0]}>
+        <coneGeometry args={[0.42, 0.86, 10]} />
+        <meshStandardMaterial color="#3b685b" roughness={0.9} />
+      </mesh>
+    </group>
+  );
+}
+
+function Cabin() {
+  return (
+    <group position={[-0.42, -0.5, 0.04]} rotation={[0, -0.12, 0]}>
+      <mesh>
+        <boxGeometry args={[1.18, 0.78, 0.96]} />
+        <meshStandardMaterial color="#80574b" roughness={0.86} />
+      </mesh>
+      <mesh position={[0, 0.63, 0]} rotation={[0, Math.PI / 4, 0]}>
+        <coneGeometry args={[0.86, 0.72, 4]} />
+        <meshStandardMaterial color="#d7d1c5" roughness={0.96} />
+      </mesh>
+      <mesh position={[0.27, 0.86, -0.18]}>
+        <boxGeometry args={[0.18, 0.55, 0.2]} />
+        <meshStandardMaterial color="#65504a" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, -0.15, 0.5]}>
+        <boxGeometry args={[0.27, 0.48, 0.035]} />
+        <meshStandardMaterial color="#4d3a34" roughness={0.92} />
+      </mesh>
+      <mesh position={[-0.36, 0.08, 0.5]}>
+        <boxGeometry args={[0.25, 0.23, 0.04]} />
+        <meshStandardMaterial
+          color="#ffd981"
+          emissive="#eaa83d"
+          emissiveIntensity={1.8}
+          toneMapped={false}
+        />
+      </mesh>
+      <pointLight position={[-0.36, 0.08, 0.72]} color="#ffc96b" intensity={3.2} distance={2.7} />
+    </group>
+  );
+}
+
+function GlobeScene({
+  shakeSignal,
+  reducedMotion,
+}: {
+  shakeSignal: number;
+  reducedMotion: boolean;
+}) {
+  const world = useRef<THREE.Group>(null);
+  const wobble = useRef(0);
+
+  useEffect(() => {
+    if (!reducedMotion && shakeSignal > 0) wobble.current = 1;
+  }, [reducedMotion, shakeSignal]);
+
+  useFrame(({ clock }, delta) => {
+    const group = world.current;
+    if (!group || reducedMotion) return;
+    group.rotation.y += delta * 0.16;
+    if (wobble.current > 0.002) {
+      const phase = clock.elapsedTime * 24;
+      group.rotation.z = Math.sin(phase) * 0.075 * wobble.current;
+      group.position.x = Math.cos(phase * 0.83) * 0.11 * wobble.current;
+      wobble.current *= Math.pow(0.035, delta);
+    } else {
+      group.rotation.z *= 0.88;
+      group.position.x *= 0.88;
+    }
+  });
+
+  return (
+    <>
+      <ambientLight intensity={1.35} />
+      <directionalLight position={[4, 6, 5]} intensity={2.6} color="#fff7df" />
+      <directionalLight position={[-4, 2, -3]} intensity={1.15} color="#9fbaff" />
+
+      <group ref={world} rotation={[0.03, -0.35, 0]}>
+        <mesh position={[0, -1.12, 0]} receiveShadow>
+          <cylinderGeometry args={[2.08, 2.18, 0.34, 48]} />
+          <meshStandardMaterial color="#e8e5dc" roughness={0.98} />
+        </mesh>
+        <Cabin />
+        <Pine position={[0.9, -0.47, -0.18]} scale={1.18} />
+        <Pine position={[1.42, -0.66, 0.24]} scale={0.72} />
+        <Pine position={[-1.38, -0.68, -0.42]} scale={0.64} />
+        <Snowfall shakeSignal={shakeSignal} reducedMotion={reducedMotion} />
+      </group>
+
+      <mesh position={[0, GLOBE_CENTRE_Y, 0]} renderOrder={3}>
+        <sphereGeometry args={[2.42, 48, 32]} />
+        <meshPhysicalMaterial
+          color="#bfd8ff"
+          transparent
+          opacity={0.16}
+          roughness={0.08}
+          metalness={0.04}
+          clearcoat={1}
+          clearcoatRoughness={0.08}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh position={[0, -2.07, 0]}>
+        <cylinderGeometry args={[1.95, 2.28, 0.72, 56]} />
+        <meshStandardMaterial color="#3f333e" roughness={0.68} metalness={0.12} />
+      </mesh>
+      <mesh position={[0, -1.73, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.98, 0.075, 12, 64]} />
+        <meshStandardMaterial color="#8b7184" roughness={0.5} metalness={0.2} />
+      </mesh>
+    </>
+  );
 }
 
 export function SnowGlobe() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
-  const shakeRef = useRef<() => void>(() => undefined);
-  const permissionRef = useRef<PermissionState>('idle');
-  const sensorEventSeenRef = useRef(false);
-  const [permission, setPermission] = useState<PermissionState>('idle');
-
-  const updatePermission = useCallback((next: PermissionState) => {
-    permissionRef.current = next;
-    setPermission(next);
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const stage = stageRef.current;
-    const context = canvas?.getContext('2d');
-    if (!canvas || !stage || !context) return;
-
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
-    let width = 1;
-    let height = 1;
-    let centreX = 0;
-    let centreY = 0;
-    let globeRadius = 1;
-    let flakes: Flake[] = [];
-    let frame = 0;
-    let previousTime = performance.now();
-    let gravityX = 0;
-    let gravityY = 0.055;
-    let targetGravityX = 0;
-    let targetGravityY = 0.055;
-    let dragging = false;
-    let pointerX = 0;
-    let pointerY = 0;
-    let baselineBeta: number | null = null;
-    let baselineGamma: number | null = null;
-    let dark = document.documentElement.classList.contains('dark');
-
-    const resize = () => {
-      const bounds = stage.getBoundingClientRect();
-      width = Math.max(1, bounds.width);
-      height = Math.max(1, bounds.height);
-      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(width * pixelRatio);
-      canvas.height = Math.round(height * pixelRatio);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-      centreX = width / 2;
-      centreY = height * 0.45;
-      globeRadius = Math.min(width * 0.42, height * 0.36);
-      flakes = createFlakes(
-        centreX,
-        centreY,
-        globeRadius,
-        Math.round(clamp((width * height) / 3000, 110, coarsePointer ? 180 : 260)),
-      );
-    };
-
-    const addShake = (strength = 1) => {
-      for (const flake of flakes) {
-        flake.vx += (Math.random() - 0.5) * 3 * strength;
-        flake.vy += (Math.random() - 0.8) * 4 * strength;
-      }
-    };
-    shakeRef.current = () => addShake(1);
-
-    const drawGlobe = () => {
-      const glass = context.createRadialGradient(
-        centreX - globeRadius * 0.35,
-        centreY - globeRadius * 0.4,
-        globeRadius * 0.08,
-        centreX,
-        centreY,
-        globeRadius,
-      );
-      if (dark) {
-        glass.addColorStop(0, 'rgba(125, 170, 255, 0.22)');
-        glass.addColorStop(0.55, 'rgba(35, 45, 76, 0.42)');
-        glass.addColorStop(1, 'rgba(8, 10, 20, 0.78)');
-      } else {
-        glass.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-        glass.addColorStop(0.55, 'rgba(203, 225, 255, 0.52)');
-        glass.addColorStop(1, 'rgba(113, 150, 207, 0.32)');
-      }
-
-      context.save();
-      context.beginPath();
-      context.arc(centreX, centreY, globeRadius, 0, Math.PI * 2);
-      context.clip();
-      context.fillStyle = glass;
-      context.fillRect(centreX - globeRadius, centreY - globeRadius, globeRadius * 2, globeRadius * 2);
-
-      const snowLine = centreY + globeRadius * 0.56;
-      context.fillStyle = dark ? 'rgba(225, 235, 255, 0.92)' : 'rgba(255,255,255,0.97)';
-      context.beginPath();
-      context.moveTo(centreX - globeRadius, centreY + globeRadius);
-      context.lineTo(centreX - globeRadius, snowLine);
-      context.quadraticCurveTo(centreX, snowLine - globeRadius * 0.12, centreX + globeRadius, snowLine);
-      context.lineTo(centreX + globeRadius, centreY + globeRadius);
-      context.closePath();
-      context.fill();
-
-      const cabinX = centreX - globeRadius * 0.18;
-      const cabinY = snowLine - globeRadius * 0.17;
-      context.fillStyle = dark ? '#845c52' : '#9b6554';
-      context.fillRect(cabinX, cabinY, globeRadius * 0.28, globeRadius * 0.2);
-      context.fillStyle = dark ? '#d9e4ff' : '#f8fbff';
-      context.beginPath();
-      context.moveTo(cabinX - globeRadius * 0.04, cabinY);
-      context.lineTo(cabinX + globeRadius * 0.14, cabinY - globeRadius * 0.15);
-      context.lineTo(cabinX + globeRadius * 0.32, cabinY);
-      context.closePath();
-      context.fill();
-      context.fillStyle = '#f5bf55';
-      context.fillRect(cabinX + globeRadius * 0.07, cabinY + globeRadius * 0.06, globeRadius * 0.055, globeRadius * 0.06);
-
-      const treeX = centreX + globeRadius * 0.27;
-      const treeBase = snowLine;
-      context.fillStyle = dark ? '#4f8b75' : '#397963';
-      for (let level = 0; level < 3; level += 1) {
-        const top = treeBase - globeRadius * (0.18 + level * 0.1);
-        const spread = globeRadius * (0.17 - level * 0.028);
-        context.beginPath();
-        context.moveTo(treeX, top - globeRadius * 0.12);
-        context.lineTo(treeX - spread, top + globeRadius * 0.12);
-        context.lineTo(treeX + spread, top + globeRadius * 0.12);
-        context.closePath();
-        context.fill();
-      }
-
-      for (const flake of flakes) {
-        context.globalAlpha = flake.opacity;
-        context.fillStyle = '#ffffff';
-        context.beginPath();
-        context.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
-        context.fill();
-      }
-      context.restore();
-      context.globalAlpha = 1;
-
-      context.strokeStyle = dark ? 'rgba(215,226,255,0.62)' : 'rgba(255,255,255,0.96)';
-      context.lineWidth = Math.max(2, globeRadius * 0.018);
-      context.beginPath();
-      context.arc(centreX, centreY, globeRadius, 0, Math.PI * 2);
-      context.stroke();
-
-      const baseWidth = globeRadius * 1.18;
-      const baseY = centreY + globeRadius * 0.86;
-      const baseHeight = globeRadius * 0.28;
-      context.fillStyle = dark ? '#39323b' : '#66515a';
-      context.beginPath();
-      context.roundRect(centreX - baseWidth / 2, baseY, baseWidth, baseHeight, globeRadius * 0.08);
-      context.fill();
-    };
-
-    const draw = (time: number) => {
-      const elapsed = Math.min(34, Math.max(1, time - previousTime));
-      const frameScale = elapsed / (1000 / 60);
-      previousTime = time;
-
-      gravityX += (targetGravityX - gravityX) * 0.08 * frameScale;
-      gravityY += (targetGravityY - gravityY) * 0.08 * frameScale;
-
-      if (!reducedMotion) {
-        for (const flake of flakes) {
-          flake.vx += gravityX * 0.32 * frameScale;
-          flake.vy += gravityY * 0.32 * frameScale;
-          flake.vx *= Math.pow(0.992, frameScale);
-          flake.vy *= Math.pow(0.992, frameScale);
-          flake.x += flake.vx * frameScale;
-          flake.y += flake.vy * frameScale;
-
-          const dx = flake.x - centreX;
-          const dy = flake.y - centreY;
-          const distance = Math.max(0.001, Math.hypot(dx, dy));
-          const limit = globeRadius - flake.radius - 4;
-          if (distance > limit) {
-            const normalX = dx / distance;
-            const normalY = dy / distance;
-            flake.x = centreX + normalX * limit;
-            flake.y = centreY + normalY * limit;
-            const outward = flake.vx * normalX + flake.vy * normalY;
-            if (outward > 0) {
-              flake.vx -= normalX * outward * 1.45;
-              flake.vy -= normalY * outward * 1.45;
-            }
-          }
-        }
-      }
-
-      context.clearRect(0, 0, width, height);
-      drawGlobe();
-    };
-
-    const animate = (time: number) => {
-      draw(time);
-      frame = window.requestAnimationFrame(animate);
-    };
-
-    const markSensorLive = () => {
-      sensorEventSeenRef.current = true;
-      if (permissionRef.current !== 'enabled') updatePermission('enabled');
-    };
-
-    const onOrientation = (event: DeviceOrientationEvent) => {
-      if (event.beta === null || event.gamma === null) return;
-      markSensorLive();
-      if (baselineBeta === null || baselineGamma === null) {
-        baselineBeta = event.beta;
-        baselineGamma = event.gamma;
-      }
-      targetGravityX = clamp((event.gamma - baselineGamma) / 240, -0.13, 0.13);
-      targetGravityY = 0.055 + clamp((event.beta - baselineBeta) / 240, -0.13, 0.13);
-    };
-
-    const onPointerDown = (event: PointerEvent) => {
-      dragging = true;
-      pointerX = event.clientX;
-      pointerY = event.clientY;
-      stage.setPointerCapture(event.pointerId);
-    };
-
-    const onPointerMove = (event: PointerEvent) => {
-      if (!dragging) return;
-      const dx = event.clientX - pointerX;
-      const dy = event.clientY - pointerY;
-      pointerX = event.clientX;
-      pointerY = event.clientY;
-      targetGravityX = clamp(dx / 45, -0.14, 0.14);
-      targetGravityY = 0.055 + clamp(dy / 45, -0.14, 0.14);
-      for (const flake of flakes) {
-        flake.vx += dx * 0.012;
-        flake.vy += dy * 0.012;
-      }
-    };
-
-    const onPointerUp = (event: PointerEvent) => {
-      dragging = false;
-      if (stage.hasPointerCapture(event.pointerId)) stage.releasePointerCapture(event.pointerId);
-      window.setTimeout(() => {
-        if (!dragging && permissionRef.current !== 'enabled') {
-          targetGravityX = 0;
-          targetGravityY = 0.055;
-        }
-      }, 200);
-    };
-
-    const resizeObserver = new ResizeObserver(resize);
-    const themeObserver = new MutationObserver(() => {
-      dark = document.documentElement.classList.contains('dark');
-    });
-    resizeObserver.observe(stage);
-    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    stage.addEventListener('pointerdown', onPointerDown);
-    stage.addEventListener('pointermove', onPointerMove);
-    stage.addEventListener('pointerup', onPointerUp);
-    stage.addEventListener('pointercancel', onPointerUp);
-    window.addEventListener('deviceorientation', onOrientation);
-    resize();
-    frame = window.requestAnimationFrame(animate);
-
-    const orientation = (window as unknown as { DeviceOrientationEvent?: PermissionCapableConstructor }).DeviceOrientationEvent;
-    if (!window.isSecureContext || !orientation) updatePermission('unavailable');
-
-    return () => {
-      shakeRef.current = () => undefined;
-      window.cancelAnimationFrame(frame);
-      resizeObserver.disconnect();
-      themeObserver.disconnect();
-      stage.removeEventListener('pointerdown', onPointerDown);
-      stage.removeEventListener('pointermove', onPointerMove);
-      stage.removeEventListener('pointerup', onPointerUp);
-      stage.removeEventListener('pointercancel', onPointerUp);
-      window.removeEventListener('deviceorientation', onOrientation);
-    };
-  }, [updatePermission]);
-
-  const enableTilt = async () => {
-    if (!window.isSecureContext) {
-      updatePermission('unavailable');
-      return;
-    }
-
-    const orientation = (window as unknown as { DeviceOrientationEvent?: PermissionCapableConstructor }).DeviceOrientationEvent;
-    if (!orientation) {
-      updatePermission('unavailable');
-      return;
-    }
-
-    sensorEventSeenRef.current = false;
-    updatePermission('requesting');
-    try {
-      const result = orientation.requestPermission ? await orientation.requestPermission() : 'granted';
-      if (result !== 'granted') {
-        updatePermission('denied');
-        return;
-      }
-      window.setTimeout(() => {
-        if (permissionRef.current === 'requesting') {
-          updatePermission(sensorEventSeenRef.current ? 'enabled' : 'unavailable');
-        }
-      }, 1500);
-    } catch {
-      updatePermission('denied');
-    }
-  };
-
-  const status =
-    permission === 'enabled'
-      ? 'Tilt is live.'
-      : permission === 'requesting'
-        ? 'Waiting for motion…'
-        : permission === 'denied'
-          ? 'Use drag or the shake button.'
-          : permission === 'unavailable'
-            ? 'Use drag or the shake button.'
-            : 'Drag, shake, or enable phone tilt.';
+  const reducedMotion = Boolean(useReducedMotion());
+  const [shakeSignal, setShakeSignal] = useState(0);
 
   return (
-    <section className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-center">
+    <section className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-center">
       <div
-        ref={stageRef}
-        className="relative min-h-[27rem] touch-none overflow-hidden rounded-[2rem] border border-border/70 bg-[radial-gradient(circle_at_50%_35%,hsl(var(--muted)/0.55),transparent_62%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] sm:min-h-[36rem]"
+        className="relative min-h-[27rem] overflow-hidden rounded-[2rem] border border-border/70 bg-[radial-gradient(circle_at_50%_32%,#dbe7ff_0%,#afbfd9_30%,#667087_68%,#272a35_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_24px_70px_rgba(20,24,38,0.18)] dark:bg-[radial-gradient(circle_at_50%_30%,#354563_0%,#1f2738_38%,#10131c_76%,#090a0f_100%)] sm:min-h-[36rem]"
         data-snow-globe-stage
+        role="img"
+        aria-label="A dimensional snow globe with a warm cabin, pine trees, and simulated snow"
       >
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 h-full w-full"
-          role="img"
-          aria-label="Interactive snow globe with a cabin, tree, and simulated snow"
+        <Canvas
+          camera={{ position: [0, 0.62, 7.2], fov: 43 }}
+          dpr={[1, 1.5]}
+          frameloop={reducedMotion ? 'demand' : 'always'}
+          gl={{
+            alpha: true,
+            antialias: false,
+            powerPreference: 'high-performance',
+          }}
+          data-snow-globe-canvas
         >
-          Interactive snow globe.
-        </canvas>
+          <GlobeScene shakeSignal={shakeSignal} reducedMotion={reducedMotion} />
+        </Canvas>
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-[linear-gradient(120deg,rgba(255,255,255,0.22),transparent_38%)]" aria-hidden="true" />
       </div>
 
       <div className="space-y-3">
-        <p className="rounded-2xl border border-border/70 bg-card p-4 text-sm text-muted-foreground" aria-live="polite">
-          {status}
-        </p>
+        <div className="rounded-2xl border border-border/70 bg-card p-4">
+          <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Auto orbit
+          </p>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            The scene turns on its own. Rattle it when the snow settles.
+          </p>
+        </div>
         <button
           type="button"
-          onClick={() => void enableTilt()}
-          disabled={permission === 'requesting' || permission === 'enabled' || permission === 'unavailable'}
-          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-border/70 bg-foreground px-4 py-2 text-sm font-semibold text-background disabled:cursor-default disabled:opacity-55"
-        >
-          <Smartphone className="h-4 w-4" aria-hidden="true" />
-          {permission === 'enabled'
-            ? 'Tilt enabled'
-            : permission === 'requesting'
-              ? 'Requesting access…'
-              : 'Enable phone tilt'}
-        </button>
-        <button
-          type="button"
-          onClick={() => shakeRef.current()}
-          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-border/70 bg-card px-4 py-2 text-sm font-semibold hover:bg-muted"
+          onClick={() => setShakeSignal(current => current + 1)}
+          className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-border/70 bg-foreground px-4 py-2 text-sm font-semibold text-background transition-transform active:scale-[0.97] motion-reduce:transition-none"
+          aria-label="Rattle the globe"
         >
           <RotateCcw className="h-4 w-4" aria-hidden="true" />
-          Shake
+          Rattle the globe
         </button>
       </div>
     </section>

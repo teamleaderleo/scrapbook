@@ -3,8 +3,15 @@
   --home-grid-alpha: 0.036;
 
   background-image:
-    linear-gradient(rgb(var(--home-grid-rgb) / var(--home-grid-alpha)) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(var(--home-grid-rgb) / var(--home-grid-alpha)) 1px, transparent 1px);
+    linear-gradient(
+      rgb(var(--home-grid-rgb) / var(--home-grid-alpha)) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgb(var(--home-grid-rgb) / var(--home-grid-alpha)) 1px,
+      transparent 1px
+    );
   background-size: 28px 28px;
 }
 
@@ -17,4 +24,5 @@
   .paperGrid {
     display: none;
   }
+
 }

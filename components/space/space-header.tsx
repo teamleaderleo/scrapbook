@@ -2,12 +2,12 @@
 
 import { SiteAtlas } from '@/components/site-atlas';
 import Link from 'next/link';
-import { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useSidebar } from '@/components/ui/sidebar';
 import { ArrowLeft, ArrowRight, Code, PanelLeft } from 'lucide-react';
 import { SpaceLinkHint } from '@/components/space/space-link-hint';
+import { useIsMacPlatform } from '@/hooks/use-is-mac-platform';
 
 interface SpaceHeaderProps {
   leftContent: React.ReactNode;
@@ -32,10 +32,7 @@ export function SpaceHeader({
     pathname === '/space/review' ||
     pathname?.startsWith('/space/add') ||
     pathname?.startsWith('/space/edit');
-  const isMac = useMemo(
-    () => typeof navigator !== 'undefined' && /Mac|iPhone|iPad/i.test(navigator.platform),
-    [],
-  );
+  const isMac = useIsMacPlatform();
   const toggleHref = isReviewLike
     ? `/space${tagsParam ? `?tags=${tagsParam}` : ''}`
     : `/space/review${tagsParam ? `?tags=${tagsParam}` : ''}`;
@@ -45,10 +42,18 @@ export function SpaceHeader({
       href={toggleHref}
       prefetch
       className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-transparent px-2 text-sm font-medium text-muted-foreground transition hover:border-border/60 hover:bg-muted/65 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      aria-label={isReviewLike ? 'Back to list' : 'Open review'}
+      aria-label={
+        isReviewLike ? 'Back to learning garden' : 'Open reading mode'
+      }
     >
-      {isReviewLike ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
-      <span className="hidden sm:inline">{isReviewLike ? 'Clippings' : 'Review'}</span>
+      {isReviewLike ? (
+        <ArrowLeft className="h-4 w-4" />
+      ) : (
+        <ArrowRight className="h-4 w-4" />
+      )}
+      <span className="hidden sm:inline">
+        {isReviewLike ? 'Garden' : 'Read'}
+      </span>
       <SpaceLinkHint />
     </Link>
   );

@@ -1,8 +1,22 @@
 import ViewportPageShell from '@/components/viewport-page-shell';
+import { Suspense } from 'react';
 import { ProxyLiveRefresh } from './proxy-live-refresh';
 import { UsageDashboardContainer } from './usage-dashboard-container';
 
-export async function UsagePage() {
+function SignalSkeleton() {
+  return (
+    <div className="grid animate-pulse gap-3 motion-reduce:animate-none" aria-label="Loading cached signal" role="status">
+      <div className="h-44 rounded-2xl border border-border/70 bg-background/55" />
+      <div className="grid gap-3 md:grid-cols-3">
+        <div className="h-32 rounded-xl border border-border/70 bg-background/45" />
+        <div className="h-32 rounded-xl border border-border/70 bg-background/45" />
+        <div className="h-32 rounded-xl border border-border/70 bg-background/45" />
+      </div>
+    </div>
+  );
+}
+
+export function UsagePage() {
   return (
     <ViewportPageShell
       className="bg-[#dfdbd2] text-[#1b1b1f] dark:bg-[#15171b] dark:text-[#f1ede5]"
@@ -13,12 +27,14 @@ export async function UsagePage() {
         <div className="mb-3 flex items-end justify-between gap-4">
           <div>
             <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-black/58 dark:text-white/62">
-              Proxy dashboard
+              Signal
             </p>
-            <h1 className="mt-0.5 text-xl font-bold tracking-tight">Usage</h1>
+            <h1 className="mt-0.5 text-xl font-bold tracking-tight">Network pulse</h1>
           </div>
         </div>
-        <UsageDashboardContainer />
+        <Suspense fallback={<SignalSkeleton />}>
+          <UsageDashboardContainer />
+        </Suspense>
       </div>
     </ViewportPageShell>
   );

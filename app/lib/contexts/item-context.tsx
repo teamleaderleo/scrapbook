@@ -1,7 +1,14 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import type { User } from '@supabase/supabase-js';
 import { useAuth } from '@/app/lib/hooks/useAuth';
 import type { Item } from '@/app/lib/item-types';
@@ -25,6 +32,8 @@ const REVIEW_SELECT = [
   'last_review',
   'suspended',
 ].join(',');
+
+const SPACE_CLIENT_LOAD_TIMEOUT_MS = 10_000;
 
 type ItemsContextType = {
   items: Item[];
@@ -52,6 +61,7 @@ interface ItemsProviderProps {
   initialUser?: User | null;
   initialNowMs?: number;
   initialHasMore?: boolean;
+  initialError?: string | null;
 }
 
 export function ItemsProvider({
@@ -61,6 +71,7 @@ export function ItemsProvider({
   initialUser = null,
   initialNowMs,
   initialHasMore = false,
+  initialError = null,
 }: ItemsProviderProps) {
   const { user, loading: authLoading } = useAuth(initialUser);
   const [supabase] = useState(() => createClient());
@@ -68,7 +79,7 @@ export function ItemsProvider({
   const [loading, setLoading] = useState(initialItems.length === 0);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [nowMs] = useState(() => initialNowMs ?? Date.now());
   const [editorOpen, setEditorOpen] = useState(false);
@@ -82,42 +93,59 @@ export function ItemsProvider({
     setHasMore(initialHasMore);
     setLoading(false);
     setRefreshing(false);
-    setError(null);
+    setError(initialError);
     lastRefreshAt.current = Date.now();
-  }, [initialHasMore, initialItems]);
+  }, [initialError, initialHasMore, initialItems]);
 
   const fetchPage = useCallback(
     async (offset: number, signal: AbortSignal) => {
-      const itemsResult = await supabase
-        .from('items')
-        .select(SPACE_ITEM_SELECT)
-        .order('created_at', { ascending: false })
-        .range(offset, offset + SPACE_PAGE_SIZE - 1)
-        .abortSignal(signal);
+      const requestController = new AbortController();
+      let timedOut = false;
+      const abortFromCaller = () => requestController.abort();
+      signal.addEventListener('abort', abortFromCaller, { once: true });
+      const timer = window.setTimeout(() => {
+        timedOut = true;
+        requestController.abort();
+      }, SPACE_CLIENT_LOAD_TIMEOUT_MS);
 
-      if (itemsResult.error) throw itemsResult.error;
+      try {
+        const itemsResult = await supabase
+          .from('items')
+          .select(SPACE_ITEM_SELECT)
+          .order('created_at', { ascending: false })
+          .range(offset, offset + SPACE_PAGE_SIZE - 1)
+          .abortSignal(requestController.signal);
 
-      const databaseItems = (itemsResult.data ?? []) as unknown as DbItem[];
-      const itemIds = databaseItems.map((item) => item.id);
-      let databaseReviews: DbReview[] = [];
+        if (timedOut) throw new Error('Space archive request timed out');
+        if (itemsResult.error) throw itemsResult.error;
 
-      if (isAdmin && itemIds.length > 0) {
-        const reviewsResult = await supabase
-          .from('reviews')
-          .select(REVIEW_SELECT)
-          .in('item_id', itemIds)
-          .abortSignal(signal);
+        const databaseItems = (itemsResult.data ?? []) as unknown as DbItem[];
+        const itemIds = databaseItems.map(item => item.id);
+        let databaseReviews: DbReview[] = [];
 
-        if (reviewsResult.error) throw reviewsResult.error;
-        databaseReviews = (reviewsResult.data ?? []) as unknown as DbReview[];
+        if (isAdmin && itemIds.length > 0) {
+          const reviewsResult = await supabase
+            .from('reviews')
+            .select(REVIEW_SELECT)
+            .in('item_id', itemIds)
+            .order('updated_at', { ascending: true })
+            .abortSignal(requestController.signal);
+
+          if (timedOut) throw new Error('Space review request timed out');
+          if (reviewsResult.error) throw reviewsResult.error;
+          databaseReviews = (reviewsResult.data ?? []) as unknown as DbReview[];
+        }
+
+        return {
+          items: mapDatabaseItemsToItems(databaseItems, databaseReviews),
+          hasMore: databaseItems.length === SPACE_PAGE_SIZE,
+        };
+      } finally {
+        window.clearTimeout(timer);
+        signal.removeEventListener('abort', abortFromCaller);
       }
-
-      return {
-        items: mapDatabaseItemsToItems(databaseItems, databaseReviews),
-        hasMore: databaseItems.length === SPACE_PAGE_SIZE,
-      };
     },
-    [isAdmin, supabase],
+    [isAdmin, supabase]
   );
 
   const signOut = useCallback(async () => {
@@ -146,7 +174,7 @@ export function ItemsProvider({
       setError(
         items.length > 0
           ? 'Could not refresh items. Showing the last loaded version.'
-          : 'Could not load items.',
+          : 'Could not load items.'
       );
     } finally {
       if (activeReload.current === controller) activeReload.current = null;
@@ -169,9 +197,12 @@ export function ItemsProvider({
     try {
       const page = await fetchPage(items.length, controller.signal);
       if (controller.signal.aborted) return;
-      setItems((current) => {
-        const existingIds = new Set(current.map((item) => item.id));
-        return [...current, ...page.items.filter((item) => !existingIds.has(item.id))];
+      setItems(current => {
+        const existingIds = new Set(current.map(item => item.id));
+        return [
+          ...current,
+          ...page.items.filter(item => !existingIds.has(item.id)),
+        ];
       });
       setHasMore(page.hasMore);
     } catch (loadError) {

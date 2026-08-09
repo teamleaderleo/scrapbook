@@ -140,6 +140,58 @@ Focused browser coverage confirms `/login` returns an ordinary not-found respons
 - #411 — tactile interaction lab remains optional research rather than a queued implementation.
 - #414 — mobile Space actions/editor behavior remains a current-product decision independent of the archived dependency branch.
 
+## 2026-08-09 hygiene pass
+
+### Removed: orphaned dashboard, project, login, and WebSocket source
+
+A repository-wide literal path, filename, import, and exported-symbol search found no caller for the following tracked files. Their original route trees and UI owners were already retired, and `components/projects/error.tsx` was not a Next.js error boundary because it lived under `components/` rather than `app/`:
+
+- `components/dashboard/footer-tiptap-editor.tsx`
+- `components/editor/content-preview.tsx`
+- `components/hardcoded-sticky-note.tsx`
+- `components/portfolio/portfolio.css`
+- `components/projects/components/tag-manager.tsx`
+- `components/projects/components/tiptap-editor-project-blocks.tsx`
+- `components/projects/error.tsx`
+- `components/simple-auth-modal.tsx`
+- `dist/socket-server.js`
+
+The tag manager was entirely commented out. The sticky note contained demo login credentials for the retired landing/login flow. The compiled WebSocket server had no source owner, package script, deployment entrypoint, route, or client. Current Space authentication, editing, schemas, database access, and deployment controls remain unchanged.
+
+### Removed: public assets owned only by retired surfaces
+
+The following assets had no current literal reference, import, metadata reference, documented archival role, or dynamic URL owner. Git history ties them to the retired landing/login page, project/block dashboard, or disconnected Scrapbook showcase:
+
+- `public/landing-desktop.jpg`
+- `public/landing-mobile.jpg`
+- `public/placeholder-default.png`
+- `public/placeholder-file.png`
+- `public/placeholder-text.png`
+- `public/blocks/app-wireframes.pdf`
+- `public/blocks/homepage-mockup.png`
+- `public/blocks/logo-concepts.png`
+- `public/scrapbook/blog-landing-preview.webp`
+- `public/scrapbook/network-performance-diff.webp`
+- `public/scrapbook/platform-vscode-overview.webp`
+- `public/scrapbook/server-actions-example.webp`
+- `public/scrapbook/tiptap-editor-demo.webp`
+
+The numbered `public/img1.jpg` through `public/img10.jpg` carousel images remain: `components/three-carousel/three-carousel.tsx` constructs those URLs at runtime from its default `/img` prefix, so a literal filename search alone would incorrectly classify them as unused. Current Gallery agent artwork and Journal documents also remain.
+
+No database row, user content, schema, migration, credential, or live route was removed. Git history is the recovery path for every deleted file.
+
+### Removed: obsolete Drizzle model and commands
+
+The live runtime database boundary is the lazy `postgres` client in
+`app/lib/db/db.ts`. Its only callers issue explicit SQL for proxy-health reads
+and writes. The unused Drizzle model and CLI configuration described only the
+retired account/project/block schema, so they were removed along with the
+misleading `generate`, `migrate`, and `studio` scripts and unused dependencies.
+
+Checked-in SQL files under `drizzle/` remain the migration ledger. No table or
+row was removed by this repository cleanup; the related live Data API grants
+were retired separately with a reversible SQL migration.
+
 ## Recovery
 
 For deleted files, use the parent commit of the relevant cleanup merge or retrieve the exact path from Git history. Restore only into a fresh branch with a current caller and current authorization model; do not restore a retired cluster by default.

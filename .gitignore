@@ -10,6 +10,7 @@
 
 # testing
 /coverage
+/test-results/
 
 # next.js
 /.next/
@@ -21,7 +22,8 @@
 # misc
 .DS_Store
 *.pem
-/drizzle/
+/drizzle/*
+!/drizzle/*.sql
 
 # debug
 npm-debug.log*

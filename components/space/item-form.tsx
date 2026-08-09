@@ -1,19 +1,21 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { MarkdownEditor } from "@/components/space/markdown-editor";
-import { CodeEditor } from "@/components/space/code-editor";
-import { RawJsonEditor } from "@/components/space/raw-json-editor";
-import { MetadataJsonEditor } from "@/components/space/metadata-json-editor";
-import { ItemPreview } from "@/components/space/item-preview";
-import { SpaceHeader } from "@/components/space/space-header";
-import { addItemAction, updateItemAction } from "@/app/space/actions";
-import { Copy, Check, Plus, Trash2 } from "lucide-react";
-import { VersionTabs } from "@/components/space/version-tabs";
+import { useEffect, useRef, useState, useTransition } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
+import { SPACE_ITEM_SELECT } from '@/app/lib/space-data';
+import type { DbItem } from '@/app/lib/db/supabase';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { MarkdownEditor } from '@/components/space/markdown-editor';
+import { CodeEditor } from '@/components/space/code-editor';
+import { RawJsonEditor } from '@/components/space/raw-json-editor';
+import { MetadataJsonEditor } from '@/components/space/metadata-json-editor';
+import { ItemPreview } from '@/components/space/item-preview';
+import { SpaceHeader } from '@/components/space/space-header';
+import { addItemAction, updateItemAction } from '@/app/space/actions';
+import { Copy, Check, Plus, Trash2 } from 'lucide-react';
+import { VersionTabs } from '@/components/space/version-tabs';
 
 // Singleton/Canonical shape for the item with only editable fields
 type Model = {
@@ -32,21 +34,22 @@ type Model = {
 
 interface ItemFormProps {
   item?: any;
-  mode: "add" | "edit";
+  mode: 'add' | 'edit';
 }
 
 const DEFAULT_MODEL: Model = {
-  slug: "unique-slug",
-  title: "0. Problem Title",
-  url: "https://leetcode.com/problems/...",
-  tags: ["type:leetcode", "company:google", "topic:array", "difficulty:easy"],
-  category: "leetcode",
+  slug: 'unique-slug',
+  title: 'A question worth following',
+  url: null,
+  tags: ['mode:read', 'state:fresh', 'device:phone'],
+  category: 'explain',
   defaultIndex: 0,
   versions: [
     {
-      label: "v1",
-      content: "# Approach\n\nYour writeup here",
-      code: "def solution():\n  # code\n",
+      label: 'Living lesson',
+      content:
+        '# The question\n\nWhat are we trying to understand?\n\n## Why it matters\n\nWhy is this useful now?\n\n## Current explanation\n\nStart with the clearest version.\n\n## Questions and answers\n\nAdd selected Q&A worth publishing.\n\n## Follow the thread\n\n- Related idea — explain why the relation matters.',
+      code: null,
     },
   ],
 };
@@ -55,43 +58,47 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const searchParams = useSearchParams();
-  const duplicateId = searchParams.get("duplicate") || null;
+  const duplicateId = searchParams.get('duplicate') || null;
   const supabase = createClient();
 
   // The database ID (only present for updates)
-  const itemId = mode === "edit" && item ? item.id : null;
+  const itemId = mode === 'edit' && item ? item.id : null;
 
   // Which version we're currently editing
   const [activeVersionIdx, setActiveVersionIdx] = useState(0);
 
   const [model, setModel] = useState<Model>(() => {
-    if (mode === "edit" && item) {
+    if (mode === 'edit' && item) {
       return {
-        slug: item.slug ?? "untitled-slug",
-        title: item.title ?? "",
+        slug: item.slug ?? 'untitled-slug',
+        title: item.title ?? '',
         url: item.url ?? null,
         tags: item.tags ?? [],
         category: item.category ?? null,
         defaultIndex: item.defaultIndex ?? 0,
-        versions: item.versions ?? [{ label: "v1", content: "", code: null }],
+        versions: item.versions ?? [{ label: 'v1', content: '', code: null }],
       };
     }
     return DEFAULT_MODEL;
   });
 
   // === Raw JSON text (Holds all the stuff) =========================
-  const [rawInput, setRawInput] = useState(() => JSON.stringify(model, null, 2));
-  const [jsonError, setJsonError] = useState<string>("");
+  const [rawInput, setRawInput] = useState(() =>
+    JSON.stringify(model, null, 2)
+  );
+  const [jsonError, setJsonError] = useState<string>('');
 
   // === Metadata JSON text (excludes content and code) ========================
   const [metadataInput, setMetadataInput] = useState(() => {
     const { versions, ...metadata } = model;
     return JSON.stringify(metadata, null, 2);
   });
-  const [metadataError, setMetadataError] = useState<string>("");
+  const [metadataError, setMetadataError] = useState<string>('');
 
   // Who changed last? avoids echo/feedback loops across editors
-  const lastChangedBy = useRef<"json" | "markdown" | "code" | "meta" | null>(null);
+  const lastChangedBy = useRef<'json' | 'markdown' | 'code' | 'meta' | null>(
+    null
+  );
 
   // Is the raw JSON textarea currently focused?
   const [isEditingRaw, setIsEditingRaw] = useState(false);
@@ -108,40 +115,47 @@ export function ItemForm({ item, mode }: ItemFormProps) {
 
   useEffect(() => {
     // Reset to default when switching to add mode (and not duplicating)
-    if (mode === "add" && !duplicateId) {
-      lastChangedBy.current = "meta";
+    if (mode === 'add' && !duplicateId) {
+      lastChangedBy.current = 'meta';
       setModel(DEFAULT_MODEL);
       setRawInput(JSON.stringify(DEFAULT_MODEL, null, 2));
       const { versions, ...metadata } = DEFAULT_MODEL;
       setMetadataInput(JSON.stringify(metadata, null, 2));
-      setJsonError("");
-      setMetadataError("");
+      setJsonError('');
+      setMetadataError('');
       setActiveVersionIdx(0);
     }
   }, [mode, duplicateId]);
 
   // === Duplicate-from-item support (only in add mode) ========================
   useEffect(() => {
-    if (mode !== "add" || !duplicateId) return;
+    if (mode !== 'add' || !duplicateId) return;
     (async () => {
-      const { data } = await supabase.from("items").select("*").eq("id", duplicateId).single();
-      if (data) {
+      const { data } = await supabase
+        .from('items')
+        .select(SPACE_ITEM_SELECT)
+        .eq('id', duplicateId)
+        .single();
+      const source = data as unknown as DbItem | null;
+      if (source) {
         const template: Model = {
-          slug: `${data.slug ?? data.id}-copy`,
-          title: `${data.title} (Copy)`,
-          url: data.url ?? null,
-          tags: data.tags ?? [],
-          category: data.category ?? null,
-          defaultIndex: data.default_index ?? 0,
-          versions: data.versions ?? [{ label: "v1", content: "", code: null }],
+          slug: `${source.slug ?? source.id}-copy`,
+          title: `${source.title} (Copy)`,
+          url: source.url ?? null,
+          tags: source.tags ?? [],
+          category: source.category ?? null,
+          defaultIndex: source.default_index ?? 0,
+          versions: source.versions ?? [
+            { label: 'v1', content: '', code: null },
+          ],
         };
-        lastChangedBy.current = "meta";
+        lastChangedBy.current = 'meta';
         setModel(template);
         setRawInput(JSON.stringify(template, null, 2));
         const { versions, ...metadata } = template;
         setMetadataInput(JSON.stringify(metadata, null, 2));
-        setJsonError("");
-        setMetadataError("");
+        setJsonError('');
+        setMetadataError('');
         setActiveVersionIdx(0);
       }
     })();
@@ -168,14 +182,14 @@ export function ItemForm({ item, mode }: ItemFormProps) {
         clearTimeout(errorTimer.current);
         errorTimer.current = null;
       }
-      setJsonError("");
+      setJsonError('');
 
-      lastChangedBy.current = "json";
+      lastChangedBy.current = 'json';
       setModel(next);
     } catch {
       if (errorTimer.current) clearTimeout(errorTimer.current);
       errorTimer.current = setTimeout(() => {
-        setJsonError("Invalid JSON");
+        setJsonError('Invalid JSON');
       }, 300);
     }
   };
@@ -192,10 +206,10 @@ export function ItemForm({ item, mode }: ItemFormProps) {
         clearTimeout(metadataErrorTimer.current);
         metadataErrorTimer.current = null;
       }
-      setMetadataError("");
+      setMetadataError('');
 
-      lastChangedBy.current = "meta";
-      setModel((prev) => ({
+      lastChangedBy.current = 'meta';
+      setModel(prev => ({
         ...prev,
         slug: parsed.slug ?? prev.slug,
         title: parsed.title ?? prev.title,
@@ -207,14 +221,14 @@ export function ItemForm({ item, mode }: ItemFormProps) {
     } catch {
       if (metadataErrorTimer.current) clearTimeout(metadataErrorTimer.current);
       metadataErrorTimer.current = setTimeout(() => {
-        setMetadataError("Invalid JSON");
+        setMetadataError('Invalid JSON');
       }, 300);
     }
   };
 
   const handleMetadataPasted = (text: string) => {
-    setMetadataInput(text);            // reflect UI
-    setIsEditingMetadata(true);        // temporarily mark as editing to allow parse/apply
+    setMetadataInput(text); // reflect UI
+    setIsEditingMetadata(true); // temporarily mark as editing to allow parse/apply
 
     try {
       const parsed = JSON.parse(text);
@@ -222,9 +236,9 @@ export function ItemForm({ item, mode }: ItemFormProps) {
         clearTimeout(metadataErrorTimer.current);
         metadataErrorTimer.current = null;
       }
-      setMetadataError("");
-      lastChangedBy.current = "meta";  // prevent mirror effects from clobbering
-      setModel((prev) => ({
+      setMetadataError('');
+      lastChangedBy.current = 'meta'; // prevent mirror effects from clobbering
+      setModel(prev => ({
         ...prev,
         slug: parsed.slug ?? prev.slug,
         title: parsed.title ?? prev.title,
@@ -236,7 +250,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
     } catch {
       if (metadataErrorTimer.current) clearTimeout(metadataErrorTimer.current);
       metadataErrorTimer.current = setTimeout(() => {
-        setMetadataError("Invalid JSON");
+        setMetadataError('Invalid JSON');
       }, 300);
     } finally {
       setIsEditingMetadata(false);
@@ -246,32 +260,32 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   // === Model -> Raw JSON mirror (only when NOT editing JSON) =================
   useEffect(() => {
     if (isEditingRaw) return;
-    if (lastChangedBy.current !== "json") {
+    if (lastChangedBy.current !== 'json') {
       setRawInput(JSON.stringify(model, null, 2));
-      setJsonError("");
+      setJsonError('');
     }
   }, [model, isEditingRaw]);
 
   // === Model -> Metadata JSON mirror (only when NOT editing metadata) ========
   useEffect(() => {
     if (isEditingMetadata) return;
-    if (lastChangedBy.current !== "meta") {
+    if (lastChangedBy.current !== 'meta') {
       const { versions, ...metadata } = model;
       setMetadataInput(JSON.stringify(metadata, null, 2));
-      setMetadataError("");
+      setMetadataError('');
     }
   }, [model, isEditingMetadata]);
 
   // === Title input change =====================================================
   const onTitleChange = (val: string) => {
-    lastChangedBy.current = "meta";
-    setModel((m) => ({ ...m, title: val }));
+    lastChangedBy.current = 'meta';
+    setModel(m => ({ ...m, title: val }));
   };
 
   // === Markdown editor change ================================================
   const onMarkdownChange = (val: string) => {
-    lastChangedBy.current = "markdown";
-    setModel((m) => ({
+    lastChangedBy.current = 'markdown';
+    setModel(m => ({
       ...m,
       versions: m.versions.map((v, i) =>
         i === activeVersionIdx ? { ...v, content: val } : v
@@ -281,8 +295,8 @@ export function ItemForm({ item, mode }: ItemFormProps) {
 
   // === Code editor change =====================================================
   const onCodeChange = (val: string) => {
-    lastChangedBy.current = "code";
-    setModel((m) => ({
+    lastChangedBy.current = 'code';
+    setModel(m => ({
       ...m,
       versions: m.versions.map((v, i) =>
         i === activeVersionIdx ? { ...v, code: val } : v
@@ -300,18 +314,17 @@ export function ItemForm({ item, mode }: ItemFormProps) {
         return match ? parseInt(match[1], 10) : 0;
       })
       .filter(n => n > 0);
-    
-    const nextNum = versionNumbers.length > 0 
-      ? Math.max(...versionNumbers) + 1 
-      : 1;
 
-    setModel((m) => ({
+    const nextNum =
+      versionNumbers.length > 0 ? Math.max(...versionNumbers) + 1 : 1;
+
+    setModel(m => ({
       ...m,
       versions: [
         ...m.versions,
         {
           label: `v${nextNum}`,
-          content: "",
+          content: '',
           code: null,
         },
       ],
@@ -321,10 +334,13 @@ export function ItemForm({ item, mode }: ItemFormProps) {
 
   const deleteVersion = (idx: number) => {
     if (model.versions.length === 1) return; // Don't delete last version
-    setModel((m) => ({
+    setModel(m => ({
       ...m,
       versions: m.versions.filter((_, i) => i !== idx),
-      defaultIndex: m.defaultIndex >= idx && m.defaultIndex > 0 ? m.defaultIndex - 1 : m.defaultIndex,
+      defaultIndex:
+        m.defaultIndex >= idx && m.defaultIndex > 0
+          ? m.defaultIndex - 1
+          : m.defaultIndex,
     }));
     if (activeVersionIdx >= idx && activeVersionIdx > 0) {
       setActiveVersionIdx(activeVersionIdx - 1);
@@ -332,7 +348,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   };
 
   const renameVersion = (idx: number, newLabel: string) => {
-    setModel((m) => ({
+    setModel(m => ({
       ...m,
       versions: m.versions.map((v, i) =>
         i === idx ? { ...v, label: newLabel } : v
@@ -341,29 +357,29 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   };
 
   const setAsDefault = (idx: number) => {
-    setModel((m) => ({ ...m, defaultIndex: idx }));
+    setModel(m => ({ ...m, defaultIndex: idx }));
   };
 
   async function handleSave() {
     try {
-      if (mode === "add") {
+      if (mode === 'add') {
         await addItemAction({
           slug: model.slug,
           title: model.title,
           url: model.url,
           tags: model.tags,
-          category: model.category ?? "general",
+          category: model.category ?? 'general',
           defaultIndex: model.defaultIndex,
           versions: model.versions,
         });
       } else {
-        if (!itemId) throw new Error("No item ID for update");
+        if (!itemId) throw new Error('No item ID for update');
         await updateItemAction(itemId, {
           slug: model.slug,
           title: model.title,
           url: model.url,
           tags: model.tags,
-          category: model.category ?? "general",
+          category: model.category ?? 'general',
           defaultIndex: model.defaultIndex,
           versions: model.versions,
         });
@@ -372,17 +388,17 @@ export function ItemForm({ item, mode }: ItemFormProps) {
       // NOTE: actions already call revalidatePath("/space").
       // Avoid refresh+push race and navigate inside a transition.
       startTransition(() => {
-        router.replace("/space");
+        router.replace('/space');
       });
     } catch (e: any) {
-      setJsonError(e?.message || "Failed to save");
+      setJsonError(e?.message || 'Failed to save');
       console.error(e);
     }
   }
 
   // === Em dash copy ==========================================================
   const copyEmDash = async () => {
-    await navigator.clipboard.writeText("—");
+    await navigator.clipboard.writeText('—');
     setCopiedDash(true);
     setTimeout(() => setCopiedDash(false), 1500);
   };
@@ -392,10 +408,15 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   return (
     <div className="min-h-screen bg-background">
       <SpaceHeader
-        leftContent={`${mode === "add" ? "Add" : "Edit"}: ${model.title || "Untitled"}`}
+        leftContent={`${mode === 'add' ? 'Add' : 'Edit'}: ${model.title || 'Untitled'}`}
         centerContent={
-          <Button onClick={handleSave} disabled={isPending} size="sm" className="bg-accent text-accent-foreground">
-            {mode === "add" ? "Save Item" : "Save Changes"}
+          <Button
+            onClick={handleSave}
+            disabled={isPending}
+            size="sm"
+            className="bg-accent text-accent-foreground"
+          >
+            {mode === 'add' ? 'Save Item' : 'Save Changes'}
           </Button>
         }
       />
@@ -409,7 +430,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
           onAdd={addVersion}
           onDelete={deleteVersion}
           onRename={(idx, label) => {
-            setModel((m) => ({
+            setModel(m => ({
               ...m,
               versions: m.versions.map((v, i) =>
                 i === idx ? { ...v, label } : v
@@ -428,7 +449,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
             <div className="flex items-center gap-2">
               <Input
                 value={model.title}
-                onChange={(e) => onTitleChange(e.target.value)}
+                onChange={e => onTitleChange(e.target.value)}
                 placeholder="Enter title..."
                 className="font-medium flex-1 bg-white dark:bg-sidebar border-border dark:border-sidebar-border"
               />
@@ -452,12 +473,18 @@ export function ItemForm({ item, mode }: ItemFormProps) {
 
             {/* Markdown Editor */}
             <div className="flex-1 flex flex-col">
-              <MarkdownEditor value={activeVersion.content} onChange={onMarkdownChange} />
+              <MarkdownEditor
+                value={activeVersion.content}
+                onChange={onMarkdownChange}
+              />
             </div>
           </div>
 
           {/* Right: Code editor */}
-          <CodeEditor value={activeVersion.code ?? ""} onChange={onCodeChange} />
+          <CodeEditor
+            value={activeVersion.code ?? ''}
+            onChange={onCodeChange}
+          />
         </div>
 
         {/* Middle Row: Metadata & Preview */}
@@ -479,14 +506,14 @@ export function ItemForm({ item, mode }: ItemFormProps) {
 
           <ItemPreview
             item={{
-              id: itemId || "preview",
+              id: itemId || 'preview',
               title: model.title,
               url: model.url,
               tags: model.tags,
-              category: model.category ?? "general",
+              category: model.category ?? 'general',
             }}
             content={activeVersion.content}
-            code={activeVersion.code ?? ""}
+            code={activeVersion.code ?? ''}
           />
         </div>
 

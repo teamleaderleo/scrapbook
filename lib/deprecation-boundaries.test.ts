@@ -20,6 +20,7 @@ const retiredSourcePaths = [
   'app/lib/external/s3-resource-tracker.ts',
   'app/lib/hooks/useProjectBlocks.ts',
   'app/lib/hooks/useTags.ts',
+  'app/lib/db/schema.ts',
   'app/lib/image-processing/image-processing.ts',
   'app/lib/seed-items.ts',
   'app/lib/stores/ui-store.ts',
@@ -28,17 +29,24 @@ const retiredSourcePaths = [
   'components/blocks/components/block-image.tsx',
   'components/blocks/components/button.tsx',
   'components/blocks/forms/block-form.tsx',
+  'components/dashboard/footer-tiptap-editor.tsx',
   'components/dashboard/header.tsx',
   'components/dashboard/nav-links.tsx',
   'components/dashboard/quick-access.tsx',
   'components/dashboard/sidenav.tsx',
   'components/dashboard/view-switcher.tsx',
+  'components/editor/content-preview.tsx',
   'components/feature-showcase.tsx',
+  'components/hardcoded-sticky-note.tsx',
+  'components/portfolio/portfolio.css',
   'components/portfolio/portfolio-block.tsx',
   'components/portfolio/project-display.tsx',
   'components/projects/components/button.tsx',
   'components/projects/components/project-block-item.tsx',
   'components/projects/components/status.tsx',
+  'components/projects/components/tag-manager.tsx',
+  'components/projects/components/tiptap-editor-project-blocks.tsx',
+  'components/projects/error.tsx',
   'components/projects/forms/project-form.tsx',
   'components/query-client-provider.tsx',
   'components/scrapbook',
@@ -52,6 +60,7 @@ const retiredSourcePaths = [
   'components/scrapbook/scrapbook-entry.tsx',
   'components/suggestions/suggestedtags.tsx',
   'components/suggestions/suggestions.tsx',
+  'components/simple-auth-modal.tsx',
   'components/ui/components',
   'components/ui/components/breadcrumb.tsx',
   'components/ui/components/button.tsx',
@@ -69,13 +78,27 @@ const retiredSourcePaths = [
   'components/ui/components/toggle.tsx',
   'components/ui/form.tsx',
   'components/ui/label.tsx',
+  'dist/socket-server.js',
+  'drizzle.config.ts',
+  'drizzle/meta/_journal.json',
+  'public/blocks/app-wireframes.pdf',
+  'public/blocks/homepage-mockup.png',
+  'public/blocks/logo-concepts.png',
+  'public/landing-desktop.jpg',
+  'public/landing-mobile.jpg',
+  'public/placeholder-default.png',
+  'public/placeholder-file.png',
+  'public/placeholder-text.png',
+  'public/scrapbook/blog-landing-preview.webp',
+  'public/scrapbook/network-performance-diff.webp',
+  'public/scrapbook/platform-vscode-overview.webp',
+  'public/scrapbook/server-actions-example.webp',
+  'public/scrapbook/tiptap-editor-demo.webp',
   'server/socket-server.cjs',
 ] as const;
 
 const preservedSourcePaths = [
   'app/lib/db/db.ts',
-  'app/lib/db/schema.ts',
-  'drizzle.config.ts',
   'drizzle/0008_proxy_health.sql',
 ] as const;
 
@@ -100,6 +123,8 @@ const retiredDirectDependencies = [
   '@types/ws',
   'bcryptjs',
   'drizzle-zod',
+  'drizzle-kit',
+  'drizzle-orm',
   'mitt',
   'modern-monaco',
   'node-vibrant',
@@ -117,8 +142,6 @@ const retiredDirectDependencies = [
 
 const preservedDirectDependencies = [
   '@shikijs/monaco',
-  'drizzle-kit',
-  'drizzle-orm',
   'file-type',
   'maath',
   'monaco-editor',
@@ -129,7 +152,7 @@ const preservedDirectDependencies = [
 ] as const;
 
 const packageJson = JSON.parse(
-  readFileSync(resolve(process.cwd(), 'package.json'), 'utf8'),
+  readFileSync(resolve(process.cwd(), 'package.json'), 'utf8')
 ) as {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
@@ -141,19 +164,25 @@ const directDependencies = {
 };
 
 describe('deprecation boundaries', () => {
-  it.each(retiredSourcePaths)('%s stays retired', (path) => {
+  it.each(retiredSourcePaths)('%s stays retired', path => {
     expect(existsSync(resolve(process.cwd(), path))).toBe(false);
   });
 
-  it.each(preservedSourcePaths)('%s remains available', (path) => {
+  it.each(preservedSourcePaths)('%s remains available', path => {
     expect(existsSync(resolve(process.cwd(), path))).toBe(true);
   });
 
-  it.each(retiredDirectDependencies)('%s stays out of the direct manifest', (name) => {
-    expect(directDependencies).not.toHaveProperty(name);
-  });
+  it.each(retiredDirectDependencies)(
+    '%s stays out of the direct manifest',
+    name => {
+      expect(directDependencies).not.toHaveProperty(name);
+    }
+  );
 
-  it.each(preservedDirectDependencies)('%s remains a direct dependency', (name) => {
-    expect(directDependencies).toHaveProperty(name);
-  });
+  it.each(preservedDirectDependencies)(
+    '%s remains a direct dependency',
+    name => {
+      expect(directDependencies).toHaveProperty(name);
+    }
+  );
 });

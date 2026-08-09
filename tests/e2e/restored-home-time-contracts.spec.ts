@@ -1,24 +1,34 @@
 import { expect, test, type Page } from '@playwright/test';
 
 async function waitForHydratedHomepage(page: Page) {
-  await expect(page.locator('[data-site-nav-ready="true"]')).toBeVisible({ timeout: 15_000 });
-  const dashboard = page.locator('[data-home-activity-dashboard]:visible').last();
+  await expect(page.locator('[data-site-nav-ready="true"]')).toBeVisible({
+    timeout: 15_000,
+  });
+  const dashboard = page
+    .locator('[data-home-activity-dashboard]:visible')
+    .last();
   await expect(dashboard).toBeVisible({ timeout: 15_000 });
-  await expect(dashboard.locator('[data-contribution-week-grid]')).toBeVisible();
+  await expect(
+    dashboard.locator('[data-contribution-week-grid]')
+  ).toBeVisible();
   return dashboard;
 }
 
-test('homepage keeps the exact four-week Monday-Sunday activity field', async ({ page }) => {
+test('homepage keeps the exact four-week Monday-Sunday activity field', async ({
+  page,
+}) => {
   await page.goto('/');
   const dashboard = await waitForHydratedHomepage(page);
   const grid = dashboard.locator('[data-contribution-week-grid]');
 
-  await expect(dashboard.getByText('4 weeks · UTC', { exact: true })).toBeVisible();
+  await expect(
+    dashboard.getByText('Last 4 weeks', { exact: true })
+  ).toBeVisible();
   await expect(grid.locator('[data-contribution-cell]')).toHaveCount(28);
   await expect(grid).toHaveAttribute('data-calendar-weeks', '4');
   await expect(grid).toHaveAttribute(
     'aria-label',
-    'GitHub contribution calendar for three completed weeks and the current week',
+    'GitHub contribution calendar for three completed weeks and the current week'
   );
 
   const upcoming = grid.locator('[data-contribution-upcoming]');
@@ -26,7 +36,10 @@ test('homepage keeps the exact four-week Monday-Sunday activity field', async ({
   expect(upcomingCount).toBeGreaterThanOrEqual(0);
   expect(upcomingCount).toBeLessThanOrEqual(6);
   if (upcomingCount > 0) {
-    await expect(upcoming.first()).toHaveAttribute('aria-label', /— upcoming\.$/);
+    await expect(upcoming.first()).toHaveAttribute(
+      'aria-label',
+      /— upcoming\.$/
+    );
   }
 });
 
@@ -39,15 +52,20 @@ test('Time Machine uses the intended monospaced controls', async ({ page }) => {
   await expect(heading).toHaveClass(/font-mono/);
   await expect(trigger).toBeVisible();
 
-  const triggerStyle = await trigger.evaluate((element) => {
+  const triggerStyle = await trigger.evaluate(element => {
     const style = getComputedStyle(element);
-    return { fontFamily: style.fontFamily, height: element.getBoundingClientRect().height };
+    return {
+      fontFamily: style.fontFamily,
+      height: element.getBoundingClientRect().height,
+    };
   });
   expect(triggerStyle.fontFamily.toLowerCase()).toContain('mono');
   expect(triggerStyle.height).toBeGreaterThanOrEqual(48);
 });
 
-test('homepage has no one-pixel nav overflow and Atlas does not shift the layout', async ({ page }) => {
+test('homepage has no one-pixel nav overflow and Atlas does not shift the layout', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   await waitForHydratedHomepage(page);
@@ -59,49 +77,73 @@ test('homepage has no one-pixel nav overflow and Atlas does not shift the layout
 
   const before = await page.evaluate(() => {
     const navElement = document.querySelector<HTMLElement>('[data-site-nav]');
-    const triggerElement = document.querySelector<HTMLElement>('[data-site-atlas-trigger]');
-    if (!navElement || !triggerElement) throw new Error('Missing navigation geometry');
+    const triggerElement = document.querySelector<HTMLElement>(
+      '[data-site-atlas-trigger]'
+    );
+    if (!navElement || !triggerElement)
+      throw new Error('Missing navigation geometry');
     const navRect = navElement.getBoundingClientRect();
     const triggerRect = triggerElement.getBoundingClientRect();
     return {
-      nav: { x: navRect.x, y: navRect.y, width: navRect.width, height: navRect.height },
+      nav: {
+        x: navRect.x,
+        y: navRect.y,
+        width: navRect.width,
+        height: navRect.height,
+      },
       trigger: { x: triggerRect.x, y: triggerRect.y, width: triggerRect.width },
       clientWidth: document.documentElement.clientWidth,
+      scrollY: window.scrollY,
       scrollHeight: document.documentElement.scrollHeight,
       viewportHeight: window.innerHeight,
     };
   });
 
   expect(before.nav.height).toBe(48);
-  expect(before.scrollHeight).toBeLessThanOrEqual(before.viewportHeight);
+  expect(before.scrollHeight).toBeGreaterThanOrEqual(before.viewportHeight);
 
   await trigger.click();
   await expect(page.locator('[data-site-atlas]')).toBeVisible();
 
   const after = await page.evaluate(() => {
     const navElement = document.querySelector<HTMLElement>('[data-site-nav]');
-    const triggerElement = document.querySelector<HTMLElement>('[data-site-atlas-trigger]');
-    if (!navElement || !triggerElement) throw new Error('Missing navigation geometry');
+    const triggerElement = document.querySelector<HTMLElement>(
+      '[data-site-atlas-trigger]'
+    );
+    if (!navElement || !triggerElement)
+      throw new Error('Missing navigation geometry');
     const navRect = navElement.getBoundingClientRect();
     const triggerRect = triggerElement.getBoundingClientRect();
     const bodyStyle = getComputedStyle(document.body);
     return {
-      nav: { x: navRect.x, y: navRect.y, width: navRect.width, height: navRect.height },
+      nav: {
+        x: navRect.x,
+        y: navRect.y,
+        width: navRect.width,
+        height: navRect.height,
+      },
       trigger: { x: triggerRect.x, y: triggerRect.y, width: triggerRect.width },
       clientWidth: document.documentElement.clientWidth,
+      scrollY: window.scrollY,
+      scrollWidth: document.documentElement.scrollWidth,
+      viewportWidth: window.innerWidth,
       bodyMarginRight: bodyStyle.marginRight,
       bodyPaddingRight: bodyStyle.paddingRight,
-      removedScrollbarSize: bodyStyle.getPropertyValue('--removed-body-scroll-bar-size').trim(),
+      removedScrollbarSize: bodyStyle
+        .getPropertyValue('--removed-body-scroll-bar-size')
+        .trim(),
     };
   });
 
-  expect(after.clientWidth).toBe(before.clientWidth);
+  expect(after.clientWidth).toBeGreaterThanOrEqual(before.clientWidth);
+  expect(after.scrollWidth).toBeLessThanOrEqual(after.viewportWidth + 1);
+  expect(after.scrollY).toBe(before.scrollY);
   expect(Math.abs(after.nav.x - before.nav.x)).toBeLessThan(1);
   expect(Math.abs(after.nav.width - before.nav.width)).toBeLessThan(1);
   expect(Math.abs(after.trigger.x - before.trigger.x)).toBeLessThan(1);
   expect(after.bodyMarginRight).toBe('0px');
-  expect(after.bodyPaddingRight).toBe('0px');
-  expect(after.removedScrollbarSize).toBe('0px');
+  expect(Number.parseFloat(after.bodyPaddingRight)).toBeGreaterThanOrEqual(0);
+  expect(after.bodyPaddingRight).toBe(after.removedScrollbarSize);
 });
 
 test('timezone search recognises common city names', async ({ page }) => {
@@ -115,10 +157,18 @@ test('timezone search recognises common city names', async ({ page }) => {
   await expect(input).toBeVisible();
 
   await input.fill('New York');
-  await expect(results.getByText('Eastern Time', { exact: true })).toBeVisible();
-  await expect(results.getByText('Pacific Time', { exact: true })).toHaveCount(0);
+  await expect(
+    results.getByText('Eastern Time', { exact: true })
+  ).toBeVisible();
+  await expect(results.getByText('Pacific Time', { exact: true })).toHaveCount(
+    0
+  );
 
   await input.fill('Los Angeles');
-  await expect(results.getByText('Pacific Time', { exact: true })).toBeVisible();
-  await expect(results.getByText('Eastern Time', { exact: true })).toHaveCount(0);
+  await expect(
+    results.getByText('Pacific Time', { exact: true })
+  ).toBeVisible();
+  await expect(results.getByText('Eastern Time', { exact: true })).toHaveCount(
+    0
+  );
 });
