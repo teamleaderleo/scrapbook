@@ -206,9 +206,18 @@ export function SpaceView() {
 
         <div className="relative mx-auto w-full max-w-5xl">
           <section className="mb-4 px-1">
-            <h1 className="text-xl font-semibold tracking-[-0.025em] sm:text-2xl">
-              Space
-            </h1>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h1 className="text-xl font-semibold tracking-[-0.025em] sm:text-2xl">
+                Space
+              </h1>
+              <Link
+                href="/space/trail"
+                prefetch
+                className="inline-flex min-h-[44px] items-center rounded-xl border border-border/70 bg-background/70 px-3 text-xs font-medium text-muted-foreground transition hover:border-foreground/25 hover:bg-card hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Open swipe trail
+              </Link>
+            </div>
           </section>
 
           <nav

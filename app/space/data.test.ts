@@ -103,4 +103,39 @@ describe('withSpaceTimeout', () => {
     expect(from).toHaveBeenCalledWith('items');
     expect(from).not.toHaveBeenCalledWith('reviews');
   });
+
+  it('starts the public archive request while identity is still loading', async () => {
+    let resolveIdentity: (value: {
+      data: { user: null };
+      error: null;
+    }) => void = () => undefined;
+    const identity = new Promise<{ data: { user: null }; error: null }>(
+      resolve => {
+        resolveIdentity = resolve;
+      }
+    );
+    const abortSignal = vi.fn().mockResolvedValue({ data: [], error: null });
+    const query = {
+      select: vi.fn(),
+      order: vi.fn(),
+      range: vi.fn(),
+      abortSignal,
+    };
+    query.select.mockReturnValue(query);
+    query.order.mockReturnValue(query);
+    query.range.mockReturnValue(query);
+    createClient.mockResolvedValue({
+      auth: { getUser: vi.fn().mockReturnValue(identity) },
+      from: vi.fn().mockReturnValue(query),
+    });
+
+    const pending = loadInitialSpaceData();
+    await vi.waitFor(() => expect(abortSignal).toHaveBeenCalledOnce());
+    resolveIdentity({ data: { user: null }, error: null });
+
+    await expect(pending).resolves.toMatchObject({
+      items: [],
+      isAdmin: false,
+    });
+  });
 });

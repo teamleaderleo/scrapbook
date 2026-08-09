@@ -12,7 +12,7 @@ import { loadReadingSheet } from '../data';
 
 type ReadingSheetPageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ lane?: string; tags?: string }>;
+  searchParams: Promise<{ lane?: string; tags?: string; from?: string }>;
 };
 
 function sectionId(label: string, index: number) {
@@ -75,7 +75,10 @@ export default async function ReadingSheetPage({
   });
   const backQuery = new URLSearchParams({ lane });
   if (query.tags?.trim()) backQuery.set('tags', query.tags.trim());
-  const backHref = `/space?${backQuery.toString()}`;
+  const fromTrail = query.from === 'trail';
+  const backHref = fromTrail
+    ? '/space/trail'
+    : `/space?${backQuery.toString()}`;
   const versions = item.versions.map((version, index) => ({
     ...version,
     id: sectionId(version.label, index),
@@ -93,7 +96,7 @@ export default async function ReadingSheetPage({
             className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-border/70 bg-background/80 px-4 text-sm font-medium backdrop-blur transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Back to {lane}
+            Back to {fromTrail ? 'trail' : lane}
           </Link>
 
           {orderedVersions.length > 1 ? (

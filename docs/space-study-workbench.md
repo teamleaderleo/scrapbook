@@ -1,7 +1,7 @@
 # Space: study workbench direction
 
 Status: implementation-ready product brief  
-Updated: 2026-08-09
+Updated: 2026-08-10
 
 ## Decision
 
@@ -94,6 +94,47 @@ The feed must retain stable URLs, clear source provenance, “why am I seeing
 this?”, a visible stopping point, and a way to resume. It should optimize for
 interesting trails and comprehension—not raw session length, outrage, novelty,
 or an unread-count treadmill.
+
+### Trail ranking, first implementation
+
+`/space/trail` is the first bounded version of this idea. It ranks the published
+archive on the device and presents one study per vertical snap point. The
+ranking combines:
+
+- explicit **more**, **less**, and **learned** feedback;
+- similarity through existing category and topic/source/mode tags;
+- recency, Fieldwork provenance, and short-session fit;
+- a deterministic exploration term so unfamiliar material can enter the mix;
+- sequence penalties that avoid adjacent items with the same category or a
+  heavily overlapping feature set.
+
+The useful TikTok mechanics are feedback density, weighted signals, controlled
+exploration, and deliberate feed diversity—not its objective function. TikTok's
+public explanation says strong intentional behavior is weighted above weak
+context, and that the feed intentionally intersperses diverse material and
+supports explicit “not interested” feedback. A contextual bandit is the likely
+later model once there is enough meaningful outcome data: it can trade off
+known relevance and exploration instead of pretending a fixed score is
+omniscient. Sources: [TikTok's recommendation overview](https://newsroom.tiktok.com/how-tiktok-recommends-videos-for-you),
+[TikTok on sequence diversity](https://newsroom.tiktok.com/an-update-on-our-work-to-safeguard-and-diversify-recommendations),
+and the [Yahoo contextual-bandit paper](https://arxiv.org/abs/1003.0146).
+
+For Space, the reward must be different. Opening a study, producing an answer,
+returning successfully, or marking the material useful is stronger evidence
+than dwell time. The feed should eventually calibrate difficulty as well as
+interest, similar in spirit to Duolingo's published description of Birdbrain,
+which estimates learner ability and exercise difficulty before assembling a
+session. Passive cards should regularly lead into explain, trace, answer, or
+compare actions, following the ICAP prediction that constructive and
+interactive engagement are stronger than passive exposure. Sources:
+[Duolingo on Birdbrain](https://blog.duolingo.com/learning-how-to-help-you-learn-introducing-birdbrain/)
+and the [ICAP framework](https://doi.org/10.1080/00461520.2014.965823).
+
+The current memory is versioned, bounded, and stored only in the browser. It is
+not uploaded and does not infer a preference merely because a card stayed on
+screen. A reset control clears the profile. Before any server-side learner
+model, define the event lifecycle, retention, export/delete behavior, and a
+learning-oriented success measure.
 
 ## Publishing boundary
 

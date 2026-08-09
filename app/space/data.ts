@@ -91,44 +91,48 @@ export async function loadInitialSpaceData(): Promise<InitialSpaceData> {
   }
 
   const supabase = await createClient();
-  let user: User | null = null;
-  try {
-    const authResult = await withSpaceTimeout(
-      supabase.auth.getUser(),
-      AUTH_TIMEOUT_MS,
-      'Space identity'
-    );
-    user = authResult.error ? null : authResult.data.user;
-  } catch (authError) {
-    console.warn('Space identity check did not complete:', authError);
-  }
-
-  const isAdmin = isAdminUser(user);
+  const userPromise: Promise<User | null> = withSpaceTimeout(
+    supabase.auth.getUser(),
+    AUTH_TIMEOUT_MS,
+    'Space identity'
+  )
+    .then(authResult => (authResult.error ? null : authResult.data.user))
+    .catch(authError => {
+      console.warn('Space identity check did not complete:', authError);
+      return null;
+    });
 
   const itemsAbortController = new AbortController();
   let itemsResult;
   try {
-    itemsResult = await withSpaceTimeout(
-      supabase
-        .from('items')
-        .select(SPACE_ITEM_SELECT)
-        .order('created_at', { ascending: false })
-        .range(0, SPACE_PAGE_SIZE - 1)
-        .abortSignal(itemsAbortController.signal),
-      INITIAL_LOAD_TIMEOUT_MS,
-      'Space archive',
-      () => itemsAbortController.abort()
-    );
+    [, itemsResult] = await Promise.all([
+      userPromise,
+      withSpaceTimeout(
+        supabase
+          .from('items')
+          .select(SPACE_ITEM_SELECT)
+          .order('created_at', { ascending: false })
+          .range(0, SPACE_PAGE_SIZE - 1)
+          .abortSignal(itemsAbortController.signal),
+        INITIAL_LOAD_TIMEOUT_MS,
+        'Space archive',
+        () => itemsAbortController.abort()
+      ),
+    ]);
   } catch (itemsError) {
     console.error('Space archive could not be loaded:', itemsError);
+    const user = await userPromise;
     return {
       ...unavailableSpaceData(
         'Space could not open the archive. Try again in a moment.'
       ),
       user,
-      isAdmin,
+      isAdmin: isAdminUser(user),
     };
   }
+
+  const user = await userPromise;
+  const isAdmin = isAdminUser(user);
 
   if (itemsResult.error) {
     console.error('Space archive could not be loaded:', itemsResult.error);
