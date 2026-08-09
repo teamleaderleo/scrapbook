@@ -206,6 +206,7 @@ export function SpaceTrail() {
   const [memory, setMemory] = useState<SpaceTrailMemory>(
     EMPTY_SPACE_TRAIL_MEMORY
   );
+  const [memoryReady, setMemoryReady] = useState(false);
   const [recommendations, setRecommendations] = useState(() =>
     rankSpaceTrail(items, EMPTY_SPACE_TRAIL_MEMORY, { seed, nowMs })
   );
@@ -227,7 +228,13 @@ export function SpaceTrail() {
     const storedMemory = readMemory();
     setMemory(storedMemory);
     setRecommendations(rankSpaceTrail(items, storedMemory, { seed, nowMs }));
+    setMemoryReady(true);
   }, [items, nowMs, seed]);
+
+  useEffect(() => {
+    if (!memoryReady) return;
+    writeMemory(memory);
+  }, [memory, memoryReady]);
 
   useEffect(() => {
     if (!initializedRef.current) return;
@@ -261,9 +268,7 @@ export function SpaceTrail() {
         if (itemId) {
           setMemory(current => {
             if (!resumedRef.current && current.resumeId) return current;
-            const nextMemory = setSpaceTrailResume(current, itemId);
-            if (nextMemory !== current) writeMemory(nextMemory);
-            return nextMemory;
+            return setSpaceTrailResume(current, itemId);
           });
         }
       },
@@ -325,7 +330,6 @@ export function SpaceTrail() {
       memory.reactions[itemId] === reaction ? null : reaction;
     const nextMemory = updateSpaceTrailReaction(memory, itemId, nextReaction);
     setMemory(nextMemory);
-    writeMemory(nextMemory);
 
     setRecommendations(current => {
       const prefix = current.slice(0, activeIndex + 1);
@@ -341,7 +345,6 @@ export function SpaceTrail() {
   const markOpened = (itemId: string) => {
     const nextMemory = markSpaceTrailOpened(memory, itemId);
     setMemory(nextMemory);
-    writeMemory(nextMemory);
   };
 
   const resetPersonalization = () => {
