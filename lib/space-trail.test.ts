@@ -6,6 +6,7 @@ import {
   markSpaceTrailOpened,
   parseSpaceTrailMemory,
   rankSpaceTrail,
+  setSpaceTrailExpanded,
   setSpaceTrailResume,
   trailItemExcerpt,
   updateSpaceTrailReaction,
@@ -110,16 +111,26 @@ describe('Space trail memory and presentation helpers', () => {
         version: 1,
         reactions: { a: 'more', b: 'invalid' },
         opened,
+        expandedId: 'item-7',
       })
     );
 
     expect(parsed.reactions).toEqual({ a: 'more' });
     expect(parsed.opened).toHaveLength(500);
+    expect(parsed.expandedId).toBe('item-7');
     expect(parseSpaceTrailMemory('{broken')).toEqual(EMPTY_SPACE_TRAIL_MEMORY);
     expect(markSpaceTrailOpened(parsed, 'item-519').opened.at(-1)).toBe(
       'item-519'
     );
     expect(setSpaceTrailResume(parsed, 'item-42').resumeId).toBe('item-42');
+    expect(setSpaceTrailExpanded(parsed, 'item-7')).toMatchObject({
+      expandedId: 'item-7',
+      resumeId: 'item-7',
+    });
+    expect(
+      setSpaceTrailExpanded(setSpaceTrailExpanded(parsed, 'item-7'), null)
+        .expandedId
+    ).toBeUndefined();
   });
 
   it('turns markdown into a compact excerpt and respects time tags', () => {

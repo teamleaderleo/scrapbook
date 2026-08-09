@@ -1,26 +1,38 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowDown,
-  ArrowUp,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
   ArrowUpRight,
   Check,
+  ChevronDown,
+  Copy,
   RotateCcw,
+  Search,
   SlidersHorizontal,
   ThumbsDown,
   ThumbsUp,
 } from 'lucide-react';
 import { useItems } from '@/app/lib/contexts/item-context';
 import { SpaceHeader } from '@/components/space/space-header';
+import {
+  buildSpaceNextMove,
+  buildSpacePracticePrompt,
+} from '@/lib/space-practice';
 import { displaySpaceTags } from '@/lib/space-tags';
-import { buildSpaceNextMove } from '@/lib/space-practice';
 import {
   EMPTY_SPACE_TRAIL_MEMORY,
   markSpaceTrailOpened,
   parseSpaceTrailMemory,
   rankSpaceTrail,
+  setSpaceTrailExpanded,
   setSpaceTrailResume,
   updateSpaceTrailReaction,
   type SpaceTrailMemory,
@@ -29,7 +41,6 @@ import {
 } from '@/lib/space-trail';
 
 const TRAIL_MEMORY_KEY = 'scrapbook:space-trail:v1';
-const LOAD_MORE_THRESHOLD = 8;
 
 function readMemory() {
   try {
@@ -45,6 +56,60 @@ function writeMemory(memory: SpaceTrailMemory) {
   } catch {
     // The current session remains personalized when storage is unavailable.
   }
+}
+
+function scrollWithinTrail(
+  scroller: HTMLElement,
+  target: HTMLElement,
+  behavior: ScrollBehavior,
+  block: 'center' | 'nearest'
+) {
+  const scrollerRect = scroller.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  let delta = 0;
+
+  if (block === 'center') {
+    delta =
+      targetRect.top -
+      scrollerRect.top -
+      (scroller.clientHeight - targetRect.height) / 2;
+  } else if (targetRect.top < scrollerRect.top + 12) {
+    delta = targetRect.top - scrollerRect.top - 12;
+  } else if (targetRect.bottom > scrollerRect.bottom - 12) {
+    delta = targetRect.bottom - scrollerRect.bottom + 12;
+  }
+
+  if (Math.abs(delta) < 1) return;
+  scroller.scrollTo({
+    top: Math.max(
+      0,
+      Math.min(scroller.scrollTop + delta, scroller.scrollHeight)
+    ),
+    behavior,
+  });
+}
+
+function readingHref(
+  recommendation: SpaceTrailRecommendation,
+  reaction?: SpaceTrailReaction
+) {
+  const nextMove = buildSpaceNextMove(recommendation.item, {
+    familiar: reaction !== undefined,
+    learned: reaction === 'learned',
+  });
+  const params = new URLSearchParams({
+    lane: 'archive',
+    from: 'trail',
+    return: recommendation.item.id,
+    practice: nextMove.mode,
+  });
+  if (reaction === 'learned') params.set('stage', 'learned');
+  else if (reaction) params.set('stage', 'familiar');
+
+  return {
+    href: `/space/read/${encodeURIComponent(recommendation.item.slug)}?${params.toString()}`,
+    nextMove,
+  };
 }
 
 function TrailReactionButton({
@@ -66,10 +131,10 @@ function TrailReactionButton({
       type="button"
       aria-pressed={active}
       onClick={() => onSelect(reaction)}
-      className={`inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border px-3 text-xs font-medium transition-[background-color,border-color,color,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] ${
+      className={`inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition-[background-color,border-color,color,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] ${
         active
           ? 'border-foreground/35 bg-foreground text-background'
-          : 'border-border/75 bg-background/65 text-muted-foreground hover:border-foreground/25 hover:text-foreground'
+          : 'border-border/70 bg-background/65 text-muted-foreground hover:border-foreground/25 hover:text-foreground'
       }`}
     >
       {icon}
@@ -78,102 +143,166 @@ function TrailReactionButton({
   );
 }
 
+function TrailLoading({ count = 5 }: { count?: number }) {
+  return (
+    <div aria-label="Loading notes" className="divide-y divide-border/55">
+      {Array.from({ length: count }, (_, index) => (
+        <div
+          key={index}
+          className="grid min-h-36 animate-pulse grid-cols-[2.25rem_minmax(0,1fr)] gap-3 px-2 py-4 motion-reduce:animate-none sm:grid-cols-[3rem_minmax(0,1fr)_7rem] sm:gap-4 sm:px-4"
+        >
+          <div className="mt-1 h-3 w-6 rounded bg-muted" />
+          <div className="min-w-0">
+            <div className="h-2.5 w-24 rounded bg-muted" />
+            <div className="mt-3 h-5 w-4/5 rounded bg-muted" />
+            <div className="mt-3 h-3 w-full rounded bg-muted/80" />
+            <div className="mt-2 h-3 w-3/5 rounded bg-muted/65" />
+          </div>
+          <div className="hidden sm:block">
+            <div className="h-9 rounded-lg bg-muted/75" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function TrailCard({
   recommendation,
   index,
-  total,
   reaction,
+  expanded,
+  copyState,
   onReaction,
+  onToggle,
+  onCopy,
   onOpen,
 }: {
   recommendation: SpaceTrailRecommendation;
   index: number;
-  total: number;
   reaction?: SpaceTrailReaction;
+  expanded: boolean;
+  copyState?: 'copied' | 'failed';
   onReaction: (reaction: SpaceTrailReaction) => void;
+  onToggle: () => void;
+  onCopy: () => void;
   onOpen: () => void;
 }) {
   const { item, estimatedMinutes, excerpt, reasons } = recommendation;
-  const tags = displaySpaceTags(item.tags).slice(0, 5);
-  const isStoppingPoint = (index + 1) % 12 === 0;
-  const nextMove = buildSpaceNextMove(item, {
-    familiar: reaction !== undefined,
-    learned: reaction === 'learned',
-  });
-  const nextMoveStage =
-    reaction === 'learned' ? 'learned' : reaction ? 'familiar' : undefined;
-  const readingHref = new URLSearchParams({
-    lane: 'archive',
-    from: 'trail',
-    practice: nextMove.mode,
-  });
-  if (nextMoveStage) readingHref.set('stage', nextMoveStage);
+  const tags = displaySpaceTags(item.tags).slice(0, 4);
+  const { href, nextMove } = readingHref(recommendation, reaction);
+  const titleId = `trail-title-${item.id}`;
+  const detailId = `trail-detail-${item.id}`;
 
   return (
-    <section
-      className="grid min-h-full snap-start snap-always place-items-center px-3 py-4 sm:px-6 sm:py-8"
+    <article
+      id={`trail-${item.id}`}
+      aria-labelledby={titleId}
+      className="group relative scroll-mt-16 px-2 py-4 sm:px-4 sm:py-5"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '160px' }}
       data-trail-index={index}
       data-trail-item={item.id}
     >
-      <article
-        className="material-paper relative flex w-full max-w-2xl flex-col overflow-hidden rounded-[1.6rem] border shadow-[0_22px_70px_rgba(43,37,29,0.12)] dark:shadow-[0_24px_72px_rgba(0,0,0,0.32)]"
-        style={{ contentVisibility: 'auto', containIntrinsicSize: '780px' }}
-      >
-        <div className="flex items-center justify-between gap-3 border-b border-dashed border-[hsl(var(--material-paper-edge)/0.62)] px-5 py-4 sm:px-7">
-          <p className="min-w-0 truncate font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--material-paper-ink)/0.55)]">
-            {item.category} · {estimatedMinutes} min
-          </p>
-          <p className="shrink-0 font-mono text-[9px] tabular-nums text-[hsl(var(--material-paper-ink)/0.42)]">
-            {String(index + 1).padStart(2, '0')} / {total}
-          </p>
+      <div className="grid grid-cols-[2.25rem_minmax(0,1fr)] gap-3 sm:grid-cols-[3rem_minmax(0,1fr)_7rem] sm:gap-4">
+        <div className="pt-0.5 font-mono text-[10px] tabular-nums text-muted-foreground/65">
+          {String(index + 1).padStart(2, '0')}
         </div>
 
-        <div className="px-5 pb-5 pt-6 sm:px-7 sm:pb-7 sm:pt-8">
-          <h2 className="max-w-[23ch] text-balance text-[clamp(1.75rem,7vw,3.15rem)] font-semibold leading-[1.02] tracking-[-0.042em] text-[hsl(var(--material-paper-ink))]">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            <span>{item.category}</span>
+            <span aria-hidden="true">·</span>
+            <span>{estimatedMinutes} min</span>
+            {reaction ? (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>{reaction}</span>
+              </>
+            ) : null}
+          </div>
+
+          <Link
+            id={titleId}
+            href={href}
+            prefetch
+            onClick={onOpen}
+            className="mt-1.5 block max-w-[48rem] text-pretty text-lg font-semibold leading-6 tracking-[-0.02em] text-foreground underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:text-xl sm:leading-7"
+          >
             {item.title}
-          </h2>
+          </Link>
 
           {excerpt ? (
-            <p className="mt-5 line-clamp-6 max-w-[62ch] text-[15px] leading-7 text-[hsl(var(--material-paper-ink)/0.7)] sm:line-clamp-none sm:text-base">
+            <p
+              className={`${
+                expanded ? '' : 'line-clamp-2'
+              } mt-2 max-w-[72ch] text-[13px] leading-5 text-muted-foreground sm:text-sm sm:leading-6`}
+            >
               {excerpt}
             </p>
           ) : null}
 
-          {tags.length > 0 ? (
-            <div className="mt-5 flex flex-wrap gap-1.5" aria-label="Topics">
-              {tags.map((tag, tagIndex) => (
-                <span
-                  key={`${tag}-${tagIndex}`}
-                  className="rounded-full border border-[hsl(var(--material-paper-edge)/0.68)] bg-[hsl(var(--material-paper-face)/0.55)] px-2.5 py-1 text-[10px] text-[hsl(var(--material-paper-ink)/0.62)]"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          ) : null}
+          <div className="mt-3 flex min-h-7 flex-wrap items-center gap-1.5">
+            <span className="rounded-md bg-muted/70 px-2 py-1 text-[10px] font-medium text-muted-foreground">
+              {nextMove.label}
+            </span>
+            {tags.map((tag, tagIndex) => (
+              <span
+                key={`${tag}-${tagIndex}`}
+                className="rounded-md border border-border/55 px-2 py-1 text-[10px] text-muted-foreground/85"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
 
-          <div className="mt-6 rounded-2xl border border-[hsl(var(--material-paper-edge)/0.68)] bg-[hsl(var(--material-paper-ink)/0.035)] px-4 py-3.5">
-            <div className="flex items-center justify-between gap-3 font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-[hsl(var(--material-paper-ink)/0.48)]">
-              <span>Next move · 2 min</span>
-              <span>{nextMove.label}</span>
+        <div className="col-start-2 flex items-start gap-2 sm:col-start-3 sm:row-start-1 sm:justify-end">
+          <button
+            type="button"
+            aria-expanded={expanded}
+            aria-controls={detailId}
+            onClick={onToggle}
+            className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-background/65 px-3 text-xs font-medium text-muted-foreground transition hover:border-foreground/25 hover:bg-card hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-none"
+          >
+            {expanded ? 'Close' : 'Peek'}
+            <ChevronDown
+              className={`h-3.5 w-3.5 transition-transform ${
+                expanded ? 'rotate-180' : ''
+              }`}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
+      </div>
+
+      {expanded ? (
+        <div
+          id={detailId}
+          className="ml-[3rem] mt-4 border-l border-border/65 pl-3 sm:ml-[4rem] sm:pl-5"
+          data-trail-detail
+        >
+          <div className="max-w-[72ch] rounded-xl border border-border/60 bg-muted/25 px-4 py-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              <span>Try before opening</span>
+              <span>{nextMove.mode}</span>
             </div>
-            <p className="mt-2 text-[13px] leading-5 text-[hsl(var(--material-paper-ink)/0.72)] sm:text-sm sm:leading-6">
+            <p className="mt-2 text-sm leading-6 text-foreground/85">
               {nextMove.prompt}
             </p>
           </div>
 
-          <details className="group mt-3 rounded-xl border border-[hsl(var(--material-paper-edge)/0.62)] bg-[hsl(var(--material-paper-ink)/0.025)] px-3.5 py-3 text-xs text-[hsl(var(--material-paper-ink)/0.62)]">
-            <summary className="cursor-pointer list-none font-medium text-[hsl(var(--material-paper-ink)/0.72)] focus-visible:outline-none group-open:mb-2">
-              Why this?
-            </summary>
-            <ul className="space-y-1.5 leading-5">
+          <div className="mt-3 max-w-[72ch]">
+            <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              Why it is here
+            </p>
+            <ul className="mt-1.5 space-y-1 text-xs leading-5 text-muted-foreground">
               {reasons.map(reason => (
                 <li key={reason}>· {reason}</li>
               ))}
             </ul>
-          </details>
+          </div>
 
-          <div className="mt-6 grid grid-cols-3 gap-2">
+          <div className="mt-4 grid max-w-md grid-cols-3 gap-2">
             <TrailReactionButton
               label="More"
               reaction="more"
@@ -197,50 +326,104 @@ function TrailCard({
             />
           </div>
 
-          <Link
-            href={`/space/read/${encodeURIComponent(item.slug)}?${readingHref.toString()}`}
-            prefetch
-            onClick={onOpen}
-            className="mt-3 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-[hsl(var(--material-paper-ink))] px-4 text-sm font-semibold text-[hsl(var(--material-paper-face))] transition-[transform,box-shadow] hover:-translate-y-px hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--material-paper-ink)/0.4)] active:translate-y-0"
-          >
-            Open study
-            <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
+          <div className="mt-3 flex max-w-md flex-col gap-2 min-[420px]:flex-row">
+            <button
+              type="button"
+              onClick={onCopy}
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg border border-border/70 bg-background/65 px-3 text-xs font-medium text-muted-foreground transition hover:border-foreground/25 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {copyState === 'copied' ? (
+                <Check className="h-3.5 w-3.5" aria-hidden="true" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+              {copyState === 'copied' ? 'Copied for chat' : 'Copy for chat'}
+            </button>
+            <Link
+              href={href}
+              prefetch
+              onClick={onOpen}
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg bg-foreground px-3 text-xs font-semibold text-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Read the note
+              <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          </div>
 
-          {isStoppingPoint ? (
-            <p className="mt-4 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-[hsl(var(--material-paper-ink)/0.45)]">
-              A good place to stop · or keep swiping
-            </p>
-          ) : null}
+          <p
+            className="mt-2 min-h-4 font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground/75"
+            aria-live="polite"
+          >
+            {copyState === 'failed'
+              ? 'Clipboard unavailable · open the note and copy from there'
+              : copyState === 'copied'
+                ? 'Prompt and links copied'
+                : 'Includes the prompt, Scrapbook link, and pinned source'}
+          </p>
         </div>
-        <span className="material-paper-edge" aria-hidden="true" />
-      </article>
-    </section>
+      ) : null}
+    </article>
   );
 }
 
 export function SpaceTrail() {
-  const { items, nowMs, hasMore, loadMore, loadingMore, error, reload } =
-    useItems();
+  const {
+    items,
+    nowMs,
+    loading,
+    hasMore,
+    loadMore,
+    loadingMore,
+    error,
+    reload,
+  } = useItems();
   const seed = `space-trail:${new Date(nowMs).toISOString().slice(0, 10)}`;
   const scrollerRef = useRef<HTMLElement>(null);
+  const loadSentinelRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
   const resumedRef = useRef(false);
   const [memory, setMemory] = useState<SpaceTrailMemory>(
     EMPTY_SPACE_TRAIL_MEMORY
   );
   const [memoryReady, setMemoryReady] = useState(false);
+  const [query, setQuery] = useState('');
+  const deferredQuery = useDeferredValue(query);
+  const [copyState, setCopyState] = useState<{
+    itemId: string;
+    status: 'copied' | 'failed';
+  } | null>(null);
   const [recommendations, setRecommendations] = useState(() =>
     rankSpaceTrail(items, EMPTY_SPACE_TRAIL_MEMORY, { seed, nowMs })
   );
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const visibleRecommendations = useMemo(() => {
+    const normalizedQuery = deferredQuery.trim().toLowerCase();
+    return recommendations
+      .map((recommendation, index) => ({ recommendation, index }))
+      .filter(({ recommendation }) => {
+        if (!normalizedQuery) return true;
+        const searchable = [
+          recommendation.item.title,
+          recommendation.item.category,
+          recommendation.excerpt,
+          ...displaySpaceTags(recommendation.item.tags),
+        ]
+          .join(' ')
+          .toLowerCase();
+        return searchable.includes(normalizedQuery);
+      });
+  }, [deferredQuery, recommendations]);
+
   const scrollToIndex = useCallback(
     (index: number, behavior: ScrollBehavior = 'smooth') => {
       const scroller = scrollerRef.current;
       const target = scroller?.querySelector<HTMLElement>(
         `[data-trail-index="${index}"]`
       );
-      target?.scrollIntoView({ behavior, block: 'start' });
+      if (scroller && target) {
+        scrollWithinTrail(scroller, target, behavior, 'center');
+      }
     },
     []
   );
@@ -288,39 +471,63 @@ export function SpaceTrail() {
         );
         setActiveIndex(index);
         const itemId = (visible.target as HTMLElement).dataset.trailItem;
-        if (itemId) {
-          setMemory(current => {
-            if (!resumedRef.current && current.resumeId) return current;
-            return setSpaceTrailResume(current, itemId);
-          });
+        if (itemId && resumedRef.current) {
+          setMemory(current => setSpaceTrailResume(current, itemId));
         }
       },
-      { root: scroller, threshold: [0.6, 0.8] }
+      { root: scroller, threshold: [0.25, 0.55] }
     );
     sections.forEach(section => observer.observe(section));
     return () => observer.disconnect();
-  }, [recommendations.length]);
+  }, [visibleRecommendations]);
 
   useEffect(() => {
-    if (resumedRef.current || !memory.resumeId) return;
-    const index = recommendations.findIndex(
-      entry => entry.item.id === memory.resumeId
-    );
-    if (index < 0) return;
-    resumedRef.current = true;
-    requestAnimationFrame(() => scrollToIndex(index, 'auto'));
-  }, [memory.resumeId, recommendations, scrollToIndex]);
-
-  useEffect(() => {
-    if (
-      activeIndex < recommendations.length - LOAD_MORE_THRESHOLD ||
-      !hasMore ||
-      loadingMore
-    ) {
+    if (!memoryReady || resumedRef.current) return;
+    const hash = window.location.hash.slice(1);
+    const hashItemId = hash.startsWith('trail-')
+      ? decodeURIComponent(hash.slice('trail-'.length))
+      : undefined;
+    const requestedId = hashItemId || memory.resumeId;
+    if (!requestedId) {
+      resumedRef.current = true;
       return;
     }
-    void loadMore();
-  }, [activeIndex, hasMore, loadMore, loadingMore, recommendations.length]);
+
+    const index = recommendations.findIndex(
+      entry => entry.item.id === requestedId
+    );
+    if (index < 0) {
+      if (hasMore && !loadingMore) void loadMore();
+      else if (!hasMore) resumedRef.current = true;
+      return;
+    }
+
+    resumedRef.current = true;
+    requestAnimationFrame(() => scrollToIndex(index, 'auto'));
+  }, [
+    hasMore,
+    loadMore,
+    loadingMore,
+    memory.resumeId,
+    memoryReady,
+    recommendations,
+    scrollToIndex,
+  ]);
+
+  useEffect(() => {
+    const sentinel = loadSentinelRef.current;
+    const scroller = scrollerRef.current;
+    if (!sentinel || !scroller || !hasMore || loadingMore) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries.some(entry => entry.isIntersecting)) void loadMore();
+      },
+      { root: scroller, rootMargin: '500px 0px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore, loadingMore, visibleRecommendations.length]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -335,11 +542,11 @@ export function SpaceTrail() {
         return;
       }
 
-      if (event.key === 'ArrowDown' || event.key.toLowerCase() === 'j') {
+      if (event.key.toLowerCase() === 'j') {
         event.preventDefault();
         scrollToIndex(Math.min(activeIndex + 1, recommendations.length - 1));
       }
-      if (event.key === 'ArrowUp' || event.key.toLowerCase() === 'k') {
+      if (event.key.toLowerCase() === 'k') {
         event.preventDefault();
         scrollToIndex(Math.max(activeIndex - 1, 0));
       }
@@ -355,7 +562,11 @@ export function SpaceTrail() {
     setMemory(nextMemory);
 
     setRecommendations(current => {
-      const prefix = current.slice(0, activeIndex + 1);
+      const selectedIndex = Math.max(
+        0,
+        current.findIndex(entry => entry.item.id === itemId)
+      );
+      const prefix = current.slice(0, selectedIndex + 1);
       const fixedIds = new Set(prefix.map(entry => entry.item.id));
       const remaining = items.filter(item => !fixedIds.has(item.id));
       return [
@@ -365,14 +576,60 @@ export function SpaceTrail() {
     });
   };
 
+  const toggleExpanded = (itemId: string) => {
+    setCopyState(null);
+    setMemory(current => {
+      const nextExpandedId = current.expandedId === itemId ? null : itemId;
+      const nextMemory = setSpaceTrailExpanded(current, nextExpandedId);
+      writeMemory(nextMemory);
+      if (nextExpandedId) {
+        requestAnimationFrame(() => {
+          const scroller = scrollerRef.current;
+          const target = document.getElementById(`trail-${itemId}`);
+          if (scroller && target) {
+            scrollWithinTrail(scroller, target, 'smooth', 'nearest');
+          }
+        });
+      }
+      return nextMemory;
+    });
+  };
+
   const markOpened = (itemId: string) => {
-    const nextMemory = markSpaceTrailOpened(memory, itemId);
-    setMemory(nextMemory);
+    setMemory(current => {
+      const nextMemory = markSpaceTrailOpened(current, itemId);
+      writeMemory(nextMemory);
+      return nextMemory;
+    });
+  };
+
+  const copyForChat = async (
+    recommendation: SpaceTrailRecommendation,
+    reaction?: SpaceTrailReaction
+  ) => {
+    const { href, nextMove } = readingHref(recommendation, reaction);
+    try {
+      await navigator.clipboard.writeText(
+        buildSpacePracticePrompt({
+          mode: nextMove.mode,
+          title: recommendation.item.title,
+          sourceUrl: recommendation.item.url,
+          studyUrl: new URL(href, window.location.origin).toString(),
+          draft: '',
+          prompt: nextMove.prompt,
+        })
+      );
+      setCopyState({ itemId: recommendation.item.id, status: 'copied' });
+    } catch {
+      setCopyState({ itemId: recommendation.item.id, status: 'failed' });
+    }
   };
 
   const resetPersonalization = () => {
     const nextMemory = EMPTY_SPACE_TRAIL_MEMORY;
+    resumedRef.current = true;
     setMemory(nextMemory);
+    setCopyState(null);
     try {
       window.localStorage.removeItem(TRAIL_MEMORY_KEY);
     } catch {
@@ -383,12 +640,12 @@ export function SpaceTrail() {
     scrollerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const headerStatus = useMemo(() => {
-    const position = recommendations.length > 0 ? activeIndex + 1 : 0;
-    return `${position} / ${recommendations.length}${hasMore ? '+' : ''}${
-      loadingMore ? ' · loading' : ''
-    }`;
-  }, [activeIndex, hasMore, loadingMore, recommendations.length]);
+  const visibleCount = visibleRecommendations.length;
+  const loadedCount = recommendations.length;
+  const count = query.trim() ? `${visibleCount} / ${loadedCount}` : loadedCount;
+  const headerStatus = `${count} notes${hasMore ? '+' : ''}${
+    loadingMore ? ' · loading' : ''
+  }`;
 
   return (
     <div className="relative flex h-full min-h-0 flex-col bg-background">
@@ -419,69 +676,106 @@ export function SpaceTrail() {
 
       <main
         ref={scrollerRef}
-        className="relative h-0 min-h-0 flex-1 snap-y snap-mandatory overflow-y-auto overscroll-y-contain bg-[radial-gradient(circle_at_12%_8%,hsl(var(--muted)/0.6),transparent_32%),radial-gradient(circle_at_88%_78%,hsl(var(--muted)/0.48),transparent_28%)] [scrollbar-gutter:stable] [touch-action:pan-y]"
+        className="relative h-0 min-h-0 flex-1 overflow-y-auto overscroll-y-contain bg-background [scrollbar-gutter:stable] [touch-action:pan-y]"
         aria-label="Personalized learning trail"
         data-space-trail
       >
         <h1 className="sr-only">Learning trail</h1>
-        {recommendations.map((recommendation, index) => (
-          <TrailCard
-            key={recommendation.item.id}
-            recommendation={recommendation}
-            index={index}
-            total={recommendations.length}
-            reaction={memory.reactions[recommendation.item.id]}
-            onReaction={reaction =>
-              chooseReaction(recommendation.item.id, reaction)
-            }
-            onOpen={() => markOpened(recommendation.item.id)}
-          />
-        ))}
-
-        {recommendations.length === 0 ? (
-          <div className="grid min-h-full place-items-center px-4 text-center">
-            <div className="max-w-sm">
-              <p className="text-lg font-semibold">No studies loaded</p>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                {error ?? 'The public archive is empty.'}
-              </p>
-              {error ? (
-                <button
-                  type="button"
-                  onClick={() => void reload()}
-                  className="mt-4 min-h-[44px] rounded-xl border px-4 text-sm font-medium hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  Try again
-                </button>
-              ) : null}
-            </div>
+        <div className="mx-auto w-full max-w-5xl px-3 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-6">
+          <div className="sticky top-0 z-10 -mx-3 border-b border-border/60 bg-background/90 px-3 py-3 backdrop-blur-md sm:-mx-6 sm:px-6">
+            <label className="relative mx-auto block max-w-5xl">
+              <span className="sr-only">Filter loaded notes</span>
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                value={query}
+                onChange={event => setQuery(event.target.value)}
+                placeholder="Filter loaded notes"
+                className="h-11 w-full rounded-xl border border-border/70 bg-background pl-9 pr-20 text-sm outline-none transition placeholder:text-muted-foreground/75 focus:border-foreground/25 focus:ring-2 focus:ring-ring"
+              />
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[9px] tabular-nums text-muted-foreground">
+                {visibleRecommendations.length}
+              </span>
+            </label>
           </div>
-        ) : null}
-      </main>
 
-      <nav
-        aria-label="Trail controls"
-        className="pointer-events-none absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-3 z-20 hidden gap-1 sm:flex"
-      >
-        <button
-          type="button"
-          onClick={() => scrollToIndex(Math.max(activeIndex - 1, 0))}
-          className="pointer-events-auto grid h-10 w-10 place-items-center rounded-full border bg-background/85 text-muted-foreground shadow-sm backdrop-blur hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label="Previous study"
-        >
-          <ArrowUp className="h-4 w-4" aria-hidden="true" />
-        </button>
-        <button
-          type="button"
-          onClick={() =>
-            scrollToIndex(Math.min(activeIndex + 1, recommendations.length - 1))
-          }
-          className="pointer-events-auto grid h-10 w-10 place-items-center rounded-full border bg-background/85 text-muted-foreground shadow-sm backdrop-blur hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label="Next study"
-        >
-          <ArrowDown className="h-4 w-4" aria-hidden="true" />
-        </button>
-      </nav>
+          {error ? (
+            <div
+              role="alert"
+              className="my-3 flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-muted/25 px-4 py-3 text-sm"
+            >
+              <span>{error}</span>
+              <button
+                type="button"
+                onClick={() => void reload()}
+                className="min-h-[44px] shrink-0 rounded-lg border border-border/70 bg-background px-3 text-xs font-medium hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Try again
+              </button>
+            </div>
+          ) : null}
+
+          <div className="border-y border-border/60" data-space-trail-list>
+            {loading && recommendations.length === 0 ? (
+              <TrailLoading />
+            ) : (
+              visibleRecommendations.map(({ recommendation, index }) => (
+                <div
+                  key={recommendation.item.id}
+                  className="border-b border-border/55 last:border-b-0"
+                >
+                  <TrailCard
+                    recommendation={recommendation}
+                    index={index}
+                    reaction={memory.reactions[recommendation.item.id]}
+                    expanded={memory.expandedId === recommendation.item.id}
+                    copyState={
+                      copyState?.itemId === recommendation.item.id
+                        ? copyState.status
+                        : undefined
+                    }
+                    onReaction={reaction =>
+                      chooseReaction(recommendation.item.id, reaction)
+                    }
+                    onToggle={() => toggleExpanded(recommendation.item.id)}
+                    onCopy={() =>
+                      void copyForChat(
+                        recommendation,
+                        memory.reactions[recommendation.item.id]
+                      )
+                    }
+                    onOpen={() => markOpened(recommendation.item.id)}
+                  />
+                </div>
+              ))
+            )}
+
+            {loadingMore ? <TrailLoading count={2} /> : null}
+          </div>
+
+          {!loading && visibleRecommendations.length === 0 ? (
+            <div className="px-4 py-14 text-center">
+              <p className="text-sm font-medium">No matching notes loaded</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                {hasMore
+                  ? 'The remaining archive is still being checked.'
+                  : 'Try a title, topic, category, or phrase from the note.'}
+              </p>
+            </div>
+          ) : null}
+
+          <div ref={loadSentinelRef} className="h-px" aria-hidden="true" />
+
+          {!hasMore && recommendations.length > 0 ? (
+            <p className="py-6 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground/70">
+              End of the loaded archive
+            </p>
+          ) : null}
+        </div>
+      </main>
     </div>
   );
 }

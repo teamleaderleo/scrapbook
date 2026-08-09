@@ -215,7 +215,7 @@ export function SpaceView() {
                 prefetch
                 className="inline-flex min-h-[44px] items-center rounded-xl border border-border/70 bg-background/70 px-3 text-xs font-medium text-muted-foreground transition hover:border-foreground/25 hover:bg-card hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                Open swipe trail
+                Open reading trail
               </Link>
             </div>
           </section>
