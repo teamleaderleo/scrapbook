@@ -19,19 +19,24 @@ import { createStaleWhileErrorCache } from './stale-while-error-cache';
 const GITHUB_USERNAME = 'teamleaderleo';
 const FEATURED_REPOSITORIES = [
   {
+    name: 'scrapbook',
+    url: 'https://github.com/teamleaderleo/scrapbook',
+    note: 'Personal site.',
+  },
+  {
+    name: 'fieldwork',
+    url: 'https://github.com/teamleaderleo/fieldwork',
+    note: 'Codebase studies.',
+  },
+  {
+    name: 'linux-fieldwork',
+    url: 'https://github.com/teamleaderleo/linux-fieldwork',
+    note: 'Linux and kernel studies.',
+  },
+  {
     name: 'smolrunner',
     url: 'https://github.com/teamleaderleo/smolrunner',
-    note: 'Plans host work before mutation and treats unknown state as a reason to inspect, not guess.',
-  },
-  {
-    name: 'stensibly',
-    url: 'https://github.com/teamleaderleo/stensibly',
-    note: 'Keeps responsibility, authority, evidence, and next actions in one shared ledger.',
-  },
-  {
-    name: 'proofwake',
-    url: 'https://github.com/teamleaderleo/proofwake',
-    note: 'Builds a privacy-minded evidence trail around revisions, failures, recovery, and missing signals.',
+    note: 'Host-work runner.',
   },
 ] as const;
 
@@ -265,7 +270,7 @@ async function loadGitHubHomeData(): Promise<UpstreamActivity> {
 
 const getCachedUpstreamActivity = unstable_cache(
   () => captureCacheLoad(loadGitHubHomeData),
-  ['github-homepage-v10'],
+  ['github-homepage-v11'],
   { revalidate: GITHUB_ACTIVITY_UPSTREAM_FRESH_SECONDS },
 );
 

@@ -1,5 +1,4 @@
 import { ActivityDashboard } from '@/components/home/activity-dashboard';
-import { WindLiftCard } from '@/components/home/wind-lift-card';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { getGitHubHomeData } from '@/lib/github-home';
 import { homeRoomNavigationItems } from '@/lib/site-navigation';
@@ -23,11 +22,6 @@ export const metadata: Metadata = {
   title: 'Leo · GitHub activity',
   description: 'Recent GitHub profile contributions from teamleaderleo.',
   alternates: { canonical: '/' },
-};
-
-const repositoryNoteOverrides: Record<string, string> = {
-  smolrunner:
-    'Plans host work before changing anything and inspects unknown state first.',
 };
 
 const homeRoomIcons: Record<string, LucideIcon> = {
@@ -70,51 +64,52 @@ async function HomeActivityContent() {
       <ActivityDashboard initial={initialActivity} />
 
       <section
-        aria-label="Recent work"
+        aria-labelledby="home-repositories-title"
         className="min-w-0"
         data-recent-systems
       >
-        <div className="grid min-w-0 grid-cols-1 gap-2.5 md:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
+        <div className="mb-2 flex items-baseline justify-between gap-4 px-0.5">
+          <h2
+            id="home-repositories-title"
+            className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground"
+          >
+            Repositories
+          </h2>
+          <a
+            href={`https://github.com/${activity.username}`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          >
+            GitHub
+          </a>
+        </div>
+        <div className="grid min-w-0 overflow-hidden rounded-xl border border-border/65 bg-card/70 sm:grid-cols-2">
           {activity.repositories.map((repository, index) => (
-            <WindLiftCard
+            <a
               key={repository.name}
               href={repository.url}
-              className={
-                index === 0
-                  ? 'min-h-48 p-4 md:row-span-2 md:min-h-full md:p-5'
-                  : 'min-h-28 p-3.5'
-              }
+              target="_blank"
+              rel="noreferrer"
+              data-home-repository={repository.name}
+              className="group flex min-h-16 items-center gap-3 border-border/55 px-3 py-2.5 transition-colors hover:bg-muted/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&:nth-child(n+2)]:border-t sm:[&:nth-child(2)]:border-t-0 sm:[&:nth-child(even)]:border-l"
             >
-              <div
-                className={`flex flex-col justify-between gap-3 ${index === 0 ? 'min-h-40 md:min-h-full' : 'min-h-20'}`}
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <ArrowUpRight
-                      size={15}
-                      className="shrink-0 text-muted-foreground transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
-                    />
-                  </div>
-                  <h3
-                    className={`mt-3 truncate font-semibold tracking-tight ${index === 0 ? 'text-2xl sm:text-3xl' : 'text-base'}`}
-                  >
-                    {repository.name}
-                  </h3>
-                  <p
-                    className={`mt-2 text-muted-foreground ${index === 0 ? 'max-w-xl text-base leading-relaxed' : 'text-sm leading-snug'}`}
-                  >
-                    {repositoryNoteOverrides[repository.name] ??
-                      repository.note}
-                  </p>
-                </div>
-                <span className="font-mono text-[9px] uppercase tracking-[0.13em] text-muted-foreground">
-                  open repository
+              <span className="w-5 shrink-0 font-mono text-[9px] tabular-nums text-muted-foreground">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold tracking-tight">
+                  {repository.name}
                 </span>
-              </div>
-            </WindLiftCard>
+                <span className="block truncate text-xs text-muted-foreground">
+                  {repository.note}
+                </span>
+              </span>
+              <ArrowUpRight
+                size={14}
+                className="shrink-0 text-muted-foreground transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
+              />
+            </a>
           ))}
         </div>
       </section>

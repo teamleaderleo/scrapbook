@@ -18,6 +18,9 @@ test('Space keeps the current Supabase auth route boundary', async ({
     'This page did not finish loading'
   );
   await expect(
-    page.getByRole('heading', { name: /Follow a thought somewhere|Space/i })
+    page.getByRole('heading', { name: 'Space', exact: true })
   ).toBeVisible({ timeout: 15_000 });
+  await expect(
+    page.getByRole('navigation', { name: 'Space sections' })
+  ).toBeVisible();
 });

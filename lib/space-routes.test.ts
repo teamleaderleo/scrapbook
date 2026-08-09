@@ -26,8 +26,8 @@ describe('reviewItemHref', () => {
   });
 
   it('preserves a real tag query without serializing an absent value', () => {
-    expect(reviewItemHref('item/id', ' topic:security ')).toBe(
-      '/space/review?item=item%2Fid&tags=topic%3Asecurity'
+    expect(reviewItemHref('item/id', ' topic:security ', ' fieldwork ')).toBe(
+      '/space/review?item=item%2Fid&tags=topic%3Asecurity&lane=fieldwork'
     );
     expect(() => reviewItemHref('   ')).toThrow('Review item id is required');
   });

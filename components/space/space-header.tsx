@@ -28,23 +28,26 @@ export function SpaceHeader({
   const pathname = usePathname();
   const { toggleSidebar } = useSidebar();
   const tagsParam = searchParams.get('tags') || '';
+  const laneParam = searchParams.get('lane') || '';
   const isReviewLike =
     pathname === '/space/review' ||
     pathname?.startsWith('/space/add') ||
     pathname?.startsWith('/space/edit');
   const isMac = useIsMacPlatform();
-  const toggleHref = isReviewLike
-    ? `/space${tagsParam ? `?tags=${tagsParam}` : ''}`
-    : `/space/review${tagsParam ? `?tags=${tagsParam}` : ''}`;
+  const toggleParams = new URLSearchParams();
+  if (tagsParam) toggleParams.set('tags', tagsParam);
+  if (laneParam) toggleParams.set('lane', laneParam);
+  const toggleSearch = toggleParams.toString();
+  const toggleHref = `${isReviewLike ? '/space' : '/space/review'}${
+    toggleSearch ? `?${toggleSearch}` : ''
+  }`;
 
   const defaultReviewControl = (
     <Link
       href={toggleHref}
       prefetch
       className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-transparent px-2 text-sm font-medium text-muted-foreground transition hover:border-border/60 hover:bg-muted/65 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      aria-label={
-        isReviewLike ? 'Back to learning garden' : 'Open reading mode'
-      }
+      aria-label={isReviewLike ? 'Back to list' : 'Open reader'}
     >
       {isReviewLike ? (
         <ArrowLeft className="h-4 w-4" />
@@ -52,7 +55,7 @@ export function SpaceHeader({
         <ArrowRight className="h-4 w-4" />
       )}
       <span className="hidden sm:inline">
-        {isReviewLike ? 'Garden' : 'Read'}
+        {isReviewLike ? 'List' : 'Reader'}
       </span>
       <SpaceLinkHint />
     </Link>

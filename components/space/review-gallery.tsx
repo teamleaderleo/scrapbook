@@ -17,6 +17,7 @@ import { reviewItemAction } from '@/app/space/actions';
 import { duplicateItemHref } from '@/lib/space-routes';
 import { SpaceHeader } from './space-header';
 import { CodeDisplay } from './code-display';
+import { filterItemsBySpaceLane, resolveSpaceLane } from '@/lib/space-lanes';
 
 export function ReviewGallery() {
   const {
@@ -36,7 +37,12 @@ export function ReviewGallery() {
   const sp = useSearchParams();
   const router = useRouter();
   const tagsParam = sp.get('tags') ?? undefined;
+  const laneParam = sp.get('lane');
   const itemParam = sp.get('item');
+  const activeLane = resolveSpaceLane(laneParam, {
+    hasQuery: Boolean(tagsParam),
+    hasTarget: Boolean(itemParam),
+  });
 
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -51,15 +57,24 @@ export function ReviewGallery() {
       const mutation = mutations[item.id];
       return mutation ? { ...item, review: mutation } : item;
     });
-    return searchItems(withMutations, q, nowMs);
-  }, [allItems, mutations, q, nowMs]);
+    const laneItems = filterItemsBySpaceLane(withMutations, activeLane);
+    return searchItems(laneItems, q, nowMs);
+  }, [activeLane, allItems, mutations, q, nowMs]);
 
   const current = items[currentIndex];
   const active = current?.versions[activeIdx];
 
   useEffect(() => {
-    if (hasMore && !loadingMore) void loadMore();
-  }, [hasMore, loadMore, loadingMore]);
+    if (!hasMore || loadingMore) return;
+
+    const targetIsMissing = Boolean(
+      itemParam && !items.some(item => item.id === itemParam)
+    );
+    const reachedLoadedEnd =
+      items.length === 0 || currentIndex >= items.length - 1;
+
+    if (targetIsMissing || reachedLoadedEnd) void loadMore();
+  }, [currentIndex, hasMore, itemParam, items, loadMore, loadingMore]);
 
   useEffect(() => {
     if (current) setActiveIdx(current.defaultIndex);
@@ -107,13 +122,17 @@ export function ReviewGallery() {
         setShowContent(visible => !visible);
       }
       if (event.key === 'Escape') {
-        router.push(`/space${tagsParam ? `?tags=${tagsParam}` : ''}`);
+        const params = new URLSearchParams();
+        if (tagsParam) params.set('tags', tagsParam);
+        if (laneParam) params.set('lane', laneParam);
+        const search = params.toString();
+        router.push(`/space${search ? `?${search}` : ''}`);
       }
     };
 
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [items.length, router, tagsParam]);
+  }, [items.length, laneParam, router, tagsParam]);
 
   const onReview = async (rating: Rating) => {
     if (!current) return;

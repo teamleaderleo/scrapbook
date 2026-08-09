@@ -9,9 +9,9 @@ import { MonacoEditorPanel } from '@/components/space/monaco-editor-panel';
 import { loadInitialSpaceData } from './data';
 
 export const metadata: Metadata = {
-  title: 'Space — a public learning garden',
+  title: 'Space · learning notes',
   description:
-    'Living notes, lesson plans, questions, code studies, and connections between things worth learning.',
+    'Public notes, code studies, exercises, and source-linked lessons.',
   alternates: { canonical: '/space' },
   robots: { index: true, follow: true },
 };

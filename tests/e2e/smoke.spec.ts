@@ -92,23 +92,33 @@ test('former blog routes return not found', async ({ page }) => {
   }
 });
 
-test('homepage keeps three recent project links without a promotional heading', async ({ page }) => {
+test('homepage keeps a factual repository ledger without promotional copy', async ({
+  page,
+}) => {
   await page.goto('/');
   await waitForHomeActivity(page);
 
-  await expect(page.getByText('Recent systems', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Recent systems', { exact: true })).toHaveCount(
+    0
+  );
   await expect(
     page.getByText('Tools that remember their boundaries')
   ).toHaveCount(0);
-  await expect(
-    page.getByText(
-      'Plans host work before changing anything and inspects unknown state first.'
-    )
-  ).toBeVisible();
   await expect(page.getByText(/not guess/i)).toHaveCount(0);
-  await expect(page.getByRole('link', { name: /smolrunner/i })).toBeVisible();
-  await expect(page.getByRole('link', { name: /stensibly/i })).toBeVisible();
-  await expect(page.getByRole('link', { name: /proofwake/i })).toBeVisible();
+  for (const repository of [
+    'scrapbook',
+    'fieldwork',
+    'linux-fieldwork',
+    'smolrunner',
+  ]) {
+    await expect(
+      page.locator(`[data-home-repository="${repository}"]`)
+    ).toBeVisible();
+  }
+  await expect(page.getByText('Personal site.', { exact: true })).toBeVisible();
+  await expect(
+    page.getByText('Codebase studies.', { exact: true })
+  ).toBeVisible();
 });
 
 test('homepage counter uses UTC, 7D, and rolling-year instrument labels', async ({
