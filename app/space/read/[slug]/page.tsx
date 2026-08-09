@@ -21,6 +21,7 @@ type ReadingSheetPageProps = {
     lane?: string;
     tags?: string;
     from?: string;
+    return?: string;
     practice?: string;
     stage?: string;
   }>;
@@ -88,7 +89,11 @@ export default async function ReadingSheetPage({
   if (query.tags?.trim()) backQuery.set('tags', query.tags.trim());
   const fromTrail = query.from === 'trail';
   const backHref = fromTrail
-    ? '/space/trail'
+    ? `/space/trail${
+        query.return?.trim()
+          ? `#trail-${encodeURIComponent(query.return.trim())}`
+          : ''
+      }`
     : `/space?${backQuery.toString()}`;
   const versions = item.versions.map((version, index) => ({
     ...version,

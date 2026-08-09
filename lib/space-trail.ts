@@ -9,6 +9,7 @@ export type SpaceTrailMemory = {
   reactions: Record<string, SpaceTrailReaction>;
   opened: string[];
   resumeId?: string;
+  expandedId?: string;
 };
 
 export type SpaceTrailRecommendation = {
@@ -136,6 +137,10 @@ export function parseSpaceTrailMemory(value: string | null): SpaceTrailMemory {
         typeof candidate.resumeId === 'string' && candidate.resumeId
           ? candidate.resumeId
           : undefined,
+      expandedId:
+        typeof candidate.expandedId === 'string' && candidate.expandedId
+          ? candidate.expandedId
+          : undefined,
     };
   } catch {
     return EMPTY_SPACE_TRAIL_MEMORY;
@@ -171,6 +176,23 @@ export function setSpaceTrailResume(
 ): SpaceTrailMemory {
   if (memory.resumeId === itemId) return memory;
   return { ...memory, resumeId: itemId };
+}
+
+export function setSpaceTrailExpanded(
+  memory: SpaceTrailMemory,
+  itemId: string | null
+): SpaceTrailMemory {
+  if (
+    (memory.expandedId ?? null) === itemId &&
+    (!itemId || memory.resumeId === itemId)
+  ) {
+    return memory;
+  }
+  if (!itemId) {
+    const { expandedId: _expandedId, ...rest } = memory;
+    return rest;
+  }
+  return { ...memory, expandedId: itemId, resumeId: itemId };
 }
 
 export function rankSpaceTrail(

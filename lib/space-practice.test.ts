@@ -100,6 +100,18 @@ describe('Space practice prompts', () => {
     ).toContain('Predict the first observable write.');
   });
 
+  it('can carry a stable Scrapbook reading URL into another chat', () => {
+    expect(
+      buildSpacePracticePrompt({
+        mode: 'trace',
+        title: 'Trace the request',
+        sourceUrl: null,
+        studyUrl: 'https://example.com/space/read/trace-the-request',
+        draft: '',
+      })
+    ).toContain('Scrapbook: https://example.com/space/read/trace-the-request');
+  });
+
   it('does not invent an empty notes block', () => {
     expect(
       buildSpacePracticePrompt({

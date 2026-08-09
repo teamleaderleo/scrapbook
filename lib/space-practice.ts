@@ -168,12 +168,14 @@ export function buildSpacePracticePrompt({
   mode,
   title,
   sourceUrl,
+  studyUrl,
   draft,
   prompt,
 }: {
   mode: SpacePracticeMode;
   title: string;
   sourceUrl?: string | null;
+  studyUrl?: string | null;
   draft: string;
   prompt?: string;
 }) {
@@ -183,6 +185,7 @@ export function buildSpacePracticePrompt({
   ];
 
   lines.push('', `Study: ${title}`);
+  if (studyUrl) lines.push(`Scrapbook: ${studyUrl}`);
   if (sourceUrl) lines.push(`Source: ${sourceUrl}`);
 
   const trimmedDraft = draft.trim();
