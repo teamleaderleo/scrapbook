@@ -74,6 +74,8 @@ export function getBotDeskEntry(slug: string) {
 }
 
 export async function getBotDeskDocument(slug: string) {
+  'use cache';
+
   const entry = getBotDeskEntry(slug);
   if (!entry) return undefined;
 
