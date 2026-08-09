@@ -16,7 +16,7 @@ export type BotDeskEntry = {
   recovered?: boolean;
 };
 
-export const botDeskEntries: readonly BotDeskEntry[] = [
+const entries: BotDeskEntry[] = [
   {
     slug: 'evaluation-structures',
     title: '(E)valuation Structures',
@@ -63,7 +63,11 @@ export const botDeskEntries: readonly BotDeskEntry[] = [
     sourcePath: 'desk/one-hundred-tiny-launches.md',
     recovered: true,
   },
-].sort((left, right) => right.date.localeCompare(left.date));
+];
+
+export const botDeskEntries: readonly BotDeskEntry[] = entries.sort((left, right) =>
+  right.date.localeCompare(left.date)
+);
 
 export function getBotDeskEntry(slug: string) {
   return botDeskEntries.find(entry => entry.slug === slug);
