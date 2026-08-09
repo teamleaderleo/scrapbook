@@ -39,6 +39,7 @@ for (const theme of ['light', 'dark'] as const) {
     });
     expect(resting.width).toBeGreaterThan(20);
     expect(resting.height).toBeGreaterThan(20);
+    expect(Math.abs(resting.width - resting.height)).toBeLessThanOrEqual(1);
     await expect(mark).toHaveAttribute('aria-pressed', 'false');
 
     const textures = await mark.evaluate(element => ({

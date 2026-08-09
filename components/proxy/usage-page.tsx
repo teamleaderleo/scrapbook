@@ -1,20 +1,17 @@
 import ViewportPageShell from '@/components/viewport-page-shell';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Suspense } from 'react';
 import { ProxyLiveRefresh } from './proxy-live-refresh';
 import { UsageDashboardContainer } from './usage-dashboard-container';
 
 function SignalSkeleton() {
   return (
-    <div
-      className="grid animate-pulse gap-3 motion-reduce:animate-none"
-      aria-label="Loading dashboard"
-      role="status"
-    >
-      <div className="h-44 rounded-2xl border border-border/70 bg-background/55" />
+    <div className="grid gap-3" aria-label="Loading dashboard" role="status">
+      <Skeleton className="h-44 rounded-2xl border border-border/70" />
       <div className="grid gap-3 md:grid-cols-3">
-        <div className="h-32 rounded-xl border border-border/70 bg-background/45" />
-        <div className="h-32 rounded-xl border border-border/70 bg-background/45" />
-        <div className="h-32 rounded-xl border border-border/70 bg-background/45" />
+        <Skeleton className="h-32 rounded-xl border border-border/70" />
+        <Skeleton className="h-32 rounded-xl border border-border/70" />
+        <Skeleton className="h-32 rounded-xl border border-border/70" />
       </div>
     </div>
   );

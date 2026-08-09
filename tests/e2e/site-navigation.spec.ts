@@ -31,6 +31,13 @@ test('site atlas exposes rooms, repositories, experiments, and connections', asy
 
   const atlas = page.locator('[data-site-atlas]');
   await expect(atlas).toBeVisible();
+  const inheritedFonts = await page.evaluate(() => ({
+    body: getComputedStyle(document.body).fontFamily,
+    atlas: getComputedStyle(
+      document.querySelector<HTMLElement>('[data-site-atlas]')!
+    ).fontFamily,
+  }));
+  expect(inheritedFonts.atlas).toBe(inheritedFonts.body);
   await expect(atlas.getByRole('heading', { name: 'Places' })).toBeVisible();
   await expect(atlas.getByRole('heading', { name: 'Tools' })).toBeVisible();
   await expect(

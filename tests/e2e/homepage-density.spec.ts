@@ -114,6 +114,9 @@ for (const viewport of desktopViewports) {
     expect(footprint.activityCell.width).toBeLessThanOrEqual(72);
     expect(footprint.activityCell.height).toBeGreaterThanOrEqual(34);
     expect(footprint.activityCell.height).toBeLessThanOrEqual(72);
+    expect(
+      Math.abs(footprint.activityCell.width - footprint.activityCell.height)
+    ).toBeLessThanOrEqual(1);
 
     await removeDevelopmentChrome(page);
     const screenshotPath = path.join(
