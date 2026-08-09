@@ -18,6 +18,7 @@ describe('site navigation registry', () => {
         '/space',
         '/time',
         '/gallery',
+        '/desk',
         '/atelier',
         '/snow-globe',
         'https://github.com/teamleaderleo/fieldwork',
@@ -29,9 +30,10 @@ describe('site navigation registry', () => {
     expect(hrefs).not.toContain('/resume');
   });
 
-  it('keeps tools, secondary places, and labs out of the primary row', () => {
+  it('keeps tools, the evidence journal, and labs out of the primary row', () => {
     const primaryIds = primaryNavigationItems.map(item => item.id);
-    expect(primaryIds).toEqual(['home', 'space', 'gallery', 'journal']);
+    expect(primaryIds).toEqual(['home', 'space', 'gallery', 'desk']);
+    expect(primaryIds).not.toContain('journal');
     expect(primaryIds).not.toContain('proxy');
     expect(primaryIds).not.toContain('snow-globe');
     expect(primaryIds).not.toContain('activity-lab');
@@ -43,6 +45,9 @@ describe('site navigation registry', () => {
       'public'
     );
     expect(siteNavigationItems.find(item => item.id === 'space')?.surface).toBe(
+      'public'
+    );
+    expect(siteNavigationItems.find(item => item.id === 'desk')?.surface).toBe(
       'public'
     );
     expect(
@@ -59,6 +64,7 @@ describe('site navigation registry', () => {
       'home',
       'space',
       'gallery',
+      'desk',
       'journal',
       'time',
     ]);
@@ -66,7 +72,7 @@ describe('site navigation registry', () => {
     expect(homeRoomNavigationItems.map(item => item.id)).toEqual([
       'space',
       'gallery',
-      'journal',
+      'desk',
       'atelier',
       'snow-globe',
     ]);
@@ -74,9 +80,12 @@ describe('site navigation registry', () => {
 
   it('matches nested routes and trailing slashes', () => {
     const space = siteNavigationItems.find(item => item.id === 'space');
+    const desk = siteNavigationItems.find(item => item.id === 'desk');
     expect(space).toBeDefined();
+    expect(desk).toBeDefined();
     expect(isNavigationItemActive('/space/review', space!)).toBe(true);
     expect(isNavigationItemActive('/space/edit/example/', space!)).toBe(true);
+    expect(isNavigationItemActive('/desk/example/', desk!)).toBe(true);
   });
 
   it('keeps home exact and external links inactive', () => {
@@ -85,13 +94,15 @@ describe('site navigation registry', () => {
     expect(home).toBeDefined();
     expect(github).toBeDefined();
     expect(isNavigationItemActive('/', home!)).toBe(true);
-    expect(isNavigationItemActive('/journal', home!)).toBe(false);
+    expect(isNavigationItemActive('/desk', home!)).toBe(false);
     expect(isNavigationItemActive('/github', github!)).toBe(false);
   });
 
   it('returns the active place for registered routes', () => {
     expect(getActiveNavigationItem('/space/review')?.id).toBe('space');
     expect(getActiveNavigationItem('/gallery')?.id).toBe('gallery');
+    expect(getActiveNavigationItem('/desk')?.id).toBe('desk');
+    expect(getActiveNavigationItem('/desk/example')?.id).toBe('desk');
     expect(getActiveNavigationItem('/journal')?.id).toBe('journal');
     expect(getActiveNavigationItem('/snow-globe')?.id).toBe('snow-globe');
     expect(getActiveNavigationItem('/resume')).toBeUndefined();
