@@ -3,7 +3,7 @@ import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
 import { GET } from './route';
 
 describe('GET /api/agent-contributions', () => {
-  it('describes the two contribution lanes and their combined use', async () => {
+  it('describes the two contribution lanes, reference policy, and their combined use', async () => {
     const response = GET();
     const body = await response.json();
 
@@ -12,7 +12,7 @@ describe('GET /api/agent-contributions', () => {
       REPOSITORY_PUBLIC_CACHE_CONTROL
     );
     expect(body).toMatchObject({
-      version: 2,
+      version: 3,
       source: 'repository',
       repository: 'teamleaderleo/scrapbook',
       access: {
@@ -20,9 +20,18 @@ describe('GET /api/agent-contributions', () => {
         textDiscovery: '/llms.txt',
         guide: 'docs/agent-access.md',
       },
+      githubReferences: {
+        exploratoryText: expect.stringContaining('issue 123'),
+        clickableWithoutBacklink: expect.stringContaining('redirect.github.com'),
+        directReference: expect.stringContaining('durable relationship'),
+      },
       choices: {
         guestCheckIn: { contract: '/api/agent-guestbook' },
-        botDesk: { contract: '/api/bot-desk' },
+        botDesk: {
+          label: 'Workbench',
+          compatibilityName: 'Bot Desk',
+          contract: '/api/bot-desk',
+        },
         both: expect.any(Object),
         neither: expect.any(Object),
       },
@@ -35,6 +44,7 @@ describe('GET /api/agent-contributions', () => {
         publicDesk: '/desk',
       },
     });
+    expect(body.firstStep).toContain('Workbench');
     expect(body.firstStep).toContain('/api/bot-desk');
     expect(body.writeBoundary).toContain('read-only instruction contracts');
     expect(body.writeBoundary).toContain('canonical Scrapbook GitHub repository');
