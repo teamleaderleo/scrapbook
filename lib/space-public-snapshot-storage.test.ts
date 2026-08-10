@@ -5,6 +5,7 @@ import {
   SPACE_PUBLIC_SNAPSHOT_MAX_BYTES,
 } from './space-public-snapshot';
 import {
+  clearStoredSpacePublicSnapshot,
   readStoredSpacePublicSnapshot,
   writeStoredSpacePublicSnapshot,
   type SpaceSnapshotStorage,
@@ -77,6 +78,22 @@ describe('Space public snapshot storage', () => {
     expect(restored?.items[0]).not.toHaveProperty('review');
     expect(restored?.items[0]).not.toHaveProperty('userId');
     expect(restored?.hasMore).toBe(true);
+  });
+
+  it('clears an obsolete snapshot without making storage failure fatal', () => {
+    const storage = memoryStorage('old');
+    expect(clearStoredSpacePublicSnapshot(storage)).toBe(true);
+    expect(storage.removeItem).toHaveBeenCalledWith(SPACE_PUBLIC_SNAPSHOT_KEY);
+    expect(storage.getItem(SPACE_PUBLIC_SNAPSHOT_KEY)).toBeNull();
+
+    const unavailable = {
+      getItem: vi.fn(() => null),
+      setItem: vi.fn(),
+      removeItem: vi.fn(() => {
+        throw new Error('SecurityError');
+      }),
+    } satisfies SpaceSnapshotStorage;
+    expect(clearStoredSpacePublicSnapshot(unavailable)).toBe(false);
   });
 
   it('removes invalid, stale, or over-budget stored payloads', () => {
