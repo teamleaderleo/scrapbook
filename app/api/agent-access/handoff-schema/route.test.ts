@@ -11,6 +11,9 @@ describe('GET /api/agent-access/handoff-schema', () => {
     expect(response.headers.get('cache-control')).toBe(
       REPOSITORY_PUBLIC_CACHE_CONTROL
     );
+    expect(response.headers.get('content-type')).toContain(
+      'application/schema+json'
+    );
     expect(body).toMatchObject({
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       $id: 'https://teamleaderleo.com/api/agent-access/handoff-schema',
