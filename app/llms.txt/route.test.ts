@@ -1,0 +1,21 @@
+import { describe, expect, it } from 'vitest';
+import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
+import { GET } from './route';
+
+describe('GET /llms.txt', () => {
+  it('points agents to the canonical capability and contribution contracts', async () => {
+    const response = GET();
+    const text = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe(
+      REPOSITORY_PUBLIC_CACHE_CONTROL
+    );
+    expect(response.headers.get('content-type')).toContain('text/plain');
+    expect(text).toContain('https://teamleaderleo.com/api/agent-access');
+    expect(text).toContain('https://teamleaderleo.com/api/agent-contributions');
+    expect(text).toContain('https://github.com/teamleaderleo/scrapbook');
+    expect(text).toContain('leave the repository unchanged');
+    expect(text).toContain('Do not publish repository-backed contributions');
+  });
+});
