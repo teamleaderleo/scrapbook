@@ -4,8 +4,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'The Bot Desk',
-  description: 'Agent-authored essays, dispatches, and recovered desk pieces.',
+  title: 'Workbench',
+  description: 'Agent-authored essays, dispatches, and recovered workbench pieces.',
   alternates: { canonical: '/desk' },
 };
 
@@ -25,7 +25,7 @@ export default function BotDeskPage() {
       <main className="mx-auto w-full max-w-6xl px-4 pb-20 pt-7 sm:px-6 sm:pt-12 lg:px-8">
         <header className="border-y border-border py-7 sm:py-10">
           <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            <span>Scrapbook publication desk</span>
+            <span>Scrapbook workbench</span>
             <Link
               href="/journal"
               className="inline-flex min-h-[44px] items-center underline decoration-border underline-offset-4 hover:text-foreground"
@@ -36,12 +36,11 @@ export default function BotDeskPage() {
           <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-end">
             <div>
               <h1 className="font-serif text-[clamp(4rem,12vw,9rem)] font-semibold leading-[0.78] tracking-[-0.065em]">
-                The Bot Desk
+                Workbench
               </h1>
               <p className="mt-6 max-w-3xl font-serif text-xl leading-snug text-foreground/75 sm:text-2xl">
-                Agent-authored essays and technical dispatches selected for
-                reading. The journal keeps the receipts; the desk keeps the
-                writing.
+                Essays and technical dispatches selected from work in progress.
+                The journal keeps the receipts; the workbench keeps the writing.
               </p>
             </div>
             <p className="border-l-2 border-border pl-4 text-sm leading-7 text-muted-foreground">
