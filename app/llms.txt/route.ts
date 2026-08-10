@@ -8,6 +8,8 @@ Canonical site: https://teamleaderleo.com
 Start here
 - Machine-readable capabilities: https://teamleaderleo.com/api/agent-access
 - Read-only handoff JSON Schema: https://teamleaderleo.com/api/agent-access/handoff-schema
+- Operator phrasebook: https://teamleaderleo.com/operator
+- Operator phrasebook, plain text: https://teamleaderleo.com/operator.txt
 - Contribution chooser: https://teamleaderleo.com/api/agent-contributions
 - Repository instructions: https://github.com/teamleaderleo/scrapbook/blob/main/AGENTS.md
 - Repository design: https://github.com/teamleaderleo/scrapbook/blob/main/DESIGN.md

@@ -196,6 +196,10 @@ test('keeps the scorecard planted and lets the visitor pet Scraplet', async ({
     })
   ).toBe(true);
 
+  // The operator console intentionally leads the homepage now. Put the activity
+  // instrument in its interaction viewport before measuring hover motion so the
+  // browser's own scroll-into-view behavior is not mistaken for card movement.
+  await scoreboard.scrollIntoViewIfNeeded();
   const scoreboardBefore = await scoreboard.boundingBox();
   expect(scoreboardBefore).not.toBeNull();
   await scoreboard.hover();

@@ -1,4 +1,5 @@
 import { ActivityDashboard } from '@/components/home/activity-dashboard';
+import { OperatorConsole } from '@/components/operator/operator-console';
 import { Skeleton } from '@/components/ui/skeleton';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { getGitHubHomeData } from '@/lib/github-home';
@@ -21,8 +22,8 @@ import { Suspense } from 'react';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-  title: 'Leo · GitHub activity',
-  description: 'Recent GitHub profile contributions from teamleaderleo.',
+  title: 'Leo · Operator',
+  description: 'Copyable operator phrases, recent GitHub activity, and Scrapbook rooms.',
   alternates: { canonical: '/' },
 };
 
@@ -62,7 +63,6 @@ async function HomeActivityContent() {
 
   return (
     <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
-      <h1 className="sr-only">teamleaderleo scrapbook</h1>
       <ActivityDashboard initial={initialActivity} />
 
       <section
@@ -229,10 +229,22 @@ export default function Page() {
         data-home-paper-grid
       />
 
-      <div className="relative mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-7xl flex-col justify-start px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
-        <Suspense fallback={<HomeActivitySkeleton />}>
-          <HomeActivityContent />
-        </Suspense>
+      <div className="relative mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-7xl flex-col justify-start gap-10 px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
+        <OperatorConsole mode="featured" />
+
+        <section aria-labelledby="home-activity-title" className="min-w-0">
+          <div className="mb-3 px-0.5">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Activity
+            </p>
+            <h2 id="home-activity-title" className="mt-1 text-xl font-black tracking-tight">
+              GitHub, still here
+            </h2>
+          </div>
+          <Suspense fallback={<HomeActivitySkeleton />}>
+            <HomeActivityContent />
+          </Suspense>
+        </section>
       </div>
     </ViewportPageShell>
   );
