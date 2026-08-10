@@ -49,6 +49,8 @@ export function MonacoEditorPanel() {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorInstanceRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
+  const editorOpenRef = useRef(editorOpen);
+  editorOpenRef.current = editorOpen;
   const restorationRef = useRef<ReturnType<
     typeof createBrowserEditorSheetRestoration
   > | null>(null);
@@ -70,10 +72,6 @@ export function MonacoEditorPanel() {
   const shikiThemeRef = useRef(shikiTheme);
   shikiThemeRef.current = shikiTheme;
   const sidebarWidth = state === 'collapsed' ? '3rem' : '16rem';
-
-  useEffect(() => {
-    if (editorOpen) setHasMountedEditor(true);
-  }, [editorOpen]);
 
   useEffect(() => {
     if (!monacoRef.current) return;
@@ -175,7 +173,7 @@ export function MonacoEditorPanel() {
         setEditorHeight(Math.max(384, Math.min(contentHeight + 32, maxHeight)));
       });
 
-      editor.focus();
+      if (editorOpenRef.current) editor.focus();
     };
 
     void initEditor().catch(error => {
@@ -256,6 +254,7 @@ export function MonacoEditorPanel() {
       }
     }
 
+    setHasMountedEditor(true);
     setEditorOpen(true);
   }, [editorOpen, historyToken, isMobile, setEditorOpen]);
 
@@ -293,6 +292,7 @@ export function MonacoEditorPanel() {
             : null,
           collectScrollableSpaceRegions()
         );
+        setHasMountedEditor(true);
         setEditorOpen(true);
         return;
       }
