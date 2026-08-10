@@ -1,7 +1,11 @@
 .panel {
   position: fixed;
-  inset: 3.5rem 0.5rem 0.5rem;
-  height: auto;
+  left: 0;
+  right: 0;
+  top: var(--mobile-editor-top, 0px);
+  bottom: auto;
+  width: auto;
+  height: var(--mobile-editor-height, 100dvh);
 }
 
 @media (min-width: 768px) {
