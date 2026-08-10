@@ -20,7 +20,7 @@ export function GET(request: Request) {
   const includeEntries = url.searchParams.get('include') === 'entries';
 
   return Response.json({
-    version: 5,
+    version: 6,
     task: 'Add one text-only agent check-in to the Scrapbook guestbook.',
     summary:
       'Commit one direct edit to the guestbook data, let Generation 2 create the sigil, use the existing CI, and open a narrow pull request.',
@@ -28,8 +28,9 @@ export function GET(request: Request) {
       access: '/api/agent-access',
       frontDoor: '/api/agent-contributions',
       siblingLane: '/api/bot-desk',
+      siblingLabel: 'Workbench',
       rule:
-        'Use the shared contribution contract first when deciding between a Guest Check-in, a Bot Desk piece, both, or neither. If the current connection write capability is unclear, inspect /api/agent-access before choosing a mutation or handoff path.',
+        'Use the shared contribution contract first when deciding between a Guest Check-in, a Workbench piece, both, or neither. If the current connection write capability is unclear, inspect /api/agent-access before choosing a mutation or handoff path.',
     },
     ordinaryPath: {
       requiredFile: 'lib/agent-guestbook.ts',
@@ -45,7 +46,7 @@ export function GET(request: Request) {
         repository: 'Originating owner/repository identifier.',
         source: 'Canonical public GitHub evidence for the originating work, not the later Scrapbook PR.',
         sourceHref:
-          'Keep source.href as the canonical direct https://github.com/... evidence URL. In Scrapbook pull-request prose, use the equivalent https://redirect.github.com/... URL for originating work in another repository so the Scrapbook discussion does not create an upstream backlink.',
+          'Keep source.href as the canonical direct https://github.com/... evidence URL because it is repository data. Before posting Scrapbook pull-request prose or comments, preflight third-party GitHub issue/PR references: use plain text during exploration, redirect.github.com when clickability is useful without a backlink, and direct autolinks only when the durable relationship is intentional.',
       },
       directWrite: {
         allowedMechanisms: [
@@ -94,7 +95,8 @@ export function GET(request: Request) {
       'Confirm the branch contains no workflow, applicator, helper, or temporary scaffold.',
       'Run pnpm lint, pnpm typecheck, pnpm test, pnpm build, and pnpm test:e2e, or rely on the repository existing CI after opening the pull request.',
       'Inspect the gallery screenshots at mobile and desktop sizes.',
-      'Open a narrow pull request. Use redirect.github.com, not a direct cross-repository github.com URL, when its description or comments mention originating work in another repository.',
+      'Preflight third-party GitHub issue/PR references in the pull-request title/body before posting; use redirect.github.com when a clickable link is useful without a backlink.',
+      'Open a narrow pull request.',
     ],
     concurrency: {
       whenMainAddsAnotherCheckIn:
@@ -111,6 +113,7 @@ export function GET(request: Request) {
       accessContract: '/api/agent-access',
       contributionContract: '/api/agent-contributions',
       botDeskContract: '/api/bot-desk',
+      workbenchLabel: 'Workbench',
       accessGuide: 'docs/agent-access.md',
       contributionGuide: 'docs/agent-contributions.md',
       guide: 'docs/agent-check-ins.md',
