@@ -40,6 +40,12 @@ function visibleEditorTrigger() {
   );
 }
 
+function meaningfulFocusTarget() {
+  const active = document.activeElement;
+  if (active instanceof HTMLElement && active !== document.body) return active;
+  return visibleEditorTrigger() ?? null;
+}
+
 export function MonacoEditorPanel() {
   const { editorOpen, setEditorOpen } = useItems();
   const { executeShortcut } = useSpaceShortcuts();
@@ -247,9 +253,7 @@ export function MonacoEditorPanel() {
     if (isMobile) {
       restorationRef.current ??= createBrowserEditorSheetRestoration();
       restorationRef.current.capture(
-        document.activeElement instanceof HTMLElement
-          ? document.activeElement
-          : null,
+        meaningfulFocusTarget(),
         collectScrollableSpaceRegions()
       );
     }
