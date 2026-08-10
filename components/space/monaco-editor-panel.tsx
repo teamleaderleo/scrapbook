@@ -17,9 +17,7 @@ import {
   useSpaceShortcuts,
 } from '@/components/space/space-shortcut-provider';
 import {
-  SPACE_EDITOR_HASH,
   createBrowserEditorSheetRestoration,
-  isEditorSheetHash,
   resolveEditorSheetViewport,
   type EditorSheetViewport,
 } from '@/lib/space-editor-sheet';
@@ -49,7 +47,6 @@ export function MonacoEditorPanel() {
   const editorInstanceRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
   const editorOpenRef = useRef(editorOpen);
-  const ownsHashEntryRef = useRef(false);
   const restorationRef = useRef<ReturnType<
     typeof createBrowserEditorSheetRestoration
   > | null>(null);
@@ -169,6 +166,20 @@ export function MonacoEditorPanel() {
         executeShortcut('editor.toggle');
       });
 
+      editor.onKeyDown(event => {
+        if (
+          event.keyCode !== monaco.KeyCode.Escape ||
+          !window.matchMedia('(max-width: 767px)').matches
+        ) {
+          return;
+        }
+
+        if (executeShortcut('editor.close')) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      });
+
       editor.onDidContentSizeChange(() => {
         const contentHeight = editor.getContentHeight();
         const maxHeight = window.innerHeight - 112;
@@ -226,18 +237,9 @@ export function MonacoEditorPanel() {
   }, [restoreBackground]);
 
   const closeEditor = useCallback(() => {
-    if (
-      isMobile &&
-      ownsHashEntryRef.current &&
-      isEditorSheetHash(window.location.hash)
-    ) {
-      history.back();
-      return;
-    }
-
     setEditorOpen(false);
     restoreAfterClose();
-  }, [isMobile, restoreAfterClose, setEditorOpen]);
+  }, [restoreAfterClose, setEditorOpen]);
 
   const openEditor = useCallback(() => {
     if (editorOpen) return;
@@ -250,11 +252,6 @@ export function MonacoEditorPanel() {
           : null,
         collectScrollableSpaceRegions()
       );
-
-      if (!isEditorSheetHash(window.location.hash)) {
-        ownsHashEntryRef.current = true;
-        window.location.hash = SPACE_EDITOR_HASH.slice(1);
-      }
     }
 
     setHasMountedEditor(true);
@@ -280,36 +277,6 @@ export function MonacoEditorPanel() {
 
   useSpaceShortcut('editor.toggle', toggleEditor);
   useSpaceShortcut('editor.close', closeEditorShortcut);
-
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const onHashChange = () => {
-      if (!ownsHashEntryRef.current) return;
-      const editorHashActive = isEditorSheetHash(window.location.hash);
-
-      if (editorHashActive && !editorOpen) {
-        restorationRef.current ??= createBrowserEditorSheetRestoration();
-        restorationRef.current.capture(
-          document.activeElement instanceof HTMLElement
-            ? document.activeElement
-            : null,
-          collectScrollableSpaceRegions()
-        );
-        setHasMountedEditor(true);
-        setEditorOpen(true);
-        return;
-      }
-
-      if (!editorHashActive && editorOpen) {
-        setEditorOpen(false);
-        restoreAfterClose();
-      }
-    };
-
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
-  }, [editorOpen, isMobile, restoreAfterClose, setEditorOpen]);
 
   useEffect(() => {
     if (!isMobile || !editorOpen) {
