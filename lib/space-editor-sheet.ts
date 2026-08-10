@@ -1,4 +1,4 @@
-export const SPACE_EDITOR_HISTORY_KEY = '__spaceEditorSheet';
+export const SPACE_EDITOR_HASH = '#space-editor';
 
 export type VisualViewportSnapshot = {
   height: number;
@@ -25,20 +25,8 @@ export function resolveEditorSheetViewport(
   return { top, height, bottom: top + height };
 }
 
-export function createEditorSheetHistoryState(baseState: unknown, token: string) {
-  const base =
-    baseState && typeof baseState === 'object'
-      ? (baseState as Record<string, unknown>)
-      : {};
-  return { ...base, [SPACE_EDITOR_HISTORY_KEY]: token };
-}
-
-export function ownsEditorSheetHistoryState(
-  state: unknown,
-  token: string | null
-) {
-  if (!token || !state || typeof state !== 'object') return false;
-  return (state as Record<string, unknown>)[SPACE_EDITOR_HISTORY_KEY] === token;
+export function isEditorSheetHash(hash: string) {
+  return hash === SPACE_EDITOR_HASH;
 }
 
 export type FocusTargetLike = {
