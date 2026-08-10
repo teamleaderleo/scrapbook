@@ -107,29 +107,6 @@ export function SpaceView() {
     }
   }, [hasMore, items.length, loadMore, loadingMore, page, totalPages]);
 
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      const isMod = event.metaKey || event.ctrlKey;
-      if (!isMod || event.key.toLowerCase() !== 'i') return;
-
-      const target = event.target as HTMLElement | null;
-      const tag = target?.tagName?.toLowerCase();
-      const role = target?.getAttribute?.('role');
-      const isTyping =
-        tag === 'input' ||
-        tag === 'textarea' ||
-        target?.getAttribute('contenteditable') === 'true' ||
-        role === 'textbox';
-
-      if (isTyping) return;
-      event.preventDefault();
-      setEditorOpen(!editorOpen);
-    };
-
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [editorOpen, setEditorOpen]);
-
   const onEnroll = useCallback(async (id: string) => {
     const initialReview: ReviewState = {
       state: 0,
