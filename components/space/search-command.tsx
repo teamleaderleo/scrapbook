@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   CommandDialog,
@@ -18,6 +18,7 @@ import { searchItems } from '@/app/lib/item-search';
 import type { Item } from '@/app/lib/item-types';
 import { Download, Plus, Search } from 'lucide-react';
 import { startNavigationFeedback } from '@/components/navigation-feedback';
+import { useSpaceShortcuts } from '@/components/space/space-shortcut-provider';
 import { readItemHref } from '@/lib/space-routes';
 import { displaySpaceTags } from '@/lib/space-tags';
 
@@ -30,52 +31,35 @@ function filterItems(allItems: Item[], search: string, nowMs: number): Item[] {
     return searchItems(allItems, query, nowMs).slice(0, 50);
   }
 
-  const terms = searchLower.split(/\s+/).filter((term) => term.length > 0);
+  const terms = searchLower.split(/\s+/).filter(term => term.length > 0);
   return allItems
-    .filter((item) =>
-      terms.every((term) => {
+    .filter(item =>
+      terms.every(term => {
         if (item.title.toLowerCase().includes(term)) return true;
         if (item.category.toLowerCase().includes(term)) return true;
 
         const tagValues = item.tags
-          .map((tag) => (tag.includes(':') ? tag.split(':')[1] : tag))
+          .map(tag => (tag.includes(':') ? tag.split(':')[1] : tag))
           .join(' ')
           .toLowerCase();
         return tagValues.includes(term);
-      }),
+      })
     )
     .slice(0, 50);
 }
 
 export function SearchCommand() {
-  const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const router = useRouter();
+  const { searchOpen, setSearchOpen } = useSpaceShortcuts();
   const { items, isAdmin, hasMore, loadMore, loadingMore } = useItems();
   const [nowMs] = useState(() => Date.now());
-
-  useEffect(() => {
-    const down = (event: KeyboardEvent) => {
-      if (event.key === 'k' && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault();
-        setOpen((current) => !current);
-      }
-    };
-    document.addEventListener('keydown', down);
-    return () => document.removeEventListener('keydown', down);
-  }, []);
-
-  useEffect(() => {
-    const handleOpen = () => setOpen(true);
-    window.addEventListener('open-search', handleOpen);
-    return () => window.removeEventListener('open-search', handleOpen);
-  }, []);
 
   const filteredItems = filterItems(items, search, nowMs);
 
   const handleSelect = (item: Item) => {
     const href = readItemHref(item.slug);
-    setOpen(false);
+    setSearchOpen(false);
     setSearch('');
     startNavigationFeedback(href, 'reading sheet');
     router.push(href);
@@ -84,14 +68,18 @@ export function SearchCommand() {
   const handleSearchWithQuery = () => {
     if (!search) return;
     const href = `/space?tags=${encodeURIComponent(search)}`;
-    setOpen(false);
+    setSearchOpen(false);
     startNavigationFeedback(href, 'filtered list');
     router.push(href);
     setSearch('');
   };
 
   return (
-    <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
+    <CommandDialog
+      open={searchOpen}
+      onOpenChange={setSearchOpen}
+      shouldFilter={false}
+    >
       <VisuallyHidden>
         <DialogTitle>Search Command</DialogTitle>
       </VisuallyHidden>
@@ -103,13 +91,17 @@ export function SearchCommand() {
       <CommandList>
         <CommandEmpty>No items found.</CommandEmpty>
 
-        <CommandGroup heading={`Items (${filteredItems.length}${hasMore ? '+' : ''})`}>
-          {filteredItems.map((item) => (
+        <CommandGroup
+          heading={`Items (${filteredItems.length}${hasMore ? '+' : ''})`}
+        >
+          {filteredItems.map(item => (
             <CommandItem key={item.id} onSelect={() => handleSelect(item)}>
               <div className="flex w-full flex-col">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">{item.title}</span>
-                  <span className="text-xs capitalize text-muted-foreground">{item.category}</span>
+                  <span className="text-xs capitalize text-muted-foreground">
+                    {item.category}
+                  </span>
                 </div>
                 <div className="mt-1 text-xs text-muted-foreground">
                   {displaySpaceTags(item.tags).join(', ')}
@@ -121,7 +113,10 @@ export function SearchCommand() {
 
         {hasMore && (
           <CommandGroup heading="More">
-            <CommandItem disabled={loadingMore} onSelect={() => void loadMore()}>
+            <CommandItem
+              disabled={loadingMore}
+              onSelect={() => void loadMore()}
+            >
               <span className="flex items-center gap-2">
                 <Download className="h-4 w-4" />
                 {loadingMore ? 'Loading…' : 'Load more items'}
@@ -134,7 +129,7 @@ export function SearchCommand() {
           <CommandGroup heading="Quick Actions">
             <CommandItem
               onSelect={() => {
-                setOpen(false);
+                setSearchOpen(false);
                 startNavigationFeedback('/space/add', 'new item');
                 router.push('/space/add');
               }}
@@ -152,7 +147,8 @@ export function SearchCommand() {
             <CommandItem onSelect={handleSearchWithQuery}>
               <span className="flex items-center gap-2">
                 <Search className="h-4 w-4" />
-                Filter list: <span className="font-mono text-sm">{search}</span>
+                Filter list:{' '}
+                <span className="font-mono text-sm">{search}</span>
               </span>
             </CommandItem>
           </CommandGroup>

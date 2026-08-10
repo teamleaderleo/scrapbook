@@ -4,10 +4,12 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useTheme } from 'next-themes';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useItems } from '@/app/lib/contexts/item-context';
+import { useSpaceShortcuts } from '@/components/space/space-shortcut-provider';
 import styles from './monaco-editor-panel.module.css';
 
 export function MonacoEditorPanel() {
   const { editorOpen, setEditorOpen } = useItems();
+  const { executeShortcut } = useSpaceShortcuts();
   const editorRef = useRef<HTMLDivElement>(null);
   const monacoRef = useRef<any>(null);
   const { resolvedTheme } = useTheme();
@@ -19,20 +21,6 @@ export function MonacoEditorPanel() {
   const isDark = resolvedTheme === 'dark';
   const shikiTheme = isDark ? 'catppuccin-macchiato' : 'one-light';
   const sidebarWidth = state === 'collapsed' ? '3rem' : '16rem';
-
-  useEffect(() => {
-    const handleKey = (event: KeyboardEvent) => {
-      const isMod = event.metaKey || event.ctrlKey;
-
-      if (isMod && !event.altKey && !event.shiftKey && (event.key === 'i' || event.code === 'KeyI')) {
-        event.preventDefault();
-        setEditorOpen(!editorOpen);
-      }
-    };
-
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [editorOpen, setEditorOpen]);
 
   useEffect(() => {
     if (!monacoRef.current) return;
@@ -56,7 +44,8 @@ export function MonacoEditorPanel() {
     if (!document.getElementById(styleId)) {
       const style = document.createElement('style');
       style.id = styleId;
-      style.textContent = '.monaco-editor .view-line span { font-style: normal !important; }';
+      style.textContent =
+        '.monaco-editor .view-line span { font-style: normal !important; }';
       document.head.appendChild(style);
     }
 
@@ -69,20 +58,26 @@ export function MonacoEditorPanel() {
           getWorker() {
             return new Worker(
               URL.createObjectURL(
-                new Blob(['self.onmessage = () => {}'], { type: 'text/javascript' }),
-              ),
+                new Blob(['self.onmessage = () => {}'], {
+                  type: 'text/javascript',
+                })
+              )
             );
           },
         };
       }
 
-      const [{ createHighlighter }, { shikiToMonaco }, _pythonContribution, monaco] =
-        await Promise.all([
-          import('shiki'),
-          import('@shikijs/monaco'),
-          import('monaco-editor/esm/vs/basic-languages/python/python.contribution'),
-          import('monaco-editor'),
-        ]);
+      const [
+        { createHighlighter },
+        { shikiToMonaco },
+        _pythonContribution,
+        monaco,
+      ] = await Promise.all([
+        import('shiki'),
+        import('@shikijs/monaco'),
+        import('monaco-editor/esm/vs/basic-languages/python/python.contribution'),
+        import('monaco-editor'),
+      ]);
 
       if (disposed || !editorRef.current) return;
 
@@ -112,7 +107,10 @@ export function MonacoEditorPanel() {
         wordWrap: 'on',
         tabSize: 4,
         insertSpaces: true,
-        scrollbar: { verticalScrollbarSize: 10, horizontalScrollbarSize: 10 },
+        scrollbar: {
+          verticalScrollbarSize: 10,
+          horizontalScrollbarSize: 10,
+        },
         padding: { top: 16, bottom: 16 },
         lineDecorationsWidth: 0,
         lineNumbersMinChars: 3,
@@ -122,7 +120,7 @@ export function MonacoEditorPanel() {
       setIsInitializing(false);
 
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
-        setEditorOpen(false);
+        executeShortcut('editor.toggle');
       });
 
       editor.focus();
@@ -130,14 +128,17 @@ export function MonacoEditorPanel() {
       editor.onDidContentSizeChange(() => {
         const contentHeight = editor.getContentHeight();
         const maxHeight = window.innerHeight - 112;
-        const newHeight = Math.max(384, Math.min(contentHeight + 32, maxHeight));
+        const newHeight = Math.max(
+          384,
+          Math.min(contentHeight + 32, maxHeight)
+        );
         setEditorHeight(newHeight);
       });
 
       cleanup = () => editor.dispose();
     };
 
-    void initEditor().catch((error) => {
+    void initEditor().catch(error => {
       console.error('Unable to initialize Monaco editor', error);
       if (disposed) return;
       setIsInitializing(false);
@@ -148,7 +149,7 @@ export function MonacoEditorPanel() {
       disposed = true;
       cleanup?.();
     };
-  }, [editorOpen, setEditorOpen, shikiTheme]);
+  }, [editorOpen, executeShortcut, shikiTheme]);
 
   if (!editorOpen) return null;
 
@@ -163,6 +164,7 @@ export function MonacoEditorPanel() {
         } as CSSProperties
       }
       data-space-editor-panel
+      data-space-shortcut-scope="editor"
     >
       {isInitializing ? (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#f4f1ea] px-6 text-center dark:bg-[#202126]">

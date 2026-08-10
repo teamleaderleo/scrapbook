@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useItems } from '@/app/lib/contexts/item-context';
 import { SpaceHeader } from '@/components/space/space-header';
+import { useSpaceShortcut } from '@/components/space/space-shortcut-provider';
 import {
   buildSpaceNextMove,
   buildSpacePracticePrompt,
@@ -529,31 +530,32 @@ export function SpaceTrail() {
     return () => observer.disconnect();
   }, [hasMore, loadMore, loadingMore, visibleRecommendations.length]);
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      const tag = target?.tagName.toLowerCase();
-      if (
-        tag === 'input' ||
-        tag === 'textarea' ||
-        tag === 'select' ||
-        target?.isContentEditable
-      ) {
-        return;
-      }
-
-      if (event.key.toLowerCase() === 'j') {
-        event.preventDefault();
-        scrollToIndex(Math.min(activeIndex + 1, recommendations.length - 1));
-      }
-      if (event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        scrollToIndex(Math.max(activeIndex - 1, 0));
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [activeIndex, recommendations.length, scrollToIndex]);
+  const nextShortcut = useMemo(
+    () => ({
+      enabled:
+        recommendations.length > 0 && activeIndex < recommendations.length - 1,
+      disabledReason:
+        recommendations.length === 0
+          ? 'No Trail recommendation is available'
+          : 'Already at the last Trail recommendation',
+      run: () =>
+        scrollToIndex(Math.min(activeIndex + 1, recommendations.length - 1)),
+    }),
+    [activeIndex, recommendations.length, scrollToIndex]
+  );
+  const previousShortcut = useMemo(
+    () => ({
+      enabled: recommendations.length > 0 && activeIndex > 0,
+      disabledReason:
+        recommendations.length === 0
+          ? 'No Trail recommendation is available'
+          : 'Already at the first Trail recommendation',
+      run: () => scrollToIndex(Math.max(activeIndex - 1, 0)),
+    }),
+    [activeIndex, recommendations.length, scrollToIndex]
+  );
+  useSpaceShortcut('trail.next', nextShortcut);
+  useSpaceShortcut('trail.previous', previousShortcut);
 
   const chooseReaction = (itemId: string, reaction: SpaceTrailReaction) => {
     const nextReaction =
