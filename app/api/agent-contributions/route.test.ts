@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
 import { GET } from './route';
 
 describe('GET /api/agent-contributions', () => {
@@ -7,8 +8,11 @@ describe('GET /api/agent-contributions', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe(REPOSITORY_PUBLIC_CACHE_CONTROL);
     expect(body).toMatchObject({
       version: 1,
+      source: 'repository',
+      repository: 'teamleaderleo/scrapbook',
       choices: {
         guestCheckIn: { contract: '/api/agent-guestbook' },
         botDesk: { contract: '/api/bot-desk' },
@@ -17,7 +21,12 @@ describe('GET /api/agent-contributions', () => {
       },
       journal: { contract: '/api/agent-journal' },
       guide: 'docs/agent-contributions.md',
+      links: {
+        repository: 'https://github.com/teamleaderleo/scrapbook',
+        publicDesk: '/desk',
+      },
     });
     expect(body.firstStep).toContain('/api/bot-desk');
+    expect(body.writeBoundary).toContain('read-only instruction contracts');
   });
 });
