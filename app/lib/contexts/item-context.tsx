@@ -17,6 +17,7 @@ import { SPACE_ITEM_SELECT, SPACE_PAGE_SIZE } from '@/app/lib/space-data';
 import { createClient } from '@/utils/supabase/client';
 import { mapDatabaseItemsToItems } from '@/app/lib/utils/database';
 import {
+  clearStoredSpacePublicSnapshot,
   readStoredSpacePublicSnapshot,
   writeStoredSpacePublicSnapshot,
 } from '@/lib/space-public-snapshot-storage';
@@ -40,6 +41,22 @@ const REVIEW_SELECT = [
 const SPACE_CLIENT_LOAD_TIMEOUT_MS = 10_000;
 const CACHED_SPACE_MESSAGE =
   'Showing the last saved public copy while live Space is unavailable.';
+
+function persistFirstSpacePage(
+  items: readonly Item[],
+  hasMore: boolean,
+  savedAt: number
+) {
+  if (items.length === 0) {
+    clearStoredSpacePublicSnapshot(window.localStorage);
+    return;
+  }
+
+  writeStoredSpacePublicSnapshot(window.localStorage, items, {
+    savedAt,
+    hasMore,
+  });
+}
 
 type ItemsContextType = {
   items: Item[];
@@ -106,10 +123,11 @@ export function ItemsProvider({
       setError(initialError);
       setUsingCachedSnapshot(false);
       lastRefreshAt.current = currentNow;
-      writeStoredSpacePublicSnapshot(window.localStorage, initialItems, {
-        savedAt: initialNowMs ?? currentNow,
-        hasMore: initialHasMore,
-      });
+      persistFirstSpacePage(
+        initialItems,
+        initialHasMore,
+        initialNowMs ?? currentNow
+      );
       return;
     }
 
@@ -134,6 +152,10 @@ export function ItemsProvider({
     setError(initialError);
     setUsingCachedSnapshot(false);
     lastRefreshAt.current = currentNow;
+
+    if (!initialError) {
+      persistFirstSpacePage(initialItems, initialHasMore, currentNow);
+    }
   }, [initialError, initialHasMore, initialItems, initialNowMs]);
 
   const fetchPage = useCallback(
@@ -209,10 +231,7 @@ export function ItemsProvider({
       setHasMore(page.hasMore);
       setUsingCachedSnapshot(false);
       lastRefreshAt.current = savedAt;
-      writeStoredSpacePublicSnapshot(window.localStorage, page.items, {
-        savedAt,
-        hasMore: page.hasMore,
-      });
+      persistFirstSpacePage(page.items, page.hasMore, savedAt);
     } catch (reloadError) {
       if (controller.signal.aborted) return;
       console.error('Error reloading items:', reloadError);
