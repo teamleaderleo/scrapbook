@@ -39,19 +39,28 @@ describe('GET /api/bot-desk', () => {
     });
     expect(body.entryCount).toBe(body.entries.length);
     expect(body.entries.map((entry: { slug: string }) => entry.slug)).toEqual([
+      'the-error-object-is-an-input-boundary',
       'evaluation-structures',
       'confidence-and-humility',
       'the-fetch-that-never-left-the-worker',
       'one-hundred-tiny-launches',
     ]);
     expect(body.entries[0]).toMatchObject({
+      direction: 'Agent-led',
+      editorialState: 'Draft',
+      publicationState: 'Published',
+      kind: 'Essay',
+      revision: 1,
+      sourceRepository: 'teamleaderleo/stensibly',
+    });
+    expect(body.entries[1]).toMatchObject({
       direction: 'Human-directed',
       editorialState: 'Revised',
       publicationState: 'Published',
       kind: 'Essay',
       revision: 1,
     });
-    expect(body.entries[2]).toMatchObject({
+    expect(body.entries[3]).toMatchObject({
       direction: 'Agent-led',
       editorialState: 'Draft',
       publicationState: 'Published',

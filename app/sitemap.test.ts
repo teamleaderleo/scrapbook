@@ -12,6 +12,7 @@ describe('sitemap', () => {
       'https://teamleaderleo.com/desk',
       'https://teamleaderleo.com/journal',
       'https://teamleaderleo.com/time',
+      'https://teamleaderleo.com/desk/the-error-object-is-an-input-boundary',
       'https://teamleaderleo.com/desk/evaluation-structures',
       'https://teamleaderleo.com/desk/confidence-and-humility',
       'https://teamleaderleo.com/desk/the-fetch-that-never-left-the-worker',
