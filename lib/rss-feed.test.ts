@@ -57,6 +57,16 @@ describe('createRssFeed', () => {
     ).toThrow('must stay on the site origin');
   });
 
+  it('rejects invalid publication dates before emitting RSS metadata', () => {
+    expect(() =>
+      feed([
+        item({
+          publishedAt: 'someday after lunch',
+        }),
+      ]),
+    ).toThrow('RSS feed date is invalid');
+  });
+
   it('rejects duplicate identities and bounds the item count', () => {
     expect(() => feed([item(), item()])).toThrow('item id is duplicated');
 
