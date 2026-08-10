@@ -6,6 +6,7 @@ import { SpaceShellSkeleton } from '@/components/space/space-shell-skeleton';
 import { ItemsProvider } from '../lib/contexts/item-context';
 import { SearchCommand } from '@/components/space/search-command';
 import { MonacoEditorPanel } from '@/components/space/monaco-editor-panel';
+import { SpaceMobileActions } from '@/components/space/space-mobile-actions';
 import { SpaceShortcutProvider } from '@/components/space/space-shortcut-provider';
 import { loadInitialSpaceData } from './data';
 
@@ -35,9 +36,13 @@ async function SpaceDataShell({ children }: { children: React.ReactNode }) {
           <div className="flex h-[100dvh] min-h-0 w-full min-w-0 overflow-hidden bg-background text-foreground">
             <SearchCommand />
             <AppSidebar />
-            <div className="h-full min-h-0 min-w-0 flex-1 overflow-hidden">
+            <div
+              className="h-full min-h-0 min-w-0 flex-1 overflow-hidden"
+              data-space-background
+            >
               {children}
             </div>
+            <SpaceMobileActions />
             <MonacoEditorPanel />
           </div>
         </SpaceShortcutProvider>
