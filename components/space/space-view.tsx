@@ -55,6 +55,7 @@ export function SpaceView() {
     nowMs: initialNowMs,
     editorOpen,
     setEditorOpen,
+    loading,
     hasMore,
     loadMore,
     loadingMore,
@@ -72,6 +73,7 @@ export function SpaceView() {
   const scrollRef = useRef<HTMLElement>(null);
   const expandedIdsRef = useRef<string[]>([]);
   const restoredViewKeyRef = useRef<string | null>(null);
+  const restoringViewKeyRef = useRef<string | null>(null);
   const scrollFrameRef = useRef<number | null>(null);
 
   const historyViewKey = useMemo(
@@ -82,28 +84,6 @@ export function SpaceView() {
       }),
     [activeLane, tagsParam]
   );
-
-  useLayoutEffect(() => {
-    restoredViewKeyRef.current = null;
-    const snapshot = readSpaceHistoryUiState(
-      window.history.state,
-      historyViewKey
-    );
-    const nextExpandedIds = snapshot?.expandedIds ?? [];
-
-    expandedIdsRef.current = nextExpandedIds;
-    setRestoredExpandedIds(nextExpandedIds);
-    setPage(snapshot?.page ?? 1);
-
-    const frame = window.requestAnimationFrame(() => {
-      if (scrollRef.current) {
-        scrollRef.current.scrollTop = snapshot?.scrollTop ?? 0;
-      }
-      restoredViewKeyRef.current = historyViewKey;
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [historyViewKey]);
 
   const itemsWithMutations = useMemo<Item[]>(() => {
     return allItems.map(item => {
@@ -124,9 +104,42 @@ export function SpaceView() {
 
   const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
 
+  useLayoutEffect(() => {
+    if (loading) return;
+    if (restoredViewKeyRef.current === historyViewKey) return;
+    if (restoringViewKeyRef.current === historyViewKey) return;
+
+    restoringViewKeyRef.current = historyViewKey;
+    const snapshot = readSpaceHistoryUiState(
+      window.history.state,
+      historyViewKey
+    );
+    const nextExpandedIds = snapshot?.expandedIds ?? [];
+
+    expandedIdsRef.current = nextExpandedIds;
+    setRestoredExpandedIds(nextExpandedIds);
+    setPage(Math.min(snapshot?.page ?? 1, totalPages));
+
+    const frame = window.requestAnimationFrame(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = snapshot?.scrollTop ?? 0;
+      }
+      restoredViewKeyRef.current = historyViewKey;
+      restoringViewKeyRef.current = null;
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      if (restoringViewKeyRef.current === historyViewKey) {
+        restoringViewKeyRef.current = null;
+      }
+    };
+  }, [historyViewKey, loading, totalPages]);
+
   useEffect(() => {
+    if (loading) return;
     if (page > totalPages) setPage(totalPages);
-  }, [page, totalPages]);
+  }, [loading, page, totalPages]);
 
   const paginatedItems = useMemo(() => {
     const start = (page - 1) * ITEMS_PER_PAGE;
@@ -411,7 +424,10 @@ export function SpaceView() {
               >
                 Previous
               </Button>
-              <span className="rounded-full border border-border/60 bg-background/65 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+              <span
+                data-space-page-indicator
+                className="rounded-full border border-border/60 bg-background/65 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground"
+              >
                 {page} of {totalPages}
               </span>
               <Button
