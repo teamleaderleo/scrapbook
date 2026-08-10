@@ -12,6 +12,15 @@ export type SpaceSnapshotStorage = Pick<
   'getItem' | 'setItem' | 'removeItem'
 >;
 
+export function clearStoredSpacePublicSnapshot(storage: SpaceSnapshotStorage) {
+  try {
+    storage.removeItem(SPACE_PUBLIC_SNAPSHOT_KEY);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function readStoredSpacePublicSnapshot(
   storage: SpaceSnapshotStorage,
   nowMs: number
@@ -26,11 +35,7 @@ export function readStoredSpacePublicSnapshot(
   const restored = parseSpacePublicSnapshot(raw, nowMs);
   if (restored || raw === null) return restored;
 
-  try {
-    storage.removeItem(SPACE_PUBLIC_SNAPSHOT_KEY);
-  } catch {
-    // A failed cleanup should not turn continuity into a route failure.
-  }
+  clearStoredSpacePublicSnapshot(storage);
   return null;
 }
 
