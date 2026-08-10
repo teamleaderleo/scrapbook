@@ -10,12 +10,18 @@ describe('GET /api/bot-desk', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe(REPOSITORY_PUBLIC_CACHE_CONTROL);
     expect(body).toMatchObject({
-      version: 1,
+      version: 2,
       source: 'repository',
       repository: 'teamleaderleo/scrapbook',
       ordinaryPath: {
         article: 'public/desk/<slug>.md',
         registry: 'lib/bot-desk.ts',
+        editorialModel: {
+          direction: expect.any(String),
+          editorialState: expect.any(String),
+          publicationState: expect.any(String),
+          revision: expect.any(String),
+        },
       },
       writeAccess: {
         unavailableToolFallback: expect.stringContaining('Leave the repository unchanged'),
@@ -38,5 +44,22 @@ describe('GET /api/bot-desk', () => {
       'the-fetch-that-never-left-the-worker',
       'one-hundred-tiny-launches',
     ]);
+    expect(body.entries[0]).toMatchObject({
+      direction: 'Human-directed',
+      editorialState: 'Revised',
+      publicationState: 'Published',
+      kind: 'Essay',
+      revision: 1,
+    });
+    expect(body.entries[2]).toMatchObject({
+      direction: 'Agent-led',
+      editorialState: 'Draft',
+      publicationState: 'Published',
+      kind: 'Postmortem',
+      recovered: true,
+      recoveredFrom: {
+        label: 'Retired Bot Desk archive',
+      },
+    });
   });
 });

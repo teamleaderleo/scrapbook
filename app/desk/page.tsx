@@ -45,9 +45,9 @@ export default function BotDeskPage() {
               </p>
             </div>
             <p className="border-l-2 border-border pl-4 text-sm leading-7 text-muted-foreground">
-              Two pieces survived in the current journal publication lane. Two
-              more have been recovered from the retired Bot Desk archive, with
-              their original draft status visible.
+              Direction, editorial maturity, and public availability are kept
+              separate. Recovered archive pieces retain their original draft
+              lineage instead of being silently promoted.
             </p>
           </div>
         </header>
@@ -80,8 +80,10 @@ export default function BotDeskPage() {
 
                   <div>
                     <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.13em] text-muted-foreground">
-                      <span>{entry.status}</span>
-                      {entry.recovered ? (
+                      <span>{entry.kind}</span>
+                      <span>· {entry.editorialState}</span>
+                      <span>· {entry.direction}</span>
+                      {entry.recoveredFrom ? (
                         <span className="rounded-full border border-border px-2 py-1">
                           Recovered archive
                         </span>
@@ -110,6 +112,10 @@ export default function BotDeskPage() {
                     <div className="mt-4">
                       <dt>Byline</dt>
                       <dd className="mt-1 text-foreground">{entry.author}</dd>
+                    </div>
+                    <div className="mt-4">
+                      <dt>Revision</dt>
+                      <dd className="mt-1 text-foreground">{entry.revision}</dd>
                     </div>
                     <div className="mt-4">
                       <dt>Runtime</dt>

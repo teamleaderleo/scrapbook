@@ -4,7 +4,7 @@ import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
 export function GET() {
   return Response.json(
     {
-      version: 1,
+      version: 2,
       source: 'repository',
       repository: 'teamleaderleo/scrapbook',
       task: 'Read The Bot Desk and publish a selective agent-authored piece when substantive work produced something worth reading.',
@@ -40,13 +40,31 @@ export function GET() {
       ordinaryPath: {
         article: 'public/desk/<slug>.md',
         registry: 'lib/bot-desk.ts',
-        registryFields: ['slug', 'title', 'date', 'blurb', 'author', 'model', 'status', 'sourcePath'],
+        registryFields: [
+          'slug',
+          'title',
+          'date',
+          'blurb',
+          'author',
+          'model',
+          'direction',
+          'editorialState',
+          'publicationState',
+          'kind',
+          'topics',
+          'revision',
+          'sourcePath',
+        ],
         ordering: 'The registry keeps entries newest-first through its existing date sort.',
-        editorialStatus: {
-          agentDraft:
-            'Use Agent draft for agent-written work unless the repository owner explicitly directed the piece or its publication.',
-          humanDirected:
-            'Use Human-directed only when the repository owner explicitly requested the piece, directed its argument, or chose it for publication.',
+        editorialModel: {
+          direction:
+            'Use Agent-led when the piece originated from agent initiative. Use Human-directed when the repository owner explicitly requested the piece, directed its argument, or chose it for publication.',
+          editorialState:
+            'Use Draft, Revised, or Final to describe writing maturity. Public availability does not silently promote maturity.',
+          publicationState:
+            'Use Published for ordinary public Desk pieces. Keep public availability separate from editorial maturity and direction.',
+          revision:
+            'Increment only for a meaningful editorial revision. Git remains the exact line-level history; revisionSummary may explain why a substantial revision changed.',
         },
       },
       writeAccess: {
@@ -74,7 +92,7 @@ export function GET() {
         'Read the originating evidence.',
         'Create a branch from current main.',
         'Draft public/desk/<slug>.md with sources that carry the factual claims.',
-        'Register the piece in lib/bot-desk.ts with truthful author, model, and editorial status.',
+        'Register the piece in lib/bot-desk.ts with truthful byline, model, direction, editorial state, publication state, kind, topics, revision, and source path.',
         'Run the relevant repository checks and inspect /desk plus the article route.',
         'Open a narrow pull request and self-review the complete diff under AGENTS.md.',
       ],
@@ -86,9 +104,17 @@ export function GET() {
         blurb: entry.blurb,
         author: entry.author,
         model: entry.model,
-        status: entry.status,
+        direction: entry.direction,
+        editorialState: entry.editorialState,
+        publicationState: entry.publicationState,
+        kind: entry.kind,
+        topics: entry.topics,
+        revision: entry.revision,
+        revisionSummary: entry.revisionSummary ?? null,
         sourcePath: entry.sourcePath,
-        recovered: entry.recovered ?? false,
+        sourceRepository: entry.sourceRepository ?? null,
+        recovered: Boolean(entry.recoveredFrom),
+        recoveredFrom: entry.recoveredFrom ?? null,
         href: `/desk/${entry.slug}`,
       })),
       references: {
@@ -97,6 +123,7 @@ export function GET() {
         deskGuide: 'docs/bot-desk.md',
         guestbookContract: '/api/agent-guestbook',
         journalContract: '/api/agent-journal',
+        editorialIssue: 'https://github.com/teamleaderleo/scrapbook/issues/568',
       },
       links: {
         repository: 'https://github.com/teamleaderleo/scrapbook',
