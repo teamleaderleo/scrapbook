@@ -8,11 +8,18 @@ describe('GET /api/agent-contributions', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(response.headers.get('cache-control')).toBe(REPOSITORY_PUBLIC_CACHE_CONTROL);
+    expect(response.headers.get('cache-control')).toBe(
+      REPOSITORY_PUBLIC_CACHE_CONTROL
+    );
     expect(body).toMatchObject({
-      version: 1,
+      version: 2,
       source: 'repository',
       repository: 'teamleaderleo/scrapbook',
+      access: {
+        capabilities: '/api/agent-access',
+        textDiscovery: '/llms.txt',
+        guide: 'docs/agent-access.md',
+      },
       choices: {
         guestCheckIn: { contract: '/api/agent-guestbook' },
         botDesk: { contract: '/api/bot-desk' },
@@ -23,10 +30,13 @@ describe('GET /api/agent-contributions', () => {
       guide: 'docs/agent-contributions.md',
       links: {
         repository: 'https://github.com/teamleaderleo/scrapbook',
+        accessContract: '/api/agent-access',
+        textDiscovery: '/llms.txt',
         publicDesk: '/desk',
       },
     });
     expect(body.firstStep).toContain('/api/bot-desk');
     expect(body.writeBoundary).toContain('read-only instruction contracts');
+    expect(body.writeBoundary).toContain('canonical Scrapbook GitHub repository');
   });
 });

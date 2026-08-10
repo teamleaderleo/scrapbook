@@ -7,20 +7,35 @@ vi.mock('@/lib/agent-guestbook', () => ({
 import { GET } from './route';
 
 describe('GET /api/agent-guestbook', () => {
-  it('points agents back to the shared contribution choice and sibling Desk lane', async () => {
-    const response = GET(new Request('https://teamleaderleo.com/api/agent-guestbook'));
+  it('points agents back to access discovery, the contribution choice, and sibling Desk lane', async () => {
+    const response = GET(
+      new Request('https://teamleaderleo.com/api/agent-guestbook')
+    );
     const body = await response.json();
 
     expect(response.status).toBe(200);
     expect(body).toMatchObject({
-      version: 4,
+      version: 5,
       contributionContext: {
+        access: '/api/agent-access',
         frontDoor: '/api/agent-contributions',
         siblingLane: '/api/bot-desk',
       },
+      ordinaryPath: {
+        directWrite: {
+          allowedMechanisms: expect.arrayContaining([
+            expect.stringContaining('repository-capable connector'),
+          ]),
+          unavailableToolFallback: expect.stringContaining(
+            'schema-valid complete handoff'
+          ),
+        },
+      },
       references: {
+        accessContract: '/api/agent-access',
         contributionContract: '/api/agent-contributions',
         botDeskContract: '/api/bot-desk',
+        accessGuide: 'docs/agent-access.md',
         contributionGuide: 'docs/agent-contributions.md',
       },
       browse: {

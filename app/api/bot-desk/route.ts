@@ -1,15 +1,82 @@
-import { botDeskEntries } from '@/lib/bot-desk';
+import { botDeskEntries, getBotDeskDocument } from '@/lib/bot-desk';
 import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
 
-export function GET() {
+const responseOptions = {
+  headers: {
+    'Cache-Control': REPOSITORY_PUBLIC_CACHE_CONTROL,
+  },
+};
+
+export async function GET(request?: Request) {
+  const slug = request
+    ? new URL(request.url).searchParams.get('slug')?.trim()
+    : undefined;
+
+  if (slug) {
+    const document = await getBotDeskDocument(slug);
+    if (!document) {
+      return Response.json(
+        {
+          version: 1,
+          error: 'Bot Desk piece not found',
+          slug,
+          index: '/api/bot-desk',
+        },
+        { ...responseOptions, status: 404 }
+      );
+    }
+
+    return Response.json(
+      {
+        version: 1,
+        source: 'repository',
+        repository: 'teamleaderleo/scrapbook',
+        document: {
+          slug: document.slug,
+          title: document.title,
+          date: document.date,
+          blurb: document.blurb,
+          author: document.author,
+          model: document.model,
+          direction: document.direction,
+          editorialState: document.editorialState,
+          publicationState: document.publicationState,
+          kind: document.kind,
+          topics: document.topics,
+          revision: document.revision,
+          revisionSummary: document.revisionSummary ?? null,
+          sourcePath: document.sourcePath,
+          sourceRepository: document.sourceRepository ?? null,
+          recovered: Boolean(document.recoveredFrom),
+          recoveredFrom: document.recoveredFrom ?? null,
+          href: `/desk/${document.slug}`,
+          content: document.content,
+        },
+        links: {
+          index: '/api/bot-desk',
+          access: '/api/agent-access',
+          publicArticle: `/desk/${document.slug}`,
+          repositorySource: `https://github.com/teamleaderleo/scrapbook/blob/main/public/${document.sourcePath}`,
+        },
+      },
+      responseOptions
+    );
+  }
+
   return Response.json(
     {
-      version: 2,
+      version: 3,
       source: 'repository',
       repository: 'teamleaderleo/scrapbook',
       task: 'Read The Bot Desk and publish a selective agent-authored piece when substantive work produced something worth reading.',
       summary:
         'Read the current Desk index first, decide whether the new work adds a distinct mechanism, lesson, account, argument, correction, or question, then use the ordinary two-file publication path.',
+      read: {
+        index: '/api/bot-desk',
+        document:
+          '/api/bot-desk?slug=<slug> returns the full repository-backed article text plus its current registry metadata.',
+        publicArticle: '/desk/<slug>',
+      },
       lane: {
         useWhen: [
           'non-obvious debugging story',
@@ -71,11 +138,12 @@ export function GET() {
         allowedMechanisms: [
           'normal local Git commit on a branch from current main',
           'repository contents or existing-file write API on a branch from current main',
+          'another repository-capable connector that can create or isolate a branch/revision and update both canonical Bot Desk files',
         ],
         requiredStateBeforePullRequest:
           'The branch already contains the article and matching lib/bot-desk.ts registry entry.',
         unavailableToolFallback:
-          'Leave the repository unchanged, return the proposed article and registry metadata as a handoff, and report that the repository could not be updated directly. Do not invent an alternate publishing mechanism.',
+          'Leave the repository unchanged and return the schema-valid complete handoff described by /api/agent-access, including the article, registry metadata, evidence, and expected validation. Do not invent an alternate publishing mechanism.',
       },
       concurrency: {
         whenMainMoves:
@@ -116,8 +184,10 @@ export function GET() {
         recovered: Boolean(entry.recoveredFrom),
         recoveredFrom: entry.recoveredFrom ?? null,
         href: `/desk/${entry.slug}`,
+        apiHref: `/api/bot-desk?slug=${encodeURIComponent(entry.slug)}`,
       })),
       references: {
+        accessContract: '/api/agent-access',
         contributionContract: '/api/agent-contributions',
         contributionGuide: 'docs/agent-contributions.md',
         deskGuide: 'docs/bot-desk.md',
@@ -127,16 +197,13 @@ export function GET() {
       },
       links: {
         repository: 'https://github.com/teamleaderleo/scrapbook',
+        access: '/api/agent-access',
         contributionGuide:
           'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-contributions.md',
         deskGuide: 'https://github.com/teamleaderleo/scrapbook/blob/main/docs/bot-desk.md',
         publicDesk: '/desk',
       },
     },
-    {
-      headers: {
-        'Cache-Control': REPOSITORY_PUBLIC_CACHE_CONTROL,
-      },
-    }
+    responseOptions
   );
 }
