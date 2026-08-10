@@ -1,6 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { parseQuery } from '@/app/lib/searchlang';
@@ -19,6 +26,12 @@ import {
 } from '@/app/space/actions';
 import { SpaceHeader } from './space-header';
 import { Button } from '@/components/ui/button';
+import { createSpaceBrowseViewKey } from '@/lib/space-browse-state';
+import {
+  createSpaceHistoryUiSnapshot,
+  mergeSpaceHistoryUiState,
+  readSpaceHistoryUiState,
+} from '@/lib/space-history-ui';
 import {
   countItemsBySpaceLane,
   filterItemsBySpaceLane,
@@ -55,13 +68,42 @@ export function SpaceView() {
   const [mutations, setMutations] = useState<Record<string, ReviewState>>({});
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [restoredExpandedIds, setRestoredExpandedIds] = useState<string[]>([]);
+  const scrollRef = useRef<HTMLElement>(null);
+  const expandedIdsRef = useRef<string[]>([]);
+  const restoredViewKeyRef = useRef<string | null>(null);
+  const scrollFrameRef = useRef<number | null>(null);
 
-  const viewKey = `${activeLane}:${tagsParam ?? ''}`;
-  const [previousViewKey, setPreviousViewKey] = useState(viewKey);
-  if (previousViewKey !== viewKey) {
-    setPreviousViewKey(viewKey);
-    setPage(1);
-  }
+  const historyViewKey = useMemo(
+    () =>
+      createSpaceBrowseViewKey('list', {
+        lane: activeLane,
+        tags: tagsParam,
+      }),
+    [activeLane, tagsParam]
+  );
+
+  useLayoutEffect(() => {
+    restoredViewKeyRef.current = null;
+    const snapshot = readSpaceHistoryUiState(
+      window.history.state,
+      historyViewKey
+    );
+    const nextExpandedIds = snapshot?.expandedIds ?? [];
+
+    expandedIdsRef.current = nextExpandedIds;
+    setRestoredExpandedIds(nextExpandedIds);
+    setPage(snapshot?.page ?? 1);
+
+    const frame = window.requestAnimationFrame(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = snapshot?.scrollTop ?? 0;
+      }
+      restoredViewKeyRef.current = historyViewKey;
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [historyViewKey]);
 
   const itemsWithMutations = useMemo<Item[]>(() => {
     return allItems.map(item => {
@@ -80,12 +122,17 @@ export function SpaceView() {
     return searchItems(laneItems, query, nowMs);
   }, [activeLane, itemsWithMutations, query, nowMs]);
 
+  const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
   const paginatedItems = useMemo(() => {
     const start = (page - 1) * ITEMS_PER_PAGE;
     return items.slice(start, start + ITEMS_PER_PAGE);
   }, [items, page]);
 
-  const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
   const itemCount = `${items.length}${hasMore ? '+' : ''}`;
   const headerStatus = tagsParam
     ? `${itemCount} · ${tagsParam}`
@@ -106,6 +153,56 @@ export function SpaceView() {
       void loadMore();
     }
   }, [hasMore, items.length, loadMore, loadingMore, page, totalPages]);
+
+  const persistHistoryState = useCallback(
+    (expandedIds = expandedIdsRef.current) => {
+      if (restoredViewKeyRef.current !== historyViewKey) return;
+
+      const snapshot = createSpaceHistoryUiSnapshot({
+        viewKey: historyViewKey,
+        page,
+        scrollTop: scrollRef.current?.scrollTop ?? 0,
+        expandedIds,
+      });
+      window.history.replaceState(
+        mergeSpaceHistoryUiState(window.history.state, snapshot),
+        '',
+        window.location.href
+      );
+    },
+    [historyViewKey, page]
+  );
+
+  useEffect(() => {
+    persistHistoryState();
+  }, [page, persistHistoryState]);
+
+  useEffect(
+    () => () => {
+      if (scrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
+      }
+    },
+    []
+  );
+
+  const onScroll = useCallback(() => {
+    if (restoredViewKeyRef.current !== historyViewKey) return;
+    if (scrollFrameRef.current !== null) return;
+
+    scrollFrameRef.current = window.requestAnimationFrame(() => {
+      scrollFrameRef.current = null;
+      persistHistoryState();
+    });
+  }, [historyViewKey, persistHistoryState]);
+
+  const onExpandedIdsChange = useCallback(
+    (expandedIds: string[]) => {
+      expandedIdsRef.current = expandedIds;
+      persistHistoryState(expandedIds);
+    },
+    [persistHistoryState]
+  );
 
   const onEnroll = useCallback(async (id: string) => {
     const initialReview: ReviewState = {
@@ -170,7 +267,12 @@ export function SpaceView() {
         onEditorToggle={() => setEditorOpen(!editorOpen)}
         isEditorOpen={editorOpen}
       />
-      <main className="relative min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:p-5">
+      <main
+        ref={scrollRef}
+        onScroll={onScroll}
+        data-space-list-scroll
+        className="relative min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:p-5"
+      >
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 opacity-45 dark:opacity-20"
@@ -269,12 +371,15 @@ export function SpaceView() {
           ) : null}
 
           <ResultsClient
+            key={historyViewKey}
             items={paginatedItems}
             onReview={onReview}
             onEnroll={onEnroll}
             nowMs={nowMs}
             isAdmin={isAdmin}
             lane={activeLane}
+            initialExpandedIds={restoredExpandedIds}
+            onExpandedIdsChange={onExpandedIdsChange}
             emptyTitle={
               loadingMore
                 ? `Loading ${activeLaneDefinition.label}…`
