@@ -1,10 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import {
-  SPACE_EDITOR_HISTORY_KEY,
-  createEditorSheetHistoryState,
+  SPACE_EDITOR_HASH,
   createEditorSheetRestoration,
-  ownsEditorSheetHistoryState,
+  isEditorSheetHash,
   resolveEditorSheetViewport,
   type FocusTargetLike,
   type ScrollRegionLike,
@@ -68,16 +67,11 @@ describe('mobile Space editor sheet helpers', () => {
     });
   });
 
-  it('adds an owned same-page history marker without dropping router state', () => {
-    const state = createEditorSheetHistoryState({ __NA: true, index: 4 }, 'editor-1');
-
-    expect(state).toEqual({
-      __NA: true,
-      index: 4,
-      [SPACE_EDITOR_HISTORY_KEY]: 'editor-1',
-    });
-    expect(ownsEditorSheetHistoryState(state, 'editor-1')).toBe(true);
-    expect(ownsEditorSheetHistoryState(state, 'editor-2')).toBe(false);
+  it('recognizes only the dedicated transient editor hash', () => {
+    expect(SPACE_EDITOR_HASH).toBe('#space-editor');
+    expect(isEditorSheetHash('#space-editor')).toBe(true);
+    expect(isEditorSheetHash('')).toBe(false);
+    expect(isEditorSheetHash('#trail-item-1')).toBe(false);
   });
 
   it('restores captured scroll regions and the original focus target', () => {
