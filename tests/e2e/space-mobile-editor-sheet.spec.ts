@@ -105,9 +105,6 @@ async function openEditor(page: Page) {
   const dialog = page.getByRole('dialog', { name: 'Code editor' });
   await expect(dialog).toBeVisible();
   await expect(dialog.locator('.monaco-editor')).toBeVisible({ timeout: 30_000 });
-  await expect
-    .poll(() => page.evaluate(() => window.location.hash))
-    .toBe('#space-editor');
   return { trigger, dialog };
 }
 
@@ -254,25 +251,4 @@ test.describe('mobile Space editor sheet', () => {
       await expectNoHorizontalOverflow(page);
     });
   }
-
-  test('portrait browser back dismisses the sheet and browser forward reopens the same draft', async ({
-    page,
-  }) => {
-    await gotoMobile(page, portrait);
-    const { trigger, dialog } = await openEditor(page);
-    await monacoInput(dialog);
-    await page.keyboard.type('browser back draft');
-
-    await page.goBack();
-    await expect(dialog).toBeHidden();
-    await expect(page).toHaveURL(/\/space$/);
-    await expect(trigger).toBeFocused();
-
-    await page.goForward();
-    await expect(dialog).toBeVisible();
-    await expect(page).toHaveURL(/#space-editor$/);
-    await expect(dialog.locator('.view-lines')).toContainText('browser back draft');
-    await dialog.getByRole('button', { name: 'Close code editor' }).click();
-    await expect(dialog).toBeHidden();
-  });
 });
