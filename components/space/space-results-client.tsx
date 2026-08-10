@@ -5,7 +5,7 @@ import { Rating } from 'ts-fsrs';
 import type { Item } from '@/app/lib/item-types';
 import { readItemHref } from '@/lib/space-routes';
 import { formatInterval, formatDueRelative } from '@/app/lib/interval-format';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { MarkdownContent } from './markdown-content';
 import { useSearchParams } from 'next/navigation';
 import { CodeDisplay } from './code-display';
@@ -63,15 +63,18 @@ export function ResultsClient({
     setExpandedIds(expansionRecord(initialExpandedIds));
   }, [initialExpandedIds]);
 
-  const updateExpandedIds = (
-    updater: (previous: Record<string, boolean>) => Record<string, boolean>
-  ) => {
-    setExpandedIds(previous => {
-      const next = updater(previous);
-      onExpandedIdsChange?.(expandedIdsFromRecord(next));
-      return next;
-    });
-  };
+  const updateExpandedIds = useCallback(
+    (
+      updater: (previous: Record<string, boolean>) => Record<string, boolean>
+    ) => {
+      setExpandedIds(previous => {
+        const next = updater(previous);
+        onExpandedIdsChange?.(expandedIdsFromRecord(next));
+        return next;
+      });
+    },
+    [onExpandedIdsChange]
+  );
 
   const toggleHoveredShortcut = useMemo(
     () => ({
@@ -85,7 +88,7 @@ export function ResultsClient({
         }));
       },
     }),
-    [hoveredId]
+    [hoveredId, updateExpandedIds]
   );
   useSpaceShortcut('list.toggle-hovered', toggleHoveredShortcut);
 
