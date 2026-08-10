@@ -28,11 +28,26 @@ describe('operator phrasebook', () => {
     }
   });
 
-  it('renders a complete plain-text copy with the lazy operator link', () => {
+  it('keeps the perspective pass as a non-featured review tool', () => {
+    const phrase = operatorPhrases.find(item => item.id === 'perspective-pass');
+
+    expect(phrase).toMatchObject({
+      group: 'review',
+      label: 'Perspective pass',
+      featured: undefined,
+    });
+    expect(phrase?.text).toContain('observed, inferred, assumed, and speculative');
+    expect(phrase?.text).toContain('simplest recommendation');
+  });
+
+  it('renders a complete plain-text copy with stable phrase references', () => {
     const rendered = renderOperatorPhrasebookText();
 
     for (const phrase of operatorPhrases) {
       expect(rendered).toContain(`${phrase.label}:`);
+      expect(rendered).toContain(
+        `Reference: https://teamleaderleo.com/operator#${phrase.id}`
+      );
       expect(rendered).toContain(phrase.text);
     }
 
