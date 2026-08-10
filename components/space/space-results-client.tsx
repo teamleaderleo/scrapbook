@@ -5,7 +5,7 @@ import { Rating } from 'ts-fsrs';
 import type { Item } from '@/app/lib/item-types';
 import { readItemHref } from '@/lib/space-routes';
 import { formatInterval, formatDueRelative } from '@/app/lib/interval-format';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MarkdownContent } from './markdown-content';
 import { useSearchParams } from 'next/navigation';
 import { CodeDisplay } from './code-display';
@@ -18,6 +18,19 @@ import {
 } from '@/components/cozy-flourishes';
 import { displaySpaceTags } from '@/lib/space-tags';
 
+function expansionRecord(ids: readonly string[]) {
+  return Object.fromEntries(ids.map(id => [id, true])) as Record<
+    string,
+    boolean
+  >;
+}
+
+function expandedIdsFromRecord(record: Record<string, boolean>) {
+  return Object.entries(record)
+    .filter(([, expanded]) => expanded)
+    .map(([id]) => id);
+}
+
 export function ResultsClient({
   items,
   onReview,
@@ -25,6 +38,8 @@ export function ResultsClient({
   nowMs,
   isAdmin,
   lane,
+  initialExpandedIds = [],
+  onExpandedIdsChange,
   emptyTitle = 'No items',
   emptyDescription = 'No published items match this view.',
 }: {
@@ -34,11 +49,29 @@ export function ResultsClient({
   nowMs: number;
   isAdmin: boolean;
   lane?: string;
+  initialExpandedIds?: readonly string[];
+  onExpandedIdsChange?: (ids: string[]) => void;
   emptyTitle?: string;
   emptyDescription?: string;
 }) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
+  const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>(() =>
+    expansionRecord(initialExpandedIds)
+  );
+
+  useEffect(() => {
+    setExpandedIds(expansionRecord(initialExpandedIds));
+  }, [initialExpandedIds]);
+
+  const updateExpandedIds = (
+    updater: (previous: Record<string, boolean>) => Record<string, boolean>
+  ) => {
+    setExpandedIds(previous => {
+      const next = updater(previous);
+      onExpandedIdsChange?.(expandedIdsFromRecord(next));
+      return next;
+    });
+  };
 
   const toggleHoveredShortcut = useMemo(
     () => ({
@@ -46,7 +79,7 @@ export function ResultsClient({
       disabledReason: hoveredId ? undefined : 'Hover an item first',
       run: () => {
         if (!hoveredId) return;
-        setExpandedIds(previous => ({
+        updateExpandedIds(previous => ({
           ...previous,
           [hoveredId]: !previous[hoveredId],
         }));
@@ -81,7 +114,7 @@ export function ResultsClient({
       {items.map(item => {
         const expanded = Boolean(expandedIds[item.id]);
         const onToggle = () =>
-          setExpandedIds(previous => ({
+          updateExpandedIds(previous => ({
             ...previous,
             [item.id]: !previous[item.id],
           }));
@@ -142,6 +175,8 @@ function Row({
       className="material-paper group relative overflow-hidden rounded-xl border transition-[transform,box-shadow,border-color] duration-150 hover:-rotate-[0.08deg] hover:border-[hsl(var(--material-paper-edge))] hover:shadow-[0_12px_26px_rgba(45,40,32,0.13)]"
       onMouseEnter={() => onHoverChange(true)}
       onMouseLeave={() => onHoverChange(false)}
+      data-space-list-item={item.id}
+      data-expanded={expanded ? 'true' : 'false'}
     >
       <span
         aria-hidden="true"
