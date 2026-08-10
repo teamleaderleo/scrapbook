@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Code, Plus, Rows3, Search } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useItems } from '@/app/lib/contexts/item-context';
@@ -39,6 +40,19 @@ export function SpaceMobileActions() {
   const { executeShortcut } = useSpaceShortcuts();
   const inReader = pathname === '/space/review';
   const visible = pathname === '/space' || inReader;
+
+  useEffect(() => {
+    const background = document.querySelector<HTMLElement>('[data-space-background]');
+    if (!background || !visible) return;
+
+    background.style.setProperty(
+      '--space-mobile-actions-offset',
+      'calc(4.75rem + env(safe-area-inset-bottom))'
+    );
+    return () => {
+      background.style.removeProperty('--space-mobile-actions-offset');
+    };
+  }, [visible]);
 
   if (!visible) return null;
 
