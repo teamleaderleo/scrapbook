@@ -49,7 +49,7 @@ describe('Space public snapshot contract', () => {
     expect(serializeSpacePublicSnapshot(snapshot)).not.toContain('private');
   });
 
-  it('restores a fresh public snapshot with private fields explicitly null', () => {
+  it('restores a fresh public snapshot without private fields', () => {
     const raw = serializeSpacePublicSnapshot(
       createSpacePublicSnapshot([item()], {
         savedAt: 10_000,
@@ -68,9 +68,9 @@ describe('Space public snapshot contract', () => {
       id: 'item-1',
       slug: 'item-1',
       title: 'Item 1',
-      review: null,
-      userId: null,
     });
+    expect(restored?.items[0]).not.toHaveProperty('review');
+    expect(restored?.items[0]).not.toHaveProperty('userId');
   });
 
   it('rejects stale, far-future, wrong-version, and oversized snapshots', () => {
