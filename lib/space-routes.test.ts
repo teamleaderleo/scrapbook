@@ -29,16 +29,16 @@ describe('reviewItemHref', () => {
     );
   });
 
-  it('preserves a real tag query without serializing an absent value', () => {
-    expect(reviewItemHref('item/id', ' topic:security ', ' fieldwork ')).toBe(
-      '/space/review?item=item%2Fid&tags=topic%3Asecurity&lane=fieldwork'
+  it('uses canonical lane, tags, item ordering and encoding', () => {
+    expect(reviewItemHref(' item/id ', ' topic:security ', ' fieldwork ')).toBe(
+      '/space/review?lane=fieldwork&tags=topic%3Asecurity&item=item%2Fid'
     );
     expect(() => reviewItemHref('   ')).toThrow('Review item id is required');
   });
 });
 
 describe('readItemHref', () => {
-  it('uses the public slug and keeps the originating Space view', () => {
+  it('uses the public slug and canonical originating Space context', () => {
     expect(
       readItemHref(
         'cache-files-are-published-atomically',
@@ -46,11 +46,14 @@ describe('readItemHref', () => {
         ' fieldwork '
       )
     ).toBe(
-      '/space/read/cache-files-are-published-atomically?tags=domain%3Areliability&lane=fieldwork'
+      '/space/read/cache-files-are-published-atomically?lane=fieldwork&tags=domain%3Areliability'
     );
   });
 
-  it('does not add an empty query string', () => {
+  it('encodes slugs and does not add an empty query string', () => {
+    expect(readItemHref(' concept / one ')).toBe(
+      '/space/read/concept%20%2F%20one'
+    );
     expect(readItemHref('a-living-lesson')).toBe('/space/read/a-living-lesson');
     expect(() => readItemHref('   ')).toThrow('Reading sheet slug is required');
   });
