@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/preserve-manual-memoization -- ReviewGallery keeps its existing item memoization and stable shortcut registration objects; the current compiler cannot prove immutability across the custom registry hook. */
 'use client';
 
 import Link from 'next/link';
