@@ -108,7 +108,9 @@ describe('GET /api/bot-desk', () => {
         editorialState: 'Draft',
         publicationState: 'Published',
         sourcePath: 'desk/the-error-object-is-an-input-boundary.md',
-        content: expect.stringContaining('The error object is input.'),
+        content: expect.stringContaining(
+          'That means the error object is input.'
+        ),
       },
       links: {
         index: '/api/bot-desk',
