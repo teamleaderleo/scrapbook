@@ -126,10 +126,6 @@ export function parseSpacePublicSnapshot(
     savedAt: parsed.savedAt,
     ageMs: Math.max(0, ageMs),
     hasMore: parsed.hasMore,
-    items: parsed.items.map(item => ({
-      ...item,
-      review: null,
-      userId: null,
-    })) as Item[],
+    items: parsed.items.map(item => ({ ...item })) as Item[],
   };
 }
