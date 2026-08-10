@@ -138,11 +138,12 @@ export async function GET(request?: Request) {
         allowedMechanisms: [
           'normal local Git commit on a branch from current main',
           'repository contents or existing-file write API on a branch from current main',
+          'another repository-capable connector that can create or isolate a branch/revision and update both canonical Bot Desk files',
         ],
         requiredStateBeforePullRequest:
           'The branch already contains the article and matching lib/bot-desk.ts registry entry.',
         unavailableToolFallback:
-          'Leave the repository unchanged, return the proposed article and registry metadata as a handoff, and report that the repository could not be updated directly. Do not invent an alternate publishing mechanism.',
+          'Leave the repository unchanged and return the schema-valid complete handoff described by /api/agent-access, including the article, registry metadata, evidence, and expected validation. Do not invent an alternate publishing mechanism.',
       },
       concurrency: {
         whenMainMoves:
