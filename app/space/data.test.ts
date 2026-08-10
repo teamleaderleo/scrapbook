@@ -3,7 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 
 const createClient = vi.hoisted(() => vi.fn());
+const loadPublicSpacePage = vi.hoisted(() => vi.fn());
 vi.mock('@/utils/supabase/server', () => ({ createClient }));
+vi.mock('./public-data', () => ({ loadPublicSpacePage }));
 
 import {
   loadInitialSpaceData,
@@ -15,6 +17,10 @@ describe('withSpaceTimeout', () => {
   beforeEach(() => {
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://example.supabase.co');
     vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'test-key');
+    loadPublicSpacePage.mockResolvedValue({
+      databaseItems: [],
+      hasMore: false,
+    });
   });
 
   afterEach(() => {
@@ -47,9 +53,9 @@ describe('withSpaceTimeout', () => {
     expect(onTimeout).toHaveBeenCalledOnce();
   });
 
-  it('loads published learning items without requiring a sign-in', async () => {
-    const abortSignal = vi.fn().mockResolvedValue({
-      data: [
+  it('loads cached public learning items without using request-bound item access', async () => {
+    loadPublicSpacePage.mockResolvedValue({
+      databaseItems: [
         {
           id: 'item-1',
           title: 'A living lesson',
@@ -72,18 +78,9 @@ describe('withSpaceTimeout', () => {
           updated_at: '2026-08-09T00:00:00.000Z',
         },
       ],
-      error: null,
+      hasMore: false,
     });
-    const query = {
-      select: vi.fn(),
-      order: vi.fn(),
-      range: vi.fn(),
-      abortSignal,
-    };
-    query.select.mockReturnValue(query);
-    query.order.mockReturnValue(query);
-    query.range.mockReturnValue(query);
-    const from = vi.fn().mockReturnValue(query);
+    const from = vi.fn();
     createClient.mockResolvedValue({
       auth: {
         getUser: vi.fn().mockResolvedValue({
@@ -100,11 +97,11 @@ describe('withSpaceTimeout', () => {
     expect(result.items[0]?.title).toBe('A living lesson');
     expect(result.isAdmin).toBe(false);
     expect(result.error).toBeNull();
-    expect(from).toHaveBeenCalledWith('items');
-    expect(from).not.toHaveBeenCalledWith('reviews');
+    expect(loadPublicSpacePage).toHaveBeenCalledOnce();
+    expect(from).not.toHaveBeenCalled();
   });
 
-  it('starts the public archive request while identity is still loading', async () => {
+  it('starts the cached public archive request while identity is still loading', async () => {
     let resolveIdentity: (value: {
       data: { user: null };
       error: null;
@@ -114,28 +111,38 @@ describe('withSpaceTimeout', () => {
         resolveIdentity = resolve;
       }
     );
-    const abortSignal = vi.fn().mockResolvedValue({ data: [], error: null });
-    const query = {
-      select: vi.fn(),
-      order: vi.fn(),
-      range: vi.fn(),
-      abortSignal,
-    };
-    query.select.mockReturnValue(query);
-    query.order.mockReturnValue(query);
-    query.range.mockReturnValue(query);
     createClient.mockResolvedValue({
       auth: { getUser: vi.fn().mockReturnValue(identity) },
-      from: vi.fn().mockReturnValue(query),
+      from: vi.fn(),
     });
 
     const pending = loadInitialSpaceData();
-    await vi.waitFor(() => expect(abortSignal).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(loadPublicSpacePage).toHaveBeenCalledOnce());
     resolveIdentity({ data: { user: null }, error: null });
 
     await expect(pending).resolves.toMatchObject({
       items: [],
       isAdmin: false,
+    });
+  });
+
+  it('keeps identity context when the shared public archive cannot load', async () => {
+    loadPublicSpacePage.mockRejectedValue(new Error('archive offline'));
+    createClient.mockResolvedValue({
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: null },
+          error: null,
+        }),
+      },
+      from: vi.fn(),
+    });
+
+    await expect(loadInitialSpaceData()).resolves.toMatchObject({
+      items: [],
+      isAdmin: false,
+      user: null,
+      error: 'Space could not open the archive. Try again in a moment.',
     });
   });
 });
