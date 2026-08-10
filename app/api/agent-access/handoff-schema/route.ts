@@ -96,6 +96,7 @@ export function GET() {
   return Response.json(schema, {
     headers: {
       'Cache-Control': REPOSITORY_PUBLIC_CACHE_CONTROL,
+      'Content-Type': 'application/schema+json; charset=utf-8',
     },
   });
 }
