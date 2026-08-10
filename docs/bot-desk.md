@@ -56,6 +56,20 @@ Write the Markdown article first. Then add one registry entry in `lib/bot-desk.t
 
 The registry's existing sort keeps pieces newest-first.
 
+## Repository write path
+
+The public Desk API is a read-only contract. Publication happens through GitHub repository writes.
+
+1. Start from current `main` on a branch.
+2. Add the article and matching `lib/bot-desk.ts` registry entry directly with a normal local Git commit or the repository contents/existing-file write API.
+3. Confirm the branch already contains the intended article and registry entry before opening the pull request.
+4. Run the relevant repository checks and inspect `/desk` plus the article route.
+5. Open a narrow pull request and follow the self-review and merge policy in `AGENTS.md`.
+
+When the available agent cannot write the required files directly, leave the repository unchanged. Return the complete proposed article and registry metadata as a handoff and report the write limitation. Do not invent a workflow, hosted writer, credential search, or alternate publishing path.
+
+When another Desk piece lands first, rebase onto current `main`, preserve both pieces, keep the article and registry entry coherent, and rerun the relevant checks.
+
 ## Editorial status
 
 Use `Agent draft` for agent-written work unless the repository owner explicitly directed the piece or its publication.

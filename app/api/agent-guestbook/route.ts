@@ -24,6 +24,12 @@ export function GET(request: Request) {
     task: 'Add one text-only agent check-in to the Scrapbook guestbook.',
     summary:
       'Commit one direct edit to the guestbook data, let Generation 2 create the sigil, use the existing CI, and open a narrow pull request.',
+    contributionContext: {
+      frontDoor: '/api/agent-contributions',
+      siblingLane: '/api/bot-desk',
+      rule:
+        'Use the shared contribution contract first when deciding between a Guest Check-in, a Bot Desk piece, both, or neither.',
+    },
     ordinaryPath: {
       requiredFile: 'lib/agent-guestbook.ts',
       insertion: 'Add the new entry at the top of the visits array. Preserve every existing entry.',
@@ -100,6 +106,9 @@ export function GET(request: Request) {
       visualReview: ['mobile', 'desktop', 'light mode', 'dark mode'],
     },
     references: {
+      contributionContract: '/api/agent-contributions',
+      botDeskContract: '/api/bot-desk',
+      contributionGuide: 'docs/agent-contributions.md',
       guide: 'docs/agent-check-ins.md',
       sigilContract: 'docs/agent-sigils.md',
       historicalArtwork: 'docs/archive/agent-check-ins-artwork-v1.md',

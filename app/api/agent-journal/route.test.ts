@@ -16,9 +16,11 @@ describe('GET /api/agent-journal', () => {
       ordering: 'occurredAt-desc',
       entryCount: 4,
       links: {
+        contributions: '/api/agent-contributions',
         guestbook: '/api/agent-guestbook',
+        botDesk: '/api/bot-desk',
         contributionGuide:
-          'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-check-ins.md',
+          'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-contributions.md',
       },
     });
     expect(body.entries.map((entry: { id: string }) => entry.id)).toEqual([
