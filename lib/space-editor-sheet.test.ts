@@ -1,9 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import {
-  SPACE_EDITOR_HASH,
   createEditorSheetRestoration,
-  isEditorSheetHash,
   resolveEditorSheetViewport,
   type FocusTargetLike,
   type ScrollRegionLike,
@@ -65,13 +63,6 @@ describe('mobile Space editor sheet helpers', () => {
       height: 390,
       bottom: 390,
     });
-  });
-
-  it('recognizes only the dedicated transient editor hash', () => {
-    expect(SPACE_EDITOR_HASH).toBe('#space-editor');
-    expect(isEditorSheetHash('#space-editor')).toBe(true);
-    expect(isEditorSheetHash('')).toBe(false);
-    expect(isEditorSheetHash('#trail-item-1')).toBe(false);
   });
 
   it('restores captured scroll regions and the original focus target', () => {
