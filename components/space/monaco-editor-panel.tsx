@@ -43,6 +43,15 @@ function visibleEditorTrigger() {
   );
 }
 
+function pushNativeSameUrlHistoryState(state: unknown) {
+  window.History.prototype.pushState.call(
+    window.history,
+    state,
+    '',
+    window.location.href
+  );
+}
+
 export function MonacoEditorPanel() {
   const { editorOpen, setEditorOpen } = useItems();
   const { executeShortcut } = useSpaceShortcuts();
@@ -249,10 +258,8 @@ export function MonacoEditorPanel() {
       );
 
       if (!ownsEditorSheetHistoryState(history.state, historyToken)) {
-        history.pushState(
-          createEditorSheetHistoryState(history.state, historyToken),
-          '',
-          window.location.href
+        pushNativeSameUrlHistoryState(
+          createEditorSheetHistoryState(history.state, historyToken)
         );
       }
     }
