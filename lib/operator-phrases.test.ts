@@ -28,13 +28,13 @@ describe('operator phrasebook', () => {
     }
   });
 
-  it('keeps the perspective pass as a non-featured review tool', () => {
+  it('features the perspective pass as the default review nudge', () => {
     const phrase = operatorPhrases.find(item => item.id === 'perspective-pass');
 
     expect(phrase).toMatchObject({
       group: 'review',
       label: 'Perspective pass',
-      featured: undefined,
+      featured: true,
     });
     expect(phrase?.text).toContain('observed, inferred, assumed, and speculative');
     expect(phrase?.text).toContain('simplest recommendation');
