@@ -68,6 +68,8 @@ export function MonacoEditorPanel() {
 
   const isDark = resolvedTheme === 'dark';
   const shikiTheme = isDark ? 'catppuccin-macchiato' : 'one-light';
+  const shikiThemeRef = useRef(shikiTheme);
+  shikiThemeRef.current = shikiTheme;
   const sidebarWidth = state === 'collapsed' ? '3rem' : '16rem';
 
   useEffect(() => {
@@ -139,7 +141,7 @@ export function MonacoEditorPanel() {
       const editor = monaco.editor.create(editorRef.current, {
         value: '',
         language: 'python',
-        theme: shikiTheme,
+        theme: shikiThemeRef.current,
         automaticLayout: true,
         minimap: { enabled: false },
         fontSize: 14,
@@ -161,7 +163,7 @@ export function MonacoEditorPanel() {
       });
 
       editorInstanceRef.current = editor;
-      monaco.editor.setTheme(shikiTheme);
+      monaco.editor.setTheme(shikiThemeRef.current);
       setIsInitializing(false);
 
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI, () => {
@@ -174,7 +176,7 @@ export function MonacoEditorPanel() {
         setEditorHeight(Math.max(384, Math.min(contentHeight + 32, maxHeight)));
       });
 
-      if (editorOpen) editor.focus();
+      editor.focus();
     };
 
     void initEditor().catch(error => {
@@ -189,7 +191,7 @@ export function MonacoEditorPanel() {
       editorInstanceRef.current?.dispose();
       editorInstanceRef.current = null;
     };
-  }, [editorOpen, executeShortcut, hasMountedEditor, shikiTheme]);
+  }, [executeShortcut, hasMountedEditor]);
 
   useEffect(() => {
     if (!editorOpen || !editorInstanceRef.current) return;
@@ -359,7 +361,7 @@ export function MonacoEditorPanel() {
       role={isMobile ? 'dialog' : undefined}
       aria-modal={isMobile ? true : undefined}
       aria-labelledby={isMobile ? 'space-code-editor-title' : undefined}
-      className={`${styles.panel} z-50 overflow-hidden border border-border bg-background shadow-2xl transition-[left,width] duration-200 ease-linear motion-reduce:transition-none ${
+      className={`${styles.panel} z-50 flex flex-col overflow-hidden border border-border bg-background shadow-2xl transition-[left,width] duration-200 ease-linear motion-reduce:transition-none ${
         isMobile ? 'rounded-none' : 'rounded-lg'
       } ${editorOpen ? '' : 'hidden'}`}
       style={
@@ -368,7 +370,9 @@ export function MonacoEditorPanel() {
           '--editor-width': `calc((100vw - ${sidebarWidth} - 2rem) / 2 - 0.375rem)`,
           '--editor-height': `${editorHeight}px`,
           '--mobile-editor-top': `${mobileViewport.top}px`,
-          '--mobile-editor-height': `${mobileViewport.height || window.innerHeight}px`,
+          '--mobile-editor-height': mobileViewport.height
+            ? `${mobileViewport.height}px`
+            : '100dvh',
         } as CSSProperties
       }
       data-space-editor-panel
@@ -376,7 +380,7 @@ export function MonacoEditorPanel() {
       data-space-shortcut-scope="editor"
     >
       {isMobile ? (
-        <header className="flex min-h-14 items-center justify-between gap-3 border-b border-border/70 px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
+        <header className="flex min-h-14 shrink-0 items-center justify-between gap-3 border-b border-border/70 px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
           <div className="min-w-0">
             <h2 id="space-code-editor-title" className="text-sm font-semibold">
               Code editor
@@ -397,7 +401,7 @@ export function MonacoEditorPanel() {
       ) : null}
 
       <div
-        className={`${isMobile ? 'h-[calc(100%-3.5rem)] pb-[env(safe-area-inset-bottom)]' : 'h-full'} w-full`}
+        className={`${isMobile ? 'pb-[env(safe-area-inset-bottom)]' : ''} relative min-h-0 flex-1`}
       >
         {isInitializing ? (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#f4f1ea] px-6 text-center dark:bg-[#202126]">
