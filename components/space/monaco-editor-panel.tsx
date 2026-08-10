@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -51,9 +52,7 @@ export function MonacoEditorPanel() {
   const restorationRef = useRef<ReturnType<
     typeof createBrowserEditorSheetRestoration
   > | null>(null);
-  const historyTokenRef = useRef(
-    `space-editor-${Math.random().toString(36).slice(2)}`
-  );
+  const historyToken = useId();
   const { resolvedTheme } = useTheme();
   const { state, isMobile } = useSidebar();
   const [editorHeight, setEditorHeight] = useState(384);
@@ -194,9 +193,22 @@ export function MonacoEditorPanel() {
   }, [executeShortcut, hasMountedEditor]);
 
   useEffect(() => {
-    if (!editorOpen || !editorInstanceRef.current) return;
-    editorInstanceRef.current.layout();
-    editorInstanceRef.current.focus();
+    if (!editorOpen) return;
+
+    if (editorInstanceRef.current) {
+      editorInstanceRef.current.layout();
+      editorInstanceRef.current.focus();
+      return;
+    }
+
+    if (isMobile) {
+      const frame = requestAnimationFrame(() => {
+        document
+          .querySelector<HTMLElement>('[data-space-editor-close]')
+          ?.focus({ preventScroll: true });
+      });
+      return () => cancelAnimationFrame(frame);
+    }
   }, [editorOpen, isMobile, mobileViewport.height]);
 
   const restoreBackground = useCallback(() => {
@@ -214,17 +226,14 @@ export function MonacoEditorPanel() {
   }, [restoreBackground]);
 
   const closeEditor = useCallback(() => {
-    if (
-      isMobile &&
-      ownsEditorSheetHistoryState(history.state, historyTokenRef.current)
-    ) {
+    if (isMobile && ownsEditorSheetHistoryState(history.state, historyToken)) {
       history.back();
       return;
     }
 
     setEditorOpen(false);
     restoreAfterClose();
-  }, [isMobile, restoreAfterClose, setEditorOpen]);
+  }, [historyToken, isMobile, restoreAfterClose, setEditorOpen]);
 
   const openEditor = useCallback(() => {
     if (editorOpen) return;
@@ -238,11 +247,9 @@ export function MonacoEditorPanel() {
         collectScrollableSpaceRegions()
       );
 
-      if (
-        !ownsEditorSheetHistoryState(history.state, historyTokenRef.current)
-      ) {
+      if (!ownsEditorSheetHistoryState(history.state, historyToken)) {
         history.pushState(
-          createEditorSheetHistoryState(history.state, historyTokenRef.current),
+          createEditorSheetHistoryState(history.state, historyToken),
           '',
           window.location.href
         );
@@ -250,7 +257,7 @@ export function MonacoEditorPanel() {
     }
 
     setEditorOpen(true);
-  }, [editorOpen, isMobile, setEditorOpen]);
+  }, [editorOpen, historyToken, isMobile, setEditorOpen]);
 
   const toggleEditor = useMemo(
     () => ({
@@ -276,10 +283,7 @@ export function MonacoEditorPanel() {
     if (!isMobile) return;
 
     const onPopState = () => {
-      const owned = ownsEditorSheetHistoryState(
-        history.state,
-        historyTokenRef.current
-      );
+      const owned = ownsEditorSheetHistoryState(history.state, historyToken);
 
       if (owned && !editorOpen) {
         restorationRef.current ??= createBrowserEditorSheetRestoration();
@@ -301,7 +305,7 @@ export function MonacoEditorPanel() {
 
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, [editorOpen, isMobile, restoreAfterClose, setEditorOpen]);
+  }, [editorOpen, historyToken, isMobile, restoreAfterClose, setEditorOpen]);
 
   useEffect(() => {
     if (!isMobile || !editorOpen) {
@@ -392,6 +396,7 @@ export function MonacoEditorPanel() {
           <button
             type="button"
             onClick={closeEditor}
+            data-space-editor-close
             className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Close code editor"
           >
