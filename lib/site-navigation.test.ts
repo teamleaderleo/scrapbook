@@ -31,9 +31,10 @@ describe('site navigation registry', () => {
     expect(hrefs).not.toContain('/resume');
   });
 
-  it('keeps tools, the evidence journal, and labs out of the primary row', () => {
+  it('keeps Operator, tools, the evidence journal, and labs out of the primary row', () => {
     const primaryIds = primaryNavigationItems.map(item => item.id);
-    expect(primaryIds).toEqual(['home', 'operator', 'space', 'gallery', 'desk']);
+    expect(primaryIds).toEqual(['home', 'space', 'gallery', 'desk']);
+    expect(primaryIds).not.toContain('operator');
     expect(primaryIds).not.toContain('journal');
     expect(primaryIds).not.toContain('proxy');
     expect(primaryIds).not.toContain('snow-globe');
