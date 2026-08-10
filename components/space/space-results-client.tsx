@@ -5,11 +5,12 @@ import { Rating } from 'ts-fsrs';
 import type { Item } from '@/app/lib/item-types';
 import { readItemHref } from '@/lib/space-routes';
 import { formatInterval, formatDueRelative } from '@/app/lib/interval-format';
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { MarkdownContent } from './markdown-content';
 import { useSearchParams } from 'next/navigation';
 import { CodeDisplay } from './code-display';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import { useSpaceShortcut } from './space-shortcut-provider';
 import {
   PageCurl,
   PressedSprig,
@@ -39,38 +40,21 @@ export function ResultsClient({
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      const tag = target?.tagName?.toLowerCase();
-      const role = target?.getAttribute?.('role');
-      const isTyping =
-        tag === 'input' ||
-        tag === 'textarea' ||
-        target?.getAttribute('contenteditable') === 'true' ||
-        role === 'textbox';
-
-      if (isTyping) return;
-
-      if (
-        event.key === 'Shift' &&
-        !event.metaKey &&
-        !event.ctrlKey &&
-        !event.altKey &&
-        !event.repeat
-      ) {
-        if (hoveredId) {
-          setExpandedIds(previous => ({
-            ...previous,
-            [hoveredId]: !previous[hoveredId],
-          }));
-        }
-      }
-    };
-
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [hoveredId]);
+  const toggleHoveredShortcut = useMemo(
+    () => ({
+      enabled: Boolean(hoveredId),
+      disabledReason: hoveredId ? undefined : 'Hover an item first',
+      run: () => {
+        if (!hoveredId) return;
+        setExpandedIds(previous => ({
+          ...previous,
+          [hoveredId]: !previous[hoveredId],
+        }));
+      },
+    }),
+    [hoveredId]
+  );
+  useSpaceShortcut('list.toggle-hovered', toggleHoveredShortcut);
 
   if (items.length === 0) {
     return (
