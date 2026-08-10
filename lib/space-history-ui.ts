@@ -1,11 +1,13 @@
 export const SPACE_HISTORY_UI_KEY = '__scrapbookSpaceUi';
-export const SPACE_HISTORY_UI_VERSION = 1;
+export const SPACE_HISTORY_UI_VERSION = 2;
 export const SPACE_HISTORY_MAX_EXPANDED_IDS = 24;
 export const SPACE_HISTORY_MAX_SCROLL_PX = 10_000_000;
+export const SPACE_HISTORY_MAX_PAGE = 10_000;
 
 export type SpaceHistoryUiSnapshot = {
   version: typeof SPACE_HISTORY_UI_VERSION;
   viewKey: string;
+  page: number;
   scrollTop: number;
   expandedIds: string[];
 };
@@ -17,6 +19,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function clampScrollTop(value: number) {
   if (!Number.isFinite(value)) return 0;
   return Math.max(0, Math.min(Math.round(value), SPACE_HISTORY_MAX_SCROLL_PX));
+}
+
+function clampPage(value: number) {
+  if (!Number.isFinite(value)) return 1;
+  return Math.max(1, Math.min(Math.round(value), SPACE_HISTORY_MAX_PAGE));
 }
 
 function normaliseExpandedIds(ids: readonly string[]) {
@@ -36,12 +43,14 @@ function normaliseExpandedIds(ids: readonly string[]) {
 
 export function createSpaceHistoryUiSnapshot(options: {
   viewKey: string;
+  page?: number;
   scrollTop: number;
   expandedIds?: readonly string[];
 }): SpaceHistoryUiSnapshot {
   return {
     version: SPACE_HISTORY_UI_VERSION,
     viewKey: options.viewKey,
+    page: clampPage(options.page ?? 1),
     scrollTop: clampScrollTop(options.scrollTop),
     expandedIds: normaliseExpandedIds(options.expandedIds ?? []),
   };
@@ -70,6 +79,14 @@ export function readSpaceHistoryUiState(
     return null;
   }
   if (
+    typeof candidate.page !== 'number' ||
+    !Number.isInteger(candidate.page) ||
+    candidate.page < 1 ||
+    candidate.page > SPACE_HISTORY_MAX_PAGE
+  ) {
+    return null;
+  }
+  if (
     typeof candidate.scrollTop !== 'number' ||
     !Number.isFinite(candidate.scrollTop) ||
     candidate.scrollTop < 0 ||
@@ -90,6 +107,7 @@ export function readSpaceHistoryUiState(
   return {
     version: SPACE_HISTORY_UI_VERSION,
     viewKey: candidate.viewKey,
+    page: candidate.page,
     scrollTop: candidate.scrollTop,
     expandedIds: [...candidate.expandedIds],
   };
