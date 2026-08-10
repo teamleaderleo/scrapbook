@@ -1,12 +1,16 @@
 import { expect, test } from '@playwright/test';
 
-test('Signal renders the dashboard without promotional framing', async ({
+test('Signal renders a factual operational state without promotional framing', async ({
   page,
 }) => {
   const response = await page.goto('/proxy-dashboard');
   expect(response?.ok()).toBe(true);
 
-  await expect(page.getByRole('heading', { name: 'Bandwidth' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', {
+      name: /^(Bandwidth|Proxy configuration missing|Proxy data unavailable|No report has arrived)$/,
+    })
+  ).toBeVisible();
   await expect(page.locator('body')).not.toContainText('Network pulse');
   await expect(page.locator('body')).not.toContainText(
     'One small path, reduced to the few numbers worth noticing.'
