@@ -6,7 +6,10 @@ import type { DbReview } from '@/app/lib/db/supabase';
 import type { Item } from '@/app/lib/item-types';
 import { mapDatabaseItemsToItems } from '@/app/lib/utils/database';
 import { createClient } from '@/utils/supabase/server';
-import { loadPublicSpacePage } from './public-data';
+import {
+  loadPublicSpacePage,
+  type PublicSpacePage,
+} from './public-data';
 
 const AUTH_TIMEOUT_MS = 5_000;
 const REVIEW_LOAD_TIMEOUT_MS = 5_000;
@@ -26,6 +29,10 @@ const REVIEW_SELECT = [
   'last_review',
   'suspended',
 ].join(',');
+
+type PublicPageResult =
+  | { page: PublicSpacePage; error: null }
+  | { page: null; error: unknown };
 
 export class SpaceLoadTimeoutError extends Error {
   constructor(label: string) {
@@ -89,8 +96,8 @@ export async function loadInitialSpaceData(): Promise<InitialSpaceData> {
     );
   }
 
-  const publicPagePromise = loadPublicSpacePage().then(
-    page => ({ page, error: null as unknown }),
+  const publicPagePromise: Promise<PublicPageResult> = loadPublicSpacePage().then(
+    page => ({ page, error: null }),
     error => ({ page: null, error })
   );
 
