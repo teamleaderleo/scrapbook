@@ -17,6 +17,8 @@ import { reviewItemAction } from '@/app/space/actions';
 import { duplicateItemHref } from '@/lib/space-routes';
 import { SpaceHeader } from './space-header';
 import { CodeDisplay } from './code-display';
+import { useSpaceShortcut } from './space-shortcut-provider';
+import { startNavigationFeedback } from '@/components/navigation-feedback';
 import { filterItemsBySpaceLane, resolveSpaceLane } from '@/lib/space-lanes';
 
 export function ReviewGallery() {
@@ -63,6 +65,11 @@ export function ReviewGallery() {
 
   const current = items[currentIndex];
   const active = current?.versions[activeIdx];
+  const exitParams = new URLSearchParams();
+  if (tagsParam) exitParams.set('tags', tagsParam);
+  if (laneParam) exitParams.set('lane', laneParam);
+  const exitSearch = exitParams.toString();
+  const exitHref = `/space${exitSearch ? `?${exitSearch}` : ''}`;
 
   useEffect(() => {
     if (!hasMore || loadingMore) return;
@@ -87,52 +94,54 @@ export function ReviewGallery() {
     }
   }, [itemParam, items]);
 
-  useEffect(() => {
-    const handleKey = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null;
-      const tag = target?.tagName?.toLowerCase();
-      const role = target?.getAttribute?.('role');
-      const isTyping =
-        tag === 'input' ||
-        tag === 'textarea' ||
-        target?.getAttribute('contenteditable') === 'true' ||
-        role === 'textbox';
-
-      if (
-        isTyping ||
-        event.ctrlKey ||
-        event.metaKey ||
-        event.altKey ||
-        event.shiftKey
-      )
-        return;
-
-      if (event.key === 'ArrowRight' || event.key === 'j') {
-        event.preventDefault();
+  const nextShortcut = useMemo(
+    () => ({
+      enabled: Boolean(current) && currentIndex < items.length - 1,
+      disabledReason: current
+        ? 'Already at the last reader item'
+        : 'No reader item is available',
+      run: () => {
         setCurrentIndex(index => Math.min(index + 1, items.length - 1));
         setShowContent(true);
-      }
-      if (event.key === 'ArrowLeft' || event.key === 'k') {
-        event.preventDefault();
+      },
+    }),
+    [current, currentIndex, items.length]
+  );
+  const previousShortcut = useMemo(
+    () => ({
+      enabled: Boolean(current) && currentIndex > 0,
+      disabledReason: current
+        ? 'Already at the first reader item'
+        : 'No reader item is available',
+      run: () => {
         setCurrentIndex(index => Math.max(index - 1, 0));
         setShowContent(true);
-      }
-      if (event.key === ' ') {
-        event.preventDefault();
-        setShowContent(visible => !visible);
-      }
-      if (event.key === 'Escape') {
-        const params = new URLSearchParams();
-        if (tagsParam) params.set('tags', tagsParam);
-        if (laneParam) params.set('lane', laneParam);
-        const search = params.toString();
-        router.push(`/space${search ? `?${search}` : ''}`);
-      }
-    };
+      },
+    }),
+    [current, currentIndex]
+  );
+  const toggleContentShortcut = useMemo(
+    () => ({
+      enabled: Boolean(current),
+      disabledReason: current ? undefined : 'No reader item is available',
+      run: () => setShowContent(visible => !visible),
+    }),
+    [current]
+  );
+  const exitShortcut = useMemo(
+    () => ({
+      run: () => {
+        startNavigationFeedback(exitHref, 'item list');
+        router.push(exitHref);
+      },
+    }),
+    [exitHref, router]
+  );
 
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [items.length, laneParam, router, tagsParam]);
+  useSpaceShortcut('review.next', nextShortcut);
+  useSpaceShortcut('review.previous', previousShortcut);
+  useSpaceShortcut('review.toggle-content', toggleContentShortcut);
+  useSpaceShortcut('review.exit', exitShortcut);
 
   const onReview = async (rating: Rating) => {
     if (!current) return;
