@@ -33,6 +33,7 @@ export function SpaceHeader({
     pathname === '/space/review' ||
     pathname?.startsWith('/space/add') ||
     pathname?.startsWith('/space/edit');
+  const usesMobileActionRail = pathname === '/space' || pathname === '/space/review';
   const isMac = useIsMacPlatform();
   const toggleParams = new URLSearchParams();
   if (tagsParam) toggleParams.set('tags', tagsParam);
@@ -78,8 +79,11 @@ export function SpaceHeader({
 
       {onEditorToggle ? (
         <button
+          data-space-editor-trigger
           onClick={onEditorToggle}
-          className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+          className={`${
+            usesMobileActionRail ? 'hidden md:inline-flex' : 'inline-flex'
+          } h-8 items-center gap-1.5 rounded-lg border px-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
             isEditorOpen
               ? 'border-border bg-muted text-foreground'
               : 'border-transparent text-muted-foreground hover:border-border/60 hover:bg-muted/65 hover:text-foreground'
@@ -90,7 +94,9 @@ export function SpaceHeader({
           type="button"
         >
           <Code className="h-4 w-4" />
-          <span className="hidden sm:inline">Editor</span>
+          <span className={usesMobileActionRail ? '' : 'hidden sm:inline'}>
+            Editor
+          </span>
         </button>
       ) : null}
 

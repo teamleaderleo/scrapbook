@@ -64,7 +64,7 @@ function fakeTarget(options: { editable?: boolean; editor?: boolean } = {}) {
 }
 
 describe('Space shortcut matching', () => {
-  it('keeps stable unique registry IDs, including Trail commands', () => {
+  it('keeps stable unique registry IDs, including Trail and sheet commands', () => {
     const ids = SPACE_SHORTCUTS.map(shortcut => shortcut.id);
     expect(new Set(ids).size).toBe(ids.length);
     expect(ids).toEqual([
@@ -73,6 +73,7 @@ describe('Space shortcut matching', () => {
       'search.toggle',
       'sidebar.toggle',
       'editor.toggle',
+      'editor.close',
       'navigation.add',
       'navigation.toggle-view',
       'review.next',
@@ -233,6 +234,22 @@ describe('Space shortcut matching', () => {
     expect(resolution?.enabled).toBe(false);
   });
 
+  it('lets the mobile editor sheet own Escape ahead of reader exit', () => {
+    const commands = registrations({
+      'review.exit': { run: vi.fn() },
+      'editor.close': { run: vi.fn() },
+    });
+
+    const resolution = resolveSpaceShortcut(
+      keyboardEvent('Escape', {
+        target: fakeTarget({ editable: true, editor: true }),
+      }),
+      commands
+    );
+    expect(resolution?.definition.id).toBe('editor.close');
+    expect(resolution?.enabled).toBe(true);
+  });
+
   it('respects events already owned by the browser or another widget', () => {
     const commands = registrations({ 'search.toggle': { run: vi.fn() } });
     expect(
@@ -243,7 +260,7 @@ describe('Space shortcut matching', () => {
     ).toBeNull();
   });
 
-  it('returns disabled reasons from the generated reference', () => {
+  it('returns disabled reasons from the generated reference and hides internal closes', () => {
     const reference = getSpaceShortcutReference(
       registrations({
         'help.open': { run: vi.fn() },
@@ -263,6 +280,9 @@ describe('Space shortcut matching', () => {
         ?.unavailableReason
     ).toBe('Admin access is required');
     expect(reference.some(entry => entry.definition.id === 'help.close')).toBe(
+      false
+    );
+    expect(reference.some(entry => entry.definition.id === 'editor.close')).toBe(
       false
     );
   });
