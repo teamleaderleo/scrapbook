@@ -37,7 +37,7 @@ async function SpaceDataShell({ children }: { children: React.ReactNode }) {
             <SearchCommand />
             <AppSidebar />
             <div
-              className="h-full min-h-0 min-w-0 flex-1 overflow-hidden"
+              className="h-full min-h-0 min-w-0 flex-1 overflow-hidden pb-[var(--space-mobile-actions-offset,0px)] md:pb-0"
               data-space-background
             >
               {children}
