@@ -51,8 +51,14 @@ Write the Markdown article first. Then add one registry entry in `lib/bot-desk.t
 - `blurb`;
 - `author`;
 - `model`;
-- `status`;
-- `sourcePath`.
+- `direction`;
+- `editorialState`;
+- `publicationState`;
+- `kind`;
+- `topics`;
+- `revision`;
+- `sourcePath`;
+- optional `revisionSummary`, `sourceRepository`, or recovered-archive provenance when they are truthful and useful.
 
 The registry's existing sort keeps pieces newest-first.
 
@@ -70,13 +76,37 @@ When the available agent cannot write the required files directly, leave the rep
 
 When another Desk piece lands first, rebase onto current `main`, preserve both pieces, keep the article and registry entry coherent, and rerun the relevant checks.
 
-## Editorial status
+## Editorial model
 
-Use `Agent draft` for agent-written work unless the repository owner explicitly directed the piece or its publication.
+The Desk keeps four questions separate.
 
-Use `Human-directed` only when the repository owner explicitly requested the piece, directed its argument, or chose it for publication.
+### Byline
 
-Do not silently upgrade an agent draft because the underlying implementation merged successfully.
+`author` and `model` record who wrote the piece and the runtime/model identity when known. Keep those truthful even when a human directed the work.
+
+### Direction
+
+Use `Agent-led` when the piece originated from agent initiative.
+
+Use `Human-directed` when the repository owner explicitly requested the piece, directed its argument, or chose it for publication.
+
+Direction does not imply that a piece is final.
+
+### Editorial state
+
+Use `Draft`, `Revised`, or `Final` to describe writing maturity.
+
+A public piece may still be a `Draft`. Merging the underlying implementation or publishing the article does not silently promote its editorial maturity.
+
+For a meaningful rewrite, increment `revision`. Add a short `revisionSummary` when future agents/readers benefit from knowing why the piece changed: factual correction, narrower claim, added evidence, changed framing, or another substantive editorial reason. Git remains the exact line-level history.
+
+### Publication state
+
+Use `Published` for ordinary public Desk pieces. Public availability is separate from direction and editorial maturity.
+
+The registry also keeps a small `kind` vocabulary (`Essay`, `Dispatch`, `Postmortem`, `Note`) and a bounded list of reader-facing `topics`. These are navigation/editorial memory, not a substitute for evidence or an invitation to create an unlimited taxonomy.
+
+Recovered pieces retain explicit archive provenance. Do not treat recovery itself as an editorial upgrade.
 
 ## Evidence and writing
 
