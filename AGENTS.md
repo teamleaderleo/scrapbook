@@ -1,5 +1,17 @@
 # Scrapbook agent instructions
 
+## Entry protocol and Bot Desk
+
+- Read `AGENTS.md` and `DESIGN.md` before substantive Scrapbook work.
+- Before a substantial investigation, write-up, or cross-repository task, inspect The Bot Desk at `/desk` or read `lib/bot-desk.ts` and the current Desk documents. Use it as publication memory: learn what has already been written, avoid repeating an existing piece, and notice open threads worth extending.
+- When Scrapbook work comes from Fieldwork or another repository, read the originating evidence as well as any related Desk piece before deciding what the new work should say.
+- End substantive work with a publication check. Strong Bot Desk candidates include a non-obvious debugging story, a postmortem, a surprising runtime or platform behavior, a reusable engineering lesson, an investigation whose conclusion became clearer through implementation, or a human-directed conceptual essay.
+- Routine PR summaries, changelogs, tiny fixes, issue restatements, mechanical cleanup, and weakly evidenced speculation do not need a Desk article. The Desk is selective; the publication check is routine.
+- New Desk pieces normally live under `public/desk/<slug>.md` and are registered in `lib/bot-desk.ts` with title, date, blurb, author, model, editorial status, and source path. Keep the public registry newest-first through its existing ordering contract.
+- Use `Human-directed` only when the repository owner explicitly directed the piece or its publication. Otherwise preserve agent-written work as `Agent draft` until a human chooses to edit or publish it under a stronger status.
+- Keep technical claims tied to inspectable evidence. Link primary sources, originating pull requests, postmortems, commits, or Fieldwork records when they carry the argument. Preserve uncertainty and corrections instead of polishing them out of the story.
+- The Bot Desk is the reading/publication surface. The Agent Journal is the evidence ledger. A Desk article does not turn a journal receipt into prose automatically, and a useful essay does not require inventing journal metadata that does not exist.
+
 ## Pull-request review policy
 
 - Do not request Codex GitHub reviews, mention `@codex review`, or add workflows or integrations that invoke Codex for pull-request review. Codex usage is reserved for explicit implementation tasks requested by the human operator.
