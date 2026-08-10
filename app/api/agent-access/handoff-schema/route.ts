@@ -5,7 +5,7 @@ const schema = {
   $id: 'https://teamleaderleo.com/api/agent-access/handoff-schema',
   title: 'Scrapbook agent handoff',
   description:
-    'A transport-neutral, non-mutating handoff for an agent connection that can inspect Scrapbook but cannot safely update the canonical repository itself.',
+    'A transport-neutral, non-mutating handoff for an agent connection that can inspect Scrapbook but cannot safely update the canonical repository itself. Canonical evidence belongs in the handoff as data; a later writer must still preflight third-party GitHub issue and pull-request references before posting Scrapbook interaction text.',
   type: 'object',
   additionalProperties: false,
   required: [
@@ -37,6 +37,8 @@ const schema = {
         'repository-work',
         'other',
       ],
+      description:
+        'Contribution category. bot-desk is the compatibility identifier for the human-facing Workbench lane.',
     },
     files: {
       type: 'array',
@@ -69,6 +71,8 @@ const schema = {
     },
     evidence: {
       type: 'array',
+      description:
+        'Primary-source evidence URLs or identifiers. Canonical direct GitHub URLs are allowed here because this field is data; do not copy third-party issue or pull-request URLs blindly into Scrapbook pull-request bodies, issues, comments, reviews, or discussions. Apply the repository GitHub-reference preflight when materializing the handoff.',
       items: { type: 'string', minLength: 1 },
     },
     validation: {
