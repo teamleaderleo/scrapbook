@@ -1,6 +1,6 @@
 # Space continuity contracts
 
-Space should feel immediate on ordinary return navigation without making browser storage a second database. The continuity layer separates three short-lived concerns and leaves durable learning/review state elsewhere.
+Space should feel immediate on ordinary return navigation without making browser storage a second database. The continuity layer separates public data reuse, browser fallback, and ephemeral presentation state while leaving private review state request-bound.
 
 ## 1. Canonical browse URL state
 
@@ -14,7 +14,26 @@ The parameter order is always `lane`, `tags`, `item`. Empty values disappear. Th
 
 Reading-sheet and Trail-specific parameters remain outside this first codec until their current route helpers are migrated deliberately. Keep `from`, `return`, `practice`, and `stage` in their existing owner until one complete migration is ready.
 
-## 2. Bounded public archive snapshot
+## 2. Shared anonymous first-page cache
+
+`app/space/public-data.ts` owns the reusable server-side public first page. It is deliberately separate from request identity and review rows.
+
+Rules:
+
+- use a request-independent anonymous Supabase client with no cookie/session storage;
+- rely on the repository RLS policy that gives `anon` and `authenticated` the same public item projection while excluding `visibility:private` rows;
+- cache only the first 100 public item rows selected by `SPACE_ITEM_SELECT`;
+- use Next Cache Components with a 60-second stale/revalidate window and 24-hour hard expiry;
+- tag the entry as `space-public-items`;
+- keep the eight-second upstream timeout and abort boundary;
+- start the public page request independently of the request-bound identity lookup;
+- query private owner review rows only after identity resolves and outside the shared cache;
+- invalidate `space-public-items` after successful item add/edit writes;
+- leave review/enrollment actions out of the public cache invalidation path.
+
+The shared cache reduces repeated public database work on warm route navigation without putting cookies, owner identity, or review schedules into a cross-request cache. A cached public page remains subject to the same public RLS projection as a live anonymous read.
+
+## 3. Bounded public browser snapshot
 
 `lib/space-public-snapshot.ts` and `lib/space-public-snapshot-storage.ts` define the only browser-persistent archive fallback.
 
@@ -32,21 +51,21 @@ Rules:
 - treat localStorage read/write/quota/security failures as ordinary cache misses;
 - remove invalid, stale, or over-budget payloads when storage permits.
 
-### Current runtime admission sequence
+### Runtime admission sequence
 
-`ItemsProvider` now uses the snapshot as a stale-readable outage fallback:
+`ItemsProvider` uses the snapshot as a stale-readable outage fallback:
 
-1. Start with the server-provided public items.
-2. A successful non-empty first page wins and refreshes the bounded public snapshot.
+1. Start with the server-provided public items, which may themselves come from the shared anonymous server cache.
+2. A successful non-empty first page wins and refreshes the bounded browser snapshot.
 3. A successful live empty archive clears any older snapshot so removed material cannot reappear during a later outage.
-4. If the server explicitly failed and supplied zero usable public items, admit a valid recent snapshot after hydration.
+4. If the server explicitly failed and supplied zero usable public items, admit a valid recent browser snapshot after hydration.
 5. Revalidate an admitted snapshot immediately through the existing `reload()` path.
 6. A successful revalidation replaces the cache-backed list and refreshes the snapshot; a refresh failure preserves the visible list and bounded error UI.
 7. Private/admin review rows continue through their authenticated path and never enter browser storage.
 
-Do not merge cached public items with a partial server response. Either the server supplied a usable current public page or the cache is a temporary fallback. Warm successful navigation that renders cached public data before the server completes remains a separate #553/#333 follow-up.
+Do not merge cached browser items with a partial server response. Either the server supplied a usable current public page or the browser snapshot is a temporary fallback.
 
-## 3. Same-entry list UI history
+## 4. Same-entry list UI history
 
 `lib/space-history-ui.ts` owns ephemeral Back/Forward state that cannot be reconstructed from the URL. Version 2 stores:
 
@@ -79,7 +98,8 @@ Incidental hover, viewport observation, editor draft text, review state, and oth
 Evaluate continuity as separate journeys rather than one synthetic timing number:
 
 - cold load with healthy server data;
-- cold load with server archive failure + valid cached public snapshot;
+- warm navigation inside the 60-second shared public cache window;
+- cold load with server archive failure + valid cached browser snapshot;
 - warm in-app list ↔ reader return;
 - reading sheet ↔ prior list/Trail return;
 - Back/Forward restoration of filter, list page, scroll, and expanded rows.
