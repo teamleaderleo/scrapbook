@@ -132,7 +132,7 @@ export function OperatorConsole({ mode = 'full' }: { mode?: 'featured' | 'full' 
     if (mode !== 'full') return;
 
     const syncPhraseHash = () => {
-      const phraseId = decodeURIComponent(window.location.hash.slice(1));
+      const phraseId = window.location.hash.slice(1);
       const phrase = operatorPhrases.find(item => item.id === phraseId);
       if (!phrase) return;
 
