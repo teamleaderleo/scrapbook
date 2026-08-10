@@ -16,6 +16,10 @@ import type { DbItem, DbReview } from '@/app/lib/db/supabase';
 import { SPACE_ITEM_SELECT, SPACE_PAGE_SIZE } from '@/app/lib/space-data';
 import { createClient } from '@/utils/supabase/client';
 import { mapDatabaseItemsToItems } from '@/app/lib/utils/database';
+import {
+  readStoredSpacePublicSnapshot,
+  writeStoredSpacePublicSnapshot,
+} from '@/lib/space-public-snapshot-storage';
 
 const REVIEW_SELECT = [
   'item_id',
@@ -34,6 +38,8 @@ const REVIEW_SELECT = [
 ].join(',');
 
 const SPACE_CLIENT_LOAD_TIMEOUT_MS = 10_000;
+const CACHED_SPACE_MESSAGE =
+  'Showing the last saved public copy while live Space is unavailable.';
 
 type ItemsContextType = {
   items: Item[];
@@ -83,19 +89,52 @@ export function ItemsProvider({
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [nowMs] = useState(() => initialNowMs ?? Date.now());
   const [editorOpen, setEditorOpen] = useState(false);
+  const [usingCachedSnapshot, setUsingCachedSnapshot] = useState(false);
   const activeReload = useRef<AbortController | null>(null);
   const activeLoadMore = useRef<AbortController | null>(null);
   const lastRefreshAt = useRef(initialNowMs ?? 0);
   const isAdmin = initialIsAdmin;
 
   useEffect(() => {
+    const currentNow = Date.now();
+
+    if (initialItems.length > 0) {
+      setItems(initialItems);
+      setHasMore(initialHasMore);
+      setLoading(false);
+      setRefreshing(false);
+      setError(initialError);
+      setUsingCachedSnapshot(false);
+      lastRefreshAt.current = currentNow;
+      writeStoredSpacePublicSnapshot(window.localStorage, initialItems, {
+        savedAt: initialNowMs ?? currentNow,
+        hasMore: initialHasMore,
+      });
+      return;
+    }
+
+    if (initialError) {
+      const cached = readStoredSpacePublicSnapshot(window.localStorage, currentNow);
+      if (cached) {
+        setItems(cached.items);
+        setHasMore(cached.hasMore);
+        setLoading(false);
+        setRefreshing(false);
+        setError(CACHED_SPACE_MESSAGE);
+        setUsingCachedSnapshot(true);
+        lastRefreshAt.current = currentNow;
+        return;
+      }
+    }
+
     setItems(initialItems);
     setHasMore(initialHasMore);
     setLoading(false);
     setRefreshing(false);
     setError(initialError);
-    lastRefreshAt.current = Date.now();
-  }, [initialError, initialHasMore, initialItems]);
+    setUsingCachedSnapshot(false);
+    lastRefreshAt.current = currentNow;
+  }, [initialError, initialHasMore, initialItems, initialNowMs]);
 
   const fetchPage = useCallback(
     async (offset: number, signal: AbortSignal) => {
@@ -165,9 +204,15 @@ export function ItemsProvider({
     try {
       const page = await fetchPage(0, controller.signal);
       if (controller.signal.aborted) return;
+      const savedAt = Date.now();
       setItems(page.items);
       setHasMore(page.hasMore);
-      lastRefreshAt.current = Date.now();
+      setUsingCachedSnapshot(false);
+      lastRefreshAt.current = savedAt;
+      writeStoredSpacePublicSnapshot(window.localStorage, page.items, {
+        savedAt,
+        hasMore: page.hasMore,
+      });
     } catch (reloadError) {
       if (controller.signal.aborted) return;
       console.error('Error reloading items:', reloadError);
@@ -184,6 +229,11 @@ export function ItemsProvider({
       }
     }
   }, [fetchPage, items.length]);
+
+  useEffect(() => {
+    if (!usingCachedSnapshot) return;
+    void reload();
+  }, [reload, usingCachedSnapshot]);
 
   const loadMore = useCallback(async () => {
     if (!hasMore || loadingMore) return;
