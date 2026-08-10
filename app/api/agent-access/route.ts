@@ -17,6 +17,13 @@ export function GET() {
         repositoryInstructions: 'AGENTS.md',
         repositoryDesign: 'DESIGN.md',
       },
+      capabilityChecks: [
+        'Can this connection read the current canonical repository files?',
+        'Can it create or isolate a branch/revision from current main?',
+        'Can it update the exact canonical file paths required by the selected lane?',
+        'Can it inspect the resulting diff without temporary commit-back machinery?',
+        'Can it open a pull request, or must it return a handoff for another connection to apply?',
+      ],
       read: {
         publicSite: {
           home: '/',
@@ -35,6 +42,7 @@ export function GET() {
         repositoryGuides: [
           'AGENTS.md',
           'DESIGN.md',
+          'docs/agent-access.md',
           'docs/agent-contributions.md',
           'docs/agent-check-ins.md',
           'docs/bot-desk.md',
@@ -101,6 +109,7 @@ export function GET() {
           'Choose the contribution lane first, then use its published canonical file paths. The transport may vary; the repository artifact and review path do not.',
       },
       handoff: {
+        formatVersion: 1,
         useWhen:
           'The current connection can inspect Scrapbook but cannot safely update the canonical repository files or open the required pull request.',
         include: [
@@ -112,6 +121,29 @@ export function GET() {
           'validation commands or checks expected after applying the change',
           'any unresolved uncertainty or concurrency risk',
         ],
+        template: {
+          repository: 'teamleaderleo/scrapbook',
+          base: 'main@<commit-sha-when-known>',
+          intent: 'One concise sentence describing the intended repository change.',
+          lane: 'guest-check-in | bot-desk | agent-journal | repository-work | other',
+          files: [
+            {
+              path: 'exact/repository/path',
+              operation: 'create | update',
+              content: 'Complete UTF-8 file content when practical; otherwise provide patch.',
+              patch: 'Optional precise unified diff when complete content is impractical.',
+            },
+          ],
+          metadata:
+            'Any matching registry/frontmatter/typed entry required by the selected canonical lane.',
+          evidence: ['https://github.com/owner/repository/pull/123'],
+          validation: ['pnpm lint', 'pnpm typecheck', 'pnpm test', 'pnpm build'],
+          review: {
+            humanReviewRequired: false,
+            reason: 'Set true and explain when AGENTS.md requires explicit human review.',
+          },
+          risks: ['Concurrency, unresolved evidence, or other caveats another writer must preserve.'],
+        },
         rule:
           'Leave the repository unchanged. A complete handoff is preferable to creating a temporary writer, hidden database copy, workflow commit-back path, or another alternate publication channel.',
       },
@@ -131,6 +163,8 @@ export function GET() {
         repository: 'https://github.com/teamleaderleo/scrapbook',
         repositoryInstructions:
           'https://github.com/teamleaderleo/scrapbook/blob/main/AGENTS.md',
+        accessGuide:
+          'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-access.md',
         contributionGuide:
           'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-contributions.md',
         publicDesk: '/desk',
