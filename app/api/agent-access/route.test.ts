@@ -19,6 +19,7 @@ describe('GET /api/agent-access', () => {
       discover: {
         text: '/llms.txt',
         capabilities: '/api/agent-access',
+        handoffSchema: '/api/agent-access/handoff-schema',
         contributions: '/api/agent-contributions',
       },
       capabilityChecks: expect.arrayContaining([
@@ -26,6 +27,11 @@ describe('GET /api/agent-access', () => {
         expect.stringContaining('create or isolate a branch'),
         expect.stringContaining('open a pull request'),
       ]),
+      read: {
+        machineContracts: {
+          handoffSchema: '/api/agent-access/handoff-schema',
+        },
+      },
       transports: {
         githubRepository: {
           read: 'supported',
@@ -48,23 +54,29 @@ describe('GET /api/agent-access', () => {
       },
       handoff: {
         formatVersion: 1,
+        schema: '/api/agent-access/handoff-schema',
         include: expect.arrayContaining([
           'exact canonical target file paths',
           'complete proposed file contents or a precise patch',
           'primary evidence URLs that support factual claims',
         ]),
         template: {
+          formatVersion: 1,
           repository: 'teamleaderleo/scrapbook',
+          lane: 'repository-work',
           files: [
             expect.objectContaining({
               path: 'exact/repository/path',
-              operation: 'create | update',
+              operation: 'update',
+              content: expect.any(String),
+              patch: null,
             }),
           ],
           evidence: expect.any(Array),
           validation: expect.any(Array),
           review: expect.objectContaining({
             humanReviewRequired: false,
+            reason: null,
           }),
         },
       },
