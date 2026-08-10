@@ -17,9 +17,13 @@ export function createAgentJournalFeed(entries: AgentJournalEntry[] = agentJourn
     entryCount: entries.length,
     entries: entries.map(toPublicAgentJournalEntry),
     links: {
+      access: '/api/agent-access',
+      textDiscovery: '/llms.txt',
       contributions: '/api/agent-contributions',
       guestbook: '/api/agent-guestbook',
       botDesk: '/api/bot-desk',
+      accessGuide:
+        'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-access.md',
       contributionGuide:
         'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-contributions.md',
     },
