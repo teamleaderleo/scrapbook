@@ -18,6 +18,8 @@ import {
 } from '@/components/cozy-flourishes';
 import { displaySpaceTags } from '@/lib/space-tags';
 
+const EMPTY_EXPANDED_IDS: readonly string[] = [];
+
 function expansionRecord(ids: readonly string[]) {
   return Object.fromEntries(ids.map(id => [id, true])) as Record<
     string,
@@ -38,7 +40,7 @@ export function ResultsClient({
   nowMs,
   isAdmin,
   lane,
-  initialExpandedIds = [],
+  initialExpandedIds = EMPTY_EXPANDED_IDS,
   onExpandedIdsChange,
   emptyTitle = 'No items',
   emptyDescription = 'No published items match this view.',
@@ -63,17 +65,17 @@ export function ResultsClient({
     setExpandedIds(expansionRecord(initialExpandedIds));
   }, [initialExpandedIds]);
 
+  useEffect(() => {
+    onExpandedIdsChange?.(expandedIdsFromRecord(expandedIds));
+  }, [expandedIds, onExpandedIdsChange]);
+
   const updateExpandedIds = useCallback(
     (
       updater: (previous: Record<string, boolean>) => Record<string, boolean>
     ) => {
-      setExpandedIds(previous => {
-        const next = updater(previous);
-        onExpandedIdsChange?.(expandedIdsFromRecord(next));
-        return next;
-      });
+      setExpandedIds(updater);
     },
-    [onExpandedIdsChange]
+    []
   );
 
   const toggleHoveredShortcut = useMemo(
@@ -193,6 +195,7 @@ function Row({
       <div
         className="cursor-pointer px-4 py-3.5 pl-5 transition-colors hover:bg-white/20 dark:hover:bg-black/5"
         onClick={onToggle}
+        data-space-list-toggle
       >
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
