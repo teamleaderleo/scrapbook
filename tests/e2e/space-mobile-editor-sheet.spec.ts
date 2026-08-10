@@ -84,6 +84,13 @@ async function gotoMobile(page: Page, scenario: MobileScenario) {
   await installSyntheticVisualViewport(page, scenario);
   const response = await page.goto('/space');
   expect(response?.ok()).toBe(true);
+
+  // Hosted CI runs the Next development server. Its diagnostics portal is
+  // outside product UI and can overlap the bottom-right action rail.
+  await page.addStyleTag({
+    content: 'nextjs-portal { pointer-events: none !important; }',
+  });
+
   await expect(page.getByRole('heading', { name: 'Space' })).toBeVisible({
     timeout: 15_000,
   });
@@ -105,7 +112,7 @@ async function openEditor(page: Page) {
 }
 
 async function monacoInput(dialog: Locator) {
-  const input = dialog.locator('textarea.inputarea');
+  const input = dialog.getByRole('textbox', { name: 'Editor content' });
   await expect(input).toBeVisible();
   await input.click();
   return input;
