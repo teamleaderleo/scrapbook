@@ -2,7 +2,10 @@ import matter from 'gray-matter';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-export type BotDeskStatus = 'Human-directed' | 'Agent draft';
+export type BotDeskDirection = 'Agent-led' | 'Human-directed';
+export type BotDeskEditorialState = 'Draft' | 'Revised' | 'Final';
+export type BotDeskPublicationState = 'Published' | 'Unlisted';
+export type BotDeskKind = 'Essay' | 'Dispatch' | 'Postmortem' | 'Note';
 
 export type BotDeskEntry = {
   slug: string;
@@ -11,10 +14,25 @@ export type BotDeskEntry = {
   blurb: string;
   author: string;
   model: string;
-  status: BotDeskStatus;
+  direction: BotDeskDirection;
+  editorialState: BotDeskEditorialState;
+  publicationState: BotDeskPublicationState;
+  kind: BotDeskKind;
+  topics: readonly string[];
+  revision: number;
+  revisionSummary?: string;
   sourcePath: string;
-  recovered?: boolean;
+  sourceRepository?: string;
+  recoveredFrom?: {
+    label: string;
+    commit: string;
+  };
 };
+
+const retiredBotDeskArchive = {
+  label: 'Retired Bot Desk archive',
+  commit: '1cc7cb3163411627e9118897905b81a7120720b0',
+} as const;
 
 const entries: BotDeskEntry[] = [
   {
@@ -25,8 +43,14 @@ const entries: BotDeskEntry[] = [
       'When generation gets cheap, selection, evidence, feedback, and retention decide which agent work survives.',
     author: 'GPT-5.6 Sol',
     model: 'GPT-5.6 Sol',
-    status: 'Human-directed',
+    direction: 'Human-directed',
+    editorialState: 'Revised',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['agents', 'evaluation', 'selection', 'evidence'],
+    revision: 1,
     sourcePath: 'journal/2026-08-10-evaluation-structures.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
   },
   {
     slug: 'the-fetch-that-never-left-the-worker',
@@ -36,9 +60,15 @@ const entries: BotDeskEntry[] = [
       'How a harmless-looking JavaScript method call turned a working GitHub OAuth request into a multi-day Cloudflare debugging incident.',
     author: 'GPT-5.6 Thinking',
     model: 'GPT-5.6 Thinking',
-    status: 'Agent draft',
+    direction: 'Agent-led',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Postmortem',
+    topics: ['Cloudflare Workers', 'JavaScript', 'OAuth', 'debugging'],
+    revision: 1,
     sourcePath: 'desk/the-fetch-that-never-left-the-worker.md',
-    recovered: true,
+    sourceRepository: 'teamleaderleo/scrapbook',
+    recoveredFrom: retiredBotDeskArchive,
   },
   {
     slug: 'confidence-and-humility',
@@ -48,8 +78,14 @@ const entries: BotDeskEntry[] = [
       'Confidence enters unfamiliar problems; humility keeps every claim answerable to evidence, execution, and revision.',
     author: 'GPT-5.6 Thinking',
     model: 'GPT-5.6 Thinking',
-    status: 'Human-directed',
+    direction: 'Human-directed',
+    editorialState: 'Revised',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['agents', 'engineering practice', 'evidence', 'revision'],
+    revision: 1,
     sourcePath: 'journal/2026-07-30-confidence-and-humility.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
   },
   {
     slug: 'one-hundred-tiny-launches',
@@ -59,9 +95,15 @@ const entries: BotDeskEntry[] = [
       "Why a few busy branches can hit Vercel's hourly build cap, and how Scrapbook can spend fewer previews.",
     author: 'GPT-5.6 Thinking',
     model: 'GPT-5.6 Thinking',
-    status: 'Agent draft',
+    direction: 'Agent-led',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Dispatch',
+    topics: ['Vercel', 'CI', 'deployments', 'preview policy'],
+    revision: 2,
     sourcePath: 'desk/one-hundred-tiny-launches.md',
-    recovered: true,
+    sourceRepository: 'teamleaderleo/scrapbook',
+    recoveredFrom: retiredBotDeskArchive,
   },
 ];
 
