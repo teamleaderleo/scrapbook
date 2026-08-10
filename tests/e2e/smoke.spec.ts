@@ -379,6 +379,10 @@ test('homepage scorecard stays planted under pointer movement', async ({
   );
   await expect(scoreboard).toHaveAttribute('data-activity-motion', 'calm');
   await expect(counter).toHaveAttribute('data-reduced-motion', 'false');
+
+  // Activity now follows the operator console. Establish the interaction viewport
+  // before sampling geometry so pointer movement itself cannot trigger scrolling.
+  await scoreboard.scrollIntoViewIfNeeded();
   const before = await scoreboard.evaluate(element => {
     const rect = element.getBoundingClientRect();
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
@@ -422,6 +426,8 @@ test('homepage scorecard remains planted with reduced motion', async ({
   );
   await expect(scoreboard).toHaveAttribute('data-activity-motion', 'reduced');
   await expect(counter).toHaveAttribute('data-reduced-motion', 'true');
+
+  await scoreboard.scrollIntoViewIfNeeded();
   const before = await scoreboard.evaluate(element => {
     const rect = element.getBoundingClientRect();
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
