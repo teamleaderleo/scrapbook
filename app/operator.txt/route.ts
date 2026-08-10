@@ -1,10 +1,11 @@
 import { renderOperatorPhrasebookText } from '@/lib/operator-phrases';
+import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
 
 export function GET() {
   return new Response(renderOperatorPhrasebookText(), {
     headers: {
-      'content-type': 'text/plain; charset=utf-8',
-      'cache-control': 'public, max-age=300, s-maxage=300',
+      'Cache-Control': REPOSITORY_PUBLIC_CACHE_CONTROL,
+      'Content-Type': 'text/plain; charset=utf-8',
     },
   });
 }
