@@ -60,7 +60,6 @@ export const operatorPhrases: readonly OperatorPhrase[] = [
     group: 'review',
     label: 'Fresh-context review',
     note: 'Another capable reviewer forms a view from the current artifacts.',
-    featured: true,
     text: "Get a fresh-context review of the current issue, pull request, code, and evidence. Give the reviewer the exact current artifacts and let them form their own view before feeding them our existing conclusion. Then reconcile the disagreements instead of blindly averaging opinions.",
   },
   {
@@ -68,6 +67,7 @@ export const operatorPhrases: readonly OperatorPhrase[] = [
     group: 'review',
     label: 'Perspective pass',
     note: 'Re-weight the problem, expose assumptions, then simplify before deciding.',
+    featured: true,
     text: "Take a fresh perspective pass before converging. Re-weight the problem from several useful angles rather than merely extending the current reasoning: simplify aggressively, check for missing constraints or consequences, reconsider whether we are solving X when the real goal is Y, make the strongest reasonable counterargument, and try a materially different emphasis. For important claims, distinguish what is observed, inferred, assumed, and speculative. Preserve real disagreement without manufacturing contrarianism. Then identify the unknowns that could actually change the decision, discard complexity that does not affect the outcome, and give the simplest recommendation that still accounts for the important evidence. Say what would cause that recommendation to change.",
   },
   {
