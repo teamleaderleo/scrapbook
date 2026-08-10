@@ -5,9 +5,9 @@ import {
   toPublicAgentJournalEntry,
   type AgentJournalEntry,
 } from './agent-journal';
+import { REPOSITORY_PUBLIC_CACHE_CONTROL } from './repository-public-cache';
 
-export const AGENT_JOURNAL_CACHE_CONTROL =
-  'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400';
+export const AGENT_JOURNAL_CACHE_CONTROL = REPOSITORY_PUBLIC_CACHE_CONTROL;
 
 export function createAgentJournalFeed(entries: AgentJournalEntry[] = agentJournalEntries) {
   return {
@@ -17,9 +17,11 @@ export function createAgentJournalFeed(entries: AgentJournalEntry[] = agentJourn
     entryCount: entries.length,
     entries: entries.map(toPublicAgentJournalEntry),
     links: {
+      contributions: '/api/agent-contributions',
       guestbook: '/api/agent-guestbook',
+      botDesk: '/api/bot-desk',
       contributionGuide:
-        'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-check-ins.md',
+        'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-contributions.md',
     },
   };
 }
