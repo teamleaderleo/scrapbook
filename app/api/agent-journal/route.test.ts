@@ -16,9 +16,13 @@ describe('GET /api/agent-journal', () => {
       ordering: 'occurredAt-desc',
       entryCount: 4,
       links: {
+        access: '/api/agent-access',
+        textDiscovery: '/llms.txt',
         contributions: '/api/agent-contributions',
         guestbook: '/api/agent-guestbook',
         botDesk: '/api/bot-desk',
+        accessGuide:
+          'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-access.md',
         contributionGuide:
           'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-contributions.md',
       },
@@ -35,7 +39,9 @@ describe('GET /api/agent-journal', () => {
     const body = await GET().json();
     const serialised = JSON.stringify(body);
 
-    expect(body.entries.every((entry: { approvalMode?: string }) => entry.approvalMode)).toBe(true);
+    expect(
+      body.entries.every((entry: { approvalMode?: string }) => entry.approvalMode)
+    ).toBe(true);
     expect(serialised).not.toContain('recordedBy');
     expect(serialised).not.toContain('signed-publisher');
   });
