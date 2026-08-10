@@ -67,6 +67,16 @@ describe('createRssFeed', () => {
     ).toThrow('RSS feed date is invalid');
   });
 
+  it('requires a public item and a bounded positive maximum', () => {
+    expect(() => feed([])).toThrow('RSS feed requires at least one public item');
+    expect(() => feed([item()], 0)).toThrow(
+      'RSS feed maximumItems must be an integer between 1 and 200'
+    );
+    expect(() => feed([item()], 201)).toThrow(
+      'RSS feed maximumItems must be an integer between 1 and 200'
+    );
+  });
+
   it('rejects duplicate identities and bounds the item count', () => {
     expect(() => feed([item(), item()])).toThrow('item id is duplicated');
 
