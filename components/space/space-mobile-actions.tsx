@@ -8,11 +8,13 @@ import { useSpaceShortcuts } from '@/components/space/space-shortcut-provider';
 function ActionButton({
   label,
   disabled = false,
+  editorTrigger = false,
   onClick,
   children,
 }: {
   label: string;
   disabled?: boolean;
+  editorTrigger?: boolean;
   onClick: () => void;
   children: React.ReactNode;
 }) {
@@ -21,6 +23,7 @@ function ActionButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
+      data-space-editor-trigger={editorTrigger ? 'true' : undefined}
       className="inline-flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-1.5 text-[10px] font-semibold text-muted-foreground transition-[background-color,color,transform] hover:bg-muted/70 hover:text-foreground active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
       aria-label={label}
     >
@@ -63,6 +66,7 @@ export function SpaceMobileActions() {
         </ActionButton>
         <ActionButton
           label={editorOpen ? 'Close code editor' : 'Open code editor'}
+          editorTrigger
           onClick={() => void executeShortcut('editor.toggle')}
         >
           <Code className="h-4 w-4" aria-hidden="true" />
