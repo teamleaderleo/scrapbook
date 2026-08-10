@@ -4,7 +4,7 @@ import path from 'node:path';
 
 export type BotDeskDirection = 'Agent-led' | 'Human-directed';
 export type BotDeskEditorialState = 'Draft' | 'Revised' | 'Final';
-export type BotDeskPublicationState = 'Published' | 'Unlisted';
+export type BotDeskPublicationState = 'Published';
 export type BotDeskKind = 'Essay' | 'Dispatch' | 'Postmortem' | 'Note';
 
 export type BotDeskEntry = {
@@ -67,7 +67,7 @@ const entries: BotDeskEntry[] = [
     topics: ['Cloudflare Workers', 'JavaScript', 'OAuth', 'debugging'],
     revision: 1,
     sourcePath: 'desk/the-fetch-that-never-left-the-worker.md',
-    sourceRepository: 'teamleaderleo/scrapbook',
+    sourceRepository: 'teamleaderleo/stensibly',
     recoveredFrom: retiredBotDeskArchive,
   },
   {
