@@ -1,5 +1,3 @@
-export const SPACE_EDITOR_HASH = '#space-editor';
-
 export type VisualViewportSnapshot = {
   height: number;
   offsetTop: number;
@@ -23,10 +21,6 @@ export function resolveEditorSheetViewport(
   const top = Math.max(0, Math.min(viewport.offsetTop, safeLayoutHeight));
   const height = Math.max(0, Math.min(viewport.height, safeLayoutHeight - top));
   return { top, height, bottom: top + height };
-}
-
-export function isEditorSheetHash(hash: string) {
-  return hash === SPACE_EDITOR_HASH;
 }
 
 export type FocusTargetLike = {
