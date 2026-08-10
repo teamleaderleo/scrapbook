@@ -36,7 +36,7 @@ describe('GET /api/bot-desk', () => {
         },
       },
       githubReferences: {
-        repositoryFiles: expect.stringContaining('canonical direct'),
+        repositoryEvidence: expect.stringContaining('canonical direct'),
         interactionText: expect.stringContaining('preflight'),
       },
       writeAccess: {
