@@ -25,7 +25,7 @@ Test at minimum:
 
 - First open lazily initializes Monaco/Shiki.
 - After first open, dismiss/reopen reuses the same Monaco instance for the current Space session.
-- Unsaved text and selection survive Escape, close-button, and browser Back dismissal followed by reopen.
+- Unsaved text and selection survive Escape and close-button dismissal followed by reopen.
 - A slow first Monaco import cannot steal focus after the sheet was already dismissed.
 - Desktop still uses the existing breakpoint geometry and `CtrlCmd+I` registry bridge.
 
@@ -44,21 +44,19 @@ While the mobile editor is open:
 - the editor is exposed as a named modal dialog;
 - underlying Space content and the mobile rail are inert and `aria-hidden` while open;
 - Escape is owned by the hidden sheet-scope `editor.close` command before reader Escape;
+- Monaco bridges its own Escape keydown into that same registry command on mobile so editor focus cannot swallow dismissal;
 - focus enters Monaco when ready, with the close control as the pre-initialization fallback;
 - close restores the previously focused visible editor trigger;
 - captured scroll regions restore to their exact previous positions;
 - stale restoration is cancelled if the sheet reopens before the restore frame runs.
 
-## Browser history
+## Navigation boundary
 
-The mobile editor uses the transient fragment `#space-editor` as its same-document history entry.
+The editor sheet stays history-neutral in this slice:
 
-- opening from a canonical Space URL adds `#space-editor` without changing route/query state;
-- browser Back removes the fragment and dismisses the sheet;
-- browser Forward restores the fragment and reopens the same in-memory Monaco draft;
-- if the underlying Space URL already had a fragment (for example a Trail return anchor), Back restores that exact previous fragment;
-- closing leaves no editor-only fragment behind;
-- direct durable learning state never lives in the editor fragment.
+- opening and closing the editor do not mutate the Space URL, hash, or `history.state`;
+- browser Back/Forward, canonical view state, and exact reading-position restoration remain owned by Space continuity work in #553;
+- durable learning/review state never lives in editor UI state.
 
 ## Regression gate
 
@@ -68,4 +66,4 @@ Before merge, require:
 - shortcut unit tests proving sheet Escape precedence;
 - focused Chromium coverage for portrait and reduced-height landscape;
 - full repository lint, typecheck, unit suite, production build, and Chromium regression job;
-- a self-review confirming no Space data model, auth, review scheduling, ranking, or draft-storage schema was added accidentally.
+- a self-review confirming no Space data model, auth, review scheduling, ranking, navigation-history mechanism, or draft-storage schema was added accidentally.
