@@ -89,7 +89,14 @@ describe('loadPublicSpacePage', () => {
 
   it('aborts a public archive request that exceeds the eight-second boundary', async () => {
     const abortSignal = vi.fn(
-      () => new Promise<never>(() => undefined)
+      (signal: AbortSignal) =>
+        new Promise<never>((_resolve, reject) => {
+          signal.addEventListener(
+            'abort',
+            () => reject(new Error('request aborted')),
+            { once: true }
+          );
+        })
     );
     const query = {
       select: vi.fn(),
