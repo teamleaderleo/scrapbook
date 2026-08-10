@@ -50,7 +50,6 @@ export function MonacoEditorPanel() {
   const editorInstanceRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
   const editorOpenRef = useRef(editorOpen);
-  editorOpenRef.current = editorOpen;
   const restorationRef = useRef<ReturnType<
     typeof createBrowserEditorSheetRestoration
   > | null>(null);
@@ -70,10 +69,14 @@ export function MonacoEditorPanel() {
   const isDark = resolvedTheme === 'dark';
   const shikiTheme = isDark ? 'catppuccin-macchiato' : 'one-light';
   const shikiThemeRef = useRef(shikiTheme);
-  shikiThemeRef.current = shikiTheme;
   const sidebarWidth = state === 'collapsed' ? '3rem' : '16rem';
 
   useEffect(() => {
+    editorOpenRef.current = editorOpen;
+  }, [editorOpen]);
+
+  useEffect(() => {
+    shikiThemeRef.current = shikiTheme;
     if (!monacoRef.current) return;
     monacoRef.current.editor.setTheme(shikiTheme);
   }, [shikiTheme]);
