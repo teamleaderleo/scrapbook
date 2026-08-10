@@ -4,6 +4,7 @@ import {
   Check,
   Clipboard,
   ExternalLink,
+  Link2,
   Search,
   ShieldCheck,
   Sparkles,
@@ -11,7 +12,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   operatorPhraseGroups,
   operatorPhrases,
@@ -46,7 +47,13 @@ async function copyText(text: string) {
   if (!copied) throw new Error('Clipboard copy failed');
 }
 
-function PhraseButton({ phrase }: { phrase: OperatorPhrase }) {
+function PhraseButton({
+  phrase,
+  showReference = false,
+}: {
+  phrase: OperatorPhrase;
+  showReference?: boolean;
+}) {
   const [state, setState] = useState<'idle' | 'copied' | 'error'>('idle');
 
   const handleCopy = async () => {
@@ -61,39 +68,57 @@ function PhraseButton({ phrase }: { phrase: OperatorPhrase }) {
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      data-operator-phrase={phrase.id}
-      className="group relative flex min-h-36 w-full select-none flex-col justify-between overflow-hidden rounded-[1.35rem] border border-border/75 bg-card px-5 py-5 text-left text-card-foreground shadow-[0_8px_0_rgba(24,24,27,0.12),0_18px_34px_rgba(24,24,27,0.08)] transition-[transform,box-shadow,border-color,background-color] duration-100 hover:-translate-y-0.5 hover:border-foreground/25 hover:bg-card/95 hover:shadow-[0_9px_0_rgba(24,24,27,0.14),0_22px_42px_rgba(24,24,27,0.11)] active:translate-y-1 active:shadow-[0_3px_0_rgba(24,24,27,0.14),0_8px_18px_rgba(24,24,27,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:shadow-[0_8px_0_rgba(0,0,0,0.35),0_18px_34px_rgba(0,0,0,0.24)] dark:hover:shadow-[0_9px_0_rgba(0,0,0,0.4),0_22px_42px_rgba(0,0,0,0.3)]"
-    >
-      <span className="flex items-start justify-between gap-4">
-        <span className="text-xl font-black tracking-[-0.035em] sm:text-2xl">
-          {phrase.label}
+    <div id={phrase.id} className="scroll-mt-8">
+      <button
+        type="button"
+        onClick={handleCopy}
+        data-operator-phrase={phrase.id}
+        className="group relative flex min-h-36 w-full select-none flex-col justify-between overflow-hidden rounded-[1.35rem] border border-border/75 bg-card px-5 py-5 text-left text-card-foreground shadow-[0_8px_0_rgba(24,24,27,0.12),0_18px_34px_rgba(24,24,27,0.08)] transition-[transform,box-shadow,border-color,background-color] duration-100 hover:-translate-y-0.5 hover:border-foreground/25 hover:bg-card/95 hover:shadow-[0_9px_0_rgba(24,24,27,0.14),0_22px_42px_rgba(24,24,27,0.11)] active:translate-y-1 active:shadow-[0_3px_0_rgba(24,24,27,0.14),0_8px_18px_rgba(24,24,27,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:shadow-[0_8px_0_rgba(0,0,0,0.35),0_18px_34px_rgba(0,0,0,0.24)] dark:hover:shadow-[0_9px_0_rgba(0,0,0,0.4),0_22px_42px_rgba(0,0,0,0.3)]"
+      >
+        <span className="flex items-start justify-between gap-4">
+          <span className="text-xl font-black tracking-[-0.035em] sm:text-2xl">
+            {phrase.label}
+          </span>
+          <span
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border/70 bg-background/65 transition-transform duration-100 group-active:scale-95"
+            aria-hidden="true"
+          >
+            {state === 'copied' ? (
+              <Check className="h-5 w-5" />
+            ) : (
+              <Clipboard className="h-5 w-5" />
+            )}
+          </span>
         </span>
-        <span
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-border/70 bg-background/65 transition-transform duration-100 group-active:scale-95"
-          aria-hidden="true"
+        <span className="mt-8 flex items-end justify-between gap-4">
+          <span className="max-w-[36rem] text-sm leading-5 text-muted-foreground">
+            {phrase.note}
+          </span>
+          <span
+            className="shrink-0 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"
+            aria-live="polite"
+          >
+            {state === 'copied'
+              ? 'Copied'
+              : state === 'error'
+                ? 'Copy failed'
+                : 'Copy'}
+          </span>
+        </span>
+      </button>
+
+      {showReference ? (
+        <a
+          href={`/operator#${phrase.id}`}
+          data-operator-reference={phrase.id}
+          aria-label={`Link to ${phrase.label}`}
+          className="mt-2 inline-flex items-center gap-1 font-mono text-[10px] font-semibold tracking-[0.04em] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          {state === 'copied' ? (
-            <Check className="h-5 w-5" />
-          ) : (
-            <Clipboard className="h-5 w-5" />
-          )}
-        </span>
-      </span>
-      <span className="mt-8 flex items-end justify-between gap-4">
-        <span className="max-w-[36rem] text-sm leading-5 text-muted-foreground">
-          {phrase.note}
-        </span>
-        <span
-          className="shrink-0 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"
-          aria-live="polite"
-        >
-          {state === 'copied' ? 'Copied' : state === 'error' ? 'Copy failed' : 'Copy'}
-        </span>
-      </span>
-    </button>
+          <Link2 className="h-3 w-3" aria-hidden="true" />
+          #{phrase.id}
+        </a>
+      ) : null}
+    </div>
   );
 }
 
@@ -102,6 +127,27 @@ export function OperatorConsole({ mode = 'full' }: { mode?: 'featured' | 'full' 
   const activePhrases = operatorPhrases.filter(
     phrase => phrase.group === activeGroup
   );
+
+  useEffect(() => {
+    if (mode !== 'full') return;
+
+    const syncPhraseHash = () => {
+      const phraseId = decodeURIComponent(window.location.hash.slice(1));
+      const phrase = operatorPhrases.find(item => item.id === phraseId);
+      if (!phrase) return;
+
+      setActiveGroup(phrase.group);
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          document.getElementById(phrase.id)?.scrollIntoView({ block: 'center' });
+        });
+      });
+    };
+
+    syncPhraseHash();
+    window.addEventListener('hashchange', syncPhraseHash);
+    return () => window.removeEventListener('hashchange', syncPhraseHash);
+  }, [mode]);
 
   if (mode === 'featured') {
     return (
@@ -142,6 +188,17 @@ export function OperatorConsole({ mode = 'full' }: { mode?: 'featured' | 'full' 
 
   const activeGroupInfo = operatorPhraseGroups.find(group => group.id === activeGroup)!;
 
+  const selectGroup = (groupId: OperatorPhraseGroupId) => {
+    setActiveGroup(groupId);
+    if (window.location.hash) {
+      window.history.replaceState(
+        window.history.state,
+        '',
+        `${window.location.pathname}${window.location.search}`
+      );
+    }
+  };
+
   return (
     <section aria-labelledby="operator-phrasebook-title" data-operator-console>
       <div className="max-w-3xl">
@@ -155,7 +212,7 @@ export function OperatorConsole({ mode = 'full' }: { mode?: 'featured' | 'full' 
           Copy the nudge. Keep moving.
         </h1>
         <p className="mt-3 text-base leading-7 text-muted-foreground">
-          These are reusable steering phrases, not a second standing instruction stack. Pick the one that fits the moment; current direct messages win.
+          These are reusable steering phrases, not a second standing instruction stack. Pick the one that fits the moment; current direct messages win. Every phrase has a stable link when you want to point someone at one exact section.
         </p>
       </div>
 
@@ -173,7 +230,7 @@ export function OperatorConsole({ mode = 'full' }: { mode?: 'featured' | 'full' 
               type="button"
               role="tab"
               aria-selected={selected}
-              onClick={() => setActiveGroup(group.id)}
+              onClick={() => selectGroup(group.id)}
               className={`flex min-h-14 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold transition-[transform,background-color,border-color,box-shadow] active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 selected
                   ? 'border-foreground/30 bg-foreground text-background shadow-[0_4px_0_rgba(24,24,27,0.18)] dark:shadow-[0_4px_0_rgba(255,255,255,0.14)]'
@@ -202,7 +259,7 @@ export function OperatorConsole({ mode = 'full' }: { mode?: 'featured' | 'full' 
 
       <div className="mt-3 grid gap-4 lg:grid-cols-3">
         {activePhrases.map(phrase => (
-          <PhraseButton key={phrase.id} phrase={phrase} />
+          <PhraseButton key={phrase.id} phrase={phrase} showReference />
         ))}
       </div>
     </section>
