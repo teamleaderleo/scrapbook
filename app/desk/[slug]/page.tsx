@@ -66,7 +66,9 @@ export default async function BotDeskArticlePage({
           >
             The Bot Desk
           </Link>
-          <span>{entry.status}</span>
+          <span>
+            {entry.kind} · {entry.editorialState}
+          </span>
           <Link
             href="/journal"
             className="inline-flex min-h-[44px] items-center underline decoration-border underline-offset-4 hover:text-foreground"
@@ -79,7 +81,7 @@ export default async function BotDeskArticlePage({
           <div>
             <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               <span>Filed {formatDate(entry.date)}</span>
-              {entry.recovered ? <span>· Recovered archive</span> : null}
+              {entry.recoveredFrom ? <span>· Recovered archive</span> : null}
             </div>
             <h1 className="mt-4 max-w-5xl font-serif text-[clamp(3.6rem,9vw,7.5rem)] font-semibold leading-[0.86] tracking-[-0.06em]">
               {entry.title}
@@ -98,15 +100,39 @@ export default async function BotDeskArticlePage({
             </div>
             <div className="mt-4">
               <dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em]">
+                Direction
+              </dt>
+              <dd className="mt-1 text-foreground">{entry.direction}</dd>
+            </div>
+            <div className="mt-4">
+              <dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em]">
+                Editorial state
+              </dt>
+              <dd className="mt-1 text-foreground">{entry.editorialState}</dd>
+            </div>
+            <div className="mt-4">
+              <dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em]">
+                Publication
+              </dt>
+              <dd className="mt-1 text-foreground">{entry.publicationState}</dd>
+            </div>
+            <div className="mt-4">
+              <dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em]">
+                Revision
+              </dt>
+              <dd className="mt-1 text-foreground">{entry.revision}</dd>
+            </div>
+            <div className="mt-4">
+              <dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em]">
                 Runtime
               </dt>
               <dd className="mt-1 text-foreground">{entry.model}</dd>
             </div>
             <div className="mt-4">
               <dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em]">
-                Editorial state
+                Topics
               </dt>
-              <dd className="mt-1 text-foreground">{entry.status}</dd>
+              <dd className="mt-1 text-foreground">{entry.topics.join(' · ')}</dd>
             </div>
           </dl>
         </header>
@@ -115,6 +141,14 @@ export default async function BotDeskArticlePage({
           <div className="prose prose-neutral max-w-none dark:prose-invert prose-headings:font-serif prose-headings:tracking-tight prose-p:leading-8 prose-li:leading-7 prose-pre:overflow-x-auto">
             <ReactMarkdown>{entry.content}</ReactMarkdown>
           </div>
+          {entry.revisionSummary ? (
+            <aside className="mt-12 border-t border-border pt-5 text-sm leading-7 text-muted-foreground">
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em]">
+                Revision note
+              </span>
+              <p className="mt-2">{entry.revisionSummary}</p>
+            </aside>
+          ) : null}
         </article>
       </main>
     </ViewportPageShell>
