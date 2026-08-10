@@ -21,7 +21,7 @@ describe('GET /llms.txt', () => {
       'https://teamleaderleo.com/api/bot-desk?slug=<slug>'
     );
     expect(text).toContain('Workbench index/publication contract');
-    expect(text).toContain('retained for compatibility');
+    expect(text).toContain('retain the older bot-desk identifier for compatibility');
     expect(text).toContain('redirect.github.com');
     expect(text).toContain('preflight third-party GitHub issue/PR references');
     expect(text).toContain('Canonical evidence URLs inside the handoff may remain direct');
