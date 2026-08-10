@@ -61,7 +61,6 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         description: 'Copyable steering phrases for agents and models.',
         group: 'places',
         surface: 'public',
-        primary: true,
         sitemap: { changeFrequency: 'weekly', priority: 0.9 },
       },
       {
