@@ -7,6 +7,16 @@ async function pressMod(page: Page, key: string) {
   await page.keyboard.press(`${modifier}+${key}`);
 }
 
+async function ensureShortcutProviderHydrated(page: Page) {
+  const trigger = page.getByRole('button', { name: 'Keyboard shortcuts' });
+  await expect(trigger).toBeVisible();
+  await trigger.click();
+  const help = page.locator('[data-space-shortcut-help]');
+  await expect(help).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(help).toBeHidden();
+}
+
 test.describe('Space shortcut registry', () => {
   test('generates the reference and preserves typing/search toggle behavior', async ({
     page,
@@ -16,6 +26,7 @@ test.describe('Space shortcut registry', () => {
     await expect(page.getByRole('heading', { name: 'Space' })).toBeVisible({
       timeout: 15_000,
     });
+    await ensureShortcutProviderHydrated(page);
 
     await page.keyboard.press('Shift+/');
     const help = page.locator('[data-space-shortcut-help]');
@@ -61,6 +72,7 @@ test.describe('Space shortcut registry', () => {
     await expect(page.getByRole('heading', { name: 'Space' })).toBeVisible({
       timeout: 15_000,
     });
+    await ensureShortcutProviderHydrated(page);
 
     const sidebar = page.locator('[data-side="left"][data-state]').first();
     await expect(sidebar).toHaveAttribute('data-state', 'expanded');
@@ -74,6 +86,7 @@ test.describe('Space shortcut registry', () => {
     await expect(
       page.getByRole('heading', { name: 'Learning trail' })
     ).toBeAttached({ timeout: 15_000 });
+    await ensureShortcutProviderHydrated(page);
 
     await page.keyboard.press('Shift+/');
     const help = page.locator('[data-space-shortcut-help]');
