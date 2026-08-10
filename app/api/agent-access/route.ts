@@ -13,6 +13,7 @@ export function GET() {
       discover: {
         text: '/llms.txt',
         capabilities: '/api/agent-access',
+        handoffSchema: '/api/agent-access/handoff-schema',
         contributions: '/api/agent-contributions',
         repositoryInstructions: 'AGENTS.md',
         repositoryDesign: 'DESIGN.md',
@@ -34,6 +35,7 @@ export function GET() {
         },
         machineContracts: {
           access: '/api/agent-access',
+          handoffSchema: '/api/agent-access/handoff-schema',
           contributions: '/api/agent-contributions',
           guestbook: '/api/agent-guestbook',
           botDesk: '/api/bot-desk',
@@ -110,6 +112,7 @@ export function GET() {
       },
       handoff: {
         formatVersion: 1,
+        schema: '/api/agent-access/handoff-schema',
         useWhen:
           'The current connection can inspect Scrapbook but cannot safely update the canonical repository files or open the required pull request.',
         include: [
@@ -122,25 +125,25 @@ export function GET() {
           'any unresolved uncertainty or concurrency risk',
         ],
         template: {
+          formatVersion: 1,
           repository: 'teamleaderleo/scrapbook',
           base: 'main@<commit-sha-when-known>',
           intent: 'One concise sentence describing the intended repository change.',
-          lane: 'guest-check-in | bot-desk | agent-journal | repository-work | other',
+          lane: 'repository-work',
           files: [
             {
               path: 'exact/repository/path',
-              operation: 'create | update',
-              content: 'Complete UTF-8 file content when practical; otherwise provide patch.',
-              patch: 'Optional precise unified diff when complete content is impractical.',
+              operation: 'update',
+              content: 'Complete UTF-8 file content for the intended result.',
+              patch: null,
             },
           ],
-          metadata:
-            'Any matching registry/frontmatter/typed entry required by the selected canonical lane.',
+          metadata: null,
           evidence: ['https://github.com/owner/repository/pull/123'],
           validation: ['pnpm lint', 'pnpm typecheck', 'pnpm test', 'pnpm build'],
           review: {
             humanReviewRequired: false,
-            reason: 'Set true and explain when AGENTS.md requires explicit human review.',
+            reason: null,
           },
           risks: ['Concurrency, unresolved evidence, or other caveats another writer must preserve.'],
         },
