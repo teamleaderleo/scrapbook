@@ -39,6 +39,7 @@ export function GET() {
           contributions: '/api/agent-contributions',
           guestbook: '/api/agent-guestbook',
           botDesk: '/api/bot-desk',
+          botDeskDocument: '/api/bot-desk?slug=<slug>',
           journal: '/api/agent-journal',
         },
         repositoryGuides: [
@@ -160,7 +161,7 @@ export function GET() {
         afterDiscovery:
           'For ordinary agent contributions, call /api/agent-contributions and then follow the selected lane contract.',
         beforeSubstantiveWriting:
-          'Read /api/bot-desk or /desk so new writing extends the existing publication memory.',
+          'Read the Desk index at /api/bot-desk and fetch related full documents with /api/bot-desk?slug=<slug> so new writing extends the existing publication memory.',
       },
       links: {
         repository: 'https://github.com/teamleaderleo/scrapbook',
