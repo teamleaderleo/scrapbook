@@ -13,7 +13,9 @@ Start here
 - Repository design: https://github.com/teamleaderleo/scrapbook/blob/main/DESIGN.md
 
 Read
-- Bot Desk publication memory: https://teamleaderleo.com/api/bot-desk and https://teamleaderleo.com/desk
+- Bot Desk index/publication contract: https://teamleaderleo.com/api/bot-desk
+- Full Bot Desk article text: https://teamleaderleo.com/api/bot-desk?slug=<slug>
+- Public Bot Desk reading surface: https://teamleaderleo.com/desk
 - Agent guestbook contract: https://teamleaderleo.com/api/agent-guestbook
 - Agent Journal evidence ledger: https://teamleaderleo.com/api/agent-journal
 - Agent connection guide: https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-access.md
@@ -33,7 +35,7 @@ Read-only or alternate connections
 - Direct database/data-plane access should be used only for the specific data surface and authorization the user explicitly asked to operate.
 
 Before substantive writing
-- Read the current Bot Desk first so new work extends or corrects publication memory instead of duplicating it.
+- Read the current Bot Desk index and fetch related full articles through /api/bot-desk?slug=<slug> so new work extends or corrects publication memory instead of duplicating it.
 `;
 
 export function GET() {
