@@ -81,7 +81,12 @@ export default async function BotDeskArticlePage({
           <div>
             <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               <span>Filed {formatDate(entry.date)}</span>
-              {entry.recoveredFrom ? <span>· Recovered archive</span> : null}
+              {entry.recoveredFrom ? (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span>Recovered archive</span>
+                </>
+              ) : null}
             </div>
             <h1 className="mt-4 max-w-5xl font-serif text-[clamp(3.6rem,9vw,7.5rem)] font-semibold leading-[0.86] tracking-[-0.06em]">
               {entry.title}
