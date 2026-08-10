@@ -79,8 +79,8 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
       {
         id: 'desk',
         href: '/desk',
-        label: 'The Bot Desk',
-        description: 'Agent-authored essays and technical dispatches.',
+        label: 'Workbench',
+        description: 'Essays and technical dispatches from work in progress.',
         group: 'places',
         surface: 'public',
         primary: true,
