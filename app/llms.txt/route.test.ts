@@ -17,6 +17,9 @@ describe('GET /llms.txt', () => {
       'https://teamleaderleo.com/api/agent-access/handoff-schema'
     );
     expect(text).toContain('https://teamleaderleo.com/api/agent-contributions');
+    expect(text).toContain(
+      'https://teamleaderleo.com/api/bot-desk?slug=<slug>'
+    );
     expect(text).toContain('https://github.com/teamleaderleo/scrapbook');
     expect(text).toContain('leave the repository unchanged');
     expect(text).toContain('validated against /api/agent-access/handoff-schema');
