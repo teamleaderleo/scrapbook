@@ -49,3 +49,22 @@ test('full operator page exposes grouped phrases and the lazy one-link path', as
     '/operator.txt'
   );
 });
+
+test('operator phrase hashes reveal the referenced section directly', async ({ page }) => {
+  await page.goto('/operator#perspective-pass');
+
+  await expect(page.getByRole('tab', { name: 'Review' })).toHaveAttribute(
+    'aria-selected',
+    'true'
+  );
+  await expect(
+    page.locator('[data-operator-phrase="perspective-pass"]')
+  ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Link to Perspective pass' })
+  ).toHaveAttribute('href', '/operator#perspective-pass');
+
+  await page.getByRole('tab', { name: 'Steer' }).click();
+  await expect(page).toHaveURL(/\/operator$/);
+  await expect(page.locator('[data-operator-phrase="think-sideways"]')).toBeVisible();
+});
