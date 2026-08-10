@@ -40,15 +40,26 @@ async function HomeActivityContent() {
   cacheLife({ stale: 30, revalidate: 30, expire: 3_600 });
 
   const activity = await getGitHubHomeData();
-  const initialActivity = {
-    source: activity.source,
-    today: activity.today,
-    weekTotal: activity.weekTotal,
-    yearTotal: activity.total,
-    days: activity.days,
-    unit: 'contributions',
-    generatedAt: activity.generatedAt,
-  };
+  const initialActivity =
+    activity.source === 'unavailable'
+      ? {
+          source: activity.source,
+          today: activity.today,
+          weekTotal: activity.weekTotal,
+          yearTotal: activity.total,
+          days: activity.days,
+          unit: 'contributions',
+          generatedAt: activity.generatedAt,
+        }
+      : {
+          source: activity.source,
+          today: activity.today,
+          weekTotal: activity.weekTotal,
+          yearTotal: activity.total,
+          days: activity.days,
+          unit: 'contributions',
+          generatedAt: activity.generatedAt,
+        };
 
   return (
     <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
