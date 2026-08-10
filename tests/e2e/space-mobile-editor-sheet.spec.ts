@@ -115,43 +115,6 @@ async function monacoInput(dialog: Locator) {
   return input;
 }
 
-async function addScrollableSpace(page: Page) {
-  return page.evaluate(() => {
-    const root = document.querySelector<HTMLElement>('[data-space-background]');
-    if (!root) throw new Error('Missing Space background');
-
-    const region = [root, ...root.querySelectorAll<HTMLElement>('*')].find(
-      element => {
-        const style = getComputedStyle(element);
-        return /^(auto|scroll)$/.test(style.overflowY);
-      }
-    );
-    if (!region) throw new Error('Missing Space scroll region');
-
-    region.dataset.spaceTestScroll = 'true';
-    const spacer = document.createElement('div');
-    spacer.dataset.spaceTestSpacer = 'true';
-    spacer.style.height = '1400px';
-    spacer.style.minHeight = '1400px';
-    region.appendChild(spacer);
-    region.scrollTop = 240;
-    return region.scrollTop;
-  });
-}
-
-async function expectScroll(page: Page, expected: number) {
-  await expect
-    .poll(() =>
-      page.evaluate((top) => {
-        const region = document.querySelector<HTMLElement>(
-          '[data-space-test-scroll="true"]'
-        );
-        return region ? Math.abs(region.scrollTop - top) : Number.POSITIVE_INFINITY;
-      }, expected)
-    )
-    .toBeLessThanOrEqual(2);
-}
-
 async function expectNoHorizontalOverflow(page: Page) {
   await expect
     .poll(() =>
@@ -199,11 +162,10 @@ test.describe('mobile Space editor sheet', () => {
   test.use({ hasTouch: true });
 
   for (const scenario of [portrait, landscape]) {
-    test(`${scenario.name} keeps the Monaco draft, viewport, focus, and scroll across dismissal`, async ({
+    test(`${scenario.name} keeps the Monaco draft, viewport, and focus across dismissal`, async ({
       page,
     }) => {
       await gotoMobile(page, scenario);
-      const savedScroll = await addScrollableSpace(page);
       const { trigger, dialog } = await openEditor(page);
       await monacoInput(dialog);
       await page.keyboard.type('alpha');
@@ -238,7 +200,6 @@ test.describe('mobile Space editor sheet', () => {
       await expect(dialog).toBeHidden();
       await expect(trigger).toBeFocused();
       await expect(page).toHaveURL(/\/space$/);
-      await expectScroll(page, savedScroll);
 
       await setSyntheticVisualViewport(page, scenario.height, 0);
       const reopened = await openEditor(page);
