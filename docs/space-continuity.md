@@ -66,6 +66,8 @@ Rules:
 
 `SpaceView` owns list restoration because it already owns pagination and the scroll container. `ResultsClient` keeps the expansion map local and reports only the bounded expanded IDs upward. Restoration waits until live/cached Space data is ready so an empty hydration frame cannot clamp a retained page or consume a scroll snapshot against zero-height content.
 
+The focused browser regression seeds 25 deterministic public fallback rows, moves to list page 2, expands one row, scrolls the actual Space list container, and verifies those values are present on the current history entry before navigating to Trail. Browser Back must restore page 2, the same expanded row, and the recorded scroll position. When a usable live archive wins over the seeded fallback, that fixture-specific regression skips rather than overriding live data.
+
 ## Browser-history ownership
 
 Use ordinary canonical URLs for durable navigation identity. Use same-entry `history.state` only for ephemeral presentation restoration on the current canonical entry. The mobile editor remains history-neutral; its dismiss/reopen continuity comes from retaining one Monaco instance, while navigation Back/Forward belongs to the Space continuity lane.
