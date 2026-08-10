@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   SPACE_HISTORY_MAX_EXPANDED_IDS,
+  SPACE_HISTORY_MAX_PAGE,
   SPACE_HISTORY_MAX_SCROLL_PX,
   SPACE_HISTORY_UI_KEY,
+  SPACE_HISTORY_UI_VERSION,
   createSpaceHistoryUiSnapshot,
   mergeSpaceHistoryUiState,
   readSpaceHistoryUiState,
@@ -12,6 +14,7 @@ describe('Space history UI state', () => {
   it('preserves router-owned history fields while namespacing Space UI state', () => {
     const snapshot = createSpaceHistoryUiSnapshot({
       viewKey: 'list:open:',
+      page: 3,
       scrollTop: 412.4,
       expandedIds: ['item-1', 'item-2'],
     });
@@ -24,16 +27,19 @@ describe('Space history UI state', () => {
       __NA: true,
       tree: ['space'],
       [SPACE_HISTORY_UI_KEY]: {
+        version: SPACE_HISTORY_UI_VERSION,
         viewKey: 'list:open:',
+        page: 3,
         scrollTop: 412,
         expandedIds: ['item-1', 'item-2'],
       },
     });
   });
 
-  it('bounds scroll and deduplicates/caps expanded row IDs', () => {
+  it('bounds page, scroll, and deduplicates/caps expanded row IDs', () => {
     const snapshot = createSpaceHistoryUiSnapshot({
       viewKey: 'list:archive:tag',
+      page: Number.POSITIVE_INFINITY,
       scrollTop: Number.POSITIVE_INFINITY,
       expandedIds: [
         '',
@@ -46,6 +52,7 @@ describe('Space history UI state', () => {
       ],
     });
 
+    expect(snapshot.page).toBe(1);
     expect(snapshot.scrollTop).toBe(0);
     expect(snapshot.expandedIds).toHaveLength(SPACE_HISTORY_MAX_EXPANDED_IDS);
     expect(snapshot.expandedIds[0]).toBe('item-1');
@@ -53,8 +60,10 @@ describe('Space history UI state', () => {
 
     const clamped = createSpaceHistoryUiSnapshot({
       viewKey: 'list:open:',
+      page: SPACE_HISTORY_MAX_PAGE + 500,
       scrollTop: SPACE_HISTORY_MAX_SCROLL_PX + 500,
     });
+    expect(clamped.page).toBe(SPACE_HISTORY_MAX_PAGE);
     expect(clamped.scrollTop).toBe(SPACE_HISTORY_MAX_SCROLL_PX);
   });
 
@@ -63,25 +72,35 @@ describe('Space history UI state', () => {
       null,
       createSpaceHistoryUiSnapshot({
         viewKey: 'reader:open:tag',
+        page: 2,
         scrollTop: 88,
         expandedIds: ['item-3'],
       })
     );
 
     expect(readSpaceHistoryUiState(state, 'reader:open:tag')).toEqual({
-      version: 1,
+      version: SPACE_HISTORY_UI_VERSION,
       viewKey: 'reader:open:tag',
+      page: 2,
       scrollTop: 88,
       expandedIds: ['item-3'],
     });
     expect(readSpaceHistoryUiState(state, 'list:open:tag')).toBeNull();
   });
 
-  it('rejects malformed, oversized, wrong-version, and out-of-range payloads', () => {
+  it('rejects legacy, malformed, oversized, cross-view, and out-of-range payloads', () => {
     expect(readSpaceHistoryUiState(null, 'list:open:')).toBeNull();
     expect(
       readSpaceHistoryUiState(
-        { [SPACE_HISTORY_UI_KEY]: { version: 99 } },
+        {
+          [SPACE_HISTORY_UI_KEY]: {
+            version: 1,
+            viewKey: 'list:open:',
+            page: 1,
+            scrollTop: 0,
+            expandedIds: [],
+          },
+        },
         'list:open:'
       )
     ).toBeNull();
@@ -89,8 +108,9 @@ describe('Space history UI state', () => {
       readSpaceHistoryUiState(
         {
           [SPACE_HISTORY_UI_KEY]: {
-            version: 1,
+            version: SPACE_HISTORY_UI_VERSION,
             viewKey: 'list:open:',
+            page: 0,
             scrollTop: -1,
             expandedIds: [],
           },
@@ -102,8 +122,9 @@ describe('Space history UI state', () => {
       readSpaceHistoryUiState(
         {
           [SPACE_HISTORY_UI_KEY]: {
-            version: 1,
+            version: SPACE_HISTORY_UI_VERSION,
             viewKey: 'list:open:',
+            page: 1,
             scrollTop: 1,
             expandedIds: Array.from(
               { length: SPACE_HISTORY_MAX_EXPANDED_IDS + 1 },
@@ -112,6 +133,20 @@ describe('Space history UI state', () => {
           },
         },
         'list:open:'
+      )
+    ).toBeNull();
+    expect(
+      readSpaceHistoryUiState(
+        {
+          [SPACE_HISTORY_UI_KEY]: {
+            version: SPACE_HISTORY_UI_VERSION,
+            viewKey: 'list:open:',
+            page: 1,
+            scrollTop: 1,
+            expandedIds: [],
+          },
+        },
+        'list:archive:'
       )
     ).toBeNull();
   });
