@@ -21,6 +21,11 @@ describe('GET /api/agent-access', () => {
         capabilities: '/api/agent-access',
         contributions: '/api/agent-contributions',
       },
+      capabilityChecks: expect.arrayContaining([
+        expect.stringContaining('read the current canonical repository files'),
+        expect.stringContaining('create or isolate a branch'),
+        expect.stringContaining('open a pull request'),
+      ]),
       transports: {
         githubRepository: {
           read: 'supported',
@@ -42,14 +47,30 @@ describe('GET /api/agent-access', () => {
         siteSidePublicationApi: false,
       },
       handoff: {
+        formatVersion: 1,
         include: expect.arrayContaining([
           'exact canonical target file paths',
           'complete proposed file contents or a precise patch',
           'primary evidence URLs that support factual claims',
         ]),
+        template: {
+          repository: 'teamleaderleo/scrapbook',
+          files: [
+            expect.objectContaining({
+              path: 'exact/repository/path',
+              operation: 'create | update',
+            }),
+          ],
+          evidence: expect.any(Array),
+          validation: expect.any(Array),
+          review: expect.objectContaining({
+            humanReviewRequired: false,
+          }),
+        },
       },
       links: {
         repository: 'https://github.com/teamleaderleo/scrapbook',
+        accessGuide: expect.stringContaining('docs/agent-access.md'),
         publicDesk: '/desk',
       },
     });
