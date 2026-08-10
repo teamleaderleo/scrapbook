@@ -8,9 +8,10 @@ import {
   ShieldCheck,
   Sparkles,
   WandSparkles,
+  type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
   operatorPhraseGroups,
   operatorPhrases,
@@ -18,12 +19,14 @@ import {
   type OperatorPhraseGroupId,
 } from '@/lib/operator-phrases';
 
-const groupIcons = {
+const groupIcons: Record<OperatorPhraseGroupId, LucideIcon> = {
   do: Sparkles,
   review: Search,
   steer: WandSparkles,
   lazy: ShieldCheck,
-} satisfies Record<OperatorPhraseGroupId, typeof Sparkles>;
+};
+
+const featuredPhrases = operatorPhrases.filter(phrase => phrase.featured);
 
 async function copyText(text: string) {
   if (navigator.clipboard?.writeText) {
@@ -96,10 +99,8 @@ function PhraseButton({ phrase }: { phrase: OperatorPhrase }) {
 
 export function OperatorConsole({ mode = 'full' }: { mode?: 'featured' | 'full' }) {
   const [activeGroup, setActiveGroup] = useState<OperatorPhraseGroupId>('do');
-  const featured = useMemo(() => operatorPhrases.filter(phrase => phrase.featured), []);
-  const activePhrases = useMemo(
-    () => operatorPhrases.filter(phrase => phrase.group === activeGroup),
-    [activeGroup]
+  const activePhrases = operatorPhrases.filter(
+    phrase => phrase.group === activeGroup
   );
 
   if (mode === 'featured') {
@@ -127,7 +128,7 @@ export function OperatorConsole({ mode = 'full' }: { mode?: 'featured' | 'full' 
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          {featured.map(phrase => (
+          {featuredPhrases.map(phrase => (
             <PhraseButton key={phrase.id} phrase={phrase} />
           ))}
         </div>
