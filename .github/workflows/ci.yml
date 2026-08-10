@@ -79,8 +79,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile --reporter=silent
-      - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Install Chrome dependencies
+        run: pnpm exec playwright install-deps chromium
       - name: Chromium regressions
         run: pnpm exec playwright test --project=chromium > playwright.log 2>&1
       - name: Upload homepage visual review
