@@ -6,9 +6,11 @@ Scrapbook began as a project-management application built around projects, block
 
 ## Live surfaces
 
-### Home — GitHub activity
+### Home — operator console and activity
 
-The homepage renders an exact four-week Monday–Sunday contribution calendar, current activity totals, rollover timing, and links to current public repositories.
+The homepage starts with the Operator console: large copy buttons for recurring human steering such as open-ended execution, fresh-context review, reframing, raw-copy output, and the lazy "read the operator page" path. `/operator` exposes the full grouped phrasebook, and `/operator.txt` exposes the same canonical phrases as plain text for agents or simple copy/paste use.
+
+The GitHub activity dashboard remains below the operator console. It renders an exact four-week Monday–Sunday contribution calendar, current activity totals, rollover timing, and links to current public repositories.
 
 When a profile token is available, activity comes from GitHub's GraphQL contribution calendar. Otherwise the server reads the public contribution page. The integration uses short-lived caching, stale-data fallback, bounded retries, and an explicit unavailable state rather than inventing zero activity when GitHub cannot be reached.
 
