@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Item } from '@/app/lib/item-types';
 import {
   SPACE_PUBLIC_SNAPSHOT_MAX_AGE_MS,
+  SPACE_PUBLIC_SNAPSHOT_MAX_BYTES,
   SPACE_PUBLIC_SNAPSHOT_MAX_ITEMS,
   SPACE_PUBLIC_SNAPSHOT_VERSION,
   createSpacePublicSnapshot,
@@ -20,33 +21,45 @@ function item(index = 1, overrides: Partial<Item> = {}): Item {
     versions: [
       {
         label: 'main',
+        content: `Item ${index}`,
         contentHtml: `<p>Item ${index}</p>`,
+        code: null,
+        codeHtml: '',
       },
     ],
     defaultIndex: 0,
+    createdAt: 100 + index,
+    updatedAt: 200 + index,
     userId: 'private-user',
     review: { private: true } as unknown as Item['review'],
     ...overrides,
-  } as Item;
+  };
 }
 
 describe('Space public snapshot contract', () => {
-  it('caps the archive page and strips private/admin fields before serialization', () => {
-    const items = Array.from(
-      { length: SPACE_PUBLIC_SNAPSHOT_MAX_ITEMS + 7 },
-      (_, index) => item(index + 1)
-    );
+  it('caps the archive page and projects only explicit public fields', () => {
+    const first = item();
+    (first as Item & { futurePrivate?: string }).futurePrivate = 'future-secret';
+    const items = [
+      first,
+      ...Array.from(
+        { length: SPACE_PUBLIC_SNAPSHOT_MAX_ITEMS + 6 },
+        (_, index) => item(index + 2)
+      ),
+    ];
     const snapshot = createSpacePublicSnapshot(items, {
       savedAt: 1_000,
       hasMore: true,
     });
+    const serialized = serializeSpacePublicSnapshot(snapshot);
 
     expect(snapshot.version).toBe(SPACE_PUBLIC_SNAPSHOT_VERSION);
     expect(snapshot.items).toHaveLength(SPACE_PUBLIC_SNAPSHOT_MAX_ITEMS);
     expect(snapshot.items[0]).not.toHaveProperty('review');
     expect(snapshot.items[0]).not.toHaveProperty('userId');
-    expect(serializeSpacePublicSnapshot(snapshot)).not.toContain('private-user');
-    expect(serializeSpacePublicSnapshot(snapshot)).not.toContain('private');
+    expect(snapshot.items[0]).not.toHaveProperty('futurePrivate');
+    expect(serialized).not.toContain('private-user');
+    expect(serialized).not.toContain('future-secret');
   });
 
   it('restores a fresh public snapshot without private fields', () => {
@@ -68,12 +81,14 @@ describe('Space public snapshot contract', () => {
       id: 'item-1',
       slug: 'item-1',
       title: 'Item 1',
+      createdAt: 101,
+      updatedAt: 201,
     });
     expect(restored?.items[0]).not.toHaveProperty('review');
     expect(restored?.items[0]).not.toHaveProperty('userId');
   });
 
-  it('rejects stale, far-future, wrong-version, and oversized snapshots', () => {
+  it('rejects stale, far-future, wrong-version, oversized-count, and oversized-byte snapshots', () => {
     const snapshot = createSpacePublicSnapshot([item()], {
       savedAt: 5_000,
       hasMore: false,
@@ -95,17 +110,43 @@ describe('Space public snapshot contract', () => {
     const wrongVersion = { ...snapshot, version: 99 };
     expect(parseSpacePublicSnapshot(JSON.stringify(wrongVersion), 5_000)).toBeNull();
 
-    const oversized = {
+    const oversizedCount = {
       ...snapshot,
       items: Array.from(
         { length: SPACE_PUBLIC_SNAPSHOT_MAX_ITEMS + 1 },
         () => snapshot.items[0]
       ),
     };
-    expect(parseSpacePublicSnapshot(JSON.stringify(oversized), 5_000)).toBeNull();
+    expect(
+      parseSpacePublicSnapshot(JSON.stringify(oversizedCount), 5_000)
+    ).toBeNull();
+
+    expect(
+      parseSpacePublicSnapshot('x'.repeat(SPACE_PUBLIC_SNAPSHOT_MAX_BYTES + 1), 5_000)
+    ).toBeNull();
+
+    const huge = createSpacePublicSnapshot(
+      [
+        item(1, {
+          versions: [
+            {
+              label: 'main',
+              content: 'large',
+              contentHtml: 'x'.repeat(SPACE_PUBLIC_SNAPSHOT_MAX_BYTES),
+              code: null,
+              codeHtml: '',
+            },
+          ],
+        }),
+      ],
+      { savedAt: 5_000, hasMore: false }
+    );
+    expect(() => serializeSpacePublicSnapshot(huge)).toThrow(
+      'browser cache byte budget'
+    );
   });
 
-  it('rejects malformed or private-field-injected browser data', () => {
+  it('rejects malformed, private-field-injected, and unknown-field browser data', () => {
     const snapshot = createSpacePublicSnapshot([item()], {
       savedAt: 5_000,
       hasMore: false,
@@ -120,6 +161,28 @@ describe('Space public snapshot contract', () => {
     };
     expect(
       parseSpacePublicSnapshot(JSON.stringify(privateInjection), 5_000)
+    ).toBeNull();
+
+    const unknownRoot = { ...snapshot, futurePrivate: 'secret' };
+    expect(parseSpacePublicSnapshot(JSON.stringify(unknownRoot), 5_000)).toBeNull();
+
+    const unknownItem = {
+      ...snapshot,
+      items: [{ ...snapshot.items[0], futurePrivate: 'secret' }],
+    };
+    expect(parseSpacePublicSnapshot(JSON.stringify(unknownItem), 5_000)).toBeNull();
+
+    const unknownVersion = {
+      ...snapshot,
+      items: [
+        {
+          ...snapshot.items[0],
+          versions: [{ ...snapshot.items[0].versions[0], futurePrivate: 'secret' }],
+        },
+      ],
+    };
+    expect(
+      parseSpacePublicSnapshot(JSON.stringify(unknownVersion), 5_000)
     ).toBeNull();
 
     const malformedVersion = {
