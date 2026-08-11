@@ -1,4 +1,5 @@
 import { botDeskEntries } from '@/lib/bot-desk';
+import { publicLearningRecords } from '@/lib/learning-records';
 import { indexedNavigationItems } from '@/lib/site-navigation';
 import type { MetadataRoute } from 'next';
 
@@ -18,5 +19,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.5,
   }));
 
-  return [...navigationEntries, ...deskEntries];
+  const learningRecordEntries = publicLearningRecords.map(record => ({
+    url: new URL(record.canonicalUrl, BASE_URL).toString(),
+    lastModified: `${record.revisions.at(-1)?.createdAt}T00:00:00.000Z`,
+    changeFrequency: 'monthly' as const,
+    priority: 0.5,
+  }));
+
+  return [
+    ...navigationEntries,
+    {
+      url: new URL('/space/records', BASE_URL).toString(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    },
+    ...learningRecordEntries,
+    ...deskEntries,
+  ];
 }
