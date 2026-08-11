@@ -10,6 +10,20 @@ Read the root `AGENTS.md` first. The normal Scrapbook pull-request and authority
 
 When substantive work elsewhere produces something potentially useful, independently ask whether it changes Leo's work record or current resume candidate pool.
 
+## Append first, reconcile later
+
+Leo often synthesizes rapidly and moves on. Do not make complete reorganization a prerequisite for preserving a useful thought.
+
+When a session produces a concrete result, interpretation, reversal, career implication, or reusable working-model insight:
+
+1. capture it in the narrowest existing durable record that fits, or create one when the concept is genuinely new;
+2. link primary evidence where the statement depends on external work;
+3. preserve uncertainty rather than forcing premature resolution;
+4. avoid rewriting older snapshots merely to make the current story look cleaner;
+5. let later agents reconcile duplication, stale status, contradictions, and ranking when a concrete question requires it.
+
+Agents are part of the retrieval layer. When answering a new career or engineering question, search the existing work records and primary repositories before assuming Leo has not encountered the relevant pattern before. Surface useful old evidence back into working memory instead of requiring the human to remember where it lived.
+
 ## Before writing
 
 1. Read the primary evidence in the originating repository. Prefer the exact issue, pull request, benchmark report, README evidence section, review, CI receipt, or current handoff over memory.
@@ -30,6 +44,8 @@ Record work when at least one of these is true:
 - a review interaction materially refined the repair boundary;
 - the work adds a new technical axis to the portfolio (compiler, VMM, runtime, browser tooling, distributed coordination, packaging, etc.);
 - the result would plausibly be useful in a resume, interview, portfolio, outreach note, or career narrative.
+
+Also record working-model changes when they explain how the broader corpus should be interpreted or retrieved later, for example changes in career framing, interview preparation strategy, agent/human division of labor, or active-recall practice.
 
 Do not record typo fixes, mechanical churn, routine dependency updates, superficial activity totals, or speculative findings that never reached a useful evidence boundary.
 
@@ -69,6 +85,8 @@ Never delete a durable record merely because it falls out of the current resume 
 Use canonical direct GitHub links inside durable work records. If a Scrapbook pull-request body mentions third-party upstream work and a backlink would be noisy, follow the root repository policy and use `redirect.github.com` there.
 
 Where useful, link both the upstream surface and the richer owned evidence packet.
+
+For current job descriptions, hiring processes, product status, package releases, or other time-sensitive career facts, refresh the primary source before updating the record. Date point-in-time role-fit notes so they are not silently treated as permanent facts.
 
 ## Voice
 
