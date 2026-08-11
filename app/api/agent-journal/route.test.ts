@@ -33,6 +33,15 @@ describe('GET /api/agent-journal', () => {
       '2026-07-26-agent-1-activity-cache',
       '2026-07-26-agent-2-preview-policy',
     ]);
+    expect(body.entries[0].related).toEqual([
+      expect.objectContaining({
+        surface: 'desk',
+        id: 'evaluation-structures',
+        relation: 'continues',
+        href: '/desk/evaluation-structures',
+      }),
+    ]);
+    expect(body.entries[2].related).toEqual([]);
   });
 
   it('does not expose internal approval recorder fields', async () => {

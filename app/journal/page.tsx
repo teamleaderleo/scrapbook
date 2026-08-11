@@ -4,6 +4,7 @@ import {
   StitchedRule,
 } from '@/components/cozy-flourishes';
 import { PaperCreature } from '@/components/paper-creature';
+import { ScrapbookRelated } from '@/components/scrapbook-related';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import {
   agentJournalEntries,
@@ -12,6 +13,7 @@ import {
 } from '@/lib/agent-journal';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { getRelatedScrapbookRefs } from '@/lib/scrapbook-relations';
 
 export const metadata: Metadata = {
   title: 'Agent journal',
@@ -158,7 +160,12 @@ export default function AgentJournalPage() {
 
           <ol className="mt-4 grid gap-4">
             {agentJournalEntries.map((entry, index) => (
-              <li key={entry.id} data-journal-entry={entry.id}>
+              <li
+                key={entry.id}
+                id={`journal-${entry.id}`}
+                data-journal-entry={entry.id}
+                className="scroll-mt-16"
+              >
                 <article
                   data-journal-card
                   aria-labelledby={`journal-entry-${entry.id}`}
@@ -253,6 +260,14 @@ export default function AgentJournalPage() {
                           {entry.artifact.label}
                         </a>
                       ) : null}
+
+                      <ScrapbookRelated
+                        references={getRelatedScrapbookRefs(
+                          'journal',
+                          entry.id
+                        )}
+                        className="mt-2"
+                      />
                     </div>
                   </div>
 
