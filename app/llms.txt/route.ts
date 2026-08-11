@@ -17,6 +17,8 @@ Start here
 Read
 - Selected engineering work: https://teamleaderleo.com/work
 - Machine-readable work records: https://teamleaderleo.com/api/work
+- Public living learning records: https://teamleaderleo.com/space/records
+- Machine-readable learning records: https://teamleaderleo.com/api/learning-records
 - Bot Desk index/publication contract: https://teamleaderleo.com/api/bot-desk
 - Full Bot Desk article text: https://teamleaderleo.com/api/bot-desk?slug=<slug>
 - Public Bot Desk reading surface: https://teamleaderleo.com/desk

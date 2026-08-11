@@ -30,6 +30,7 @@ export function GET() {
           home: '/',
           space: '/space',
           work: '/work',
+          learningRecords: '/space/records',
           desk: '/desk',
           journal: '/journal',
           gallery: '/gallery',
@@ -43,6 +44,7 @@ export function GET() {
           botDeskDocument: '/api/bot-desk?slug=<slug>',
           journal: '/api/agent-journal',
           work: '/api/work',
+          learningRecords: '/api/learning-records',
         },
         repositoryGuides: [
           'AGENTS.md',

@@ -21,6 +21,8 @@ describe('GET /llms.txt', () => {
     expect(text).toContain('https://teamleaderleo.com/api/agent-contributions');
     expect(text).toContain('https://teamleaderleo.com/work');
     expect(text).toContain('https://teamleaderleo.com/api/work');
+    expect(text).toContain('https://teamleaderleo.com/space/records');
+    expect(text).toContain('https://teamleaderleo.com/api/learning-records');
     expect(text).toContain(
       'https://teamleaderleo.com/api/bot-desk?slug=<slug>'
     );

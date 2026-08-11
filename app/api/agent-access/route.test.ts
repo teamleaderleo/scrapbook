@@ -30,10 +30,12 @@ describe('GET /api/agent-access', () => {
       read: {
         publicSite: {
           work: '/work',
+          learningRecords: '/space/records',
         },
         machineContracts: {
           handoffSchema: '/api/agent-access/handoff-schema',
           work: '/api/work',
+          learningRecords: '/api/learning-records',
         },
       },
       transports: {

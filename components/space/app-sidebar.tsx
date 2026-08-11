@@ -22,6 +22,7 @@ import {
   ArrowLeft,
   ArrowRight,
   CircleHelp,
+  LibraryBig,
   Loader2,
   LogOut,
   Plus,
@@ -194,6 +195,28 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    className="mx-2 rounded-lg px-3"
+                    isActive={pathname?.startsWith('/space/records')}
+                    asChild
+                  >
+                    <Link
+                      href="/space/records"
+                      onClick={closeMobile}
+                      className="flex items-center gap-2"
+                    >
+                      <LibraryBig
+                        className="h-4 w-4 shrink-0"
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0 flex-1 truncate">
+                        Living records
+                      </span>
+                      <SpaceLinkHint />
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     className="mx-2 rounded-lg px-3"

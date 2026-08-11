@@ -302,13 +302,22 @@ export function SpaceView() {
               <h1 className="text-xl font-semibold tracking-[-0.025em] sm:text-2xl">
                 Space
               </h1>
-              <Link
-                href="/space/trail"
-                prefetch
-                className="inline-flex min-h-[44px] items-center rounded-xl border border-border/70 bg-background/70 px-3 text-xs font-medium text-muted-foreground transition hover:border-foreground/25 hover:bg-card hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                Open reading trail
-              </Link>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href="/space/records"
+                  prefetch
+                  className="inline-flex min-h-[44px] items-center rounded-xl border border-border/70 bg-background/70 px-3 text-xs font-medium text-muted-foreground transition hover:border-foreground/25 hover:bg-card hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Living records
+                </Link>
+                <Link
+                  href="/space/trail"
+                  prefetch
+                  className="inline-flex min-h-[44px] items-center rounded-xl border border-border/70 bg-background/70 px-3 text-xs font-medium text-muted-foreground transition hover:border-foreground/25 hover:bg-card hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Reading trail
+                </Link>
+              </div>
             </div>
           </section>
 
