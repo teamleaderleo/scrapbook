@@ -122,7 +122,63 @@ function PhraseButton({
   );
 }
 
-export function OperatorConsole({ mode = 'full' }: { mode?: 'featured' | 'full' }) {
+function FeaturedPhraseButton({ phrase }: { phrase: OperatorPhrase }) {
+  const [state, setState] = useState<'idle' | 'copied' | 'error'>('idle');
+
+  const handleCopy = async () => {
+    try {
+      await copyText(phrase.text);
+      setState('copied');
+      window.setTimeout(() => setState('idle'), 1400);
+    } catch {
+      setState('error');
+      window.setTimeout(() => setState('idle'), 1800);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      aria-label={`Copy ${phrase.label}`}
+      data-operator-phrase={phrase.id}
+      data-copy-state={state}
+      className="group flex min-h-[4.5rem] w-full select-none items-center gap-3 px-3.5 py-3 text-left transition-colors hover:bg-muted/55 active:bg-muted/80 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:min-h-20 sm:px-4"
+    >
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-bold tracking-[-0.015em] sm:text-[0.95rem]">
+          {phrase.label}
+        </span>
+        <span className="mt-0.5 block text-xs leading-4 text-muted-foreground sm:line-clamp-1">
+          {phrase.note}
+        </span>
+      </span>
+      <span
+        className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-border/70 bg-background/65 text-muted-foreground transition-[color,transform,background-color] group-hover:bg-background group-hover:text-foreground group-active:scale-95"
+        aria-hidden="true"
+      >
+        {state === 'copied' ? (
+          <Check className="h-4 w-4" />
+        ) : (
+          <Clipboard className="h-4 w-4" />
+        )}
+      </span>
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {state === 'copied'
+          ? 'Copied'
+          : state === 'error'
+            ? 'Copy failed'
+            : ''}
+      </span>
+    </button>
+  );
+}
+
+export function OperatorConsole({
+  mode = 'full',
+}: {
+  mode?: 'featured' | 'full';
+}) {
   const [activeGroup, setActiveGroup] = useState<OperatorPhraseGroupId>('do');
   const activePhrases = operatorPhrases.filter(
     phrase => phrase.group === activeGroup
@@ -139,7 +195,9 @@ export function OperatorConsole({ mode = 'full' }: { mode?: 'featured' | 'full' 
       setActiveGroup(phrase.group);
       window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
-          document.getElementById(phrase.id)?.scrollIntoView({ block: 'center' });
+          document
+            .getElementById(phrase.id)
+            ?.scrollIntoView({ block: 'center' });
         });
       });
     };
@@ -152,36 +210,34 @@ export function OperatorConsole({ mode = 'full' }: { mode?: 'featured' | 'full' 
   if (mode === 'featured') {
     return (
       <section aria-labelledby="operator-console-title" data-operator-console>
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              Operator
-            </p>
-            <h1
-              id="operator-console-title"
-              className="mt-1 text-3xl font-black tracking-[-0.045em] sm:text-4xl"
+        <div className="overflow-hidden rounded-[1.4rem] border border-border/70 bg-card/80 shadow-[0_12px_30px_rgba(35,31,26,0.07)] backdrop-blur-sm dark:shadow-[0_14px_34px_rgba(0,0,0,0.22)]">
+          <div className="flex min-h-14 items-center justify-between gap-4 border-b border-border/65 px-3.5 py-2.5 sm:px-4">
+            <div className="min-w-0">
+              <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Copy into a chat
+              </p>
+              <h1
+                id="operator-console-title"
+                className="mt-0.5 truncate text-lg font-bold tracking-[-0.025em] sm:text-xl"
+              >
+                Operator phrases
+              </h1>
+            </div>
+            <Link
+              href="/operator"
+              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              What do you want them to do?
-            </h1>
+              All phrases
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
           </div>
-          <Link
-            href="/operator"
-            className="inline-flex items-center gap-1.5 self-start rounded-full border border-border/75 bg-background/75 px-3 py-2 text-sm font-semibold shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            All phrases
-            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-          </Link>
-        </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          {featuredPhrases.map(phrase => (
-            <PhraseButton key={phrase.id} phrase={phrase} />
-          ))}
+          <div className="grid border-border/55 [&>*:nth-child(n+2)]:border-t sm:grid-cols-2 sm:[&>*:nth-child(2)]:border-l sm:[&>*:nth-child(2)]:border-t-0 sm:[&>*:nth-child(4)]:border-l">
+            {featuredPhrases.map(phrase => (
+              <FeaturedPhraseButton key={phrase.id} phrase={phrase} />
+            ))}
+          </div>
         </div>
-
-        <p className="mt-4 max-w-3xl text-sm leading-6 text-muted-foreground">
-          Tap a button and paste it into whatever model or chat you are using. The full page keeps the broader phrasebook and a plain-text version for the lazy route.
-        </p>
       </section>
     );
   }
