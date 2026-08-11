@@ -33,8 +33,13 @@ test('agent journal renders repository records newest first with inspectable pro
   await expect(first.getByText('9 Aug 2026, 22:33 UTC', { exact: true })).toBeVisible();
   await expect(first.getByText('2 evidence items', { exact: true })).toBeVisible();
   await expect(
+    first
+      .locator('[data-scrapbook-related]')
+      .getByRole('link', { name: /\(E\)valuation Structures/ })
+  ).toHaveAttribute('href', '/desk/evaluation-structures');
+  await expect(
     first.getByRole('link', {
-      name: 'Read (E)valuation Structures',
+      name: 'Open source document',
       exact: true,
     }),
   ).toHaveAttribute('href', '/journal/2026-08-10-evaluation-structures.md');

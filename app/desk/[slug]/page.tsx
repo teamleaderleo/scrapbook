@@ -1,4 +1,5 @@
 import ViewportPageShell from '@/components/viewport-page-shell';
+import { ScrapbookRelated } from '@/components/scrapbook-related';
 import {
   botDeskEntries,
   getBotDeskDocument,
@@ -8,6 +9,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
+import { getRelatedScrapbookRefs } from '@/lib/scrapbook-relations';
 
 export function generateStaticParams() {
   return botDeskEntries.map(entry => ({ slug: entry.slug }));
@@ -52,13 +54,14 @@ export default async function BotDeskArticlePage({
   const { slug } = await params;
   const entry = await getBotDeskDocument(slug);
   if (!entry) notFound();
+  const related = getRelatedScrapbookRefs('desk', entry.slug);
 
   return (
     <ViewportPageShell
       className="bg-background text-foreground"
       contentClassName="min-h-[calc(100dvh-3rem)]"
     >
-      <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-7 sm:px-6 sm:pt-12 lg:px-8">
+      <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-7 sm:px-6 sm:pt-12 lg:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3 border-y border-border py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           <Link
             href="/desk"
@@ -154,8 +157,12 @@ export default async function BotDeskArticlePage({
               <p className="mt-2">{entry.revisionSummary}</p>
             </aside>
           ) : null}
+          <ScrapbookRelated
+            references={related}
+            className="mt-12 border-t border-border pt-5"
+          />
         </article>
-      </main>
+      </div>
     </ViewportPageShell>
   );
 }

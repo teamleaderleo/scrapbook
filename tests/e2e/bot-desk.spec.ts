@@ -7,6 +7,7 @@ test('Bot Desk exposes the publication index', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'Evidence journal' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'The Error Object Is an Input Boundary' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'The Fetch That Never Left the Worker' })).toBeVisible();
+  await expect(page.locator('main')).toHaveCount(1);
 });
 
 test('Bot Desk renders a harvested agent-led draft', async ({ page }) => {
@@ -29,4 +30,21 @@ test('Bot Desk renders a recovered article with separate editorial metadata', as
   await expect(page.getByText('Published', { exact: true })).toBeVisible();
   await expect(page.getByText('Recovered archive', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'The innocent-looking line' })).toBeVisible();
+});
+
+test('a Desk essay continues into its exact evidence record', async ({ page }) => {
+  await page.goto('/desk/evaluation-structures');
+
+  const related = page.locator('[data-scrapbook-related]');
+  await expect(page.locator('main')).toHaveCount(1);
+  const evidence = related.getByRole('link', { name: /The Selection Environment/ });
+  await expect(evidence).toHaveAttribute(
+    'href',
+    '/journal#journal-2026-08-10-evaluation-structures'
+  );
+  await evidence.click();
+  await expect(page).toHaveURL(/\/journal#journal-2026-08-10-evaluation-structures$/);
+  await expect(
+    page.locator('[data-journal-entry="2026-08-10-evaluation-structures"]')
+  ).toBeVisible();
 });
