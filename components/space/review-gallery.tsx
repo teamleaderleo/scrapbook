@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { parseQuery } from '@/app/lib/searchlang';
 import { searchItems } from '@/app/lib/item-search';
@@ -15,7 +15,8 @@ import { reviewOnce } from '@/app/lib/fsrs-adapter';
 import type { ReviewState } from '@/app/lib/review-types';
 import { rollbackFailedReview } from '@/app/lib/review-overrides';
 import { reviewItemAction } from '@/app/space/actions';
-import { duplicateItemHref } from '@/lib/space-routes';
+import { duplicateItemHref, reviewItemHref } from '@/lib/space-routes';
+import { createSpaceBrowseHref } from '@/lib/space-browse-state';
 import { SpaceHeader } from './space-header';
 import { CodeDisplay } from './code-display';
 import { useSpaceShortcut } from './space-shortcut-provider';
@@ -66,11 +67,22 @@ export function ReviewGallery() {
 
   const current = items[currentIndex];
   const active = current?.versions[activeIdx];
-  const exitParams = new URLSearchParams();
-  if (tagsParam) exitParams.set('tags', tagsParam);
-  if (laneParam) exitParams.set('lane', laneParam);
-  const exitSearch = exitParams.toString();
-  const exitHref = `/space${exitSearch ? `?${exitSearch}` : ''}`;
+  const exitHref = createSpaceBrowseHref('/space', {
+    lane: laneParam,
+    tags: tagsParam,
+  });
+
+  const replaceReaderItem = useCallback(
+    (index: number) => {
+      const nextItem = items[index];
+      if (!nextItem) return;
+      router.replace(
+        reviewItemHref(nextItem.id, tagsParam, laneParam ?? undefined),
+        { scroll: false }
+      );
+    },
+    [items, laneParam, router, tagsParam]
+  );
 
   useEffect(() => {
     if (!hasMore || loadingMore) return;
@@ -95,6 +107,10 @@ export function ReviewGallery() {
     }
   }, [itemParam, items]);
 
+  useEffect(() => {
+    if (!itemParam && current) replaceReaderItem(currentIndex);
+  }, [current, currentIndex, itemParam, replaceReaderItem]);
+
   const nextShortcut = useMemo(
     () => ({
       enabled: Boolean(current) && currentIndex < items.length - 1,
@@ -102,11 +118,14 @@ export function ReviewGallery() {
         ? 'Already at the last reader item'
         : 'No reader item is available',
       run: () => {
-        setCurrentIndex(index => Math.min(index + 1, items.length - 1));
+        const nextIndex = Math.min(currentIndex + 1, items.length - 1);
+        if (nextIndex === currentIndex) return;
+        setCurrentIndex(nextIndex);
         setShowContent(true);
+        replaceReaderItem(nextIndex);
       },
     }),
-    [current, currentIndex, items.length]
+    [current, currentIndex, items.length, replaceReaderItem]
   );
   const previousShortcut = useMemo(
     () => ({
@@ -115,11 +134,14 @@ export function ReviewGallery() {
         ? 'Already at the first reader item'
         : 'No reader item is available',
       run: () => {
-        setCurrentIndex(index => Math.max(index - 1, 0));
+        const previousIndex = Math.max(currentIndex - 1, 0);
+        if (previousIndex === currentIndex) return;
+        setCurrentIndex(previousIndex);
         setShowContent(true);
+        replaceReaderItem(previousIndex);
       },
     }),
-    [current, currentIndex]
+    [current, currentIndex, replaceReaderItem]
   );
   const toggleContentShortcut = useMemo(
     () => ({
@@ -167,8 +189,10 @@ export function ReviewGallery() {
     }
 
     if (currentIndex < items.length - 1) {
-      setCurrentIndex(index => index + 1);
+      const nextIndex = currentIndex + 1;
+      setCurrentIndex(nextIndex);
       setShowContent(true);
+      replaceReaderItem(nextIndex);
     }
   };
 
