@@ -75,6 +75,17 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         sitemap: { changeFrequency: 'weekly', priority: 0.8 },
       },
       {
+        id: 'work',
+        href: '/work',
+        label: 'Work',
+        description: 'Selected engineering work and its evidence.',
+        group: 'places',
+        surface: 'public',
+        primary: true,
+        homeShelf: true,
+        sitemap: { changeFrequency: 'weekly', priority: 0.8 },
+      },
+      {
         id: 'gallery',
         href: '/gallery',
         label: 'Gallery',

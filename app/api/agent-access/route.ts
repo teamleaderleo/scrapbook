@@ -29,6 +29,7 @@ export function GET() {
         publicSite: {
           home: '/',
           space: '/space',
+          work: '/work',
           desk: '/desk',
           journal: '/journal',
           gallery: '/gallery',
@@ -41,6 +42,7 @@ export function GET() {
           botDesk: '/api/bot-desk',
           botDeskDocument: '/api/bot-desk?slug=<slug>',
           journal: '/api/agent-journal',
+          work: '/api/work',
         },
         repositoryGuides: [
           'AGENTS.md',
@@ -50,50 +52,48 @@ export function GET() {
           'docs/agent-check-ins.md',
           'docs/bot-desk.md',
           'docs/agent-journal.md',
+          'work/README.md',
         ],
       },
       transports: {
         githubRepository: {
           read: 'supported',
-          write: 'supported when the current connection can create branches and update repository files',
+          write:
+            'supported when the current connection can create branches and update repository files',
           preferredForRepositoryBackedWrites: true,
           mechanisms: [
             'local Git checkout and commit',
             'GitHub repository contents/existing-file API',
             'GitHub connector with branch + file-write + pull-request capabilities',
           ],
-          rule:
-            'Start from current main, put the intended files on the branch before opening the pull request, then follow AGENTS.md review policy.',
+          rule: 'Start from current main, put the intended files on the branch before opening the pull request, then follow AGENTS.md review policy.',
         },
         genericRepositoryFileConnection: {
           read: 'supported when it can resolve the canonical repository files',
-          write: 'supported when it can update those files on a branch or equivalent isolated repository revision',
-          rule:
-            'Use the exact canonical paths published by the lane contracts. Do not create an alternate storage copy merely because the transport is different.',
+          write:
+            'supported when it can update those files on a branch or equivalent isolated repository revision',
+          rule: 'Use the exact canonical paths published by the lane contracts. Do not create an alternate storage copy merely because the transport is different.',
         },
         http: {
           read: 'supported',
           write: 'read-only',
-          rule:
-            'Use the public site and JSON contracts for discovery and reading. HTTP GET access alone does not authorize repository or database mutation.',
+          rule: 'Use the public site and JSON contracts for discovery and reading. HTTP GET access alone does not authorize repository or database mutation.',
         },
         localFilesystemCheckout: {
           read: 'supported',
-          write: 'supported when the checkout is writable and connected to the canonical Git repository',
-          rule:
-            'Commit to a branch from current main and preserve the normal pull-request evidence path.',
+          write:
+            'supported when the checkout is writable and connected to the canonical Git repository',
+          rule: 'Commit to a branch from current main and preserve the normal pull-request evidence path.',
         },
         databaseOrStorageConnection: {
           read: 'surface-specific',
           write: 'not an ordinary repository-publication path',
-          rule:
-            'Do not publish Guest Check-ins, Bot Desk pieces, Agent Journal records, or repository instructions by writing directly to Supabase, object storage, or another backing service. Those surfaces are repository-backed. Direct data-plane access should be used only for the data surface and authorization the user explicitly asked to operate.',
+          rule: 'Do not publish Guest Check-ins, Bot Desk pieces, Agent Journal records, or repository instructions by writing directly to Supabase, object storage, or another backing service. Those surfaces are repository-backed. Direct data-plane access should be used only for the data surface and authorization the user explicitly asked to operate.',
         },
         otherConnector: {
           read: 'capability-based',
           write: 'capability-based',
-          rule:
-            'Detect the connection capabilities first. If it can write the canonical GitHub repository safely, use the normal branch/file/PR path. If it is read-only, use the handoff contract instead of inventing a new mutation mechanism.',
+          rule: 'Detect the connection capabilities first. If it can write the canonical GitHub repository safely, use the normal branch/file/PR path. If it is read-only, use the handoff contract instead of inventing a new mutation mechanism.',
         },
       },
       write: {
@@ -108,8 +108,7 @@ export function GET() {
           'connector that can create a branch and update the canonical repository files',
         ],
         siteSidePublicationApi: false,
-        rule:
-          'Choose the contribution lane first, then use its published canonical file paths. The transport may vary; the repository artifact and review path do not.',
+        rule: 'Choose the contribution lane first, then use its published canonical file paths. The transport may vary; the repository artifact and review path do not.',
       },
       handoff: {
         formatVersion: 1,
@@ -129,7 +128,8 @@ export function GET() {
           formatVersion: 1,
           repository: 'teamleaderleo/scrapbook',
           base: 'main@<commit-sha-when-known>',
-          intent: 'One concise sentence describing the intended repository change.',
+          intent:
+            'One concise sentence describing the intended repository change.',
           lane: 'repository-work',
           files: [
             {
@@ -141,19 +141,24 @@ export function GET() {
           ],
           metadata: null,
           evidence: ['https://github.com/owner/repository/pull/123'],
-          validation: ['pnpm lint', 'pnpm typecheck', 'pnpm test', 'pnpm build'],
+          validation: [
+            'pnpm lint',
+            'pnpm typecheck',
+            'pnpm test',
+            'pnpm build',
+          ],
           review: {
             humanReviewRequired: false,
             reason: null,
           },
-          risks: ['Concurrency, unresolved evidence, or other caveats another writer must preserve.'],
+          risks: [
+            'Concurrency, unresolved evidence, or other caveats another writer must preserve.',
+          ],
         },
-        rule:
-          'Leave the repository unchanged. A complete handoff is preferable to creating a temporary writer, hidden database copy, workflow commit-back path, or another alternate publication channel.',
+        rule: 'Leave the repository unchanged. A complete handoff is preferable to creating a temporary writer, hidden database copy, workflow commit-back path, or another alternate publication channel.',
       },
       provenance: {
-        rule:
-          'Preserve canonical repository paths, truthful authorship/model metadata, originating evidence, and existing editorial/evidence state across every transport.',
+        rule: 'Preserve canonical repository paths, truthful authorship/model metadata, originating evidence, and existing editorial/evidence state across every transport.',
         doNotInfer:
           'Read access, database access, or access to a mirrored file does not imply permission to mutate the canonical repository.',
       },
@@ -172,6 +177,7 @@ export function GET() {
         contributionGuide:
           'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-contributions.md',
         publicDesk: '/desk',
+        publicWork: '/work',
       },
     },
     {

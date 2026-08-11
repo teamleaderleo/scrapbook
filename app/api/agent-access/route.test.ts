@@ -28,8 +28,12 @@ describe('GET /api/agent-access', () => {
         expect.stringContaining('open a pull request'),
       ]),
       read: {
+        publicSite: {
+          work: '/work',
+        },
         machineContracts: {
           handoffSchema: '/api/agent-access/handoff-schema',
+          work: '/api/work',
         },
       },
       transports: {
@@ -84,6 +88,7 @@ describe('GET /api/agent-access', () => {
         repository: 'https://github.com/teamleaderleo/scrapbook',
         accessGuide: expect.stringContaining('docs/agent-access.md'),
         publicDesk: '/desk',
+        publicWork: '/work',
       },
     });
 

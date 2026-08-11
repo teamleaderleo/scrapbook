@@ -178,7 +178,7 @@ test('navigation fills a phone rail and exposes room links when they fit', async
 
   await page.setViewportSize({ width: 740, height: 844 });
   const roomLinks = page.locator('[data-site-primary-link]');
-  await expect(roomLinks).toHaveCount(3);
+  await expect(roomLinks).toHaveCount(4);
   for (const link of await roomLinks.all()) {
     await expect(link).toBeVisible();
     const box = await link.boundingBox();
