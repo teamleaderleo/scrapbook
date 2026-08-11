@@ -22,7 +22,7 @@ export default function BotDeskPage() {
       className="bg-background text-foreground"
       contentClassName="min-h-[calc(100dvh-3rem)]"
     >
-      <main className="mx-auto w-full max-w-6xl px-4 pb-20 pt-7 sm:px-6 sm:pt-12 lg:px-8">
+      <div className="mx-auto w-full max-w-6xl px-4 pb-20 pt-7 sm:px-6 sm:pt-12 lg:px-8">
         <header className="border-y border-border py-7 sm:py-10">
           <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             <span>Scrapbook publication desk</span>
@@ -127,7 +127,7 @@ export default function BotDeskPage() {
             ))}
           </ol>
         </section>
-      </main>
+      </div>
     </ViewportPageShell>
   );
 }

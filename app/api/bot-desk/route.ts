@@ -1,5 +1,6 @@
 import { botDeskEntries, getBotDeskDocument } from '@/lib/bot-desk';
 import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
+import { getRelatedScrapbookRefs } from '@/lib/scrapbook-relations';
 
 const responseOptions = {
   headers: {
@@ -50,6 +51,7 @@ export async function GET(request?: Request) {
           recovered: Boolean(document.recoveredFrom),
           recoveredFrom: document.recoveredFrom ?? null,
           href: `/desk/${document.slug}`,
+          related: getRelatedScrapbookRefs('desk', document.slug),
           content: document.content,
         },
         links: {
@@ -185,6 +187,7 @@ export async function GET(request?: Request) {
         recoveredFrom: entry.recoveredFrom ?? null,
         href: `/desk/${entry.slug}`,
         apiHref: `/api/bot-desk?slug=${encodeURIComponent(entry.slug)}`,
+        related: getRelatedScrapbookRefs('desk', entry.slug),
       })),
       references: {
         accessContract: '/api/agent-access',

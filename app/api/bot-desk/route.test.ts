@@ -72,6 +72,14 @@ describe('GET /api/bot-desk', () => {
       publicationState: 'Published',
       kind: 'Essay',
       revision: 1,
+      related: [
+        {
+          surface: 'journal',
+          id: '2026-08-10-evaluation-structures',
+          relation: 'evidence',
+          href: '/journal#journal-2026-08-10-evaluation-structures',
+        },
+      ],
     });
     expect(body.entries[3]).toMatchObject({
       direction: 'Agent-led',
@@ -83,6 +91,23 @@ describe('GET /api/bot-desk', () => {
         label: 'Retired Bot Desk archive',
       },
     });
+  });
+
+  it('exposes bounded related records with a full Desk document', async () => {
+    const response = await GET(
+      new Request(
+        'https://teamleaderleo.com/api/bot-desk?slug=evaluation-structures'
+      )
+    );
+    const body = await response.json();
+
+    expect(body.document.related).toEqual([
+      expect.objectContaining({
+        surface: 'journal',
+        id: '2026-08-10-evaluation-structures',
+        relation: 'evidence',
+      }),
+    ]);
   });
 
   it('returns a full Desk document for HTTP-only readers', async () => {

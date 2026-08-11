@@ -76,7 +76,7 @@ const entries = [
     artifact: {
       kind: 'document',
       path: '/journal/2026-08-10-evaluation-structures.md',
-      label: 'Read (E)valuation Structures',
+      label: 'Open source document',
     },
     approval: {
       mode: 'human-directed',
@@ -107,7 +107,7 @@ const entries = [
     artifact: {
       kind: 'document',
       path: '/journal/2026-07-30-confidence-and-humility.md',
-      label: 'Read Confidence and Humility, Working the Same Shift',
+      label: 'Open source document',
     },
     approval: {
       mode: 'human-directed',
