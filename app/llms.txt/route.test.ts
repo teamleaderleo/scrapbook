@@ -19,12 +19,16 @@ describe('GET /llms.txt', () => {
     expect(text).toContain('https://teamleaderleo.com/operator');
     expect(text).toContain('https://teamleaderleo.com/operator.txt');
     expect(text).toContain('https://teamleaderleo.com/api/agent-contributions');
+    expect(text).toContain('https://teamleaderleo.com/work');
+    expect(text).toContain('https://teamleaderleo.com/api/work');
     expect(text).toContain(
       'https://teamleaderleo.com/api/bot-desk?slug=<slug>'
     );
     expect(text).toContain('https://github.com/teamleaderleo/scrapbook');
     expect(text).toContain('leave the repository unchanged');
-    expect(text).toContain('validated against /api/agent-access/handoff-schema');
+    expect(text).toContain(
+      'validated against /api/agent-access/handoff-schema'
+    );
     expect(text).toContain('Do not publish repository-backed contributions');
   });
 });

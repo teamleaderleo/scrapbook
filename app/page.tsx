@@ -9,6 +9,7 @@ import {
   ArrowUpRight,
   Brain,
   Compass,
+  Hammer,
   Images,
   NotebookPen,
   Palette,
@@ -23,12 +24,14 @@ import styles from './page.module.css';
 
 export const metadata: Metadata = {
   title: 'Leo · Operator',
-  description: 'Copyable operator phrases, recent GitHub activity, and Scrapbook rooms.',
+  description:
+    'Copyable operator phrases, recent GitHub activity, and Scrapbook rooms.',
   alternates: { canonical: '/' },
 };
 
 const homeRoomIcons: Record<string, LucideIcon> = {
   space: Brain,
+  work: Hammer,
   gallery: Images,
   journal: NotebookPen,
   atelier: Palette,
@@ -237,7 +240,10 @@ export default function Page() {
             <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Activity
             </p>
-            <h2 id="home-activity-title" className="mt-1 text-xl font-black tracking-tight">
+            <h2
+              id="home-activity-title"
+              className="mt-1 text-xl font-black tracking-tight"
+            >
               GitHub, still here
             </h2>
           </div>

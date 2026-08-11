@@ -17,6 +17,7 @@ describe('site navigation registry', () => {
         '/',
         '/operator',
         '/space',
+        '/work',
         '/time',
         '/gallery',
         '/desk',
@@ -33,7 +34,7 @@ describe('site navigation registry', () => {
 
   it('keeps Operator, tools, the evidence journal, and labs out of the primary row', () => {
     const primaryIds = primaryNavigationItems.map(item => item.id);
-    expect(primaryIds).toEqual(['home', 'space', 'gallery', 'desk']);
+    expect(primaryIds).toEqual(['home', 'space', 'work', 'gallery', 'desk']);
     expect(primaryIds).not.toContain('operator');
     expect(primaryIds).not.toContain('journal');
     expect(primaryIds).not.toContain('proxy');
@@ -50,6 +51,9 @@ describe('site navigation registry', () => {
       siteNavigationItems.find(item => item.id === 'operator')?.surface
     ).toBe('public');
     expect(siteNavigationItems.find(item => item.id === 'space')?.surface).toBe(
+      'public'
+    );
+    expect(siteNavigationItems.find(item => item.id === 'work')?.surface).toBe(
       'public'
     );
     expect(siteNavigationItems.find(item => item.id === 'desk')?.surface).toBe(
@@ -69,6 +73,7 @@ describe('site navigation registry', () => {
       'home',
       'operator',
       'space',
+      'work',
       'gallery',
       'desk',
       'journal',
@@ -77,6 +82,7 @@ describe('site navigation registry', () => {
     expect(nonPublicNavigationItems.map(item => item.id)).toEqual(['proxy']);
     expect(homeRoomNavigationItems.map(item => item.id)).toEqual([
       'space',
+      'work',
       'gallery',
       'desk',
       'atelier',
@@ -110,6 +116,7 @@ describe('site navigation registry', () => {
   it('returns the active place for registered routes', () => {
     expect(getActiveNavigationItem('/operator')?.id).toBe('operator');
     expect(getActiveNavigationItem('/space/review')?.id).toBe('space');
+    expect(getActiveNavigationItem('/work')?.id).toBe('work');
     expect(getActiveNavigationItem('/gallery')?.id).toBe('gallery');
     expect(getActiveNavigationItem('/desk')?.id).toBe('desk');
     expect(getActiveNavigationItem('/desk/example')?.id).toBe('desk');

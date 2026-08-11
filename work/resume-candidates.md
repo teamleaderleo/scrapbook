@@ -169,7 +169,7 @@ Keep boring and compact.
 
 Current default candidate:
 
-> **Languages:** TypeScript/JavaScript, Rust, Java, Python, Go, SQL  
+> **Languages:** TypeScript/JavaScript, Rust, Java, Python, Go, SQL
 > **Technologies:** Linux, React, Node.js, Cloudflare Workers, Docker, AWS, PostgreSQL, Git
 
 Tailor lightly by role.

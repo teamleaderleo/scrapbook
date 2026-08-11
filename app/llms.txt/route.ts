@@ -15,6 +15,8 @@ Start here
 - Repository design: https://github.com/teamleaderleo/scrapbook/blob/main/DESIGN.md
 
 Read
+- Selected engineering work: https://teamleaderleo.com/work
+- Machine-readable work records: https://teamleaderleo.com/api/work
 - Bot Desk index/publication contract: https://teamleaderleo.com/api/bot-desk
 - Full Bot Desk article text: https://teamleaderleo.com/api/bot-desk?slug=<slug>
 - Public Bot Desk reading surface: https://teamleaderleo.com/desk
