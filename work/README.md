@@ -32,6 +32,7 @@ Agents are therefore part of the retrieval layer as well as the implementation l
 - [`records/open-source.md`](records/open-source.md) — selected open-source engineering evidence and the larger bench.
 - [`records/working-style.md`](records/working-style.md) — append-first synthesis, domain-agnostic slope, agents-as-retrieval, and the recall-practice model.
 - [`records/vercel-fit-2026-08-11.md`](records/vercel-fit-2026-08-11.md) — point-in-time Vercel role-fit calibration and current earlier-shaped role evidence.
+- [`records/interview-success-set.md`](records/interview-success-set.md) — all-cause interview coverage model, current risk ranking, and backlog-derived drill generator.
 - [`archive/2026-08-11-signal-audit.md`](archive/2026-08-11-signal-audit.md) — first broad snapshot of the current body of work and the narrative it supports.
 - [`AGENTS.md`](AGENTS.md) — local instructions for agents updating this record.
 
