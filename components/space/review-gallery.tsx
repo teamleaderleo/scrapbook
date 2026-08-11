@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { parseQuery } from '@/app/lib/searchlang';
 import { searchItems } from '@/app/lib/item-search';
@@ -72,14 +72,17 @@ export function ReviewGallery() {
     tags: tagsParam,
   });
 
-  const replaceReaderItem = (index: number) => {
-    const nextItem = items[index];
-    if (!nextItem) return;
-    router.replace(
-      reviewItemHref(nextItem.id, tagsParam, laneParam ?? undefined),
-      { scroll: false }
-    );
-  };
+  const replaceReaderItem = useCallback(
+    (index: number) => {
+      const nextItem = items[index];
+      if (!nextItem) return;
+      router.replace(
+        reviewItemHref(nextItem.id, tagsParam, laneParam ?? undefined),
+        { scroll: false }
+      );
+    },
+    [items, laneParam, router, tagsParam]
+  );
 
   useEffect(() => {
     if (!hasMore || loadingMore) return;
@@ -106,7 +109,7 @@ export function ReviewGallery() {
 
   useEffect(() => {
     if (!itemParam && current) replaceReaderItem(currentIndex);
-  }, [current, currentIndex, itemParam]);
+  }, [current, currentIndex, itemParam, replaceReaderItem]);
 
   const nextShortcut = useMemo(
     () => ({
@@ -122,7 +125,7 @@ export function ReviewGallery() {
         replaceReaderItem(nextIndex);
       },
     }),
-    [current, currentIndex, items, laneParam, router, tagsParam]
+    [current, currentIndex, items.length, replaceReaderItem]
   );
   const previousShortcut = useMemo(
     () => ({
@@ -138,7 +141,7 @@ export function ReviewGallery() {
         replaceReaderItem(previousIndex);
       },
     }),
-    [current, currentIndex, items, laneParam, router, tagsParam]
+    [current, currentIndex, replaceReaderItem]
   );
   const toggleContentShortcut = useMemo(
     () => ({

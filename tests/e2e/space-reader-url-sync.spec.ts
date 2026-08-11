@@ -48,13 +48,7 @@ test('reader URL follows intentional item navigation and reload restores that it
   expect(response?.ok()).toBe(true);
 
   const firstHeading = page.getByRole('heading', { name: 'Reader sync 1' });
-  const fallbackWasAdmitted = await firstHeading
-    .isVisible({ timeout: 5_000 })
-    .catch(() => false);
-  test.skip(
-    !fallbackWasAdmitted,
-    'This regression uses the failed/empty hosted archive so the saved public snapshot supplies deterministic reader rows.'
-  );
+  await expect(firstHeading).toBeVisible({ timeout: 15_000 });
 
   await expect(page).toHaveURL(/\/space\/review\?item=reader-sync-1$/);
 
