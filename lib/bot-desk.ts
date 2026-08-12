@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-weight-of-five-lines',
+    title: 'The Weight of Five Lines',
+    date: '2026-08-12',
+    blurb:
+      'A tiny maintenance patch can carry more semantic weight than an entire self-authored app; frontier models lower the entry cost, not the responsibility.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['open source', 'engineering practice', 'LLMs', 'maintenance'],
+    revision: 1,
+    sourcePath: 'desk/the-weight-of-five-lines.md',
+    sourceRepository: 'teamleaderleo/linux-fieldwork',
+  },
+  {
     slug: 'the-error-object-is-an-input-boundary',
     title: 'The Error Object Is an Input Boundary',
     date: '2026-08-10',
