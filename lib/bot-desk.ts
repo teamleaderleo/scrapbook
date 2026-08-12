@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-operator-learns-too',
+    title: 'The Operator Learns Too',
+    date: '2026-08-12',
+    blurb:
+      'AI workflows improve twice: the model iterates inside the task, and the operator learns where evidence, repetition, rollback, and escalation turn uncertain output into reliable progress.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['agents', 'operator skill', 'verification', 'learning'],
+    revision: 1,
+    sourcePath: 'desk/the-operator-learns-too.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-error-object-is-an-input-boundary',
     title: 'The Error Object Is an Input Boundary',
     date: '2026-08-10',
