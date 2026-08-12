@@ -56,7 +56,7 @@ Software has a special advantage here: so much of its world is executable. If th
 
 A language model can argue with itself forever. Execution gives something outside the conversation a vote, and that vote often teaches more than another thousand tokens of elegant explanation. A failed test can reveal the hidden assumption; a strange benchmark can expose a tradeoff; a production trace can kill a beautiful theory in seconds. Cheap conjecture becomes powerful when reality is allowed to kill bad conjectures quickly.
 
-## Verification has an economics
+## The economics of verification
 
 The usual objection arrives here: if a human has to check the output, perhaps the productivity gain disappears. Sometimes it does, because generation, discovery, verification, correction, and failure costs vary wildly by task.
 
@@ -106,9 +106,9 @@ That translation never captures every aesthetic judgment, and it captures enough
 
 Correctness, however, only covers part of the story. Sometimes the artifact is acceptable while the process quietly changes the kind of work a person does.
 
-The recent controversy around Hank Green’s use of generative AI is interesting for that reason. One episode involved an AI-generated scientific diagram with concrete errors, a familiar case in which the artifact was wrong, people noticed, the image was removed, and the operator updated. Another controversy grew around Green’s use of ChatGPT while researching educational material. The public accusation quickly became larger than the behavior he described: his account was closer to using the model to locate sources and resources, then reading those sources and developing the interpretation himself.
+The recent controversy around Hank Green’s use of ChatGPT while researching educational material is interesting for that reason. The public accusation quickly became larger than the behavior he described. In [his own account](https://www.reddit.com/r/nerdfighters/comments/1vbmoj5/comment/p0vzmog/), Green said he had been using AI to locate papers and other resources, then reading those sources and developing the interpretation himself. His concern was subtler than “the model gave me a false fact”: he felt that relying on it too heavily for discovery had reduced his freedom to find his own ways into and around a topic.
 
-That produced the predictable questions about hallucination, trust, verification cost, and credibility. Green’s later reflection opened a more interesting line of inquiry because his concern included what the tool was doing to his path through a topic.
+That produced the predictable questions about hallucination, trust, verification cost, and credibility. Green’s reflection opened a more interesting line of inquiry because his concern included what the tool was doing to his path through a topic.
 
 An LLM can take an enormous subject and immediately supply a route: the important papers, the main disputes, the likely connections, the conventional synthesis. That can save enormous time, and it also changes what the researcher encounters along the way.
 
