@@ -35,9 +35,9 @@ The API lifecycle tests treated loss of SSH as proof that guest shutdown had com
 
 The repair starts the VMM with `--no-shutdown` plus an event monitor, powers off the guest normally, then waits for the VMM's exact `shutdown` event before boot or delete/create reuse.
 
-The upstream review involved small cleanup/squash requests, then approval and merge.
+The upstream review requested changes, Leo revised the patch, and the maintainer subsequently approved it before merge. Later ARM CI exposed an adjacent `--no-shutdown` issue that the maintainer fixed separately and rebased underneath this PR.
 
-Resume signal: **lock**. Strong lifecycle/concurrency correctness story in a real Rust VMM.
+Resume signal: **lock**. Strong lifecycle/concurrency correctness story in a real Rust VMM, with a visible review cycle rather than a drive-by merge.
 
 ### Cloud Hypervisor — propagate ACPI construction failures
 
@@ -51,19 +51,51 @@ The repair introduced a typed ACPI error path and propagated failure through VM 
 
 Validation covered nightly rustfmt, VMM Clippy with warnings denied, x86_64 KVM/MSHV, fw_cfg, TDX, AArch64 KVM/MSHV, and the repository's RISC-V KVM build. The PR explicitly disclosed that a VM boot smoke test was not run for that change.
 
+The PR received approvals from two Cloud Hypervisor members before merge, including repeated approval after final review cleanup.
+
 Resume signal: best paired with the lifecycle PR as one Cloud Hypervisor entry rather than spending two headings.
+
+### Cloud Hypervisor — QCOW L2 ownership before L1 publication
+
+Upstream PR: https://github.com/cloud-hypervisor/cloud-hypervisor/pull/8721
+
+State: **open; no human review yet** at the latest refresh.
+
+`map_write()` can publish a newly allocated or relocated QCOW L2 table through L1 before the L2's `refcount=1` ownership update is applied. If later work fails, the deferred refcount update can be lost while the L1 pointer survives. After shutdown/reopen, the still-referenced L2 can therefore appear free to the allocator and become eligible for reuse.
+
+The candidate moves new-L2 ownership before L1 publication while leaving release of the old relocated L2 deferred. Regressions cover fresh-L2 ENOSPC plus allocator reuse after reopen, relocated-L2 ownership, the zero-marker path, and the existing failed-relocation cases.
+
+Local validation reports 298 block tests passing normally and 326 with `io_uring`, plus `cargo check`, Clippy, nightly rustfmt and diff checks. Upstream CI's substantive build/quality lanes are green; the aggregate failure at this refresh is a gitlint complaint about overlong commit-message body lines.
+
+Signal: **high upside systems follow-on**. If accepted, the Cloud Hypervisor story expands from lifecycle and boot errors into persistent block-image metadata ownership, which materially strengthens the systems resume cut.
 
 ### Cloudflare Workers SDK — current credentials vs cached authorization state
 
 Upstream PR: https://github.com/cloudflare/workers-sdk/pull/15080
 
-State: **open; Wrangler codeowner approval present; changesets prepared** at the current audit.
+State: **open; human-approved; Wrangler CODEOWNERS satisfied; changesets prepared** at the latest refresh.
 
 `getAccessHeaders()` cached Access service-token headers by domain. If the environment later removed or partially changed the client ID/secret, the same domain could reuse stale complete credentials.
 
 The repair returns service-token headers from the current environment and leaves interactive `CF_Authorization` cookie caching intact. Regressions cover unsetting either/both service-token variables and preservation of legitimate interactive-cookie reuse.
 
-Resume signal: **strong**. Good state/credential-semantics example; status should be refreshed before final wording.
+A human reviewer approved the current head and the repository's CODEOWNERS gate explicitly reports satisfied. GitHub still reports the PR open/blocked rather than merged, so public wording should distinguish accepted review from merge.
+
+Resume signal: **strong**. This has crossed from merely submitted work into real external validation even before merge.
+
+### Cloudflare Workers SDK — Miniflare runtime disposal ordering
+
+Upstream PR: https://github.com/cloudflare/workers-sdk/pull/15143
+
+State: **open; awaiting human approval** at the latest refresh.
+
+`Miniflare.dispose()` currently waits for browser/proxy cleanup before requesting `Runtime.dispose()`, so slow or failed auxiliary cleanup can delay or skip the `workerd` termination request.
+
+The repair starts runtime disposal first, preserves the existing browser → exit-hook → proxy cleanup ordering, remembers the first cleanup error, waits for the already-started runtime exit, then returns the cleanup error. Regressions cover requesting `workerd` termination while proxy cleanup is still pending and waiting for runtime settlement after proxy cleanup failure.
+
+A bot review flagged only release-note wording; Leo revised the changeset to describe user-facing behavior and clarified that the guarantee is early `workerd` termination rather than making all cleanup complete early. Human reviewers are still requested.
+
+Signal: strong lifecycle follow-on if accepted. Together with #15080, it would make Cloudflare a small cluster of state/credential and teardown work rather than a single isolated contribution.
 
 ## Vercel AI SDK — wider current bench
 
@@ -109,7 +141,7 @@ Signal: demonstrates continuing familiarity with the AI SDK harness codebase. Do
 
 Upstream PR: https://github.com/swc-project/swc/pull/12110
 
-Current state at audit: submitted/draft-style current work; human approval not yet established.
+Current state at audit: submitted current work; human approval not yet established.
 
 The optimizer/minifier can treat `instanceof` as though preserving operand effects is enough when the result is unused. But the operation itself can be observable through `Symbol.hasInstance` and can throw for an invalid RHS. Existing operand-shape folds can also return the wrong boolean for cases such as null-prototype objects.
 
@@ -135,13 +167,37 @@ Signal: excellent mechanism, lower marginal resume value once AI SDK/Cloud Hyper
 
 ## Vite
 
-Current submitted work has covered three bounded correctness/lifecycle areas:
+Vite now has enough upstream validation to be a real resume specimen rather than bench-only evidence.
 
-- repeated config-resolution idempotence;
-- cleanup of temporary Rolldown optimizer-analysis bundles;
-- `closeBundle(error)` semantics after `buildEnd` failure.
+### Close temporary custom-extension optimizer analysis bundles
 
-Signal: strong recognizable build-tooling work, but crowded by newer examples. Keep in bench unless one develops particularly strong maintainer acceptance/merge or a target role values Vite specifically.
+Upstream PR: https://github.com/vitejs/vite/pull/23207
+
+State: **merged**.
+
+When Vite analyzes a dependency matched by `optimizeDeps.extensions`, it creates a temporary Rolldown build to inspect exports. The path generated/parses output and returned without closing the build, leaving one temporary build open.
+
+The repair wraps analysis in `try/finally` and closes the build after success or failure. A regression uses an optimizer-only Rolldown plugin to count `buildStart`/`closeBundle` and verifies that every started build closes.
+
+### Preserve `closeBundle(error)` after `buildEnd` failure
+
+Upstream PR: https://github.com/vitejs/vite/pull/23165
+
+State: **open; approved by two Vite members**.
+
+The dev-server shutdown path could exit after a failing `buildEnd` hook before calling `closeBundle`, diverging from the Rollup/Rolldown lifecycle contract. The revised repair catches the `buildEnd` error, calls `closeBundle(error)`, then rethrows it. The original broader settle-all idea was narrowed after maintainer feedback.
+
+Two Vite members have approved the current head. This is meaningful technical acceptance even while the PR remains open.
+
+### Keep repeated config resolution idempotent
+
+Upstream PR: https://github.com/vitejs/vite/pull/23208
+
+State: **open; active review, no current approval recorded**.
+
+Repeated `resolveConfig()` calls with the same inline config can re-merge resolver-generated environment state and duplicate optimizer plugins, changing the dependency optimizer hash and causing a warm cache to rebuild. The candidate shallow-copies the config/environment objects before resolver defaults are applied and adds a two-resolution regression.
+
+Resume signal: **promoted**. The merged optimizer cleanup plus two-maintainer-approved teardown correction are enough external validation to use Vite selectively on a general/devtools resume. Keep all three PRs discoverable in the work record without turning the resume into a Vite mini-changelog.
 
 ## BuildKit
 
@@ -227,12 +283,13 @@ Do not list these as a logo parade. Their value is that the systems bench is dee
 
 The OSS section should usually show **four or five specimens**, not every repository.
 
-A good general mix at this audit is:
+A good general mix at this refresh is:
 
 1. Vercel AI SDK — merged/published, subtle TypeScript/runtime state correctness.
-2. Cloud Hypervisor — two merged Rust/VMM lifecycle/error-propagation changes.
-3. Cloudflare Workers SDK — current credential/caching semantics, accepted codeowner gate.
-4. SWC if accepted — compiler/minifier observability; otherwise Vite or a role-specific alternative.
+2. Cloud Hypervisor — two merged Rust/VMM lifecycle/error-propagation changes, with a deeper QCOW follow-on under review.
+3. Cloudflare Workers SDK — credential/caching semantics with human + CODEOWNERS approval; Miniflare lifecycle follow-on active.
+4. Vite — one merged optimizer lifecycle fix plus a second teardown repair approved by two maintainers.
+5. SWC if accepted — compiler/minifier observability; otherwise choose the four strongest role-specific specimens above.
 
 Then let GitHub/`/work` reveal the much larger collection.
 
