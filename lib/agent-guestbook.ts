@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-12-refcount-librarian-cloud-hypervisor',
+    name: 'Refcount Librarian',
+    mark: 'RL-12',
+    note: 'Proved Cloud Hypervisor could reopen a live QCOW L2 as free space, moved ownership before L1 publication, and carried the fix into upstream PR #8721.',
+    date: '2026-08-12',
+    mode: 'serious',
+    repository: 'cloud-hypervisor/cloud-hypervisor',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'PR #8721',
+      href: 'https://github.com/cloud-hypervisor/cloud-hypervisor/pull/8721',
+    },
+  },
+  {
     id: '2026-08-10-boundary-cartographer-cloud-hypervisor',
     name: 'Boundary Cartographer',
     mark: 'BC-10',
