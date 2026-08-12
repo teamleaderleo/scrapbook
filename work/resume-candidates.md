@@ -45,7 +45,7 @@ Do not waste resume space saying "contributed to Vercel AI SDK." The mechanism i
 
 #### 2. Cloud Hypervisor — lock
 
-Combine the two merged changes into one entry. Together they show lifecycle and error-boundary work inside a Rust VMM.
+The two merged changes already earn the entry. A newer QCOW ownership/refcount repair is under upstream review and can strengthen this further if accepted.
 
 Candidate bullet family:
 
@@ -55,19 +55,37 @@ A second line can mention validation breadth if the role is systems-heavy:
 
 > Validated the ACPI path across x86_64/AArch64 KVM/MSHV plus fw_cfg, TDX, Clippy and the repository's RISC-V build.
 
+Current follow-on: PR #8721 moves QCOW L2 refcount ownership before L1 publication so failure cannot leave a reachable table eligible for allocator reuse after reopen. It has focused block/io_uring regressions and broad build/Clippy coverage; no human review yet. Do not fold it into a landed resume claim unless accepted.
+
 For a general resume, the first line may be enough.
 
 #### 3. Cloudflare Workers SDK — strong current
+
+The Access credential fix is now human-approved with Wrangler CODEOWNERS satisfied; it remains open. A second Miniflare teardown/lifecycle PR is also active but still awaiting human approval.
 
 Candidate bullet family:
 
 > Fixed stale Cloudflare Access service-token headers surviving environment changes by separating current credential state from legitimately cached interactive authorization; added regressions for removed/partial credentials while preserving cookie reuse.
 
-Refresh exact merge/review status before final export. Do not imply merged if still open.
+Keep the final resume wording status-accurate: approved upstream is meaningful external validation, but do not imply merge until GitHub records one.
 
-#### 4. SWC — high-upside pending slot
+#### 4. Vite — promoted current
 
-If maintainer review accepts the direction, this likely displaces Vite because it adds a compiler/minifier axis.
+Vite now has enough external validation to stand as a real resume specimen rather than a bench logo:
+
+- PR #23207 merged: closes temporary Rolldown optimizer-analysis bundles on success and error;
+- PR #23165 remains open but has approvals from two Vite maintainers: preserves Rollup/Rolldown `closeBundle(error)` semantics after `buildEnd` failure;
+- PR #23208 remains active around repeated config-resolution idempotence.
+
+Candidate bullet family while #23165 remains open:
+
+> Fixed Vite optimizer resource leakage by closing temporary custom-extension Rolldown analysis builds on success/error; separately aligned dev-server teardown with Rollup/Rolldown `closeBundle(error)` semantics after `buildEnd` failure, approved by two Vite maintainers.
+
+If #23165 merges, simplify the status language and treat the pair as two landed lifecycle/correctness fixes.
+
+#### 5. SWC — high-upside pending slot
+
+If maintainer review accepts the direction, this remains unusually valuable because it adds a compiler/minifier axis rather than another adjacent web-tooling example.
 
 Candidate bullet family:
 
@@ -77,7 +95,6 @@ Until human/upstream acceptance exists, keep in the bullpen rather than presenti
 
 #### Bench / alternates
 
-- Vite correctness/lifecycle cluster — recognizable and solid; crowded by newer work.
 - Zustand hydration generation race — technically clean, lower marginal signal after AI SDK/Cloudflare; useful if upstream attribution becomes especially strong.
 - BuildKit rootless/rootful reproducibility — excellent for systems-specific applications.
 - Bat/Delta/fd/urllib3/Serde/Rspack — strong Fieldwork/portfolio/interview bench; promote selectively with upstream validation or target-role fit.
@@ -183,10 +200,11 @@ Priority order:
 1. Vercel AI SDK.
 2. Cloud Hypervisor (proves range outside TS/AI).
 3. Cloudflare Workers SDK.
-4. SWC if accepted, otherwise best Vite/AI SDK current candidate.
-5. Preflight, but frame as runtime/instrumentation/performance rather than game fandom first.
-6. Stensibly gets one stronger line because agent coordination/MCP/hosted authority is relevant.
-7. SmolRunner only if space survives.
+4. Vite — now externally validated through one merge plus a two-maintainer-approved lifecycle repair.
+5. SWC rises above Vite if accepted and the compiler/minifier axis is useful for the target.
+6. Preflight, but frame as runtime/instrumentation/performance rather than game fandom first.
+7. Stensibly gets one stronger line because agent coordination/MCP/hosted authority is relevant.
+8. SmolRunner only if space survives.
 
 Useful application thesis:
 
@@ -227,7 +245,9 @@ Priority order:
 3. Preflight runtime/bytecode/performance.
 4. SmolRunner.
 5. Vercel AI SDK as cross-language correctness proof.
-6. Cloudflare as state/credential semantics.
+6. Cloudflare as state/credential/lifecycle semantics.
+
+If the QCOW L2 ownership repair lands, Cloud Hypervisor becomes an even stronger lead because the accepted work then spans VM lifecycle, boot error propagation, and block-image metadata ownership.
 
 Stensibly becomes optional unless the role values distributed coordination.
 
