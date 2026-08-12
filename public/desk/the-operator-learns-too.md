@@ -2,1228 +2,188 @@
 
 Written by GPT-5.6 Sol under Leo’s direction. Human-directed publication for Scrapbook, 12 August 2026.
 
-A lot of arguments about AI-assisted work freeze the scene at the least interesting moment.
+A lot of arguments about AI-assisted work freeze the scene at the least interesting moment. There is a model, there is a person, the person asks a question, and the model gives an answer that may be wrong. From there comes the familiar conclusion: the person should be careful.
 
-There is a model. There is a person. The person asks a question. The model gives an answer. The answer can be wrong. Therefore the person should be careful.
+True enough, as far as it goes. Sustained use quickly becomes a different object.
 
-True enough. It barely describes sustained use.
-
-The model gets another turn.
-
-The program runs. The test fails. The benchmark moves. The documentation says something different. Another agent attacks the patch. A source contradicts the summary. A user notices a recurring failure mode. The next investigation begins with a better question. A week later the human has learned more of the domain, more of the tool, more of the repository, and more about the ways their own evaluation process can fool them.
+The model gets another turn. The program runs and the test fails. A benchmark moves in the wrong direction. Documentation contradicts the explanation. Another agent attacks the patch. A primary source refuses to support the summary. The human notices a recurring failure mode, changes the next investigation, and begins again with a better question. A week later they know more about the domain, the repository, the model, and the ways their own evaluation can mislead them.
 
 The operator learns too.
 
-That obvious fact changes the whole picture.
+Once that fact enters the picture, the interesting question grows larger than a model’s error rate on one attempt. A serious user is an adaptive participant: they acquire domain knowledge, learn where a model tends to drift, discover which checks expose which errors, develop instincts about when another pass is useful, and become more selective about how much evidence a decision deserves. Meanwhile the model remains only one participant in a process that includes tests, sources, tools, collaborators, production behavior, memory, and the operator’s changing judgment.
 
-A human using an AI system seriously is an adaptive participant. They build domain knowledge, acquire instincts for where the model tends to drift, discover which checks expose which classes of error, learn when another pass adds value, learn when another pass merely produces more prose, and develop a sense for how much evidence a particular decision deserves.
-
-The useful object of study is therefore larger than the model’s error rate on one attempt.
-
-It is the changing human-model process over time.
-
-And once that process becomes the object, many familiar arguments about trust, expertise, hallucination, taste, and dependency begin to look different.
+That changing process is what deserves study.
 
 ## The frozen-operator mistake
 
-Imagine evaluating a novice programmer by watching their first afternoon with a debugger and assuming they will use it with exactly the same skill forever.
+Imagine evaluating a novice programmer by watching their first afternoon with a debugger and then assuming they will use it with exactly the same skill forever. The conclusion would tell you very little about their work three months later, because tools alter their users. Failure teaches technique, repetition creates pattern recognition, and every ugly mistake becomes a candidate lesson.
 
-Nobody would take that evaluation seriously.
+Yet a surprising amount of AI criticism quietly assumes a frozen operator. The person asks vague questions forever, accepts polished output forever, and never learns the characteristic failures of the system in their domain. They never discover history inspection, characterization tests, differential testing, traces, static analysis, staged rollouts, primary-source checks, independent review, or adversarial testing. Every session begins at epistemic day one.
 
-Tools alter their users. Users learn the tool. Failures teach technique. Repetition creates pattern recognition.
+Serious users accumulate a private catalogue instead. They learn that a model often invents a clean explanation before reading strange historical code; generated tests may prove the mock instead of the behavior; refactors can preserve the happy path while damaging retry or cancellation semantics; research answers may blend strong primary evidence with weak secondary reporting; several agents can inherit the same false premise and produce an impressive consensus around it; and a benchmark can improve because the system stopped doing something users valued.
 
-Yet a surprising amount of AI criticism smuggles in a frozen operator.
+Those failures change what happens next. After one elegant explanation collapses under repository history, the operator searches history earlier. After a generated test turns out to observe the wrong thing, they inspect the test’s actual claim. After several reviewers repeat the same premise, one future reviewer gets an explicit assignment to challenge the premise itself. After a metric improves while the product gets worse, the operator asks what disappeared when the number went up.
 
-The person asks vague questions forever. They accept polished output forever. They never learn what characteristic failures look like in their domain. They never discover source search, history inspection, characterization tests, differential testing, benchmarks, traces, static analysis, staged rollouts, independent review, or adversarial checking. They never become better at deciding which uncertainty deserves another experiment.
+Calling all of this “prompt engineering” makes the phenomenon sound tiny. Prompting is visible, but the deeper skill is experimental judgment: deciding what to inspect, what to measure, what could falsify the current belief, which uncertainty deserves another experiment, and when the consequences deserve another pair of eyes.
 
-Every session begins at epistemic day one.
+The operator learns the domain, the model, and the combined method at the same time. Those forms of learning reinforce one another.
 
-Real people can improve.
+## Two loops, one accumulating practice
 
-A person who takes the work seriously starts accumulating a private catalogue of failure modes.
+Serious AI-assisted work usually contains at least two loops. The first occurs inside a task: the model proposes something, evidence pushes back, the proposal changes, another check exposes a remaining problem, and the artifact changes again. The second loop occurs across tasks: the human remembers which errors survived the first loop and changes how future work is investigated, reviewed, measured, or bounded.
 
-The model tends to invent a clean explanation before reading the strange historical code.
+The first loop improves an artifact. The second improves the method that produces artifacts, and over time it can become the more important one.
 
-Generated tests sometimes prove the mock instead of the behavior.
+Suppose an agent refactors a module and introduces duplicate behavior somewhere distant. You eventually find it, which teaches you that local correctness gives too narrow a view for this class of change, so future refactors begin with a wider search. Then static search misses behavior registered dynamically, so you start inspecting runtime traces. The traces only cover exercised paths, so you add characterization tests. One of those tests faithfully preserves an old defect, which sends you back to requirements, historical discussion, and user-visible behavior.
 
-A refactor can preserve the happy path while damaging cancellation or retry semantics.
+Each failure reveals an observation that was absent before. Eventually the operator can hand six previous failures to the model and ask it to derive a review procedure aimed specifically at catching them. Yesterday’s mistake becomes tomorrow’s gate.
 
-A research answer can quietly blend strong primary evidence with weak secondary reporting.
+This explains how the same fixed model can produce better work for the same person after months of use. The weights may stay the same while the surrounding tools improve, the failure record grows, the questions become sharper, the stopping rules change, and the operator gets better at deciding which evidence deserves trust. Combined capability can move even when the model itself does not.
 
-Several agents can inherit the same false premise and produce an impressive consensus around it.
+## Reliability comes from the loop
 
-A benchmark can improve because the system stopped doing something users actually valued.
+People often imagine reliability as a property that must originate inside the model: the ideal system remembers every dependency, sees every edge case, hallucinates nothing, and produces the correct artifact in one pass. Engineering has spent decades getting useful reliability from components far less perfect than that. Networks lose packets and protocols recover. Storage media fail and replication catches many failures. Humans write bugs and surround themselves with compilers, tests, review, telemetry, rollback, and incident response.
 
-A model can keep expanding scope because every additional task appears cheap from inside the conversation.
+Language models fit comfortably into that tradition when the task offers useful feedback. The central question becomes whether the process can expose enough mistakes before they become expensive.
 
-Each discovered failure changes future behavior.
+In programming, the menu of checks is unusually rich. Compile and type-check the change. Run the existing suite, then add tests aimed at the new behavior and inspect what those tests actually observe. Fuzz the boundary. Benchmark the implementation. Compare old and new outputs. Search every caller, read the schema and documentation, inspect history, run the program, add instrumentation, and give another reviewer a narrow adversarial assignment. For a large change, one reviewer can search specifically for silent semantic drift while another asks whether the proposed abstraction can be deleted and replaced with something smaller.
 
-Next time, the operator searches history before accepting the elegant explanation.
+The useful confidence comes from what the work has endured.
 
-Next time, they inspect what the test actually observes.
+This is why evaluating AI as an oracle misses so much of the interesting action. “Ask once, receive answer, judge answer” describes a chatbot transaction. Serious work often looks more like search, experiment, criticism, execution, measurement, revision, and retention. An individual inference can still fail while the larger process remains highly productive because many failures become visible and repairable.
 
-Next time, they compare old and new behavior under failure.
+Software has a special advantage here: so much of its world is executable. If the function supposedly preserves an invariant, run it. If the migration supposedly preserves records, copy the data and perform it. If the new implementation is quicker, measure it. If a refactor supposedly preserves behavior, differential-test the implementations. If a package supposedly behaves a certain way, install the exact version and try it.
 
-Next time, they ask for primary sources first.
+A language model can argue with itself forever. Execution gives something outside the conversation a vote, and that vote often teaches more than another thousand tokens of elegant explanation. A failed test can reveal the hidden assumption; a strange benchmark can expose a tradeoff; a production trace can kill a beautiful theory in seconds. Cheap conjecture becomes powerful when reality is allowed to kill bad conjectures quickly.
 
-Next time, they assign one reviewer to challenge the premise itself.
+## Verification has an economics
 
-Next time, they check what disappeared when the metric improved.
+The usual objection arrives here: if a human has to check the output, perhaps the productivity gain disappears. Sometimes it does, because generation, discovery, verification, correction, and failure costs vary wildly by task.
 
-Next time, they cut the task in half before the model builds an empire around it.
+Imagine that finding an obscure but relevant paper manually takes two hours. An AI system locates it in ten minutes, after which the human confirms the paper exists, opens it, reads the relevant section, and decides whether it supports the claim. Fifteen minutes of verification can still leave a large gain because discovery was expensive and checking was comparatively cheap.
 
-This is expertise formation.
+A repetitive refactor across eighty files may have a similar profile. Performing each edit manually can consume hours, while reviewing the diff, compiling, running tests, searching call sites, and sampling representative changes takes much less. Here again, verification is cheaper than production.
 
-Calling all of it “prompt engineering” makes the phenomenon sound smaller than it is. Prompting is one visible part. The deeper skill is experimental judgment: deciding what to inspect, what to measure, what could falsify the current belief, how much evidence is enough, and when the consequences deserve another pair of eyes.
+Other tasks reverse the ratio. When the intellectual value lies in reading a body of literature closely, checking a generated synthesis may require doing much of the original reading. In that case the verification cost approaches the cost of the alternative workflow, and the model’s speed contributes less.
 
-The operator learns the domain.
+The useful comparison is therefore generation plus verification plus correction plus expected failure cost, set against the best alternative process. “You have to check it” supplies only one term.
 
-The operator learns the model.
+Human work belongs in the same accounting. A senior engineer’s confidence cannot make a payment migration safe by itself, and a professor’s memory cannot substitute for opening a source when an exact citation carries weight. AI makes checking conspicuous because everyone knows a model can hallucinate, while human hallucinations have enjoyed a softer cultural reputation for a very long time.
 
-The operator learns the combined process.
+Trust becomes more useful when it is granular. A model can deserve high confidence for renaming a symbol in a typed repository with immediate compiler feedback, moderate confidence for locating papers that the researcher will open personally, and very little confidence for reconstructing unwritten intentions behind a decade-old subsystem. It can receive broad freedom on a reversible branch and require human signoff on a production billing change.
 
-Those three kinds of learning reinforce one another.
+The relevant question is rarely “Do I trust AI?” It is “What proof burden fits this consequence?” Downside, reversibility, observability, and uncertainty determine the answer.
 
-## Two adaptive loops
+## Beginners can grow inside cheap feedback
 
-There are at least two loops running during serious AI-assisted work.
+Discussions about inexperienced users often collapse into two possibilities: either the person already knows enough to judge the model, or they are helpless before it. There is a third route, and it is the ordinary route by which people have always gained expertise: they learn.
 
-The first happens inside a task.
+A serious beginner in a domain with cheap feedback can make an enormous number of reversible mistakes, investigate them, and improve. They write a program, encounter an error, learn the concept behind it, try again, hit another layer, and gradually turn mysterious vocabulary into ordinary working knowledge. AI can accelerate this apprenticeship by lowering the cost of questions, examples, comparisons, and experiments. It can also supply plausible nonsense at exactly the moment the beginner lacks the instinct to reject it, which makes the quality of the feedback loop decisive.
 
-A model proposes something. Evidence pushes back. The model revises. Another check exposes a remaining problem. The model revises again.
+The productive beginner treats generated answers as hypotheses and keeps moving outward toward evidence. A hobby project permits reckless curiosity; an internal tool with tests permits ambitious refactoring; a production payment path calls for staging, rollback, experienced review, and more conservative proof. The operator grows by choosing experiments whose failures they can afford.
 
-The second happens across tasks.
+Experience eventually adds another kind of knowledge: a catalogue of places where small misunderstandings can carry large consequences. Authentication, concurrency, money, data loss, privacy, irreversible migrations, distributed state, compliance, physical safety, and long-tail compatibility all deserve different caution than a styling tweak on a personal project.
 
-The human notices which kinds of mistakes survived the first loop. They alter the way future work is investigated, reviewed, measured, or bounded.
+A newcomer begins without that catalogue, but the catalogue is learnable. Documentation, incident histories, threat models, experienced collaborators, and AI systems can all point toward the dangerous areas; actual failures make the lesson memorable. Judgment is partly compressed history.
 
-The first loop improves the artifact.
+This also changes the comparison baseline for AI-generated code. Much of real software already contains rushed migrations, duplicated logic, dead paths, strange compatibility layers, stale comments, half-finished abstractions, tests that exercise mocks, and business rules whose original authors vanished years ago. The useful benchmark is often less grand than “Can AI match the greatest programmer at their peak?” A better question is whether a disciplined process can improve the code that actually exists.
 
-The second loop improves the method that produces artifacts.
+Brownfield work is especially revealing because ordinary improvements count. Make behavior visible, preserve compatibility, add characterization tests, delete duplication, tighten types, remove dead paths, clarify ownership, measure performance, and reduce the number of concepts a maintainer has to remember. Mechanical refactoring is fertile territory because the machine can perform tedious work at scale while many forms of verification remain automatable.
 
-Over time, the second can become more important.
+Persistence changes the economics here. An agent can inspect another seventy files, compare two thousand call sites, rerun the suite, and then approach the problem from a different angle. That persistence does not make the model wiser than a great engineer, but it makes diligence cheaper. A competent operation repeated hundreds of times can produce impressive aggregate results, especially when the useful findings survive and the mistakes feed the next loop.
 
-Suppose an agent refactors a module and introduces duplicate behavior somewhere distant.
+## Taste can often be unpacked
 
-You eventually find it.
+Taste often appears in these conversations as the final human sanctuary: the senior engineer simply knows the code feels wrong. That intuition can contain years of compressed experience, and some of it will remain difficult to verbalize. A surprising amount, however, can be unpacked into consequences.
 
-That experience teaches you that local correctness is insufficient for this class of change. Future refactors begin with a wider search.
+Why does implementation A feel worse? Maybe it adds another dependency, duplicates a concept, expands the API, hides failure, increases the number of files touched by a common change, violates local conventions, makes rollback harder, mixes policy with mechanism, creates a second representation of the same state, or optimizes a metric while making behavior harder to observe.
 
-Then you discover that static search misses behavior registered dynamically.
+Once the preference has consequences, the preference can become a question. How much coupling did we add? How many concepts must a reader keep in mind? How many places change when this policy changes? Which new failure modes appeared? Can we delete this later? Does the repository already contain a familiar way to do the same job? Would a new maintainer understand why this exists?
 
-So you start inspecting runtime traces.
+That translation never captures every aesthetic judgment, and it captures enough to make a large amount of taste teachable. Experienced people can explain what they look for, teams can encode some of those lessons into review practices, and models can participate in applying them. The human still supplies values and chooses among tradeoffs, but seniority becomes less magical when judgment can travel as examples, evidence, and questions.
 
-Then you discover the traces only cover exercised paths.
+## The harder case: when the answer is right
 
-So you add characterization tests.
+Correctness, however, only covers part of the story. Sometimes the artifact is acceptable while the process quietly changes the kind of work a person does.
 
-Then you discover the characterization tests faithfully preserve an old defect.
+The recent controversy around Hank Green’s use of generative AI is interesting for that reason. One episode involved an AI-generated scientific diagram with concrete errors, a familiar case in which the artifact was wrong, people noticed, the image was removed, and the operator updated. Another controversy grew around Green’s use of ChatGPT while researching educational material. The public accusation quickly became larger than the behavior he described: his account was closer to using the model to locate sources and resources, then reading those sources and developing the interpretation himself.
 
-So you compare against requirements, historical discussion, and user-visible behavior.
+That produced the predictable questions about hallucination, trust, verification cost, and credibility. Green’s later reflection opened a more interesting line of inquiry because his concern included what the tool was doing to his path through a topic.
 
-Every failure reveals an observation you were missing.
+An LLM can take an enormous subject and immediately supply a route: the important papers, the main disputes, the likely connections, the conventional synthesis. That can save enormous time, and it also changes what the researcher encounters along the way.
 
-Eventually you can ask the model itself to turn that history into a reusable review procedure:
+Manual browsing contains inefficiencies that sometimes produce discoveries. You open the wrong paper and find a strange citation; follow a footnote sideways; misunderstand a term and uncover an adjacent literature; spend an afternoon reading something that never appears in the final script but changes what you find interesting. You may form a theory before encountering the standard explanation, or become attached to an odd question before anyone tells you which questions are supposed to be central.
 
-> Here are six failures from previous changes. Derive checks specifically aimed at catching them.
+A very good search assistant can remove wasted motion and, in the same motion, remove some productive wandering.
 
-Yesterday’s mistake becomes tomorrow’s gate.
+That is a different failure mode from hallucination. The citations can all be accurate while the research path becomes narrower. The model can influence what answer you receive, what evidence you inspect, and what questions occur to you before you begin. The third deserves more attention because early framing can quietly determine everything that follows.
 
-This is one reason a fixed model can produce better work for the same person after months of use. The weights stayed the same. The operator changed.
+Suppose a model gives a perfect summary of the dominant literature. The summary can anchor the researcher so strongly that unconventional interpretations become less likely. Suppose it identifies the twenty most obviously relevant papers. The list may save hours while hiding the twenty-first paper whose relevance only becomes visible after an odd detour. Suppose it generates ten plausible project ideas every morning. The abundance can become its own behavioral problem: every curiosity produces a plan, every plan produces a prototype, and every prototype creates more possible work.
 
-The surrounding tools changed.
+The machine has lowered the friction between impulse and execution. For a person who already tends to keep making things, endless availability can become an invitation to proliferate faster than they can judge, finish, or even remember what drew them to the work in the first place.
 
-The accumulated failure record changed.
-
-The questions changed.
-
-The stopping rules changed.
-
-The combined capability moved.
-
-## Reliability can come from a fallible reasoner
-
-People often want reliability to originate inside the model.
-
-The ideal model, in this picture, knows the answer, remembers every dependency, never hallucinates, sees every edge case, and produces the correct artifact in one pass.
-
-That would be convenient.
-
-Engineering has rarely waited for perfect components.
-
-Networks lose packets. Protocols recover.
-
-Storage media suffer faults. Filesystems and replication schemes detect and survive many of them.
-
-Humans write bugs. Compilers, tests, review, static analysis, telemetry, rollback, and incident response catch some of them.
-
-Reliability often emerges from a fallible component operating inside a disciplined loop.
-
-Language models can be treated the same way.
-
-The useful question becomes:
-
-Can the process expose enough mistakes before they become expensive?
-
-For a large class of programming work, the answer is yes.
-
-Compile it.
-
-Type-check it.
-
-Run the existing suite.
-
-Generate additional tests.
-
-Inspect whether those tests actually cover the claimed behavior.
-
-Fuzz it.
-
-Benchmark it.
-
-Compare outputs against the old implementation.
-
-Search every caller.
-
-Read the schema.
-
-Read the documentation.
-
-Read the history.
-
-Run the program.
-
-Instrument it.
-
-Have another agent attack the patch.
-
-Have another one search specifically for silent semantic changes.
-
-Have another one ask whether the whole patch can be deleted and replaced with something smaller.
-
-Then inspect what survived.
-
-Confidence comes from what the work endured.
-
-An individual inference can still be wrong. A system capable of discovering and repairing many of its own errors can remain extremely useful.
-
-That distinction gets lost when people evaluate AI as an oracle.
-
-Ask once. Receive answer. Judge answer.
-
-Serious use often looks closer to search, experiment, criticism, execution, measurement, revision, and retention.
-
-Those are very different objects.
-
-## Reality gets a vote
-
-Software gives this process an unusual advantage because so much of the relevant world is executable.
-
-Does the function preserve these invariants?
-
-Run it.
-
-Does the migration preserve these records?
-
-Copy the data and perform it.
-
-Is the new implementation quicker?
-
-Measure it.
-
-Did the refactor alter behavior?
-
-Differential-test the implementations.
-
-Does anything else depend on this interface?
-
-Search the repository, inspect dynamic callers, run the suite, instrument the relevant path.
-
-Does the package really behave the way the model claims?
-
-Install the exact version and try it.
-
-The language model can argue with itself indefinitely. Execution gives something outside the conversation a vote.
-
-This makes verification much richer than “check the AI’s work.”
-
-The phrase makes checking sound like an annoying tax attached to generation.
-
-Often the check is the engineering.
-
-A good experiment reveals which model of the system deserves to survive.
-
-A failed test can teach more than another thousand tokens of reasoning.
-
-A strange benchmark result can expose a hidden tradeoff.
-
-A production trace can destroy an elegant theory in ten seconds.
-
-This is why repeated contact with reality is such a powerful way to use AI.
-
-The machine can generate conjectures cheaply.
-
-Reality gets to kill them.
-
-## Verification has a price, and so does doing everything yourself
-
-A common response to AI-assisted work says that checking the output cancels the productivity gain.
-
-Sometimes it does.
-
-That depends on the task.
-
-Generation cost, discovery cost, verification cost, correction cost, and failure cost differ radically across domains.
-
-Suppose finding an obscure relevant paper manually takes two hours. An AI system finds it in ten minutes. Confirming the paper exists, opening it, reading the relevant section, and deciding whether it supports the claim takes fifteen more.
-
-The check is much cheaper than the discovery.
-
-Suppose an agent performs a repetitive refactor across eighty files. Doing the edits manually takes hours. Reviewing the diff, compiling, running tests, searching call sites, and sampling representative changes may take considerably less.
-
-Again, verification can be cheap compared with production.
-
-Other tasks reverse the ratio.
-
-If the intellectual value lies in reading a body of literature closely, then verifying a generated synthesis may require doing much of the reading yourself. In that case the check approaches the original work.
-
-So the useful calculation is closer to:
-
-generation + verification + correction + expected failure cost
-
-compared with the alternative workflow.
-
-“You have to check it” gives no answer until you know the relative cost of the check.
-
-The same applies to human work.
-
-Human output also deserves verification when the consequences justify it. A senior engineer’s confidence does not turn a payment migration into a safe change. A professor’s memory does not substitute for opening the source when the exact citation is important.
-
-AI makes the need for checking vivid because everyone knows the machine can hallucinate.
-
-Human beings have enjoyed a softer cultural treatment of their own hallucinations for a very long time.
-
-## Trust is granular
-
-Another weak frame asks whether AI should be trusted.
-
-Trusted to do what?
-
-I trust a compiler differently from a calculator.
-
-I trust a search engine differently from a physician.
-
-I trust a unit test differently from a product manager.
-
-Likewise, a model can deserve very different levels of confidence across different operations.
-
-You might trust it heavily to rename a symbol across a typed repository where the compiler and tests provide immediate feedback.
-
-You might trust it moderately to locate relevant papers, provided you open and read the papers yourself.
-
-You might trust it lightly to reconstruct the unwritten intentions behind a decade-old subsystem.
-
-You might give it broad freedom to experiment on a reversible branch.
-
-You might require human signoff for a production billing change.
-
-This is ordinary calibration.
-
-The useful question is:
-
-What proof burden fits this consequence?
-
-A broken animation has one answer.
-
-A corrupted financial record has another.
-
-A medication dose has another.
-
-Good operators learn to match their verification effort to downside, reversibility, observability, and uncertainty.
-
-That skill lets inexperienced people learn safely.
-
-## The serious beginner
-
-Discussions about inexperienced users often assume only two possibilities.
-
-Either the person already knows enough to judge the model, or they are helpless before it.
-
-There is another route.
-
-They can learn.
-
-A serious beginner working in a domain with cheap feedback can make an enormous number of reversible mistakes, investigate them, and improve.
-
-They write a program.
-
-It breaks.
-
-They ask why.
-
-They inspect the error.
-
-They read the relevant concept.
-
-They try again.
-
-Something else breaks.
-
-They discover another layer.
-
-Eventually the vocabulary that once sounded mysterious becomes ordinary.
-
-This is how expertise has always grown.
-
-AI can accelerate the loop by lowering the cost of questions, examples, experiments, comparisons, and explanations.
-
-That does create a danger: a beginner can accept plausible answers too easily.
-
-It also creates an opportunity: a beginner can conduct far more experiments than before.
-
-The decisive variable is how they behave.
-
-A person who treats every generated answer as the end of inquiry may learn slowly.
-
-A person who treats generated answers as hypotheses can learn quickly.
-
-The difference is enormous.
-
-And the cost of failure controls how much experimentation is sensible.
-
-A hobby project gives room for reckless curiosity.
-
-An internal tool with tests gives room for ambitious refactoring.
-
-A production payment path asks for deeper review, staging, rollback, and domain expertise.
-
-A life-critical system demands an entirely different standard.
-
-The operator can grow by choosing experiments whose failures they can afford.
-
-## There are dragons
-
-Experience does give people something valuable: knowledge of where the cliffs tend to be.
-
-The newcomer may lack that map.
-
-They can still begin.
-
-They need to discover the dragons before strolling casually into the cave.
-
-Authentication.
-
-Concurrency.
-
-Money.
-
-Data loss.
-
-Privacy.
-
-Security boundaries.
-
-Irreversible migrations.
-
-Distributed state.
-
-Compliance.
-
-Physical safety.
-
-Long-tail compatibility.
-
-These are places where tiny misunderstandings can carry large consequences.
-
-An AI system can help identify them. Other humans can help identify them. Documentation, incident histories, threat models, and existing review practices can identify them.
-
-Eventually the beginner develops their own instinct.
-
-They start feeling when a seemingly small change touches a dangerous seam.
-
-That feeling grows from remembered consequences.
-
-Judgment is partly compressed history.
-
-AI can accelerate the acquisition of that history when the operator actually studies the failures.
-
-## Brownfield reality
-
-There is another distortion in the way AI-generated code gets discussed.
-
-The comparison baseline is often imaginary.
-
-Human code appears as careful, elegant, intentional engineering.
-
-AI code appears as mediocre sludge.
-
-A large amount of real software is already mediocre sludge.
-
-Production systems contain rushed migrations, abandoned experiments, duplicated logic, strange compatibility layers, stale comments, dead code, half-finished abstractions, tests that exercise the mock, and business rules whose original author left years ago.
-
-The relevant question is therefore rarely:
-
-Can AI produce code as beautiful as the greatest programmer at their peak?
-
-A more common question is:
-
-Can this process improve the code that actually exists?
-
-For a lot of brownfield work, the first valuable threshold is remarkably ordinary.
-
-Make it work.
-
-Make the behavior visible.
-
-Write characterization tests.
-
-Delete duplication.
-
-Tighten the types.
-
-Clarify ownership.
-
-Remove dead paths.
-
-Preserve compatibility.
-
-Measure performance.
-
-Reduce the number of concepts a future maintainer must remember.
-
-Run everything.
-
-Then iterate.
-
-Mechanical refactoring is especially fertile territory because the machine can perform huge amounts of tedious work and verification can often be automated.
-
-The result may still be ordinary code.
-
-Ordinary, working, tested code can be a triumph when the starting point was confusing, duplicated, and fragile.
-
-## Persistence changes the economics
-
-Humans get tired.
-
-An agent can inspect another seventy files.
-
-Then another seventy.
-
-Then compare two thousand call sites.
-
-Then rerun the suite.
-
-Then ask a different question.
-
-This does not make the model wiser than a great engineer.
-
-It changes the economics of diligence.
-
-A merely competent operation repeated hundreds of times can produce impressive aggregate results.
-
-This is one reason model capability gets underestimated when people focus entirely on isolated flashes of intelligence.
-
-Engineering output depends on more than peak cleverness.
-
-It depends on persistence.
-
-Breadth of inspection.
-
-Iteration count.
-
-Search cost.
-
-Retry cost.
-
-Tolerance for tedious checking.
-
-Ability to retain lessons.
-
-A model can be imperfect at each individual operation and still become formidable inside a loop that lets useful work accumulate.
-
-## Taste becomes less mysterious
-
-Taste often enters these conversations as the final human sanctuary.
-
-The senior engineer simply knows the code feels wrong.
-
-Sometimes that kind of intuition is real and difficult to verbalize.
-
-A surprising amount of practical taste can still be unpacked.
-
-Why does implementation A feel worse?
-
-Perhaps it adds another dependency.
-
-Perhaps it duplicates a concept.
-
-Perhaps it expands the API.
-
-Perhaps it hides failure.
-
-Perhaps it increases the number of files touched by a common change.
-
-Perhaps it violates local conventions.
-
-Perhaps it makes rollback harder.
-
-Perhaps it mixes policy with mechanism.
-
-Perhaps it creates a second way to represent the same state.
-
-Perhaps it optimizes a metric while making the code harder to observe.
-
-Once the preference has consequences, those consequences can often be compared.
-
-Taste can become a set of questions.
-
-How much coupling did we add?
-
-How many concepts must a reader hold?
-
-How many places change when this policy changes?
-
-How much behavior became implicit?
-
-What new failure modes appeared?
-
-Can we delete this later?
-
-Does the surrounding repository already have a way to do this?
-
-Would a new maintainer understand why it exists?
-
-This never captures every aesthetic judgment.
-
-It captures enough to make taste more teachable.
-
-And once taste becomes partially teachable, models can participate in applying it.
-
-## The harder case: when the output is correct and the process still went wrong
-
-So far, most of the argument has dealt with correctness.
-
-Did the answer survive evidence?
-
-Did the code work?
-
-Did the source support the claim?
-
-Did the benchmark improve?
-
-Those are powerful questions.
-
-They still leave another class of failure.
-
-Sometimes the output can be acceptable while the way you arrived there quietly changes the kind of work you do.
-
-The recent controversy around Hank Green’s use of generative AI is interesting for exactly this reason.
-
-The public argument became tangled almost immediately.
-
-One episode involved an AI-generated scientific diagram that contained concrete errors. That case fits the familiar model easily. The artifact was wrong. People noticed. The image was removed. The operator updated.
-
-Then another controversy grew around Green’s use of ChatGPT during research for an educational segment.
-
-The accusation quickly became larger than the disclosed behavior. Some viewers treated particular phrasing as evidence that AI had written the material. Green’s own account described something narrower: using the model to help locate sources and resources, then reading those sources and developing the interpretation himself.
-
-This produced the familiar debate.
-
-Can AI hallucinate?
-
-Can research sourced through AI be trusted?
-
-Does verification erase the time savings?
-
-Does using the tool degrade the author’s credibility?
-
-Those questions are useful.
-
-Green’s own later explanation introduced a more interesting one.
-
-His concern centered partly on what the tool was doing to his path through a topic.
-
-An LLM can take an enormous subject and immediately give you a route.
-
-Here are the important papers.
-
-Here are the main disputes.
-
-Here are the likely connections.
-
-Here is the conventional synthesis.
-
-That can be extraordinarily useful.
-
-It can also change what the researcher encounters.
-
-Browsing a field manually has inefficiencies. Those inefficiencies sometimes produce discoveries.
-
-You open the wrong paper and find a strange citation.
-
-You follow a footnote sideways.
-
-You misunderstand a term and discover a whole adjacent literature.
-
-You spend an afternoon reading something that never enters the final script but changes what you consider interesting.
-
-You form a theory before encountering the standard explanation.
-
-You become attached to an odd question because nobody has yet told you which questions are supposed to be central.
-
-A good search assistant can reduce wasted motion.
-
-It can also remove productive wandering.
-
-That is a different failure mode from hallucination.
-
-The final answer can contain accurate citations.
-
-The research can still have become narrower.
-
-## The tool can alter the question before it alters the answer
-
-This is where the operator-learning thesis needs to grow beyond verification.
-
-An AI tool can influence three things:
-
-what answer you receive,
-
-what evidence you inspect,
-
-and what questions occur to you in the first place.
-
-The third deserves more attention.
-
-Suppose a model gives a perfect summary of the dominant literature on a topic.
-
-That summary may still anchor the researcher so strongly that unconventional interpretations become less likely.
-
-Suppose it identifies the twenty most obviously relevant papers.
-
-That can save hours.
-
-It can also cause the researcher to miss the twenty-first paper whose relevance only becomes visible after a strange conceptual detour.
-
-Suppose it helps someone generate ten project ideas every morning.
-
-Every idea may be plausible.
-
-The abundance itself can become a behavioral problem.
-
-Now the operator is living in a world where every curiosity instantly produces a plan, every plan produces a prototype, every prototype produces another branch of possible work.
-
-The machine has lowered the friction between impulse and execution.
-
-That can feel wonderful.
-
-It can also produce compulsive expansion.
-
-Green described something along these lines in reflecting on his own recent use: the tool was useful, yet its endless availability interacted poorly with his own tendency to keep making things.
-
-That is an operator-level failure.
-
-The model did not need to hallucinate.
-
-The individual outputs did not need to be bad.
-
-The combined system drifted toward a mode the human no longer wanted.
-
-That belongs inside any mature account of AI use.
+That belongs inside an account of operator learning because the model can be useful, the individual outputs can be good, and the combined process can still drift toward a mode the human dislikes.
 
 ## Reality includes the operator
 
-Earlier we said reality gets a vote.
+Earlier, reality meant external facts: the code runs, the source says what it says, the benchmark moves, the customer behaves a certain way. The person using the tool belongs in the same field of observation.
 
-Usually that means external facts.
+Are they learning the domain? Are they still reading primary sources? Do they remember what they read? Can they reconstruct the argument without the model? Are they exploring widely enough to encounter surprises? Are they generating more work than they can judge? Are summaries making them impatient with difficult material? Are they finishing more worthwhile things, or merely starting more things? Are they developing their own questions? Is their attention going where they intended?
 
-The code runs.
+These questions feel softer than a unit test, yet many can still receive evidence. If someone suspects that AI-assisted literature search narrows discovery, compare several search methods across the same research questions: an LLM, Google Scholar, PubMed, citation chaining, a domain expert, and open-ended browsing. Compare overlap and unique discoveries. Blind-review relevance. Record methodological diversity and which paths surface older or contrarian work. Have researchers form a preliminary thesis before seeing an AI synthesis in one condition and after seeing it in another, then compare the questions they ask and what they remember a week later.
 
-The source says what it says.
+The experiment will never capture every romantic quality of wandering through a library and finding the paper that changes your life. It can still move the conversation beyond slogans.
 
-The benchmark moves.
+The same principle travels. If coding agents seem to weaken debugging ability, test debugging ability over time. If generated explanations seem to impair retention, measure retention. If endless generation encourages shallow project switching, track completion and abandonment. If model suggestions anchor design decisions, vary whether the human commits to an approach before or after exposure.
 
-The customer behaves a certain way.
+Some questions remain difficult. Difficulty is an invitation to better evidence.
 
-There is another part of reality available for inspection:
+## A personal policy can record operator learning
 
-what the tool is doing to the person using it.
+Once the operator becomes part of the system under inspection, personal AI policies begin to look useful for reasons beyond public signaling. A policy can record observed failure modes for a specific human-machine pair.
 
-Are you learning the domain?
+One person may decide to use AI freely for mechanical transformations, test generation, and search; read every primary source used in public educational work; form the central thesis before requesting synthesis; keep final prose human-written; avoid generated explanatory diagrams; limit simultaneous projects; and involve a human collaborator before expanding a project past a certain size.
 
-Are you losing the ability to begin without assistance?
+Someone else will choose different rules because their work, temptations, strengths, and risks differ. The important part is that the rules arise from experience: I trust this tool here. Its search helps me here. It anchors me too early here. Verification is cheap here. The downside is large here. Endless availability changes my behavior here. Therefore I will use it accordingly.
 
-Are you reading primary sources?
+Written down, those lessons become a working manual for the pair.
 
-Are you exploring widely enough?
+This is also where stopping becomes part of intelligence. AI makes continuation cheap: another query, another reviewer, another edge case, another source, another benchmark, another test. Unlimited continuation can imitate rigor while producing little new evidence. A capable operator needs a stopping rule: what uncertainty remains, what happens if that uncertainty hides an error, how reversible is the decision, and how much did the last few checks change our belief? When new passes only restate the same argument, continued effort has lost its evidentiary value.
 
-Are you generating more work than you can judge?
+Good stopping means the remaining uncertainty fits the decision.
 
-Are you becoming more ambitious because experimentation became cheap?
+## The process can hold both participants to a higher standard
 
-Are you becoming less patient with difficult material because summaries arrive instantly?
+People sometimes ask whether they should trust themselves or trust the AI, but a good process can be more demanding than either participant working casually alone. The model proposes an interpretation, the human challenges it, another model searches for contrary evidence, and a primary source decides between them. The human sees a recurring weakness and adds a check. The model spots an inconsistency and the human changes the experiment. Useful lessons survive into the next task.
 
-Are you finishing more worthwhile things?
+A person can become attached to their own idea. A model can become attached to the premise supplied in the prompt. An external test can embarrass both, which is exactly why it is valuable.
 
-Are you merely starting more things?
+Multiple agents help when their jobs create genuinely different evidence paths. One proposes a patch, another tries to break it, another checks the specification, another searches history for reasons the ugly old behavior exists, and another looks for evidence that the reported problem never existed. Diversity comes from assignments and evidence, not from multiplying agreeable voices. The operator then adjudicates based on what each participant can prove.
 
-Do you remember what you read?
+The same idea makes seniority more transmissible. An experienced engineer may look at a change and say, “I don’t like this,” carrying years of compressed lessons in the reaction. A newcomer can ask what specifically worries them, which failure they have seen before, what invariant seems threatened, which test would expose it, and what alternative they prefer. As judgment becomes legible in evidence and consequences, other people—and models—can learn from it.
 
-Can you reconstruct the argument without the model?
+Seniority still carries real advantage. The ladder simply becomes easier to climb when more of the accumulated experience can travel.
 
-Are you developing your own questions?
+## Learning how to learn with the machine
 
-Are you spending your attention where you intended?
+At first, a new user often thinks the central skill is asking the model good questions. Later they discover that a good question only begins the process. The deeper skill lies in deciding what happens after the answer arrives: what would make this false, what can I execute or measure, which source can I open, which assumption came from me, which came from the model, what kind of failure can I afford, what deserves escalation, and what lesson should survive into the next attempt?
 
-These can feel soft compared with a unit test.
+Then comes the additional question that the Hank Green episode brings into focus: what am I learning about myself while I use this tool?
 
-Many can still be investigated.
-
-## Even wandering can be studied
-
-Suppose someone worries that AI-assisted literature search narrows discovery.
-
-That concern can become an experiment.
-
-Take several research questions.
-
-Run one search through an LLM.
-
-Run another through Google Scholar.
-
-Another through PubMed.
-
-Another through citation chaining.
-
-Another through a domain expert.
-
-Another through open-ended manual browsing.
-
-Compare the source sets.
-
-Measure overlap.
-
-Measure unique relevant discoveries.
-
-Blind-review the papers for relevance.
-
-Categorize methodological diversity.
-
-Record which search path discovers contrarian or older work.
-
-Have researchers form a preliminary thesis before seeing an AI synthesis in one condition and after seeing it in another.
-
-Compare the resulting questions.
-
-Test recall a week later.
-
-Measure how much primary material participants actually read.
-
-Study which process produces surprising connections.
-
-The concern becomes empirical.
-
-The experiment will never capture every romantic quality of wandering through a library and finding a paper that changes your life.
-
-It can still tell us far more than “AI kills curiosity” or “AI makes research better.”
-
-The same principle applies elsewhere.
-
-If you worry that coding agents make developers worse at debugging, test debugging ability over time.
-
-If you worry that AI-generated explanations impair retention, measure retention.
-
-If you worry that endless generation encourages shallow project switching, track completion and abandonment.
-
-If you worry that model suggestions anchor design decisions, vary whether the human commits to an approach before or after model exposure.
-
-Some questions remain hard.
-
-Hard questions can still receive evidence.
-
-## A stronger personal AI policy
-
-This is also why personal AI policies can become useful.
-
-A policy does more than express a moral position about the technology.
-
-It can encode lessons learned about a specific operator.
-
-For one person:
-
-Use AI freely for mechanical transformations, test generation, and search.
-
-Read every primary source used in public educational work.
-
-Form the central thesis before asking for synthesis.
-
-Keep final prose human-written.
-
-Avoid generated images in explanatory diagrams.
-
-Limit simultaneous projects.
-
-Require a human collaborator before expanding a project beyond a certain size.
-
-For another person, the policy will differ.
-
-The point is that the rules emerge from observed failure modes.
-
-That makes a personal AI policy closer to an operating manual for a human-machine pair.
-
-I learned that I trust this tool here.
-
-I learned that I become lazy here.
-
-I learned that its search is excellent here.
-
-I learned that it anchors me too early here.
-
-I learned that verification is cheap here.
-
-I learned that the downside is too high here.
-
-I learned that endless availability changes my behavior here.
-
-So I will use it accordingly.
-
-That is operator learning written down.
-
-## The process can become more trustworthy than either participant
-
-This leads to a useful inversion.
-
-People sometimes ask whether they should trust themselves or trust the AI.
-
-Why choose?
-
-The process can hold both to a higher standard.
-
-The model proposes an interpretation.
-
-The human challenges it.
-
-Another model searches for contrary evidence.
-
-The primary source decides between them.
-
-The human sees a recurring weakness.
-
-A new check gets added.
-
-The model notices another inconsistency.
-
-The human changes the experiment.
-
-Over time, the combined method can become more reliable than either participant working casually alone.
-
-A person can become attached to their own idea.
-
-A model can become attached to the premise supplied in the prompt.
-
-An external test can embarrass both.
-
-Good.
-
-That embarrassment is information.
-
-## Multiple agents help when their incentives differ
-
-Adding more models alone does little if every one of them inherits the same assumptions.
-
-Useful multi-agent work gives them different jobs.
-
-One proposes the patch.
-
-One tries to break it.
-
-One checks the specification.
-
-One searches history for reasons the ugly old behavior exists.
-
-One examines concurrency.
-
-One compares the patch against current production behavior.
-
-One asks which requirement remains untested.
-
-One tries to delete the whole proposed abstraction.
-
-One looks for evidence that the reported problem never existed.
-
-The diversity comes from the assignment and evidence paths.
-
-Then the operator adjudicates based on what each agent can prove.
-
-This resembles scientific collaboration more than chatbotting.
-
-Different researchers attack a claim from different angles.
-
-The claim survives or dies.
-
-The record remains.
-
-Future work begins from what was learned.
-
-## Stopping is part of intelligence
-
-AI makes continuation extremely cheap.
-
-There is always another query.
-
-Another reviewer.
-
-Another possible edge case.
-
-Another architectural alternative.
-
-Another source.
-
-Another benchmark.
-
-Another test.
-
-Unlimited continuation can masquerade as rigor.
-
-A capable operator learns when to stop.
-
-This requires a decision rule.
-
-What uncertainty remains?
-
-What is the consequence if that uncertainty hides an error?
-
-How reversible is the decision?
-
-How much did the last three checks change our belief?
-
-Are new passes producing independent evidence or restating the same argument?
-
-Would another hour meaningfully change the action we take?
-
-A good stopping point never means perfect knowledge.
-
-It means the remaining uncertainty fits the decision.
-
-This is another thing beginners learn through consequences.
-
-Stop too early and something breaks.
-
-Search too long and progress disappears into an endless audit.
-
-Eventually the operator develops calibration.
-
-## Authority matters less when evidence can travel
-
-Seniority carries useful compressed experience.
-
-It also gets treated as magic.
-
-A senior engineer sees a problem and says, “I don’t like this.”
-
-That opinion may contain years of accumulated lessons.
-
-The newcomer should pay attention.
-
-The newcomer can also ask:
-
-What specifically worries you?
-
-Which failure have you seen before?
-
-What invariant do you think this violates?
-
-What test would expose it?
-
-What alternative would you prefer?
-
-The more judgment can be unpacked into evidence and consequences, the more it can travel.
-
-This is where AI can help newcomers punch above their prior exposure.
-
-They can ask what a concurrency expert would inspect.
-
-They can read incident reports.
-
-They can trace analogous bugs.
-
-They can generate adversarial tests.
-
-They can compare designs against known failure modes.
-
-They can learn the vocabulary much quicker.
-
-Seniority still helps.
-
-The ladder becomes more climbable.
-
-## The deepest skill may be learning how to learn with the machine
-
-At first, the new user thinks the central skill is asking the model good questions.
-
-Later they learn that a good question only begins the process.
-
-The deeper skill is deciding what happens after the answer arrives.
-
-Do I believe this?
-
-What would make it false?
-
-What can I execute?
-
-What can I measure?
-
-What source can I open?
-
-Which assumption came from me?
-
-Which assumption came from the model?
-
-What part of this result depends on taste?
-
-Can that taste be translated into consequences?
-
-What failure would be cheap enough to tolerate?
-
-What failure deserves escalation?
-
-What did I learn about the domain?
-
-What did I learn about the tool?
-
-What did I learn about myself while using the tool?
-
-That last question deserves a permanent place beside the others.
-
-Because the machine changes the search space available to the person.
-
-It changes the cost of curiosity.
-
-It changes how quickly a thought can become a project.
-
-It changes how much material one person can inspect.
-
-It changes the temptation to keep going.
-
-It changes what kinds of work feel possible.
+The machine changes the cost of curiosity. It changes how quickly a thought can become a project, how much material one person can inspect, how many alternatives can be generated before lunch, and how tempting it is to continue. Those changes can expand a person’s reach dramatically. They can also crowd out wandering, patience, authorship, completion, or any other part of the work the person values enough to preserve.
 
 A serious operator studies those effects too.
 
-## The apprenticeship becomes strange and powerful
+There is something beautiful about this mode of work when it goes well. You encounter an unfamiliar system and ask the model to explain part of it. The explanation turns out to be wrong in an interesting way, so you inspect the source and run an experiment. The experiment contradicts both of you. Repository history reveals a strange old decision that suddenly makes sense. Your understanding changes, the model’s working theory changes, and the next experiment starts from a better place. A week later you understand a subsystem you had never seen before, with the mistakes woven into the curriculum.
 
-There is something beautiful about this mode of work when it goes well.
+It resembles apprenticeship with an endlessly available collaborator that can read at extraordinary scale. It resembles research because conjectures can often become experiments quickly, and engineering because several competing directions can be tried at a cost that once would have made them impractical. The abundance can produce noise, but when selection, evidence, retention, and stopping are taken seriously, it can also create an intense learning environment.
 
-You encounter an unfamiliar system.
+So keep asking how often the model is wrong. Then ask what happens after the error: how quickly the process discovers it, how expensive it is, which evidence exposes it, whether the lesson survives, and whether the next attempt begins somewhere better. Ask whether the tool deepens the operator’s understanding of the domain, whether it narrows the search in ways they actually want, whether cheap generation produces useful ambition or endless proliferation, and whether the person preserves the kinds of wandering, authorship, judgment, and attention they value.
 
-The model explains part of it.
+Months after that first prompt, the person pressing Enter has changed. They know which explanations deserve suspicion, which experiments reveal the most, which failures are cheap enough to invite, and which decisions need somebody else in the room. They have also learned something harder to capture in a benchmark: what happens to their own attention when every question can become a research project, every curiosity can become a prototype, and every unfinished thought has an endlessly available collaborator waiting to continue it.
 
-You inspect the source.
+Sometimes that learning produces greater trust in the process. Sometimes it produces a new test, a stricter source rule, a smaller scope, or a deliberate patch of silence where the machine stays out of the work. And sometimes the strangest result is the one Green’s reflection points toward: the answer may be correct, the sources real, the tool genuinely useful, while the person using it decides that they dislike the habits growing around it.
 
-The explanation turns out to be wrong in an interesting way.
-
-You run an experiment.
-
-The experiment contradicts both of you.
-
-You read the history.
-
-A strange old decision suddenly makes sense.
-
-You update your understanding.
-
-The model updates its working theory.
-
-You try another experiment.
-
-A week later you understand a subsystem you had never seen before.
-
-The model made mistakes along the way.
-
-So did you.
-
-The mistakes became part of the curriculum.
-
-This resembles apprenticeship, except the apprentice has an endlessly available collaborator capable of reading at extraordinary scale.
-
-It resembles research, except conjectures can often be turned into executable artifacts almost immediately.
-
-It resembles engineering, except the cost of trying several competing directions has collapsed.
-
-Used carelessly, that abundance produces noise.
-
-Used seriously, it produces an intense learning environment.
-
-## The better question
-
-People ask:
-
-How often is the model wrong?
-
-Keep asking that.
-
-Then ask more.
-
-When it is wrong, how quickly does the process discover the error?
-
-How expensive is the error?
-
-How reversible is it?
-
-Which kinds of evidence expose it?
-
-Does the operator learn the recurring failure mode?
-
-Does that lesson get retained?
-
-Does the next attempt begin from somewhere better?
-
-Does the tool improve the operator’s understanding of the domain?
-
-Does it narrow the operator’s search in ways they actually want?
-
-Does it encourage useful ambition or endless proliferation?
-
-Does the human preserve the kinds of wandering, authorship, judgment, and attention they personally value?
-
-Those questions describe a living system.
-
-A person presses Enter on day one.
-
-Months later, the same action belongs to a very different practice.
-
-The model proposes.
-
-The operator directs.
-
-Reality answers.
-
-The model revises.
-
-The operator revises the method.
-
-The successful lesson gets retained.
-
-The next problem begins from somewhere better.
-
-And sometimes the lesson is stranger.
-
-The answer was correct.
-
-The sources were real.
-
-The code worked.
-
-The machine was useful.
-
-And the operator still says:
-
-I don’t like what this way of working is doing to me.
-
-That observation counts too.
-
-Reality includes the artifact.
-
-Reality includes the world.
-
-Reality includes the person doing the work.
+That belongs in the evidence too. The artifact changes, the method changes, and over time the person doing the work changes with them.
 
 The operator learns too.
