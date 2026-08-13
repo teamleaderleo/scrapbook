@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'cpp-makes-you-look',
+    title: 'C++ Makes You Look',
+    date: '2026-08-14',
+    blurb:
+      'The strongest case for C++ is not scarcity; native systems work repeatedly forces fuzzy source-level understanding to collide with registers, lifetimes, ABIs, and real execution.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Revised',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['C++', 'debugging', 'systems', 'AI-assisted engineering'],
+    revision: 1,
+    sourcePath: 'desk/cpp-makes-you-look.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-error-object-is-an-input-boundary',
     title: 'The Error Object Is an Input Boundary',
     date: '2026-08-10',
