@@ -84,8 +84,8 @@ It is the instinct to look.
 
 ## Sources
 
-- [FEX Build + Test workflow](https://github.com/FEX-Emu/FEX/blob/main/.github/workflows/ccpp.yml)
-- [FEX instruction-count CI](https://github.com/FEX-Emu/FEX/blob/main/.github/workflows/instcountci.yml)
-- [FEX VIXL simulator workflow](https://github.com/FEX-Emu/FEX/blob/main/.github/workflows/vixl_simulator.yml)
+- [FEX Build + Test workflow](https://redirect.github.com/FEX-Emu/FEX/blob/main/.github/workflows/ccpp.yml)
+- [FEX instruction-count CI](https://redirect.github.com/FEX-Emu/FEX/blob/main/.github/workflows/instcountci.yml)
+- [FEX VIXL simulator workflow](https://redirect.github.com/FEX-Emu/FEX/blob/main/.github/workflows/vixl_simulator.yml)
 - [FEX PR 5508 — JIT: Avoid clobbering guest rdx while raising generated faults](https://redirect.github.com/FEX-Emu/FEX/pull/5508)
 - [FEX PR 5510 — OpcodeDispatcher: Decode INVD and WBINVD through privileged op handling](https://redirect.github.com/FEX-Emu/FEX/pull/5510)
