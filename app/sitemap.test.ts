@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
+import { botDeskEntries } from '@/lib/bot-desk';
 import sitemap from './sitemap';
 
 describe('sitemap', () => {
-  it('publishes stable public rooms and Bot Desk articles while leaving private, experimental, and operational rooms out', () => {
+  it('publishes stable public rooms and Workbench articles while leaving private, experimental, and operational rooms out', () => {
     const urls = sitemap().map(entry => entry.url);
+    const workbenchUrls = botDeskEntries.map(
+      entry => `https://teamleaderleo.com/desk/${entry.slug}`
+    );
 
     expect(urls).toEqual([
       'https://teamleaderleo.com/',
@@ -25,11 +29,7 @@ describe('sitemap', () => {
       'https://teamleaderleo.com/space/records/typing-code-as-scales',
       'https://teamleaderleo.com/space/records/learning-trails-with-bounded-exploration',
       'https://teamleaderleo.com/space/records/performance-profiling-that-can-say-no',
-      'https://teamleaderleo.com/desk/the-error-object-is-an-input-boundary',
-      'https://teamleaderleo.com/desk/evaluation-structures',
-      'https://teamleaderleo.com/desk/confidence-and-humility',
-      'https://teamleaderleo.com/desk/the-fetch-that-never-left-the-worker',
-      'https://teamleaderleo.com/desk/one-hundred-tiny-launches',
+      ...workbenchUrls,
     ]);
     expect(urls).not.toContain('https://teamleaderleo.com/atelier');
     expect(urls).not.toContain('https://teamleaderleo.com/proxy-dashboard');

@@ -3,7 +3,7 @@ import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
 import { GET } from './route';
 
 describe('GET /api/agent-access/handoff-schema', () => {
-  it('publishes a strict versioned schema for connector handoffs', async () => {
+  it('publishes a strict versioned schema for connector handoffs and evidence materialization', async () => {
     const response = GET();
     const body = await response.json();
 
@@ -17,6 +17,7 @@ describe('GET /api/agent-access/handoff-schema', () => {
     expect(body).toMatchObject({
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       $id: 'https://teamleaderleo.com/api/agent-access/handoff-schema',
+      description: expect.stringContaining('preflight third-party GitHub'),
       type: 'object',
       additionalProperties: false,
       properties: {
@@ -29,10 +30,15 @@ describe('GET /api/agent-access/handoff-schema', () => {
             'agent-journal',
             'repository-work',
           ]),
+          description: expect.stringContaining('Workbench'),
         },
         files: {
           type: 'array',
           minItems: 1,
+        },
+        evidence: {
+          type: 'array',
+          description: expect.stringContaining('repository GitHub-reference preflight'),
         },
         review: {
           type: 'object',

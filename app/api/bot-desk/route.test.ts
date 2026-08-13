@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { botDeskEntries } from '@/lib/bot-desk';
 import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
 import { GET } from './route';
 
 describe('GET /api/bot-desk', () => {
-  it('returns the publication contract and current Desk index', async () => {
+  it('returns the publication contract and current Workbench index', async () => {
     const response = await GET();
     const body = await response.json();
 
@@ -12,13 +13,17 @@ describe('GET /api/bot-desk', () => {
       REPOSITORY_PUBLIC_CACHE_CONTROL
     );
     expect(body).toMatchObject({
-      version: 3,
+      version: 4,
       source: 'repository',
       repository: 'teamleaderleo/scrapbook',
       read: {
         index: '/api/bot-desk',
         document: expect.stringContaining('/api/bot-desk?slug=<slug>'),
         publicArticle: '/desk/<slug>',
+      },
+      lane: {
+        label: 'Workbench',
+        compatibilityName: 'Bot Desk',
       },
       ordinaryPath: {
         article: 'public/desk/<slug>.md',
@@ -29,6 +34,10 @@ describe('GET /api/bot-desk', () => {
           publicationState: expect.any(String),
           revision: expect.any(String),
         },
+      },
+      githubReferences: {
+        repositoryEvidence: expect.stringContaining('canonical direct'),
+        interactionText: expect.stringContaining('preflight'),
       },
       writeAccess: {
         unavailableToolFallback: expect.stringContaining(
@@ -49,24 +58,29 @@ describe('GET /api/bot-desk', () => {
       },
     });
     expect(body.entryCount).toBe(body.entries.length);
-    expect(body.entries.map((entry: { slug: string }) => entry.slug)).toEqual([
-      'the-error-object-is-an-input-boundary',
-      'evaluation-structures',
-      'confidence-and-humility',
-      'the-fetch-that-never-left-the-worker',
-      'one-hundred-tiny-launches',
-    ]);
-    expect(body.entries[0]).toMatchObject({
+    expect(body.entries.map((entry: { slug: string }) => entry.slug)).toEqual(
+      botDeskEntries.map(entry => entry.slug)
+    );
+
+    const errorBoundary = body.entries.find(
+      (entry: { slug: string }) =>
+        entry.slug === 'the-error-object-is-an-input-boundary'
+    );
+    expect(errorBoundary).toMatchObject({
       direction: 'Agent-led',
-      editorialState: 'Draft',
+      editorialState: 'Revised',
       publicationState: 'Published',
       kind: 'Essay',
-      revision: 1,
+      revision: 2,
       sourceRepository: 'teamleaderleo/stensibly',
       apiHref:
         '/api/bot-desk?slug=the-error-object-is-an-input-boundary',
     });
-    expect(body.entries[1]).toMatchObject({
+
+    const evaluationStructures = body.entries.find(
+      (entry: { slug: string }) => entry.slug === 'evaluation-structures'
+    );
+    expect(evaluationStructures).toMatchObject({
       direction: 'Human-directed',
       editorialState: 'Revised',
       publicationState: 'Published',
@@ -81,11 +95,17 @@ describe('GET /api/bot-desk', () => {
         },
       ],
     });
-    expect(body.entries[3]).toMatchObject({
+
+    const recoveredPostmortem = body.entries.find(
+      (entry: { slug: string }) =>
+        entry.slug === 'the-fetch-that-never-left-the-worker'
+    );
+    expect(recoveredPostmortem).toMatchObject({
       direction: 'Agent-led',
-      editorialState: 'Draft',
+      editorialState: 'Revised',
       publicationState: 'Published',
       kind: 'Postmortem',
+      revision: 2,
       recovered: true,
       recoveredFrom: {
         label: 'Retired Bot Desk archive',
@@ -93,7 +113,7 @@ describe('GET /api/bot-desk', () => {
     });
   });
 
-  it('exposes bounded related records with a full Desk document', async () => {
+  it('exposes bounded related records with a full Workbench document', async () => {
     const response = await GET(
       new Request(
         'https://teamleaderleo.com/api/bot-desk?slug=evaluation-structures'
@@ -110,7 +130,7 @@ describe('GET /api/bot-desk', () => {
     ]);
   });
 
-  it('returns a full Desk document for HTTP-only readers', async () => {
+  it('returns a full Workbench document for HTTP-only readers', async () => {
     const response = await GET(
       new Request(
         'https://teamleaderleo.com/api/bot-desk?slug=the-error-object-is-an-input-boundary'
@@ -130,11 +150,11 @@ describe('GET /api/bot-desk', () => {
         slug: 'the-error-object-is-an-input-boundary',
         title: 'The Error Object Is an Input Boundary',
         direction: 'Agent-led',
-        editorialState: 'Draft',
+        editorialState: 'Revised',
         publicationState: 'Published',
         sourcePath: 'desk/the-error-object-is-an-input-boundary.md',
         content: expect.stringContaining(
-          'That means the error object is input.'
+          'That makes the error object input.'
         ),
       },
       links: {
@@ -145,7 +165,7 @@ describe('GET /api/bot-desk', () => {
     });
   });
 
-  it('returns a bounded 404 contract for an unknown Desk slug', async () => {
+  it('returns a bounded 404 contract for an unknown Workbench slug', async () => {
     const response = await GET(
       new Request('https://teamleaderleo.com/api/bot-desk?slug=missing-piece')
     );
@@ -154,7 +174,7 @@ describe('GET /api/bot-desk', () => {
     expect(response.status).toBe(404);
     expect(body).toEqual({
       version: 1,
-      error: 'Bot Desk piece not found',
+      error: 'Workbench piece not found',
       slug: 'missing-piece',
       index: '/api/bot-desk',
     });

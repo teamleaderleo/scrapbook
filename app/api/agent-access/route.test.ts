@@ -3,7 +3,7 @@ import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
 import { GET } from './route';
 
 describe('GET /api/agent-access', () => {
-  it('describes transport-neutral read, write, and handoff capabilities', async () => {
+  it('describes transport-neutral read, write, handoff, and GitHub-reference capabilities', async () => {
     const response = GET();
     const body = await response.json();
 
@@ -12,7 +12,7 @@ describe('GET /api/agent-access', () => {
       REPOSITORY_PUBLIC_CACHE_CONTROL
     );
     expect(body).toMatchObject({
-      version: 1,
+      version: 2,
       source: 'repository',
       repository: 'teamleaderleo/scrapbook',
       canonicalSite: 'https://teamleaderleo.com',
@@ -31,12 +31,15 @@ describe('GET /api/agent-access', () => {
         publicSite: {
           work: '/work',
           learningRecords: '/space/records',
+          workbench: '/desk',
         },
         machineContracts: {
           handoffSchema: '/api/agent-access/handoff-schema',
+          botDesk: '/api/bot-desk',
           work: '/api/work',
           learningRecords: '/api/learning-records',
         },
+        compatibility: expect.stringContaining('Workbench'),
       },
       transports: {
         githubRepository: {
@@ -49,6 +52,12 @@ describe('GET /api/agent-access', () => {
         },
         databaseOrStorageConnection: expect.any(Object),
         otherConnector: expect.any(Object),
+      },
+      githubReferences: {
+        repositoryEvidence: expect.stringContaining('direct https://github.com'),
+        exploratoryInteractionText: expect.stringContaining('issue 123'),
+        clickableWithoutBacklink: expect.stringContaining('redirect.github.com'),
+        materialization: expect.stringContaining('preflight'),
       },
       write: {
         canonicalSource: 'GitHub repository',
@@ -85,11 +94,12 @@ describe('GET /api/agent-access', () => {
             reason: null,
           }),
         },
+        evidenceRule: expect.stringContaining('evidence array is data'),
       },
       links: {
         repository: 'https://github.com/teamleaderleo/scrapbook',
         accessGuide: expect.stringContaining('docs/agent-access.md'),
-        publicDesk: '/desk',
+        publicWorkbench: '/desk',
         publicWork: '/work',
       },
     });

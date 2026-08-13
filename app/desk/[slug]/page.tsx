@@ -67,7 +67,7 @@ export default async function BotDeskArticlePage({
             href="/desk"
             className="inline-flex min-h-[44px] items-center underline decoration-border underline-offset-4 hover:text-foreground"
           >
-            The Bot Desk
+            Workbench
           </Link>
           <span>
             {entry.kind} · {entry.editorialState}

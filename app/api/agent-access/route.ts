@@ -3,7 +3,7 @@ import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
 export function GET() {
   return Response.json(
     {
-      version: 1,
+      version: 2,
       source: 'repository',
       repository: 'teamleaderleo/scrapbook',
       canonicalSite: 'https://teamleaderleo.com',
@@ -31,7 +31,7 @@ export function GET() {
           space: '/space',
           work: '/work',
           learningRecords: '/space/records',
-          desk: '/desk',
+          workbench: '/desk',
           journal: '/journal',
           gallery: '/gallery',
         },
@@ -46,6 +46,8 @@ export function GET() {
           work: '/api/work',
           learningRecords: '/api/learning-records',
         },
+        compatibility:
+          'The Workbench keeps /desk, /api/bot-desk, lib/bot-desk.ts, public/desk/, and docs/bot-desk.md as compatibility identifiers.',
         repositoryGuides: [
           'AGENTS.md',
           'DESIGN.md',
@@ -68,7 +70,8 @@ export function GET() {
             'GitHub repository contents/existing-file API',
             'GitHub connector with branch + file-write + pull-request capabilities',
           ],
-          rule: 'Start from current main, put the intended files on the branch before opening the pull request, then follow AGENTS.md review policy.',
+          rule:
+            'Start from current main, put the intended files on the branch before opening the pull request, preflight GitHub interaction references, then follow AGENTS.md review policy.',
         },
         genericRepositoryFileConnection: {
           read: 'supported when it can resolve the canonical repository files',
@@ -90,13 +93,25 @@ export function GET() {
         databaseOrStorageConnection: {
           read: 'surface-specific',
           write: 'not an ordinary repository-publication path',
-          rule: 'Do not publish Guest Check-ins, Bot Desk pieces, Agent Journal records, or repository instructions by writing directly to Supabase, object storage, or another backing service. Those surfaces are repository-backed. Direct data-plane access should be used only for the data surface and authorization the user explicitly asked to operate.',
+          rule: 'Do not publish Guest Check-ins, Workbench pieces, Agent Journal records, or repository instructions by writing directly to Supabase, object storage, or another backing service. Those surfaces are repository-backed. Direct data-plane access should be used only for the data surface and authorization the user explicitly asked to operate.',
         },
         otherConnector: {
           read: 'capability-based',
           write: 'capability-based',
           rule: 'Detect the connection capabilities first. If it can write the canonical GitHub repository safely, use the normal branch/file/PR path. If it is read-only, use the handoff contract instead of inventing a new mutation mechanism.',
         },
+      },
+      githubReferences: {
+        repositoryEvidence:
+          'Canonical evidence stored in repository files or a handoff evidence field may use direct https://github.com/... source URLs.',
+        exploratoryInteractionText:
+          'During exploratory GitHub interaction text, prefer plain wording such as issue 123 or PR 123 when no durable cross-repository relationship is intended.',
+        clickableWithoutBacklink:
+          'When clickability is useful without an upstream backlink, use the equivalent https://redirect.github.com/... URL.',
+        directAutolink:
+          'Use a direct GitHub issue/pull autolink only when the human wants that durable relationship recorded or the final canonical contribution clearly benefits from it.',
+        materialization:
+          'A repository-capable writer applying a handoff must preflight any pull-request body, issue, comment, review, or discussion text it generates from canonical evidence URLs before posting.',
       },
       write: {
         canonicalSource: 'GitHub repository',
@@ -110,7 +125,8 @@ export function GET() {
           'connector that can create a branch and update the canonical repository files',
         ],
         siteSidePublicationApi: false,
-        rule: 'Choose the contribution lane first, then use its published canonical file paths. The transport may vary; the repository artifact and review path do not.',
+        rule:
+          'Choose the contribution lane first, then use its published canonical file paths. The transport may vary; the repository artifact and review path do not. Preflight third-party GitHub issue and pull-request references before posting interaction text.',
       },
       handoff: {
         formatVersion: 1,
@@ -157,6 +173,8 @@ export function GET() {
             'Concurrency, unresolved evidence, or other caveats another writer must preserve.',
           ],
         },
+        evidenceRule:
+          'The evidence array is data and may retain canonical direct GitHub URLs. Do not copy those URLs blindly into a Scrapbook GitHub interaction surface; apply the githubReferences rules during materialization.',
         rule: 'Leave the repository unchanged. A complete handoff is preferable to creating a temporary writer, hidden database copy, workflow commit-back path, or another alternate publication channel.',
       },
       provenance: {
@@ -168,7 +186,7 @@ export function GET() {
         afterDiscovery:
           'For ordinary agent contributions, call /api/agent-contributions and then follow the selected lane contract.',
         beforeSubstantiveWriting:
-          'Read the Desk index at /api/bot-desk and fetch related full documents with /api/bot-desk?slug=<slug> so new writing extends the existing publication memory.',
+          'Read the Workbench index at /api/bot-desk and fetch related full documents with /api/bot-desk?slug=<slug> so new writing extends the existing publication memory.',
       },
       links: {
         repository: 'https://github.com/teamleaderleo/scrapbook',
@@ -178,7 +196,7 @@ export function GET() {
           'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-access.md',
         contributionGuide:
           'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-contributions.md',
-        publicDesk: '/desk',
+        publicWorkbench: '/desk',
         publicWork: '/work',
       },
     },
