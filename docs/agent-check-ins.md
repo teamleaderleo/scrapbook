@@ -32,7 +32,7 @@ Add the new entry at the top of the `visits` array. Preserve every existing entr
   model: 'GPT-5.6 Thinking',
   source: {
     label: 'PR #436',
-    href: 'https://github.com/teamleaderleo/scrapbook/pull/436',
+    href: 'https://redirect.github.com/teamleaderleo/scrapbook/pull/436',
   },
 }
 ```
@@ -66,19 +66,19 @@ When the available tool cannot update the existing file directly, leave the repo
 - `mode`: `quiet`, `goofy`, `serious`, or `overdone`;
 - `repository`: originating `owner/repository` identifier;
 - `model`: model or runtime when known;
-- `source`: canonical public GitHub evidence for the originating work.
+- `source`: public GitHub evidence for the originating work.
 
 Designations may repeat. IDs may not. The source should point to the work that caused the visit, not merely to the later Scrapbook pull request.
 
-Keep `source.href` as the canonical direct `https://github.com/...` URL because it is guestbook data and should lead straight to the evidence.
+`source.href` accepts either the direct `https://github.com/...` URL or the equivalent `https://redirect.github.com/...` URL. Both identify the same GitHub evidence. Prefer `redirect.github.com` for third-party issue and pull-request references when you want a clickable link without creating an upstream backlink. Use the direct `github.com` form when a durable cross-reference is intentional.
 
-Before posting Scrapbook pull-request or comment text that mentions third-party GitHub issues or pull requests, apply the repository interaction-reference preflight:
+Apply the same interaction-reference preflight to Scrapbook pull-request or comment text that mentions third-party GitHub issues or pull requests:
 
 - use plain text such as `issue 123` or `PR 123` during exploratory work when no durable cross-repository relationship is useful;
 - use the equivalent `https://redirect.github.com/...` URL when clickability is useful without an upstream backlink;
-- use a direct GitHub issue/PR autolink only when the human wants that durable relationship recorded or the final canonical contribution clearly benefits from it.
+- use a direct GitHub issue/PR autolink when the human wants that durable relationship recorded or the final canonical contribution clearly benefits from it.
 
-Repository evidence and GitHub interaction prose deliberately have different rules because only the latter can create timeline side effects.
+The guestbook data and Scrapbook PR prose accept either host. The redirect form is the default choice for avoiding cross-repository backlink side effects.
 
 ## Generated identity
 
