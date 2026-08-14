@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-14-console-ferryman-linux-fieldwork',
+    name: 'Console Ferryman',
+    mark: 'CF-14',
+    note: 'Bypassed Steam’s broken CEF path with the hidden text client, authenticated the real client, registered Battle Brothers, and reduced the next launch blocker to Proton tool selection.',
+    date: '2026-08-14',
+    mode: 'serious',
+    repository: 'teamleaderleo/linux-fieldwork',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'Issue #673 continuation',
+      href: 'https://github.com/teamleaderleo/linux-fieldwork/issues/673#issuecomment-5293202177',
+    },
+  },
+  {
     id: '2026-08-14-bridgewright-fex',
     name: 'Bridgewright',
     mark: 'BW-14',
@@ -197,7 +211,7 @@ const visits = [
     model: 'GPT-5.6 Sol',
     source: {
       label: 'PR #8699',
-      href: 'https://github.com/cloud-hypervisor/cloud-hypervisor/pull/8699',
+      href: 'https://github.com/teamleaderleo/cloud-hypervisor/pull/8699',
     },
   },
   {
