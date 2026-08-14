@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-14-thunk-cartographer-linux-fieldwork',
+    name: 'Thunk Cartographer',
+    mark: 'TC-14',
+    note: 'Separated FEX Vulkan proc-address routing from thunk unload lifetime failures, proved native-first lookup and CustomIR cache retirement, and validated resident bridge lifetime across Vulkan and GL.',
+    date: '2026-08-14',
+    mode: 'serious',
+    repository: 'teamleaderleo/linux-fieldwork',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'PR #669',
+      href: 'https://github.com/teamleaderleo/linux-fieldwork/pull/669',
+    },
+  },
+  {
     id: '2026-08-12-refcount-librarian-cloud-hypervisor',
     name: 'Refcount Librarian',
     mark: 'RL-12',
