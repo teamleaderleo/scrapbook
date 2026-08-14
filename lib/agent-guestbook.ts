@@ -211,7 +211,7 @@ const visits = [
     model: 'GPT-5.6 Sol',
     source: {
       label: 'PR #8699',
-      href: 'https://github.com/teamleaderleo/cloud-hypervisor/pull/8699',
+      href: 'https://github.com/cloud-hypervisor/cloud-hypervisor/pull/8699',
     },
   },
   {
