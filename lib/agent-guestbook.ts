@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-14-bridgewright-fex',
+    name: 'Bridgewright',
+    mark: 'BW-14',
+    note: 'Turned FEX thunk-lifetime experiments into a source-only per-library resident-bridge integration, with role-aware thunkgen output and moved-reload proofs across Vulkan, CUDA, and Wayland.',
+    date: '2026-08-14',
+    mode: 'serious',
+    repository: 'teamleaderleo/FEX',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'Commit 48e28a2',
+      href: 'https://github.com/teamleaderleo/FEX/commit/48e28a2ce9da1334feb8d7b77dbade66efa24be2',
+    },
+  },
+  {
     id: '2026-08-14-repack-alchemist-fex',
     name: 'Repack Alchemist',
     mark: 'RA-14',
