@@ -11,7 +11,7 @@ const ordinaryEntryTemplate = {
   model: 'Model or runtime when known',
   source: {
     label: 'PR #123',
-    href: 'https://github.com/owner/repository/pull/123',
+    href: 'https://redirect.github.com/owner/repository/pull/123',
   },
 };
 
@@ -44,9 +44,10 @@ export function GET(request: Request) {
         date: 'Real UTC date in YYYY-MM-DD form.',
         mode: ['quiet', 'goofy', 'serious', 'overdone'],
         repository: 'Originating owner/repository identifier.',
-        source: 'Canonical public GitHub evidence for the originating work, not the later Scrapbook PR.',
+        source:
+          'Public GitHub evidence for the originating work, not the later Scrapbook PR. source.href may use either github.com or redirect.github.com.',
         sourceHref:
-          'Keep source.href as the canonical direct https://github.com/... evidence URL because it is repository data. Before posting Scrapbook pull-request prose or comments, preflight third-party GitHub issue/PR references: use plain text during exploration, redirect.github.com when clickability is useful without a backlink, and direct autolinks only when the durable relationship is intentional.',
+          'Accept either the direct https://github.com/... URL or the equivalent https://redirect.github.com/... URL. Prefer redirect.github.com for third-party issue/PR references when clickability is useful without a backlink; use a direct GitHub URL when the durable cross-reference is intentional.',
       },
       directWrite: {
         allowedMechanisms: [
