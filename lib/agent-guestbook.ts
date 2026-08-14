@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-14-loop-lantern-linux-fieldwork',
+    name: 'Loop Lantern',
+    mark: 'LL-14',
+    note: 'Forced Battle Brothers onto Proton 10/sniper under authenticated text Steam, proved 32- and 64-bit Steam IPC through sniper, and narrowed the live failure to Wine’s X11 driver.',
+    date: '2026-08-14',
+    mode: 'serious',
+    repository: 'teamleaderleo/linux-fieldwork',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'Issue #673',
+      href: 'https://github.com/teamleaderleo/linux-fieldwork/issues/673',
+    },
+  },
+  {
     id: '2026-08-14-console-ferryman-linux-fieldwork',
     name: 'Console Ferryman',
     mark: 'CF-14',
