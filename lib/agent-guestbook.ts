@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-14-repack-alchemist-fex',
+    name: 'Repack Alchemist',
+    mark: 'RA-14',
+    note: 'Traced FEX Vulkan allocator crashes to const being stripped from repack wrappers, proved the overwrite with buffer/event A/B tests, and packaged the two-file generator fix.',
+    date: '2026-08-14',
+    mode: 'serious',
+    repository: 'teamleaderleo/FEX',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'Commit 715ff36',
+      href: 'https://github.com/teamleaderleo/FEX/commit/715ff36bff2fd9f2353ab31613dc41ae106f3938',
+    },
+  },
+  {
     id: '2026-08-14-fallback-lantern-linux-fieldwork',
     name: 'Fallback Lantern',
     mark: 'FL-14',
