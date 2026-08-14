@@ -12,7 +12,7 @@ A recent LocalLLaMA thread about an HP Z8 Fury configuration captured the whole 
 
 The thread was funny, and plenty of people treated it that way. It also exposed a recurring habit in local-AI culture: a cool personal preference expands into an economic argument, then a privacy argument, then an ownership argument, then a moral argument about closed labs and compute providers.
 
-The machine was already cool. It never needed all that help.
+The machine was already cool. Its own appeal carried the argument.
 
 ## The hobby already won
 
@@ -44,9 +44,9 @@ You ask for compute. You use it. You release it. Somebody else buys the building
 
 For bursty personal AI use, this is an astonishing luxury.
 
-Most people do not need maximum inference throughput every minute of every day. They code for a while. They ask questions. They generate something. They run an experiment. They disappear for lunch. They sleep. Their demand arrives in lumps.
+Personal inference demand often arrives in lumps. You code for a while. You ask questions. You generate something. You run an experiment. You disappear for lunch. You sleep.
 
-A provider can spread expensive machines across many customers whose lumps occur at different times. A person with a workstation spreads the purchase price across their own usage and their own idle hours.
+A provider can spread expensive machines across many customers whose demand peaks at different times. A person with a workstation spreads the purchase price across their own usage and their own idle hours.
 
 That distinction gets lost when someone compares the retail price of four GPUs with the price of a workstation containing four GPUs and declares victory. The more useful comparison is the full cost of the machine against the compute the owner will actually consume over its useful life.
 
@@ -76,7 +76,7 @@ The useful question is simple: what data are you protecting, from whom, and what
 
 Credentials have direct leverage. Trade secrets have direct leverage. Private keys, unreleased source code, intimate photographs, medical records, legal strategy, unpublished research, and material useful for fraud or extortion deserve serious handling.
 
-Everyday personal data often has far less commercial power in isolation. A random chat transcript becomes more useful when it joins aggregation, labeling, feedback, segmentation, and analysis across many users. That process takes scale and work. The existence of an individual's conversation does not automatically make the conversation a tiny oil well.
+Everyday personal data often has far less commercial power in isolation. A random chat transcript becomes more useful when it joins aggregation, labeling, feedback, segmentation, and analysis across many users. That process takes scale and work. Commercial value usually appears through the work done across the collection, rather than through one ordinary conversation sitting by itself.
 
 This distinction gets mangled online. Concern about data collection turns into a vague belief that every ordinary interaction is a treasure providers are desperate to seize. From there, a five-figure local workstation begins to look like a privacy appliance.
 
@@ -96,9 +96,9 @@ Ownership is useful when control over the object gives you something you value e
 
 Ownership also gives you the old GPU when the new GPU arrives.
 
-There is no medal for personally carrying depreciation.
+Personally carrying depreciation is simply carrying depreciation.
 
-Renting compute can be luxurious. A huge pool of expensive machinery appears when you need it, disappears when you finish, and becomes somebody else's aging asset. The bill can end next month. The hardware never has to leave your house because it never entered your house.
+Renting compute can be luxurious. A huge pool of expensive machinery appears when you need it, disappears when you finish, and becomes somebody else's aging asset. The bill can end next month. The hardware stays somebody else's aging asset from purchase to disposal.
 
 Sometimes ownership is freedom. Sometimes freedom is having one fewer object to maintain.
 
@@ -106,7 +106,7 @@ Sometimes ownership is freedom. Sometimes freedom is having one fewer object to 
 
 This is where some local-AI communities begin to resemble Linux communities at their most exhausting.
 
-Linux itself is magnificent. The expertise around it is real. The culture has produced decades of useful software, documentation, reverse engineering, performance work, and people who understand computers at a depth most users will never need.
+Linux itself is magnificent. The expertise around it is real. The culture has produced decades of useful software, documentation, reverse engineering, performance work, and people who understand computers at a depth most users will ever need.
 
 Then preference becomes hierarchy.
 
@@ -132,7 +132,7 @@ Then call each choice what it is.
 
 A hobby purchase can be a hobby purchase. A privacy requirement can name the data and threat. An economic claim can show utilization and total cost. An investment gain can become real when the asset sells. A political complaint can point at the provider behavior that deserves the complaint.
 
-The giant machine never needed to represent freedom, financial genius, resistance to subscription culture, privacy maximalism, and the future of computing all at once.
+The giant machine can simply be a giant machine.
 
 Want the machine. Build the machine. Name the machine. Run enormous open models because you can. Enjoy the lovely absurdity of having a small datacenter's worth of compute glowing beside your desk.
 
