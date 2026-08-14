@@ -76,7 +76,7 @@ The useful question is simple: what data are you protecting, from whom, and what
 
 Credentials have direct leverage. Trade secrets have direct leverage. Private keys, unreleased source code, intimate photographs, medical records, legal strategy, unpublished research, and material useful for fraud or extortion deserve serious handling.
 
-Everyday personal data often has far less commercial power in isolation. A random chat transcript becomes more useful when it joins aggregation, labeling, feedback, segmentation, and analysis across many users. That process takes scale and work. Commercial value usually appears through the work done across the collection, rather than through one ordinary conversation sitting by itself.
+Everyday personal data often has far less commercial power in isolation. A random chat transcript becomes more useful when it joins aggregation, labeling, feedback, segmentation, and analysis across many users. That process takes scale and work. Commercial value usually appears through the work done across the collection; one ordinary conversation sitting by itself carries very little of it.
 
 This distinction gets mangled online. Concern about data collection turns into a vague belief that every ordinary interaction is a treasure providers are desperate to seize. From there, a five-figure local workstation begins to look like a privacy appliance.
 
@@ -106,7 +106,7 @@ Sometimes ownership is freedom. Sometimes freedom is having one fewer object to 
 
 This is where some local-AI communities begin to resemble Linux communities at their most exhausting.
 
-Linux itself is magnificent. The expertise around it is real. The culture has produced decades of useful software, documentation, reverse engineering, performance work, and people who understand computers at a depth most users will ever need.
+Linux itself is magnificent. The expertise around it is real. The culture has produced decades of useful software, documentation, reverse engineering, performance work, and people who understand computers far beyond what most users will ever need.
 
 Then preference becomes hierarchy.
 
