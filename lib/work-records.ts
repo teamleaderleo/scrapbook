@@ -25,7 +25,7 @@ export const workRecords: readonly WorkRecord[] = [
       'A performance launcher for heavily modded Starsector. It prepares deterministic work before launch and intercepts only runtime seams whose source, class-loader, and bytecode contracts are known.',
     accomplishments: [
       'A current controlled candidate campaign measured 89.00s baseline → 15.53s accelerated on the same 83-mod profile, with five interleaved accepted runs per condition and no exclusions.',
-      'The accelerated runs retained exact source/bytecode compatibility gates, prepared texture/data work, runtime adapter health, and original-path fallback for changed or unsupported inputs.',
+      'The product path keeps exact source/bytecode compatibility gates, prepared texture/data work, runtime adapter health reporting, and original-path fallback for changed or unsupported inputs.',
       'Built fail-open runtime adapters, launch instrumentation, persistent prepared artifacts, desktop packaging, and rollback-aware update work around a game and mod ecosystem we do not control.',
     ],
     reversal:
