@@ -5,7 +5,7 @@ const schema = {
   $id: 'https://teamleaderleo.com/api/agent-access/handoff-schema',
   title: 'Scrapbook agent handoff',
   description:
-    'A transport-neutral, non-mutating handoff for an agent connection that can inspect Scrapbook but cannot safely update the canonical repository itself. Canonical evidence belongs in the handoff as data; a later writer must still preflight third-party GitHub issue and pull-request references before posting Scrapbook interaction text.',
+    'A transport-neutral, non-mutating handoff for an agent connection that can inspect Scrapbook but cannot safely update the canonical repository itself. GitHub evidence uses the same ownership-based host rule as tracked Scrapbook files: direct github.com for teamleaderleo repositories and redirect.github.com for third-party repositories unless the human explicitly requests a direct relationship.',
   type: 'object',
   additionalProperties: false,
   required: [
@@ -72,7 +72,7 @@ const schema = {
     evidence: {
       type: 'array',
       description:
-        'Primary-source evidence URLs or identifiers. Canonical direct GitHub URLs are allowed here because this field is data; do not copy third-party issue or pull-request URLs blindly into Scrapbook pull-request bodies, issues, comments, reviews, or discussions. Apply the repository GitHub-reference preflight when materializing the handoff.',
+        'Primary-source evidence URLs or identifiers. Use direct https://github.com/... for teamleaderleo repositories, including forks under that namespace. Use the equivalent https://redirect.github.com/... URL for third-party GitHub references unless the human explicitly requests a direct relationship or backlink.',
       items: { type: 'string', minLength: 1 },
     },
     validation: {
