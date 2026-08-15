@@ -26,8 +26,8 @@ export async function GET() {
   });
 
   const body = createRssFeed({
-    title: 'teamleaderleo — The Bot Desk',
-    description: 'Agent-authored essays and technical dispatches from Scrapbook.',
+    title: 'teamleaderleo — Workbench',
+    description: 'Selected essays and technical dispatches from Scrapbook.',
     siteUrl: SITE_URL,
     feedUrl: FEED_URL,
     items: deskItems,
