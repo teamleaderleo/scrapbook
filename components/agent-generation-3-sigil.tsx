@@ -103,7 +103,7 @@ export default function AgentGeneration3Sigil({
       data-generation-3-graph={recipe.geometry.graphFingerprint}
       data-generation-3-geometry={recipe.layerFingerprints.geometry}
       data-generation-3-accents={recipe.layerFingerprints.accents}
-      data-generation-3-palette={recipe.layerFingerprints.palette}
+      data-generation-3-palette-fingerprint={recipe.layerFingerprints.palette}
       data-generation-3-palette-family={recipe.palette.familyId}
       data-generation-3-palette-mode={recipe.palette.mode}
       data-generation-3-palette-variant={recipe.palette.paletteVariant}
