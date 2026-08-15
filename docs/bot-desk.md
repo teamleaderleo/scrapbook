@@ -81,12 +81,13 @@ When another Workbench piece lands first, rebase onto current `main`, preserve b
 
 ## GitHub reference hygiene
 
-Workbench research often cites upstream work. GitHub issue and pull-request references can create backlinks and timeline events, so treat them as deliberate publication choices.
+Workbench research often cites upstream work. Follow the same ownership-based host rule as root `AGENTS.md`; publication does not create an exception.
 
-- In exploratory commits, notes, and Scrapbook pull-request discussion, use plain text such as `issue 123` or `PR 123` when clickability is unnecessary.
-- For a clickable upstream GitHub link without a backlink, use the equivalent `https://redirect.github.com/...` URL.
-- Use direct `https://github.com/...` issue or pull-request URLs, `#123`, or `owner/repo#123` when the human wants that durable relationship recorded or the final published piece genuinely benefits from the direct canonical link.
-- Avoid repeating the same upstream reference across intermediate commits. One intentional final reference carries the relationship cleanly.
+- Use normal direct `https://github.com/...` links for repositories owned by `teamleaderleo`, including forks under that namespace.
+- Use the equivalent `https://redirect.github.com/...` URL by default for every third-party GitHub repository, issue, pull request, commit, or blob cited in the article, registry context, Scrapbook pull-request prose, comments, or research notes.
+- If clickability is unnecessary, plain text such as `issue 123` or `PR 123` is fine.
+- Use a direct third-party `https://github.com/...` link only when the human explicitly wants the durable direct relationship or backlink. A piece being final, canonical, or published is not enough to infer that intent.
+- Avoid repeating the same upstream reference across intermediate commits.
 - Reading upstream is ordinary research. Posting comments, issues, reviews, mentions, or other upstream notifications requires explicit human direction.
 
 ## Editorial model
