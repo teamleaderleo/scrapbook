@@ -20,6 +20,7 @@ const retiredSourcePaths = [
   'app/lib/external/s3-resource-tracker.ts',
   'app/lib/hooks/useProjectBlocks.ts',
   'app/lib/hooks/useTags.ts',
+  'app/lib/hooks/useToastMessages.ts',
   'app/lib/db/schema.ts',
   'app/lib/image-processing/image-processing.ts',
   'app/lib/seed-items.ts',
