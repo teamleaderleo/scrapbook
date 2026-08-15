@@ -17,7 +17,7 @@ describe('GET /api/agent-access/handoff-schema', () => {
     expect(body).toMatchObject({
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       $id: 'https://teamleaderleo.com/api/agent-access/handoff-schema',
-      description: expect.stringContaining('preflight third-party GitHub'),
+      description: expect.stringContaining('redirect.github.com'),
       type: 'object',
       additionalProperties: false,
       properties: {
@@ -38,13 +38,14 @@ describe('GET /api/agent-access/handoff-schema', () => {
         },
         evidence: {
           type: 'array',
-          description: expect.stringContaining('repository GitHub-reference preflight'),
+          description: expect.stringContaining('teamleaderleo'),
         },
         review: {
           type: 'object',
         },
       },
     });
+    expect(body.properties.evidence.description).toContain('redirect.github.com');
     expect(body.required).toEqual(
       expect.arrayContaining([
         'formatVersion',
