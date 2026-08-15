@@ -27,7 +27,7 @@ A connection that can safely update that repository may use its native write mec
 - a GitHub connector that can create a branch, update files, and open a pull request;
 - another repository-file connector that maps back to the same canonical Git repository and isolated branch/revision.
 
-For these paths, start from current `main`, place the intended files on the branch before opening the pull request, preflight third-party GitHub issue/PR references in interaction text, and follow `AGENTS.md`.
+For these paths, start from current `main`, place the intended files on the branch before opening the pull request, preflight GitHub references under the ownership-based host rule, and follow `AGENTS.md`.
 
 ## Capability first, connector second
 
@@ -67,17 +67,18 @@ Useful entry points:
 
 Read `AGENTS.md`, `DESIGN.md`, and the relevant guide under `docs/`. For substantive writing, inspect the current Workbench index and read related full documents before drafting.
 
-## GitHub interaction references
+## GitHub references
 
-Repository evidence and GitHub interaction text have different side effects.
+Use one ownership-based host rule for repository evidence, handoffs, tracked files, and GitHub interaction text.
 
-- Tracked repository files and handoff evidence fields may use canonical direct `https://github.com/...` links to primary sources.
-- In exploratory GitHub interaction text, prefer plain wording such as `issue 123` or `PR 123` when a durable cross-repository relationship is unnecessary.
-- When a clickable third-party issue/PR link is useful without creating an upstream backlink, use the equivalent `https://redirect.github.com/...` URL.
-- Use a direct GitHub issue/PR autolink only when the human wants that durable relationship recorded or the final canonical contribution clearly benefits from it.
-- Apply this preflight before opening or editing Scrapbook pull requests, issues, comments, reviews, or discussions. Editing later may clean the visible prose while leaving a timeline event GitHub already created.
+- For repositories owned by `teamleaderleo`, including forks under that namespace, use normal direct `https://github.com/...` links by default.
+- For any third-party GitHub repository, use the equivalent `https://redirect.github.com/...` URL by default for repository, issue, pull-request, commit, and blob references.
+- If clickability is unnecessary, plain wording such as `issue 123` or `PR 123` is fine.
+- Use a direct third-party `https://github.com/...` link only when the human explicitly wants the durable direct relationship or backlink. Do not infer that intent because a record or handoff is canonical, final, public, or durable.
+- Apply the same rule before opening or editing Scrapbook pull requests, issues, comments, reviews, or discussions. Editing later may clean the visible prose while leaving a timeline event GitHub already created.
+- Keep non-`github.com` machine endpoints unchanged when their exact host is part of the interface, such as GitHub API URLs, raw-content URLs, Actions endpoints, or other protocol-specific URLs.
 
-A read-only handoff may therefore keep direct canonical evidence URLs. The repository-capable agent that materializes it must still preflight any interaction prose generated from those URLs.
+A read-only handoff must preserve this same host rule in its evidence values so the next writer does not need a second exception model.
 
 ## Write paths
 
@@ -120,14 +121,12 @@ The version 1 handoff carries:
 - exact target paths and create/update operations;
 - complete proposed file contents or a precise patch for every file;
 - optional lane-specific registry/metadata;
-- primary evidence URLs;
+- primary evidence URLs using the same ownership-based GitHub host rule;
 - expected validation commands/checks;
 - explicit human-review requirement and reason;
 - unresolved uncertainty, concurrency, or other risks.
 
-Primary evidence URLs in the handoff are data and may remain canonical direct GitHub links. Before those values enter a Scrapbook pull-request body, issue, comment, review, or discussion, apply the interaction-reference rules above.
-
-The next repository-capable agent should be able to validate and apply the handoff without rediscovering the intended artifact.
+The next repository-capable agent should be able to validate and apply the handoff without rediscovering the intended artifact or rewriting its evidence-link policy.
 
 ## Database and storage connections
 
