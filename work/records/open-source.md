@@ -8,11 +8,11 @@ The useful claim is repeatability across unrelated systems: enter an unfamiliar 
 
 ### Vercel AI SDK — direct merge plus Factory adoption
 
-The current AI SDK record now has three distinct accepted repairs.
+The current AI SDK record has three distinct accepted repairs.
 
 #### Deterministic URL-regex evaluation
 
-Upstream PR: https://github.com/vercel/ai/pull/18570
+Upstream PR: https://redirect.github.com/vercel/ai/pull/18570
 
 State: **merged and published**.
 
@@ -29,9 +29,9 @@ The upstream bugfix review called the change fully addressing, low-risk, minimal
 
 #### Async stream reader cleanup after source errors
 
-Contributor PR: https://github.com/vercel/ai/pull/18371
+Contributor PR: https://redirect.github.com/vercel/ai/pull/18371
 
-Factory landing PR: https://github.com/vercel/ai/pull/18400
+Factory landing PR: https://redirect.github.com/vercel/ai/pull/18400
 
 State: **contributor repair approved; Factory implementation merged with explicit co-author credit**.
 
@@ -39,17 +39,17 @@ A rejected `reader.read()` could bypass cleanup in the AI SDK's async-iterable s
 
 The contributor PR reproduced the behavior across both helper implementations, preserved the exact source rejection, released the reader without cancelling an already errored stream, and covered exact, undefined, partial-consumption, concurrent, reacquisition, and subsequent-iteration cases in Node and Edge environments.
 
-AI SDK Factory reviewed the contributor PR as fully addressing and appropriately tested. The final upstream implementation landed through Factory PR #18400; the merged fix commit explicitly includes `Co-authored-by: teamleaderleo` alongside Lars Grammel.
+AI SDK Factory reviewed the contributor PR as fully addressing and appropriately tested. The final upstream implementation landed through Factory PR 18400; the merged fix commit explicitly includes `Co-authored-by: teamleaderleo` alongside Lars Grammel.
 
 That is stronger attribution than merely saying the idea overlapped upstream: the repository's own landing workflow preserved contributor credit in the merged commit.
 
 #### Preserve streamed size-limit errors when cancellation fails
 
-Contributor PR: https://github.com/vercel/ai/pull/18572
+Contributor PR: https://redirect.github.com/vercel/ai/pull/18572
 
-Factory landing PR: https://github.com/vercel/ai/pull/18695
+Factory landing PR: https://redirect.github.com/vercel/ai/pull/18695
 
-Release-branch landings: https://github.com/vercel/ai/pull/18700 and https://github.com/vercel/ai/pull/18702
+Release-branch landings: https://redirect.github.com/vercel/ai/pull/18700 and https://redirect.github.com/vercel/ai/pull/18702
 
 State: **contributor repair approved; Factory implementation merged with explicit co-author credit on main and merged into maintained v5/v6 release branches**.
 
@@ -57,13 +57,13 @@ State: **contributor repair approved; Factory implementation merged with explici
 
 The contributor PR contained cancellation rejection, preserved lock release, and added a native `ReadableStream` regression proving the size-limit error survives while cancellation is still attempted.
 
-AI SDK Factory reviewed the change as fully addressing with minimal scope. Factory PR #18695 landed the fix on main and its merged commits explicitly credit `teamleaderleo` as co-author. The same repair then landed through Factory PRs #18700 and #18702 on the v5 and v6 release branches.
+AI SDK Factory reviewed the change as fully addressing with minimal scope. Factory PR 18695 landed the fix on main and its merged commits explicitly credit `teamleaderleo` as co-author. The same repair then landed through Factory PRs 18700 and 18702 on the v5 and v6 release branches.
 
-Resume signal: **absolute lock** for Vercel/devtools and unusually strong general OSS evidence. The value is now a cluster: one direct merge plus two repairs independently adopted by the owning repository's maintenance system with retained co-author credit, including one propagated across three maintained branches.
+Resume signal: **absolute lock** for Vercel/devtools and unusually strong general OSS evidence. The value is a cluster: one direct merge plus two repairs independently adopted by the owning repository's maintenance system with retained co-author credit, including one propagated across three maintained branches.
 
 ### Cloud Hypervisor — exact shutdown lifecycle gates
 
-Upstream PR: https://github.com/cloud-hypervisor/cloud-hypervisor/pull/8699
+Upstream PR: https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8699
 
 State: **merged**.
 
@@ -77,7 +77,7 @@ Resume signal: **lock**. Strong lifecycle/concurrency correctness story in a rea
 
 ### Cloud Hypervisor — propagate ACPI construction failures
 
-Upstream PR: https://github.com/cloud-hypervisor/cloud-hypervisor/pull/8709
+Upstream PR: https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8709
 
 State: **merged**.
 
@@ -93,7 +93,7 @@ Resume signal: best paired with the lifecycle PR as one Cloud Hypervisor entry r
 
 ### Cloud Hypervisor — QCOW L2 ownership before L1 publication
 
-Upstream PR: https://github.com/cloud-hypervisor/cloud-hypervisor/pull/8721
+Upstream PR: https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8721
 
 State: **open; one maintainer approval; a later requested-change review has been addressed and awaits refreshed disposition** at the latest refresh.
 
@@ -117,9 +117,23 @@ Focused validation reports 298 block tests passing normally and 326 with `io_uri
 
 Signal: **high-upside systems follow-on with substantive maintainer engagement**. Even before final merge, the review history is a strong interview story about making persistent metadata ownership local and failure-safe instead of defending the first narrow patch.
 
+### Cloudflare Workers SDK — Miniflare runtime disposal ordering
+
+Upstream PR: https://redirect.github.com/cloudflare/workers-sdk/pull/15143
+
+State: **merged**.
+
+`Miniflare.dispose()` waited for browser/proxy cleanup before requesting `Runtime.dispose()`, so slow or failed auxiliary cleanup could delay or skip the `workerd` termination request.
+
+The landed repair starts runtime disposal first, preserves the existing browser → exit-hook → proxy cleanup ordering, remembers the first cleanup error, waits for the already-started runtime exit, continues remaining cleanup, then returns the preserved cleanup error.
+
+Human maintainer review materially improved the boundary: an earlier version stopped remaining cleanup after the first failure; the final merged version preserves the first error while continuing teardown with runtime termination already in flight.
+
+Resume signal: **strong merged lifecycle specimen**. It is now a clean Cloudflare receipt rather than a pending follow-on.
+
 ### Cloudflare Workers SDK — current credentials vs cached authorization state
 
-Upstream PR: https://github.com/cloudflare/workers-sdk/pull/15080
+Upstream PR: https://redirect.github.com/cloudflare/workers-sdk/pull/15080
 
 State: **open; human-approved; Wrangler CODEOWNERS satisfied; changesets prepared** at the latest refresh.
 
@@ -129,21 +143,67 @@ The repair returns service-token headers from the current environment and leaves
 
 A human reviewer approved the current head and the repository's CODEOWNERS gate explicitly reports satisfied. GitHub still reports the PR open rather than merged, so public wording should distinguish accepted review from merge.
 
-Resume signal: **strong**. This has crossed from merely submitted work into real external validation even before merge.
+Resume signal: **strong**. Together with the merged Miniflare repair, this is a small but coherent Cloudflare cluster around lifecycle and state correctness.
 
-### Cloudflare Workers SDK — Miniflare runtime disposal ordering
+## Accepted findings through another repair path
 
-Upstream PR: https://github.com/cloudflare/workers-sdk/pull/15143
+### Zustand — clear-storage hydration generation race
 
-State: **open; active human maintainer review** at the latest refresh.
+Public report: https://redirect.github.com/pmndrs/zustand/discussions/3554
 
-`Miniflare.dispose()` currently waits for browser/proxy cleanup before requesting `Runtime.dispose()`, so slow or failed auxiliary cleanup can delay or skip the `workerd` termination request.
+Upstream landing: https://redirect.github.com/pmndrs/zustand/pull/3555
 
-The repair starts runtime disposal first, preserves the existing browser → exit-hook → proxy cleanup ordering, remembers the first cleanup error, waits for the already-started runtime exit, continues remaining cleanup, then returns the preserved cleanup error.
+The persist middleware already used a `hydrationVersion` generation to prevent stale concurrent hydration publication, but `clearStorage()` did not advance the generation. A delayed read or migration could therefore publish state and lifecycle callbacks after the caller had cleared persisted storage.
 
-A bot review first flagged release-note wording; Leo revised the changeset to describe user-facing behavior. Human maintainer review later asked why a cleanup failure should stop the rest of teardown. The current head adopts that direction: preserve the first error while continuing remaining cleanup, with runtime termination already in flight.
+The independently developed candidate added `++hydrationVersion` before `removeItem()` and validated delayed read/migration, synchronous removal failure, live-state preservation, stale callback suppression, `hasHydrated()` behavior, and later successful hydration.
 
-Signal: strong lifecycle follow-on if accepted. Together with #15080, it would make Cloudflare a small cluster of state/credential and teardown work rather than a single isolated contribution.
+Upstream subsequently merged the same core production mechanism through its own PR with broader regression coverage.
+
+Safe career wording:
+
+> Identified an async persist hydration race and supplied the generation-invalidation repair subsequently implemented upstream.
+
+Signal: excellent mechanism, lower marginal resume value once AI SDK/Cloud Hypervisor/Cloudflare already prove correctness work.
+
+### Playwright — MCP HTTP shutdown authority
+
+Report: https://redirect.github.com/microsoft/playwright/issues/42129
+
+Maintainer landing: https://redirect.github.com/microsoft/playwright/pull/42133
+
+State: **finding accepted; maintainer-owned fix merged; report closed as completed**.
+
+The report showed that an ordinary reachable MCP HTTP client could invoke a fixed-header `/killkillkill` route and enter the server's graceful `SIGINT` shutdown path. The route existed for a Windows lifecycle test; the fixed header reduced CSRF exposure but did not establish process ownership.
+
+The report proposed moving graceful-shutdown authority back to the spawning test parent through stdin. Upstream agreed with the authority problem but chose a smaller project-native repair: gate `/killkillkill` on `isUnderTest()` so production MCP HTTP servers do not expose the test hook.
+
+Signal: strong accepted-finding story. The diagnosis landed; the final repair boundary changed. Do not claim the prepared stdin implementation as the upstream fix.
+
+### BuildKit — rootless/rootful mount-point reproducibility
+
+Contributor PR: https://redirect.github.com/moby/buildkit/pull/7033
+
+Maintainer replacement: https://redirect.github.com/moby/buildkit/pull/7039
+
+Linux Fieldwork reproduced a rootful/rootless filesystem divergence involving runtime-created `/proc`/`/sys` mountpoint stubs. Pre-creating the mountpoints made the control converge. The candidate reused BuildKit's existing mount-stub ownership cleanup against the finalized OCI spec after rootless conversion.
+
+The maintainer accepted the underlying divergence but chose the opposite compatibility policy: restore the missing rootless mount points rather than remove rootful ones, preserving existing rootful output and avoiding a compatibility-version change.
+
+Signal: deep systems review story about which side of a compatibility boundary should move, not a merge-statistic story.
+
+### runc — useful reversal, not resume headline
+
+Upstream issue: https://redirect.github.com/opencontainers/runc/issues/5388
+
+Contributor PR: https://redirect.github.com/opencontainers/runc/pull/5389
+
+Maintainer replacement: https://redirect.github.com/opencontainers/runc/pull/5392
+
+A boundary mismatch between inclusive `configs.MaxCPU` meaning and exclusive `unix.NewCPUSet()` sizing produced an off-by-one reset mask. A patch changed the allocation to `MaxCPU + 1` and added a boundary regression.
+
+The maintainer preferred repairing the historical meaning of `MaxCPU` on the other side. After reviewing that history, Leo agreed and closed the competing patch.
+
+Signal: **great interview story, low resume value**. It demonstrates recognizing a real symptom, accepting a better repair boundary, and not optimizing for personal merge count.
 
 ## Vercel AI SDK — wider current bench
 
@@ -153,7 +213,7 @@ The three accepted repairs above are the clean public receipts. Current Fieldwor
 
 Owned clean candidate: `teamleaderleo/ai#78`.
 
-Some OpenAI-compatible providers can report internally inconsistent counters (for example reasoning tokens exceeding completion tokens while raw total is consistent with prompt + reasoning). Current normalization can publish an output total smaller than the reasoning detail.
+Some OpenAI-compatible providers can report internally inconsistent counters, for example reasoning tokens exceeding completion tokens while raw total is consistent with prompt + reasoning. Current normalization can publish an output total smaller than the reasoning detail.
 
 The selected candidate uses a conservative envelope over completion, reasoning, and `total - prompt` evidence while preserving literal provider counters in `raw`.
 
@@ -165,7 +225,7 @@ Signal: technically good, especially for a Vercel conversation; avoid presenting
 
 ### Claude built-in permission-kind parity
 
-Fieldwork found drift between the public Claude built-in tool catalog and the sandbox bridge's separate permission-kind representation. One concrete example: public metadata classifies PowerShell as bash-like while the bridge can fall through through an edit-class default, changing approval behavior under `allow-edits`.
+Fieldwork found drift between the public Claude built-in tool catalog and the sandbox bridge's separate permission-kind representation. One concrete example: public metadata classifies PowerShell as bash-like while the bridge can fall through an edit-class default, changing approval behavior under `allow-edits`.
 
 Work expanded into a mechanical public-catalog-to-bridge parity matrix plus unknown-native and external-MCP compatibility discriminators.
 
@@ -185,33 +245,30 @@ Current research includes inline-extension failure visibility, project-local Ope
 
 Signal: demonstrates continuing familiarity with the AI SDK harness codebase. Do not turn every finding into a resume line.
 
-## SWC
+## SWC — narrowed `instanceof` constant-folding repair
 
-Upstream PR: https://github.com/swc-project/swc/pull/12110
+Upstream PR: https://redirect.github.com/swc-project/swc/pull/12110
 
-Current state at audit: submitted current work; human approval not yet established.
+State: **open; narrowed after maintainer feedback; no current approval recorded**.
 
-The optimizer/minifier can treat `instanceof` as though preserving operand effects is enough when the result is unused. But the operation itself can be observable through `Symbol.hasInstance` and can throw for an invalid RHS. Existing operand-shape folds can also return the wrong boolean for cases such as null-prototype objects.
+The original investigation found two different `instanceof` concerns:
 
-The candidate preserves complete `instanceof` evaluation where shared effect analysis/minification/dead-branch cleanup would otherwise keep only operand effects, removes unsafe operand-shape folds, adds SWC-owned regressions, and runs relevant formatting, Clippy, utility, optimization and minifier suites.
+1. operand-shape constant folding could return the wrong boolean result;
+2. discarded-result cleanup could remove observable `instanceof` evaluation involving `Symbol.hasInstance` or exceptions.
 
-Signal: **high upside** because it adds a compiler/minifier axis to the portfolio. Promote quickly if maintainers accept the direction. Until then, bullpen rather than headline resume claim.
+A maintainer explicitly preferred retaining SWC's existing Terser-compatible assumption for the discarded-result path. Leo accepted that project boundary and reduced the PR instead of defending the broader semantic change.
 
-## Zustand
+The current PR is therefore narrower: avoid incorrect constant folding from operand shape alone. For example:
 
-Owned Fieldwork record: clear-storage hydration generation race.
+```js
+({ __proto__: null }) instanceof Object
+```
 
-The persist middleware already used a `hydrationVersion` generation to prevent stale concurrent hydration publication, but `clearStorage()` did not advance the generation. A delayed read or migration could therefore publish state and lifecycle callbacks after the caller had cleared persisted storage.
+evaluates to `false`, but could be folded to `true`. The current head removes those unsafe folds, adds regressions in the existing optimizer/minifier fixture suites, and explicitly leaves the discarded-result behavior unchanged.
 
-The independently developed candidate adds `++hydrationVersion` before `removeItem()` and validates delayed read/migration, synchronous removal failure, live-state preservation, stale callback suppression, `hasHydrated()` behavior, and later successful hydration.
+The latest maintainer inline objection is attached to an outdated diff and remains unresolved; there is no current maintainer approval. Do not describe the broad `Symbol.hasInstance` observability thesis as the current upstream patch.
 
-Current upstream PR #3555 uses the same one-line production change and substantively overlapping tests.
-
-Attribution/issue linkage should be rechecked before a public resume sentence. Avoid the ambiguous term `co-author` unless GitHub/upstream metadata supports it directly. Safer eventual wording if evidence remains as understood:
-
-> Reported/investigated an async persist hydration race and developed the generation-invalidation repair subsequently implemented upstream.
-
-Signal: excellent mechanism, lower marginal resume value once AI SDK/Cloud Hypervisor already prove correctness work.
+Signal: still **high upside** because it adds a compiler/minifier axis, and the narrowing itself is a good review-boundary story. Promote if the constant-folding repair is accepted or merged.
 
 ## Vite
 
@@ -219,7 +276,7 @@ Vite now has enough upstream validation to be a real resume specimen rather than
 
 ### Close temporary custom-extension optimizer analysis bundles
 
-Upstream PR: https://github.com/vitejs/vite/pull/23207
+Upstream PR: https://redirect.github.com/vitejs/vite/pull/23207
 
 State: **merged**.
 
@@ -229,7 +286,7 @@ The repair wraps analysis in `try/finally` and closes the build after success or
 
 ### Preserve `closeBundle(error)` after `buildEnd` failure
 
-Upstream PR: https://github.com/vitejs/vite/pull/23165
+Upstream PR: https://redirect.github.com/vitejs/vite/pull/23165
 
 State: **open; approved by two Vite members**.
 
@@ -239,7 +296,7 @@ Two Vite members have approved the current head. This is meaningful technical ac
 
 ### Keep repeated config resolution idempotent
 
-Upstream PR: https://github.com/vitejs/vite/pull/23208
+Upstream PR: https://redirect.github.com/vitejs/vite/pull/23208
 
 State: **open; active review, no current approval recorded**.
 
@@ -248,24 +305,6 @@ Repeated `resolveConfig()` calls with the same inline config can re-merge resolv
 A maintainer asked that the regression live in the existing config test suite; the current head incorporates that request. All visible review threads are resolved, while the prior approval was dismissed after subsequent changes.
 
 Resume signal: **promoted**. The merged optimizer cleanup plus two-maintainer-approved teardown correction are enough external validation to use Vite selectively on a general/devtools resume. Keep all three PRs discoverable in the work record without turning the resume into a Vite mini-changelog.
-
-## BuildKit
-
-Linux Fieldwork has an end-to-end-proven rootless/rootful reproducibility candidate on the runc/native path.
-
-The investigation reproduced a rootful/rootless filesystem divergence involving runtime-created `/proc`/`/sys` mountpoint stubs. Pre-creating the mountpoints made the control converge. The candidate reuses BuildKit's existing mount-stub ownership cleanup against the finalized OCI spec after rootless conversion; focused ownership tests, candidate builds, matching workers, and parity controls passed. Live containerd-worker/runtime coverage remained a scope caveat at the recorded boundary.
-
-Signal: deep systems proof. Strong bench item; could replace a web-tooling item on a systems-focused resume.
-
-## runc — useful reversal, not resume headline
-
-Upstream issue/PR: https://github.com/opencontainers/runc/issues/5388 / https://github.com/opencontainers/runc/pull/5389
-
-A boundary mismatch between inclusive `configs.MaxCPU` meaning and exclusive `unix.NewCPUSet()` sizing produced an off-by-one reset mask. A patch changed the allocation to `MaxCPU + 1` and added a boundary regression.
-
-The maintainer preferred repairing the historical meaning of `MaxCPU` on the other side (PR #5392). After reviewing that history, Leo agreed and closed #5389.
-
-Signal: **great interview story, low resume value**. It demonstrates recognizing a real symptom, accepting a better repair boundary, and not optimizing for personal merge count.
 
 ## Bat — grapheme-aware character wrapping
 
@@ -337,10 +376,10 @@ A good general mix at this refresh is:
 
 1. Vercel AI SDK — one direct merge plus two Factory-adopted merged repairs with explicit co-author credit; one propagated across maintained v5/v6 branches.
 2. Cloud Hypervisor — two merged Rust/VMM lifecycle/error-propagation changes, with a deeper QCOW metadata-ownership repair through substantive maintainer review.
-3. Cloudflare Workers SDK — credential/caching semantics with human + CODEOWNERS approval; Miniflare lifecycle follow-on in human review.
+3. Cloudflare Workers SDK — merged Miniflare teardown lifecycle repair plus Access credential/cache semantics with human + CODEOWNERS approval.
 4. Vite — one merged optimizer lifecycle fix plus a second teardown repair approved by two maintainers.
-5. SWC if accepted — compiler/minifier observability; otherwise choose the four strongest role-specific specimens above.
+5. SWC if accepted — narrowed compiler/minifier constant-folding correctness repair; otherwise choose the four strongest role-specific specimens above.
 
-Then let GitHub/`/work` reveal the much larger collection.
+Then let GitHub/`/work` reveal the much larger collection. Playwright, Zustand, BuildKit and runc remain useful examples of accepted findings or repaired boundaries even when they lose scarce resume space.
 
 The marginal question is no longer "can Leo contribute to unfamiliar repositories?" The stronger question is which examples best demonstrate that the capability survives changes in language, domain, lifecycle, and abstraction level.

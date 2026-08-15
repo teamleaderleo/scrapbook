@@ -8,7 +8,7 @@ This record intentionally stores more detail than any one-page resume should use
 
 ## Current headline
 
-The strongest current before/after evidence is the 2026-08-15 controlled 83-mod campaign now carried in Preflight PR #440:
+The strongest current before/after evidence is the 2026-08-15 controlled 83-mod campaign merged through Preflight PR #440:
 
 - **89.00s baseline median**;
 - **15.53s accelerated median**;
@@ -17,7 +17,7 @@ The strongest current before/after evidence is the 2026-08-15 controlled 83-mod 
 - no exclusions;
 - exact same 83-mod profile for both conditions.
 
-That is the comparison to lead with when the claim/update candidate is published. It replaces the old temptation to present chronological endpoints from different development states as one before/after experiment.
+That is now the comparison to lead with. PR #440 merged it into the project's published claim/docs, replacing the old temptation to present chronological endpoints from different development states as one before/after experiment.
 
 The earlier reviewed 83-mod development profile also recorded:
 
@@ -145,7 +145,7 @@ Use only metrics whose measurement boundary fits the claim being made.
 
 ### Current / headline candidates
 
-- **89.00s baseline → 15.53s accelerated** on the same 83-mod profile in one interleaved session, five accepted runs per condition, no exclusions (2026-08-15 campaign candidate).
+- **89.00s baseline → 15.53s accelerated** on the same 83-mod profile in one interleaved session, five accepted runs per condition, no exclusions (2026-08-15 controlled campaign).
 - Earlier 83-mod gates include 16.66s cold, 16.28s warm, and a 15.88s warm record with 42/42 transformed-class hits and 15,469/15,469 prepared texture/pixel-conversion hits.
 - Earlier accepted launches reached roughly 101s, but that is chronology rather than the controlled baseline for the 15.53s result.
 - The historical 88.13s five-run median came from a 77-mod profile and should not be mislabeled as the later 83-mod baseline.
@@ -282,7 +282,7 @@ These are ingredients, not final resume bullets.
 
 ## Open verification / release notes
 
-The 2026-08-15 campaign now supplies the clean same-profile controlled comparison that the record previously lacked. Before turning it into the final release/package claim, preserve the exact evidence boundary already recorded in the candidate:
+The 2026-08-15 campaign now supplies the clean same-profile controlled comparison that the record previously lacked, and the documentation claim is merged. Before turning it into a packaged-binary claim, preserve the exact evidence boundary already recorded:
 
 - exact game build;
 - exact enabled-mod profile/order;
@@ -293,4 +293,4 @@ The 2026-08-15 campaign now supplies the clean same-profile controlled compariso
 - accepted/rejected run rules;
 - adapter health / activation evidence.
 
-The current claim candidate records the same 83-mod profile, one sitting, five accepted runs per condition, interleaving, and zero exclusions. A later hosted release candidate should rerun or explicitly bind the packaged artifact before claiming that the distributed binary has the same measured result.
+The merged claim records the same 83-mod profile, one sitting, five accepted runs per condition, interleaving, and zero exclusions. A later hosted release candidate should rerun or explicitly bind the packaged artifact before claiming that the distributed binary has the same measured result.

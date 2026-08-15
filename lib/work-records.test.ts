@@ -12,7 +12,15 @@ describe('public work records', () => {
       expect(record.accomplishments.length).toBeGreaterThanOrEqual(2);
       expect(record.evidence.length).toBeGreaterThan(0);
       for (const evidence of record.evidence) {
-        expect(evidence.href).toMatch(/^https:\/\/github\.com\//);
+        const url = new URL(evidence.href);
+        const owner = url.pathname.split('/').filter(Boolean)[0];
+
+        expect(url.protocol).toBe('https:');
+        if (owner === 'teamleaderleo') {
+          expect(url.hostname).toBe('github.com');
+        } else {
+          expect(url.hostname).toBe('redirect.github.com');
+        }
       }
     }
   });

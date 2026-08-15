@@ -32,7 +32,7 @@ Detailed Scrapbook record: [`records/preflight.md`](records/preflight.md)
 
 State: **owned performance system; strongest current independent-engineering artifact**.
 
-Current controlled timing evidence is the 2026-08-15 same-profile campaign carried in Preflight PR 440: 89.00s baseline median versus 15.53s accelerated median on one 83-mod profile, five accepted runs per condition, interleaved in one session, no exclusions.
+Current controlled timing evidence is the 2026-08-15 same-profile campaign merged through Preflight PR 440: 89.00s baseline median versus 15.53s accelerated median on one 83-mod profile, five accepted runs per condition, interleaved in one session, no exclusions.
 
 What it proves:
 
@@ -83,7 +83,7 @@ Detailed Scrapbook record: [`records/open-source.md`](records/open-source.md)
 State:
 
 - Vite: one merged optimizer resource-lifecycle fix, a second lifecycle repair approved by two maintainers, and a config-idempotence follow-on in review;
-- Cloudflare Workers SDK: Access credential-cache repair human-approved with Wrangler CODEOWNERS satisfied; Miniflare teardown repair in active human review.
+- Cloudflare Workers SDK: Miniflare teardown repair merged; Access credential-cache repair human-approved with Wrangler CODEOWNERS satisfied and still open.
 
 What they prove:
 
@@ -101,9 +101,9 @@ These are important because they demonstrate technical diagnosis and project-bou
 
 ### Zustand — stale async hydration after `clearStorage()`
 
-Public report: https://github.com/pmndrs/zustand/discussions/3554
+Public report: https://redirect.github.com/pmndrs/zustand/discussions/3554
 
-Upstream landing: https://github.com/pmndrs/zustand/pull/3555
+Upstream landing: https://redirect.github.com/pmndrs/zustand/pull/3555
 
 State: **reported with a concrete repair; upstream subsequently merged the same core production mechanism through its own PR**.
 
@@ -115,9 +115,9 @@ Resume value: technically clean but usually bench material because stronger land
 
 ### BuildKit — rootless/rootful mount-point reproducibility
 
-Leo's PR: https://github.com/moby/buildkit/pull/7033
+Leo's PR: https://redirect.github.com/moby/buildkit/pull/7033
 
-Maintainer replacement: https://github.com/moby/buildkit/pull/7039
+Maintainer replacement: https://redirect.github.com/moby/buildkit/pull/7039
 
 State: **real divergence identified and submitted; maintainer replaced the repair with a different compatibility policy**.
 
@@ -129,11 +129,11 @@ Resume value: strong alternate for systems/container roles; usually interview/po
 
 ### runc — `MaxCPU` boundary semantics
 
-Issue: https://github.com/opencontainers/runc/issues/5388
+Issue: https://redirect.github.com/opencontainers/runc/issues/5388
 
-Leo's PR: https://github.com/opencontainers/runc/pull/5389
+Leo's PR: https://redirect.github.com/opencontainers/runc/pull/5389
 
-Maintainer replacement: https://github.com/opencontainers/runc/pull/5392
+Maintainer replacement: https://redirect.github.com/opencontainers/runc/pull/5392
 
 State: **real off-by-one relationship identified; maintainer preferred repairing the historical semantic boundary on the other side; Leo agreed and closed the competing patch**.
 
@@ -143,19 +143,21 @@ Career interpretation: excellent evidence of review judgment. The win is recogni
 
 Resume value: interview story, not headline bullet.
 
----
+### Playwright — MCP HTTP shutdown authority
 
-## Public reports awaiting stronger external disposition
+Issue: https://redirect.github.com/microsoft/playwright/issues/42129
 
-### Playwright MCP HTTP shutdown authority
+Maintainer landing: https://redirect.github.com/microsoft/playwright/pull/42133
 
-Issue: https://github.com/microsoft/playwright/issues/42129
+State: **finding accepted; maintainer-owned fix merged; report closed as completed**.
 
-State: **public bug report; no maintainer response recorded at the latest career refresh**.
+The report showed that the production MCP HTTP server exposed a fixed-header `/killkillkill` route that allowed an ordinary reachable HTTP client to trigger the server's graceful `SIGINT` shutdown path. It traced the route to a Windows lifecycle test, distinguished CSRF mitigation from caller/process ownership, and included a prepared parent-stdin alternative.
 
-The MCP HTTP server exposed a fixed-header `/killkillkill` route that allowed an ordinary reachable HTTP client to trigger the server's graceful `SIGINT` shutdown path. The report traces why the test hook exists, distinguishes CSRF mitigation from caller/process ownership, provides a direct reproduction, and describes a prepared parent-stdin alternative that keeps lifecycle authority with the spawning process.
+Upstream agreed with the authority problem but chose a smaller project-native boundary: PR 42133 gates `/killkillkill` on `isUnderTest()` so production MCP HTTP servers do not expose the test-only shutdown hook. That merged and closed the report.
 
-Career interpretation: substantive authority/lifecycle analysis, but do not count it as external validation until upstream responds or acts.
+Career interpretation: accepted diagnosis with a different final repair. The strong part is locating the lifecycle-authority leak and providing a reproducible report; do not claim the prepared stdin design as the upstream implementation.
+
+Resume value: solid accepted-finding/interview material, but usually below the merged Vite/Cloudflare/Cloud Hypervisor specimens on a one-page cut.
 
 ---
 
@@ -332,13 +334,13 @@ Do not list Zustand, BuildKit, runc, Playwright, FEX, Renderprove, Proofwake, an
 
 ## LinkedIn
 
-LinkedIn does not need to mimic conventional employment history. A later rewrite can use a small number of project entries or a consolidated independent/open-source engineering section with concrete mechanisms and direct evidence links.
+LinkedIn does not need to mimic conventional employment history. A later rewrite can use a small number of project entries or a consolidated independent/open-source engineering section with concrete mechanisms and evidence links.
 
 Useful project candidates for LinkedIn are Preflight, Stensibly, SmolRunner, and potentially Elatura once its product boundary advances. Renderprove/Proofwake/Scrapbook fit better as supporting links or portfolio context unless a target audience specifically values them.
 
 ## Interviews
 
-Keep the non-merge stories. BuildKit and runc are especially good because they show the ability to change conclusion after maintainer/project-history evidence. FEX is useful for systems depth if described as research rather than contribution. Zustand is useful for explaining substantive authorship when GitHub landing mechanics obscure it.
+Keep the non-merge stories. BuildKit and runc are especially good because they show the ability to change conclusion after maintainer/project-history evidence. Playwright is useful as an accepted diagnosis where upstream chose a smaller repair boundary. FEX is useful for systems depth if described as research rather than contribution. Zustand is useful for explaining substantive authorship when GitHub landing mechanics obscure it.
 
 ## Applications
 
