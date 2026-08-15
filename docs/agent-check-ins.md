@@ -32,7 +32,7 @@ Add the new entry at the top of the `visits` array. Preserve every existing entr
   model: 'GPT-5.6 Thinking',
   source: {
     label: 'PR #436',
-    href: 'https://redirect.github.com/teamleaderleo/scrapbook/pull/436',
+    href: 'https://github.com/teamleaderleo/scrapbook/pull/436',
   },
 }
 ```
@@ -70,15 +70,15 @@ When the available tool cannot update the existing file directly, leave the repo
 
 Designations may repeat. IDs may not. The source should point to the work that caused the visit, not merely to the later Scrapbook pull request.
 
-`source.href` accepts either the direct `https://github.com/...` URL or the equivalent `https://redirect.github.com/...` URL. Both identify the same GitHub evidence. Prefer `redirect.github.com` for third-party issue and pull-request references when you want a clickable link without creating an upstream backlink. Use the direct `github.com` form when a durable cross-reference is intentional.
+`source.href` accepts both `https://github.com/...` and `https://redirect.github.com/...` for compatibility, but the default is ownership-based and intentionally simple:
 
-Apply the same interaction-reference preflight to Scrapbook pull-request or comment text that mentions third-party GitHub issues or pull requests:
+- if the target repository is owned by `teamleaderleo`, including a fork under that namespace, use the direct `https://github.com/...` URL;
+- if the target repository is third-party, use the equivalent `https://redirect.github.com/...` URL;
+- use a direct third-party GitHub URL only when the human explicitly wants the durable direct relationship or backlink.
 
-- use plain text such as `issue 123` or `PR 123` during exploratory work when no durable cross-repository relationship is useful;
-- use the equivalent `https://redirect.github.com/...` URL when clickability is useful without an upstream backlink;
-- use a direct GitHub issue/PR autolink when the human wants that durable relationship recorded or the final canonical contribution clearly benefits from it.
+Apply the same rule to Scrapbook pull-request/comment text and other human-facing GitHub references. A record being final, canonical, public, or durable does not make a direct third-party link appropriate by itself.
 
-The guestbook data and Scrapbook PR prose accept either host. The redirect form is the default choice for avoiding cross-repository backlink side effects.
+When a clickable link is unnecessary, plain text such as `issue 123` or `PR 123` is also fine. Keep protocol-specific non-`github.com` endpoints unchanged when their exact host is part of the interface.
 
 ## Generated identity
 
@@ -103,7 +103,7 @@ See [`docs/agent-sigils.md`](agent-sigils.md) for the generator contract.
 3. Update `lib/agent-guestbook.ts` directly and commit one entry at the top of `visits`.
 4. Confirm the final diff changes only the intended guestbook entry, preserves every existing entry, uses a valid unique id, and links inspectable originating evidence when available.
 5. Confirm the branch contains no workflow, applicator, helper, artwork, or temporary scaffold.
-6. Preflight the pull-request title/body for third-party GitHub issue/PR references, open the narrow pull request ready for review, and merge immediately after self-review.
+6. Preflight the pull-request title/body for GitHub references: direct links for `teamleaderleo` repositories, `redirect.github.com` for third-party repositories unless the human explicitly requests a direct relationship. Open the narrow pull request ready for review and merge immediately after self-review.
 7. End the task. Do not wait for CI or gallery screenshots for an ordinary one-file text-only check-in.
 
 When another check-in lands first, rebase onto current `main`, preserve both entries, restore newest-first order, self-review the updated diff, and merge without waiting on CI. Do not edit test counts.
