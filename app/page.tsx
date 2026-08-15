@@ -1,4 +1,5 @@
 import { ActivityDashboard } from '@/components/home/activity-dashboard';
+import { HomeNowShelf } from '@/components/home/home-now-shelf';
 import { OperatorConsole } from '@/components/operator/operator-console';
 import { Skeleton } from '@/components/ui/skeleton';
 import ViewportPageShell from '@/components/viewport-page-shell';
@@ -23,9 +24,9 @@ import { Suspense } from 'react';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-  title: 'Leo · Operator',
+  title: 'Leo · Scrapbook',
   description:
-    'Copyable operator phrases, recent GitHub activity, and Scrapbook rooms.',
+    'Operator tools, current writing and learning, recent GitHub activity, and Scrapbook rooms.',
   alternates: { canonical: '/' },
 };
 
@@ -118,51 +119,55 @@ async function HomeActivityContent() {
           ))}
         </div>
       </section>
-
-      <section
-        aria-labelledby="explore-scrapbook-title"
-        className="min-w-0 md:hidden"
-        data-home-room-shelf
-      >
-        <div className="px-0.5">
-          <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
-            Explore
-          </p>
-          <h2
-            id="explore-scrapbook-title"
-            className="mt-1 text-lg font-semibold tracking-tight"
-          >
-            Open a room
-          </h2>
-        </div>
-
-        <div className="-mx-4 mt-2.5 grid snap-x snap-mandatory grid-flow-col auto-cols-[10.5rem] gap-2.5 overflow-x-auto px-4 pb-2">
-          {homeRoomNavigationItems.map(destination => {
-            const Icon = homeRoomIcons[destination.id] ?? Compass;
-            return (
-              <Link
-                key={destination.id}
-                href={destination.href}
-                prefetch
-                data-home-room-link={destination.id}
-                className="group flex min-h-28 snap-start flex-col justify-between rounded-2xl border border-border/65 bg-card p-3.5 text-card-foreground shadow-[0_8px_20px_rgba(35,31,26,0.07)] transition-[border-color,background-color,box-shadow] hover:border-foreground/25 hover:bg-card/95 hover:shadow-[0_14px_30px_rgba(35,31,26,0.11)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:shadow-[0_8px_20px_rgba(0,0,0,0.22)]"
-              >
-                <span className="grid h-10 w-10 place-items-center rounded-xl border border-border/70 bg-background/60">
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <span className="flex items-center justify-between gap-2 font-semibold">
-                  {destination.label}
-                  <ArrowRight
-                    className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5"
-                    aria-hidden="true"
-                  />
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
     </div>
+  );
+}
+
+function HomeRoomShelf() {
+  return (
+    <section
+      aria-labelledby="explore-scrapbook-title"
+      className="min-w-0 md:hidden"
+      data-home-room-shelf
+    >
+      <div className="px-0.5">
+        <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
+          Explore
+        </p>
+        <h2
+          id="explore-scrapbook-title"
+          className="mt-1 text-lg font-semibold tracking-tight"
+        >
+          Open a room
+        </h2>
+      </div>
+
+      <div className="-mx-4 mt-2.5 grid snap-x snap-mandatory grid-flow-col auto-cols-[10.5rem] gap-2.5 overflow-x-auto px-4 pb-2">
+        {homeRoomNavigationItems.map(destination => {
+          const Icon = homeRoomIcons[destination.id] ?? Compass;
+          return (
+            <Link
+              key={destination.id}
+              href={destination.href}
+              prefetch
+              data-home-room-link={destination.id}
+              className="group flex min-h-28 snap-start flex-col justify-between rounded-2xl border border-border/65 bg-card p-3.5 text-card-foreground shadow-[0_8px_20px_rgba(35,31,26,0.07)] transition-[border-color,background-color,box-shadow] hover:border-foreground/25 hover:bg-card/95 hover:shadow-[0_14px_30px_rgba(35,31,26,0.11)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:shadow-[0_8px_20px_rgba(0,0,0,0.22)]"
+            >
+              <span className="grid h-10 w-10 place-items-center rounded-xl border border-border/70 bg-background/60">
+                <Icon className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <span className="flex items-center justify-between gap-2 font-semibold">
+                {destination.label}
+                <ArrowRight
+                  className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -235,22 +240,27 @@ export default function Page() {
       <div className="relative mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-7xl flex-col justify-start gap-10 px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
         <OperatorConsole mode="featured" />
 
-        <section aria-labelledby="home-activity-title" className="min-w-0">
-          <div className="mb-3 px-0.5">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              Activity
-            </p>
-            <h2
-              id="home-activity-title"
-              className="mt-1 text-xl font-black tracking-tight"
-            >
-              GitHub, still here
-            </h2>
-          </div>
-          <Suspense fallback={<HomeActivitySkeleton />}>
-            <HomeActivityContent />
-          </Suspense>
-        </section>
+        <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
+          <section aria-labelledby="home-activity-title" className="min-w-0">
+            <div className="mb-3 px-0.5">
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                Activity
+              </p>
+              <h2
+                id="home-activity-title"
+                className="mt-1 text-xl font-black tracking-tight"
+              >
+                GitHub, still here
+              </h2>
+            </div>
+            <Suspense fallback={<HomeActivitySkeleton />}>
+              <HomeActivityContent />
+            </Suspense>
+          </section>
+
+          <HomeNowShelf />
+          <HomeRoomShelf />
+        </div>
       </div>
     </ViewportPageShell>
   );
