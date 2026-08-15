@@ -11,7 +11,7 @@ test('Work presents a dense selected record with direct evidence', async ({
   await expect(page.locator('main')).toHaveCount(1);
   await expect(page.locator('[data-work-record]')).toHaveCount(5);
   await expect(page.locator('[data-work-record="preflight"]')).toContainText(
-    '15.88s fresh-warm launch'
+    '89.00s baseline → 15.53s accelerated'
   );
   await expect(
     page.getByRole('link', { name: 'AI SDK · deterministic URL matching' })

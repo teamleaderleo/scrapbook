@@ -11,7 +11,7 @@ describe('GET /api/work', () => {
     expect(body).toMatchObject({
       version: 1,
       source: 'repository',
-      updatedAt: '2026-08-11',
+      updatedAt: '2026-08-15',
       recordCount: 5,
     });
     expect(body.records.map((record: { id: string }) => record.id)).toEqual([

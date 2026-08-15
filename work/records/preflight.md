@@ -8,24 +8,35 @@ This record intentionally stores more detail than any one-page resume should use
 
 ## Current headline
 
-The current development branch records an 83-mod Starsector 0.98a-RC8 profile reaching the main menu in:
+The strongest current before/after evidence is the 2026-08-15 controlled 83-mod campaign now carried in Preflight PR #440:
+
+- **89.00s baseline median**;
+- **15.53s accelerated median**;
+- five accepted runs per condition;
+- conditions interleaved in one session;
+- no exclusions;
+- exact same 83-mod profile for both conditions.
+
+That is the comparison to lead with when the claim/update candidate is published. It replaces the old temptation to present chronological endpoints from different development states as one before/after experiment.
+
+The earlier reviewed 83-mod development profile also recorded:
 
 - 16.66s cold;
 - 16.28s warm;
-- **15.88s fresh-warm record**.
+- **15.88s warm gate**.
 
-At the 15.88s record, the run retained:
+At that 15.88s gate, the run retained:
 
 - 42/42 transformed-class cache hits;
 - all 15,469 prepared texture/pixel-conversion hits;
 - active adapter health;
 - zero adapter declines or contained failures.
 
-The development installation began around an 88.13s controlled median and earlier accepted development launches reached roughly 101s. Those endpoints come from different development stages/profile states, so **101s → 15.88s is an observed progression, not yet the clean same-cohort release benchmark**. A fresh release-candidate cohort is still required for the public before/after claim.
+Earlier accepted development states reached roughly 101s, while the historical 88.13s median belonged to a 77-mod profile rather than the later 83-mod profile. Those values remain useful chronology, **not** the preferred before/after comparison.
 
-Canonical current packet: https://github.com/teamleaderleo/preflight/pull/322
+Current controlled-claim packet: https://github.com/teamleaderleo/preflight/pull/440
 
-Older main-branch documentation still contains earlier accepted campaigns such as 80.09s → 42.36s. Treat those as historical waypoints, not the current headline.
+Current optimization/product record: https://github.com/teamleaderleo/preflight
 
 ## Why the project is technically interesting
 
@@ -134,10 +145,10 @@ Use only metrics whose measurement boundary fits the claim being made.
 
 ### Current / headline candidates
 
-- 15.88s current fresh-warm record on the reviewed 83-mod development profile.
-- 42/42 transformed-class cache hits on that record.
-- 15,469/15,469 prepared texture/pixel conversion hits on that record.
-- Early accepted development launches reached roughly 101s, but not in the same final release cohort.
+- **89.00s baseline → 15.53s accelerated** on the same 83-mod profile in one interleaved session, five accepted runs per condition, no exclusions (2026-08-15 campaign candidate).
+- Earlier 83-mod gates include 16.66s cold, 16.28s warm, and a 15.88s warm record with 42/42 transformed-class hits and 15,469/15,469 prepared texture/pixel-conversion hits.
+- Earlier accepted launches reached roughly 101s, but that is chronology rather than the controlled baseline for the 15.53s result.
+- The historical 88.13s five-run median came from a 77-mod profile and should not be mislabeled as the later 83-mod baseline.
 
 ### Historical composed campaign
 
@@ -245,7 +256,7 @@ The final resume should not try to fit every metric. Strong composite families a
 
 ### 1. Outcome + product
 
-Current launch record, scale of the mod profile, and distribution/productization.
+Controlled same-profile launch result, scale of the mod profile, and distribution/productization.
 
 ### 2. Runtime compatibility engineering
 
@@ -261,7 +272,7 @@ A general resume can probably spend three dense bullets / roughly six lines here
 
 These are ingredients, not final resume bullets.
 
-- Built a Java-agent performance layer for an 80+ mod Starsector installation; current development builds reach the main menu in a 15.88s warm record while preserving exact source/bytecode compatibility gates and original runtime fallbacks.
+- Built a Java-agent performance layer for an 83-mod Starsector installation; a controlled interleaved campaign measured main-menu startup at 89.00s baseline versus 15.53s accelerated across five accepted runs per condition with no exclusions.
 - Precompute and replay merged game/mod data, textures, audio, resource indexes, and Janino-generated class maps only when exact input/compiler/archive identities match; unsupported or changed builds automatically execute the original implementation.
 - Built JFR, seam-level timing, unattended A/B campaigns, loader probes, and exact replay harnesses that repeatedly overturned initial bottleneck theories and redirected optimization toward critical-path work rather than profiler/log volume.
 - Reduced Janino generated-class-map work 18.014s → 2.364s (86.9%) in a live 89-mod cold/warm pilot with 228/228 warm cache hits and zero corruption/policy declines.
@@ -271,7 +282,7 @@ These are ingredients, not final resume bullets.
 
 ## Open verification / release notes
 
-Before using a clean percentage such as "84% faster" publicly, run the fresh release-candidate same-profile before/after cohort and record:
+The 2026-08-15 campaign now supplies the clean same-profile controlled comparison that the record previously lacked. Before turning it into the final release/package claim, preserve the exact evidence boundary already recorded in the candidate:
 
 - exact game build;
 - exact enabled-mod profile/order;
@@ -282,4 +293,4 @@ Before using a clean percentage such as "84% faster" publicly, run the fresh rel
 - accepted/rejected run rules;
 - adapter health / activation evidence.
 
-The 15.88s current record is already a legitimate current-performance fact. The fresh cohort determines the clean release delta.
+The current claim candidate records the same 83-mod profile, one sitting, five accepted runs per condition, interleaving, and zero exclusions. A later hosted release candidate should rerun or explicitly bind the packaged artifact before claiming that the distributed binary has the same measured result.
