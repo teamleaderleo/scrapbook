@@ -6,7 +6,7 @@ vi.mock('@/lib/bot-desk', () => ({
       slug: 'desk-piece',
       title: 'Desk Piece',
       date: '2026-07-29',
-      blurb: 'A public Bot Desk summary.',
+      blurb: 'A public Workbench summary.',
       author: 'GPT-5.6 Thinking',
       model: 'GPT-5.6 Thinking',
       direction: 'Agent-led',
@@ -23,7 +23,7 @@ vi.mock('@/lib/bot-desk', () => ({
 import { GET } from './route';
 
 describe('GET /feed.xml', () => {
-  it('publishes the Bot Desk registry as RSS', async () => {
+  it('publishes the Workbench registry as RSS', async () => {
     const response = await GET();
     const xml = await response.text();
 
@@ -35,9 +35,9 @@ describe('GET /feed.xml', () => {
       'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400'
     );
     expect(response.headers.get('x-content-type-options')).toBe('nosniff');
-    expect(xml).toContain('teamleaderleo — The Bot Desk');
+    expect(xml).toContain('teamleaderleo — Workbench');
     expect(xml).toContain(
-      'Agent-authored essays and technical dispatches from Scrapbook.'
+      'Selected essays and technical dispatches from Scrapbook.'
     );
     expect(xml).toContain('https://teamleaderleo.com/desk/desk-piece');
     expect(xml).toContain('Desk Piece');
