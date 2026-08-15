@@ -3,7 +3,7 @@ import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
 export function GET() {
   return Response.json(
     {
-      version: 2,
+      version: 3,
       source: 'repository',
       repository: 'teamleaderleo/scrapbook',
       canonicalSite: 'https://teamleaderleo.com',
@@ -71,7 +71,7 @@ export function GET() {
             'GitHub connector with branch + file-write + pull-request capabilities',
           ],
           rule:
-            'Start from current main, put the intended files on the branch before opening the pull request, preflight GitHub interaction references, then follow AGENTS.md review policy.',
+            'Start from current main, put the intended files on the branch before opening the pull request, apply the ownership-based GitHub host rule, then follow AGENTS.md review policy.',
         },
         genericRepositoryFileConnection: {
           read: 'supported when it can resolve the canonical repository files',
@@ -102,16 +102,18 @@ export function GET() {
         },
       },
       githubReferences: {
-        repositoryEvidence:
-          'Canonical evidence stored in repository files or a handoff evidence field may use direct https://github.com/... source URLs.',
-        exploratoryInteractionText:
-          'During exploratory GitHub interaction text, prefer plain wording such as issue 123 or PR 123 when no durable cross-repository relationship is intended.',
-        clickableWithoutBacklink:
-          'When clickability is useful without an upstream backlink, use the equivalent https://redirect.github.com/... URL.',
-        directAutolink:
-          'Use a direct GitHub issue/pull autolink only when the human wants that durable relationship recorded or the final canonical contribution clearly benefits from it.',
-        materialization:
-          'A repository-capable writer applying a handoff must preflight any pull-request body, issue, comment, review, or discussion text it generates from canonical evidence URLs before posting.',
+        rule:
+          'Use one ownership-based host rule for tracked repository files, handoff evidence, and GitHub interaction text.',
+        ownedRepository:
+          'For repositories owned by teamleaderleo, including forks under that namespace, use normal direct https://github.com/... links by default.',
+        thirdPartyRepository:
+          'For every third-party GitHub repository, issue, pull request, commit, or blob, use the equivalent https://redirect.github.com/... URL by default.',
+        plainText:
+          'When clickability is unnecessary, plain wording such as issue 123 or PR 123 is fine.',
+        directThirdPartyException:
+          'Use a direct third-party https://github.com/... link only when the human explicitly wants the durable direct relationship or backlink. Canonical, final, public, durable, or career-facing status does not imply that intent.',
+        machineEndpoints:
+          'Keep non-github.com machine endpoints unchanged when their exact host is part of the interface, including GitHub API, raw-content, and Actions URLs.',
       },
       write: {
         canonicalSource: 'GitHub repository',
@@ -126,7 +128,7 @@ export function GET() {
         ],
         siteSidePublicationApi: false,
         rule:
-          'Choose the contribution lane first, then use its published canonical file paths. The transport may vary; the repository artifact and review path do not. Preflight third-party GitHub issue and pull-request references before posting interaction text.',
+          'Choose the contribution lane first, then use its published canonical file paths. The transport may vary; the repository artifact and review path do not. Apply the ownership-based GitHub host rule before storing or posting references.',
       },
       handoff: {
         formatVersion: 1,
@@ -138,7 +140,7 @@ export function GET() {
           'exact canonical target file paths',
           'complete proposed file contents or a precise patch',
           'required registry or metadata entry when the lane has one',
-          'primary evidence URLs that support factual claims',
+          'primary evidence URLs using the ownership-based GitHub host rule',
           'validation commands or checks expected after applying the change',
           'any unresolved uncertainty or concurrency risk',
         ],
@@ -158,7 +160,7 @@ export function GET() {
             },
           ],
           metadata: null,
-          evidence: ['https://github.com/owner/repository/pull/123'],
+          evidence: ['https://redirect.github.com/owner/repository/pull/123'],
           validation: [
             'pnpm lint',
             'pnpm typecheck',
@@ -174,7 +176,7 @@ export function GET() {
           ],
         },
         evidenceRule:
-          'The evidence array is data and may retain canonical direct GitHub URLs. Do not copy those URLs blindly into a Scrapbook GitHub interaction surface; apply the githubReferences rules during materialization.',
+          'Evidence values follow the same host rule as tracked Scrapbook files: direct github.com for teamleaderleo repositories and redirect.github.com for third-party GitHub references unless the human explicitly requests a direct relationship.',
         rule: 'Leave the repository unchanged. A complete handoff is preferable to creating a temporary writer, hidden database copy, workflow commit-back path, or another alternate publication channel.',
       },
       provenance: {

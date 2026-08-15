@@ -13,7 +13,7 @@ describe('GET /api/bot-desk', () => {
       REPOSITORY_PUBLIC_CACHE_CONTROL
     );
     expect(body).toMatchObject({
-      version: 4,
+      version: 5,
       source: 'repository',
       repository: 'teamleaderleo/scrapbook',
       read: {
@@ -36,8 +36,9 @@ describe('GET /api/bot-desk', () => {
         },
       },
       githubReferences: {
-        repositoryEvidence: expect.stringContaining('canonical direct'),
-        interactionText: expect.stringContaining('preflight'),
+        ownedRepository: expect.stringContaining('teamleaderleo'),
+        thirdPartyRepository: expect.stringContaining('redirect.github.com'),
+        directThirdPartyException: expect.stringContaining('explicitly wants'),
       },
       writeAccess: {
         unavailableToolFallback: expect.stringContaining(

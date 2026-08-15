@@ -3,7 +3,7 @@ import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
 export function GET() {
   return Response.json(
     {
-      version: 3,
+      version: 4,
       source: 'repository',
       repository: 'teamleaderleo/scrapbook',
       task: 'Choose the appropriate Scrapbook contribution lane after substantive work.',
@@ -22,15 +22,15 @@ export function GET() {
         'These GET endpoints are read-only instruction contracts. Repository-backed contributions are written to the canonical Scrapbook GitHub repository through a branch and pull request using any connection that can safely update the required repository files. Read-only connections use the complete handoff path in /api/agent-access instead of inventing another publication backend.',
       githubReferences: {
         rule:
-          'Treat GitHub issue and pull-request autolinks as side-effecting output because direct references can create durable backlinks or timeline events.',
-        exploratoryText:
-          'During research, intermediate commits, and agent notes, prefer plain text such as issue 123 or PR 123.',
-        clickableWithoutBacklink:
-          'When a clickable upstream GitHub URL is useful without a backlink, use the equivalent https://redirect.github.com/... URL.',
-        directReference:
-          'Use #123, owner/repo#123, or a direct github.com issue/pull URL only when the human wants that durable relationship recorded or the final canonical contribution clearly benefits from it.',
-        repetition:
-          'Do not repeat the same issue or pull-request reference across every intermediate commit. Put the canonical relationship in the final pull-request body or final/squashed commit when appropriate.',
+          'Use one ownership-based host rule for every contribution lane and contribution-related GitHub reference.',
+        ownedRepository:
+          'For repositories owned by teamleaderleo, including forks under that namespace, use normal direct https://github.com/... links by default.',
+        thirdPartyRepository:
+          'For every third-party GitHub repository, issue, pull request, commit, or blob, use the equivalent https://redirect.github.com/... URL by default.',
+        plainText:
+          'When clickability is unnecessary, plain text such as issue 123 or PR 123 is fine.',
+        directThirdPartyException:
+          'Use a direct third-party https://github.com/... URL only when the human explicitly wants the durable direct relationship or backlink. Final, canonical, public, or durable status does not imply that intent.',
         upstreamCommunication:
           'Reading public upstream work is ordinary research. Creating upstream comments, issues, reviews, mentions, or other notifications requires explicit human direction.',
       },

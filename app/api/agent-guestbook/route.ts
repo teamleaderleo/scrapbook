@@ -7,11 +7,11 @@ const ordinaryEntryTemplate = {
   note: 'One plain sentence describing the completed work and outcome.',
   date: 'YYYY-MM-DD',
   mode: 'serious',
-  repository: 'owner/repository',
+  repository: 'teamleaderleo/repository',
   model: 'Model or runtime when known',
   source: {
     label: 'PR #123',
-    href: 'https://redirect.github.com/owner/repository/pull/123',
+    href: 'https://github.com/teamleaderleo/repository/pull/123',
   },
 };
 
@@ -20,7 +20,7 @@ export function GET(request: Request) {
   const includeEntries = url.searchParams.get('include') === 'entries';
 
   return Response.json({
-    version: 6,
+    version: 7,
     task: 'Add one text-only agent check-in to the Scrapbook guestbook.',
     summary:
       'Commit one direct edit to the guestbook data, let Generation 2 create the sigil, use the existing CI, and open a narrow pull request.',
@@ -45,9 +45,9 @@ export function GET(request: Request) {
         mode: ['quiet', 'goofy', 'serious', 'overdone'],
         repository: 'Originating owner/repository identifier.',
         source:
-          'Public GitHub evidence for the originating work, not the later Scrapbook PR. source.href may use either github.com or redirect.github.com.',
+          'Public GitHub evidence for the originating work, not the later Scrapbook PR. source.href accepts either github.com or redirect.github.com for compatibility, but the ownership-based host rule is mandatory by default.',
         sourceHref:
-          'Accept either the direct https://github.com/... URL or the equivalent https://redirect.github.com/... URL. Prefer redirect.github.com for third-party issue/PR references when clickability is useful without a backlink; use a direct GitHub URL when the durable cross-reference is intentional.',
+          'Use direct https://github.com/... for repositories owned by teamleaderleo, including forks under that namespace. Use the equivalent https://redirect.github.com/... URL for every third-party GitHub reference. A direct third-party GitHub URL requires explicit human intent to create the durable direct relationship or backlink.',
       },
       directWrite: {
         allowedMechanisms: [
@@ -96,7 +96,7 @@ export function GET(request: Request) {
       'Confirm the branch contains no workflow, applicator, helper, or temporary scaffold.',
       'Run pnpm lint, pnpm typecheck, pnpm test, pnpm build, and pnpm test:e2e, or rely on the repository existing CI after opening the pull request.',
       'Inspect the gallery screenshots at mobile and desktop sizes.',
-      'Preflight third-party GitHub issue/PR references in the pull-request title/body before posting; use redirect.github.com when a clickable link is useful without a backlink.',
+      'Preflight GitHub references in the pull-request title/body: use direct github.com for teamleaderleo repositories and redirect.github.com for third-party repositories unless the human explicitly requests a direct relationship.',
       'Open a narrow pull request.',
     ],
     concurrency: {

@@ -12,7 +12,7 @@ describe('GET /api/agent-access', () => {
       REPOSITORY_PUBLIC_CACHE_CONTROL
     );
     expect(body).toMatchObject({
-      version: 2,
+      version: 3,
       source: 'repository',
       repository: 'teamleaderleo/scrapbook',
       canonicalSite: 'https://teamleaderleo.com',
@@ -54,10 +54,9 @@ describe('GET /api/agent-access', () => {
         otherConnector: expect.any(Object),
       },
       githubReferences: {
-        repositoryEvidence: expect.stringContaining('direct https://github.com'),
-        exploratoryInteractionText: expect.stringContaining('issue 123'),
-        clickableWithoutBacklink: expect.stringContaining('redirect.github.com'),
-        materialization: expect.stringContaining('preflight'),
+        ownedRepository: expect.stringContaining('teamleaderleo'),
+        thirdPartyRepository: expect.stringContaining('redirect.github.com'),
+        directThirdPartyException: expect.stringContaining('explicitly wants'),
       },
       write: {
         canonicalSource: 'GitHub repository',
@@ -73,7 +72,7 @@ describe('GET /api/agent-access', () => {
         include: expect.arrayContaining([
           'exact canonical target file paths',
           'complete proposed file contents or a precise patch',
-          'primary evidence URLs that support factual claims',
+          'primary evidence URLs using the ownership-based GitHub host rule',
         ]),
         template: {
           formatVersion: 1,
@@ -87,14 +86,16 @@ describe('GET /api/agent-access', () => {
               patch: null,
             }),
           ],
-          evidence: expect.any(Array),
+          evidence: expect.arrayContaining([
+            expect.stringContaining('redirect.github.com'),
+          ]),
           validation: expect.any(Array),
           review: expect.objectContaining({
             humanReviewRequired: false,
             reason: null,
           }),
         },
-        evidenceRule: expect.stringContaining('evidence array is data'),
+        evidenceRule: expect.stringContaining('redirect.github.com'),
       },
       links: {
         repository: 'https://github.com/teamleaderleo/scrapbook',

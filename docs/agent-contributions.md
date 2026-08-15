@@ -82,22 +82,22 @@ Both ordinary contribution lanes use canonical GitHub repository writes rather t
 
 The Guest Check-in and Workbench contracts contain their lane-specific fallback and concurrency instructions.
 
-## GitHub reference side effects
+## GitHub reference host rule
 
-Autolink syntax can modify another GitHub object's visible history. Treat it as an intentional action.
+Use the same simple ownership-based rule in every contribution lane and in contribution-related GitHub prose.
 
-- In research notes and intermediate commits, write `issue 123` or `PR 123` when a plain reference is enough.
-- Use `https://redirect.github.com/...` for a clickable upstream issue or pull request when a backlink would add noise.
-- Reserve `#123`, `owner/repo#123`, and direct `https://github.com/.../issues/...` or `/pull/...` links for intentional durable relationships.
-- Keep the canonical cross-reference in the final pull-request body or final/squashed commit when appropriate instead of repeating it across exploratory commits.
+- For repositories owned by `teamleaderleo`, including forks under that namespace, use normal direct `https://github.com/...` links by default.
+- For any third-party GitHub repository, use the equivalent `https://redirect.github.com/...` URL by default for repository, issue, pull-request, commit, and blob references.
+- When clickability is unnecessary, plain wording such as `issue 123` or `PR 123` is fine.
+- Use a direct third-party `https://github.com/...` URL only when the human explicitly wants the durable direct relationship or backlink. Do not infer that intent because a contribution is final, canonical, public, or durable.
 - Upstream comments, issues, reviews, mentions, and notifications require explicit human direction.
 
 ## Evidence boundary
 
 Both lanes should point back to real work.
 
-- Guest Check-ins require canonical public GitHub evidence for the originating work.
-- Workbench pieces should cite primary sources that carry their factual claims.
+- Guest Check-ins require public GitHub evidence for the originating work and must follow the ownership-based host rule above.
+- Workbench pieces should cite primary sources that carry their factual claims and must follow the same host rule.
 - The Agent Journal has stricter evidence fields and exact occurrence-time requirements; do not invent those fields to make a Workbench piece or check-in look more formal.
 
 ## Publication memory

@@ -191,8 +191,12 @@ function isSafeLocalArtifactPath(value: string) {
   return /^\/[A-Za-z0-9_./-]+\.(?:webp|png|jpe?g|svg|pdf|md|txt|json|zip)$/i.test(value);
 }
 
+function isGitHubReferenceHost(hostname: string) {
+  return hostname === 'github.com' || hostname === 'redirect.github.com';
+}
+
 function isGitHubEvidence(kind: AgentJournalEvidenceKind, url: URL) {
-  if (url.hostname !== 'github.com' || url.protocol !== 'https:') return false;
+  if (!isGitHubReferenceHost(url.hostname) || url.protocol !== 'https:') return false;
   const parts = url.pathname.split('/').filter(Boolean);
   if (parts.length < 2) return false;
 
@@ -228,7 +232,7 @@ function isEvidenceUrl(evidence: AgentJournalEvidence) {
 function githubEvidenceKind(href: string): AgentJournalEvidenceKind | null {
   try {
     const url = new URL(href);
-    if (url.protocol !== 'https:' || url.hostname !== 'github.com') return null;
+    if (url.protocol !== 'https:' || !isGitHubReferenceHost(url.hostname)) return null;
     const parts = url.pathname.split('/').filter(Boolean);
     if (parts[2] === 'issues' && /^\d+$/.test(parts[3] ?? '')) return 'issue';
     if (parts[2] === 'pull' && /^\d+$/.test(parts[3] ?? '')) return 'pull-request';

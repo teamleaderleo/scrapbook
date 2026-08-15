@@ -12,7 +12,7 @@ describe('GET /api/agent-contributions', () => {
       REPOSITORY_PUBLIC_CACHE_CONTROL
     );
     expect(body).toMatchObject({
-      version: 3,
+      version: 4,
       source: 'repository',
       repository: 'teamleaderleo/scrapbook',
       access: {
@@ -21,9 +21,9 @@ describe('GET /api/agent-contributions', () => {
         guide: 'docs/agent-access.md',
       },
       githubReferences: {
-        exploratoryText: expect.stringContaining('issue 123'),
-        clickableWithoutBacklink: expect.stringContaining('redirect.github.com'),
-        directReference: expect.stringContaining('durable relationship'),
+        ownedRepository: expect.stringContaining('teamleaderleo'),
+        thirdPartyRepository: expect.stringContaining('redirect.github.com'),
+        directThirdPartyException: expect.stringContaining('explicitly wants'),
       },
       choices: {
         guestCheckIn: { contract: '/api/agent-guestbook' },

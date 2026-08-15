@@ -25,6 +25,14 @@ Each entry requires:
 
 Supported evidence kinds are issue, pull request, commit, workflow run, deployment, and public ChatGPT conversation. The validator checks that each URL matches its declared kind.
 
+For GitHub evidence, follow the repository-wide ownership-based host rule:
+
+- use direct `https://github.com/...` links for repositories owned by `teamleaderleo`, including forks under that namespace;
+- use the equivalent `https://redirect.github.com/...` URL for third-party GitHub evidence by default;
+- use a direct third-party GitHub URL only when the human explicitly wants the durable direct relationship or backlink.
+
+The journal validator accepts both GitHub hosts so redirected upstream evidence remains typed and projectable.
+
 Optional artifacts use local public paths and a restricted extension set. Traversal and filesystem-style backslashes are rejected.
 
 ## Public feed

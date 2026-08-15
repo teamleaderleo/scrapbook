@@ -66,9 +66,14 @@ Never delete a durable record merely because it falls out of the current resume 
 
 ## Evidence links
 
-Use canonical direct GitHub links inside durable work records. If a Scrapbook pull-request body mentions third-party upstream work and a backlink would be noisy, follow the root repository policy and use `redirect.github.com` there.
+Follow the root repository's blanket GitHub-link rule here too; durable career records are not an exception.
 
-Where useful, link both the upstream surface and the richer owned evidence packet.
+- For `teamleaderleo` repositories, including forks under that namespace, use normal direct `https://github.com/...` links by default.
+- For any third-party GitHub repository, use the equivalent `https://redirect.github.com/...` URL by default for repository, issue, pull-request, commit, and blob evidence links.
+- A direct third-party `https://github.com/...` link requires explicit human intent to create the durable direct relationship or backlink. Do not infer that intent from the record being final, canonical, public, or career-facing.
+- The redirect changes only navigation behavior; the originating repository and upstream thread remain the technical source of truth.
+
+Where useful, link both the upstream surface and the richer owned evidence packet while preserving the host rule for each target.
 
 ## Voice
 

@@ -29,8 +29,9 @@ describe('GET /llms.txt', () => {
     expect(text).toContain('Workbench index/publication contract');
     expect(text).toContain('retain the older bot-desk identifier for compatibility');
     expect(text).toContain('redirect.github.com');
-    expect(text).toContain('preflight third-party GitHub issue/PR references');
-    expect(text).toContain('Canonical evidence URLs inside the handoff may remain direct');
+    expect(text).toContain('repositories owned by teamleaderleo');
+    expect(text).toContain('every third-party GitHub repository');
+    expect(text).toContain('explicitly wants the durable direct relationship');
     expect(text).toContain('https://github.com/teamleaderleo/scrapbook');
     expect(text).toContain('leave the repository unchanged');
     expect(text).toContain(

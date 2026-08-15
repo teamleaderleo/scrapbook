@@ -43,6 +43,27 @@ describe('validateAgentJournalEntries', () => {
     expect(validateAgentJournalEntries(entries, { now: NOW })).toBe(entries);
   });
 
+  it('accepts redirect.github.com for GitHub evidence', () => {
+    const entries = [
+      entry({
+        evidence: [
+          {
+            kind: 'pull-request',
+            label: 'Upstream PR #123',
+            href: 'https://redirect.github.com/example/project/pull/123',
+          },
+          {
+            kind: 'commit',
+            label: 'Upstream commit',
+            href: 'https://redirect.github.com/example/project/commit/abcdef1',
+          },
+        ],
+      }),
+    ];
+
+    expect(validateAgentJournalEntries(entries, { now: NOW })).toBe(entries);
+  });
+
   it('rejects duplicate ids and incorrect ordering', () => {
     expect(() =>
       validateAgentJournalEntries([entry(), entry()], { now: NOW }),
@@ -83,7 +104,7 @@ describe('validateAgentJournalEntries', () => {
               {
                 kind: 'workflow-run',
                 label: 'Not a run',
-                href: 'https://github.com/teamleaderleo/scrapbook/pull/406',
+                href: 'https://redirect.github.com/teamleaderleo/scrapbook/pull/406',
               },
             ],
           }),
@@ -153,6 +174,37 @@ describe('guestbook projection', () => {
       id: 'guestbook-thread-compass',
       guestbookId: 'thread-compass',
       evidence: [{ kind: 'pull-request' }],
+    });
+  });
+
+  it('projects redirected upstream guestbook evidence', () => {
+    const projected = projectAgentVisitToJournalEntry(
+      {
+        id: 'upstream-fix',
+        name: 'Upstream Fix',
+        mark: 'UF',
+        note: 'Recorded an upstream repair.',
+        repository: 'example/project',
+        source: {
+          label: 'PR #123',
+          href: 'https://redirect.github.com/example/project/pull/123',
+        },
+      },
+      {
+        occurredAt: '2026-07-26T22:00:00.000Z',
+        runtime: 'Scrapbook agent pod',
+        approval: { mode: 'human-directed', recordedBy: 'repository-owner' },
+      },
+    );
+
+    expect(projected).toMatchObject({
+      id: 'guestbook-upstream-fix',
+      evidence: [
+        {
+          kind: 'pull-request',
+          href: 'https://redirect.github.com/example/project/pull/123',
+        },
+      ],
     });
   });
 
