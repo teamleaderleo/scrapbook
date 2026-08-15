@@ -220,3 +220,103 @@ Current default candidate:
 > **Technologies:** Linux, React, Node.js, Cloudflare Workers, Docker, AWS, PostgreSQL, Git
 
 Tailor lightly by role.
+
+Do not put KVM/MSHV/fw_cfg/TDX in the generic skills line merely because Cloud Hypervisor validation touched them. Those details belong in the evidence that used them.
+
+## Target cut: Vercel / devtools / AI runtime
+
+Priority order:
+
+1. Vercel AI SDK — direct merge plus Factory-adopted/co-authored fixes is now the strongest upstream cluster.
+2. Cloud Hypervisor (proves range outside TS/AI).
+3. Cloudflare Workers SDK — one merged lifecycle fix plus one human-approved credential/cache repair.
+4. Vite — one merge plus a two-maintainer-approved lifecycle repair.
+5. SWC rises above Vite if the narrowed constant-folding repair is accepted and the compiler/minifier axis is useful for the target.
+6. Preflight, framed as runtime/instrumentation/performance and controlled evaluation rather than game fandom first.
+7. Stensibly gets one stronger line because agent coordination/MCP/hosted authority is relevant.
+8. SmolRunner rises when the role touches coding-agent execution, sandboxes, CI, or benchmark harnesses.
+
+Useful application thesis:
+
+> Already able to enter Vercel-owned code, understand lifecycle/state boundaries, and produce fixes that merge directly or are adopted by the AI SDK Factory with retained co-author credit; independent work shows the same ability generalizes beyond the codebase.
+
+Do not imply OSS creates entitlement to an interview. It makes a targeted cold application unusually well-supported.
+
+## Target cut: coding-agent evaluation / benchmark engineering
+
+This is now a concrete target category rather than only a hypothetical one.
+
+Priority order:
+
+1. **Preflight** — controlled experiments, benchmark design, instrumentation, falsifiable claims, technical evidence writing.
+2. **Vercel AI SDK** — AI-tooling codebase familiarity plus upstream accepted lifecycle/error-state work.
+3. **SmolRunner** — disposable execution, exact worker identity, crash recovery, cleanup, hostile-CI thinking.
+4. **Cloud Hypervisor / Vite / Cloudflare** — diverse specimens of code review and lifecycle/correctness reasoning in unfamiliar codebases.
+5. **Stensibly** — agent authority, continuation, provenance, and coordination.
+
+Useful thesis:
+
+> Already doing the ingredients of coding-agent benchmark work: entering arbitrary repositories, finding behavioral boundaries, writing discriminating regressions, building reproducible execution/evidence systems, and explaining why a result is trustworthy.
+
+This target is where the breadth becomes unusually coherent rather than looking scattered.
+
+## Target cut: Valve / game/runtime/performance
+
+Priority order changes substantially:
+
+1. **Preflight dominates the page.** Give it the most acreage.
+2. Cloud Hypervisor.
+3. Best systems/compiler OSS specimens.
+4. SmolRunner may beat Stensibly because runtime/crash/recovery systems are more relevant.
+5. Glossless can appear if visual/graphics/product breadth helps.
+6. Web-library correctness examples are supporting evidence, not identity.
+
+Possible Preflight emphasis:
+
+- controlled 89.00s → 15.53s same-profile campaign;
+- runtime instrumentation of an obfuscated game/mod ecosystem;
+- Java bytecode transformations;
+- JFR and critical-path performance work;
+- graphics/audio/resource-loader investigation;
+- generated code / Janino;
+- Rosetta/JIT/platform behavior;
+- mod compatibility and fail-open source drift;
+- real desktop packaging, updater/rollback, diagnostics and gameplay pilots.
+
+The pitch is not "Starsector modder." It is "engineer who cracked open a real game/mod runtime, built instrumentation around it, made it radically faster, and productized the result without owning the underlying source ecosystem."
+
+## Target cut: systems / infra
+
+Priority order:
+
+1. Cloud Hypervisor.
+2. BuildKit or another strong Linux Fieldwork candidate if externally validated.
+3. Preflight runtime/bytecode/performance.
+4. SmolRunner.
+5. Vercel AI SDK as cross-language correctness proof.
+6. Cloudflare as state/credential/lifecycle semantics.
+
+If the QCOW L2 ownership repair lands, Cloud Hypervisor becomes an even stronger lead because the accepted work then spans VM lifecycle, boot error propagation, and block-image metadata ownership.
+
+Stensibly becomes optional unless the role values distributed coordination.
+
+## What not to do
+
+- Do not make the page a logo wall.
+- Do not list every open PR to prove volume.
+- Do not over-index on "high impact" wording without a specific mechanism/result.
+- Do not call independent work freelance work unless client/service work actually happened.
+- Do not call the profile 0 YOE when the question is ordinary engineering experience.
+- Do not claim three years of conventional post-grad full-time employment.
+- Do not let IBM sit above the current work simply because it is an employer name.
+- Do not waste Preflight's acreage on a generic technology stack line.
+- Do not encode internal Fieldwork evidence levels into recruiter-facing prose unless they solve a real credibility question.
+- Do not turn recruiter outreach into a resume bullet or treat unknown sourcing as validation; use the actual role description only as a targeting hypothesis.
+
+## Current identity thesis
+
+The page should make a reader infer something close to:
+
+> Nontraditional early-career chronology, roughly three years of substantive engineering activity, unusually strong evidence of entering unfamiliar systems and finding correctness/performance/lifecycle boundaries, repeated external acceptance across Vercel AI SDK, Vite, Cloud Hypervisor and Cloudflare, plus one owned performance product deep enough to demonstrate sustained technical pursuit and benchmark discipline.
+
+The resume's job is to resolve the chronology/capability mismatch quickly enough that a human wants to ask about it.
