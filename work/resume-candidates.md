@@ -14,18 +14,18 @@ Avoid claiming three years of full-time post-graduate professional employment. A
 
 The resume itself probably does not need a YOE headline. Let the chronology and evidence support the answer when asked.
 
-### Current market signal
+### Recent role-fit prompt
 
-A recent inbound recruiting approach for a senior software-engineering contract on a Snorkel AI coding-agent benchmark project is useful corroboration of the portfolio's current direction. The work described code and architecture review, technical writing, and benchmark development for coding agents.
+Recent recruiter outreach described a senior software-engineering contract centered on code/architecture review, technical writing, and benchmark development for coding agents. The sourcing path is unknown and may have been automated, so **do not treat the outreach itself as external validation or evidence that a Snorkel/Terminal engineer manually selected the portfolio**.
 
-Do **not** put recruiter outreach on the resume as an accomplishment. Treat it as evidence about what the market is already selecting for:
+The useful part is narrower: the role description is a concrete fit hypothesis worth testing against the existing work.
 
 - Preflight demonstrates benchmark design, instrumentation, controlled comparison, and technical writing around a difficult real system;
 - the upstream work demonstrates repeated code review, repair-boundary judgment, and externally accepted changes in unfamiliar repositories;
 - SmolRunner demonstrates disposable execution, recovery, and hostile-CI concerns that become directly relevant when evaluating generated code;
 - Stensibly demonstrates sustained work on agent coordination, authority, provenance, and continuation.
 
-The interesting part is the overlap between the requested work and the public engineering record, not the existence of an email.
+Keep recruiter sourcing and technical fit separate. A coding-agent benchmark role surfacing in this direction is useful context for application targeting; it is not a resume accomplishment or a market endorsement by itself.
 
 ## General one-page cut — current recommendation
 
@@ -80,17 +80,17 @@ For a general resume, the first merged-work line may be enough. For systems role
 
 #### 3. Cloudflare Workers SDK — strong current
 
-The Access credential fix is human-approved with Wrangler CODEOWNERS satisfied and remains open. The Miniflare teardown/lifecycle PR has also crossed into active human maintainer review.
+The Miniflare teardown/lifecycle PR #15143 is now **merged**. The Access credential fix #15080 remains open but is human-approved with Wrangler CODEOWNERS satisfied.
 
 Candidate bullet family:
 
-> Fixed stale Cloudflare Access service-token headers surviving environment changes by separating current credential state from legitimately cached interactive authorization; added regressions for removed/partial credentials while preserving cookie reuse.
+> Landed a Miniflare teardown fix that starts `workerd` termination before independent browser/proxy cleanup can delay it, preserves the first cleanup failure, waits for runtime exit, and continues remaining teardown.
 
-Possible follow-on after the teardown PR is accepted:
+Useful paired line for Cloudflare/devtools roles:
 
-> Reordered Miniflare disposal so `workerd` termination begins before independent browser/proxy cleanup can delay it, while preserving the first cleanup failure and continuing remaining teardown.
+> Separately fixed stale Cloudflare Access service-token headers surviving environment changes by separating current credential state from legitimately cached interactive authorization; the current patch is human-approved with CODEOWNERS satisfied.
 
-The second PR's current human review asked whether cleanup should continue after the first failure; the revised head adopts that direction. Keep the final resume wording status-accurate until approval/merge is recorded.
+This is now a real two-item Cloudflare cluster: one merged lifecycle repair plus one accepted credential/cache repair awaiting merge.
 
 #### 4. Vite — promoted current
 
@@ -106,20 +106,23 @@ Candidate bullet family while #23165 remains open:
 
 If #23165 merges, simplify the status language and treat the pair as two landed lifecycle/correctness fixes.
 
-#### 5. SWC — high-upside pending slot
+#### 5. SWC — compiler-axis pending slot
 
-If maintainer review accepts the direction, this remains unusually valuable because it adds a compiler/minifier axis rather than another adjacent web-tooling example.
+The original SWC investigation included discarded-result `instanceof` observability. A maintainer explicitly preferred retaining SWC/Terser's existing assumption for that path, so the current PR was narrowed instead of defending the broader semantics change.
 
-Candidate bullet family:
+PR #12110 now targets the cleaner correctness bug: operand-shape constant folding can produce the **wrong boolean result**, for example folding a null-prototype object as `instanceof Object` incorrectly. The current head removes those unsafe folds and keeps the existing discarded-result behavior unchanged. There is no current maintainer approval; the latest maintainer thread is outdated against the current diff but remains unresolved.
 
-> Preserved observable `instanceof` evaluation across SWC optimizer/minifier paths where dead-result cleanup could discard `Symbol.hasInstance` calls or exceptions; removed unsafe operand-shape folds and added optimizer-owned regressions.
+Candidate bullet family if the narrowed direction lands:
 
-Until human/upstream acceptance exists, keep in the bullpen rather than presenting it as equivalent to landed work.
+> Fixed incorrect SWC `instanceof` constant folding that could return the wrong boolean for null-prototype objects; removed unsafe operand-shape folds and added regressions in the repository's existing optimizer/minifier fixtures.
+
+This is still useful because it adds a compiler/minifier axis, but the current claim should be the narrower constant-folding repair rather than the earlier `Symbol.hasInstance`/discarded-result thesis.
 
 #### Bench / alternates
 
 - Zustand hydration generation race — technically clean, lower marginal signal after AI SDK/Cloudflare; useful if upstream attribution becomes especially strong.
 - BuildKit rootless/rootful reproducibility — excellent for systems-specific applications.
+- Playwright MCP shutdown authority — reported a reachable production lifecycle-control route; a Playwright maintainer subsequently merged PR #42133 gating `/killkillkill` under test and closed the report as completed. Good accepted-finding story, probably not scarce one-page space.
 - Bat/Delta/fd/urllib3/Serde/Rspack — strong Fieldwork/portfolio/interview bench; promote selectively with upstream validation or target-role fit.
 - runc #5389 — interview story, not current resume headline.
 
@@ -129,7 +132,7 @@ Until human/upstream acceptance exists, keep in the bullpen rather than presenti
 
 Do not compress Preflight into a single generic project bullet. It is the strongest owned-work proof and should receive roughly **three dense bullets / six-ish lines** in Leo's actual typography.
 
-The 2026-08-15 controlled campaign materially improves the headline evidence. On one 83-mod profile, in one interleaved session, five accepted baseline runs and five accepted accelerated runs measured **89.00s → 15.53s**, with no exclusions. That is the comparison to lead with once the current claim/documentation candidate is published; the older 101s and 15.88s points remain chronology, not the preferred before/after pair.
+The 2026-08-15 controlled campaign materially improves the headline evidence. On one 83-mod profile, in one interleaved session, five accepted baseline runs and five accepted accelerated runs measured **89.00s → 15.53s**, with no exclusions. PR #440 has now merged that comparison into the project's published claim/docs; the older 101s and 15.88s points remain chronology, not the preferred before/after pair.
 
 Current story families:
 
@@ -217,103 +220,3 @@ Current default candidate:
 > **Technologies:** Linux, React, Node.js, Cloudflare Workers, Docker, AWS, PostgreSQL, Git
 
 Tailor lightly by role.
-
-Do not put KVM/MSHV/fw_cfg/TDX in the generic skills line merely because Cloud Hypervisor validation touched them. Those details belong in the evidence that used them.
-
-## Target cut: Vercel / devtools / AI runtime
-
-Priority order:
-
-1. Vercel AI SDK — direct merge plus Factory-adopted/co-authored fixes is now the strongest upstream cluster.
-2. Cloud Hypervisor (proves range outside TS/AI).
-3. Cloudflare Workers SDK.
-4. Vite — one merge plus a two-maintainer-approved lifecycle repair.
-5. SWC rises above Vite if accepted and the compiler/minifier axis is useful for the target.
-6. Preflight, framed as runtime/instrumentation/performance and controlled evaluation rather than game fandom first.
-7. Stensibly gets one stronger line because agent coordination/MCP/hosted authority is relevant.
-8. SmolRunner rises when the role touches coding-agent execution, sandboxes, CI, or benchmark harnesses.
-
-Useful application thesis:
-
-> Already able to enter Vercel-owned code, understand lifecycle/state boundaries, and produce fixes that merge directly or are adopted by the AI SDK Factory with retained co-author credit; independent work shows the same ability generalizes beyond the codebase.
-
-Do not imply OSS creates entitlement to an interview. It makes a targeted cold application unusually well-supported.
-
-## Target cut: coding-agent evaluation / benchmark engineering
-
-This is now a real target category rather than a hypothetical one.
-
-Priority order:
-
-1. **Preflight** — controlled experiments, benchmark design, instrumentation, falsifiable claims, technical evidence writing.
-2. **Vercel AI SDK** — AI-tooling codebase familiarity plus upstream accepted lifecycle/error-state work.
-3. **SmolRunner** — disposable execution, exact worker identity, crash recovery, cleanup, hostile-CI thinking.
-4. **Cloud Hypervisor / Vite / Cloudflare** — diverse specimens of code review and lifecycle/correctness reasoning in unfamiliar codebases.
-5. **Stensibly** — agent authority, continuation, provenance, and coordination.
-
-Useful thesis:
-
-> Already doing the ingredients of coding-agent benchmark work: entering arbitrary repositories, finding behavioral boundaries, writing discriminating regressions, building reproducible execution/evidence systems, and explaining why a result is trustworthy.
-
-This target is where the breadth becomes unusually coherent rather than looking scattered.
-
-## Target cut: Valve / game/runtime/performance
-
-Priority order changes substantially:
-
-1. **Preflight dominates the page.** Give it the most acreage.
-2. Cloud Hypervisor.
-3. Best systems/compiler OSS specimens.
-4. SmolRunner may beat Stensibly because runtime/crash/recovery systems are more relevant.
-5. Glossless can appear if visual/graphics/product breadth helps.
-6. Web-library correctness examples are supporting evidence, not identity.
-
-Possible Preflight emphasis:
-
-- controlled 89.00s → 15.53s same-profile campaign;
-- runtime instrumentation of an obfuscated game/mod ecosystem;
-- Java bytecode transformations;
-- JFR and critical-path performance work;
-- graphics/audio/resource-loader investigation;
-- generated code / Janino;
-- Rosetta/JIT/platform behavior;
-- mod compatibility and fail-open source drift;
-- real desktop packaging, updater/rollback, diagnostics and gameplay pilots.
-
-The pitch is not "Starsector modder." It is "engineer who cracked open a real game/mod runtime, built instrumentation around it, made it radically faster, and productized the result without owning the underlying source ecosystem."
-
-## Target cut: systems / infra
-
-Priority order:
-
-1. Cloud Hypervisor.
-2. BuildKit or another strong Linux Fieldwork candidate if externally validated.
-3. Preflight runtime/bytecode/performance.
-4. SmolRunner.
-5. Vercel AI SDK as cross-language correctness proof.
-6. Cloudflare as state/credential/lifecycle semantics.
-
-If the QCOW L2 ownership repair lands, Cloud Hypervisor becomes an even stronger lead because the accepted work then spans VM lifecycle, boot error propagation, and block-image metadata ownership.
-
-Stensibly becomes optional unless the role values distributed coordination.
-
-## What not to do
-
-- Do not make the page a logo wall.
-- Do not list every open PR to prove volume.
-- Do not over-index on "high impact" wording without a specific mechanism/result.
-- Do not call independent work freelance work unless client/service work actually happened.
-- Do not call the profile 0 YOE when the question is ordinary engineering experience.
-- Do not claim three years of conventional post-grad full-time employment.
-- Do not let IBM sit above the current work simply because it is an employer name.
-- Do not waste Preflight's acreage on a generic technology stack line.
-- Do not encode internal Fieldwork evidence levels into recruiter-facing prose unless they solve a real credibility question.
-- Do not turn inbound recruiting into a resume bullet; use it to calibrate which existing evidence resonates.
-
-## Current identity thesis
-
-The page should make a reader infer something close to:
-
-> Nontraditional early-career chronology, roughly three years of substantive engineering activity, unusually strong evidence of entering unfamiliar systems and finding correctness/performance/lifecycle boundaries, repeated external acceptance across Vercel AI SDK, Vite, Cloud Hypervisor and Cloudflare, plus one owned performance product deep enough to demonstrate sustained technical pursuit and benchmark discipline.
-
-The resume's job is to resolve the chronology/capability mismatch quickly enough that a human wants to ask about it.
