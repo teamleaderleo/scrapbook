@@ -21,7 +21,7 @@ export function HomeNowShelf() {
     workbench
       ? {
           id: `workbench-${workbench.slug}`,
-          kind: 'new dispatch',
+          kind: 'latest writing',
           title: workbench.title,
           note: workbench.blurb,
           href: `/desk/${workbench.slug}`,
