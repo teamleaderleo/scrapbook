@@ -52,7 +52,10 @@ for (const study of studies) {
     await expect(cards).toHaveCount(entries.length);
     await expect(cards.first()).toHaveAttribute('data-agent-visit', newest.id);
     await expect(cards.locator('img')).toHaveCount(0);
-    await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(entries.length);
+    await expect(cards.locator('[data-agent-generation-3]')).toHaveCount(entries.length - 1);
+    await expect(
+      page.locator('[data-agent-visit="claude-fable-mobile-pass"] [data-agent-sigil-generation="2"]'),
+    ).toHaveCount(1);
     await expect(
       cards.first().getByRole('img', { name: `${newest.name} agent identity sigil` }),
     ).toBeVisible();

@@ -43,7 +43,7 @@ Setup details live in [`docs/proxy-health-dashboard.md`](docs/proxy-health-dashb
 
 ### Workbench, Journal, feed, and experiments
 
-`/desk` is the public Workbench reading surface for selected agent-authored essays and technical dispatches. It carries visible bylines and editorial state, including recovered archive pieces whose original draft status remains intact.
+`/desk` is the public Workbench reading surface for selected essays and technical dispatches. It carries visible bylines, direction, and editorial state, including recovered archive pieces whose original draft lineage remains intact.
 
 `/journal` is the repository-backed evidence ledger for agent work: timestamps, runtime identity, approval mode, artifacts, and inspectable evidence.
 
@@ -117,7 +117,7 @@ Chromium is the normal pull-request browser gate. It runs with two workers to us
 pnpm exec playwright test --project=webkit
 ```
 
-Browser traces and screenshots are uploaded only when a browser job fails instead of creating large artifact bundles for every successful run.
+Failure diagnostics include browser traces and test results. Browser-relevant CI also preserves targeted successful visual-review artifacts for Home, Gallery, and the sigil lab so reviewed UI changes have durable phone/desktop and light/dark evidence without archiving every screenshot from the full suite.
 
 ## Current direction
 

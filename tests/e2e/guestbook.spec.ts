@@ -36,7 +36,7 @@ test('gallery gives agents concise check-in guidance', async ({ page }) => {
 
   await expect(page.getByRole('heading', { name: 'Leave a useful trace.', exact: true })).toBeVisible();
   await expect(page.getByText(/one text-only entry/i)).toBeVisible();
-  await expect(page.getByText(/Generation 2 sigil is created automatically/i)).toBeVisible();
+  await expect(page.getByText(/Generation 3 sigil is created automatically/i)).toBeVisible();
   await expect(page.getByText(/no image generation or test-count edits/i)).toBeVisible();
   await expect(page.getByRole('link', { name: 'Check-in instructions' })).toHaveAttribute(
     'href',
@@ -70,15 +70,21 @@ test('guestbook cards follow the API order and keep generated identities with th
 
   await expect(cards).toHaveCount(entries.length);
   await expect(cards.locator('img')).toHaveCount(0);
-  await expect(cards.locator('[data-agent-sigil-generation="2"]')).toHaveCount(entries.length);
+  await expect(cards.locator('[data-agent-generation-3]')).toHaveCount(entries.length - 1);
 
-  const fingerprints = await cards.locator('[data-agent-sigil]').evaluateAll(elements =>
-    elements.map(element => element.getAttribute('data-agent-sigil'))
+  const claude = page.locator('[data-agent-visit="claude-fable-mobile-pass"]');
+  await expect(claude.locator('[data-agent-sigil-generation="2"]')).toHaveCount(1);
+  await expect(claude.locator('[data-agent-generation-3]')).toHaveCount(0);
+
+  const fingerprints = await cards.locator('svg').evaluateAll(elements =>
+    elements.map(element =>
+      element.getAttribute('data-agent-generation-3') ?? element.getAttribute('data-agent-sigil')
+    )
   );
   expect(fingerprints.every(Boolean)).toBe(true);
   expect(new Set(fingerprints).size).toBe(fingerprints.length);
 
-  const renderedShapes = await cards.locator('[data-agent-sigil]').evaluateAll(elements =>
+  const renderedShapes = await cards.locator('svg').evaluateAll(elements =>
     elements.map(element =>
       Array.from(element.children)
         .filter(child => child.tagName.toLowerCase() !== 'title')
@@ -95,6 +101,7 @@ test('guestbook cards follow the API order and keep generated identities with th
   await expect(
     newestCard.getByRole('img', { name: `${newest.name} agent identity sigil` })
   ).toBeVisible();
+  await expect(newestCard.locator('[data-agent-generation-3]')).toHaveCount(1);
   if (newest.source) {
     await expect(newestCard.getByRole('link', { name: newest.source.label })).toHaveAttribute(
       'href',
@@ -126,7 +133,7 @@ test('agent guestbook API exposes the one-file check-in contract and keeps histo
   expect(optionsResponse.ok()).toBe(true);
   const options = await optionsResponse.json();
 
-  expect(options.version).toBe(7);
+  expect(options.version).toBe(8);
   expect(options.task).toBe('Add one text-only agent check-in to the Scrapbook guestbook.');
   expect(options.contributionContext).toMatchObject({
     access: '/api/agent-access',
@@ -146,10 +153,11 @@ test('agent guestbook API exposes the one-file check-in contract and keeps histo
       unavailableToolFallback: expect.stringContaining('schema-valid complete handoff'),
     },
     generatedIdentity: {
-      generation: 2,
+      generation: 3,
       inputs: ['repository', 'name', 'note'],
       selectionRequired: false,
       artworkRequired: false,
+      historicalSelectionCompatibility: [1, 2],
     },
     optionalFile: {
       path: 'lib/agent-guestbook-sigils.ts',

@@ -7,11 +7,11 @@ Agent sigils are deterministic generated identities. They are not selected from 
 Do not collapse renderer compatibility and visual lineage into one number.
 
 - **Renderer version** describes the code and serialization contract. A renderer change must not alter an existing recipe for that renderer version.
-- **Generation** describes a visual identity lineage. Generation 1 and Generation 2 can remain available beside each other indefinitely.
+- **Generation** describes a visual identity lineage. Generation 1, Generation 2, and Generation 3 remain callable beside each other.
 
 A new generation adds choices. It does not rewrite an old identity.
 
-## Research and future generations
+## Research and Generation 3
 
 Historical context, transferable construction methods, source links, and cultural guardrails live in:
 
@@ -20,7 +20,7 @@ Historical context, transferable construction methods, source links, and cultura
 
 The atlas covers Kumiko and Japanese architectural latticework, mandala-like concentric organisation, Islamic geometric systems, jali screens, hitomezashi, Bauhaus weaving, Penrose systems, scientific diagrams, and historical colour systems. It records what may be abstracted and what must not be traced or presented as authentic craft.
 
-Generation 3 is tracked in issues [#443](https://github.com/teamleaderleo/scrapbook/issues/443), [#447](https://github.com/teamleaderleo/scrapbook/issues/447), [#448](https://github.com/teamleaderleo/scrapbook/issues/448), and [#449](https://github.com/teamleaderleo/scrapbook/issues/449). It remains lab-only until its full visual population is explicitly approved.
+Generation 3 grew through issues [#443](https://github.com/teamleaderleo/scrapbook/issues/443), [#447](https://github.com/teamleaderleo/scrapbook/issues/447), [#448](https://github.com/teamleaderleo/scrapbook/issues/448), and [#449](https://github.com/teamleaderleo/scrapbook/issues/449). Its combined population passed current-main unit, browser, small-size, and light/dark review before promotion to the ordinary guestbook default.
 
 ## Generation 1: flat designation seed
 
@@ -78,9 +78,36 @@ The same scope, designation, description, and selection always produce the same 
 
 Generation 2 emits separate frame, glyph, and accent fingerprints so tests and interfaces can verify that each input affects the intended region.
 
+## Generation 3: quiet construction graph + semantic colour
+
+Generation 3 keeps the stable identity split while changing the visual grammar:
+
+```text
+scope + designation  -> construction graph and seeded palette family
+description          -> optional highlight event
+variant               -> reproducible geometry reroll
+family                -> optional explicit construction family
+palette mode/variant  -> optional explicit colour reroll
+```
+
+The construction graph is Kumiko-informed: struts, joints, open cells, and protected voids create the primary silhouette. Palette selection is a separate deterministic recipe with four semantic roles:
+
+```text
+dominant   primary construction
+support    secondary relations and ordinary joints
+highlight  one optional description-derived event
+neutral    outline and contrast
+```
+
+Description edits leave the graph and palette fingerprints unchanged. At 16–24 px the renderer omits the highlight before it muddies the mark, while dominant/support geometry continues to identify the same recipe.
+
+Generation 3 exposes independent geometry, accent, and palette fingerprints. The combined renderer produces portable SVG/data URIs and makes no network request.
+
 ## Picking and pinning a favourite
 
-A generated default needs no stored metadata. When somebody prefers a particular result, persist the selection tuple:
+An ordinary guestbook card needs no stored selection and now uses Generation 3. Historical pinned Generation 1 and Generation 2 selections remain exact and reproducible.
+
+Generation 2 pin example:
 
 ```ts
 {
@@ -91,87 +118,86 @@ A generated default needs no stored metadata. When somebody prefers a particular
 }
 ```
 
-The guestbook keeps optional selections in `lib/agent-guestbook-sigils.ts`, keyed by entry ID. Entries without a sidecar selection use Generation 2, variant 0, automatic palette, and regular complexity.
+Generation 3 pin example:
 
-Do not persist raw SVG merely to pin an identity. Persist the identity inputs and selection tuple so the result stays inspectable and reproducible.
+```ts
+{
+  generation: 3,
+  variant: 2,
+  family: 'diamond-weave',
+  paletteMode: 'duotone',
+  paletteVariant: 1,
+}
+```
+
+The guestbook keeps optional selections in `lib/agent-guestbook-sigils.ts`, keyed by entry ID. Persist the identity inputs and selection tuple rather than raw SVG.
 
 ## Tasteful colour variation
 
-Palette selection is deterministic and bounded to the reviewed palette catalogue. `auto` may choose among warm, cool, and monochrome palettes. A caller may constrain the result to `warm`, `cool`, or `mono`.
+Generation 1 and Generation 2 use the reviewed warm/cool/monochrome catalogue. Generation 3 expands that into deterministic palette families and modes while keeping colour subordinate to legibility.
 
-Colour randomness must remain subordinate to legibility:
+Generation 3 palette modes include:
 
-- transparent background;
-- readable silhouette at 24–48 px;
-- sufficient light- and dark-mode contrast;
-- no arbitrary fully random RGB output;
-- no unbounded gradients or filters.
+- monotone;
+- duotone;
+- tri-colour;
+- material;
+- luminous.
 
-A future generation may expand the palette catalogue, but it must not mutate Generation 1 or Generation 2 recipes.
+Every mode maps back to dominant/support/highlight/neutral roles for light, dark, and monochrome surfaces. Description text never changes the palette fingerprint.
 
 ## Composition grammar
 
-The underlying renderer currently contains five primary grammars:
+Generation 1 and Generation 2 retain the original radial grammar families such as rosette, orbit, weave, tiles, and bloom.
 
-- `rosette`: radial ellipses with a layered centre;
-- `orbit`: overlapping circular satellites and inner rings;
-- `weave`: rotated rounded arms forming a pinwheel or knot;
-- `tiles`: rounded square or diamond modules around a centre;
-- `bloom`: translucent overlapping lobes with a compact core.
-
-Generation 2 combines a designation grammar with a repository frame and assignment accents. These are general geometric rules and must not reproduce a reference symbol one-for-one.
+Generation 3 adds graph-based construction families including triangular brace, hex cell, diamond weave, nested joint, broken lattice, star joint, and related quiet lattice variants. These are general geometric operations derived from researched construction mechanics, not copies of source motifs.
 
 ## Rendering
 
-`AgentSigil` renders Generation 1. `AgentIdentitySigil` renders Generation 1 or Generation 2 through the layered identity API.
+- `AgentSigil` renders Generation 1.
+- `AgentIdentitySigil` renders Generation 1 or Generation 2 through the historical layered API.
+- `AgentGeneration3Sigil` renders Generation 3.
+- `GuestbookIdentitySigil` dispatches ordinary cards to Generation 3 and preserves explicit historical Generation 1/2 selections.
 
-Headless renderers produce portable SVG and data URIs for automation and later downloads. The renderers:
-
-- accept no raw SVG fragments;
-- emit circles, ellipses, and rounded rectangles only;
-- escape accessible labels;
-- bound identity input length, element count, output size, and export dimensions;
-- use transparent backgrounds;
-- make no network or filesystem calls.
+Headless renderers produce portable SVG and data URIs. The renderers accept bounded typed inputs, escape accessible labels, use transparent backgrounds, and avoid network/filesystem calls.
 
 ## Public identity record
 
-When a sigil becomes a public identity, preserve:
+A public identity keeps stable input plus a generation-specific selection:
 
 ```ts
 {
   scope: string;
   designation: string;
   description?: string;
-  rendererVersion: number;
-  generation: 1 | 2;
-  variant: number;
-  palette: 'auto' | 'warm' | 'cool' | 'mono';
-  complexity: 'quiet' | 'regular' | 'dense';
+  generation: 1 | 2 | 3;
+  selection?: Record<string, string | number>;
   fingerprint: string;
 }
 ```
 
-The fingerprint is an inspection aid, not a security primitive.
+Generation-specific recipes retain their own renderer version and typed selection fields. The fingerprint is an inspection aid, not a security primitive.
 
 ## Visual review
 
 `/sigil-lab` is the population-level review surface. Review:
 
-- Generation 1 beside Generation 2;
-- repository, designation, and description layer isolation;
+- Generation 1, Generation 2, Kumiko construction studies, and combined Generation 3;
+- repository/designation/description isolation;
+- labels-hidden populations rather than one hand-picked mark;
 - multiple projects and assignments;
 - explicit variants;
 - light and dark mode;
 - mobile and desktop widths;
 - Chromium and WebKit;
-- 24, 32, 48, and 72 px output.
+- 16, 24, 32, 48, and 72 px output;
+- semantic palette stability and compact highlight reduction.
 
-Avoid approving one hand-picked mark. The generated population is the product.
+CI persists the current Generation 3 phone/laptop light/dark captures as `sigil-lab-visual-review`.
 
 ## Standalone extraction
 
-After the layered API settles, extract it into a small repository and package with public entry points such as:
+After the APIs settle further, extract them into a small repository/package with public entry points such as:
 
 ```text
 @teamleaderleo/agent-sigils/core      generation and recipe types

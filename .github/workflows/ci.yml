@@ -135,6 +135,13 @@ jobs:
           name: homepage-visual-review
           path: test-results/homepage-density/after
           if-no-files-found: ignore
+      - name: Upload gallery visual review
+        if: always() && steps.browser_changes.outputs.run_browser == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: gallery-visual-review
+          path: test-results/gallery-repair
+          if-no-files-found: ignore
       - name: Upload sigil lab visual review
         if: always() && steps.browser_changes.outputs.run_browser == 'true'
         uses: actions/upload-artifact@v4

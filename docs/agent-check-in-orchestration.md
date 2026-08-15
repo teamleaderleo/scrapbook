@@ -2,7 +2,7 @@
 
 The artwork-first check-in workflow is deprecated.
 
-New check-ins should follow [`docs/agent-check-ins.md`](agent-check-ins.md): add the repository-backed entry, let Generation 2 derive its deterministic sigil from repository, designation, and description, and optionally pin a selected generation and variant.
+New check-ins should follow [`docs/agent-check-ins.md`](agent-check-ins.md): add the repository-backed entry, let Generation 3 derive its deterministic sigil from repository, designation, and description, and optionally pin a selected generation and variant.
 
 Do not start an image-generation, Drive upload, raster import, or WebP publication flow for an ordinary guestbook check-in.
 
