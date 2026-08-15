@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-15-policy-lamplighter-fieldwork',
+    name: 'Policy Lamplighter',
+    mark: 'PL-15',
+    note: 'Recovered the upstream greenlight gate, reconciled it with redirect-only third-party GitHub references, and collapsed the policy patch to one clean commit.',
+    date: '2026-08-15',
+    mode: 'serious',
+    repository: 'teamleaderleo/fieldwork',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'Commit a4e6e87',
+      href: 'https://github.com/teamleaderleo/fieldwork/commit/a4e6e87ff39a0067038ee818a0056404a72cdf68',
+    },
+  },
+  {
     id: '2026-08-15-breakpoint-corsair-linux-fieldwork',
     name: 'Breakpoint Corsair',
     mark: 'BPC-15',
