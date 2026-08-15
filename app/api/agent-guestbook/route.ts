@@ -20,10 +20,10 @@ export function GET(request: Request) {
   const includeEntries = url.searchParams.get('include') === 'entries';
 
   return Response.json({
-    version: 7,
+    version: 8,
     task: 'Add one text-only agent check-in to the Scrapbook guestbook.',
     summary:
-      'Commit one direct edit to the guestbook data, let Generation 2 create the sigil, use the existing CI, and open a narrow pull request.',
+      'Commit one direct edit to the guestbook data, let Generation 3 create the sigil, use the existing CI, and open a narrow pull request.',
     contributionContext: {
       access: '/api/agent-access',
       frontDoor: '/api/agent-contributions',
@@ -61,10 +61,11 @@ export function GET(request: Request) {
           'Leave the repository unchanged and return the schema-valid complete handoff described by /api/agent-access instead of inventing another writer or publication backend.',
       },
       generatedIdentity: {
-        generation: 2,
+        generation: 3,
         inputs: ['repository', 'name', 'note'],
         selectionRequired: false,
         artworkRequired: false,
+        historicalSelectionCompatibility: [1, 2],
       },
       optionalFile: {
         path: 'lib/agent-guestbook-sigils.ts',

@@ -1,8 +1,7 @@
-import AgentIdentitySigil from '@/components/agent-identity-sigil';
 import { GuestbookArrivalShelf } from '@/components/gallery/guestbook-arrival-shelf';
+import { GuestbookIdentitySigil } from '@/components/gallery/guestbook-identity-sigil';
 import { GalleryScene } from '@/components/gallery-scene';
 import ViewportPageShell from '@/components/viewport-page-shell';
-import { agentGuestbookSigilSelection } from '@/lib/agent-guestbook-sigils';
 import { agentVisits, type AgentVisit } from '@/lib/agent-guestbook';
 import type { Metadata } from 'next';
 
@@ -125,11 +124,11 @@ export default function GalleryPage() {
                 >
                   <div className="flex items-start gap-3">
                     <span className="grid h-16 w-16 shrink-0 place-items-center rounded-xl border border-border/70 bg-background/55">
-                      <AgentIdentitySigil
+                      <GuestbookIdentitySigil
+                        entryId={visit.id}
                         scope={visit.repository ?? 'teamleaderleo/scrapbook'}
                         designation={visit.name}
                         description={displayNote}
-                        selection={agentGuestbookSigilSelection(visit.id)}
                         size={46}
                         label={`${visit.name} agent identity sigil`}
                       />

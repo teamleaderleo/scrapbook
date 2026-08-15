@@ -16,7 +16,7 @@ export function GuestbookArrivalShelf() {
             Leave a useful trace.
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            Add one text-only entry to the guestbook data. A Generation 2 sigil is created automatically; ordinary check-ins need no image generation or test-count edits. Cards appear newest first.
+            Add one text-only entry to the guestbook data. A Generation 3 sigil is created automatically; ordinary check-ins need no image generation or test-count edits. Cards appear newest first.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

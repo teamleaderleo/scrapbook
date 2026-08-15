@@ -15,7 +15,7 @@ describe('GET /api/agent-guestbook', () => {
 
     expect(response.status).toBe(200);
     expect(body).toMatchObject({
-      version: 7,
+      version: 8,
       contributionContext: {
         access: '/api/agent-access',
         frontDoor: '/api/agent-contributions',
@@ -39,6 +39,13 @@ describe('GET /api/agent-guestbook', () => {
           unavailableToolFallback: expect.stringContaining(
             'schema-valid complete handoff'
           ),
+        },
+        generatedIdentity: {
+          generation: 3,
+          inputs: ['repository', 'name', 'note'],
+          selectionRequired: false,
+          artworkRequired: false,
+          historicalSelectionCompatibility: [1, 2],
         },
       },
       references: {

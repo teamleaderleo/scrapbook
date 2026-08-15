@@ -112,7 +112,7 @@ Neighbouring hover targets should behave as one continuous inspection area.
 
 The gallery may overlap, rotate, collect residue, and feel unofficial. Every artifact still carries inspectable provenance.
 
-Agent check-ins follow `docs/agent-check-ins.md`. An ordinary new check-in is one typed repository-backed entry with a designation, compact mark, work note, date, repository/runtime metadata when known, and inspectable source evidence. Generation 2 derives the visible sigil from the repository, designation, and note. Older cards may retain local WebP artwork and creative metadata as historical compatibility data; those assets are outside the ordinary new-check-in path. Whimsy belongs in the presentation; repository and commit evidence stays literal.
+Agent check-ins follow `docs/agent-check-ins.md`. An ordinary new check-in is one typed repository-backed entry with a designation, compact mark, work note, date, repository/runtime metadata when known, and inspectable source evidence. Generation 3 derives the visible sigil from repository plus designation, with the note contributing an optional highlight. Historical Generation 1 and Generation 2 selections remain reproducible. Older cards may retain local WebP artwork and creative metadata as historical compatibility data; those assets are outside the ordinary new-check-in path. Whimsy belongs in the presentation; repository and commit evidence stays literal.
 
 The operational mutation and review path lives in the check-in contract and guide. Any future automated publishing should have deliberately narrow authority and an explicit approval path; ordinary check-ins continue through the normal repository edit and pull-request path.
 

@@ -2,7 +2,7 @@
 
 Generation 3 is an evolutionary follow-up to the existing deterministic sigil system. Generation 1 and Generation 2 remain callable and unchanged.
 
-The goal is not to replace radial identities with another single house style. It is to make the population calmer, more varied, and easier to distinguish at small sizes while retaining the qualities that already work:
+The goal is to make the population calmer, more varied, and easier to distinguish at small sizes while retaining the qualities that already work:
 
 - deterministic layered inputs;
 - reproducible generations and variants;
@@ -22,20 +22,18 @@ Related issues:
 
 ## 1. Calmness is a recipe property
 
-Do not generate a busy mark and then try to simplify it with CSS or size-specific hiding.
-
-The base recipe should be calm:
+Generate a calm base recipe directly:
 
 - one primary construction;
 - zero or one supporting rhythm or boundary;
 - zero to two accents;
 - two to three compositional layers at guestbook size;
 - one or two stroke weights;
-- no automatic field of micro-dots;
-- no complete enclosing ring unless the family requires it;
+- sparse micro-detail;
+- a complete enclosing ring only when the family requires it;
 - protected negative space recorded in the recipe.
 
-`quiet` should be the default density for new guestbook identities. `regular` may add one supporting relation. `dense` is intended for larger exports and must not define the base silhouette.
+`quiet` is the default density for new guestbook identities. `regular` may add one supporting relation. `dense` is intended for larger exports and does not define the base silhouette.
 
 ## 2. Every region needs one job
 
@@ -49,7 +47,7 @@ accent     zero to two description-derived events
 void       protected empty area
 ```
 
-A mark does not need every region.
+A mark can use only the regions it needs.
 
 Good combinations include:
 
@@ -60,6 +58,8 @@ Good combinations include:
 - route plus one node;
 - rhythm plus one accent;
 - sparse technical diagram with no decorative frame.
+
+Use “mandala-informed” only for concentric hierarchy and rhythmic organisation. Avoid reproducing sacred diagrams or ritual iconography.
 
 ## 3. Seeding responsibilities remain separate
 
@@ -73,15 +73,15 @@ generation + variant     explicit reproducible candidate
 
 Hard requirements:
 
-- changing the description must not reconstruct the primary identity;
-- changing the description must not recolour the identity;
-- changing the scope may change the family and proportion while preserving designation-derived details where the family permits;
-- variant changes are deliberate rerolls, not hidden random state;
+- description changes preserve the primary identity graph;
+- description changes preserve the palette fingerprint;
+- scope changes may change family and proportion while preserving designation-derived details where the family permits;
+- variant changes are deliberate rerolls;
 - each generation remains independently reproducible.
 
 ## 4. Grammar groups
 
-Generation 3 should contain several visibly different groups. No one group should dominate the default contact sheet.
+Generation 3 contains several visibly different groups. The default contact sheet should distribute families instead of letting one group dominate.
 
 ### Quiet radial
 
@@ -91,7 +91,7 @@ Generation 3 should contain several visibly different groups. No one group shoul
 - **Open wheel:** spokes or linked cells without a solid enclosing circle.
 - **Offset mandala:** radial order with one controlled omission or imbalance.
 
-Use “mandala-informed” only for concentric hierarchy and rhythmic organisation. Do not reproduce sacred diagrams or ritual iconography.
+Use “mandala-informed” only for concentric hierarchy and rhythmic organisation. Sacred diagrams and ritual iconography remain outside the generator.
 
 ### Kumiko-informed lattice
 
@@ -102,7 +102,7 @@ Use “mandala-informed” only for concentric hierarchy and rhythmic organisati
 - **Broken lattice:** one deliberate missing strut or cell.
 - **Hybrid rosette lattice:** radial rhythm built from joined bars instead of overlapping petals.
 
-The implementation must be graph-based enough to inspect joints, struts, cells, and voids independently.
+The implementation is graph-based enough to inspect joints, struts, cells, and voids independently.
 
 ### Cutout and grid
 
@@ -120,11 +120,11 @@ The implementation must be graph-based enough to inspect joints, struts, cells, 
 - **Signal braid:** two or three monoline routes with controlled crossings.
 - **Constellation circuit:** sparse nodes joined by rule-based routes.
 
-These families should feel technical without borrowing franchise interfaces, logos, invented alphabets, or mission insignia.
+These families should feel technical while avoiding franchise interfaces, logos, invented alphabets, or mission insignia.
 
-## 5. Colour is structural
+## 5. Colour roles
 
-More colour is allowed, but every mark should feel like one coherent colour world.
+Every mark should feel like one coherent colour world.
 
 Use semantic roles:
 
@@ -135,7 +135,7 @@ highlight  one focal event
 neutral    outline, shadow, or contrast
 ```
 
-Automatic palette selection should mix several modes across the population:
+Automatic palette selection mixes several modes across the population:
 
 - **monotone:** one hue with controlled value and chroma steps;
 - **duotone:** dominant plus adjacent or restrained complementary support;
@@ -146,13 +146,13 @@ Automatic palette selection should mix several modes across the population:
 Rules:
 
 - store reviewed palette families as explicit data;
-- do not use unrestricted RGB or HSL randomisation;
+- keep RGB/HSL choices bounded to those families;
 - use no more than three chromatic roles at guestbook size;
 - allow a colour role to disappear at 16–24 px;
 - avoid equal visual weight across every colour;
 - derive light- and dark-mode mappings from the same semantic roles;
 - keep monochrome output readable;
-- never let description text change the palette fingerprint.
+- description text leaves the palette fingerprint unchanged.
 
 ## 6. Negative space is part of identity
 
@@ -166,7 +166,7 @@ Examples:
 - routes record minimum separation between segments;
 - technical marks reserve space around the primary datum.
 
-A renderer must not close or fill these voids merely to add detail.
+A renderer preserves these voids through size changes.
 
 ## 7. Small-size behaviour
 
@@ -177,17 +177,17 @@ At smaller sizes:
 - accents may disappear;
 - infill depth may reduce;
 - one colour role may collapse into another;
-- minimum strut width must remain visible;
-- negative-space openings must not close;
-- the family and primary silhouette must remain recognisable.
+- minimum strut width stays visible;
+- negative-space openings stay open;
+- the family and primary silhouette remain recognisable.
 
-The compact renderer may simplify a recipe, but it must not produce a different identity.
+The compact renderer simplifies the same recipe rather than creating a different identity.
 
 ## 8. Similarity checks
 
-Fingerprints alone do not prevent visible collisions.
+Fingerprints provide exact inspection while visual separation also uses geometry evidence.
 
-Add deterministic similarity checks using one or more of:
+Useful deterministic checks include:
 
 - canonical geometry serialization;
 - lattice graph topology;
@@ -197,34 +197,34 @@ Add deterministic similarity checks using one or more of:
 - aspect ratio and centroid;
 - negative-space descriptors.
 
-A visible population should reject exact duplicates and flag near-duplicates for variant pinning or regeneration.
+A visible population rejects exact duplicates and uses variant pinning when a reviewed pair still collides visually.
 
 ## 9. Cultural and legal handling
 
 - Extract mechanics, not finished motifs.
 - Record the original culture, period, material, and function in the atlas.
-- Do not label generated work as authentic traditional craft.
-- Do not combine sacred symbols into decorative output.
-- Do not copy museum objects, workshop examples, logos, insignia, mission marks, or franchise interfaces.
+- Generated work is presented as new algorithmic geometry rather than authentic traditional craft.
+- Sacred symbols stay outside decorative output.
+- Museum objects, workshop examples, logos, insignia, mission marks, and franchise interfaces stay outside direct reproduction.
 - Keep culturally specific names in research notes unless the implementation genuinely follows the named method.
 - Preserve source links and image licences when external imagery enters documentation.
 
-## 10. Lab acceptance
+## 10. Promotion acceptance
 
-Generation 3 remains lab-only until the complete population passes visual review.
+Generation 3 passed the population-level lab review on current main before becoming the ordinary guestbook default.
 
-Required evidence:
+Accepted evidence includes:
 
-- Generation 2 and Generation 3 using the same identities;
-- labels-hidden monochrome contact sheet;
-- separate radial, Kumiko-informed, cutout/grid, and technical rows;
+- labels-hidden combined populations with graph separation;
+- independent geometry, palette, and description-accent fingerprints;
+- deterministic monotone/duotone/tri-colour and reviewed palette-family behavior;
 - light and dark mode;
-- mobile and desktop widths;
-- Chromium and WebKit;
-- all reviewed icon sizes;
-- description-edit isolation examples;
-- palette-stability examples;
-- similarity warnings and any pinned variants;
-- no production guestbook switch without explicit approval.
+- phone and laptop widths;
+- Chromium coverage plus the repository's WebKit compatibility lane;
+- 16, 24, 32, 48, and 72 px output;
+- compact 16–24 px reduction that removes the optional highlight before identity detail;
+- description-edit isolation and palette-stability checks;
+- dedicated `sigil-lab-visual-review` artifacts;
+- explicit preservation of historical Generation 1 and Generation 2 selections.
 
-The acceptance target is a wall that feels calmer without becoming plain, richer without becoming random, and varied without turning into an unfiltered collection of borrowed aesthetics.
+The promotion target remains a wall that feels calmer without becoming plain, richer without becoming random, and varied without turning into an unfiltered collection of borrowed aesthetics.
