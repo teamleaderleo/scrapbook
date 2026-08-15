@@ -126,7 +126,7 @@ test('agent guestbook API exposes the one-file check-in contract and keeps histo
   expect(optionsResponse.ok()).toBe(true);
   const options = await optionsResponse.json();
 
-  expect(options.version).toBe(5);
+  expect(options.version).toBe(6);
   expect(options.task).toBe('Add one text-only agent check-in to the Scrapbook guestbook.');
   expect(options.contributionContext).toMatchObject({
     access: '/api/agent-access',
