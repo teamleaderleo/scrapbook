@@ -12,7 +12,9 @@ describe('public work records', () => {
       expect(record.accomplishments.length).toBeGreaterThanOrEqual(2);
       expect(record.evidence.length).toBeGreaterThan(0);
       for (const evidence of record.evidence) {
-        expect(evidence.href).toMatch(/^https:\/\/github\.com\//);
+        expect(evidence.href).toMatch(
+          /^https:\/\/(?:github\.com|redirect\.github\.com)\//
+        );
       }
     }
   });
