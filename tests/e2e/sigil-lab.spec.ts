@@ -1,3 +1,4 @@
+import { mkdirSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 
 async function expectNoHorizontalOverflow(page: Page) {
@@ -19,7 +20,7 @@ const variants = [
 for (const variant of variants) {
   test(`sigil lab exposes layered generations and visual evidence in ${variant.theme} at ${variant.width}x${variant.height}`, async ({
     page,
-  }, testInfo) => {
+  }) => {
     test.setTimeout(120_000);
     await page.emulateMedia({ colorScheme: variant.theme });
     await page.setViewportSize({ width: variant.width, height: variant.height });
@@ -80,10 +81,9 @@ for (const variant of variants) {
     await expect(page.locator('[data-agent-generation-3]')).toHaveCount(38);
     await expectNoHorizontalOverflow(page);
 
+    mkdirSync('test-results/sigil-lab-review', { recursive: true });
     await page.screenshot({
-      path: testInfo.outputPath(
-        `sigil-lab-${variant.theme}-${variant.width}x${variant.height}.png`,
-      ),
+      path: `test-results/sigil-lab-review/${variant.theme}-${variant.width}x${variant.height}.png`,
       fullPage: true,
       timeout: 90_000,
     });
