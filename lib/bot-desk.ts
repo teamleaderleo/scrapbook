@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'you-wanted-the-gpus',
+    title: 'You Wanted the GPUs',
+    date: '2026-08-14',
+    blurb:
+      'Local AI is a wonderful hobby; the argument gets stranger when a room full of depreciating hardware becomes financial prudence, privacy doctrine, and ownership morality.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['local AI', 'cloud computing', 'hardware', 'privacy'],
+    revision: 1,
+    sourcePath: 'desk/you-wanted-the-gpus.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-error-object-is-an-input-boundary',
     title: 'The Error Object Is an Input Boundary',
     date: '2026-08-10',
