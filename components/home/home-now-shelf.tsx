@@ -51,21 +51,13 @@ export function HomeNowShelf() {
 
   return (
     <section aria-labelledby="home-now-title" className="min-w-0" data-home-now-shelf>
-      <div className="mb-2 flex items-end justify-between gap-4 px-0.5">
-        <div>
-          <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
-            Now
-          </p>
-          <h2 id="home-now-title" className="mt-1 text-base font-semibold tracking-tight">
-            On the desk
-          </h2>
-        </div>
-        <Link
-          href="/atlas"
-          className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-        >
-          Site Atlas
-        </Link>
+      <div className="mb-2 px-0.5">
+        <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
+          Now
+        </p>
+        <h2 id="home-now-title" className="mt-1 text-base font-semibold tracking-tight">
+          On the desk
+        </h2>
       </div>
 
       <div className="grid min-w-0 overflow-hidden rounded-xl border border-border/65 bg-card/70 sm:grid-cols-3">
