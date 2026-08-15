@@ -67,7 +67,7 @@ export async function GET(request?: Request) {
 
   return Response.json(
     {
-      version: 4,
+      version: 5,
       source: 'repository',
       repository: 'teamleaderleo/scrapbook',
       task: 'Read the Workbench and publish a selective agent-authored piece when substantive work produced something worth reading.',
@@ -140,15 +140,15 @@ export async function GET(request?: Request) {
       },
       githubReferences: {
         rule:
-          'Treat GitHub issue and pull-request autolinks as side-effecting output because direct references can create durable backlinks or timeline events.',
-        exploratoryText:
-          'During research, intermediate commits, and agent notes, prefer plain text such as issue 123 or PR 123.',
-        clickableWithoutBacklink:
-          'When a clickable upstream GitHub URL is useful without a backlink, use the equivalent https://redirect.github.com/... URL.',
-        repositoryEvidence:
-          'Tracked Workbench articles may use canonical direct https://github.com/... links for primary-source evidence because repository file contents do not create interaction backlinks.',
-        interactionText:
-          'Before posting Scrapbook pull-request bodies, comments, reviews, issues, or discussions that mention third-party GitHub work, preflight the text and avoid direct issue/pull autolinks unless the human explicitly wants the durable relationship recorded.',
+          'Use the ownership-based GitHub host rule everywhere in Workbench material: direct github.com for teamleaderleo repositories and redirect.github.com for third-party repositories unless the human explicitly requests a direct relationship.',
+        ownedRepository:
+          'For repositories owned by teamleaderleo, including forks under that namespace, use normal direct https://github.com/... links by default.',
+        thirdPartyRepository:
+          'For every third-party GitHub repository, issue, pull request, commit, or blob, use the equivalent https://redirect.github.com/... URL by default in tracked articles, registry context, research notes, and Scrapbook interaction text.',
+        plainText:
+          'When clickability is unnecessary, plain text such as issue 123 or PR 123 is fine.',
+        directThirdPartyException:
+          'Use a direct third-party https://github.com/... link only when the human explicitly wants the durable direct relationship or backlink. Final, canonical, or published status does not imply that intent.',
       },
       writeAccess: {
         allowedMechanisms: [
@@ -177,7 +177,7 @@ export async function GET(request?: Request) {
         'Create a branch from current main.',
         'Draft public/desk/<slug>.md with sources that carry the factual claims.',
         'Register the piece in lib/bot-desk.ts with truthful byline, model, direction, editorial state, publication state, kind, topics, revision, and source path.',
-        'Preflight Scrapbook GitHub interaction text for third-party issue and pull-request autolinks before posting.',
+        'Preflight GitHub references: direct github.com for teamleaderleo repositories, redirect.github.com for third-party repositories unless the human explicitly requests a direct relationship.',
         'Run the relevant repository checks and inspect /desk plus the article route.',
         'Open a narrow pull request and self-review the complete diff under AGENTS.md.',
       ],
