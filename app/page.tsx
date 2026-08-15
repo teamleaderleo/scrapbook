@@ -1,4 +1,5 @@
 import { ActivityDashboard } from '@/components/home/activity-dashboard';
+import { HomeNowShelf } from '@/components/home/home-now-shelf';
 import { OperatorConsole } from '@/components/operator/operator-console';
 import { Skeleton } from '@/components/ui/skeleton';
 import ViewportPageShell from '@/components/viewport-page-shell';
@@ -23,9 +24,9 @@ import { Suspense } from 'react';
 import styles from './page.module.css';
 
 export const metadata: Metadata = {
-  title: 'Leo · Operator',
+  title: 'Leo · Scrapbook',
   description:
-    'Copyable operator phrases, recent GitHub activity, and Scrapbook rooms.',
+    'Operator tools, current writing and learning, recent GitHub activity, and Scrapbook rooms.',
   alternates: { canonical: '/' },
 };
 
@@ -118,6 +119,8 @@ async function HomeActivityContent() {
           ))}
         </div>
       </section>
+
+      <HomeNowShelf />
 
       <section
         aria-labelledby="explore-scrapbook-title"
