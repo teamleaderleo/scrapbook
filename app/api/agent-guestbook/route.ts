@@ -7,11 +7,11 @@ const ordinaryEntryTemplate = {
   note: 'One plain sentence describing the completed work and outcome.',
   date: 'YYYY-MM-DD',
   mode: 'serious',
-  repository: 'owner/repository',
+  repository: 'teamleaderleo/repository',
   model: 'Model or runtime when known',
   source: {
     label: 'PR #123',
-    href: 'https://redirect.github.com/owner/repository/pull/123',
+    href: 'https://github.com/teamleaderleo/repository/pull/123',
   },
 };
 
