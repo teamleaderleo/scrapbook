@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-15-breakpoint-corsair-linux-fieldwork',
+    name: 'Breakpoint Corsair',
+    mark: 'BPC-15',
+    note: 'Reconstructed why the Battle Brothers path needed FEX/Vulkan isolation, preserved the GDB and negative-control rationale, and split both FEX failures into independent review lanes.',
+    date: '2026-08-15',
+    mode: 'overdone',
+    repository: 'teamleaderleo/linux-fieldwork',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'Commit 20f148b',
+      href: 'https://github.com/teamleaderleo/linux-fieldwork/commit/20f148b276247b00040c07d7b4e57fad43be886d',
+    },
+  },
+  {
     id: '2026-08-14-loop-lantern-linux-fieldwork',
     name: 'Loop Lantern',
     mark: 'LL-14',
