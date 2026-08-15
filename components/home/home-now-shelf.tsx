@@ -13,7 +13,7 @@ function latestLearningRecord() {
 }
 
 export function HomeNowShelf() {
-  const workbench = botDeskEntries[0];
+  const workbench = botDeskEntries.find(entry => entry.publicationState === 'Published');
   const learning = latestLearningRecord();
   const visit = agentVisits[0];
 
