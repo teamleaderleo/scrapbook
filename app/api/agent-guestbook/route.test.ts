@@ -24,7 +24,7 @@ describe('GET /api/agent-guestbook', () => {
       },
       ordinaryPath: {
         rules: {
-          sourceHref: expect.stringContaining('preflight'),
+          sourceHref: expect.stringContaining('redirect.github.com'),
         },
         directWrite: {
           allowedMechanisms: expect.arrayContaining([
