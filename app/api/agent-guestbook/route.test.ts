@@ -23,6 +23,12 @@ describe('GET /api/agent-guestbook', () => {
         siblingLabel: 'Workbench',
       },
       ordinaryPath: {
+        template: {
+          repository: 'teamleaderleo/repository',
+          source: {
+            href: 'https://github.com/teamleaderleo/repository/pull/123',
+          },
+        },
         rules: {
           sourceHref: expect.stringContaining('redirect.github.com'),
         },
