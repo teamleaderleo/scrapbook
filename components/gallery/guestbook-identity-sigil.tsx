@@ -37,15 +37,17 @@ export function GuestbookIdentitySigil({
     );
   }
 
+  const generation3Selection = selection?.generation === 3 ? selection : undefined;
+
   return (
     <AgentGeneration3Sigil
       scope={scope}
       designation={designation}
       description={description}
-      variant={selection?.variant}
-      family={selection?.family}
-      paletteMode={selection?.paletteMode}
-      paletteVariant={selection?.paletteVariant}
+      variant={generation3Selection?.variant}
+      family={generation3Selection?.family}
+      paletteMode={generation3Selection?.paletteMode}
+      paletteVariant={generation3Selection?.paletteVariant}
       size={size}
       className={className}
       label={label}
