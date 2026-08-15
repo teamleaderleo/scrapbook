@@ -14,6 +14,19 @@ Avoid claiming three years of full-time post-graduate professional employment. A
 
 The resume itself probably does not need a YOE headline. Let the chronology and evidence support the answer when asked.
 
+### Current market signal
+
+A recent inbound recruiting approach for a senior software-engineering contract on a Snorkel AI coding-agent benchmark project is useful corroboration of the portfolio's current direction. The work described code and architecture review, technical writing, and benchmark development for coding agents.
+
+Do **not** put recruiter outreach on the resume as an accomplishment. Treat it as evidence about what the market is already selecting for:
+
+- Preflight demonstrates benchmark design, instrumentation, controlled comparison, and technical writing around a difficult real system;
+- the upstream work demonstrates repeated code review, repair-boundary judgment, and externally accepted changes in unfamiliar repositories;
+- SmolRunner demonstrates disposable execution, recovery, and hostile-CI concerns that become directly relevant when evaluating generated code;
+- Stensibly demonstrates sustained work on agent coordination, authority, provenance, and continuation.
+
+The interesting part is the overlap between the requested work and the public engineering record, not the existence of an email.
+
 ## General one-page cut — current recommendation
 
 ### Header
@@ -28,24 +41,30 @@ Do not over-specialize if the target role is generalist.
 
 ### Selected Open-Source Engineering
 
-#### 1. Vercel AI SDK — lock
+#### 1. Vercel AI SDK — absolute lock
 
-Best current proof:
+The current AI SDK signal is broader than one merged patch:
 
-- merged and published upstream;
-- subtle shared-state/API correctness;
-- human approval plus release receipt;
-- compact enough to understand quickly.
+- PR #18570 merged and published directly after upstream review;
+- the async-stream reader-lock investigation in PR #18371 was approved by AI SDK Factory, then landed through Factory PR #18400 with `teamleaderleo` explicitly credited as a co-author in the merged fix commit;
+- the streamed size-limit/cancellation-error repair in PR #18572 was likewise approved, then landed through Factory PR #18695 with explicit co-author credit;
+- the size-limit repair was also merged into the maintained v5 and v6 release branches through Factory PRs #18700 and #18702.
+
+That is stronger than "contributed to Vercel AI SDK." It shows one direct merge plus two cases where Vercel's own automated maintenance workflow independently reproduced/adopted the repair and preserved contributor credit.
 
 Candidate bullet family:
 
-> Fixed nondeterministic global/sticky URL-regex evaluation in `@ai-sdk/provider-utils` by evaluating from index zero and restoring caller-owned `lastIndex`; added Node/Edge regressions covering repeated, mismatch and throw paths; merged and published upstream.
+> Fixed stateful URL matching in `@ai-sdk/provider-utils` (merged/published) and developed two additional Web Streams cleanup/error-precedence repairs adopted by Vercel's AI SDK Factory into merged upstream commits with co-author credit; one repair was backported across maintained v5/v6 release branches.
 
-Do not waste resume space saying "contributed to Vercel AI SDK." The mechanism is the signal.
+More mechanism-heavy alternative if one line can become two:
+
+> Made global/sticky URL-regex checks deterministic by restoring caller-owned `lastIndex`; separately fixed stream-reader cleanup after source errors and preserved actionable size-limit errors when cancellation itself fails, with the latter propagated across three maintained AI SDK branches.
+
+Use "credited as co-author in Factory-authored merged commits" when attribution detail matters. Do not imply the Factory bot itself is a human collaborator.
 
 #### 2. Cloud Hypervisor — lock
 
-The two merged changes already earn the entry. A newer QCOW ownership/refcount repair is under upstream review and can strengthen this further if accepted.
+The two merged changes already earn the entry. The newer QCOW ownership/refcount repair now adds meaningful maintainer acceptance even while it remains open.
 
 Candidate bullet family:
 
@@ -55,19 +74,23 @@ A second line can mention validation breadth if the role is systems-heavy:
 
 > Validated the ACPI path across x86_64/AArch64 KVM/MSHV plus fw_cfg, TDX, Clippy and the repository's RISC-V build.
 
-Current follow-on: PR #8721 moves QCOW L2 refcount ownership before L1 publication so failure cannot leave a reachable table eligible for allocator reuse after reopen. It has focused block/io_uring regressions and broad build/Clippy coverage; no human review yet. Do not fold it into a landed resume claim unless accepted.
+Current follow-on: PR #8721 moves QCOW L2 refcount ownership before L1 publication so failure cannot leave a reachable table eligible for allocator reuse after reopen. `weltling` approved the direction and regressions; `rbradford` later found a remaining deferred-release error window and requested that the old-L2 release be made local to the handoff. The current head folds that review into the implementation and removes the deferred release path. GitHub still carries the earlier requested-changes review pending a refreshed review, so do not call this landed or fully approved yet.
 
-For a general resume, the first line may be enough.
+For a general resume, the first merged-work line may be enough. For systems roles, the QCOW review story is already excellent interview material even before final disposition.
 
 #### 3. Cloudflare Workers SDK — strong current
 
-The Access credential fix is now human-approved with Wrangler CODEOWNERS satisfied; it remains open. A second Miniflare teardown/lifecycle PR is also active but still awaiting human approval.
+The Access credential fix is human-approved with Wrangler CODEOWNERS satisfied and remains open. The Miniflare teardown/lifecycle PR has also crossed into active human maintainer review.
 
 Candidate bullet family:
 
 > Fixed stale Cloudflare Access service-token headers surviving environment changes by separating current credential state from legitimately cached interactive authorization; added regressions for removed/partial credentials while preserving cookie reuse.
 
-Keep the final resume wording status-accurate: approved upstream is meaningful external validation, but do not imply merge until GitHub records one.
+Possible follow-on after the teardown PR is accepted:
+
+> Reordered Miniflare disposal so `workerd` termination begins before independent browser/proxy cleanup can delay it, while preserving the first cleanup failure and continuing remaining teardown.
+
+The second PR's current human review asked whether cleanup should continue after the first failure; the revised head adopts that direction. Keep the final resume wording status-accurate until approval/merge is recorded.
 
 #### 4. Vite — promoted current
 
@@ -75,7 +98,7 @@ Vite now has enough external validation to stand as a real resume specimen rathe
 
 - PR #23207 merged: closes temporary Rolldown optimizer-analysis bundles on success and error;
 - PR #23165 remains open but has approvals from two Vite maintainers: preserves Rollup/Rolldown `closeBundle(error)` semantics after `buildEnd` failure;
-- PR #23208 remains active around repeated config-resolution idempotence.
+- PR #23208 remains active around repeated config-resolution idempotence and has already incorporated maintainer test-placement feedback.
 
 Candidate bullet family while #23165 remains open:
 
@@ -106,17 +129,21 @@ Until human/upstream acceptance exists, keep in the bullpen rather than presenti
 
 Do not compress Preflight into a single generic project bullet. It is the strongest owned-work proof and should receive roughly **three dense bullets / six-ish lines** in Leo's actual typography.
 
+The 2026-08-15 controlled campaign materially improves the headline evidence. On one 83-mod profile, in one interleaved session, five accepted baseline runs and five accepted accelerated runs measured **89.00s → 15.53s**, with no exclusions. That is the comparison to lead with once the current claim/documentation candidate is published; the older 101s and 15.88s points remain chronology, not the preferred before/after pair.
+
 Current story families:
 
 **Outcome / product**
 
-> Built a Java-agent performance layer for an 80+ mod Starsector installation; current development builds reach the main menu in a 15.88s warm record, with a fresh same-cohort release benchmark pending before publishing a final before/after percentage.
+Candidate wording from the controlled pair:
 
-Potential future replacement after release cohort:
+> Built a Java-agent performance layer for an 83-mod Starsector installation; a controlled interleaved campaign measured main-menu startup at 89.00s baseline versus 15.53s accelerated across five accepted runs per condition, with no exclusions.
 
-> Reduced 83-mod Starsector startup from X to Y across N interleaved release-candidate runs ...
+If the resume needs one more clause, spend it on safety/compatibility rather than another number:
 
-Use the fresh cohort, not mismatched development-stage endpoints, for the final public delta.
+> ... while exact source/classloader/bytecode gates automatically return changed or unsupported inputs to the original runtime path.
+
+Do not compare the historical ~101s worst case to the 15.53s controlled accelerated median as if they were one experiment.
 
 **Runtime / compatibility**
 
@@ -133,7 +160,7 @@ Possible role-specific swaps:
 - resource/path construction story;
 - audio predecode architecture;
 - Tauri/multi-platform packaging and opt-in diagnostics;
-- current 42/42 class-cache and 15,469 texture hit evidence.
+- current transformed-class / prepared-texture activation evidence.
 
 For Valve/performance roles, Preflight can consume more space and Stensibly can disappear.
 
@@ -197,20 +224,38 @@ Do not put KVM/MSHV/fw_cfg/TDX in the generic skills line merely because Cloud H
 
 Priority order:
 
-1. Vercel AI SDK.
+1. Vercel AI SDK — direct merge plus Factory-adopted/co-authored fixes is now the strongest upstream cluster.
 2. Cloud Hypervisor (proves range outside TS/AI).
 3. Cloudflare Workers SDK.
-4. Vite — now externally validated through one merge plus a two-maintainer-approved lifecycle repair.
+4. Vite — one merge plus a two-maintainer-approved lifecycle repair.
 5. SWC rises above Vite if accepted and the compiler/minifier axis is useful for the target.
-6. Preflight, but frame as runtime/instrumentation/performance rather than game fandom first.
+6. Preflight, framed as runtime/instrumentation/performance and controlled evaluation rather than game fandom first.
 7. Stensibly gets one stronger line because agent coordination/MCP/hosted authority is relevant.
-8. SmolRunner only if space survives.
+8. SmolRunner rises when the role touches coding-agent execution, sandboxes, CI, or benchmark harnesses.
 
 Useful application thesis:
 
-> Already able to enter Vercel-owned code, understand lifecycle/state boundaries, and produce accepted fixes; independent work shows the ability generalizes beyond the codebase.
+> Already able to enter Vercel-owned code, understand lifecycle/state boundaries, and produce fixes that merge directly or are adopted by the AI SDK Factory with retained co-author credit; independent work shows the same ability generalizes beyond the codebase.
 
 Do not imply OSS creates entitlement to an interview. It makes a targeted cold application unusually well-supported.
+
+## Target cut: coding-agent evaluation / benchmark engineering
+
+This is now a real target category rather than a hypothetical one.
+
+Priority order:
+
+1. **Preflight** — controlled experiments, benchmark design, instrumentation, falsifiable claims, technical evidence writing.
+2. **Vercel AI SDK** — AI-tooling codebase familiarity plus upstream accepted lifecycle/error-state work.
+3. **SmolRunner** — disposable execution, exact worker identity, crash recovery, cleanup, hostile-CI thinking.
+4. **Cloud Hypervisor / Vite / Cloudflare** — diverse specimens of code review and lifecycle/correctness reasoning in unfamiliar codebases.
+5. **Stensibly** — agent authority, continuation, provenance, and coordination.
+
+Useful thesis:
+
+> Already doing the ingredients of coding-agent benchmark work: entering arbitrary repositories, finding behavioral boundaries, writing discriminating regressions, building reproducible execution/evidence systems, and explaining why a result is trustworthy.
+
+This target is where the breadth becomes unusually coherent rather than looking scattered.
 
 ## Target cut: Valve / game/runtime/performance
 
@@ -225,6 +270,7 @@ Priority order changes substantially:
 
 Possible Preflight emphasis:
 
+- controlled 89.00s → 15.53s same-profile campaign;
 - runtime instrumentation of an obfuscated game/mod ecosystem;
 - Java bytecode transformations;
 - JFR and critical-path performance work;
@@ -262,11 +308,12 @@ Stensibly becomes optional unless the role values distributed coordination.
 - Do not let IBM sit above the current work simply because it is an employer name.
 - Do not waste Preflight's acreage on a generic technology stack line.
 - Do not encode internal Fieldwork evidence levels into recruiter-facing prose unless they solve a real credibility question.
+- Do not turn inbound recruiting into a resume bullet; use it to calibrate which existing evidence resonates.
 
 ## Current identity thesis
 
 The page should make a reader infer something close to:
 
-> Early-career chronology, roughly three years of substantive engineering activity, unusually strong evidence of entering unfamiliar systems and finding correctness/performance/lifecycle boundaries, plus one owned performance product deep enough to demonstrate sustained technical pursuit.
+> Nontraditional early-career chronology, roughly three years of substantive engineering activity, unusually strong evidence of entering unfamiliar systems and finding correctness/performance/lifecycle boundaries, repeated external acceptance across Vercel AI SDK, Vite, Cloud Hypervisor and Cloudflare, plus one owned performance product deep enough to demonstrate sustained technical pursuit and benchmark discipline.
 
 The resume's job is to resolve the chronology/capability mismatch quickly enough that a human wants to ask about it.
