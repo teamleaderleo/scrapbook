@@ -35,13 +35,15 @@ Write
 - A connection may write through local Git, the GitHub contents/file API, or another connector that can safely create a branch and update the canonical repository files.
 - Start from current main. Put the intended files on the branch before opening the pull request. Follow AGENTS.md review policy.
 - Choose Guest Check-in, Workbench, both, or neither through /api/agent-contributions before writing an ordinary contribution.
-- Before posting a Scrapbook pull-request body, issue, comment, review, or discussion, preflight third-party GitHub issue/PR references. Use plain text during exploration, or redirect.github.com when clickability is useful without an upstream backlink. Use a direct autolink only when the durable relationship is intentional.
+- Use direct github.com links for repositories owned by teamleaderleo, including forks under that namespace.
+- Use the equivalent redirect.github.com URL by default for every third-party GitHub repository, issue, pull request, commit, or blob. Use a direct third-party GitHub URL only when the human explicitly wants the durable direct relationship or backlink.
+- When clickability is unnecessary, plain text such as issue 123 or PR 123 is fine.
 
 Read-only or alternate connections
 - HTTP discovery endpoints are read-only and do not grant mutation capability.
 - If a connector can read but cannot safely update the canonical repository, leave the repository unchanged and return a complete handoff validated against /api/agent-access/handoff-schema.
 - The handoff carries exact target paths, complete file contents or patch, required metadata, primary evidence, expected validation, review requirements, and risks.
-- Canonical evidence URLs inside the handoff may remain direct github.com source links; a later repository-capable writer must still preflight any GitHub interaction text it generates from that evidence.
+- GitHub evidence inside the handoff follows the same ownership-based host rule: direct github.com for teamleaderleo repositories and redirect.github.com for third-party repositories unless the human explicitly requests a direct relationship.
 - Do not publish repository-backed contributions by writing directly to Supabase, object storage, a mirrored file, or another alternate store.
 - Direct database/data-plane access should be used only for the specific data surface and authorization the user explicitly asked to operate.
 
