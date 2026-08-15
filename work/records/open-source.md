@@ -6,7 +6,11 @@ The useful claim is repeatability across unrelated systems: enter an unfamiliar 
 
 ## Current strongest external validation
 
-### Vercel AI SDK — deterministic URL-regex evaluation
+### Vercel AI SDK — direct merge plus Factory adoption
+
+The current AI SDK record now has three distinct accepted repairs.
+
+#### Deterministic URL-regex evaluation
 
 Upstream PR: https://github.com/vercel/ai/pull/18570
 
@@ -21,9 +25,41 @@ The repair:
 - restores the caller's original `lastIndex` in `finally`;
 - covers repeated calls, global/sticky behavior, nonzero caller state, mismatches, throwing custom execution, and frozen ordinary regexes.
 
-The upstream bugfix review called the change fully addressing, low-risk, minimal-scope, and appropriately tested; human review approved it and the patch was published.
+The upstream bugfix review called the change fully addressing, low-risk, minimal-scope, and appropriately tested. The patch merged directly and was published in `@ai-sdk/provider-utils` 5.0.24.
 
-Resume signal: **lock** for Vercel/devtools and strong general-purpose OSS evidence. It is compact, externally validated, and demonstrates subtle shared-state/API correctness.
+#### Async stream reader cleanup after source errors
+
+Contributor PR: https://github.com/vercel/ai/pull/18371
+
+Factory landing PR: https://github.com/vercel/ai/pull/18400
+
+State: **contributor repair approved; Factory implementation merged with explicit co-author credit**.
+
+A rejected `reader.read()` could bypass cleanup in the AI SDK's async-iterable stream helpers. The caller received the original source error, but the stream remained locked and later iterator calls did not settle through the intended cleanup path.
+
+The contributor PR reproduced the behavior across both helper implementations, preserved the exact source rejection, released the reader without cancelling an already errored stream, and covered exact, undefined, partial-consumption, concurrent, reacquisition, and subsequent-iteration cases in Node and Edge environments.
+
+AI SDK Factory reviewed the contributor PR as fully addressing and appropriately tested. The final upstream implementation landed through Factory PR #18400; the merged fix commit explicitly includes `Co-authored-by: teamleaderleo` alongside Lars Grammel.
+
+That is stronger attribution than merely saying the idea overlapped upstream: the repository's own landing workflow preserved contributor credit in the merged commit.
+
+#### Preserve streamed size-limit errors when cancellation fails
+
+Contributor PR: https://github.com/vercel/ai/pull/18572
+
+Factory landing PR: https://github.com/vercel/ai/pull/18695
+
+Release-branch landings: https://github.com/vercel/ai/pull/18700 and https://github.com/vercel/ai/pull/18702
+
+State: **contributor repair approved; Factory implementation merged with explicit co-author credit on main and merged into maintained v5/v6 release branches**.
+
+`readResponseWithSizeLimit()` had already selected an actionable `DownloadError` when streamed bytes exceeded `maxBytes`. If terminal `reader.cancel()` cleanup then rejected, the incidental cancellation error replaced the size-limit error the caller actually needed.
+
+The contributor PR contained cancellation rejection, preserved lock release, and added a native `ReadableStream` regression proving the size-limit error survives while cancellation is still attempted.
+
+AI SDK Factory reviewed the change as fully addressing with minimal scope. Factory PR #18695 landed the fix on main and its merged commits explicitly credit `teamleaderleo` as co-author. The same repair then landed through Factory PRs #18700 and #18702 on the v5 and v6 release branches.
+
+Resume signal: **absolute lock** for Vercel/devtools and unusually strong general OSS evidence. The value is now a cluster: one direct merge plus two repairs independently adopted by the owning repository's maintenance system with retained co-author credit, including one propagated across three maintained branches.
 
 ### Cloud Hypervisor — exact shutdown lifecycle gates
 
@@ -59,15 +95,27 @@ Resume signal: best paired with the lifecycle PR as one Cloud Hypervisor entry r
 
 Upstream PR: https://github.com/cloud-hypervisor/cloud-hypervisor/pull/8721
 
-State: **open; no human review yet** at the latest refresh.
+State: **open; one maintainer approval; a later requested-change review has been addressed and awaits refreshed disposition** at the latest refresh.
 
 `map_write()` can publish a newly allocated or relocated QCOW L2 table through L1 before the L2's `refcount=1` ownership update is applied. If later work fails, the deferred refcount update can be lost while the L1 pointer survives. After shutdown/reopen, the still-referenced L2 can therefore appear free to the allocator and become eligible for reuse.
 
-The candidate moves new-L2 ownership before L1 publication while leaving release of the old relocated L2 deferred. Regressions cover fresh-L2 ENOSPC plus allocator reuse after reopen, relocated-L2 ownership, the zero-marker path, and the existing failed-relocation cases.
+The current repair gives the replacement L2 ownership before L1 publication. During review, `weltling` approved the ownership direction and regressions. `rbradford` then identified a remaining error window: release of the old relocated L2 was still deferred after L1 switched, so a later failure could leave on-disk leaked ownership state.
 
-Local validation reports 298 block tests passing normally and 326 with `io_uring`, plus `cargo check`, Clippy, nightly rustfmt and diff checks. Upstream CI's substantive build/quality lanes are green; the aggregate failure at this refresh is a gitlint complaint about overlong commit-message body lines.
+The current head folds that review into the design. Relocation now performs the handoff locally:
 
-Signal: **high upside systems follow-on**. If accepted, the Cloud Hypervisor story expands from lifecycle and boot errors into persistent block-image metadata ownership, which materially strengthens the systems resume cut.
+```text
+allocate replacement
+→ refcount = 1
+→ prepare replacement L2
+→ switch L1
+→ release old L2
+```
+
+The deferred old-L2 release path was removed. The review thread is resolved, but GitHub still carries the earlier `CHANGES_REQUESTED` review until a maintainer refreshes the final disposition.
+
+Focused validation reports 298 block tests passing normally and 326 with `io_uring`, plus `cargo check`, Clippy, nightly rustfmt and diff checks.
+
+Signal: **high-upside systems follow-on with substantive maintainer engagement**. Even before final merge, the review history is a strong interview story about making persistent metadata ownership local and failure-safe instead of defending the first narrow patch.
 
 ### Cloudflare Workers SDK — current credentials vs cached authorization state
 
@@ -79,7 +127,7 @@ State: **open; human-approved; Wrangler CODEOWNERS satisfied; changesets prepare
 
 The repair returns service-token headers from the current environment and leaves interactive `CF_Authorization` cookie caching intact. Regressions cover unsetting either/both service-token variables and preservation of legitimate interactive-cookie reuse.
 
-A human reviewer approved the current head and the repository's CODEOWNERS gate explicitly reports satisfied. GitHub still reports the PR open/blocked rather than merged, so public wording should distinguish accepted review from merge.
+A human reviewer approved the current head and the repository's CODEOWNERS gate explicitly reports satisfied. GitHub still reports the PR open rather than merged, so public wording should distinguish accepted review from merge.
 
 Resume signal: **strong**. This has crossed from merely submitted work into real external validation even before merge.
 
@@ -87,19 +135,19 @@ Resume signal: **strong**. This has crossed from merely submitted work into real
 
 Upstream PR: https://github.com/cloudflare/workers-sdk/pull/15143
 
-State: **open; awaiting human approval** at the latest refresh.
+State: **open; active human maintainer review** at the latest refresh.
 
 `Miniflare.dispose()` currently waits for browser/proxy cleanup before requesting `Runtime.dispose()`, so slow or failed auxiliary cleanup can delay or skip the `workerd` termination request.
 
-The repair starts runtime disposal first, preserves the existing browser → exit-hook → proxy cleanup ordering, remembers the first cleanup error, waits for the already-started runtime exit, then returns the cleanup error. Regressions cover requesting `workerd` termination while proxy cleanup is still pending and waiting for runtime settlement after proxy cleanup failure.
+The repair starts runtime disposal first, preserves the existing browser → exit-hook → proxy cleanup ordering, remembers the first cleanup error, waits for the already-started runtime exit, continues remaining cleanup, then returns the preserved cleanup error.
 
-A bot review flagged only release-note wording; Leo revised the changeset to describe user-facing behavior and clarified that the guarantee is early `workerd` termination rather than making all cleanup complete early. Human reviewers are still requested.
+A bot review first flagged release-note wording; Leo revised the changeset to describe user-facing behavior. Human maintainer review later asked why a cleanup failure should stop the rest of teardown. The current head adopts that direction: preserve the first error while continuing remaining cleanup, with runtime termination already in flight.
 
 Signal: strong lifecycle follow-on if accepted. Together with #15080, it would make Cloudflare a small cluster of state/credential and teardown work rather than a single isolated contribution.
 
 ## Vercel AI SDK — wider current bench
 
-The merged regex change is only the cleanest public receipt. Current Fieldwork/owned-fork work also covers multiple AI SDK integration/lifecycle boundaries.
+The three accepted repairs above are the clean public receipts. Current Fieldwork/owned-fork work also covers multiple AI SDK integration/lifecycle boundaries.
 
 ### OpenAI-compatible usage consistency
 
@@ -197,6 +245,8 @@ State: **open; active review, no current approval recorded**.
 
 Repeated `resolveConfig()` calls with the same inline config can re-merge resolver-generated environment state and duplicate optimizer plugins, changing the dependency optimizer hash and causing a warm cache to rebuild. The candidate shallow-copies the config/environment objects before resolver defaults are applied and adds a two-resolution regression.
 
+A maintainer asked that the regression live in the existing config test suite; the current head incorporates that request. All visible review threads are resolved, while the prior approval was dismissed after subsequent changes.
+
 Resume signal: **promoted**. The merged optimizer cleanup plus two-maintainer-approved teardown correction are enough external validation to use Vite selectively on a general/devtools resume. Keep all three PRs discoverable in the work record without turning the resume into a Vite mini-changelog.
 
 ## BuildKit
@@ -285,9 +335,9 @@ The OSS section should usually show **four or five specimens**, not every reposi
 
 A good general mix at this refresh is:
 
-1. Vercel AI SDK — merged/published, subtle TypeScript/runtime state correctness.
-2. Cloud Hypervisor — two merged Rust/VMM lifecycle/error-propagation changes, with a deeper QCOW follow-on under review.
-3. Cloudflare Workers SDK — credential/caching semantics with human + CODEOWNERS approval; Miniflare lifecycle follow-on active.
+1. Vercel AI SDK — one direct merge plus two Factory-adopted merged repairs with explicit co-author credit; one propagated across maintained v5/v6 branches.
+2. Cloud Hypervisor — two merged Rust/VMM lifecycle/error-propagation changes, with a deeper QCOW metadata-ownership repair through substantive maintainer review.
+3. Cloudflare Workers SDK — credential/caching semantics with human + CODEOWNERS approval; Miniflare lifecycle follow-on in human review.
 4. Vite — one merged optimizer lifecycle fix plus a second teardown repair approved by two maintainers.
 5. SWC if accepted — compiler/minifier observability; otherwise choose the four strongest role-specific specimens above.
 
