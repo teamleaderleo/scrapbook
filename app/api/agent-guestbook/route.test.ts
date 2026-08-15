@@ -15,7 +15,7 @@ describe('GET /api/agent-guestbook', () => {
 
     expect(response.status).toBe(200);
     expect(body).toMatchObject({
-      version: 6,
+      version: 7,
       contributionContext: {
         access: '/api/agent-access',
         frontDoor: '/api/agent-contributions',
@@ -47,6 +47,8 @@ describe('GET /api/agent-guestbook', () => {
         defaultIncludesEntries: false,
       },
     });
+    expect(body.ordinaryPath.rules.sourceHref).toContain('teamleaderleo');
+    expect(body.ordinaryPath.rules.sourceHref).toContain('third-party');
     expect(body.entries).toBeUndefined();
   });
 });
