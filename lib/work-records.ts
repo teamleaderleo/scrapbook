@@ -24,7 +24,7 @@ export const workRecords: readonly WorkRecord[] = [
     summary:
       'A performance launcher for heavily modded Starsector. It prepares deterministic work before launch and intercepts only runtime seams whose source, class-loader, and bytecode contracts are known.',
     accomplishments: [
-      'A current controlled candidate campaign measured 89.00s baseline → 15.53s accelerated on the same 83-mod profile, with five interleaved accepted runs per condition and no exclusions.',
+      'A controlled campaign measured 89.00s baseline → 15.53s accelerated on the same 83-mod profile, with five interleaved accepted runs per condition and no exclusions.',
       'The product path keeps exact source/bytecode compatibility gates, prepared texture/data work, runtime adapter health reporting, and original-path fallback for changed or unsupported inputs.',
       'Built fail-open runtime adapters, launch instrumentation, persistent prepared artifacts, desktop packaging, and rollback-aware update work around a game and mod ecosystem we do not control.',
     ],
@@ -58,39 +58,44 @@ export const workRecords: readonly WorkRecord[] = [
     accomplishments: [
       'In Vercel AI SDK, directly merged and published a deterministic URL-regex fix; two independently developed Web Streams fixes were adopted by AI SDK Factory into merged upstream commits that credit teamleaderleo as co-author, with one also merged to the v5 and v6 release branches.',
       'Landed two Cloud Hypervisor fixes: exact shutdown-event gating before VM/disk reuse and typed ACPI table-construction failures instead of VMM panics.',
-      'Merged a Vite optimizer lifecycle fix; a second Vite teardown repair has two maintainer approvals, while a Cloudflare Access credential-cache repair is human-approved with Wrangler CODEOWNERS satisfied.',
+      'Merged a Vite optimizer lifecycle fix and a Cloudflare Miniflare teardown fix; a second Vite teardown repair has two maintainer approvals, while the Cloudflare Access credential-cache repair is human-approved with Wrangler CODEOWNERS satisfied.',
     ],
     reversal:
       'A real runc off-by-one was patched on the allocation side. Repository history showed the better repair belonged in MaxCPU semantics instead, so the proposed patch was closed rather than defended for its merge statistic.',
     evidence: [
       {
         label: 'AI SDK · deterministic URL matching',
-        href: 'https://github.com/vercel/ai/pull/18570',
+        href: 'https://redirect.github.com/vercel/ai/pull/18570',
         kind: 'pull-request',
       },
       {
         label: 'AI SDK Factory · async stream cleanup',
-        href: 'https://github.com/vercel/ai/pull/18400',
+        href: 'https://redirect.github.com/vercel/ai/pull/18400',
         kind: 'pull-request',
       },
       {
         label: 'AI SDK Factory · size-limit cleanup',
-        href: 'https://github.com/vercel/ai/pull/18695',
+        href: 'https://redirect.github.com/vercel/ai/pull/18695',
         kind: 'pull-request',
       },
       {
         label: 'Cloud Hypervisor · shutdown event',
-        href: 'https://github.com/cloud-hypervisor/cloud-hypervisor/pull/8699',
+        href: 'https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8699',
         kind: 'pull-request',
       },
       {
         label: 'Cloud Hypervisor · typed ACPI failures',
-        href: 'https://github.com/cloud-hypervisor/cloud-hypervisor/pull/8709',
+        href: 'https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8709',
         kind: 'pull-request',
       },
       {
         label: 'Vite · optimizer bundle lifecycle',
-        href: 'https://github.com/vitejs/vite/pull/23207',
+        href: 'https://redirect.github.com/vitejs/vite/pull/23207',
+        kind: 'pull-request',
+      },
+      {
+        label: 'Cloudflare · Miniflare disposal lifecycle',
+        href: 'https://redirect.github.com/cloudflare/workers-sdk/pull/15143',
         kind: 'pull-request',
       },
       {
