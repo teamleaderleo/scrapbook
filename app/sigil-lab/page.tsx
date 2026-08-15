@@ -1,4 +1,5 @@
 import { AgentSigilLab } from '@/components/labs/agent-sigil-lab';
+import { Generation3SigilLab } from '@/components/labs/generation-3-sigil-lab';
 import { KumikoSigilLab } from '@/components/labs/kumiko-sigil-lab';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { ArrowLeft } from 'lucide-react';
@@ -57,14 +58,19 @@ export default function AgentSigilLabPage() {
           <KumikoSigilLab />
         </div>
 
+        <div className="mt-5">
+          <Generation3SigilLab />
+        </div>
+
         <aside className="mx-auto mt-5 max-w-4xl rounded-[1.25rem] border border-border/70 bg-card p-4 text-sm leading-relaxed text-muted-foreground shadow-[0_16px_38px_rgba(35,31,26,0.08)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.24)] sm:p-5">
           <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-foreground">
             How to read them
           </p>
           <p className="mt-2">
-            The guestbook uses the fuller layered marks. The quieter lattice
-            family is still a study: it stays here until it works just as well
-            small, monochrome, light, and dark.
+            The guestbook still uses the fuller Generation 2 marks. Generation
+            3 now combines the quieter lattice grammar with reviewed colour
+            roles here in the lab, including compact-size reduction and
+            description-isolation checks, before any production switch.
           </p>
         </aside>
       </main>
