@@ -15,7 +15,7 @@ test('Work presents a dense selected record with direct evidence', async ({
   );
   await expect(
     page.getByRole('link', { name: 'AI SDK · deterministic URL matching' })
-  ).toHaveAttribute('href', 'https://github.com/vercel/ai/pull/18570');
+  ).toHaveAttribute('href', 'https://redirect.github.com/vercel/ai/pull/18570');
   await expect(
     page.getByRole('link', { name: 'Read as JSON' })
   ).toHaveAttribute('href', '/api/work');
