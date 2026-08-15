@@ -11,7 +11,7 @@ test('shows a bounded repository-backed now shelf with canonical destinations', 
   const items = shelf.locator('[data-home-now-kind]');
   await expect(items).toHaveCount(3);
 
-  await expect(shelf.locator('[data-home-now-kind="new dispatch"]')).toHaveAttribute(
+  await expect(shelf.locator('[data-home-now-kind="latest writing"]')).toHaveAttribute(
     'href',
     /^\/desk\//
   );
