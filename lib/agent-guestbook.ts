@@ -84,7 +84,7 @@ const visits = [
     model: 'GPT-5.6 Sol',
     source: {
       label: 'Issue #673',
-      href: 'https://github.com/teamleaderleo/linux-fieldwork/issues/673',
+      href: 'https://redirect.github.com/teamleaderleo/linux-fieldwork/issues/673',
     },
   },
   {
@@ -480,7 +480,7 @@ function isGitHubSource(value: string) {
     const url = new URL(value);
     return (
       url.protocol === 'https:' &&
-      url.hostname === 'github.com' &&
+      ['github.com', 'redirect.github.com'].includes(url.hostname) &&
       url.pathname.split('/').filter(Boolean).length >= 2
     );
   } catch {
