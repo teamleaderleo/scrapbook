@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('Work presents a dense selected record with direct evidence', async ({
+test('Work presents a dense selected record with inspectable evidence', async ({
   page,
 }) => {
   await page.goto('/work');
