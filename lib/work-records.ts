@@ -20,12 +20,12 @@ export const workRecords: readonly WorkRecord[] = [
     id: 'preflight',
     title: 'Preflight',
     kind: 'Owned performance system',
-    status: 'Active · release evidence still being tightened',
+    status: 'Active · controlled 83-mod campaign recorded',
     summary:
       'A performance launcher for heavily modded Starsector. It prepares deterministic work before launch and intercepts only runtime seams whose source, class-loader, and bytecode contracts are known.',
     accomplishments: [
-      'Recorded a 15.88s fresh-warm launch on the reviewed 83-mod profile; a fresh same-cohort release benchmark remains the public-delta gate.',
-      'Kept 42/42 transformed-class cache hits and 15,469 prepared texture and pixel-conversion hits active on that run.',
+      'A current controlled candidate campaign measured 89.00s baseline → 15.53s accelerated on the same 83-mod profile, with five interleaved accepted runs per condition and no exclusions.',
+      'The accelerated runs retained exact source/bytecode compatibility gates, prepared texture/data work, runtime adapter health, and original-path fallback for changed or unsupported inputs.',
       'Built fail-open runtime adapters, launch instrumentation, persistent prepared artifacts, desktop packaging, and rollback-aware update work around a game and mod ecosystem we do not control.',
     ],
     reversal:
@@ -37,8 +37,8 @@ export const workRecords: readonly WorkRecord[] = [
         kind: 'repository',
       },
       {
-        label: 'Current evidence packet',
-        href: 'https://github.com/teamleaderleo/preflight/pull/322',
+        label: 'Controlled 83-mod campaign',
+        href: 'https://github.com/teamleaderleo/preflight/pull/440',
         kind: 'pull-request',
       },
       {
@@ -52,13 +52,13 @@ export const workRecords: readonly WorkRecord[] = [
     id: 'open-source',
     title: 'Open-source repairs',
     kind: 'Upstream engineering',
-    status: 'Selected merged work',
+    status: 'Selected merged and maintainer-accepted work',
     summary:
-      'Small repairs in unfamiliar systems, selected for the ownership boundary they clarify rather than for repository-name accumulation.',
+      'Repairs in unfamiliar systems, selected for the ownership boundary they clarify and the quality of external review or adoption rather than for repository-name accumulation.',
     accomplishments: [
-      'Made repeated global and sticky URL-regex checks deterministic in the Vercel AI SDK while restoring caller-owned lastIndex; merged and published.',
-      'Replaced SSH loss with Cloud Hypervisor’s exact shutdown event before VM and disk reuse; merged.',
-      'Propagated ACPI table-construction failures through typed Cloud Hypervisor boot errors instead of panicking; merged.',
+      'In Vercel AI SDK, directly merged and published a deterministic URL-regex fix; two independently developed Web Streams fixes were adopted by AI SDK Factory into merged upstream commits that credit teamleaderleo as co-author, with one also merged to the v5 and v6 release branches.',
+      'Landed two Cloud Hypervisor fixes: exact shutdown-event gating before VM/disk reuse and typed ACPI table-construction failures instead of VMM panics.',
+      'Merged a Vite optimizer lifecycle fix; a second Vite teardown repair has two maintainer approvals, while a Cloudflare Access credential-cache repair is human-approved with Wrangler CODEOWNERS satisfied.',
     ],
     reversal:
       'A real runc off-by-one was patched on the allocation side. Repository history showed the better repair belonged in MaxCPU semantics instead, so the proposed patch was closed rather than defended for its merge statistic.',
@@ -69,6 +69,16 @@ export const workRecords: readonly WorkRecord[] = [
         kind: 'pull-request',
       },
       {
+        label: 'AI SDK Factory · async stream cleanup',
+        href: 'https://github.com/vercel/ai/pull/18400',
+        kind: 'pull-request',
+      },
+      {
+        label: 'AI SDK Factory · size-limit cleanup',
+        href: 'https://github.com/vercel/ai/pull/18695',
+        kind: 'pull-request',
+      },
+      {
         label: 'Cloud Hypervisor · shutdown event',
         href: 'https://github.com/cloud-hypervisor/cloud-hypervisor/pull/8699',
         kind: 'pull-request',
@@ -76,6 +86,11 @@ export const workRecords: readonly WorkRecord[] = [
       {
         label: 'Cloud Hypervisor · typed ACPI failures',
         href: 'https://github.com/cloud-hypervisor/cloud-hypervisor/pull/8709',
+        kind: 'pull-request',
+      },
+      {
+        label: 'Vite · optimizer bundle lifecycle',
+        href: 'https://github.com/vitejs/vite/pull/23207',
         kind: 'pull-request',
       },
       {
@@ -162,7 +177,7 @@ export const workRecords: readonly WorkRecord[] = [
   },
 ];
 
-export const workRecordUpdatedAt = '2026-08-11';
+export const workRecordUpdatedAt = '2026-08-15';
 
 export function getWorkRecord(id: string): WorkRecord | undefined {
   return workRecords.find(record => record.id === id);
