@@ -207,7 +207,7 @@ test('combined Generation 3 population separates geometry, palette, and accents'
   const layers = await descriptions.evaluateAll((elements) =>
     elements.map((element) => ({
       graph: element.getAttribute('data-generation-3-geometry'),
-      palette: element.getAttribute('data-generation-3-palette'),
+      palette: element.getAttribute('data-generation-3-palette-fingerprint'),
       accents: element.getAttribute('data-generation-3-accents'),
     })),
   );
