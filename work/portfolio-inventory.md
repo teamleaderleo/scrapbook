@@ -83,7 +83,7 @@ Detailed Scrapbook record: [`records/open-source.md`](records/open-source.md)
 State:
 
 - Vite: one merged optimizer resource-lifecycle fix, a second lifecycle repair approved by two maintainers, and a config-idempotence follow-on in review;
-- Cloudflare Workers SDK: Miniflare teardown repair merged; Access credential-cache repair human-approved with Wrangler CODEOWNERS satisfied and still open.
+- Cloudflare Workers SDK: two merged repairs covering Miniflare teardown ordering and Cloudflare Access credential freshness/cache semantics.
 
 What they prove:
 

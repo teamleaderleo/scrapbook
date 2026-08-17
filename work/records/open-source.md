@@ -135,15 +135,15 @@ Resume signal: **strong merged lifecycle specimen**. It is now a clean Cloudflar
 
 Upstream PR: https://redirect.github.com/cloudflare/workers-sdk/pull/15080
 
-State: **open; human-approved; Wrangler CODEOWNERS satisfied; changesets prepared** at the latest refresh.
+State: **merged**.
 
 `getAccessHeaders()` cached Access service-token headers by domain. If the environment later removed or partially changed the client ID/secret, the same domain could reuse stale complete credentials.
 
 The repair returns service-token headers from the current environment and leaves interactive `CF_Authorization` cookie caching intact. Regressions cover unsetting either/both service-token variables and preservation of legitimate interactive-cookie reuse.
 
-A human reviewer approved the current head and the repository's CODEOWNERS gate explicitly reports satisfied. GitHub still reports the PR open rather than merged, so public wording should distinguish accepted review from merge.
+The PR merged on 2026-08-16 after human approval and Wrangler CODEOWNERS satisfaction.
 
-Resume signal: **strong**. Together with the merged Miniflare repair, this is a small but coherent Cloudflare cluster around lifecycle and state correctness.
+Resume signal: **strong**. Together with the Miniflare repair, this gives a two-merge Cloudflare cluster around lifecycle and state correctness.
 
 ## Accepted findings through another repair path
 
@@ -376,7 +376,7 @@ A good general mix at this refresh is:
 
 1. Vercel AI SDK — one direct merge plus two Factory-adopted merged repairs with explicit co-author credit; one propagated across maintained v5/v6 branches.
 2. Cloud Hypervisor — two merged Rust/VMM lifecycle/error-propagation changes, with a deeper QCOW metadata-ownership repair through substantive maintainer review.
-3. Cloudflare Workers SDK — merged Miniflare teardown lifecycle repair plus Access credential/cache semantics with human + CODEOWNERS approval.
+3. Cloudflare Workers SDK — two merged repairs covering Miniflare teardown lifecycle and Access credential/cache semantics.
 4. Vite — one merged optimizer lifecycle fix plus a second teardown repair approved by two maintainers.
 5. SWC if accepted — narrowed compiler/minifier constant-folding correctness repair; otherwise choose the four strongest role-specific specimens above.
 

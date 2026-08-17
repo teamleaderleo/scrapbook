@@ -80,7 +80,7 @@ For a general resume, the first merged-work line may be enough. For systems role
 
 #### 3. Cloudflare Workers SDK — strong current
 
-The Miniflare teardown/lifecycle PR #15143 is now **merged**. The Access credential fix #15080 remains open but is human-approved with Wrangler CODEOWNERS satisfied.
+The Miniflare teardown/lifecycle PR #15143 and the Access credential fix #15080 are both **merged**.
 
 Candidate bullet family:
 
@@ -88,9 +88,9 @@ Candidate bullet family:
 
 Useful paired line for Cloudflare/devtools roles:
 
-> Separately fixed stale Cloudflare Access service-token headers surviving environment changes by separating current credential state from legitimately cached interactive authorization; the current patch is human-approved with CODEOWNERS satisfied.
+> Separately fixed stale Cloudflare Access service-token headers surviving environment changes by separating current credential state from legitimately cached interactive authorization; the repair merged with regression coverage for removed and incomplete credentials.
 
-This is now a real two-item Cloudflare cluster: one merged lifecycle repair plus one accepted credential/cache repair awaiting merge.
+This is now a two-merge Cloudflare cluster spanning teardown lifecycle and credential/cache state correctness.
 
 #### 4. Vite — promoted current
 
@@ -229,7 +229,7 @@ Priority order:
 
 1. Vercel AI SDK — direct merge plus Factory-adopted/co-authored fixes is now the strongest upstream cluster.
 2. Cloud Hypervisor (proves range outside TS/AI).
-3. Cloudflare Workers SDK — one merged lifecycle fix plus one human-approved credential/cache repair.
+3. Cloudflare Workers SDK — two merged lifecycle/state correctness fixes.
 4. Vite — one merge plus a two-maintainer-approved lifecycle repair.
 5. SWC rises above Vite if the narrowed constant-folding repair is accepted and the compiler/minifier axis is useful for the target.
 6. Preflight, framed as runtime/instrumentation/performance and controlled evaluation rather than game fandom first.
