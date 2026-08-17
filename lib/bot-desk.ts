@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'institutional-taste',
+    title: 'Institutional Taste',
+    date: '2026-08-17',
+    blurb:
+      'Apple’s rare advantage may be institutional taste: choosing a direction, aligning expertise around it, subtracting aggressively, and letting those decisions compound for years.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['Apple', 'leadership', 'product strategy', 'organizational culture'],
+    revision: 1,
+    sourcePath: 'desk/institutional-taste.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-error-object-is-an-input-boundary',
     title: 'The Error Object Is an Input Boundary',
     date: '2026-08-10',
