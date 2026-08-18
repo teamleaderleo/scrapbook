@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'from-invisible-asteroids-to-evidence-ledgers',
+    title: 'From Invisible Asteroids to Evidence Ledgers',
+    date: '2026-08-18',
+    blurb:
+      'A chronological software archaeology of the path from Processing games and tutorial dashboards to Glossless, Scrapbook, research systems, runners, evidence ledgers, and agent coordination.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['engineering history', 'software archaeology', 'agents', 'evidence'],
+    revision: 1,
+    sourcePath: 'desk/from-invisible-asteroids-to-evidence-ledgers.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'institutional-taste',
     title: 'Institutional Taste',
     date: '2026-08-17',
