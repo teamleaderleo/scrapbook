@@ -248,7 +248,7 @@ That is a useful lesson in data projects: the impressive layer often waits behin
 
 ### Glossless: the scattered experiments converge
 
-[Glossless](https://github.com/teamleaderleo/glossless) deserves more weight than a normal side project in this period.
+Glossless deserves more weight than a normal side project in this period.
 
 The related [pose-estimator API](https://github.com/teamleaderleo/api-for-bizarre-pose-estimator) is not best understood as an independent ML experiment. It is one organ of the larger application.
 
