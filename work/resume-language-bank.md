@@ -32,6 +32,23 @@ Systems-heavy optional second line:
 
 What this proves: the systems work is not merely library-level Rust. It crossed VMM lifecycle, guest memory, firmware delivery, architecture-specific build paths, and maintainer review.
 
+Current follow-ons, refresh before export:
+
+- QCOW L2 ownership: https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8721 — open; one maintainer approved the ownership-before-publication direction and regressions, while later review found another deferred-release error window. The current head incorporates that objection by making replacement ownership and old-table release local to the L2 handoff, but the review state still needs a refreshed maintainer disposition.
+- VFIO sparse DMA mapping: https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8734 — open and explicitly approved by `phip1611`. The repair rejects DMA ranges that fit the logical BAR but do not fit entirely inside any single mmap-backed sparse region, replacing an assertion/invariant failure with the existing lookup-error contract and adding a focused regression for the hole-crossing case.
+
+If both current follow-ons land, condensed four-fix candidate:
+
+> Landed four Cloud Hypervisor fixes spanning VM lifecycle, typed boot failure handling, QCOW metadata ownership, and VFIO sparse DMA mapping; added discriminating regressions for reuse-after-shutdown, architecture-specific failure paths, allocator reuse after reopen, and ranges that fit a logical BAR but not any single mmap-backed region.
+
+Hiring-manager / portfolio formulation:
+
+> Entered a mature Rust VMM, traced bugs across lifecycle, firmware, block-image metadata, and VFIO memory-mapping boundaries, built focused regressions, and iterated with maintainers until the repair matched project-local ownership and compatibility expectations.
+
+Project-memory archaeology is useful interview evidence too. During the VFIO review, a test-module naming nit exposed a concrete example of stale precedent: commit https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/commit/d1680b9ff9d1a861ebcc646d1c3abf8bb1948fcb deliberately standardized modules on `unit_tests` in November 2025, while https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/issues/8438 records a June 2026 decision to move to `tests`. The cleanup never happened, so repository frequency still favored the older convention and could mislead a contributor about current intent.
+
+Do not make that naming episode a standalone resume bullet. Its value is the broader brownfield skill: recover project knowledge from commits, issues, and review history when local code frequency and remembered convention disagree.
+
 ### Vercel AI SDK
 
 Merged URL-regex specimen:
@@ -179,6 +196,7 @@ Current high-value examples:
 - Preflight: rejected digest memo because the safety trade did not clear the measured bar;
 - Cloud Hypervisor: replacing SSH disappearance with the lifecycle event that actually owns VM reuse;
 - Cloud Hypervisor: narrowing ACPI error propagation rather than inventing a broader local poison policy;
+- Cloud Hypervisor: tracing `tests` versus `unit_tests` through a deliberate mass rename and an unfinished later reversal, showing how repository frequency can preserve obsolete intent;
 - Vercel AI SDK: caller-owned mutable regex state crossing a helper boundary;
 - runc: identifying a real off-by-one symptom, then accepting the maintainer's historically cleaner repair boundary and closing the competing patch;
 - libarchive: finding that non-seekable listing and extraction had different capability boundaries and declining to race an overlapping upstream implementation.
