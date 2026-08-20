@@ -21,12 +21,22 @@ The operating idea is simple:
 - keep links to the canonical evidence;
 - do not manufacture impact merely because a repository name is recognizable.
 
+A second operating principle is **append first, reconcile later**. Leo often synthesizes quickly and then moves on. The record should make that sustainable: capture useful conclusions while they are fresh, then let later agents retrieve, compare, deduplicate, challenge, and compress the corpus when a concrete decision needs it.
+
+Agents are therefore part of the retrieval layer as well as the implementation layer. They should be able to bring old evidence back into working memory, notice stale claims, and answer "haven't I already done something like this?" without forcing the human to reconstruct old context from chats.
+
 ## Files
 
 - [`portfolio-inventory.md`](portfolio-inventory.md) — unified retrieval index across owned systems, upstream contributions, adopted findings, reversals, reports, and research-only work; start here before a resume or LinkedIn rewrite.
 - [`resume-candidates.md`](resume-candidates.md) — intentionally churny ranking of the strongest current resume material.
 - [`records/preflight.md`](records/preflight.md) — detailed Preflight performance/product evidence and candidate stories.
 - [`records/open-source.md`](records/open-source.md) — selected open-source engineering evidence and the larger bench.
+- [`records/working-style.md`](records/working-style.md) — append-first synthesis, domain-agnostic slope, agents-as-retrieval, and the recall-practice model.
+- [`records/vercel-fit-2026-08-11.md`](records/vercel-fit-2026-08-11.md) — point-in-time Vercel role-fit calibration and current earlier-shaped role evidence.
+- [`records/interview-success-set.md`](records/interview-success-set.md) — all-cause interview coverage model, current risk ranking, and backlog-derived drill generator.
+- [`records/prerequisite-doctrine.md`](records/prerequisite-doctrine.md) — remove interview information asymmetry by mapping explicit/implied prerequisites, personal deltas, and required mastery depth before studying.
+- [`records/cpp-positioning.md`](records/cpp-positioning.md) — C++ as a role prerequisite and market shift rather than an automatic differentiation strategy.
+- [`records/frontend-positioning.md`](records/frontend-positioning.md) — frontend as first-class product engineering, where it differentiates, and where artistic experimentation belongs.
 - [`archive/2026-08-11-signal-audit.md`](archive/2026-08-11-signal-audit.md) — first broad snapshot of the current body of work and the narrative it supports.
 - [`AGENTS.md`](AGENTS.md) — local instructions for agents updating this record.
 
