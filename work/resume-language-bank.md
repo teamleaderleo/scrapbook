@@ -24,26 +24,27 @@ Avoid turning this into a summary paragraph unless a target application benefits
 
 Strong combined bullet:
 
-> Landed two Cloud Hypervisor fixes spanning VMM lifecycle and failure handling: replaced SSH-loss shutdown proxies with the VMM's exact shutdown event before VM/disk reuse, and propagated ACPI address/`fw_cfg`/guest-memory failures through typed boot errors instead of panicking.
+> Landed three Cloud Hypervisor fixes spanning VMM lifecycle, typed failure handling, and VFIO mapping safety: replaced SSH-loss shutdown proxies with the VMM's exact shutdown event before VM/disk reuse, propagated ACPI address/`fw_cfg`/guest-memory failures through typed boot errors instead of panicking, and rejected DMA ranges that fit a logical VFIO BAR but cross an unmapped gap between sparse mmap-backed areas.
 
 Systems-heavy optional second line:
 
-> Validated the ACPI repair across x86_64/AArch64 KVM/MSHV plus `fw_cfg`, TDX, Clippy, and the repository's RISC-V build.
+> Validated the ACPI repair across x86_64/AArch64 KVM/MSHV plus `fw_cfg`, TDX, Clippy, and the repository's RISC-V build; the VFIO repair adds focused coverage for a range that is valid at the BAR level but invalid for every individual backing mapping.
 
-What this proves: the systems work is not merely library-level Rust. It crossed VMM lifecycle, guest memory, firmware delivery, architecture-specific build paths, and maintainer review.
+What this proves: the systems work is not merely library-level Rust. It crossed VM lifecycle, guest memory, firmware delivery, architecture-specific build paths, and pointer/range safety under sparse device mappings, all in a mature VMM under maintainer review.
 
-Current follow-ons, refresh before export:
+Current follow-on, refresh before export:
 
 - QCOW L2 ownership: https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8721 — open; one maintainer approved the ownership-before-publication direction and regressions, while later review found another deferred-release error window. The current head incorporates that objection by making replacement ownership and old-table release local to the L2 handoff, but the review state still needs a refreshed maintainer disposition.
-- VFIO sparse DMA mapping: https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8734 — open and explicitly approved by `phip1611`. The repair rejects DMA ranges that fit the logical BAR but do not fit entirely inside any single mmap-backed sparse region, replacing an assertion/invariant failure with the existing lookup-error contract and adding a focused regression for the hole-crossing case.
 
-If both current follow-ons land, condensed four-fix candidate:
+If the QCOW follow-on lands, condensed four-fix candidate:
 
 > Landed four Cloud Hypervisor fixes spanning VM lifecycle, typed boot failure handling, QCOW metadata ownership, and VFIO sparse DMA mapping; added discriminating regressions for reuse-after-shutdown, architecture-specific failure paths, allocator reuse after reopen, and ranges that fit a logical BAR but not any single mmap-backed region.
 
 Hiring-manager / portfolio formulation:
 
 > Entered a mature Rust VMM, traced bugs across lifecycle, firmware, block-image metadata, and VFIO memory-mapping boundaries, built focused regressions, and iterated with maintainers until the repair matched project-local ownership and compatibility expectations.
+
+The VFIO merge is also a useful interview story about choosing the right authority boundary: a range being contained by the logical BAR does not prove that one concrete mmap-backed area can safely satisfy the complete access. The repair keeps the returned-pointer contract tied to the actual mapping that owns the bytes instead of treating the larger logical region as sufficient evidence.
 
 Project-memory archaeology is useful interview evidence too. During the VFIO review, a test-module naming nit exposed a concrete example of stale precedent: commit https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/commit/d1680b9ff9d1a861ebcc646d1c3abf8bb1948fcb deliberately standardized modules on `unit_tests` in November 2025, while https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/issues/8438 records a June 2026 decision to move to `tests`. The cleanup never happened, so repository frequency still favored the older convention and could mislead a contributor about current intent.
 
@@ -196,6 +197,7 @@ Current high-value examples:
 - Preflight: rejected digest memo because the safety trade did not clear the measured bar;
 - Cloud Hypervisor: replacing SSH disappearance with the lifecycle event that actually owns VM reuse;
 - Cloud Hypervisor: narrowing ACPI error propagation rather than inventing a broader local poison policy;
+- Cloud Hypervisor: VFIO logical-BAR containment versus concrete mmap-area containment, and preserving the guarantee that any returned user pointer covers the complete DMA range;
 - Cloud Hypervisor: tracing `tests` versus `unit_tests` through a deliberate mass rename and an unfinished later reversal, showing how repository frequency can preserve obsolete intent;
 - Vercel AI SDK: caller-owned mutable regex state crossing a helper boundary;
 - runc: identifying a real off-by-one symptom, then accepting the maintainer's historically cleaner repair boundary and closing the competing patch;
