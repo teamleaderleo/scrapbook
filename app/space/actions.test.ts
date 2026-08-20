@@ -8,6 +8,7 @@ const {
   parseMarkdown,
   highlightCode,
   revalidatePath,
+  updateTag,
 } = vi.hoisted(() => ({
   createClient: vi.fn(),
   requireSpaceAdmin: vi.fn(),
@@ -15,13 +16,15 @@ const {
   parseMarkdown: vi.fn(),
   highlightCode: vi.fn(),
   revalidatePath: vi.fn(),
+  updateTag: vi.fn(),
 }));
 
-vi.mock('next/cache', () => ({ revalidatePath }));
+vi.mock('next/cache', () => ({ revalidatePath, updateTag }));
 vi.mock('@/utils/supabase/server', () => ({ createClient }));
 vi.mock('./authorization', () => ({ requireSpaceAdmin }));
 vi.mock('@/app/lib/utils/markdown', () => ({ parseMarkdown, highlightCode }));
 
+import { SPACE_PUBLIC_ITEMS_CACHE_TAG } from '@/app/lib/space-cache';
 import {
   addItemAction,
   enrollItemForReviewAction,
@@ -56,6 +59,7 @@ describe('Space server actions', () => {
       await expect(action()).rejects.toThrow('not allowed');
       expect(requireSpaceAdmin).toHaveBeenCalledOnce();
       expect(from).not.toHaveBeenCalled();
+      expect(updateTag).not.toHaveBeenCalled();
     }
   );
 
@@ -65,9 +69,10 @@ describe('Space server actions', () => {
     ).rejects.toThrow();
     await expect(reviewItemAction('not-an-id', Rating.Good)).rejects.toThrow();
     expect(createClient).not.toHaveBeenCalled();
+    expect(updateTag).not.toHaveBeenCalled();
   });
 
-  it('authorizes before parsing or inserting an item and confirms the inserted row', async () => {
+  it('authorizes before parsing or inserting an item and invalidates the public cache after success', async () => {
     const single = vi
       .fn()
       .mockResolvedValue({ data: { id: itemId }, error: null });
@@ -83,13 +88,14 @@ describe('Space server actions', () => {
     expect(insert).toHaveBeenCalledWith(
       expect.objectContaining({ user_id: 'admin-id' })
     );
+    expect(updateTag).toHaveBeenCalledWith(SPACE_PUBLIC_ITEMS_CACHE_TAG);
     expect(revalidatePath).toHaveBeenCalledWith('/space');
     expect(requireSpaceAdmin.mock.invocationCallOrder[0]).toBeLessThan(
       parseMarkdown.mock.invocationCallOrder[0]
     );
   });
 
-  it('does not report a successful update when RLS or a stale ID matches no row', async () => {
+  it('does not invalidate public cache when an item update matched no row', async () => {
     const maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
     const select = vi.fn().mockReturnValue({ maybeSingle });
     const eq = vi.fn().mockReturnValue({ select });
@@ -100,6 +106,7 @@ describe('Space server actions', () => {
     await expect(
       updateItemAction(itemId, { title: 'Changed' })
     ).rejects.toThrow('That Space item no longer exists or is not writable.');
+    expect(updateTag).not.toHaveBeenCalled();
     expect(revalidatePath).not.toHaveBeenCalled();
   });
 });

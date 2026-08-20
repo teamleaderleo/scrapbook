@@ -2,13 +2,15 @@ import 'server-only';
 
 import type { User } from '@supabase/supabase-js';
 import { isAdminUser } from '@/app/lib/auth/admin';
-import type { DbItem, DbReview } from '@/app/lib/db/supabase';
+import type { DbReview } from '@/app/lib/db/supabase';
 import type { Item } from '@/app/lib/item-types';
-import { SPACE_ITEM_SELECT, SPACE_PAGE_SIZE } from '@/app/lib/space-data';
 import { mapDatabaseItemsToItems } from '@/app/lib/utils/database';
 import { createClient } from '@/utils/supabase/server';
+import {
+  loadPublicSpacePage,
+  type PublicSpacePage,
+} from './public-data';
 
-const INITIAL_LOAD_TIMEOUT_MS = 8_000;
 const AUTH_TIMEOUT_MS = 5_000;
 const REVIEW_LOAD_TIMEOUT_MS = 5_000;
 
@@ -27,6 +29,10 @@ const REVIEW_SELECT = [
   'last_review',
   'suspended',
 ].join(',');
+
+type PublicPageResult =
+  | { page: PublicSpacePage; error: null }
+  | { page: null; error: unknown };
 
 export class SpaceLoadTimeoutError extends Error {
   constructor(label: string) {
@@ -90,6 +96,11 @@ export async function loadInitialSpaceData(): Promise<InitialSpaceData> {
     );
   }
 
+  const publicPagePromise: Promise<PublicPageResult> = loadPublicSpacePage().then(
+    page => ({ page, error: null }),
+    error => ({ page: null, error })
+  );
+
   const supabase = await createClient();
   const userPromise: Promise<User | null> = withSpaceTimeout(
     supabase.auth.getUser(),
@@ -102,25 +113,9 @@ export async function loadInitialSpaceData(): Promise<InitialSpaceData> {
       return null;
     });
 
-  const itemsAbortController = new AbortController();
-  let itemsResult;
-  try {
-    [, itemsResult] = await Promise.all([
-      userPromise,
-      withSpaceTimeout(
-        supabase
-          .from('items')
-          .select(SPACE_ITEM_SELECT)
-          .order('created_at', { ascending: false })
-          .range(0, SPACE_PAGE_SIZE - 1)
-          .abortSignal(itemsAbortController.signal),
-        INITIAL_LOAD_TIMEOUT_MS,
-        'Space archive',
-        () => itemsAbortController.abort()
-      ),
-    ]);
-  } catch (itemsError) {
-    console.error('Space archive could not be loaded:', itemsError);
+  const publicResult = await publicPagePromise;
+  if (!publicResult.page) {
+    console.error('Space archive could not be loaded:', publicResult.error);
     const user = await userPromise;
     return {
       ...unavailableSpaceData(
@@ -133,19 +128,7 @@ export async function loadInitialSpaceData(): Promise<InitialSpaceData> {
 
   const user = await userPromise;
   const isAdmin = isAdminUser(user);
-
-  if (itemsResult.error) {
-    console.error('Space archive could not be loaded:', itemsResult.error);
-    return {
-      ...unavailableSpaceData(
-        'Space could not open the archive. Try again in a moment.'
-      ),
-      user,
-      isAdmin,
-    };
-  }
-
-  const databaseItems = (itemsResult.data ?? []) as unknown as DbItem[];
+  const { databaseItems, hasMore } = publicResult.page;
   let databaseReviews: DbReview[] = [];
   let error: string | null = null;
 
@@ -181,7 +164,7 @@ export async function loadInitialSpaceData(): Promise<InitialSpaceData> {
     isAdmin,
     user,
     nowMs: Date.now(),
-    hasMore: databaseItems.length === SPACE_PAGE_SIZE,
+    hasMore,
     error,
   };
 }

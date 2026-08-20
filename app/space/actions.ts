@@ -1,10 +1,11 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
 import { Rating } from 'ts-fsrs';
 import { parseMarkdown, highlightCode } from '@/app/lib/utils/markdown';
 import { reviewOnce } from '@/app/lib/fsrs-adapter';
 import type { ReviewState } from '@/app/lib/review-types';
+import { SPACE_PUBLIC_ITEMS_CACHE_TAG } from '@/app/lib/space-cache';
 import { createClient } from '@/utils/supabase/server';
 import { requireSpaceAdmin } from './authorization';
 import {
@@ -61,6 +62,11 @@ function reviewWrite(userId: string, review: ReviewState) {
   };
 }
 
+function revalidatePublicSpaceItems() {
+  updateTag(SPACE_PUBLIC_ITEMS_CACHE_TAG);
+  revalidatePath('/space');
+}
+
 async function parseVersions(versions: AddItemInput['versions']) {
   return Promise.all(
     versions.map(async version => ({
@@ -97,7 +103,7 @@ export async function addItemAction(input: AddItemInput) {
 
   if (error || !data) throw new Error('Space could not save that item.');
 
-  revalidatePath('/space');
+  revalidatePublicSpaceItems();
 }
 
 export async function updateItemAction(
@@ -135,7 +141,7 @@ export async function updateItemAction(
   if (!data)
     throw new Error('That Space item no longer exists or is not writable.');
 
-  revalidatePath('/space');
+  revalidatePublicSpaceItems();
 }
 
 export async function enrollItemForReviewAction(
