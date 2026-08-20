@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'oh-thats-a-shame',
+    title: "Oh, That's a Shame",
+    date: '2026-08-21',
+    blurb:
+      'What happens when failure stops arriving as an ambush: familiar errors become expected costs, repair paths become obvious, and anger loses its old job.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['agents', 'mastery', 'failure', 'engineering practice'],
+    revision: 1,
+    sourcePath: 'desk/oh-thats-a-shame.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'from-invisible-asteroids-to-evidence-ledgers',
     title: 'From Invisible Asteroids to Evidence Ledgers',
     date: '2026-08-18',
