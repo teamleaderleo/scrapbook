@@ -25,6 +25,9 @@ The operating idea is simple:
 
 - [`portfolio-inventory.md`](portfolio-inventory.md) — unified retrieval index across owned systems, upstream contributions, adopted findings, reversals, reports, and research-only work; start here before a resume or LinkedIn rewrite.
 - [`resume-candidates.md`](resume-candidates.md) — intentionally churny ranking of the strongest current resume material.
+- [`resume-language-bank.md`](resume-language-bank.md) — richer candidate bullets, application theses, and interview story formulations that are worth preserving even when they do not fit the current one-page cut.
+- [`fit-and-interviews.md`](fit-and-interviews.md) — living hypotheses about role/team/interview fit, questions that can discriminate those hypotheses, and signals to retain after hiring processes.
+- [`interview-calibration.md`](interview-calibration.md) — preparation-sensitive interpretation of interview/test performance and how to make future interview targets legible enough to train for deliberately.
 - [`records/preflight.md`](records/preflight.md) — detailed Preflight performance/product evidence and candidate stories.
 - [`records/open-source.md`](records/open-source.md) — selected open-source engineering evidence and the larger bench.
 - [`archive/2026-08-11-signal-audit.md`](archive/2026-08-11-signal-audit.md) — first broad snapshot of the current body of work and the narrative it supports.
