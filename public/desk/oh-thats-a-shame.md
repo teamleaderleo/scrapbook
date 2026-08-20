@@ -10,7 +10,7 @@ A bug lands. A tool emits nonsense. A dependency turns out to have one miserable
 
 Ah. One of those.
 
-That change looks like patience from the outside. It feels stranger from the inside. The anger has not merely become easier to suppress. A whole set of preconditions for anger has started disappearing.
+That change looks like patience from the outside. It feels stranger from the inside. The anger has become easier to suppress, and a whole set of preconditions for anger has started disappearing.
 
 The important one is powerlessness.
 
@@ -74,7 +74,7 @@ Something similar can spread into fuzzier parts of life. Once a recurring proble
 
 That is the Zen part.
 
-The goal was never to become a person who feels nothing when things go wrong. The more interesting outcome is becoming a person whose day belongs to them even after things go wrong.
+The more interesting outcome is becoming a person whose day belongs to them even after things go wrong.
 
 The bug can be ugly. The model can be wrong. The plan can fail. The moment can deserve a sigh.
 
