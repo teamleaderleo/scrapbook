@@ -237,6 +237,89 @@ The development branch includes:
 
 For career signal, this matters because it changes Preflight from "private performance experiment" toward "software distributed into uncontrolled user environments."
 
+## Release convergence / authority bank
+
+As of 2026-08-20, the most valuable new Preflight evidence is no longer another startup micro-optimization. The repository is in release-candidate convergence, and the remaining work exposes several business-relevant engineering axes that the older record barely captured.
+
+Current live release scoreboard: https://github.com/teamleaderleo/preflight/issues/652
+
+### Exact content identity under adversarial mutation
+
+Issue #832 / draft PR #833 owns the top remaining content-identity blocker.
+
+The important story is the counterexample and redesign, not the eventual merge badge. The older exact-content proof combined pathname checks, size/mtime/file identity, a hard-link anchor, and one SHA-256 payload read. A same-inode ABA regression demonstrated that a writer could mutate the opened inode to different same-size bytes, restore the original bytes and observed mtime, and still cause the raced digest to be published as exact evidence.
+
+The first generation-token repair then exposed a second, cross-platform composition failure: creating the existing hard-link anchor itself changes Linux ctime and Windows latest-USN, so stacking the new generation token on top of the anchor self-invalidated unchanged files.
+
+The current #833 direction was therefore rebuilt around an opened-handle exact reader: pin the actual file object, capture a strong platform generation before the existing one payload read, hash through that same handle, re-check the generation, and separately prove the public pathname still names the indexed generation. Linux/macOS/Windows weak or unsupported authority fails closed.
+
+Career meaning:
+
+- adversarial tests are allowed to invalidate a nearly-finished architecture;
+- portability is treated as part of correctness rather than a later compatibility patch;
+- performance constraints remain explicit: preserve one payload read instead of "fixing" the race by hashing everything twice;
+- exact evidence is attached to the object generation that actually produced the bytes, not convenient pathname metadata.
+
+Keep the current status explicit: #833 remains an active draft / RC blocker until its helper-free exact head and three-platform evidence are accepted.
+
+### Report authority as a cross-platform capability problem
+
+The remote-report path is being decomposed through issue #800, with draft PR #804 owning the first reusable layer: a retained `BoundDirectory` filesystem capability.
+
+This work takes a seemingly ordinary support feature and follows its authority boundary through restart, cancellation, deletion, concurrency, and all-data removal. The selected design keeps consequential file work relative to retained opened directory/file capabilities instead of reviewing one pathname generation and reopening another later.
+
+The reviewed contract distinguishes platform reality instead of claiming a stronger abstraction than Unix can supply. Unix missing-directory creation and deletion carry explicit narrow same-UID staging/quarantine limits; Windows can use stronger handle-relative native operations. Directory enumeration and actual reads are separately bounded, and destructive clear prevalidates the complete bounded namespace before deletion begins.
+
+Higher planned layers then consume that capability for:
+
+- durable per-case deletion authority before remote success can become final;
+- multiple report cases that cannot overwrite or delete one another;
+- separate manual-foreground and automatic-background ownership;
+- restart recovery and expiry/pruning;
+- all-data removal that cannot erase actionable remote-deletion authority;
+- renderer views that never receive bearer deletion secrets.
+
+Career meaning: privacy/support UI becomes a concrete systems story about durable authority, capability-relative filesystem operations, concurrency, restart recovery, and explicit platform threat boundaries.
+
+Keep the current status explicit: #804 is still a draft foundation; later report layers begin only after that exact lower layer is accepted.
+
+### Hostile-input and persistence hardening as a repeated method
+
+A large August hardening wave took custom persistence formats one at a time instead of applying a ceremonial bulk refactor.
+
+The recurring contract became:
+
+1. keep a cheap metadata refusal for input already obviously outside the declared ceiling;
+2. make the actual opened stream authoritative with a `limit + 1` read so concurrent growth cannot cross the work/allocation bound;
+3. reject malformed persisted UTF-8 instead of replacement-decoding authenticated bytes;
+4. reject writer-side malformed Java UTF-16 where deterministic serialization would otherwise emit replacement bytes;
+5. require persisted paths/keys to already be canonical when the model normalizes them;
+6. pin exact-limit, initially-oversized, concurrent-growth, malformed-text, and checksum-resigned counterexamples as appropriate.
+
+Many format-specific repairs are now on `main`; remaining work is tracked explicitly instead of claiming the inventory can never produce another counterexample.
+
+Career meaning: this is useful reliability/security evidence because the method separates parser/model bounds from actual I/O bounds and insists that authenticated bytes decode to the same model the deterministic writer could have emitted.
+
+### Exact-candidate release evidence
+
+The first public beta is being treated as a byte-identity problem, not simply "main is green, publish whatever CI built."
+
+The release plan requires the final package-dependent claims to belong to one accepted tagged Distribution package generation. Package lifecycle, production report-intake canary, packaged-engine startup benchmark, singleton admission/reacquisition, checksums/SBOM/legal/privacy artifacts, and proprietary-content/package-boundary audits all have to bind back to the exact tagged candidate bytes that publication will expose.
+
+A private signed rehearsal candidate remains useful for exercising secret-gated workflows before tagging, but it cannot silently stand in for the later tagged packages merely because the source revision matches.
+
+Career meaning: release engineering here includes claim provenance, artifact identity, update/rollback lifecycle, secret/ref admission, and preventing evidence from an earlier build from authorizing a later one.
+
+### Agent-heavy convergence without duplicate authority
+
+Preflight has also become the strongest owned example of Leo's broader agent-heavy operating model.
+
+Issue #652 functions as a live convergence scoreboard rather than a generic backlog. It names the current `main`, the authoritative implementation owner for each consequential boundary, collision-sensitive files, frozen reference/prototype branches, permitted parallel lanes, merge sequencing, and candidate-freeze rules. The repeated project rule is one implementation authority per boundary: review or repair the active lane instead of spawning another solution that silently races it.
+
+This is useful career evidence only when phrased carefully. It does **not** prove human people-management experience. It does demonstrate that a high-throughput multi-agent workflow can be operated with explicit ownership, exact-head review, adversarial evidence, handoff/recovery, and a deliberate point where discretionary research is frozen so a candidate can ship.
+
+The stronger commercial claim is therefore not "AI wrote lots of code." It is that human attention is being spent on problem selection, contract choice, evidence quality, collision control, release decisions, and deciding when a plausible implementation has failed its proof.
+
 ## Mod linter / secondary evidence
 
 The same codebase contains read-only analysis tooling. Historical profiles found examples including:
@@ -266,6 +349,12 @@ Exact-gated Java-agent transformations, generated bytecode/data preparation, and
 
 Critical-path instrumentation repeatedly disproved attractive first theories and redirected effort to the true bottleneck: queue wait, resource walks/path construction, duplicated identity work, generated-code compilation, etc.
 
+### 4. Release / adversarial correctness
+
+For roles where release engineering, systems reliability, security boundaries, or agent orchestration matter, the RC convergence adds a fourth family: exact file-generation evidence, retained filesystem capabilities, hostile-input work bounds, exact tagged-package claim provenance, and explicit ownership across parallel implementation lanes.
+
+This family is strongest after the first accepted public candidate exists. Until then, use it as portfolio/interview evidence with draft/RC status attached rather than displacing the already-landed performance result.
+
 A general resume can probably spend three dense bullets / roughly six lines here. A Valve/performance-oriented resume can spend more.
 
 ## Candidate prose, intentionally overcomplete
@@ -279,6 +368,10 @@ These are ingredients, not final resume bullets.
 - Eliminated over a GiB of empty texture padding in a historical full load while preserving upload-ready pixels and original OpenGL ownership.
 - Reworked resource resolution after tracing more than a million root/path joins and discovering that path construction/normalization, not only filesystem syscalls, dominated the remaining resolver cost.
 - Shipped the engine behind a Tauri desktop app with multi-platform beta artifacts, signed-update/rollback machinery, opt-in bounded diagnostics, and explicit fail-safe compatibility reporting.
+- Drove the first-beta release toward one exact tagged package generation whose lifecycle, report-canary, packaged benchmark, singleton, checksums/SBOMs, and package-boundary evidence must all describe the bytes actually eligible for publication.
+- Rebuilt exact-content identity around an opened-file generation proof after an adversarial same-inode ABA test defeated size/mtime/file-key evidence and the first generation-token composition self-invalidated through Linux ctime / Windows USN changes.
+- Decomposed restart-safe support-report authority around retained cross-platform filesystem capabilities, durable per-case deletion authority, background/foreground ownership, and all-data removal that cannot erase live remote-deletion authority.
+- Operated high-throughput agent development through explicit per-boundary ownership, collision-sensitive lanes, exact-head review, preserved failed experiments, and a candidate freeze that keeps discretionary research out of the release path.
 
 ## Open verification / release notes
 
@@ -293,4 +386,6 @@ The 2026-08-15 campaign now supplies the clean same-profile controlled compariso
 - accepted/rejected run rules;
 - adapter health / activation evidence.
 
-The merged claim records the same 83-mod profile, one sitting, five accepted runs per condition, interleaving, and zero exclusions. A later hosted release candidate should rerun or explicitly bind the packaged artifact before claiming that the distributed binary has the same measured result.
+The merged claim records the same 83-mod profile, one sitting, five accepted runs per condition, interleaving, and zero exclusions.
+
+The next credibility jump is candidate-specific rather than another checkout benchmark: freeze the final tagged package generation, run the packaged-engine pair against those exact bytes, retain the receipt, and keep report/lifecycle/singleton/audit evidence bound to the same candidate before public claims are promoted to the distributed release.
