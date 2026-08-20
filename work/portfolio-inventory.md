@@ -190,6 +190,34 @@ For Valve/runtime/platform roles this is a particularly useful frame beside Pref
 
 ---
 
+# Cross-repository engineering method
+
+Detailed Scrapbook record: [`records/working-style.md`](records/working-style.md)
+
+State: **active working model; increasingly explicit across several owned systems and upstream research lanes**.
+
+The portfolio-level point is narrower than "AI makes Leo faster." The stronger evidence is that a recurring method now spans several kinds of work:
+
+- [Preflight](https://github.com/teamleaderleo/preflight) uses agents inside one deep product while tying performance and compatibility claims to runtime evidence, controlled measurement, exact identities, and fallback behavior;
+- [Fieldwork](https://github.com/teamleaderleo/fieldwork) and [Linux Fieldwork](https://github.com/teamleaderleo/linux-fieldwork) move the same code-first investigation method across unfamiliar repositories, preserve negative results, and expose selected work to independent maintainer review;
+- [Stensibly](https://github.com/teamleaderleo/stensibly) externalizes responsibility, authority, leases, handoffs, and continuation so work can survive worker replacement and stale sessions;
+- [Cultist](https://github.com/teamleaderleo/cultist) explores repository memory and just-enough evidence so a fresh worker can recover useful precedent, counterexamples, current work, and reviewed rationale before repeating manual archaeology.
+
+What it currently supports:
+
+- human attention is increasingly allocated to problem selection, contract choice, evidence quality, review boundaries, and consequential decisions while agents supply search, implementation, experimentation, and retrieval capacity;
+- the workflow treats worker/session loss as normal and tries to preserve enough durable state for another actor to continue from evidence rather than chat memory;
+- domain transfer is visible across Java/JVM performance, TypeScript SDKs/tooling, Rust virtualization, Linux/container work, browser systems, and agent coordination;
+- several outputs have encountered independent external review, while Cultist is explicitly adding held-out behavioral tests for whether surfaced repository evidence changes what a fresh worker does next.
+
+This is also the modern version of an older personal habit: capture generously, synthesize quickly, keep useful residue, and revisit it when a real problem creates demand. Speech-to-text and agents make the residue cheaper to create and much cheaper to recover; Stensibly and Cultist attempt to make continuation and retrieval explicit engineering concerns rather than personal-memory tricks.
+
+Career use: **synthesis narrative rather than a standalone logo/bullet**. It is especially useful for coding-agent environments, developer tools, evaluation, durable execution, and research-engineering roles because it explains why the owned systems and cross-repository work belong in one portfolio. Keep individual technical claims tied to their source repositories.
+
+Do not overstate: Stensibly still describes a guarded pilot boundary, Cultist is an early prototype, and the broader method has several strong cases rather than a general proof that agent-heavy engineering works everywhere.
+
+---
+
 # Owned systems inventory
 
 ## Stensibly
@@ -341,6 +369,8 @@ Useful project candidates for LinkedIn are Preflight, Stensibly, SmolRunner, and
 ## Interviews
 
 Keep the non-merge stories. BuildKit and runc are especially good because they show the ability to change conclusion after maintainer/project-history evidence. Playwright is useful as an accepted diagnosis where upstream chose a smaller repair boundary. FEX is useful for systems depth if described as research rather than contribution. Zustand is useful for explaining substantive authorship when GitHub landing mechanics obscure it.
+
+The cross-repository method is useful when an interviewer asks how AI changes the work itself. Keep the answer concrete: agents expand search and execution capacity; durable evidence, exact review boundaries, external maintainers, and selective human attention keep the work answerable to reality. Use Preflight, Stensibly, Fieldwork/Linux Fieldwork, and Cultist as distinct examples rather than presenting them as one finished platform.
 
 ## Applications
 
