@@ -23,7 +23,8 @@ The operating idea is simple:
 
 ## Files
 
-- [`portfolio-inventory.md`](portfolio-inventory.md) — unified retrieval index across owned systems, upstream contributions, adopted findings, reversals, reports, and research-only work; start here before a resume or LinkedIn rewrite.
+- [`current-state.md`](current-state.md) — short live-status overlay across the current body of work; read this first when repository status has moved faster than the deeper records.
+- [`portfolio-inventory.md`](portfolio-inventory.md) — unified retrieval index across owned systems, upstream contributions, adopted findings, reversals, reports, and research-only work.
 - [`resume-candidates.md`](resume-candidates.md) — intentionally churny ranking of the strongest current resume material.
 - [`resume-language-bank.md`](resume-language-bank.md) — richer candidate bullets, application theses, and interview story formulations that are worth preserving even when they do not fit the current one-page cut.
 - [`fit-and-interviews.md`](fit-and-interviews.md) — living hypotheses about role/team/interview fit, questions that can discriminate those hypotheses, and signals to retain after hiring processes.
@@ -33,7 +34,7 @@ The operating idea is simple:
 - [`archive/2026-08-11-signal-audit.md`](archive/2026-08-11-signal-audit.md) — first broad snapshot of the current body of work and the narrative it supports.
 - [`AGENTS.md`](AGENTS.md) — local instructions for agents updating this record.
 
-The inventory is intentionally the central index rather than a second source of technical truth. Detailed records own the deeper story; source repositories and upstream threads own the facts.
+For current status, read `current-state.md` first. The inventory remains the central durable retrieval index rather than a second source of technical truth. Detailed records own the deeper story; source repositories and upstream threads own the facts.
 
 ## What belongs here
 
