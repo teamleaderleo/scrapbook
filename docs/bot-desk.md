@@ -152,6 +152,7 @@ When the human directs the prose closely, treat repeated line-level corrections 
 For Leo-directed writing in particular:
 
 - Let casual diction coexist with careful grammar and the occasional more exact or eloquent word. Keep the register conversational without sanding it into consultant prose.
+- Use contractions aggressively when spoken English would use them: `it's`, `that's`, `there's`, `we're`, `you're`, `I'd`, `can't`, `don't`, and the rest. Repeated full forms such as `it is`, `that is`, `there is`, and `we are` make casual prose feel staged or overly formal; save them for places where the extra emphasis or rhythm earns it.
 - Follow the cadence of spoken thought. Longer comma-linked sentences, small digressions, and a little doubling back can belong in the finished piece. Keep the logic legible without forcing every paragraph into claim, explanation, conclusion.
 - Use local, human transitions: `But then`, `For instance`, `Maybe, after a while`, or a direct sentence start. Avoid generic signposts that announce the argument from above, such as `The version that interests me is...`, `And separately...`, or `I guess that is what I am wondering about...`.
 - Make adverbs earn their place. Smoothing words such as `just`, `genuinely`, `deliberately`, `slightly`, or `really` often make a sentence tidier while making the voice less specific.
