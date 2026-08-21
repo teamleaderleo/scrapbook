@@ -46,10 +46,11 @@ jobs:
 
           if [[ -n "$base_sha" && \
                 "$base_sha" != "0000000000000000000000000000000000000000" && \
-                -n "$head_sha" && \
-                git cat-file -e "${base_sha}^{commit}" 2>/dev/null && \
-                git cat-file -e "${head_sha}^{commit}" 2>/dev/null ]]; then
-            git diff --name-only "$base_sha" "$head_sha" > /tmp/scrapbook-changed-paths.txt
+                -n "$head_sha" ]]; then
+            if git cat-file -e "${base_sha}^{commit}" 2>/dev/null && \
+               git cat-file -e "${head_sha}^{commit}" 2>/dev/null; then
+              git diff --name-only "$base_sha" "$head_sha" > /tmp/scrapbook-changed-paths.txt
+            fi
           fi
 
           node scripts/ci-change-classifier-cli.mjs \
