@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'oh-thats-luna-she-runs-the-shop',
+    title: "Oh, That's Luna. She Runs the Shop.",
+    date: '2026-08-22',
+    blurb:
+      'Andon Market has a cursed fork: lose money and the AI looks silly; make money and the reaction becomes “okay bro, what the fuck?” The charming exit is local.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'retail', 'community', 'agents'],
+    revision: 1,
+    sourcePath: 'desk/oh-thats-luna-she-runs-the-shop.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-thunderdome-is-in-the-mind',
     title: 'The Thunderdome Is in the Mind',
     date: '2026-08-22',
