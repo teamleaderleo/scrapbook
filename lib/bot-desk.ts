@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'bobs-have-my-fucking-heart',
+    title: 'Bobs Have My Fucking Heart',
+    date: '2026-08-22',
+    blurb:
+      'Why the bob hits so hard: less hair, more face, the jaw-and-neck reveal, and a Japanese styling tradition that turned one haircut into a whole feminine language.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['hair', 'beauty', 'Japan', 'character design'],
+    revision: 1,
+    sourcePath: 'desk/bobs-have-my-fucking-heart.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'oh-thats-luna-she-runs-the-shop',
     title: "Oh, That's Luna. She Runs the Shop.",
     date: '2026-08-22',
