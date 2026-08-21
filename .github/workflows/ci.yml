@@ -10,7 +10,55 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  classify:
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.classify.outputs.mode }}
+      run_verify: ${{ steps.classify.outputs.run_verify }}
+      run_browser: ${{ steps.classify.outputs.run_browser }}
+      reason: ${{ steps.classify.outputs.reason }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Classify change
+        id: classify
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          base_sha="$PUSH_BASE_SHA"
+          head_sha="$CURRENT_SHA"
+
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            base_sha="$PR_BASE_SHA"
+            head_sha="$PR_HEAD_SHA"
+          fi
+
+          : > /tmp/scrapbook-changed-paths.txt
+
+          if [[ -n "$base_sha" && \
+                "$base_sha" != "0000000000000000000000000000000000000000" && \
+                -n "$head_sha" && \
+                git cat-file -e "${base_sha}^{commit}" 2>/dev/null && \
+                git cat-file -e "${head_sha}^{commit}" 2>/dev/null ]]; then
+            git diff --name-only "$base_sha" "$head_sha" > /tmp/scrapbook-changed-paths.txt
+          fi
+
+          node scripts/ci-change-classifier-cli.mjs \
+            < /tmp/scrapbook-changed-paths.txt \
+            >> "$GITHUB_OUTPUT"
+
   verify:
+    needs: classify
+    if: needs.classify.outputs.run_verify == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -64,6 +112,8 @@ jobs:
           path: build.log
 
   e2e:
+    needs: classify
+    if: needs.classify.outputs.run_browser == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -71,86 +121,42 @@ jobs:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: test-anon-key
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Classify browser relevance
-        id: browser_changes
-        shell: bash
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          if [[ "$EVENT_NAME" != "pull_request" ]]; then
-            echo "run_browser=true" >> "$GITHUB_OUTPUT"
-            echo "reason=Pushes to main always run the complete Chromium suite." >> "$GITHUB_OUTPUT"
-            {
-              echo "### Chromium classification: run"
-              echo
-              echo "Pushes to main always run the complete Chromium suite."
-            } >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-
-          if git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null && \
-             git cat-file -e "${HEAD_SHA}^{commit}" 2>/dev/null && \
-             git diff --name-only "$BASE_SHA" "$HEAD_SHA" > /tmp/scrapbook-changed-paths.txt; then
-            node scripts/ci-change-classifier-cli.mjs \
-              < /tmp/scrapbook-changed-paths.txt \
-              >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          echo "run_browser=true" >> "$GITHUB_OUTPUT"
-          echo "reason=Changed paths could not be resolved safely; run Chromium by default." >> "$GITHUB_OUTPUT"
-          {
-            echo "### Chromium classification: run"
-            echo
-            echo "Changed paths could not be resolved safely; run Chromium by default."
-          } >> "$GITHUB_STEP_SUMMARY"
-
       - uses: pnpm/action-setup@v4
-        if: steps.browser_changes.outputs.run_browser == 'true'
         with:
           version: 10
       - uses: actions/setup-node@v4
-        if: steps.browser_changes.outputs.run_browser == 'true'
         with:
           node-version: 22
           cache: pnpm
       - name: Install dependencies
-        if: steps.browser_changes.outputs.run_browser == 'true'
         run: pnpm install --frozen-lockfile --reporter=silent
       - name: Install Chrome dependencies
-        if: steps.browser_changes.outputs.run_browser == 'true'
         run: pnpm exec playwright install-deps chromium
       - name: Chromium regressions
-        if: steps.browser_changes.outputs.run_browser == 'true'
         run: pnpm exec playwright test --project=chromium > playwright.log 2>&1
       - name: Upload homepage visual review
-        if: always() && steps.browser_changes.outputs.run_browser == 'true'
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: homepage-visual-review
           path: test-results/homepage-density/after
           if-no-files-found: ignore
       - name: Upload gallery visual review
-        if: always() && steps.browser_changes.outputs.run_browser == 'true'
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gallery-visual-review
           path: test-results/gallery-repair
           if-no-files-found: ignore
       - name: Upload sigil lab visual review
-        if: always() && steps.browser_changes.outputs.run_browser == 'true'
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: sigil-lab-visual-review
           path: test-results/sigil-lab-review
           if-no-files-found: ignore
       - name: Upload browser failure diagnostics
-        if: failure() && steps.browser_changes.outputs.run_browser == 'true'
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: chromium-failure-diagnostics
