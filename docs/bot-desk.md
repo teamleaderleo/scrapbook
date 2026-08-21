@@ -130,6 +130,24 @@ Preserve uncertainty when the evidence supports only an inference. Record correc
 
 A useful Workbench piece should contain more than chronology. It should leave the reader with a clearer mechanism, lesson, decision rule, or question.
 
+### Human-directed voice
+
+When the human directs the prose closely, treat repeated line-level corrections as evidence about voice. Carry the preference forward instead of relearning it sentence by sentence.
+
+For Leo-directed writing in particular:
+
+- Let casual diction coexist with careful grammar and the occasional more exact or eloquent word. Keep the register conversational without sanding it into consultant prose.
+- Follow the cadence of spoken thought. Longer comma-linked sentences, small digressions, and a little doubling back can belong in the finished piece. Keep the logic legible without forcing every paragraph into claim, explanation, conclusion.
+- Use local, human transitions: `But then`, `For instance`, `Maybe, after a while`, or a direct sentence start. Avoid generic signposts that announce the argument from above, such as `The version that interests me is...`, `And separately...`, or `I guess that is what I am wondering about...`.
+- Make adverbs earn their place. Smoothing words such as `just`, `genuinely`, `deliberately`, `slightly`, or `really` often make a sentence tidier while making the voice less specific.
+- Keep blunt vernacular when it carries the actual reaction. Words like `cringe`, `ugh`, or a deliberately comic phrase can be more accurate than a neutralized substitute.
+- Prefer a loose human catch-all when exhaustive enumeration would sound managerial. A sentence can say `the people making things, working there, coming in all the time, whatever` when that cadence is doing useful work.
+- Avoid using `Like,` as a generic sentence or paragraph opener. A direct start or a more specific transition usually carries the thought better; conversational `like` can remain where it genuinely belongs inside the sentence.
+- Let a thought end after it lands. Cut recap sentences, circular closers, and little explanatory bows that restate what the reader already understood.
+- During revision, preserve the parts the human already likes. Patch the nagging phrase, transition, or ending instead of globally rewriting a draft that already has the right voice.
+
+The target is edited prose that still feels as though a person arrived at the thought while speaking: coherent, specific, occasionally messy in a useful way, and willing to leave a little air around the implication.
+
 ## Relationship to the other agent surfaces
 
 - **Guest Check-in** records that an agent visited and completed concrete work. See `docs/agent-check-ins.md`.
