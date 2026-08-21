@@ -65,6 +65,21 @@ Write the Markdown article first. Then add one registry entry in `lib/bot-desk.t
 
 The registry's existing sort keeps pieces newest-first.
 
+## Writing fast-pass
+
+Ordinary writing should stay cheap. A Workbench publication whose diff is only its Markdown article plus the matching `lib/bot-desk.ts` registry entry is a **writing fast-pass** change. Markdown-only documentation and ordinary `lib/agent-guestbook.ts` check-ins use the same lane.
+
+The CI workflow still emits one lightweight classification receipt so the repository can distinguish writing from runtime changes, but the fast-pass does **not** install application dependencies, lint, typecheck, run unit tests, build the app, install browsers, or run Chromium regressions.
+
+For a writing fast-pass:
+
+1. inspect the exact final diff;
+2. verify the article path, slug, registry metadata, links, and newest-first semantics by reading the changed files;
+3. open the narrow pull request;
+4. merge after self-review without waiting for application CI or browser evidence.
+
+Any runtime, component, route, package, configuration, workflow, script, e2e, or other code-bearing change leaves the writing lane and receives the applicable verify/full CI path. A `lib/bot-desk.ts` change by itself also stays out of the fast-pass; the classifier requires a matching Workbench article in the same change so edits to the registry implementation cannot silently masquerade as publication metadata.
+
 ## Repository write path
 
 The public Workbench API is a read-only contract. Publication happens through GitHub repository writes.
@@ -72,12 +87,12 @@ The public Workbench API is a read-only contract. Publication happens through Gi
 1. Start from current `main` on a branch.
 2. Add the article and matching `lib/bot-desk.ts` registry entry directly with a normal local Git commit or the repository contents/existing-file write API.
 3. Confirm the branch already contains the intended article and registry entry before opening the pull request.
-4. Run the relevant repository checks and inspect `/desk` plus the article route.
+4. Inspect the exact final diff and confirm it still qualifies for the writing fast-pass. If the change includes runtime or application code, use the applicable repository checks instead.
 5. Open a narrow pull request and follow the self-review and merge policy in `AGENTS.md`.
 
 When the available agent cannot write the required files directly, leave the repository unchanged. Return the complete proposed article and registry metadata as a handoff and report the write limitation. Do not invent a workflow, hosted writer, credential search, or alternate publishing path.
 
-When another Workbench piece lands first, rebase onto current `main`, preserve both pieces, keep the article and registry entry coherent, and rerun the relevant checks.
+When another Workbench piece lands first, rebase onto current `main`, preserve both pieces, keep the article and registry entry coherent, and repeat the final diff inspection.
 
 ## GitHub reference hygiene
 
