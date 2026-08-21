@@ -36,11 +36,11 @@ That history helps explain part of why Japan seems to have such ridiculous fluen
 
 Cute bob. Severe bob. Schoolgirl bob. Art-school bob. Office bob. Idol bob. Fashion-editorial bob. Blunt bob. Round bob. Mini-bob. Jaw-line bob. Bob with heavy bangs, wispy bangs, no bangs, center part, one side tucked behind the ear, inward curl, dead-straight ends, slightly messy ends. Tiny changes in length and weight can move the haircut between completely different kinds of femininity.
 
-You can see how developed that language is in something as mundane as a salon catalog. Hot Pepper Beauty's current Japanese hairstyle index has [hundreds of thousands of results tagged as mini-bobs](https://beauty.hotpepper.jp/catalog/ladys/word%E3%83%9F%E3%83%8B%E3%83%9C%E3%83%96/) and tens of thousands for combinations like [blunt-cut mini-bob](https://beauty.hotpepper.jp/catalog/ladys/word%E5%88%87%E3%82%8A%E3%81%A3%E3%81%B1%E3%81%AA%E3%81%97%E3%80%80%E3%83%9F%E3%83%8B%E3%83%9C%E3%83%96/). The numbers themselves are messy search-index numbers, so I would never treat them as some scientific measure of national taste. The interesting part is the vocabulary. There are enough recognized variations that you can keep subdividing the thing and everybody still knows what you mean.
+You can see how developed that language is in something as mundane as a salon catalog. Hot Pepper Beauty's current Japanese hairstyle index has [hundreds of thousands of results tagged as mini-bobs](https://beauty.hotpepper.jp/catalog/ladys/word%E3%83%9F%E3%83%8B%E3%83%9C%E3%83%96/) and tens of thousands for combinations like [blunt-cut mini-bob](https://beauty.hotpepper.jp/catalog/ladys/word%E5%88%87%E3%82%8A%E3%81%A3%E3%81%B1%E3%81%AA%E3%81%97%E3%80%80%E3%83%9F%E3%83%8B%E3%83%9C%E3%83%96/). Those are messy search-index counts. The useful evidence is the vocabulary. There are enough recognized variations that you can keep subdividing the thing and everybody still knows what you mean.
 
 That might be the part I was reaching for when I kept thinking, man, the Japanese have perfected this.
 
-It is less about Japanese faces having some secret compatibility with the haircut. Chinese, Korean, Japanese, whatever, there is massive individual variation and plenty of women across all three countries who look incredible with short hair. The more interesting difference is cultural permission and accumulated taste. Japan has spent generations treating the bob as an ordinary feminine option, so it can be adventurous without feeling like a stunt.
+Chinese, Korean, Japanese, whatever, there is massive individual variation and plenty of women across all three countries who look incredible with short hair. The interesting variable is cultural permission and accumulated taste. Japan has spent generations treating the bob as an ordinary feminine option, so it can be adventurous without feeling like a stunt.
 
 That is powerful. If a culture treats a haircut as one unusual category called SHORT HAIR, every woman who gets it has to carry the meaning of having made a dramatic choice. Once the culture has ten, twenty, fifty familiar versions of the thing, the choice gets much lighter. You are choosing *which bob*.
 
@@ -50,9 +50,9 @@ Maybe that is also why it keeps feeling a little counterintuitive. We are used t
 
 The exact endpoint starts carrying erotic weight. The jaw gets emphasized because the hair stops beside it. The neck gets emphasized because the hair leaves it alone. The cheekbones get emphasized because the volume sits next to them. The eyes get emphasized because there is less competing material around the face. Even the ears can suddenly become part of the look. A small earring with a sharp bob can do an absurd amount of work.
 
-And then there is the fact that a bob can be both cute and hot without feeling confused about either one.
+And then there is the fact that a bob can be cute and hot at the same time.
 
-The roundedness can be youthful. Bangs can make it sweeter. The shortness exposes more adult facial and bodily cues: jaw, neck, collarbones, earrings, makeup. A blunt line can add confidence. A little mess can make the whole thing intimate. That combination is lethal because it never has to pick one register and stay there.
+The roundedness can be youthful. Bangs can make it sweeter. The shortness exposes more adult facial and bodily cues: jaw, neck, collarbones, earrings, makeup. A blunt line can add confidence. A little mess can make the whole thing intimate. That combination is lethal because it moves between both registers easily.
 
 2B gets that combination for free every time she appears on screen. Doll-like head, severe blindfold, exposed neck, ridiculous gothic battle dress. Softness and danger occupy about six inches of hair.
 
