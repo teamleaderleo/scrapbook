@@ -4,8 +4,8 @@ import { headers } from 'next/headers';
 
 const DEFAULT_REGION = 'us-west-2';
 const DEFAULT_INSTANCE_NAME = 'lightsail-uswest2';
-const DASHBOARD_CACHE_MS = 60_000;
-const CREDENTIAL_REFRESH_SKEW_MS = 5 * 60_000;
+const CACHE_MS = 60_000;
+const CREDENTIAL_SKEW_MS = 5 * 60_000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 type AwsCredentials = {
@@ -15,7 +15,7 @@ type AwsCredentials = {
   expiration?: number;
 };
 
-type MetricDatapoint = {
+type MetricPoint = {
   timestamp?: number | string;
   sum?: number;
   average?: number;
@@ -23,28 +23,20 @@ type MetricDatapoint = {
   sampleCount?: number;
 };
 
-type LightsailInstance = {
+type Instance = {
   name?: string;
   bundleId?: string;
   blueprintName?: string;
-  createdAt?: number | string;
   isStaticIp?: boolean;
   publicIpAddress?: string;
-  location?: {
-    availabilityZone?: string;
-    regionName?: string;
-  };
+  location?: { availabilityZone?: string; regionName?: string };
   hardware?: {
     cpuCount?: number;
-    disks?: Array<{
-      isSystemDisk?: boolean;
-      sizeInGb?: number;
-    }>;
+    ramSizeInGb?: number;
+    disks?: Array<{ isSystemDisk?: boolean; sizeInGb?: number }>;
   };
   networking?: {
-    monthlyTransfer?: {
-      gbPerMonthAllocated?: number;
-    };
+    monthlyTransfer?: { gbPerMonthAllocated?: number };
     ports?: Array<{
       accessDirection?: string;
       accessType?: string;
@@ -53,19 +45,16 @@ type LightsailInstance = {
       protocol?: string;
     }>;
   };
-  state?: {
-    code?: number;
-    name?: string;
-  };
+  state?: { code?: number; name?: string };
 };
 
-type LightsailBundle = {
+type Bundle = {
   bundleId?: string;
-  cpuCount?: number;
-  diskSizeInGb?: number;
   name?: string;
   price?: number;
   ramSizeInGb?: number;
+  cpuCount?: number;
+  diskSizeInGb?: number;
   transferPerMonthInGb?: number;
 };
 
@@ -109,21 +98,14 @@ export type LightsailAwsSnapshot = {
     last24hInBytes: number;
     last24hOutBytes: number;
   };
-  cpu: {
-    average24h: number | null;
-    maximum24h: number | null;
-  };
+  cpu: { average24h: number | null; maximum24h: number | null };
   burst: {
     latestPercent: number | null;
     average24h: number | null;
     maximum24h: number | null;
   };
   statusCheckFailures24h: number | null;
-  ports: {
-    tcp443: boolean;
-    udp443: boolean;
-    ssh22: boolean;
-  };
+  ports: { tcp443: boolean; udp443: boolean; ssh22: boolean };
   billing: BillingSummary | null;
   billingError: string | null;
 };
@@ -133,19 +115,29 @@ export type LightsailAwsReadResult =
   | { status: 'configuration-error'; message: string }
   | { status: 'error'; message: string };
 
-let cachedRoleCredentials:
+let credentialCache:
   | { roleArn: string; credentials: AwsCredentials }
   | undefined;
-let cachedDashboard:
-  | { expiresAt: number; region: string; instanceName: string; data: LightsailAwsSnapshot }
+let dashboardCache:
+  | {
+      region: string;
+      instanceName: string;
+      expiresAt: number;
+      data: LightsailAwsSnapshot;
+    }
   | undefined;
 
-function finiteNumber(value: unknown): number | null {
+function numberOrNull(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
-function stringValue(value: unknown): string | null {
+function stringOrNull(value: unknown) {
   return typeof value === 'string' && value.trim() ? value : null;
+}
+
+function errorText(value: unknown) {
+  if (value instanceof Error && value.message) return value.message.slice(0, 500);
+  return String(value).slice(0, 500);
 }
 
 function sha256(value: string) {
@@ -156,16 +148,8 @@ function hmac(key: Buffer | string, value: string) {
   return createHmac('sha256', key).update(value, 'utf8').digest();
 }
 
-function collapseHeaderWhitespace(value: string) {
-  return value.trim().replace(/\s+/g, ' ');
-}
-
 function amzDate(value: Date) {
   return value.toISOString().replace(/[:-]|\.\d{3}/g, '');
-}
-
-function dateStamp(value: Date) {
-  return amzDate(value).slice(0, 8);
 }
 
 function xmlValue(xml: string, name: string) {
@@ -179,14 +163,8 @@ function xmlValue(xml: string, name: string) {
     .replace(/&#39;/g, "'");
 }
 
-function cleanAwsError(value: unknown) {
-  if (value instanceof Error && value.message) return value.message.slice(0, 500);
-  return String(value).slice(0, 500);
-}
-
-async function requestOidcCredentials(roleArn: string): Promise<AwsCredentials> {
+async function oidcCredentials(roleArn: string): Promise<AwsCredentials> {
   let token = process.env.VERCEL_OIDC_TOKEN?.trim() || '';
-
   if (!token) {
     try {
       token = (await headers()).get('x-vercel-oidc-token')?.trim() || '';
@@ -194,10 +172,9 @@ async function requestOidcCredentials(roleArn: string): Promise<AwsCredentials> 
       token = '';
     }
   }
-
   if (!token) {
     throw new Error(
-      'AWS_ROLE_ARN is configured, but this request has no Vercel OIDC token.'
+      'AWS_ROLE_ARN is set, but Vercel did not supply an OIDC token for this request.'
     );
   }
 
@@ -209,7 +186,6 @@ async function requestOidcCredentials(roleArn: string): Promise<AwsCredentials> 
     WebIdentityToken: token,
     DurationSeconds: '3600',
   });
-
   const response = await fetch('https://sts.amazonaws.com/', {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
@@ -217,34 +193,34 @@ async function requestOidcCredentials(roleArn: string): Promise<AwsCredentials> 
     cache: 'no-store',
   });
   const body = await response.text();
-
   if (!response.ok) {
-    const message = xmlValue(body, 'Message') ?? `STS HTTP ${response.status}`;
-    throw new Error(`Unable to assume the Vercel AWS role: ${message}`);
+    throw new Error(
+      `Unable to assume the Vercel AWS role: ${xmlValue(body, 'Message') ?? `STS HTTP ${response.status}`}`
+    );
   }
 
   const accessKeyId = xmlValue(body, 'AccessKeyId');
   const secretAccessKey = xmlValue(body, 'SecretAccessKey');
   const sessionToken = xmlValue(body, 'SessionToken');
   const expirationText = xmlValue(body, 'Expiration');
-  const expiration = expirationText ? Date.parse(expirationText) : Number.NaN;
-
   if (!accessKeyId || !secretAccessKey || !sessionToken) {
     throw new Error('AWS STS returned incomplete temporary credentials.');
   }
 
+  const parsedExpiration = expirationText ? Date.parse(expirationText) : Number.NaN;
   return {
     accessKeyId,
     secretAccessKey,
     sessionToken,
-    expiration: Number.isFinite(expiration) ? expiration : Date.now() + 45 * 60_000,
+    expiration: Number.isFinite(parsedExpiration)
+      ? parsedExpiration
+      : Date.now() + 45 * 60_000,
   };
 }
 
-async function awsCredentials(): Promise<AwsCredentials> {
+async function credentials(): Promise<AwsCredentials> {
   const accessKeyId = process.env.AWS_ACCESS_KEY_ID?.trim();
   const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY?.trim();
-
   if (accessKeyId && secretAccessKey) {
     return {
       accessKeyId,
@@ -260,58 +236,54 @@ async function awsCredentials(): Promise<AwsCredentials> {
     );
   }
 
-  const cached = cachedRoleCredentials;
   if (
-    cached?.roleArn === roleArn &&
-    cached.credentials.expiration &&
-    cached.credentials.expiration - CREDENTIAL_REFRESH_SKEW_MS > Date.now()
+    credentialCache?.roleArn === roleArn &&
+    credentialCache.credentials.expiration &&
+    credentialCache.credentials.expiration - CREDENTIAL_SKEW_MS > Date.now()
   ) {
-    return cached.credentials;
+    return credentialCache.credentials;
   }
 
-  const credentials = await requestOidcCredentials(roleArn);
-  cachedRoleCredentials = { roleArn, credentials };
-  return credentials;
+  const value = await oidcCredentials(roleArn);
+  credentialCache = { roleArn, credentials: value };
+  return value;
 }
 
-async function awsJsonRequest<T>({
-  credentials,
+async function awsJson<T>({
+  credentials: creds,
   service,
   region,
+  host = `${service}.${region}.amazonaws.com`,
   targetPrefix,
   action,
   body,
-  host,
 }: {
   credentials: AwsCredentials;
   service: string;
   region: string;
+  host?: string;
   targetPrefix: string;
   action: string;
   body: Record<string, unknown>;
-  host?: string;
 }): Promise<T> {
-  const requestDate = new Date();
-  const timestamp = amzDate(requestDate);
-  const day = dateStamp(requestDate);
-  const requestHost = host ?? `${service}.${region}.amazonaws.com`;
-  const endpoint = `https://${requestHost}/`;
-  const payload = JSON.stringify(body);
+  const now = new Date();
+  const timestamp = amzDate(now);
+  const day = timestamp.slice(0, 8);
   const target = `${targetPrefix}.${action}`;
-  const canonicalHeaderMap: Record<string, string> = {
+  const payload = JSON.stringify(body);
+  const headerValues: Record<string, string> = {
     'content-type': 'application/x-amz-json-1.1',
-    host: requestHost,
+    host,
     'x-amz-date': timestamp,
     'x-amz-target': target,
   };
-
-  if (credentials.sessionToken) {
-    canonicalHeaderMap['x-amz-security-token'] = credentials.sessionToken;
+  if (creds.sessionToken) {
+    headerValues['x-amz-security-token'] = creds.sessionToken;
   }
 
-  const signedHeaders = Object.keys(canonicalHeaderMap).sort();
+  const signedHeaders = Object.keys(headerValues).sort();
   const canonicalHeaders = signedHeaders
-    .map(name => `${name}:${collapseHeaderWhitespace(canonicalHeaderMap[name])}\n`)
+    .map(name => `${name}:${headerValues[name].trim().replace(/\s+/g, ' ')}\n`)
     .join('');
   const canonicalRequest = [
     'POST',
@@ -328,58 +300,56 @@ async function awsJsonRequest<T>({
     scope,
     sha256(canonicalRequest),
   ].join('\n');
-  const kDate = hmac(`AWS4${credentials.secretAccessKey}`, day);
+  const kDate = hmac(`AWS4${creds.secretAccessKey}`, day);
   const kRegion = hmac(kDate, region);
   const kService = hmac(kRegion, service);
   const kSigning = hmac(kService, 'aws4_request');
   const signature = createHmac('sha256', kSigning)
     .update(stringToSign, 'utf8')
     .digest('hex');
-  const authorization =
-    `AWS4-HMAC-SHA256 Credential=${credentials.accessKeyId}/${scope}, ` +
-    `SignedHeaders=${signedHeaders.join(';')}, Signature=${signature}`;
 
   const requestHeaders: Record<string, string> = {
-    'content-type': canonicalHeaderMap['content-type'],
+    'content-type': headerValues['content-type'],
     'x-amz-date': timestamp,
     'x-amz-target': target,
-    authorization,
+    authorization:
+      `AWS4-HMAC-SHA256 Credential=${creds.accessKeyId}/${scope}, ` +
+      `SignedHeaders=${signedHeaders.join(';')}, Signature=${signature}`,
   };
-  if (credentials.sessionToken) {
-    requestHeaders['x-amz-security-token'] = credentials.sessionToken;
+  if (creds.sessionToken) {
+    requestHeaders['x-amz-security-token'] = creds.sessionToken;
   }
 
-  const response = await fetch(endpoint, {
+  const response = await fetch(`https://${host}/`, {
     method: 'POST',
     headers: requestHeaders,
     body: payload,
     cache: 'no-store',
   });
   const text = await response.text();
-
   if (!response.ok) {
     let detail = text;
     try {
       const parsed = JSON.parse(text) as { message?: unknown; Message?: unknown };
-      detail =
-        stringValue(parsed.message) ?? stringValue(parsed.Message) ?? text;
+      detail = stringOrNull(parsed.message) ?? stringOrNull(parsed.Message) ?? text;
     } catch {
-      // Keep the raw response below.
+      // Keep raw AWS response.
     }
-    throw new Error(`${service}.${action} failed (${response.status}): ${detail.slice(0, 400)}`);
+    throw new Error(
+      `${service}.${action} failed (${response.status}): ${detail.slice(0, 400)}`
+    );
   }
-
   return (text ? JSON.parse(text) : {}) as T;
 }
 
-function lightsailRequest<T>(
-  credentials: AwsCredentials,
+function lightsail<T>(
+  creds: AwsCredentials,
   region: string,
   action: string,
   body: Record<string, unknown>
 ) {
-  return awsJsonRequest<T>({
-    credentials,
+  return awsJson<T>({
+    credentials: creds,
     service: 'lightsail',
     region,
     targetPrefix: 'Lightsail_20161128',
@@ -388,43 +358,38 @@ function lightsailRequest<T>(
   });
 }
 
-async function allInstances(credentials: AwsCredentials, region: string) {
-  const instances: LightsailInstance[] = [];
+async function getInstances(creds: AwsCredentials, region: string) {
+  const values: Instance[] = [];
   let pageToken: string | undefined;
-
   do {
-    const response = await lightsailRequest<{
-      instances?: LightsailInstance[];
+    const result = await lightsail<{
+      instances?: Instance[];
       nextPageToken?: string;
-    }>(credentials, region, 'GetInstances', pageToken ? { pageToken } : {});
-    if (Array.isArray(response.instances)) instances.push(...response.instances);
-    pageToken = stringValue(response.nextPageToken) ?? undefined;
+    }>(creds, region, 'GetInstances', pageToken ? { pageToken } : {});
+    if (Array.isArray(result.instances)) values.push(...result.instances);
+    pageToken = stringOrNull(result.nextPageToken) ?? undefined;
   } while (pageToken);
-
-  return instances;
+  return values;
 }
 
-async function allBundles(credentials: AwsCredentials, region: string) {
-  const bundles: LightsailBundle[] = [];
+async function getBundles(creds: AwsCredentials, region: string) {
+  const values: Bundle[] = [];
   let pageToken: string | undefined;
-
   do {
-    const response = await lightsailRequest<{
-      bundles?: LightsailBundle[];
-      nextPageToken?: string;
-    }>(credentials, region, 'GetBundles', {
-      includeInactive: true,
-      ...(pageToken ? { pageToken } : {}),
-    });
-    if (Array.isArray(response.bundles)) bundles.push(...response.bundles);
-    pageToken = stringValue(response.nextPageToken) ?? undefined;
+    const result = await lightsail<{ bundles?: Bundle[]; nextPageToken?: string }>(
+      creds,
+      region,
+      'GetBundles',
+      { includeInactive: true, ...(pageToken ? { pageToken } : {}) }
+    );
+    if (Array.isArray(result.bundles)) values.push(...result.bundles);
+    pageToken = stringOrNull(result.nextPageToken) ?? undefined;
   } while (pageToken);
-
-  return bundles;
+  return values;
 }
 
-async function metricData(
-  credentials: AwsCredentials,
+async function metric(
+  creds: AwsCredentials,
   region: string,
   instanceName: string,
   metricName: string,
@@ -434,88 +399,97 @@ async function metricData(
   statistics: string[],
   unit: string
 ) {
-  const response = await lightsailRequest<{ metricData?: MetricDatapoint[] }>(
-    credentials,
+  const result = await lightsail<{ metricData?: MetricPoint[] }>(
+    creds,
     region,
     'GetInstanceMetricData',
     {
       instanceName,
       metricName,
-      period,
       startTime: startTime.getTime() / 1000,
       endTime: endTime.getTime() / 1000,
+      period,
       statistics,
       unit,
     }
   );
-  return Array.isArray(response.metricData) ? response.metricData : [];
+  return Array.isArray(result.metricData) ? result.metricData : [];
 }
 
-function pointTimeMs(point: MetricDatapoint) {
+function pointTime(point: MetricPoint) {
   if (typeof point.timestamp === 'number' && Number.isFinite(point.timestamp)) {
     return point.timestamp * 1000;
   }
   if (typeof point.timestamp === 'string') {
-    const parsed = Date.parse(point.timestamp);
-    return Number.isFinite(parsed) ? parsed : null;
+    const value = Date.parse(point.timestamp);
+    return Number.isFinite(value) ? value : null;
   }
   return null;
 }
 
-function sumMetric(points: MetricDatapoint[], sinceMs?: number) {
-  return points.reduce((total, point) => {
-    const value = finiteNumber(point.sum);
-    if (value === null) return total;
-    if (sinceMs !== undefined) {
-      const timestamp = pointTimeMs(point);
-      if (timestamp === null || timestamp < sinceMs) return total;
+function metricSum(points: MetricPoint[], since?: number) {
+  let total = 0;
+  for (const point of points) {
+    const value = numberOrNull(point.sum);
+    if (value === null) continue;
+    if (since !== undefined) {
+      const timestamp = pointTime(point);
+      if (timestamp === null || timestamp < since) continue;
     }
-    return total + value;
-  }, 0);
+    total += value;
+  }
+  return total;
 }
 
-function weightedAverage(points: MetricDatapoint[], key: 'average') {
-  let weighted = 0;
+function metricAverage(points: MetricPoint[]) {
+  let total = 0;
   let samples = 0;
   for (const point of points) {
-    const value = finiteNumber(point[key]);
+    const value = numberOrNull(point.average);
     if (value === null) continue;
-    const sampleCount = finiteNumber(point.sampleCount) ?? 1;
-    weighted += value * sampleCount;
-    samples += sampleCount;
+    const count = numberOrNull(point.sampleCount) ?? 1;
+    total += value * count;
+    samples += count;
   }
-  return samples > 0 ? weighted / samples : null;
+  return samples > 0 ? total / samples : null;
 }
 
-function maximum(points: MetricDatapoint[]) {
-  const values = points.map(point => finiteNumber(point.maximum)).filter((value): value is number => value !== null);
-  return values.length > 0 ? Math.max(...values) : null;
+function metricMaximum(points: MetricPoint[]) {
+  let result: number | null = null;
+  for (const point of points) {
+    const value = numberOrNull(point.maximum);
+    if (value !== null && (result === null || value > result)) result = value;
+  }
+  return result;
 }
 
-function latestAverage(points: MetricDatapoint[]) {
-  return points
-    .map(point => ({ value: finiteNumber(point.average), timestamp: pointTimeMs(point) }))
-    .filter(
-      (point): point is { value: number; timestamp: number } =>
-        point.value !== null && point.timestamp !== null
-    )
-    .sort((left, right) => right.timestamp - left.timestamp)[0]?.value ?? null;
+function metricLatestAverage(points: MetricPoint[]) {
+  let result: { timestamp: number; value: number } | null = null;
+  for (const point of points) {
+    const timestamp = pointTime(point);
+    const value = numberOrNull(point.average);
+    if (timestamp === null || value === null) continue;
+    if (!result || timestamp > result.timestamp) result = { timestamp, value };
+  }
+  return result?.value ?? null;
 }
 
-function monthStart(value: Date) {
+function utcMonthStart(value: Date) {
   return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), 1));
 }
 
-function nextMonth(value: Date) {
+function utcNextMonth(value: Date) {
   return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth() + 1, 1));
 }
 
-function tomorrowUtc(value: Date) {
-  return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate() + 1));
+function tomorrow(value: Date) {
+  return new Date(
+    Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate() + 1)
+  );
 }
 
-function billingRegionPrefix(region: string) {
-  const prefixes: Record<string, string> = {
+function regionBillingCode(region: string) {
+  const values: Record<string, string> = {
     'us-east-1': 'USE1',
     'us-east-2': 'USE2',
     'us-west-1': 'USW1',
@@ -537,65 +511,53 @@ function billingRegionPrefix(region: string) {
     'eu-south-2': 'EUS2',
     'sa-east-1': 'SAE1',
   };
-  return prefixes[region] ?? null;
+  return values[region] ?? null;
 }
 
-async function costExplorerSummary(
-  credentials: AwsCredentials,
-  lightsailRegion: string,
-  now: Date
+async function billingSummary(
+  creds: AwsCredentials,
+  region: string,
+  checkedAt: Date
 ): Promise<BillingSummary | null> {
-  const regionPrefix = billingRegionPrefix(lightsailRegion);
-  if (!regionPrefix) return null;
-
-  const start = monthStart(now).toISOString().slice(0, 10);
-  const end = tomorrowUtc(now).toISOString().slice(0, 10);
-  const response = await awsJsonRequest<{
+  const code = regionBillingCode(region);
+  if (!code) return null;
+  const result = await awsJson<{
     ResultsByTime?: Array<{
       Estimated?: boolean;
       Groups?: Array<{
         Keys?: string[];
-        Metrics?: Record<
-          string,
-          {
-            Amount?: string;
-            Unit?: string;
-          }
-        >;
+        Metrics?: Record<string, { Amount?: string; Unit?: string }>;
       }>;
     }>;
   }>({
-    credentials,
+    credentials: creds,
     service: 'ce',
     region: 'us-east-1',
     host: 'ce.us-east-1.amazonaws.com',
     targetPrefix: 'AWSInsightsIndexService',
     action: 'GetCostAndUsage',
     body: {
-      TimePeriod: { Start: start, End: end },
+      TimePeriod: {
+        Start: utcMonthStart(checkedAt).toISOString().slice(0, 10),
+        End: tomorrow(checkedAt).toISOString().slice(0, 10),
+      },
       Granularity: 'MONTHLY',
       Metrics: ['UsageQuantity', 'UnblendedCost'],
-      Filter: {
-        Dimensions: {
-          Key: 'SERVICE',
-          Values: ['Amazon Lightsail'],
-        },
-      },
+      Filter: { Dimensions: { Key: 'SERVICE', Values: ['Amazon Lightsail'] } },
       GroupBy: [{ Type: 'DIMENSION', Key: 'USAGE_TYPE' }],
     },
   });
 
-  const result = response.ResultsByTime?.[0];
-  const groups = Array.isArray(result?.Groups) ? result.Groups : [];
+  const period = result.ResultsByTime?.[0];
+  const groups = period?.Groups ?? [];
   const usage = new Map<string, number>();
   let costUsd = 0;
   let hasCost = false;
-
   for (const group of groups) {
     const key = group.Keys?.[0];
     if (!key) continue;
-    const usageAmount = Number(group.Metrics?.UsageQuantity?.Amount);
-    if (Number.isFinite(usageAmount)) usage.set(key, usageAmount);
+    const quantity = Number(group.Metrics?.UsageQuantity?.Amount);
+    if (Number.isFinite(quantity)) usage.set(key, quantity);
     const cost = Number(group.Metrics?.UnblendedCost?.Amount);
     if (Number.isFinite(cost)) {
       costUsd += cost;
@@ -603,112 +565,100 @@ async function costExplorerSummary(
     }
   }
 
-  const inType = `${regionPrefix}-TotalDataXfer-In-Bytes`;
-  const outType = `${regionPrefix}-TotalDataXfer-Out-Bytes`;
-  const overageType = `${regionPrefix}-DataXfer-Out-Overage-Bytes`;
-
   return {
     costUsd: hasCost ? costUsd : null,
-    transferInGb: usage.get(inType) ?? null,
-    transferOutGb: usage.get(outType) ?? null,
-    overageOutGb: usage.get(overageType) ?? 0,
-    estimated: typeof result?.Estimated === 'boolean' ? result.Estimated : null,
+    transferInGb: usage.get(`${code}-TotalDataXfer-In-Bytes`) ?? null,
+    transferOutGb: usage.get(`${code}-TotalDataXfer-Out-Bytes`) ?? null,
+    overageOutGb: usage.get(`${code}-DataXfer-Out-Overage-Bytes`) ?? 0,
+    estimated:
+      typeof period?.Estimated === 'boolean' ? period.Estimated : null,
   };
 }
 
-function publicPort(instance: LightsailInstance, port: number, protocol: string) {
+function hasPublicPort(instance: Instance, port: number, protocol: string) {
   return Boolean(
     instance.networking?.ports?.some(rule => {
       if (rule.accessDirection && rule.accessDirection !== 'inbound') return false;
       if (rule.accessType && rule.accessType !== 'public') return false;
       if (rule.protocol !== protocol) return false;
-      const from = finiteNumber(rule.fromPort);
-      const to = finiteNumber(rule.toPort);
+      const from = numberOrNull(rule.fromPort);
+      const to = numberOrNull(rule.toPort);
       return from !== null && to !== null && from <= port && to >= port;
     })
   );
 }
 
-async function buildSnapshot(
-  credentials: AwsCredentials,
+async function snapshot(
+  creds: AwsCredentials,
   region: string,
   instanceName: string
 ): Promise<LightsailAwsSnapshot> {
   const checkedAt = new Date();
-  const cycleStart = monthStart(checkedAt);
-  const resetAt = nextMonth(checkedAt);
+  const monthStart = utcMonthStart(checkedAt);
+  const resetAt = utcNextMonth(checkedAt);
   const cutoff24h = checkedAt.getTime() - DAY_MS;
   const [instances, bundles] = await Promise.all([
-    allInstances(credentials, region),
-    allBundles(credentials, region),
+    getInstances(creds, region),
+    getBundles(creds, region),
   ]);
-  const instance = instances.find(item => item.name === instanceName);
-
+  const instance = instances.find(value => value.name === instanceName);
   if (!instance) {
-    const available = instances.map(item => item.name).filter(Boolean).join(', ');
+    const names = instances.map(value => value.name).filter(Boolean).join(', ');
     throw new Error(
-      `Lightsail instance ${instanceName} was not found in ${region}.${available ? ` Available: ${available}` : ''}`
+      `Lightsail instance ${instanceName} was not found in ${region}.${names ? ` Available: ${names}` : ''}`
     );
   }
 
-  const bundleId = stringValue(instance.bundleId);
+  const bundleId = stringOrNull(instance.bundleId);
   const pool = bundleId
-    ? instances.filter(item => item.bundleId === bundleId)
+    ? instances.filter(value => value.bundleId === bundleId)
     : [instance];
   const bundle = bundleId
-    ? bundles.find(item => item.bundleId === bundleId) ?? null
+    ? bundles.find(value => value.bundleId === bundleId) ?? null
     : null;
 
-  const network = await Promise.all(
-    pool.map(async pooledInstance => {
-      if (!pooledInstance.name) return null;
-      const [networkIn, networkOut] = await Promise.all([
-        metricData(
-          credentials,
+  let monthIn = 0;
+  let monthOut = 0;
+  let dayIn = 0;
+  let dayOut = 0;
+  await Promise.all(
+    pool.map(async value => {
+      if (!value.name) return;
+      const [incoming, outgoing] = await Promise.all([
+        metric(
+          creds,
           region,
-          pooledInstance.name,
+          value.name,
           'NetworkIn',
-          cycleStart,
+          monthStart,
           checkedAt,
           3600,
           ['Sum'],
           'Bytes'
         ),
-        metricData(
-          credentials,
+        metric(
+          creds,
           region,
-          pooledInstance.name,
+          value.name,
           'NetworkOut',
-          cycleStart,
+          monthStart,
           checkedAt,
           3600,
           ['Sum'],
           'Bytes'
         ),
       ]);
-      return {
-        monthIn: sumMetric(networkIn),
-        monthOut: sumMetric(networkOut),
-        dayIn: sumMetric(networkIn, cutoff24h),
-        dayOut: sumMetric(networkOut, cutoff24h),
-      };
+      monthIn += metricSum(incoming);
+      monthOut += metricSum(outgoing);
+      dayIn += metricSum(incoming, cutoff24h);
+      dayOut += metricSum(outgoing, cutoff24h);
     })
   );
 
-  const networkTotals = network.reduce(
-    (total, value) => ({
-      monthIn: total.monthIn + (value?.monthIn ?? 0),
-      monthOut: total.monthOut + (value?.monthOut ?? 0),
-      dayIn: total.dayIn + (value?.dayIn ?? 0),
-      dayOut: total.dayOut + (value?.dayOut ?? 0),
-    }),
-    { monthIn: 0, monthOut: 0, dayIn: 0, dayOut: 0 }
-  );
-
   const start24h = new Date(cutoff24h);
-  const [cpuPoints, burstPoints, statusPoints] = await Promise.all([
-    metricData(
-      credentials,
+  const [cpu, burst, status] = await Promise.all([
+    metric(
+      creds,
       region,
       instanceName,
       'CPUUtilization',
@@ -718,8 +668,8 @@ async function buildSnapshot(
       ['Average', 'Maximum'],
       'Percent'
     ),
-    metricData(
-      credentials,
+    metric(
+      creds,
       region,
       instanceName,
       'BurstCapacityPercentage',
@@ -729,8 +679,8 @@ async function buildSnapshot(
       ['Average', 'Maximum'],
       'Percent'
     ),
-    metricData(
-      credentials,
+    metric(
+      creds,
       region,
       instanceName,
       'StatusCheckFailed',
@@ -742,80 +692,88 @@ async function buildSnapshot(
     ),
   ]);
 
-  const allocatedGb = pool.reduce((total, item) => {
-    const value = finiteNumber(item.networking?.monthlyTransfer?.gbPerMonthAllocated);
-    return total + (value ?? 0);
-  }, 0);
-  const fallbackPerInstanceGb = finiteNumber(bundle?.transferPerMonthInGb);
+  let allocatedGb = 0;
+  for (const value of pool) {
+    allocatedGb +=
+      numberOrNull(value.networking?.monthlyTransfer?.gbPerMonthAllocated) ?? 0;
+  }
+  const bundleTransferGb = numberOrNull(bundle?.transferPerMonthInGb);
   const allowanceGb =
     allocatedGb > 0
       ? allocatedGb
-      : fallbackPerInstanceGb !== null
-        ? fallbackPerInstanceGb * Math.max(1, pool.length)
+      : bundleTransferGb !== null
+        ? bundleTransferGb * Math.max(pool.length, 1)
         : null;
   const allowanceBytes = allowanceGb === null ? null : allowanceGb * 1024 ** 3;
-  const usedBytes = networkTotals.monthIn + networkTotals.monthOut;
-  const remainingBytes =
-    allowanceBytes === null ? null : Math.max(0, allowanceBytes - usedBytes);
+  const usedBytes = monthIn + monthOut;
 
   let billing: BillingSummary | null = null;
   let billingError: string | null = null;
   try {
-    billing = await costExplorerSummary(credentials, region, checkedAt);
+    billing = await billingSummary(creds, region, checkedAt);
   } catch (error) {
-    billingError = cleanAwsError(error);
+    billingError = errorText(error);
   }
 
   return {
     checkedAt: checkedAt.toISOString(),
     region,
-    availabilityZone: stringValue(instance.location?.availabilityZone),
+    availabilityZone: stringOrNull(instance.location?.availabilityZone),
     instanceName,
-    state: stringValue(instance.state?.name),
-    publicIpAddress: stringValue(instance.publicIpAddress),
-    staticIp: typeof instance.isStaticIp === 'boolean' ? instance.isStaticIp : null,
-    blueprintName: stringValue(instance.blueprintName),
+    state: stringOrNull(instance.state?.name),
+    publicIpAddress: stringOrNull(instance.publicIpAddress),
+    staticIp:
+      typeof instance.isStaticIp === 'boolean' ? instance.isStaticIp : null,
+    blueprintName: stringOrNull(instance.blueprintName),
     poolSize: pool.length,
-    pooledInstanceNames: pool.map(item => item.name).filter((value): value is string => Boolean(value)),
+    pooledInstanceNames: pool
+      .map(value => value.name)
+      .filter((value): value is string => Boolean(value)),
     plan: {
       bundleId,
-      name: stringValue(bundle?.name),
-      priceUsd: finiteNumber(bundle?.price),
-      ramGb: finiteNumber(bundle?.ramSizeInGb),
-      cpuCount: finiteNumber(bundle?.cpuCount) ?? finiteNumber(instance.hardware?.cpuCount),
+      name: stringOrNull(bundle?.name),
+      priceUsd: numberOrNull(bundle?.price),
+      ramGb:
+        numberOrNull(bundle?.ramSizeInGb) ??
+        numberOrNull(instance.hardware?.ramSizeInGb),
+      cpuCount:
+        numberOrNull(bundle?.cpuCount) ?? numberOrNull(instance.hardware?.cpuCount),
       diskGb:
-        finiteNumber(bundle?.diskSizeInGb) ??
-        finiteNumber(instance.hardware?.disks?.find(disk => disk.isSystemDisk)?.sizeInGb),
+        numberOrNull(bundle?.diskSizeInGb) ??
+        numberOrNull(
+          instance.hardware?.disks?.find(value => value.isSystemDisk)?.sizeInGb
+        ),
       transferPerInstanceGb:
-        finiteNumber(instance.networking?.monthlyTransfer?.gbPerMonthAllocated) ??
-        fallbackPerInstanceGb,
+        numberOrNull(instance.networking?.monthlyTransfer?.gbPerMonthAllocated) ??
+        bundleTransferGb,
     },
     transfer: {
-      cycleStart: cycleStart.toISOString(),
+      cycleStart: monthStart.toISOString(),
       resetAt: resetAt.toISOString(),
       allowanceBytes,
       usedBytes,
-      remainingBytes,
-      networkInBytes: networkTotals.monthIn,
-      networkOutBytes: networkTotals.monthOut,
-      last24hBytes: networkTotals.dayIn + networkTotals.dayOut,
-      last24hInBytes: networkTotals.dayIn,
-      last24hOutBytes: networkTotals.dayOut,
+      remainingBytes:
+        allowanceBytes === null ? null : Math.max(0, allowanceBytes - usedBytes),
+      networkInBytes: monthIn,
+      networkOutBytes: monthOut,
+      last24hBytes: dayIn + dayOut,
+      last24hInBytes: dayIn,
+      last24hOutBytes: dayOut,
     },
     cpu: {
-      average24h: weightedAverage(cpuPoints, 'average'),
-      maximum24h: maximum(cpuPoints),
+      average24h: metricAverage(cpu),
+      maximum24h: metricMaximum(cpu),
     },
     burst: {
-      latestPercent: latestAverage(burstPoints),
-      average24h: weightedAverage(burstPoints, 'average'),
-      maximum24h: maximum(burstPoints),
+      latestPercent: metricLatestAverage(burst),
+      average24h: metricAverage(burst),
+      maximum24h: metricMaximum(burst),
     },
-    statusCheckFailures24h: sumMetric(statusPoints),
+    statusCheckFailures24h: metricSum(status),
     ports: {
-      tcp443: publicPort(instance, 443, 'tcp'),
-      udp443: publicPort(instance, 443, 'udp'),
-      ssh22: publicPort(instance, 22, 'tcp'),
+      tcp443: hasPublicPort(instance, 443, 'tcp'),
+      udp443: hasPublicPort(instance, 443, 'udp'),
+      ssh22: hasPublicPort(instance, 22, 'tcp'),
     },
     billing,
     billingError,
@@ -828,31 +786,30 @@ export async function readLightsailAwsDashboard(): Promise<LightsailAwsReadResul
     process.env.AWS_LIGHTSAIL_INSTANCE_NAME?.trim() || DEFAULT_INSTANCE_NAME;
 
   if (
-    cachedDashboard &&
-    cachedDashboard.region === region &&
-    cachedDashboard.instanceName === instanceName &&
-    cachedDashboard.expiresAt > Date.now()
+    dashboardCache?.region === region &&
+    dashboardCache.instanceName === instanceName &&
+    dashboardCache.expiresAt > Date.now()
   ) {
-    return { status: 'ok', data: cachedDashboard.data };
+    return { status: 'ok', data: dashboardCache.data };
   }
 
-  let credentials: AwsCredentials;
+  let creds: AwsCredentials;
   try {
-    credentials = await awsCredentials();
+    creds = await credentials();
   } catch (error) {
-    return { status: 'configuration-error', message: cleanAwsError(error) };
+    return { status: 'configuration-error', message: errorText(error) };
   }
 
   try {
-    const data = await buildSnapshot(credentials, region, instanceName);
-    cachedDashboard = {
-      expiresAt: Date.now() + DASHBOARD_CACHE_MS,
+    const data = await snapshot(creds, region, instanceName);
+    dashboardCache = {
       region,
       instanceName,
+      expiresAt: Date.now() + CACHE_MS,
       data,
     };
     return { status: 'ok', data };
   } catch (error) {
-    return { status: 'error', message: cleanAwsError(error) };
+    return { status: 'error', message: errorText(error) };
   }
 }
