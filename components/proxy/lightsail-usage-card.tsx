@@ -163,7 +163,15 @@ function UsageRing({ percent }: { percent: number | null }) {
   );
 }
 
-function Stat({ label, value, detail }: { label: string; value: string; detail: string }) {
+function Stat({
+  label,
+  value,
+  detail,
+}: {
+  label: string;
+  value: string;
+  detail: string;
+}) {
   return (
     <div className="px-4 py-4">
       <div className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
@@ -195,10 +203,13 @@ export function LightsailUsageCard({
     isFiniteNumber(used) && isFiniteNumber(limit)
       ? Math.max(0, limit - used)
       : null;
+  const checkedAt = usage.lastRawAt ?? status.checkedAt ?? status.updatedAt;
+  const checkedTime = Date.parse(checkedAt);
   const resetTime = usage.resetAt ? Date.parse(usage.resetAt) : Number.NaN;
-  const daysLeft = Number.isFinite(resetTime)
-    ? Math.max(1, Math.ceil((resetTime - Date.now()) / DAY_MS))
-    : null;
+  const daysLeft =
+    Number.isFinite(resetTime) && Number.isFinite(checkedTime)
+      ? Math.max(1, Math.ceil((resetTime - checkedTime) / DAY_MS))
+      : null;
   const dailyRoom =
     isFiniteNumber(remaining) && isFiniteNumber(daysLeft)
       ? remaining / daysLeft
@@ -209,8 +220,8 @@ export function LightsailUsageCard({
   const errors = Array.isArray(status.payload.errors)
     ? status.payload.errors.filter(error => typeof error === 'string')
     : [];
-  const healthy = xray === 'active' && hysteria === 'active' && errors.length === 0;
-  const checkedAt = usage.lastRawAt ?? status.updatedAt;
+  const healthy =
+    xray === 'active' && hysteria === 'active' && errors.length === 0;
 
   return (
     <section className="overflow-hidden rounded-[1.5rem] border border-border/70 bg-background/78">
