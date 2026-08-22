@@ -27,7 +27,7 @@ EOF
 sudo chmod 600 /etc/lightsail-health.env
 ```
 
-The `$12` Oregon bundle has a 3072 GB monthly transfer allowance. If you have an existing month-to-date transfer estimate when installing the reporter, put that value in `LIGHTSAIL_USAGE_SEED_GB`. The seed is used only when a new UTC calendar month starts or when the local state file is first created.
+The `$12` Oregon bundle has a 3072 GB monthly transfer allowance. If you have an existing month-to-date transfer estimate when installing the reporter, put that value in `LIGHTSAIL_USAGE_SEED_GB`. The seed is applied only when the local state file is first created; later UTC calendar-month resets start at zero automatically.
 
 Create the service:
 
@@ -88,6 +88,6 @@ The reporter stores its monthly running total in:
 /var/lib/proxy-health/lightsail-usage.json
 ```
 
-It handles Linux interface-counter resets after a reboot by treating the new counter value as traffic observed since the reset. At the first sample of a new UTC calendar month, it starts a new cycle and applies `LIGHTSAIL_USAGE_SEED_GB` if configured.
+It handles Linux interface-counter resets after a reboot by treating the new counter value as traffic observed since the reset. At the first sample of each new UTC calendar month, it starts a fresh zero-based cycle.
 
 The resulting number is an operational estimate from the instance interface. AWS billing remains authoritative for chargeable transfer and may differ slightly from the local counter.
