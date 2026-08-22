@@ -1,12 +1,23 @@
-import type { ProxyHealthPayload, ProxyHealthSample } from '@/app/lib/proxy-health-store';
+import type {
+  ProxyHealthPayload,
+  ProxyHealthReadResult,
+  ProxyHealthSample,
+} from '@/app/lib/proxy-health-store';
 import { readProxyHealth } from '@/app/lib/proxy-health-store';
 import { unstable_cache } from 'next/cache';
+import { LightsailUsageCard } from './lightsail-usage-card';
 import { UsageDashboard } from './usage-dashboard';
 
 const readCachedProxyHealth = unstable_cache(
   () => readProxyHealth('bandwagon-la', 35),
   ['proxy-dashboard-bandwagon-la-v2'],
-  { revalidate: 60 },
+  { revalidate: 60 }
+);
+
+const readCachedLightsailHealth = unstable_cache(
+  () => readProxyHealth('lightsail-oregon', 35),
+  ['proxy-dashboard-lightsail-oregon-v1'],
+  { revalidate: 60 }
 );
 
 function usageLimitBytes() {
@@ -19,7 +30,9 @@ function numberOrNull(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
-function latestStatusSample(payload: ProxyHealthPayload): ProxyHealthSample | null {
+function latestStatusSample(
+  payload: ProxyHealthPayload
+): ProxyHealthSample | null {
   const checkedAt = payload.checked_at;
   if (typeof checkedAt !== 'string') return null;
 
@@ -35,20 +48,43 @@ function latestStatusSample(payload: ProxyHealthPayload): ProxyHealthSample | nu
   };
 }
 
-function StateCard({ title, body, requestId }: { title: string; body: string; requestId?: string }) {
+function visibleSamples(result: Extract<ProxyHealthReadResult, { status: 'ok' }>) {
+  const fallbackSample = latestStatusSample(result.report.payload);
+  return result.samples.length > 0 || !fallbackSample
+    ? result.samples
+    : [fallbackSample];
+}
+
+function StateCard({
+  title,
+  body,
+  requestId,
+}: {
+  title: string;
+  body: string;
+  requestId?: string;
+}) {
   return (
-    <section className="rounded-2xl border bg-background p-5 shadow-sm" role="status">
+    <section
+      className="rounded-2xl border bg-background p-5 shadow-sm"
+      role="status"
+    >
       <h2 className="text-xl font-bold">{title}</h2>
       <p className="mt-2 text-sm text-muted-foreground">{body}</p>
       {requestId ? (
-        <p className="mt-3 font-mono text-xs text-muted-foreground">Request {requestId}</p>
+        <p className="mt-3 font-mono text-xs text-muted-foreground">
+          Request {requestId}
+        </p>
       ) : null}
     </section>
   );
 }
 
 export async function UsageDashboardContainer() {
-  const result = await readCachedProxyHealth();
+  const [result, lightsailResult] = await Promise.all([
+    readCachedProxyHealth(),
+    readCachedLightsailHealth(),
+  ]);
 
   if (result.status === 'configuration-error') {
     return (
@@ -62,7 +98,11 @@ export async function UsageDashboardContainer() {
 
   if (result.status === 'error') {
     return (
-      <StateCard title="Proxy data unavailable" body={result.message} requestId={result.requestId} />
+      <StateCard
+        title="Proxy data unavailable"
+        body={result.message}
+        requestId={result.requestId}
+      />
     );
   }
 
@@ -75,9 +115,23 @@ export async function UsageDashboardContainer() {
     );
   }
 
-  const { report, samples } = result;
-  const fallbackSample = latestStatusSample(report.payload);
-  const visibleSamples = samples.length > 0 || !fallbackSample ? samples : [fallbackSample];
+  const bandwagonSamples = visibleSamples(result);
+  const lightsailCard =
+    lightsailResult.status === 'ok' ? (
+      <LightsailUsageCard
+        status={lightsailResult.report}
+        samples={visibleSamples(lightsailResult)}
+      />
+    ) : null;
 
-  return <UsageDashboard samples={visibleSamples} status={report} limitBytes={usageLimitBytes()} />;
+  return (
+    <div className="grid gap-3">
+      <UsageDashboard
+        samples={bandwagonSamples}
+        status={result.report}
+        limitBytes={usageLimitBytes()}
+      />
+      {lightsailCard}
+    </div>
+  );
 }
