@@ -1,19 +1,6 @@
-'use client';
-
-import type {
-  ProxyHealthSample,
-  StoredProxyHealth,
-} from '@/app/lib/proxy-health-store';
+import type { LightsailAwsSnapshot } from '@/app/lib/lightsail-aws';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-type LightsailUsage = {
-  usedBytes: number | null;
-  limitBytes: number | null;
-  resetAt: string | null;
-  lastRawAt: string | null;
-  source: string | null;
-};
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);
@@ -35,6 +22,16 @@ function formatPercent(value: number | null | undefined) {
   if (!isFiniteNumber(value)) return '—';
   if (value > 0 && value < 1) return '<1%';
   return `${Math.round(value)}%`;
+}
+
+function formatUsd(value: number | null | undefined) {
+  if (!isFiniteNumber(value)) return '—';
+  return `$${value.toFixed(value < 10 ? 2 : 1)}`;
+}
+
+function formatGb(value: number | null | undefined) {
+  if (!isFiniteNumber(value)) return '—';
+  return `${value.toFixed(value < 10 ? 2 : 1)} GB`;
 }
 
 function formatDate(value: string | null | undefined) {
@@ -61,60 +58,6 @@ function formatRelativeTime(value: string | null | undefined) {
   if (absolute < DAY_MS)
     return `${Math.round(absolute / (60 * 60 * 1000))}h ${suffix}`;
   return `${Math.round(absolute / DAY_MS)}d ${suffix}`;
-}
-
-function readUsage(status: StoredProxyHealth): LightsailUsage | null {
-  const usage = status.payload.provider?.usage;
-  if (!usage || usage.source === 'disabled') return null;
-  return {
-    usedBytes: isFiniteNumber(usage.used_bytes) ? usage.used_bytes : null,
-    limitBytes: isFiniteNumber(usage.limit_bytes) ? usage.limit_bytes : null,
-    resetAt: typeof usage.reset_at === 'string' ? usage.reset_at : null,
-    lastRawAt:
-      typeof usage.last_raw_at === 'string' ? usage.last_raw_at : null,
-    source: typeof usage.source === 'string' ? usage.source : null,
-  };
-}
-
-function sampleTotal(sample: ProxyHealthSample) {
-  if (!isFiniteNumber(sample.rxBytes) || !isFiniteNumber(sample.txBytes))
-    return null;
-  return sample.rxBytes + sample.txBytes;
-}
-
-function trafficSince(samples: ProxyHealthSample[], windowMs: number) {
-  const counters = samples
-    .map(sample => ({
-      checkedAt: new Date(sample.checkedAt),
-      total: sampleTotal(sample),
-    }))
-    .filter(
-      (sample): sample is { checkedAt: Date; total: number } =>
-        isFiniteNumber(sample.total) && !Number.isNaN(sample.checkedAt.getTime())
-    )
-    .sort((left, right) => left.checkedAt.getTime() - right.checkedAt.getTime());
-
-  const latest = counters.at(-1)?.checkedAt;
-  if (!latest) return 0;
-  const cutoff = latest.getTime() - windowMs;
-  let total = 0;
-
-  for (let index = 1; index < counters.length; index += 1) {
-    const previous = counters[index - 1];
-    const current = counters[index];
-    if (current.checkedAt.getTime() < cutoff) continue;
-    total +=
-      current.total >= previous.total
-        ? current.total - previous.total
-        : current.total;
-  }
-
-  return total;
-}
-
-function serviceState(status: StoredProxyHealth, service: string) {
-  const value = status.payload.services?.[service];
-  return typeof value === 'string' ? value : 'unknown';
 }
 
 function UsageRing({ percent }: { percent: number | null }) {
@@ -183,45 +126,48 @@ function Stat({
   );
 }
 
-export function LightsailUsageCard({
-  status,
-  samples,
-}: {
-  status: StoredProxyHealth;
-  samples: ProxyHealthSample[];
-}) {
-  const usage = readUsage(status);
-  if (!usage) return null;
+function endpointLabel(data: LightsailAwsSnapshot) {
+  const tcp = data.ports.tcp443 ? 'TCP443 ✓' : 'TCP443 ?';
+  const udp = data.ports.udp443 ? 'UDP443 ✓' : 'UDP443 ?';
+  return `${tcp} · ${udp}`;
+}
 
-  const used = usage.usedBytes;
-  const limit = usage.limitBytes;
+function planLabel(data: LightsailAwsSnapshot) {
+  const pieces = [
+    isFiniteNumber(data.plan.priceUsd) ? `$${data.plan.priceUsd}/mo` : null,
+    isFiniteNumber(data.plan.ramGb) ? `${data.plan.ramGb} GB RAM` : null,
+    isFiniteNumber(data.plan.cpuCount) ? `${data.plan.cpuCount} vCPU` : null,
+  ].filter((piece): piece is string => Boolean(piece));
+  return pieces.join(' · ') || data.plan.bundleId || '—';
+}
+
+export function LightsailUsageCard({ data }: { data: LightsailAwsSnapshot }) {
+  const allowance = data.transfer.allowanceBytes;
   const percent =
-    isFiniteNumber(used) && isFiniteNumber(limit) && limit > 0
-      ? (used / limit) * 100
+    isFiniteNumber(allowance) && allowance > 0
+      ? (data.transfer.usedBytes / allowance) * 100
       : null;
-  const remaining =
-    isFiniteNumber(used) && isFiniteNumber(limit)
-      ? Math.max(0, limit - used)
-      : null;
-  const checkedAt = usage.lastRawAt ?? status.checkedAt ?? status.updatedAt;
-  const checkedTime = Date.parse(checkedAt);
-  const resetTime = usage.resetAt ? Date.parse(usage.resetAt) : Number.NaN;
+  const checkedTime = Date.parse(data.checkedAt);
+  const resetTime = Date.parse(data.transfer.resetAt);
   const daysLeft =
     Number.isFinite(resetTime) && Number.isFinite(checkedTime)
       ? Math.max(1, Math.ceil((resetTime - checkedTime) / DAY_MS))
       : null;
   const dailyRoom =
-    isFiniteNumber(remaining) && isFiniteNumber(daysLeft)
-      ? remaining / daysLeft
+    isFiniteNumber(data.transfer.remainingBytes) && isFiniteNumber(daysLeft)
+      ? data.transfer.remainingBytes / daysLeft
       : null;
-  const traffic24h = trafficSince(samples, DAY_MS);
-  const xray = serviceState(status, 'xray');
-  const hysteria = serviceState(status, 'hysteria-server');
-  const errors = Array.isArray(status.payload.errors)
-    ? status.payload.errors.filter(error => typeof error === 'string')
-    : [];
-  const healthy =
-    xray === 'active' && hysteria === 'active' && errors.length === 0;
+  const running = data.state === 'running';
+  const statusHealthy =
+    running &&
+    data.statusCheckFailures24h === 0 &&
+    data.ports.tcp443 &&
+    data.ports.udp443;
+  const billingTransfer = data.billing
+    ? `billing in ${formatGb(data.billing.transferInGb)} · out ${formatGb(data.billing.transferOutGb)} · overage ${formatGb(data.billing.overageOutGb)}`
+    : data.billingError
+      ? 'Cost Explorer permission unavailable'
+      : 'Cost Explorer unavailable';
 
   return (
     <section className="overflow-hidden rounded-[1.5rem] border border-border/70 bg-background/78">
@@ -231,69 +177,109 @@ export function LightsailUsageCard({
             Lightsail Oregon
           </span>
           <span
-            className={`rounded-full border px-2 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.12em] ${healthy ? 'border-[#8d8af1]/50 bg-[#8d8af1]/12' : 'border-amber-400/50 bg-amber-400/12'}`}
+            className={`rounded-full border px-2 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.12em] ${statusHealthy ? 'border-[#8d8af1]/50 bg-[#8d8af1]/12' : 'border-amber-400/50 bg-amber-400/12'}`}
           >
-            {healthy ? 'Online' : 'Check services'}
+            {running ? 'AWS online' : (data.state ?? 'AWS state unknown')}
           </span>
         </div>
         <div className="font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground">
-          checked{' '}
+          AWS checked{' '}
           <span className="font-semibold text-foreground">
-            {formatRelativeTime(checkedAt)}
+            {formatRelativeTime(data.checkedAt)}
           </span>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-        <div className="relative flex min-h-48 items-center gap-4 overflow-hidden border-b border-border/60 bg-[radial-gradient(circle_at_18%_25%,rgba(141,138,241,0.16),transparent_52%)] p-4 lg:border-b-0 lg:border-r sm:p-6">
+      <div className="grid lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+        <div className="relative flex min-h-52 items-center gap-4 overflow-hidden border-b border-border/60 bg-[radial-gradient(circle_at_18%_25%,rgba(141,138,241,0.16),transparent_52%)] p-4 lg:border-b-0 lg:border-r sm:p-6">
           <UsageRing percent={percent} />
           <div className="min-w-0 flex-1">
             <div className="font-mono text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Current cycle
+              AWS transfer · current month
             </div>
             <div className="mt-2 text-xl font-semibold tracking-[-0.025em] sm:text-3xl">
-              {formatBytes(used)} / {formatBytes(limit)}
+              {formatBytes(data.transfer.usedBytes)} / {formatBytes(allowance)}
             </div>
-            <div className="mt-1.5 text-xs text-muted-foreground">
-              Reset · {formatDate(usage.resetAt)} · us-west-2
+            <div className="mt-1.5 text-xs leading-5 text-muted-foreground">
+              In {formatBytes(data.transfer.networkInBytes)} · Out{' '}
+              {formatBytes(data.transfer.networkOutBytes)}
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              Reset · {formatDate(data.transfer.resetAt)} · {data.region}
+              {data.availabilityZone ? ` · ${data.availabilityZone}` : ''}
             </div>
             <div className="mt-3 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
-              {usage.source === 'lightsail-local-counter'
-                ? 'local interface counter'
-                : usage.source ?? 'usage source unavailable'}
+              {data.poolSize > 1
+                ? `${data.poolSize} matching bundle instances pooled`
+                : '1 instance · AWS Lightsail metrics'}
             </div>
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 xl:grid-cols-4">
-          <div className="border-b border-border/60 sm:border-r xl:border-b-0">
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3">
+          <div className="border-b border-border/60 sm:border-r">
             <Stat
               label="Remaining"
-              value={formatBytes(remaining)}
-              detail="of this month's allowance"
+              value={formatBytes(data.transfer.remainingBytes)}
+              detail={`${formatBytes(dailyRoom)} / day · ${daysLeft ?? '—'}d to reset`}
+            />
+          </div>
+          <div className="border-b border-border/60 xl:border-r">
+            <Stat
+              label="24h traffic"
+              value={formatBytes(data.transfer.last24hBytes)}
+              detail={`in ${formatBytes(data.transfer.last24hInBytes)} · out ${formatBytes(data.transfer.last24hOutBytes)}`}
+            />
+          </div>
+          <div className="border-b border-border/60 sm:border-r xl:border-r-0">
+            <Stat
+              label="CPU · 24h"
+              value={formatPercent(data.cpu.average24h)}
+              detail={`peak ${formatPercent(data.cpu.maximum24h)}`}
             />
           </div>
           <div className="border-b border-border/60 xl:border-b-0 xl:border-r">
             <Stat
-              label="24h traffic"
-              value={formatBytes(traffic24h)}
-              detail="ingress + egress observed"
+              label="Burst capacity"
+              value={formatPercent(data.burst.latestPercent)}
+              detail={`24h avg ${formatPercent(data.burst.average24h)} · peak ${formatPercent(data.burst.maximum24h)}`}
             />
           </div>
           <div className="border-b border-border/60 sm:border-b-0 sm:border-r">
             <Stat
-              label="Daily room"
-              value={formatBytes(dailyRoom)}
-              detail={daysLeft ? `${daysLeft}d until reset` : 'reset unavailable'}
+              label="Plan"
+              value={planLabel(data)}
+              detail={`${data.plan.diskGb ?? '—'} GB SSD · pool × ${data.poolSize}`}
             />
           </div>
           <div>
             <Stat
-              label="Services"
-              value={`${xray === 'active' ? 'Xray ✓' : 'Xray ?'} · ${hysteria === 'active' ? 'HY2 ✓' : 'HY2 ?'}`}
-              detail={errors.length > 0 ? `${errors.length} reporter warning${errors.length === 1 ? '' : 's'}` : 'TCP + UDP endpoints'}
+              label="Endpoints"
+              value={endpointLabel(data)}
+              detail={`${data.staticIp ? 'static IPv4' : 'dynamic IPv4'} · status failures ${data.statusCheckFailures24h ?? '—'}`}
             />
           </div>
+        </div>
+      </div>
+
+      <div className="grid border-t border-border/60 text-xs text-muted-foreground sm:grid-cols-2">
+        <div className="border-b border-border/60 px-4 py-3 sm:border-b-0 sm:border-r">
+          <span className="font-mono text-[9px] uppercase tracking-[0.12em]">
+            Billing MTD
+          </span>{' '}
+          <span className="font-semibold text-foreground">
+            {formatUsd(data.billing?.costUsd)}
+          </span>{' '}
+          · {billingTransfer}
+          {data.billing?.estimated ? ' · estimated' : ''}
+        </div>
+        <div className="px-4 py-3">
+          <span className="font-mono text-[9px] uppercase tracking-[0.12em]">
+            Instance
+          </span>{' '}
+          <span className="font-semibold text-foreground">{data.instanceName}</span>
+          {data.blueprintName ? ` · ${data.blueprintName}` : ''}
+          {data.publicIpAddress ? ` · ${data.publicIpAddress}` : ''}
         </div>
       </div>
     </section>
