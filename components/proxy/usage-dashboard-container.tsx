@@ -5,15 +5,9 @@ import type {
   ProxyHealthSample,
 } from '@/app/lib/proxy-health-store';
 import { readProxyHealth } from '@/app/lib/proxy-health-store';
-import { unstable_cache } from 'next/cache';
+import { headers } from 'next/headers';
 import { LightsailUsageCard } from './lightsail-usage-card';
 import { UsageDashboard } from './usage-dashboard';
-
-const readCachedProxyHealth = unstable_cache(
-  () => readProxyHealth('bandwagon-la', 35),
-  ['proxy-dashboard-bandwagon-la-v2'],
-  { revalidate: 60 }
-);
 
 function usageLimitBytes() {
   const gb = Number(process.env.PROXY_USAGE_30D_LIMIT_GB ?? '1024');
@@ -76,8 +70,13 @@ function StateCard({
 }
 
 export async function UsageDashboardContainer() {
+  // The dashboard intentionally reads live provider state and the current clock.
+  // Touch request data first so Next.js treats this route as request-dynamic
+  // instead of attempting to prerender it during a Vercel production build.
+  await headers();
+
   const [result, lightsailResult] = await Promise.all([
-    readCachedProxyHealth(),
+    readProxyHealth('bandwagon-la', 35),
     readLightsailAwsDashboard(),
   ]);
 
