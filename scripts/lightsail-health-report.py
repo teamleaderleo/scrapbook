@@ -91,7 +91,8 @@ def write_state(value: dict[str, Any]) -> None:
 def current_usage(rx_bytes: int, tx_bytes: int, checked_at: datetime) -> int:
     state = read_state()
     current_month = month_key(checked_at)
-    seed = max(0, int(USAGE_SEED_GB * 1024**3))
+    first_sample = not state
+    seed = max(0, int(USAGE_SEED_GB * 1024**3)) if first_sample else 0
 
     if state.get("month") != current_month:
         used_bytes = seed
