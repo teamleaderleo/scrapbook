@@ -24,16 +24,6 @@ function formatPercent(value: number | null | undefined) {
   return `${Math.round(value)}%`;
 }
 
-function formatUsd(value: number | null | undefined) {
-  if (!isFiniteNumber(value)) return '—';
-  return `$${value.toFixed(value < 10 ? 2 : 1)}`;
-}
-
-function formatGb(value: number | null | undefined) {
-  if (!isFiniteNumber(value)) return '—';
-  return `${value.toFixed(value < 10 ? 2 : 1)} GB`;
-}
-
 function formatDate(value: string | null | undefined) {
   if (!value) return '—';
   const date = new Date(value);
@@ -121,24 +111,11 @@ function Stat({
         {label}
       </div>
       <div className="mt-2 text-xl font-semibold tracking-tight">{value}</div>
-      <div className="mt-1 text-xs leading-5 text-muted-foreground">{detail}</div>
+      <div className="mt-1 text-xs leading-5 text-muted-foreground">
+        {detail}
+      </div>
     </div>
   );
-}
-
-function endpointLabel(data: LightsailAwsSnapshot) {
-  const tcp = data.ports.tcp443 ? 'TCP443 ✓' : 'TCP443 ?';
-  const udp = data.ports.udp443 ? 'UDP443 ✓' : 'UDP443 ?';
-  return `${tcp} · ${udp}`;
-}
-
-function planLabel(data: LightsailAwsSnapshot) {
-  const pieces = [
-    isFiniteNumber(data.plan.priceUsd) ? `$${data.plan.priceUsd}/mo` : null,
-    isFiniteNumber(data.plan.ramGb) ? `${data.plan.ramGb} GB RAM` : null,
-    isFiniteNumber(data.plan.cpuCount) ? `${data.plan.cpuCount} vCPU` : null,
-  ].filter((piece): piece is string => Boolean(piece));
-  return pieces.join(' · ') || data.plan.bundleId || '—';
 }
 
 export function LightsailUsageCard({ data }: { data: LightsailAwsSnapshot }) {
@@ -163,12 +140,6 @@ export function LightsailUsageCard({ data }: { data: LightsailAwsSnapshot }) {
     data.statusCheckFailures24h === 0 &&
     data.ports.tcp443 &&
     data.ports.udp443;
-  const billingTransfer = data.billing
-    ? `billing in ${formatGb(data.billing.transferInGb)} · out ${formatGb(data.billing.transferOutGb)} · overage ${formatGb(data.billing.overageOutGb)}`
-    : data.billingError
-      ? 'Cost Explorer permission unavailable'
-      : 'Cost Explorer unavailable';
-
   return (
     <section className="overflow-hidden rounded-[1.5rem] border border-border/70 bg-background/78">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-4 py-3">
@@ -216,70 +187,28 @@ export function LightsailUsageCard({ data }: { data: LightsailAwsSnapshot }) {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-2 xl:grid-cols-3">
-          <div className="border-b border-border/60 sm:border-r">
+        <div className="grid sm:grid-cols-3">
+          <div className="border-b border-border/60 sm:border-b-0 sm:border-r">
             <Stat
               label="Remaining"
               value={formatBytes(data.transfer.remainingBytes)}
               detail={`${formatBytes(dailyRoom)} / day · ${daysLeft ?? '—'}d to reset`}
             />
           </div>
-          <div className="border-b border-border/60 xl:border-r">
+          <div className="border-b border-border/60 sm:border-b-0 sm:border-r">
             <Stat
               label="24h traffic"
               value={formatBytes(data.transfer.last24hBytes)}
               detail={`in ${formatBytes(data.transfer.last24hInBytes)} · out ${formatBytes(data.transfer.last24hOutBytes)}`}
             />
           </div>
-          <div className="border-b border-border/60 sm:border-r xl:border-r-0">
+          <div>
             <Stat
               label="CPU · 24h"
               value={formatPercent(data.cpu.average24h)}
               detail={`peak ${formatPercent(data.cpu.maximum24h)}`}
             />
           </div>
-          <div className="border-b border-border/60 xl:border-b-0 xl:border-r">
-            <Stat
-              label="Burst capacity"
-              value={formatPercent(data.burst.latestPercent)}
-              detail={`24h avg ${formatPercent(data.burst.average24h)} · peak ${formatPercent(data.burst.maximum24h)}`}
-            />
-          </div>
-          <div className="border-b border-border/60 sm:border-b-0 sm:border-r">
-            <Stat
-              label="Plan"
-              value={planLabel(data)}
-              detail={`${data.plan.diskGb ?? '—'} GB SSD · pool × ${data.poolSize}`}
-            />
-          </div>
-          <div>
-            <Stat
-              label="Endpoints"
-              value={endpointLabel(data)}
-              detail={`${data.staticIp ? 'static IPv4' : 'dynamic IPv4'} · status failures ${data.statusCheckFailures24h ?? '—'}`}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="grid border-t border-border/60 text-xs text-muted-foreground sm:grid-cols-2">
-        <div className="border-b border-border/60 px-4 py-3 sm:border-b-0 sm:border-r">
-          <span className="font-mono text-[9px] uppercase tracking-[0.12em]">
-            Billing MTD
-          </span>{' '}
-          <span className="font-semibold text-foreground">
-            {formatUsd(data.billing?.costUsd)}
-          </span>{' '}
-          · {billingTransfer}
-          {data.billing?.estimated ? ' · estimated' : ''}
-        </div>
-        <div className="px-4 py-3">
-          <span className="font-mono text-[9px] uppercase tracking-[0.12em]">
-            Instance
-          </span>{' '}
-          <span className="font-semibold text-foreground">{data.instanceName}</span>
-          {data.blueprintName ? ` · ${data.blueprintName}` : ''}
-          {data.publicIpAddress ? ` · ${data.publicIpAddress}` : ''}
         </div>
       </div>
     </section>
