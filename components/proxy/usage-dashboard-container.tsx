@@ -1,3 +1,4 @@
+import { readLightsailAwsDashboard } from '@/app/lib/lightsail-aws';
 import type {
   ProxyHealthPayload,
   ProxyHealthReadResult,
@@ -11,12 +12,6 @@ import { UsageDashboard } from './usage-dashboard';
 const readCachedProxyHealth = unstable_cache(
   () => readProxyHealth('bandwagon-la', 35),
   ['proxy-dashboard-bandwagon-la-v2'],
-  { revalidate: 60 }
-);
-
-const readCachedLightsailHealth = unstable_cache(
-  () => readProxyHealth('lightsail-oregon', 35),
-  ['proxy-dashboard-lightsail-oregon-v1'],
   { revalidate: 60 }
 );
 
@@ -83,7 +78,7 @@ function StateCard({
 export async function UsageDashboardContainer() {
   const [result, lightsailResult] = await Promise.all([
     readCachedProxyHealth(),
-    readCachedLightsailHealth(),
+    readLightsailAwsDashboard(),
   ]);
 
   if (result.status === 'configuration-error') {
@@ -118,11 +113,17 @@ export async function UsageDashboardContainer() {
   const bandwagonSamples = visibleSamples(result);
   const lightsailCard =
     lightsailResult.status === 'ok' ? (
-      <LightsailUsageCard
-        status={lightsailResult.report}
-        samples={visibleSamples(lightsailResult)}
+      <LightsailUsageCard data={lightsailResult.data} />
+    ) : (
+      <StateCard
+        title="Lightsail AWS API"
+        body={
+          lightsailResult.status === 'configuration-error'
+            ? `${lightsailResult.message} The dashboard is ready for Vercel OIDC once AWS_ROLE_ARN is set.`
+            : lightsailResult.message
+        }
       />
-    ) : null;
+    );
 
   return (
     <div className="grid gap-3">
