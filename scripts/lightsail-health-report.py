@@ -141,16 +141,18 @@ def service_status(name: str) -> str:
 def build_payload() -> dict[str, Any]:
     checked_at = now()
     errors: list[str] = []
+    state = read_state()
 
     try:
         rx_bytes = read_counter("rx_bytes")
         tx_bytes = read_counter("tx_bytes")
+        used_bytes = current_usage(rx_bytes, tx_bytes, checked_at)
     except Exception as exc:  # noqa: BLE001 - reporter errors are dashboard data
-        rx_bytes = 0
-        tx_bytes = 0
+        rx_bytes = as_nonnegative_int(state.get("last_rx"))
+        tx_bytes = as_nonnegative_int(state.get("last_tx"))
+        used_bytes = as_nonnegative_int(state.get("used_bytes"))
         errors.append(f"interface counter read failed: {exc}")
 
-    used_bytes = current_usage(rx_bytes, tx_bytes, checked_at)
     limit_bytes = max(0, int(TRANSFER_LIMIT_GB * 1024**3))
     services = {
         "xray": service_status("xray"),
