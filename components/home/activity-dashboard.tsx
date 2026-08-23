@@ -240,6 +240,9 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
               onPreviewDateChange={setPreviewDate}
             />
           </div>
+          <div className="min-w-0 lg:col-start-1 lg:row-start-2">
+            <ScrapbookPet activity={activity.today} updating={updating} />
+          </div>
           <div className="min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1">
             <ActivityScoreboard
               score={displayDay.count}
@@ -248,9 +251,6 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
               weekTotal={activity.weekTotal}
               yearTotal={activity.yearTotal}
             />
-          </div>
-          <div className="min-w-0 lg:col-start-1 lg:row-start-2">
-            <ScrapbookPet activity={activity.today} updating={updating} />
           </div>
         </>
       )}
