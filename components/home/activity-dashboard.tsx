@@ -230,28 +230,28 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
         <UnavailableActivity />
       ) : (
         <>
-          <ActivityGrid
-            className="lg:col-start-1 lg:row-start-1"
-            days={activity.days}
-            unit={activity.unit}
-            generatedAt={activity.generatedAt}
-            selectedDate={resolvedSelectedDate}
-            onSelectedDateChange={setSelectedDate}
-            onPreviewDateChange={setPreviewDate}
-          />
-          <ActivityScoreboard
-            className="lg:col-start-2 lg:row-span-2 lg:row-start-1"
-            score={displayDay.count}
-            scoreDate={displayDay.date}
-            scoreLabel={formatScoreDate(displayDay.date, displayIsToday)}
-            weekTotal={activity.weekTotal}
-            yearTotal={activity.yearTotal}
-          />
-          <ScrapbookPet
-            className="lg:col-start-1 lg:row-start-2"
-            activity={activity.today}
-            updating={updating}
-          />
+          <div className="min-w-0 lg:col-start-1 lg:row-start-1">
+            <ActivityGrid
+              days={activity.days}
+              unit={activity.unit}
+              generatedAt={activity.generatedAt}
+              selectedDate={resolvedSelectedDate}
+              onSelectedDateChange={setSelectedDate}
+              onPreviewDateChange={setPreviewDate}
+            />
+          </div>
+          <div className="min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+            <ActivityScoreboard
+              score={displayDay.count}
+              scoreDate={displayDay.date}
+              scoreLabel={formatScoreDate(displayDay.date, displayIsToday)}
+              weekTotal={activity.weekTotal}
+              yearTotal={activity.yearTotal}
+            />
+          </div>
+          <div className="min-w-0 lg:col-start-1 lg:row-start-2">
+            <ScrapbookPet activity={activity.today} updating={updating} />
+          </div>
         </>
       )}
     </div>
