@@ -1,15 +1,16 @@
-import ViewportPageShell from '@/components/viewport-page-shell';
 import { ScrapbookRelated } from '@/components/scrapbook-related';
+import { CensorReveal } from '@/components/ui/censor-reveal';
+import ViewportPageShell from '@/components/viewport-page-shell';
 import {
   botDeskEntries,
   getBotDeskDocument,
   getBotDeskEntry,
 } from '@/lib/bot-desk';
+import { getRelatedScrapbookRefs } from '@/lib/scrapbook-relations';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
-import { getRelatedScrapbookRefs } from '@/lib/scrapbook-relations';
 
 export function generateStaticParams() {
   return botDeskEntries.map(entry => ({ slug: entry.slug }));
@@ -92,10 +93,10 @@ export default async function BotDeskArticlePage({
               ) : null}
             </div>
             <h1 className="mt-4 max-w-5xl font-serif text-[clamp(3.6rem,9vw,7.5rem)] font-semibold leading-[0.86] tracking-[-0.06em]">
-              {entry.title}
+              <CensorReveal text={entry.title} focusable />
             </h1>
             <p className="mt-6 max-w-3xl font-serif text-xl leading-snug text-foreground/75 sm:text-2xl">
-              {entry.blurb}
+              <CensorReveal text={entry.blurb} focusable />
             </p>
           </div>
 
