@@ -8,9 +8,13 @@ const result = classifyCiPaths(paths);
 process.stdout.write(`mode=${result.mode}\n`);
 process.stdout.write(`run_verify=${result.runVerify ? 'true' : 'false'}\n`);
 process.stdout.write(`run_browser=${result.runBrowser ? 'true' : 'false'}\n`);
+process.stdout.write(`browser_groups=${result.browserGroups.join(',')}\n`);
 process.stdout.write(`reason=${result.reason}\n`);
 
 if (process.env.GITHUB_STEP_SUMMARY) {
+  const groups = result.browserGroups.length
+    ? `\n\nBrowser groups: ${result.browserGroups.map(group => `\`${group}\``).join(', ')}`
+    : '';
   const relevant = result.browserRelevantPaths.length
     ? `\n\nBrowser-relevant paths:\n${result.browserRelevantPaths
         .map(path => `- \`${path}\``)
@@ -24,6 +28,6 @@ if (process.env.GITHUB_STEP_SUMMARY) {
 
   fs.appendFileSync(
     process.env.GITHUB_STEP_SUMMARY,
-    `### CI classification: ${result.mode}\n\n${result.reason}${relevant}${independent}\n`
+    `### CI classification: ${result.mode}\n\n${result.reason}${groups}${relevant}${independent}\n`
   );
 }
