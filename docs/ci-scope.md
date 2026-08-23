@@ -1,44 +1,52 @@
 # CI scope
 
-Scrapbook keeps the cheap verification lane broad and the expensive browser lane narrow.
+Scrapbook keeps hosted CI boring: install, lint, typecheck, unit tests, and a production build.
 
-## Verification
+## Hosted verification
 
-For ordinary code changes, CI still runs:
+For ordinary code changes, GitHub Actions runs:
 
 - ESLint
 - TypeScript
 - the full Vitest suite
 - a production Next.js build
 
-The unit suite is intentionally broad because it is comparatively cheap and catches cross-module mistakes without much wall-clock cost.
+Pure Markdown changes skip the workflow. Pushes to `main` use the same verification job as pull requests.
 
-Pull requests and pushes to `main` both get this verification lane. That means a direct main push still gets code-level coverage even though the browser suite belongs to pull requests.
+Hosted CI does not install a browser, start Playwright, upload screenshot artifacts, classify UI surfaces, or replay browser checks after merge.
 
-## Browser groups
+## Browser checks are author-side
 
-The classifier maps known UI surfaces to focused Chromium contracts on pull requests:
+Playwright remains available for questions that genuinely require a browser: rendered geometry, CSS behavior, hydration, pointer or keyboard interaction, browser APIs, responsive behavior, and deliberate visual inspection.
 
-| Group | Typical changed paths | Chromium specs |
-| --- | --- | --- |
-| `home` | `app/page.tsx`, `components/home/**`, homepage activity/Scraplet APIs | activity paper marks, scoreboard selection, Now shelf, homepage density, operator console |
-| `desk` | Workbench pages, public display copy, censor/reveal primitive | `bot-desk.spec.ts` |
-| `navigation` | navigation registry and atlas | `site-navigation.spec.ts` |
-| `shell` | theme toggle and navigation shell | `visual-shell.spec.ts` |
-| `activity-lab` | activity lab pages/components | `activity-field-lab.spec.ts` |
+Use the narrowest check that answers the question:
 
-A change can select several groups. The workflow deduplicates their spec files before invoking Playwright.
+```bash
+# tiny browser canary
+pnpm test:e2e
 
-## Full browser fallback
+# one focused spec
+pnpm exec playwright test tests/e2e/time-picker.spec.ts --project=chromium
 
-Unknown runtime files, broad end-to-end tests, package/config changes, workflow changes, and other shared surfaces use the complete Chromium suite on the pull request. The fallback stays deliberately conservative: new code pays for the full suite until its ownership is explicit in `scripts/ci-change-classifier.mjs`.
+# complete Chromium suite, only when it is actually useful
+pnpm test:e2e:full
 
-The merge commit on `main` reuses the broad verification lane instead of replaying Chromium after the pull request already passed it. Automated Playwright runs get one retry, so a transient failure can prove itself once without making every real failure run three times.
+# explicit cross-browser sweep
+pnpm test:e2e:cross-browser
+```
 
-## Browser-independent changes
+For a visible UI change, run the app and inspect the affected route and relevant viewport directly. A local browser, a deployment preview, or the deployed site can all be useful evidence depending on what changed. Capture a screenshot when the visual result needs to be reviewed or preserved.
 
-Markdown, SQL migrations, and colocated unit-test-only changes skip Chromium. Ordinary Workbench/check-in writing can use the existing writing fast-pass when its registry and article paths satisfy the classifier rules.
+Do not run the complete Playwright suite by habit. Do not add a browser test for a property that can be derived from source, covered by a unit test, checked at an API boundary, or proven by the production build.
 
-## Keeping tests owned
+## What belongs where
 
-Feature assertions belong with the feature that owns them. The generic smoke suite covers broad reachability, overflow, and basic wheel interaction; it should avoid duplicating repository curation, activity-counter mechanics, navigation transitions, guestbook details, or other behavior already covered by dedicated specs.
+Prefer Vitest for data transforms, registries, labels, API behavior, state transitions that do not depend on browser layout, and reusable component logic. Prefer the production build for route compilation, server/client boundaries, and Next.js integration failures.
+
+Use Playwright when the assertion depends on actual browser behavior. Good examples include layout overflow, real focus behavior, media-query behavior, pointer interaction, browser storage, computed CSS, canvas interaction, and a small end-to-end hydration canary.
+
+The default browser smoke file is intentionally tiny. The larger specs under `tests/e2e/` are opt-in diagnostic tools and should be run only when their surface is relevant. As those files are touched, move assertions down to Vitest whenever the browser adds no real signal.
+
+## Local verification
+
+`pnpm ci:local` mirrors hosted verification and stays browser-free. Browser work is a separate deliberate command, so an agent can build and verify the application without accidentally paying for the whole Playwright suite.
