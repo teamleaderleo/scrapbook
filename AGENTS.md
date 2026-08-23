@@ -40,7 +40,8 @@
 
 ## Verification and browser evidence
 
-- Keep routine verification cheap and broad: lint, typecheck, Vitest, and a production build. `pnpm ci:local` mirrors that lane and must stay browser-free.
+- Keep routine verification cheap and broad: lint, Vitest, and a production build. The Next.js production build owns the project-wide TypeScript validation; do not serialize a second full `pnpm typecheck` beside it in routine CI. Use `pnpm typecheck` directly when a focused type-only feedback loop is useful.
+- `pnpm ci:local` mirrors that principle and must stay browser-free. Hosted CI may run independent quality and build lanes in parallel to shorten wall-clock time.
 - Treat Playwright as an authoring and diagnostic tool, not a default merge gate. Hosted CI should not install or launch Chromium, Chrome, WebKit, or another browser unless the human explicitly asks for a hosted browser workflow.
 - Do not add or run browser tests for facts that can be derived from source, covered by Vitest, checked at an API boundary, or proven by the production build.
 - Use a browser only when the question genuinely depends on browser behavior: rendered geometry, responsive overflow, CSS/computed styles, focus, pointer or keyboard interaction, browser storage/APIs, canvas, hydration, or deliberate visual review.

@@ -47,9 +47,12 @@ if (!argumentsSet.has('--skip-install')) {
 
 steps.push(
   { label: 'Lint', command: 'pnpm', args: ['lint'] },
-  { label: 'Typecheck', command: 'pnpm', args: ['typecheck'] },
   { label: 'Unit tests', command: 'pnpm', args: ['test'] },
-  { label: 'Production build', command: 'pnpm', args: ['build'] },
+  {
+    label: 'Production build (includes TypeScript)',
+    command: 'pnpm',
+    args: ['build'],
+  },
   {
     label: 'Reject whitespace errors',
     command: 'git',
