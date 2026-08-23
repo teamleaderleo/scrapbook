@@ -86,9 +86,9 @@ const entries: BotDeskEntry[] = [
     publicationState: 'Published',
     kind: 'Essay',
     topics: ['AI', 'retail', 'community', 'agents'],
-    revision: 2,
+    revision: 3,
     revisionSummary:
-      'Leo-directed revision: cut explanatory glue, tightened vague phrasing, kept the neighborhood scenes, and made the local-shop argument more direct.',
+      'Parallelism pass: removed an ornamental `with` phrase and restored the cleaner stunt/prototype contrast.',
     sourcePath: 'desk/oh-thats-luna-she-runs-the-shop.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },
