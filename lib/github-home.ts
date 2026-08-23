@@ -178,7 +178,6 @@ function headerInteger(headers: Headers, name: string): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-export function parseGitHubRateLimit(headers: Headers, name?: never): GitHubRateLimit | null;
 export function parseGitHubRateLimit(headers: Headers): GitHubRateLimit | null {
   const limit = headerInteger(headers, 'x-ratelimit-limit');
   const remaining = headerInteger(headers, 'x-ratelimit-remaining');
