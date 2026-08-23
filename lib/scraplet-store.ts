@@ -9,7 +9,7 @@ function petCountFromDatabase(value: unknown) {
 }
 
 export async function getScrapletPetCount() {
-  const rows = await client<[{ pet_count: string }?]>`
+  const rows = await client<{ pet_count: string }[]>`
     SELECT pet_count::text AS pet_count
     FROM public.scraplet_pet_counter
     WHERE id = true
@@ -20,7 +20,7 @@ export async function getScrapletPetCount() {
 }
 
 export async function incrementScrapletPetCount() {
-  const rows = await client<[{ pet_count: string }]>`
+  const rows = await client<{ pet_count: string }[]>`
     INSERT INTO public.scraplet_pet_counter (id, pet_count, updated_at)
     VALUES (true, 1, now())
     ON CONFLICT (id) DO UPDATE
