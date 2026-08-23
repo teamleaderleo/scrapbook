@@ -192,37 +192,19 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
     description: 'Source repositories.',
     items: [
       {
-        id: 'scrapbook-repository',
-        href: 'https://github.com/teamleaderleo/scrapbook',
-        label: 'Scrapbook',
-        description: 'Source for this site.',
+        id: 'preflight-repository',
+        href: 'https://github.com/teamleaderleo/preflight',
+        label: 'Preflight',
+        description: 'Performance launcher for modded Starsector.',
         group: 'repositories',
         surface: 'external',
         external: true,
       },
       {
-        id: 'fieldwork-repository',
-        href: 'https://github.com/teamleaderleo/fieldwork',
-        label: 'Fieldwork',
-        description: 'Codebase investigations and contributions.',
-        group: 'repositories',
-        surface: 'external',
-        external: true,
-      },
-      {
-        id: 'linux-fieldwork-repository',
-        href: 'https://github.com/teamleaderleo/linux-fieldwork',
-        label: 'Linux fieldwork',
-        description: 'Linux and kernel studies.',
-        group: 'repositories',
-        surface: 'external',
-        external: true,
-      },
-      {
-        id: 'smolrunner-repository',
-        href: 'https://github.com/teamleaderleo/smolrunner',
-        label: 'Smolrunner',
-        description: 'Host-work runner.',
+        id: 'stensibly-repository',
+        href: 'https://github.com/teamleaderleo/stensibly',
+        label: 'Stensibly',
+        description: 'Agent coordination system.',
         group: 'repositories',
         surface: 'external',
         external: true,
@@ -285,7 +267,7 @@ export const homeRoomNavigationItems = siteNavigationItems.filter(
 );
 export const indexedNavigationItems = siteNavigationItems.filter(
   (item): item is SiteNavigationItem & { sitemap: SiteSitemapEntry } =>
-    Boolean(item.sitemap)
+  Boolean(item.sitemap)
 );
 export const nonPublicNavigationItems = siteNavigationItems.filter(
   item => item.surface === 'private' || item.surface === 'operational'
