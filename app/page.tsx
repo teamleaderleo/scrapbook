@@ -195,15 +195,6 @@ function HomeActivitySkeleton() {
           </div>
         </section>
 
-        <section className="min-h-[24rem] rounded-[1.25rem] border border-border/70 bg-card p-5 shadow-[0_16px_38px_rgba(24,24,26,0.08)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <Skeleton className="h-3 w-24" />
-          <Skeleton className="mt-8 h-16 w-3/5 rounded-xl" />
-          <div className="mt-6 grid grid-cols-2 gap-2">
-            <Skeleton className="h-14 rounded-xl" />
-            <Skeleton className="h-14 rounded-xl" />
-          </div>
-        </section>
-
         <section className="min-h-[13rem] rounded-[1.1rem] border border-border/70 bg-card p-4 shadow-[0_10px_24px_rgba(35,31,26,0.07)] dark:shadow-[0_12px_28px_rgba(0,0,0,0.22)] lg:col-start-1 lg:row-start-2">
           <div className="flex items-center justify-between gap-3">
             <Skeleton className="h-2.5 w-24" />
@@ -211,6 +202,15 @@ function HomeActivitySkeleton() {
           </div>
           <Skeleton className="mx-auto mt-4 h-24 w-36 rounded-2xl" />
           <Skeleton className="mt-3 h-3 w-2/3" />
+        </section>
+
+        <section className="min-h-[24rem] rounded-[1.25rem] border border-border/70 bg-card p-5 shadow-[0_16px_38px_rgba(24,24,26,0.08)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="mt-8 h-16 w-3/5 rounded-xl" />
+          <div className="mt-6 grid grid-cols-2 gap-2">
+            <Skeleton className="h-14 rounded-xl" />
+            <Skeleton className="h-14 rounded-xl" />
+          </div>
         </section>
       </div>
 
