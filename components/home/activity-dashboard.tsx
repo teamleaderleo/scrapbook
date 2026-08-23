@@ -5,6 +5,7 @@ import {
   type ActivityGridDay,
 } from '@/components/home/activity-grid';
 import { ActivityScoreboard } from '@/components/home/activity-scoreboard';
+import { ScrapbookPet } from '@/components/home/scrapbook-pet';
 import { GITHUB_ACTIVITY_CLIENT_REFRESH_SECONDS } from '@/lib/github-activity-policy';
 import { useEffect, useRef, useState } from 'react';
 
@@ -217,7 +218,7 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
 
   return (
     <div
-      className="relative grid min-w-0 items-stretch gap-3.5 sm:gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(21rem,0.65fr)]"
+      className="relative grid min-w-0 items-stretch gap-3.5 sm:gap-4 lg:grid-cols-[minmax(21rem,0.65fr)_minmax(0,1.35fr)] lg:grid-rows-[auto_auto]"
       data-home-activity-dashboard
       data-home-activity-source={activity.source}
     >
@@ -229,22 +230,27 @@ export function ActivityDashboard({ initial }: { initial: ActivitySnapshot }) {
         <UnavailableActivity />
       ) : (
         <>
-          <ActivityScoreboard
-            score={displayDay.count}
-            scoreDate={displayDay.date}
-            scoreLabel={formatScoreDate(displayDay.date, displayIsToday)}
-            todayActivity={activity.today}
-            weekTotal={activity.weekTotal}
-            yearTotal={activity.yearTotal}
-            updating={updating}
-          />
           <ActivityGrid
+            className="lg:col-start-1 lg:row-start-1"
             days={activity.days}
             unit={activity.unit}
             generatedAt={activity.generatedAt}
             selectedDate={resolvedSelectedDate}
             onSelectedDateChange={setSelectedDate}
             onPreviewDateChange={setPreviewDate}
+          />
+          <ActivityScoreboard
+            className="lg:col-start-2 lg:row-span-2 lg:row-start-1"
+            score={displayDay.count}
+            scoreDate={displayDay.date}
+            scoreLabel={formatScoreDate(displayDay.date, displayIsToday)}
+            weekTotal={activity.weekTotal}
+            yearTotal={activity.yearTotal}
+          />
+          <ScrapbookPet
+            className="lg:col-start-1 lg:row-start-2"
+            activity={activity.today}
+            updating={updating}
           />
         </>
       )}
