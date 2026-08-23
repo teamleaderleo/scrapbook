@@ -141,6 +141,37 @@ for (const viewport of desktopViewports) {
   });
 }
 
+test('keeps the latest Workbench swear behind a hover reveal', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const response = await page.goto('/');
+  expect(response?.ok()).toBe(true);
+
+  const latestWriting = page.locator('[data-home-now-kind="latest writing"]');
+  await expect(latestWriting).toBeVisible({ timeout: 15_000 });
+  const spoiler = latestWriting.locator('[data-swear-spoiler]').first();
+  await expect(spoiler).toBeVisible();
+  await expect(spoiler).toHaveAttribute(
+    'title',
+    'swear jar · hover to reveal'
+  );
+
+  const concealed = await spoiler.evaluate(element => {
+    const style = getComputedStyle(element);
+    return { color: style.color, filter: style.filter };
+  });
+  await spoiler.hover();
+  await page.waitForTimeout(180);
+  const revealed = await spoiler.evaluate(element => {
+    const style = getComputedStyle(element);
+    return { color: style.color, filter: style.filter };
+  });
+
+  expect(revealed.color).not.toBe(concealed.color);
+  expect(revealed.filter).not.toBe(concealed.filter);
+});
+
 test('moves through the desktop layout transition without inflating the activity cells', async ({
   page,
 }) => {
