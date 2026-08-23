@@ -4,17 +4,16 @@ import { spawnSync } from 'node:child_process';
 import process from 'node:process';
 
 const argumentsSet = new Set(process.argv.slice(2));
-const supportedArguments = new Set([
-  '--skip-install',
-  '--skip-e2e',
-  '--webkit',
-]);
+const supportedArguments = new Set(['--skip-install']);
 const unknownArguments = [...argumentsSet].filter(
   argument => !supportedArguments.has(argument)
 );
 
 if (unknownArguments.length > 0) {
   console.error(`Unknown local CI option: ${unknownArguments.join(', ')}`);
+  console.error(
+    'Browser checks are explicit: use pnpm test:e2e, pnpm test:e2e:full, or a targeted Playwright command.'
+  );
   process.exit(2);
 }
 
@@ -42,7 +41,7 @@ if (!argumentsSet.has('--skip-install')) {
   steps.push({
     label: 'Install locked dependencies',
     command: 'pnpm',
-    args: ['install', '--frozen-lockfile', '--reporter=silent'],
+    args: ['install', '--frozen-lockfile', '--prefer-offline', '--reporter=silent'],
   });
 }
 
@@ -57,22 +56,6 @@ steps.push(
     args: ['diff', '--check'],
   }
 );
-
-if (!argumentsSet.has('--skip-e2e')) {
-  steps.push({
-    label: 'Chromium browser tests',
-    command: 'pnpm',
-    args: ['exec', 'playwright', 'test', '--project=chromium'],
-  });
-}
-
-if (argumentsSet.has('--webkit') && !argumentsSet.has('--skip-e2e')) {
-  steps.push({
-    label: 'WebKit browser tests',
-    command: 'pnpm',
-    args: ['exec', 'playwright', 'test', '--project=webkit'],
-  });
-}
 
 const startedAt = Date.now();
 
@@ -102,5 +85,5 @@ for (const [index, step] of steps.entries()) {
 
 const totalSeconds = ((Date.now() - startedAt) / 1_000).toFixed(1);
 console.log(
-  `\nLocal CI passed ${steps.length}/${steps.length} steps in ${totalSeconds}s.`
+  `\nLocal verification passed ${steps.length}/${steps.length} steps in ${totalSeconds}s.`
 );
