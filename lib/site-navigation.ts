@@ -267,7 +267,7 @@ export const homeRoomNavigationItems = siteNavigationItems.filter(
 );
 export const indexedNavigationItems = siteNavigationItems.filter(
   (item): item is SiteNavigationItem & { sitemap: SiteSitemapEntry } =>
-  Boolean(item.sitemap)
+    Boolean(item.sitemap)
 );
 export const nonPublicNavigationItems = siteNavigationItems.filter(
   item => item.surface === 'private' || item.surface === 'operational'
