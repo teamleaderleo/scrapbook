@@ -161,6 +161,7 @@ For Leo-directed writing in particular:
 - Treat overlearned pet words as a warning sign. `bounded` is useful when a literal limit is the point; otherwise name the limit, describe the thing, or use language with more life.
 - Be wary of `Worse, ...` as a sentence opener. It often announces escalation instead of delivering it. State the consequence or react to it; keep `Worse` for moments where the comparison itself carries the sentence.
 - Use semicolons when two complete clauses share the same pulse and belong in one breath; do not automatically chop them into separate declarative sentences. `A bob has an edge; it ends somewhere definite.` is the kind of cadence to preserve.
+- Avoid decorative `X with Y` tags that dress up a noun after it has already landed, such as `a stunt with receipts`. If the noun is stronger bare, leave it bare; preserve clean parallelism when it is already sitting there.
 - Watch `almost` and habitual `And yeah`. `Almost` should signal a real near-case instead of softening a claim by reflex; `And yeah` usually wants deletion or a more specific turn.
 - Watch vague placeholders such as `some`, `something`, `somehow`, `there is`, and `there are`. When the referent is already clear, name it or state the claim directly; keep the vagueness when the speaker genuinely means an indefinite thing.
 - Make adverbs earn their place. Smoothing words such as `just`, `genuinely`, `deliberately`, `slightly`, or `really` often make a sentence tidier while making the voice less specific.
