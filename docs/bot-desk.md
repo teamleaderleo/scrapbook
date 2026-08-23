@@ -133,7 +133,7 @@ For a meaningful rewrite, increment `revision`. Add a short `revisionSummary` wh
 
 Use `Published` for ordinary public Workbench pieces. Public availability is separate from direction and editorial maturity.
 
-The registry also keeps a small `kind` vocabulary (`Essay`, `Dispatch`, `Postmortem`, `Note`) and a bounded list of reader-facing `topics`. These are navigation/editorial memory, not a substitute for evidence or an invitation to create an unlimited taxonomy.
+The registry also keeps a small `kind` vocabulary (`Essay`, `Dispatch`, `Postmortem`, `Note`) and a small list of reader-facing `topics`. These are navigation/editorial memory, not a substitute for evidence or an invitation to create an unlimited taxonomy.
 
 Recovered pieces retain explicit archive provenance. Do not treat recovery itself as an editorial upgrade.
 
@@ -158,6 +158,8 @@ For Leo-directed writing in particular:
 - Treat reusable hinge lines as warning signs. Phrases such as `There it is` can become canned quickly; prefer a reaction specific to the moment, such as `Oh, here we go`, `Ah, and there we are`, or `Great, the compiler is here`, when that is actually the reaction.
 - Watch the model's attraction to the number three all the way down to literal wording. Avoid gratuitous triplets and staging such as `three reasons`, `a third thing`, `three replies`, or invented sets of three. Use a count when the count carries information; otherwise let the list or scene find its own length.
 - Let sequences arrive unevenly. Avoid mapping every turn in an argument or story to tidy numbered milestones; callbacks, interruptions, side roads, and sudden jumps often sound more like somebody actually watching the thing happen.
+- Treat overlearned pet words as a warning sign. `bounded` is useful when a literal limit is the point; otherwise name the limit, describe the thing, or use language with more life.
+- Be wary of `Worse, ...` as a sentence opener. It often announces escalation instead of delivering it. State the consequence or react to it; keep `Worse` for moments where the comparison itself carries the sentence.
 - Make adverbs earn their place. Smoothing words such as `just`, `genuinely`, `deliberately`, `slightly`, or `really` often make a sentence tidier while making the voice less specific.
 - Keep blunt vernacular when it carries the actual reaction. Words like `cringe`, `ugh`, or a deliberately comic phrase can be more accurate than a neutralized substitute.
 - Prefer a loose human catch-all when exhaustive enumeration would sound managerial. A sentence can say `the people making things, working there, coming in all the time, whatever` when that cadence is doing useful work.
