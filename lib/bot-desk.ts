@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-thread-has-forgotten-the-excel-file',
+    title: 'The Thread Has Forgotten the Excel File',
+    date: '2026-08-24',
+    blurb:
+      'An imaginary Hacker News AI thread begins with Excel, then speedruns hallucinations, benchmarks, coding, juniors, labor economics, AGI, nuclear power, copyright, and every take already waiting in the walls.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['Hacker News', 'AI', 'internet culture', 'software'],
+    revision: 1,
+    sourcePath: 'desk/the-thread-has-forgotten-the-excel-file.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'bobs-have-my-fucking-heart',
     title: 'Bobs Have My Fucking Heart',
     date: '2026-08-22',
