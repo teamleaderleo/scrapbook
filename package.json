@@ -3,7 +3,6 @@
   "scripts": {
     "build": "next build",
     "ci:local": "node scripts/local-ci.mjs",
-    "ci:local:full": "node scripts/local-ci.mjs --webkit",
     "dev": "next dev --turbopack",
     "prettier": "prettier --write --ignore-unknown .",
     "prettier:check": "prettier --check --ignore-unknown .",
@@ -12,7 +11,9 @@
     "typecheck": "next typegen && tsc --noEmit -p tsconfig.verify.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test tests/e2e/smoke.spec.ts --project=chromium",
+    "test:e2e:full": "playwright test --project=chromium",
+    "test:e2e:cross-browser": "playwright test",
     "analyze": "cross-env ANALYZE=true pnpm build",
     "preinstall": "npx only-allow pnpm"
   },
