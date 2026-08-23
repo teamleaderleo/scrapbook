@@ -5,6 +5,10 @@ type DisplayCopy = Pick<BotDeskEntry, 'title' | 'blurb'>;
 const DISPLAY_COPY_OVERRIDES: Readonly<
   Record<string, Partial<DisplayCopy>>
 > = {
+  'the-thread-has-forgotten-the-excel-file': {
+    blurb:
+      'CACHE-PROBE-HOMEPAGE-1632 · An imaginary Hacker News AI thread begins with Excel, then speedruns hallucinations, benchmarks, coding, juniors, labor economics, AGI, nuclear power, copyright, and every take already waiting in the walls.',
+  },
   'bobs-have-my-fucking-heart': {
     blurb:
       'CACHE-PROBE-1632 · Bobs fucking rule. Lose a few inches of hair and suddenly the face, jaw, neck, silhouette, and attitude all snap into focus—and Japanese styling turned that tiny cut into an entire feminine language.',
