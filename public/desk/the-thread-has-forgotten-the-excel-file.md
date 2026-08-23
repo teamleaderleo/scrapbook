@@ -7,19 +7,19 @@ At this point an AI post on Hacker News barely needs a subject. The subject is a
 Imagine the submission:
 
 > **Claude can now edit Excel files**  
-> 487 points | 312 comments
+> 487 points | 296 comments
 
 The first comment is useful.
 
 **tableflip42**
 
-> I tried this on a twelve-tab operating model. It fixed some ugly formatting, added the formulas I asked for, and found two cells where somebody had hard-coded a number into a formula column. Pretty impressive. I would still review every change, but this is already useful for tedious spreadsheet work.
+> I tried this on a twelve-tab operating model. It fixed some ugly formatting, added the formulas I asked for, cleaned up a few labels, and found two cells where somebody had hard-coded a number into a formula column. Pretty impressive. I would still review every change, but this is already useful for tedious spreadsheet work.
 
 For about four minutes, we are discussing Excel.
 
 **oldunixguy**
 
-> I gave it a workbook with named ranges and external references. It broke three formulas, invented a sheet name, and confidently told me the workbook was consistent. Took longer to inspect the damage than to do the work myself.
+> I gave it a workbook with named ranges and external references. It broke a couple formulas, invented a sheet name, and confidently told me the workbook was consistent. Took longer to inspect the damage than to do the work myself.
 
 **tableflip42**
 
@@ -33,7 +33,7 @@ For about four minutes, we are discussing Excel.
 
 > Both experiences can be true. The interesting question is the distribution of task difficulty and failure cost.
 
-There it is. The thread has achieved ignition.
+Ah, okay. We're off.
 
 Somebody now has to say that humans make mistakes too.
 
@@ -49,13 +49,13 @@ Somebody now has to say that humans make mistakes too.
 
 > Have you met humans?
 
-This gets 143 points.
+This gets 146 points.
 
-A third person enters to explain that the real issue is tool use.
+Somebody else shows up to explain that the real issue is tool use.
 
 **promptartisan**
 
-> I think a lot of the bad experiences come from asking the model to "fix the spreadsheet" instead of giving it a precise task, constraints, and a verification loop. These systems reward good decomposition.
+> I think a lot of the bad experiences come from asking the model to "fix the spreadsheet" instead of giving it a precise task and a verification loop that checks the result. These systems reward good decomposition.
 
 **cobolsaint**
 
@@ -65,9 +65,9 @@ A third person enters to explain that the real issue is tool use.
 
 > Learning to use a compiler also required learning a new tool.
 
-And now the compiler has entered the thread.
+Oh, great. The compiler is here.
 
-It was always going to enter the thread.
+Of course it is.
 
 **deterministic_ferret**
 
@@ -81,7 +81,7 @@ It was always going to enter the thread.
 
 > We are now calling a coworker who invents APIs an abstraction layer.
 
-By comment 37, the spreadsheet has become a referendum on the philosophy of tools.
+Somewhere around here the spreadsheet becomes a referendum on the philosophy of tools.
 
 Then somebody posts a benchmark.
 
@@ -113,15 +113,17 @@ Then somebody posts a benchmark.
 
 > And vibes from one failed workbook are science?
 
-At this exact moment, somebody links an arXiv paper. Somebody else has already read the appendix. A third person finds a sentence on page 47 saying the model had access to LibreOffice during evaluation, and the next twenty replies debate whether this invalidates the entire result or makes it more realistic.
+At this exact moment, somebody links an arXiv paper. Somebody else has already read the appendix. Then someone finds a sentence on page 47 saying the model had access to LibreOffice during evaluation, and the replies split over whether this ruins the result or makes it more realistic.
 
-Then comes the sentence that summons the whole field:
+Then somebody says the one fucking word that can ruin the rest of your afternoon:
 
 **scale_pilled**
 
 > The larger point is the trajectory. A year ago these models could barely do this at all.
 
-The word **trajectory** appears and the thread explodes.
+Oh, for fuck's sake. Somebody said **trajectory**.
+
+Great. We're never seeing the spreadsheet again.
 
 **diminishing_returns**
 
@@ -149,7 +151,7 @@ The word **trajectory** appears and the thread explodes.
 
 Both comments receive hundreds of points. Everybody feels seen.
 
-By comment 61, Excel has become a proxy war for software engineering.
+A little further down, Excel becomes a proxy war for software engineering.
 
 **senior_staff_plus**
 
@@ -167,11 +169,7 @@ By comment 61, Excel has become a proxy war for software engineering.
 
 > So the senior engineer gets the easy repetitive work automated and keeps the hard reasoning. Great. How does the junior become senior?
 
-Ah.
-
-The juniors.
-
-The juniors have entered.
+Ah, fuck. Here come the juniors.
 
 **apprentice_problem**
 
@@ -195,9 +193,7 @@ The juniors have entered.
 
 Nobody asked how he learned C. Everybody knew he would tell us.
 
-By comment 104, the thread is discussing whether junior developers should exist as an economic category.
-
-This naturally brings in labor economics.
+Give it a little longer and now everybody has an economics degree.
 
 **comparative_advantage**
 
@@ -223,7 +219,7 @@ This naturally brings in labor economics.
 
 > Jevons paradox still stops short of every company buying infinite software.
 
-Someone says Baumol. Somebody says induced demand. Somebody says lump-of-labor fallacy. A person with "econ" in the username appears and spends twelve comments correcting everybody's terminology, then leaves behind twelve corrections and zero forecasts anyone can check later.
+Someone says Baumol. Somebody else says induced demand. A person with "econ" in the username appears and spends twelve comments correcting everybody's terminology, then leaves behind twelve corrections and zero forecasts anyone can check later.
 
 Then salaries arrive.
 
@@ -243,17 +239,17 @@ Then salaries arrive.
 
 > Amazing how every technology discussion eventually produces a theory explaining why the speaker personally deserves a larger share of the surplus.
 
-That one gets 311 points and three angry replies from founders.
+That one gets 287 points and a small founder pile-on.
 
-The original post still concerns Excel.
+Remember Excel?
 
-The thread has moved on.
+Nobody else does.
 
-By comment 151, somebody says "stochastic parrot."
+Eventually somebody says "stochastic parrot."
 
 **parrot_skeptic**
 
-> The core limitation remains. The model predicts tokens. Token prediction gives me zero evidence that it understands the spreadsheet, the business, or the consequences of its edits.
+> The core limitation remains. The model predicts tokens. Token prediction gives me zero evidence that it understands the spreadsheet or the consequences of its edits.
 
 **predictive_brain**
 
@@ -283,13 +279,11 @@ By comment 151, somebody says "stochastic parrot."
 
 > Excel is beginning to look pretty formal from here.
 
-Somebody mentions the Chinese Room. Somebody explains that everybody misunderstands the Chinese Room. Somebody else explains that the explanation misunderstands the Systems Reply. A fourth person says consciousness is irrelevant to economic usefulness. A fifth says economic usefulness without consciousness is exactly what makes the whole thing dangerous.
+Somebody mentions the Chinese Room. Somebody explains that everybody misunderstands the Chinese Room. Somebody else explains that the explanation misunderstands the Systems Reply. Another person says consciousness is irrelevant to economic usefulness. Then someone says economic usefulness without consciousness is exactly what makes the whole thing dangerous.
 
-The thread has reached AGI.
+Ah, and there we are: AGI.
 
-It took 173 comments.
-
-A little slow for Hacker News.
+Took a while, actually. Hacker News is slipping.
 
 **pdoom_17pct**
 
@@ -315,9 +309,9 @@ A little slow for Hacker News.
 
 > There is an entire literature on why tiny probabilities times giant utilities produce absurd decisions.
 
-Now there are links to LessWrong, an old Nick Bostrom interview, a paper on corrigibility, and three comments arguing over whether any of these sources deserve to be in the same sentence.
+Now there are links to LessWrong, an old Nick Bostrom interview, a corrigibility paper, and some ancient forum post that somebody swears anticipated the entire debate. The replies immediately split over whether any of them belong in the same conversation.
 
-At comment 211, the energy person arrives.
+Somewhere deep in the wreckage, the energy person arrives.
 
 **megawatt_monk**
 
@@ -335,7 +329,7 @@ At comment 211, the energy person arrives.
 
 > Good. Build nuclear.
 
-For eighteen comments, Hacker News achieves its final form: a nuclear-power thread hiding inside an AI thread hiding inside an Excel thread.
+Beautiful. We have now achieved Hacker News's final form: a nuclear-power thread hiding inside an AI thread hiding inside an Excel thread.
 
 Then copyright arrives because copyright always arrives.
 
@@ -359,17 +353,11 @@ Then copyright arrives because copyright always arrives.
 
 > I love when programmers discover one sentence of copyright law and become maritime attorneys of the imagination.
 
-Somebody brings up books. Somebody brings up open source licenses. Somebody asks whether generated code can reproduce GPL fragments. Somebody pastes a seven-year-old court opinion. The person who posted it has misunderstood the holding. Three attorneys appear, disagree with one another, and leave.
+Somebody brings up books. Somebody brings up open source licenses. Somebody asks whether generated code can reproduce GPL fragments. Somebody pastes a seven-year-old court opinion and has misunderstood the holding. Actual attorneys eventually show up, disagree with each other, and leave.
 
-At comment 267, the open-source model person arrives to say closed labs are the real problem.
+Then the open-source model person says closed labs are the real problem. A few replies later somebody says open weights make catastrophic misuse easier. Soon somebody else says local models are the only defense against surveillance capitalism. Another person points out that running a 200-billion-parameter model locally is a peculiar definition of consumer freedom.
 
-At comment 278, someone says open weights make catastrophic misuse easier.
-
-At comment 286, somebody says local models are the only defense against surveillance capitalism.
-
-At comment 294, somebody says running a 200-billion-parameter model locally is a peculiar definition of consumer freedom.
-
-At comment 301, a person who has used the spreadsheet feature for actual spreadsheet work returns.
+And way down there, after all of that, the person who actually used the spreadsheet feature comes back.
 
 **tableflip42**
 
@@ -381,7 +369,7 @@ Zero replies.
 
 The metaphysics are elsewhere now.
 
-And then, down at the bottom, seven hours after the submission went up:
+Seven hours after the submission went up:
 
 **spreadsheet_dad**
 
