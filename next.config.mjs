@@ -32,8 +32,9 @@ const nextConfig = {
     } : false,
   },
 
-  // React Compiler is stable in Next.js 16!
-  reactCompiler: true,
+  // Performance probe: quantify the build-time cost of the Babel-based
+  // React Compiler on Next 16.0 before deciding how to handle it long-term.
+  reactCompiler: false,
 
   experimental: {
     turbopackFileSystemCacheForDev: true,
