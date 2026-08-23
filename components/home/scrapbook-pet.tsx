@@ -41,11 +41,17 @@ export function ScrapbookPet({
   const pose = updating ? 'sniffing' : activity > 0 ? 'idle' : 'napping';
 
   useEffect(() => {
+    let storedPets = 0;
     try {
-      setPets(parsePetCount(window.localStorage.getItem(PET_COUNT_STORAGE_KEY)));
+      storedPets = parsePetCount(
+        window.localStorage.getItem(PET_COUNT_STORAGE_KEY)
+      );
     } catch {
-      // Keep the in-memory counter when storage is unavailable.
+      return;
     }
+
+    const frame = window.requestAnimationFrame(() => setPets(storedPets));
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   const petScraplet = () => {
