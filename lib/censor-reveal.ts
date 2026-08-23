@@ -41,7 +41,7 @@ export function censorRuleFromWords(
   return {
     id,
     pattern: new RegExp(
-      `\\b(?:${alternatives.join('|')})\\b`,
+      `(?<![\\p{L}\\p{N}_])(?:${alternatives.join('|')})(?![\\p{L}\\p{N}_])`,
       caseSensitive ? 'gu' : 'giu'
     ),
   };
