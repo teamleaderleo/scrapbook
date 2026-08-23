@@ -25,6 +25,8 @@ describe('site navigation registry', () => {
         '/snow-globe',
         'https://github.com/teamleaderleo/preflight',
         'https://github.com/teamleaderleo/stensibly',
+        'https://github.com/teamleaderleo/smolrunner',
+        'https://github.com/teamleaderleo/cultist',
       ])
     );
     expect(hrefs).not.toContain('/blog');
