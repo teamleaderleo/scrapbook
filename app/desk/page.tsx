@@ -1,3 +1,4 @@
+import { CensorReveal } from '@/components/ui/censor-reveal';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { botDeskEntries } from '@/lib/bot-desk';
 import type { Metadata } from 'next';
@@ -91,13 +92,13 @@ export default function BotDeskPage() {
                     <h3 className="mt-3 max-w-4xl font-serif text-3xl font-semibold leading-tight tracking-[-0.025em] sm:text-4xl">
                       <Link
                         href={`/desk/${entry.slug}`}
-                        className="underline decoration-transparent underline-offset-4 transition-colors hover:decoration-current"
+                        className="group underline decoration-transparent underline-offset-4 transition-colors hover:decoration-current"
                       >
-                        {entry.title}
+                        <CensorReveal text={entry.title} />
                       </Link>
                     </h3>
                     <p className="mt-4 max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">
-                      {entry.blurb}
+                      <CensorReveal text={entry.blurb} focusable />
                     </p>
                   </div>
 
