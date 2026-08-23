@@ -115,7 +115,7 @@ jobs:
 
   e2e:
     needs: classify
-    if: needs.classify.outputs.run_browser == 'true'
+    if: github.event_name == 'pull_request' && needs.classify.outputs.run_browser == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
