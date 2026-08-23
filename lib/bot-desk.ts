@@ -67,9 +67,9 @@ const entries: BotDeskEntry[] = [
     publicationState: 'Published',
     kind: 'Essay',
     topics: ['hair', 'beauty', 'Japan', 'character design'],
-    revision: 3,
+    revision: 4,
     revisionSummary:
-      'Cadence pass: restored semicolons where clauses belonged together; removed repeated `almost` and the habitual `And yeah` closer.',
+      'Directness pass: replaced vague placeholder phrasing with the actual claim where the referent was already clear.',
     sourcePath: 'desk/bobs-have-my-fucking-heart.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },
