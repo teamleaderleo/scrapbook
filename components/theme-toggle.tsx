@@ -69,18 +69,18 @@ export function ThemeToggle({
       <span
         data-theme-sun-spark
         aria-hidden="true"
-        className="absolute left-[7px] top-[8px] h-1 w-1 rotate-45 rounded-[1px] bg-amber-500/65 opacity-80 transition-opacity duration-500 motion-safe:animate-pulse dark:opacity-0 motion-reduce:animate-none"
+        className="absolute left-[7px] top-[8px] h-1 w-1 rotate-45 rounded-[1px] bg-amber-500/65 opacity-80 transition-opacity duration-500 motion-safe:animate-pulse dark:animate-none dark:opacity-0 motion-reduce:animate-none"
       />
       <span
         data-theme-sun-spark
         aria-hidden="true"
-        className="absolute right-[7px] top-[10px] h-0.5 w-0.5 rotate-45 rounded-[1px] bg-amber-400/75 opacity-70 transition-opacity duration-500 motion-safe:animate-pulse dark:opacity-0 motion-reduce:animate-none"
+        className="absolute right-[7px] top-[10px] h-0.5 w-0.5 rotate-45 rounded-[1px] bg-amber-400/75 opacity-70 transition-opacity duration-500 motion-safe:animate-pulse dark:animate-none dark:opacity-0 motion-reduce:animate-none"
         style={{ animationDelay: '600ms' }}
       />
       <span
         data-theme-sun-spark
         aria-hidden="true"
-        className="absolute bottom-[7px] left-[9px] h-0.5 w-0.5 rotate-45 rounded-[1px] bg-orange-400/70 opacity-65 transition-opacity duration-500 motion-safe:animate-pulse dark:opacity-0 motion-reduce:animate-none"
+        className="absolute bottom-[7px] left-[9px] h-0.5 w-0.5 rotate-45 rounded-[1px] bg-orange-400/70 opacity-65 transition-opacity duration-500 motion-safe:animate-pulse dark:animate-none dark:opacity-0 motion-reduce:animate-none"
         style={{ animationDelay: '1.15s' }}
       />
 
