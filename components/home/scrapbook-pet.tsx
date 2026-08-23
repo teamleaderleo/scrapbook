@@ -1,8 +1,10 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
-import { useState } from 'react';
 import { PaperCreature } from '@/components/paper-creature';
+import { motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+
+const PET_COUNT_STORAGE_KEY = 'scrapbook:scraplet:pets:v1';
 
 const petMessages = [
   'Scraplet rustles happily.',
@@ -10,6 +12,17 @@ const petMessages = [
   'Scraplet does a tiny victory stomp.',
   'Scraplet saves you a seat at the workbench.',
 ] as const;
+
+function parsePetCount(value: string | null) {
+  if (!value) return 0;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function petCountLabel(pets: number) {
+  if (pets === 0) return 'tap to pet';
+  return `${pets.toLocaleString('en-GB')} ${pets === 1 ? 'pet' : 'pets'} total`;
+}
 
 export function ScrapbookPet({
   activity,
@@ -27,16 +40,36 @@ export function ScrapbookPet({
       : petMessages[(pets - 1) % petMessages.length];
   const pose = updating ? 'sniffing' : activity > 0 ? 'idle' : 'napping';
 
+  useEffect(() => {
+    try {
+      setPets(parsePetCount(window.localStorage.getItem(PET_COUNT_STORAGE_KEY)));
+    } catch {
+      // Keep the in-memory counter when storage is unavailable.
+    }
+  }, []);
+
+  const petScraplet = () => {
+    setPets(count => {
+      const next = count + 1;
+      try {
+        window.localStorage.setItem(PET_COUNT_STORAGE_KEY, String(next));
+      } catch {
+        // The interaction still works for this visit when storage is unavailable.
+      }
+      return next;
+    });
+  };
+
   return (
     <motion.button
       type="button"
       data-scrapbook-pet
       data-pets={pets}
-      aria-label={`Pet Scraplet, the scrapbook dinosaur. Scraplet is ${status}.`}
+      aria-label={`Pet Scraplet, the scrapbook dinosaur. Scraplet is ${status}. ${pets} lifetime pets on this browser.`}
       title={`Pet Scraplet · ${status}`}
       whileTap={reduceMotion ? undefined : { scale: 0.96 }}
-      onClick={() => setPets(count => count + 1)}
-      className="group/pet relative flex min-h-56 w-full flex-col overflow-hidden rounded-[1.1rem] border border-border/70 bg-background/48 px-4 py-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] transition-colors duration-150 hover:bg-background/68 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none sm:min-h-64"
+      onClick={petScraplet}
+      className="group/pet relative flex min-h-56 w-full flex-col overflow-hidden rounded-[1.1rem] border border-border/70 bg-background/48 px-4 py-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] transition-colors duration-150 hover:bg-background/68 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none sm:min-h-64 lg:min-h-56"
     >
       <span
         aria-hidden="true"
@@ -44,7 +77,7 @@ export function ScrapbookPet({
       />
       <span className="relative flex items-center justify-between gap-3 font-mono text-[8px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
         <span>Field companion</span>
-        <span>{pets === 0 ? 'tap to pet' : `${pets} pets`}</span>
+        <span>{petCountLabel(pets)}</span>
       </span>
 
       <span
