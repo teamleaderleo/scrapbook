@@ -23,13 +23,17 @@ describe('site navigation registry', () => {
         '/desk',
         '/atelier',
         '/snow-globe',
-        'https://github.com/teamleaderleo/fieldwork',
-        'https://github.com/teamleaderleo/linux-fieldwork',
+        'https://github.com/teamleaderleo/preflight',
+        'https://github.com/teamleaderleo/stensibly',
       ])
     );
     expect(hrefs).not.toContain('/blog');
     expect(hrefs).toContain('/journal');
     expect(hrefs).not.toContain('/resume');
+    expect(hrefs).not.toContain('https://github.com/teamleaderleo/fieldwork');
+    expect(hrefs).not.toContain(
+      'https://github.com/teamleaderleo/linux-fieldwork'
+    );
   });
 
   it('keeps Operator, tools, the evidence journal, and labs out of the primary row', () => {
