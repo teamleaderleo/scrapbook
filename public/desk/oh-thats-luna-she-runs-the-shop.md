@@ -14,7 +14,7 @@ Okay, now the joke gets weird.
 
 The store sits inside a cursed fork: if Luna burns through the money, everybody gets to laugh because AI got a real storefront and still lost money; if she actually keeps making money, the reaction becomes something closer to, okay bro, what the fuck?
 
-A money-losing AI boutique is a stunt with receipts; a profitable one starts looking like a prototype.
+A money-losing AI boutique is a stunt; a profitable one is a prototype.
 
 The version I find endearing is local; I don't particularly care whether Luna becomes a brilliant autonomous capitalist.
 
