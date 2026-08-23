@@ -7,7 +7,7 @@ const DISPLAY_COPY_OVERRIDES: Readonly<
 > = {
   'bobs-have-my-fucking-heart': {
     blurb:
-      'Bobs fucking rule. Lose a few inches of hair and suddenly the face, jaw, neck, silhouette, and attitude all snap into focus—and Japanese styling turned that tiny cut into an entire feminine language.',
+      'CACHE-PROBE-1632 · Bobs fucking rule. Lose a few inches of hair and suddenly the face, jaw, neck, silhouette, and attitude all snap into focus—and Japanese styling turned that tiny cut into an entire feminine language.',
   },
 };
 
