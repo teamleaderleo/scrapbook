@@ -4,12 +4,12 @@ import { publicLearningRecords } from '@/lib/learning-records';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
+const SWEAR_PATTERN = /\bfuck(?:ing|ed|er|ers|s)?\b/i;
 const SWEAR_SPLIT_PATTERN = /(\bfuck(?:ing|ed|er|ers|s)?\b)/gi;
 const SWEAR_WORD_PATTERN = /^fuck(?:ing|ed|er|ers|s)?$/i;
 
 function SwearJarText({ text, enabled }: { text: string; enabled: boolean }) {
-  if (!enabled || !SWEAR_SPLIT_PATTERN.test(text)) return <>{text}</>;
-  SWEAR_SPLIT_PATTERN.lastIndex = 0;
+  if (!enabled || !SWEAR_PATTERN.test(text)) return <>{text}</>;
 
   return (
     <span aria-label={text}>
