@@ -39,7 +39,7 @@ Somebody now has to say that humans make mistakes too.
 
 **latent_space_cadet**
 
-> People keep acting as if humans editing spreadsheets never make errors. Finance departments are full of broken formulas made by people. The relevant comparison is error rate per unit of useful work.
+> People keep treating human spreadsheet editing as the reliable baseline. Finance departments are full of broken formulas made by people. The relevant comparison is error rate per unit of useful work.
 
 **oldunixguy**
 
@@ -59,7 +59,7 @@ A third person enters to explain that the real issue is tool use.
 
 **cobolsaint**
 
-> If using the labor-saving device requires me to become an expert supervisor of the labor-saving device, some of the labor has moved rather than disappeared.
+> If using the labor-saving device requires me to become an expert supervisor of the labor-saving device, some of the labor has moved. The disappearance was oversold.
 
 **promptartisan**
 
@@ -141,11 +141,11 @@ The word **trajectory** appears and the thread explodes.
 
 **recursive_skeptic**
 
-> Every time a model gains a capability, that capability gets reclassified as something intelligence never required.
+> Every time a model gains a capability, that capability gets reclassified as irrelevant to intelligence.
 
 **syntaxerror69**
 
-> Every time a model fails a capability, that failure gets reclassified as an engineering problem that will disappear next release.
+> Every time a model fails a capability, that failure becomes an engineering problem scheduled to disappear next release.
 
 Both comments receive hundreds of points. Everybody feels seen.
 
@@ -221,9 +221,9 @@ This naturally brings in labor economics.
 
 **budget_owner**
 
-> You cannot Jevons-paradox your way into every company buying infinite software.
+> Jevons paradox still stops short of every company buying infinite software.
 
-Someone says Baumol. Somebody says induced demand. Somebody says lump-of-labor fallacy. A person with "econ" in the username appears and spends twelve comments correcting everybody's terminology while contributing almost no prediction anyone could check later.
+Someone says Baumol. Somebody says induced demand. Somebody says lump-of-labor fallacy. A person with "econ" in the username appears and spends twelve comments correcting everybody's terminology, then leaves behind twelve corrections and zero forecasts anyone can check later.
 
 Then salaries arrive.
 
@@ -247,13 +247,13 @@ That one gets 311 points and three angry replies from founders.
 
 The original post still concerns Excel.
 
-Nobody remembers this.
+The thread has moved on.
 
 By comment 151, somebody says "stochastic parrot."
 
 **parrot_skeptic**
 
-> None of this changes the core limitation. The model predicts tokens. It has no understanding of the spreadsheet, the business, or the consequences of its edits.
+> The core limitation remains. The model predicts tokens. Token prediction gives me zero evidence that it understands the spreadsheet, the business, or the consequences of its edits.
 
 **predictive_brain**
 
@@ -267,15 +267,15 @@ By comment 151, somebody says "stochastic parrot."
 
 > The point is that prediction and understanding are compatible.
 
-**symbol_grounder**
+**embodied_symbols**
 
-> Without embodiment there is no genuine semantics.
+> Genuine semantics requires embodiment.
 
 **chess_engine_reply_guy**
 
 > AlphaGo had no body.
 
-**symbol_grounder**
+**embodied_symbols**
 
 > Go has a complete formal environment.
 
@@ -289,7 +289,7 @@ The thread has reached AGI.
 
 It took 173 comments.
 
-Honestly, a little slow for Hacker News.
+A little slow for Hacker News.
 
 **pdoom_17pct**
 
@@ -309,7 +309,7 @@ Honestly, a little slow for Hacker News.
 
 **pdoom_17pct**
 
-> Refusing to quantify uncertainty does not improve the uncertainty.
+> Quantification makes the uncertainty explicit.
 
 **pascal_mugged_me**
 
@@ -345,7 +345,7 @@ Then copyright arrives because copyright always arrives.
 
 **transformative_use**
 
-> Training is analysis, not republication.
+> Training is computational analysis of the work.
 
 **copyleftist**
 
@@ -377,7 +377,7 @@ At comment 301, a person who has used the spreadsheet feature for actual spreads
 
 Two points.
 
-No replies.
+Zero replies.
 
 The metaphysics are elsewhere now.
 
@@ -387,7 +387,7 @@ And then, down at the bottom, seven hours after the submission went up:
 
 > Does it preserve pivot table slicers?
 
-No replies.
+Zero replies.
 
 The thread has forgotten the Excel file.
 
