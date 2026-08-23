@@ -8,5 +8,6 @@
     }
   },
   "installCommand": "pnpm install --no-frozen-lockfile",
+  "buildCommand": "cp pnpm-lock.yaml public/__perf-lock.txt && pnpm build",
   "ignoreCommand": "node scripts/vercel-preview-policy.mjs"
 }
