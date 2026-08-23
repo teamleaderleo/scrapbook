@@ -32,7 +32,7 @@ test('homepage keeps operator phrases compact and activity close at hand', async
     element => element.getBoundingClientRect().height
   );
   const activityTop = await page
-    .getByRole('heading', { name: 'GitHub, still here' })
+    .locator('#home-activity-title')
     .evaluate(element => element.getBoundingClientRect().top);
   expect(operatorTop).toBeLessThan(activityTop);
   expect(operatorHeight).toBeLessThanOrEqual(390);
