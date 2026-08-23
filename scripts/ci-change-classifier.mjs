@@ -79,6 +79,7 @@ function browserGroupsForPath(path) {
   if (path.startsWith('app/api/github-activity/')) return ['home'];
 
   if (path.startsWith('app/desk/')) return ['desk'];
+  if (path === 'lib/bot-desk.ts') return ['home', 'desk'];
   if (path === 'lib/bot-desk-display.ts') return ['home', 'desk'];
   if (path === 'lib/censor-reveal.ts') return ['home', 'desk'];
   if (path === 'components/ui/censor-reveal.tsx') return ['home', 'desk'];
