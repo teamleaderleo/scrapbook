@@ -1,9 +1,7 @@
 name: Lockfile Probe
 
 on:
-  push:
-    branches:
-      - agent/next-16-3-build-cache-2026-08-24
+  pull_request:
 
 jobs:
   lockfile:
