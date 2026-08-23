@@ -1,7 +1,7 @@
 'use client';
 
-import { useTheme } from 'next-themes';
 import { Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 type ThemeTransitionDocument = Document & {
   startViewTransition?: (update: () => void) => { finished: Promise<unknown> };
@@ -52,6 +52,11 @@ export function ThemeToggle({
       type="button"
     >
       <span
+        data-theme-sun-glow
+        aria-hidden="true"
+        className="absolute h-7 w-7 rounded-full bg-amber-300/10 opacity-90 shadow-[0_0_10px_rgba(245,158,11,0.16)] transition-[opacity,transform] duration-500 dark:scale-50 dark:opacity-0"
+      />
+      <span
         data-theme-corona
         aria-hidden="true"
         className="absolute h-5 w-5 rounded-full border border-amber-400/45 opacity-75 transition-[opacity,transform] duration-500 motion-safe:animate-[spin_18s_linear_infinite] dark:scale-50 dark:opacity-0 motion-reduce:animate-none"
@@ -61,6 +66,23 @@ export function ThemeToggle({
         <span className="absolute left-1/2 -top-1 h-1 w-px bg-amber-500/55" />
         <span className="absolute bottom-[-0.25rem] left-1/2 h-1 w-px bg-amber-500/55" />
       </span>
+      <span
+        data-theme-sun-spark
+        aria-hidden="true"
+        className="absolute left-[7px] top-[8px] h-1 w-1 rotate-45 rounded-[1px] bg-amber-500/65 opacity-80 transition-opacity duration-500 motion-safe:animate-pulse dark:animate-none dark:opacity-0 motion-reduce:animate-none"
+      />
+      <span
+        data-theme-sun-spark
+        aria-hidden="true"
+        className="absolute right-[7px] top-[10px] h-0.5 w-0.5 rotate-45 rounded-[1px] bg-amber-400/75 opacity-70 transition-opacity duration-500 motion-safe:animate-pulse dark:animate-none dark:opacity-0 motion-reduce:animate-none"
+        style={{ animationDelay: '600ms' }}
+      />
+      <span
+        data-theme-sun-spark
+        aria-hidden="true"
+        className="absolute bottom-[7px] left-[9px] h-0.5 w-0.5 rotate-45 rounded-[1px] bg-orange-400/70 opacity-65 transition-opacity duration-500 motion-safe:animate-pulse dark:animate-none dark:opacity-0 motion-reduce:animate-none"
+        style={{ animationDelay: '1.15s' }}
+      />
 
       <Sun
         data-theme-sun

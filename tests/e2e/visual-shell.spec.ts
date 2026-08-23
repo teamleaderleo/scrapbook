@@ -84,16 +84,22 @@ test('theme aperture softens the root swap and has restrained idle motion', asyn
 
   const toggle = page.locator('[data-theme-toggle]').first();
   const corona = toggle.locator('[data-theme-corona]');
+  const sunSpark = toggle.locator('[data-theme-sun-spark]').first();
   const moon = toggle.locator('[data-theme-moon]');
 
   await expect(toggle).toBeVisible();
+  await expect(sunSpark).toBeVisible();
   const lightMotion = await corona.evaluate(
+    element => getComputedStyle(element).animationName
+  );
+  const sparkMotion = await sunSpark.evaluate(
     element => getComputedStyle(element).animationName
   );
   const transition = await moon.evaluate(
     element => getComputedStyle(element).transitionDuration
   );
   expect(lightMotion).not.toBe('none');
+  expect(sparkMotion).not.toBe('none');
   expect(transition).not.toBe('0s');
 
   await toggle.click();
@@ -110,6 +116,11 @@ test('theme aperture softens the root swap and has restrained idle motion', asyn
       moon.evaluate(element => Number(getComputedStyle(element).opacity))
     )
     .toBeGreaterThan(0.9);
+  await expect
+    .poll(() =>
+      sunSpark.evaluate(element => Number(getComputedStyle(element).opacity))
+    )
+    .toBeLessThan(0.1);
 
   const starMotion = await toggle
     .locator('[data-theme-star]')

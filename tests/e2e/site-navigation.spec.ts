@@ -68,16 +68,21 @@ test('site atlas exposes rooms, repositories, experiments, and connections', asy
   await expect(atlas.locator('[data-site-atlas-appearance]')).toBeVisible();
 
   for (const [id, href] of [
-    ['scrapbook-repository', 'https://github.com/teamleaderleo/scrapbook'],
-    ['fieldwork-repository', 'https://github.com/teamleaderleo/fieldwork'],
-    [
-      'linux-fieldwork-repository',
-      'https://github.com/teamleaderleo/linux-fieldwork',
-    ],
+    ['preflight-repository', 'https://github.com/teamleaderleo/preflight'],
+    ['stensibly-repository', 'https://github.com/teamleaderleo/stensibly'],
   ] as const) {
     await expect(
       atlas.locator(`[data-site-atlas-link="${id}"]`)
     ).toHaveAttribute('href', href);
+  }
+
+  for (const id of [
+    'scrapbook-repository',
+    'fieldwork-repository',
+    'linux-fieldwork-repository',
+    'smolrunner-repository',
+  ]) {
+    await expect(atlas.locator(`[data-site-atlas-link="${id}"]`)).toHaveCount(0);
   }
 
   await page.screenshot({

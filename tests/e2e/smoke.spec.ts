@@ -105,19 +105,17 @@ test('homepage keeps a factual repository ledger without promotional copy', asyn
     page.getByText('Tools that remember their boundaries')
   ).toHaveCount(0);
   await expect(page.getByText(/not guess/i)).toHaveCount(0);
-  for (const repository of [
-    'scrapbook',
-    'fieldwork',
-    'linux-fieldwork',
-    'smolrunner',
-  ]) {
+  await expect(page.locator('[data-home-repository]')).toHaveCount(2);
+  for (const repository of ['preflight', 'stensibly']) {
     await expect(
       page.locator(`[data-home-repository="${repository}"]`)
     ).toBeVisible();
   }
-  await expect(page.getByText('Personal site.', { exact: true })).toBeVisible();
   await expect(
-    page.getByText('Codebase studies.', { exact: true })
+    page.getByText('Starsector launch performance.', { exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByText('Agent coordination system.', { exact: true })
   ).toBeVisible();
 });
 

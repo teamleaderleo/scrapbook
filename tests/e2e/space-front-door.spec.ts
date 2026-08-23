@@ -69,12 +69,8 @@ test('Home shows a compact factual repository ledger', async ({ page }) => {
 
   const repositories = page.locator('[data-recent-systems]');
   await expect(repositories).toBeVisible({ timeout: 15_000 });
-  for (const repository of [
-    'scrapbook',
-    'fieldwork',
-    'linux-fieldwork',
-    'smolrunner',
-  ]) {
+  await expect(repositories.locator('[data-home-repository]')).toHaveCount(2);
+  for (const repository of ['preflight', 'stensibly']) {
     await expect(
       repositories.locator(`[data-home-repository="${repository}"]`)
     ).toBeVisible();

@@ -19,24 +19,14 @@ import { createStaleWhileErrorCache } from './stale-while-error-cache';
 const GITHUB_USERNAME = 'teamleaderleo';
 const FEATURED_REPOSITORIES = [
   {
-    name: 'scrapbook',
-    url: 'https://github.com/teamleaderleo/scrapbook',
-    note: 'Personal site.',
+    name: 'preflight',
+    url: 'https://github.com/teamleaderleo/preflight',
+    note: 'Starsector launch performance.',
   },
   {
-    name: 'fieldwork',
-    url: 'https://github.com/teamleaderleo/fieldwork',
-    note: 'Codebase studies.',
-  },
-  {
-    name: 'linux-fieldwork',
-    url: 'https://github.com/teamleaderleo/linux-fieldwork',
-    note: 'Linux and kernel studies.',
-  },
-  {
-    name: 'smolrunner',
-    url: 'https://github.com/teamleaderleo/smolrunner',
-    note: 'Host-work runner.',
+    name: 'stensibly',
+    url: 'https://github.com/teamleaderleo/stensibly',
+    note: 'Agent coordination system.',
   },
 ] as const;
 
@@ -270,7 +260,7 @@ async function loadGitHubHomeData(): Promise<UpstreamActivity> {
 
 const getCachedUpstreamActivity = unstable_cache(
   () => captureCacheLoad(loadGitHubHomeData),
-  ['github-homepage-v11'],
+  ['github-homepage-v12'],
   { revalidate: GITHUB_ACTIVITY_UPSTREAM_FRESH_SECONDS },
 );
 
