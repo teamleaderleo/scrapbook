@@ -21,16 +21,20 @@ describe('censor reveal matching', () => {
   });
 
   it('supports deliberate non-profanity censor rules', () => {
-    const privateNames = censorRuleFromWords('private-name', ['Mothbit', 'Luna']);
+    const privateNames = censorRuleFromWords('private-name', [
+      'Mothbit',
+      'Luna',
+      'C++',
+      'Project Velvet',
+    ]);
     const segments = segmentCensoredText(
-      'Mothbit met Luna at the workbench.',
+      'Mothbit met Luna over C++ before Project Velvet shipped.',
       [privateNames]
     );
 
-    expect(segments.filter(segment => segment.censored).map(segment => segment.text)).toEqual([
-      'Mothbit',
-      'Luna',
-    ]);
+    expect(
+      segments.filter(segment => segment.censored).map(segment => segment.text)
+    ).toEqual(['Mothbit', 'Luna', 'C++', 'Project Velvet']);
   });
 
   it('does not mutate caller-owned regular expression cursors', () => {
