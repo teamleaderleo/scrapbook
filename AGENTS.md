@@ -38,6 +38,17 @@
 - Do not repeatedly retrigger external review bots after every push. Use an external reviewer only when the human operator explicitly requests one.
 - Verify every automated finding against the current code. Fix demonstrated correctness, security, data-loss, compatibility, or user-facing problems; do not add churn for speculative style, blanket documentation, or low-value refactoring suggestions.
 
+## Verification and browser evidence
+
+- Keep routine verification cheap and broad: lint, typecheck, Vitest, and a production build. `pnpm ci:local` mirrors that lane and must stay browser-free.
+- Treat Playwright as an authoring and diagnostic tool, not a default merge gate. Hosted CI should not install or launch Chromium, Chrome, WebKit, or another browser unless the human explicitly asks for a hosted browser workflow.
+- Do not add or run browser tests for facts that can be derived from source, covered by Vitest, checked at an API boundary, or proven by the production build.
+- Use a browser only when the question genuinely depends on browser behavior: rendered geometry, responsive overflow, CSS/computed styles, focus, pointer or keyboard interaction, browser storage/APIs, canvas, hydration, or deliberate visual review.
+- For visible UI work, run the application and inspect the affected route at the relevant viewport. A targeted Playwright spec is fine when it helps; direct inspection of a local run, preview deployment, or deployed site is also valid evidence. Capture a screenshot when the visual result needs durable review evidence.
+- Prefer `pnpm test:e2e` for the tiny browser canary or a single focused `pnpm exec playwright test <spec> --project=chromium` command. Run `pnpm test:e2e:full` or cross-browser sweeps only when the change justifies them.
+- Existing larger Playwright specs are opt-in diagnostic tools. When touching them, move assertions to Vitest whenever the browser itself adds no signal. Do not preserve a browser assertion merely because it already exists.
+- See `docs/ci-scope.md` for the command-level policy.
+
 ## Agent guestbook check-ins
 
 - When the contribution check selects the Guest Check-in lane, start with `GET /api/agent-guestbook`. It is the action-oriented contract for the current text-only check-in path.
