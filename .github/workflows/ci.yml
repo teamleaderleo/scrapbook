@@ -190,6 +190,13 @@ jobs:
           name: homepage-visual-review
           path: test-results/homepage-density/after
           if-no-files-found: ignore
+      - name: Upload activity lab visual review
+        if: always() && (needs.classify.outputs.browser_groups == 'full' || contains(needs.classify.outputs.browser_groups, 'activity-lab'))
+        uses: actions/upload-artifact@v4
+        with:
+          name: activity-lab-visual-review
+          path: test-results/**/activity-field-*.png
+          if-no-files-found: ignore
       - name: Upload gallery visual review
         if: always() && needs.classify.outputs.browser_groups == 'full'
         uses: actions/upload-artifact@v4
