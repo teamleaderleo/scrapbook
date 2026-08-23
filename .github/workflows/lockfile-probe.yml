@@ -3,12 +3,18 @@ name: Lockfile Probe
 on:
   pull_request:
 
+permissions:
+  contents: write
+
 jobs:
   lockfile:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
       - uses: pnpm/action-setup@v4
         with:
           version: 10
@@ -18,9 +24,16 @@ jobs:
           cache: pnpm
       - name: Regenerate lockfile
         run: pnpm install --lockfile-only --no-frozen-lockfile --ignore-scripts
-      - name: Upload lockfile
-        uses: actions/upload-artifact@v4
-        with:
-          name: next-16-3-lockfile
-          path: pnpm-lock.yaml
-          retention-days: 1
+      - name: Commit lockfile
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- pnpm-lock.yaml; then
+            echo "Lockfile already current."
+            exit 0
+          fi
+          git config user.name "scrapbook-lockfile-probe"
+          git config user.email "actions@users.noreply.github.com"
+          git add pnpm-lock.yaml
+          git commit -m "Update lockfile for Next 16.3.2"
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
