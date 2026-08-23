@@ -8,11 +8,11 @@ import { homeRoomNavigationItems } from '@/lib/site-navigation';
 import {
   ArrowRight,
   ArrowUpRight,
-  Brain,
   Compass,
   Hammer,
   Images,
   NotebookPen,
+  Orbit,
   Palette,
   Snowflake,
   type LucideIcon,
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 };
 
 const homeRoomIcons: Record<string, LucideIcon> = {
-  space: Brain,
+  space: Orbit,
   work: Hammer,
   gallery: Images,
   journal: NotebookPen,
@@ -179,13 +179,8 @@ function HomeActivitySkeleton() {
       role="status"
       data-home-activity-skeleton
     >
-      <div className="grid min-w-0 gap-3.5 sm:gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(21rem,0.65fr)]">
-        <section className="min-h-[30.5rem] rounded-[1.25rem] border border-border/70 bg-card p-5 shadow-[0_16px_38px_rgba(24,24,26,0.08)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] lg:min-h-[28rem]">
-          <Skeleton className="h-3 w-24" />
-          <Skeleton className="mt-5 h-16 w-3/5 rounded-xl" />
-          <Skeleton className="mt-4 h-28 w-full rounded-2xl" />
-        </section>
-        <section className="min-h-[27.25rem] rounded-[1.25rem] border border-border/70 bg-card p-4 shadow-[0_12px_28px_rgba(35,31,26,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.25)]">
+      <div className="grid min-w-0 gap-3.5 sm:gap-4 lg:grid-cols-[minmax(21rem,0.65fr)_minmax(0,1.35fr)] lg:grid-rows-[auto_auto]">
+        <section className="min-h-[18rem] rounded-[1.25rem] border border-border/70 bg-card p-4 shadow-[0_12px_28px_rgba(35,31,26,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.25)] lg:col-start-1 lg:row-start-1">
           <div className="flex items-center justify-between gap-4">
             <Skeleton className="h-2.5 w-20" />
             <Skeleton className="h-2.5 w-28" />
@@ -198,6 +193,24 @@ function HomeActivitySkeleton() {
               />
             ))}
           </div>
+        </section>
+
+        <section className="min-h-[24rem] rounded-[1.25rem] border border-border/70 bg-card p-5 shadow-[0_16px_38px_rgba(24,24,26,0.08)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="mt-8 h-16 w-3/5 rounded-xl" />
+          <div className="mt-6 grid grid-cols-2 gap-2">
+            <Skeleton className="h-14 rounded-xl" />
+            <Skeleton className="h-14 rounded-xl" />
+          </div>
+        </section>
+
+        <section className="min-h-[13rem] rounded-[1.1rem] border border-border/70 bg-card p-4 shadow-[0_10px_24px_rgba(35,31,26,0.07)] dark:shadow-[0_12px_28px_rgba(0,0,0,0.22)] lg:col-start-1 lg:row-start-2">
+          <div className="flex items-center justify-between gap-3">
+            <Skeleton className="h-2.5 w-24" />
+            <Skeleton className="h-2.5 w-16" />
+          </div>
+          <Skeleton className="mx-auto mt-4 h-24 w-36 rounded-2xl" />
+          <Skeleton className="mt-3 h-3 w-2/3" />
         </section>
       </div>
 
@@ -243,15 +256,12 @@ export default function Page() {
         <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
           <section aria-labelledby="home-activity-title" className="min-w-0">
             <div className="mb-3 px-0.5">
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              <p
+                id="home-activity-title"
+                className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
+              >
                 Activity
               </p>
-              <h2
-                id="home-activity-title"
-                className="mt-1 text-xl font-black tracking-tight"
-              >
-                GitHub, still here
-              </h2>
             </div>
             <Suspense fallback={<HomeActivitySkeleton />}>
               <HomeActivityContent />
