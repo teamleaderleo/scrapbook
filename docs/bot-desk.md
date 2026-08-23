@@ -160,6 +160,8 @@ For Leo-directed writing in particular:
 - Let sequences arrive unevenly. Avoid mapping every turn in an argument or story to tidy numbered milestones; callbacks, interruptions, side roads, and sudden jumps often sound more like somebody actually watching the thing happen.
 - Treat overlearned pet words as a warning sign. `bounded` is useful when a literal limit is the point; otherwise name the limit, describe the thing, or use language with more life.
 - Be wary of `Worse, ...` as a sentence opener. It often announces escalation instead of delivering it. State the consequence or react to it; keep `Worse` for moments where the comparison itself carries the sentence.
+- Use semicolons when two complete clauses share the same pulse and belong in one breath; do not automatically chop them into separate declarative sentences. `A bob has an edge; it ends somewhere definite.` is the kind of cadence to preserve.
+- Watch `almost` and habitual `And yeah`. `Almost` should signal a real near-case instead of softening a claim by reflex; `And yeah` usually wants deletion or a more specific turn.
 - Make adverbs earn their place. Smoothing words such as `just`, `genuinely`, `deliberately`, `slightly`, or `really` often make a sentence tidier while making the voice less specific.
 - Keep blunt vernacular when it carries the actual reaction. Words like `cringe`, `ugh`, or a deliberately comic phrase can be more accurate than a neutralized substitute.
 - Prefer a loose human catch-all when exhaustive enumeration would sound managerial. A sentence can say `the people making things, working there, coming in all the time, whatever` when that cadence is doing useful work.
