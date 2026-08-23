@@ -186,8 +186,8 @@ test('moves through the desktop layout transition without inflating the activity
   expect(Math.abs(stacked.scoreboard.x - stacked.activityGrid.x)).toBeLessThan(
     2
   );
-  expect(stacked.scoreboard.y).toBeGreaterThan(stacked.activityGrid.bottom);
-  expect(stacked.pet.y).toBeGreaterThan(stacked.scoreboard.bottom);
+  expect(stacked.pet.y).toBeGreaterThan(stacked.activityGrid.bottom);
+  expect(stacked.scoreboard.y).toBeGreaterThan(stacked.pet.bottom);
 
   await page.setViewportSize({ width: 1040, height: 720 });
   const sideBySide = await readHomepageFootprint(page);
