@@ -7,7 +7,7 @@
     "prettier": "prettier --write --ignore-unknown .",
     "prettier:check": "prettier --check --ignore-unknown .",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint . --cache --cache-location .eslintcache",
     "typecheck": "next typegen && tsc --noEmit -p tsconfig.verify.json",
     "test": "vitest run",
     "test:watch": "vitest",

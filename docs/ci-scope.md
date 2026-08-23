@@ -1,17 +1,17 @@
 # CI scope
 
-Scrapbook keeps hosted CI boring: install, lint, typecheck, unit tests, and a production build.
+Scrapbook keeps hosted CI boring and short: lint plus unit tests in one job, and the production build in another. The jobs run in parallel.
 
 ## Hosted verification
 
-For ordinary code changes, GitHub Actions runs:
+For ordinary code changes, GitHub Actions runs two independent lanes:
 
-- ESLint
-- TypeScript
-- the full Vitest suite
-- a production Next.js build
+- **quality** — ESLint and the full Vitest suite;
+- **build** — the production Next.js build, including Next.js' TypeScript validation.
 
-Pure Markdown changes skip the workflow. Pushes to `main` use the same verification job as pull requests.
+Pure Markdown changes skip the workflow. Pushes to `main` use the same lanes as pull requests.
+
+Do not add a separate hosted `pnpm typecheck` step beside `next build`. Next.js already runs TypeScript during the production build, so serializing another full TypeScript pass adds wall-clock time without adding a second independent gate. `pnpm typecheck` remains available when a focused type-only check is useful during authoring.
 
 Hosted CI does not install a browser, start Playwright, upload screenshot artifacts, classify UI surfaces, or replay browser checks after merge.
 
@@ -41,7 +41,7 @@ Do not run the complete Playwright suite by habit. Do not add a browser test for
 
 ## What belongs where
 
-Prefer Vitest for data transforms, registries, labels, API behavior, state transitions that do not depend on browser layout, and reusable component logic. Prefer the production build for route compilation, server/client boundaries, and Next.js integration failures.
+Prefer Vitest for data transforms, registries, labels, API behavior, state transitions that do not depend on browser layout, and reusable component logic. Prefer the production build for TypeScript validation, route compilation, server/client boundaries, and Next.js integration failures.
 
 Use Playwright when the assertion depends on actual browser behavior. Good examples include layout overflow, real focus behavior, media-query behavior, pointer interaction, browser storage, computed CSS, canvas interaction, and a small end-to-end hydration canary.
 
@@ -49,4 +49,6 @@ The default browser smoke file is intentionally tiny. The larger specs under `te
 
 ## Local verification
 
-`pnpm ci:local` mirrors hosted verification and stays browser-free. Browser work is a separate deliberate command, so an agent can build and verify the application without accidentally paying for the whole Playwright suite.
+`pnpm ci:local` runs install, lint, Vitest, the production build, and `git diff --check`. The build owns TypeScript validation here too, so local verification does not immediately repeat the same project-wide type analysis with a separate command.
+
+Use `pnpm typecheck` directly when a type-only feedback loop is what you want. Browser work is a separate deliberate command.
