@@ -1,6 +1,5 @@
 'use client';
 
-import { ScrapbookPet } from '@/components/home/scrapbook-pet';
 import { motion, useAnimate } from 'framer-motion';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './activity-scoreboard.module.css';
@@ -361,18 +360,14 @@ export function ActivityScoreboard({
   score,
   scoreDate,
   scoreLabel,
-  todayActivity,
   weekTotal,
   yearTotal,
-  updating,
 }: {
   score: number;
   scoreDate: string;
   scoreLabel: string;
-  todayActivity: number;
   weekTotal: number;
   yearTotal: number | null;
-  updating: boolean;
 }) {
   const reduceMotion = useReducedMotionPreference();
   const [countdown, setCountdown] = useState('--:--:--');
@@ -405,8 +400,8 @@ export function ActivityScoreboard({
         </div>
       </div>
 
-      <div className="relative z-10 grid flex-1 gap-4 p-4 sm:p-5 md:grid-cols-[minmax(0,1fr)_minmax(15rem,0.72fr)] md:items-stretch">
-        <div className="flex min-w-0 flex-col justify-center gap-4">
+      <div className="relative z-10 flex flex-1 items-center p-4 sm:p-5 md:p-7">
+        <div className="flex w-full min-w-0 flex-col justify-center gap-6">
           <div>
             <p className="mb-2 font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
               Activity on the desk
@@ -426,7 +421,6 @@ export function ActivityScoreboard({
             />
           </div>
         </div>
-        <ScrapbookPet activity={todayActivity} updating={updating} />
       </div>
     </section>
   );
