@@ -19,9 +19,16 @@ function parsePetCount(value: string | null) {
   return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : 0;
 }
 
-function petCountLabel(pets: number) {
-  if (pets === 0) return 'tap to pet';
-  return `${pets.toLocaleString('en-GB')} ${pets === 1 ? 'pet' : 'pets'} total`;
+function parseRemotePetCount(value: unknown) {
+  return Number.isSafeInteger(value) && Number(value) >= 0 ? Number(value) : null;
+}
+
+function globalPetCountLabel(globalPets: number | null, localPets: number) {
+  if (globalPets !== null) {
+    return `${globalPets.toLocaleString('en-GB')} worldwide`;
+  }
+  if (localPets === 0) return 'tap to pet';
+  return `${localPets.toLocaleString('en-GB')} from you`;
 }
 
 export function ScrapbookPet({
@@ -33,11 +40,12 @@ export function ScrapbookPet({
 }) {
   const reduceMotion = useReducedMotion();
   const [pets, setPets] = useState(0);
+  const [globalPets, setGlobalPets] = useState<number | null>(null);
   const status = updating ? 'sniffing' : activity > 0 ? 'awake' : 'napping';
   const message =
     pets === 0
       ? 'Keeping watch over the field desk.'
-      : petMessages[(pets - 1) % petMessages.length];
+      : `${petMessages[(pets - 1) % petMessages.length]} ${pets.toLocaleString('en-GB')} from you.`;
   const pose = updating ? 'sniffing' : activity > 0 ? 'idle' : 'napping';
 
   useEffect(() => {
@@ -47,11 +55,33 @@ export function ScrapbookPet({
         window.localStorage.getItem(PET_COUNT_STORAGE_KEY)
       );
     } catch {
-      return;
+      storedPets = 0;
     }
 
     const frame = window.requestAnimationFrame(() => setPets(storedPets));
-    return () => window.cancelAnimationFrame(frame);
+    const controller = new AbortController();
+
+    void fetch('/api/scraplet', {
+      cache: 'no-store',
+      signal: controller.signal,
+    })
+      .then(async response => {
+        if (!response.ok) return null;
+        return (await response.json()) as { pets?: unknown };
+      })
+      .then(body => {
+        const next = parseRemotePetCount(body?.pets);
+        if (next !== null) setGlobalPets(next);
+      })
+      .catch(error => {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        console.error('Unable to load global Scraplet pets', error);
+      });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      controller.abort();
+    };
   }, []);
 
   const petScraplet = () => {
@@ -60,10 +90,31 @@ export function ScrapbookPet({
       try {
         window.localStorage.setItem(PET_COUNT_STORAGE_KEY, String(next));
       } catch {
-        // The interaction still works for this visit when storage is unavailable.
+        // Keep the interaction local to this visit when storage is unavailable.
       }
       return next;
     });
+
+    setGlobalPets(count => (count === null ? null : count + 1));
+    void fetch('/api/scraplet', {
+      method: 'POST',
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    })
+      .then(async response => {
+        if (!response.ok) throw new Error(`Scraplet pet returned ${response.status}`);
+        return (await response.json()) as { pets?: unknown };
+      })
+      .then(body => {
+        const next = parseRemotePetCount(body.pets);
+        if (next !== null) {
+          setGlobalPets(current => (current === null ? next : Math.max(current, next)));
+        }
+      })
+      .catch(error => {
+        console.error('Unable to save global Scraplet pet', error);
+        setGlobalPets(null);
+      });
   };
 
   return (
@@ -71,7 +122,8 @@ export function ScrapbookPet({
       type="button"
       data-scrapbook-pet
       data-pets={pets}
-      aria-label={`Pet Scraplet, the scrapbook dinosaur. Scraplet is ${status}. ${pets} lifetime pets on this browser.`}
+      data-global-pets={globalPets ?? 'unavailable'}
+      aria-label={`Pet Scraplet, the scrapbook dinosaur. Scraplet is ${status}. ${pets} pets from you${globalPets === null ? '' : `, ${globalPets} worldwide`}.`}
       title={`Pet Scraplet · ${status}`}
       whileTap={reduceMotion ? undefined : { scale: 0.96 }}
       onClick={petScraplet}
@@ -83,7 +135,9 @@ export function ScrapbookPet({
       />
       <span className="relative flex items-center justify-between gap-3 font-mono text-[8px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
         <span>Field companion</span>
-        <span>{petCountLabel(pets)}</span>
+        <span data-scraplet-global-count>
+          {globalPetCountLabel(globalPets, pets)}
+        </span>
       </span>
 
       <span

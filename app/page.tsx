@@ -220,7 +220,7 @@ function HomeActivitySkeleton() {
           <Skeleton className="h-3 w-10" />
         </div>
         <div className="grid overflow-hidden rounded-xl border border-border/65 bg-card/70 sm:grid-cols-2">
-          {Array.from({ length: 2 }, (_, index) => (
+          {Array.from({ length: 4 }, (_, index) => (
             <div
               key={index}
               className="flex min-h-16 items-center gap-3 border-border/55 px-3 py-2.5 [&:nth-child(n+2)]:border-t sm:[&:nth-child(2)]:border-t-0 sm:[&:nth-child(even)]:border-l"

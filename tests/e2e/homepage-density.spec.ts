@@ -79,6 +79,18 @@ async function removeDevelopmentChrome(page: Page) {
   });
 }
 
+test.beforeEach(async ({ page }) => {
+  let globalPets = 1200;
+  await page.route('**/api/scraplet', async route => {
+    if (route.request().method() === 'POST') globalPets += 1;
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ pets: globalPets }),
+    });
+  });
+});
+
 for (const viewport of desktopViewports) {
   test(`keeps the homepage field desk bounded at ${viewport.width}x${viewport.height}`, async ({
     page,
@@ -96,13 +108,17 @@ for (const viewport of desktopViewports) {
     await expect(page.getByText('GitHub, still here', { exact: true })).toHaveCount(
       0
     );
-    await expect(page.locator('[data-home-repository]')).toHaveCount(2);
-    await expect(
-      page.locator('[data-home-repository="preflight"]')
-    ).toBeVisible();
-    await expect(
-      page.locator('[data-home-repository="stensibly"]')
-    ).toBeVisible();
+    await expect(page.locator('[data-home-repository]')).toHaveCount(4);
+    for (const repository of [
+      'preflight',
+      'stensibly',
+      'smolrunner',
+      'cultist',
+    ]) {
+      await expect(
+        page.locator(`[data-home-repository="${repository}"]`)
+      ).toBeVisible();
+    }
 
     const footprint = await readHomepageFootprint(page);
     expect(footprint.document.width).toBeLessThanOrEqual(
@@ -141,7 +157,7 @@ for (const viewport of desktopViewports) {
   });
 }
 
-test('keeps the latest Workbench swear behind a hover reveal', async ({
+test('covers strong language with the reusable hover reveal', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
@@ -150,26 +166,35 @@ test('keeps the latest Workbench swear behind a hover reveal', async ({
 
   const latestWriting = page.locator('[data-home-now-kind="latest writing"]');
   await expect(latestWriting).toBeVisible({ timeout: 15_000 });
-  const spoiler = latestWriting.locator('[data-swear-spoiler]').first();
-  await expect(spoiler).toBeVisible();
-  await expect(spoiler).toHaveAttribute(
+  const covered = latestWriting.locator('[data-censor-token]').first();
+  await expect(covered).toBeVisible();
+  await expect(covered).toHaveAttribute(
     'title',
-    'swear jar · hover to reveal'
+    'covered text · hover or focus to reveal'
   );
 
-  const concealed = await spoiler.evaluate(element => {
+  const concealed = await covered.evaluate(element => {
     const style = getComputedStyle(element);
-    return { color: style.color, filter: style.filter };
+    return {
+      color: style.color,
+      backgroundImage: style.backgroundImage,
+      textShadow: style.textShadow,
+    };
   });
-  await spoiler.hover();
+  await covered.hover();
   await page.waitForTimeout(180);
-  const revealed = await spoiler.evaluate(element => {
+  const revealed = await covered.evaluate(element => {
     const style = getComputedStyle(element);
-    return { color: style.color, filter: style.filter };
+    return {
+      color: style.color,
+      backgroundImage: style.backgroundImage,
+      textShadow: style.textShadow,
+    };
   });
 
   expect(revealed.color).not.toBe(concealed.color);
-  expect(revealed.filter).not.toBe(concealed.filter);
+  expect(revealed.backgroundImage).not.toBe(concealed.backgroundImage);
+  expect(revealed.textShadow).not.toBe(concealed.textShadow);
 });
 
 test('moves through the desktop layout transition without inflating the activity cells', async ({
@@ -205,7 +230,7 @@ test('moves through the desktop layout transition without inflating the activity
   );
 });
 
-test('keeps the scorecard planted and lets the visitor pet Scraplet over time', async ({
+test('keeps the scorecard planted and tracks personal plus worldwide Scraplet pets', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
@@ -217,6 +242,7 @@ test('keeps the scorecard planted and lets the visitor pet Scraplet over time', 
 
   await expect(scoreboard).toBeVisible({ timeout: 15_000 });
   await expect(pet).toHaveAttribute('data-pets', '0');
+  await expect(pet).toHaveAttribute('data-global-pets', '1200');
   await expect(pet.locator('[data-paper-creature-tail]')).toHaveCount(1);
   await expect(pet.locator('[data-paper-creature-tail-fold]')).toHaveCount(1);
   await expect(
@@ -253,9 +279,11 @@ test('keeps the scorecard planted and lets the visitor pet Scraplet over time', 
 
   await pet.click();
   await expect(pet).toHaveAttribute('data-pets', '1');
+  await expect(pet).toHaveAttribute('data-global-pets', '1201');
 
   await page.reload();
   const reloadedPet = page.locator('[data-scrapbook-pet]');
   await expect(reloadedPet).toBeVisible({ timeout: 15_000 });
   await expect(reloadedPet).toHaveAttribute('data-pets', '1');
+  await expect(reloadedPet).toHaveAttribute('data-global-pets', '1201');
 });

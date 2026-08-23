@@ -62,22 +62,3 @@ test('Space lanes stay contained on a phone viewport', async ({ page }) => {
   expect(footprint.documentWidth).toBeLessThanOrEqual(footprint.viewportWidth);
   expect(footprint.laneHeight).toBeGreaterThanOrEqual(100);
 });
-
-test('Home shows a compact factual repository ledger', async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 720 });
-  await page.goto('/');
-
-  const repositories = page.locator('[data-recent-systems]');
-  await expect(repositories).toBeVisible({ timeout: 15_000 });
-  await expect(repositories.locator('[data-home-repository]')).toHaveCount(2);
-  for (const repository of ['preflight', 'stensibly']) {
-    await expect(
-      repositories.locator(`[data-home-repository="${repository}"]`)
-    ).toBeVisible();
-  }
-
-  const height = await repositories.evaluate(
-    element => element.getBoundingClientRect().height
-  );
-  expect(height).toBeLessThan(190);
-});

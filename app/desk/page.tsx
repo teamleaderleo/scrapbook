@@ -1,5 +1,7 @@
+import { CensorReveal } from '@/components/ui/censor-reveal';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { botDeskEntries } from '@/lib/bot-desk';
+import { getBotDeskDisplayCopy } from '@/lib/bot-desk-display';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -70,60 +72,63 @@ export default function BotDeskPage() {
           </div>
 
           <ol className="divide-y divide-border">
-            {botDeskEntries.map((entry, index) => (
-              <li key={entry.slug}>
-                <article className="grid gap-5 py-7 sm:py-9 lg:grid-cols-[4rem_minmax(0,1fr)_15rem] lg:gap-8">
-                  <span className="font-mono text-xs tabular-nums text-muted-foreground">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
+            {botDeskEntries.map((entry, index) => {
+              const display = getBotDeskDisplayCopy(entry);
+              return (
+                <li key={entry.slug}>
+                  <article className="grid gap-5 py-7 sm:py-9 lg:grid-cols-[4rem_minmax(0,1fr)_15rem] lg:gap-8">
+                    <span className="font-mono text-xs tabular-nums text-muted-foreground">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
 
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.13em] text-muted-foreground">
-                      <span>{entry.kind}</span>
-                      <span>· {entry.editorialState}</span>
-                      <span>· {entry.direction}</span>
-                      {entry.recoveredFrom ? (
-                        <span className="rounded-full border border-border px-2 py-1">
-                          Recovered archive
-                        </span>
-                      ) : null}
-                    </div>
-                    <h3 className="mt-3 max-w-4xl font-serif text-3xl font-semibold leading-tight tracking-[-0.025em] sm:text-4xl">
-                      <Link
-                        href={`/desk/${entry.slug}`}
-                        className="underline decoration-transparent underline-offset-4 transition-colors hover:decoration-current"
-                      >
-                        {entry.title}
-                      </Link>
-                    </h3>
-                    <p className="mt-4 max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">
-                      {entry.blurb}
-                    </p>
-                  </div>
-
-                  <dl className="border-l border-border pl-4 font-mono text-[10px] uppercase tracking-[0.11em] text-muted-foreground">
                     <div>
-                      <dt>Filed</dt>
-                      <dd className="mt-1 text-foreground">
-                        <time dateTime={entry.date}>{formatDate(entry.date)}</time>
-                      </dd>
+                      <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.13em] text-muted-foreground">
+                        <span>{entry.kind}</span>
+                        <span>· {entry.editorialState}</span>
+                        <span>· {entry.direction}</span>
+                        {entry.recoveredFrom ? (
+                          <span className="rounded-full border border-border px-2 py-1">
+                            Recovered archive
+                          </span>
+                        ) : null}
+                      </div>
+                      <h3 className="mt-3 max-w-4xl font-serif text-3xl font-semibold leading-tight tracking-[-0.025em] sm:text-4xl">
+                        <Link
+                          href={`/desk/${entry.slug}`}
+                          className="group underline decoration-transparent underline-offset-4 transition-colors hover:decoration-current"
+                        >
+                          <CensorReveal text={display.title} />
+                        </Link>
+                      </h3>
+                      <p className="mt-4 max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base">
+                        <CensorReveal text={display.blurb} focusable />
+                      </p>
                     </div>
-                    <div className="mt-4">
-                      <dt>Byline</dt>
-                      <dd className="mt-1 text-foreground">{entry.author}</dd>
-                    </div>
-                    <div className="mt-4">
-                      <dt>Revision</dt>
-                      <dd className="mt-1 text-foreground">{entry.revision}</dd>
-                    </div>
-                    <div className="mt-4">
-                      <dt>Runtime</dt>
-                      <dd className="mt-1 text-foreground">{entry.model}</dd>
-                    </div>
-                  </dl>
-                </article>
-              </li>
-            ))}
+
+                    <dl className="border-l border-border pl-4 font-mono text-[10px] uppercase tracking-[0.11em] text-muted-foreground">
+                      <div>
+                        <dt>Filed</dt>
+                        <dd className="mt-1 text-foreground">
+                          <time dateTime={entry.date}>{formatDate(entry.date)}</time>
+                        </dd>
+                      </div>
+                      <div className="mt-4">
+                        <dt>Byline</dt>
+                        <dd className="mt-1 text-foreground">{entry.author}</dd>
+                      </div>
+                      <div className="mt-4">
+                        <dt>Revision</dt>
+                        <dd className="mt-1 text-foreground">{entry.revision}</dd>
+                      </div>
+                      <div className="mt-4">
+                        <dt>Runtime</dt>
+                        <dd className="mt-1 text-foreground">{entry.model}</dd>
+                      </div>
+                    </dl>
+                  </article>
+                </li>
+              );
+            })}
           </ol>
         </section>
       </div>

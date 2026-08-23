@@ -10,6 +10,19 @@ test('Workbench exposes the publication index', async ({ page }) => {
   await expect(page.locator('main')).toHaveCount(1);
 });
 
+test('Workbench covers strong language while keeping the Bob piece loud', async ({
+  page,
+}) => {
+  const response = await page.goto('/desk/bobs-have-my-fucking-heart');
+  expect(response?.ok()).toBe(true);
+
+  await expect(
+    page.getByRole('heading', { name: 'Bobs Have My Fucking Heart' })
+  ).toBeVisible();
+  await expect(page.getByText(/^Bobs fucking rule\./)).toBeVisible();
+  await expect(page.locator('[data-censor-token]')).toHaveCount(2);
+});
+
 test('Workbench renders a revised agent-led essay', async ({ page }) => {
   const response = await page.goto('/desk/the-error-object-is-an-input-boundary');
   expect(response?.ok()).toBe(true);

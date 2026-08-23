@@ -16,6 +16,7 @@ jobs:
       mode: ${{ steps.classify.outputs.mode }}
       run_verify: ${{ steps.classify.outputs.run_verify }}
       run_browser: ${{ steps.classify.outputs.run_browser }}
+      browser_groups: ${{ steps.classify.outputs.browser_groups }}
       reason: ${{ steps.classify.outputs.reason }}
     steps:
       - uses: actions/checkout@v4
@@ -120,6 +121,7 @@ jobs:
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: test-anon-key
+      BROWSER_GROUPS: ${{ needs.classify.outputs.browser_groups }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -134,23 +136,76 @@ jobs:
       - name: Install Chrome dependencies
         run: pnpm exec playwright install-deps chromium
       - name: Chromium regressions
-        run: pnpm exec playwright test --project=chromium > playwright.log 2>&1
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "$BROWSER_GROUPS" == "full" || -z "$BROWSER_GROUPS" ]]; then
+            pnpm exec playwright test --project=chromium > playwright.log 2>&1
+            exit 0
+          fi
+
+          declare -A selected_specs=()
+          add_spec() {
+            selected_specs["$1"]=1
+          }
+
+          IFS=',' read -ra groups <<< "$BROWSER_GROUPS"
+          for group in "${groups[@]}"; do
+            case "$group" in
+              home)
+                add_spec tests/e2e/activity-paper-marks.spec.ts
+                add_spec tests/e2e/activity-scoreboard-selection.spec.ts
+                add_spec tests/e2e/home-now-shelf.spec.ts
+                add_spec tests/e2e/homepage-density.spec.ts
+                add_spec tests/e2e/operator-console.spec.ts
+                ;;
+              desk)
+                add_spec tests/e2e/bot-desk.spec.ts
+                ;;
+              navigation)
+                add_spec tests/e2e/site-navigation.spec.ts
+                ;;
+              shell)
+                add_spec tests/e2e/visual-shell.spec.ts
+                ;;
+              activity-lab)
+                add_spec tests/e2e/activity-field-lab.spec.ts
+                ;;
+              *)
+                echo "Unknown browser group: $group" >&2
+                exit 1
+                ;;
+            esac
+          done
+
+          specs=("${!selected_specs[@]}")
+          printf 'Scoped Chromium specs:\n' > playwright.log
+          printf ' - %s\n' "${specs[@]}" >> playwright.log
+          pnpm exec playwright test --project=chromium "${specs[@]}" >> playwright.log 2>&1
       - name: Upload homepage visual review
-        if: always()
+        if: always() && (needs.classify.outputs.browser_groups == 'full' || contains(needs.classify.outputs.browser_groups, 'home'))
         uses: actions/upload-artifact@v4
         with:
           name: homepage-visual-review
           path: test-results/homepage-density/after
           if-no-files-found: ignore
+      - name: Upload activity lab visual review
+        if: always() && (needs.classify.outputs.browser_groups == 'full' || contains(needs.classify.outputs.browser_groups, 'activity-lab'))
+        uses: actions/upload-artifact@v4
+        with:
+          name: activity-lab-visual-review
+          path: test-results/**/activity-field-*.png
+          if-no-files-found: ignore
       - name: Upload gallery visual review
-        if: always()
+        if: always() && needs.classify.outputs.browser_groups == 'full'
         uses: actions/upload-artifact@v4
         with:
           name: gallery-visual-review
           path: test-results/gallery-repair
           if-no-files-found: ignore
       - name: Upload sigil lab visual review
-        if: always()
+        if: always() && needs.classify.outputs.browser_groups == 'full'
         uses: actions/upload-artifact@v4
         with:
           name: sigil-lab-visual-review

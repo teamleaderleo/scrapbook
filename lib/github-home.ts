@@ -28,6 +28,16 @@ const FEATURED_REPOSITORIES = [
     url: 'https://github.com/teamleaderleo/stensibly',
     note: 'Agent coordination system.',
   },
+  {
+    name: 'smolrunner',
+    url: 'https://github.com/teamleaderleo/smolrunner',
+    note: 'Disposable GitHub Actions runners.',
+  },
+  {
+    name: 'cultist',
+    url: 'https://github.com/teamleaderleo/cultist',
+    note: 'Repository-aware evidence for software work.',
+  },
 ] as const;
 
 const HOME_WINDOW_DAYS = 35;
@@ -260,7 +270,7 @@ async function loadGitHubHomeData(): Promise<UpstreamActivity> {
 
 const getCachedUpstreamActivity = unstable_cache(
   () => captureCacheLoad(loadGitHubHomeData),
-  ['github-homepage-v12'],
+  ['github-homepage-v13'],
   { revalidate: GITHUB_ACTIVITY_UPSTREAM_FRESH_SECONDS },
 );
 

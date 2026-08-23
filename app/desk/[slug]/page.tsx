@@ -1,15 +1,17 @@
-import ViewportPageShell from '@/components/viewport-page-shell';
 import { ScrapbookRelated } from '@/components/scrapbook-related';
+import { CensorReveal } from '@/components/ui/censor-reveal';
+import ViewportPageShell from '@/components/viewport-page-shell';
 import {
   botDeskEntries,
   getBotDeskDocument,
   getBotDeskEntry,
 } from '@/lib/bot-desk';
+import { getBotDeskDisplayCopy } from '@/lib/bot-desk-display';
+import { getRelatedScrapbookRefs } from '@/lib/scrapbook-relations';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
-import { getRelatedScrapbookRefs } from '@/lib/scrapbook-relations';
 
 export function generateStaticParams() {
   return botDeskEntries.map(entry => ({ slug: entry.slug }));
@@ -23,15 +25,16 @@ export async function generateMetadata({
   const { slug } = await params;
   const entry = getBotDeskEntry(slug);
   if (!entry) return {};
+  const display = getBotDeskDisplayCopy(entry);
 
   return {
-    title: entry.title,
-    description: entry.blurb,
+    title: display.title,
+    description: display.blurb,
     authors: [{ name: entry.author }],
     alternates: { canonical: `/desk/${entry.slug}` },
     openGraph: {
-      title: entry.title,
-      description: entry.blurb,
+      title: display.title,
+      description: display.blurb,
       type: 'article',
       publishedTime: `${entry.date}T00:00:00.000Z`,
       authors: [entry.author],
@@ -54,6 +57,7 @@ export default async function BotDeskArticlePage({
   const { slug } = await params;
   const entry = await getBotDeskDocument(slug);
   if (!entry) notFound();
+  const display = getBotDeskDisplayCopy(entry);
   const related = getRelatedScrapbookRefs('desk', entry.slug);
 
   return (
@@ -92,10 +96,10 @@ export default async function BotDeskArticlePage({
               ) : null}
             </div>
             <h1 className="mt-4 max-w-5xl font-serif text-[clamp(3.6rem,9vw,7.5rem)] font-semibold leading-[0.86] tracking-[-0.06em]">
-              {entry.title}
+              <CensorReveal text={display.title} focusable />
             </h1>
             <p className="mt-6 max-w-3xl font-serif text-xl leading-snug text-foreground/75 sm:text-2xl">
-              {entry.blurb}
+              <CensorReveal text={display.blurb} focusable />
             </p>
           </div>
 

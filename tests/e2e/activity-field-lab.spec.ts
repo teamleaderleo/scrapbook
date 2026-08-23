@@ -21,8 +21,8 @@ test('keeps chronological DOM order in every visual candidate', async ({ page })
   for (const layout of ['square', 'honeycomb', 'pyramid']) {
     const dates = await page
       .locator(`[data-activity-field][data-layout="${layout}"] [data-activity-day]`)
-      .evaluateAll((elements) =>
-        elements.map((element) => (element as HTMLElement).dataset.date ?? ''),
+      .evaluateAll(elements =>
+        elements.map(element => (element as HTMLElement).dataset.date ?? '')
       );
     expect(dates).toEqual(chronologicalDates);
   }
@@ -34,38 +34,38 @@ test('places today at the honeycomb origin while retaining the square control', 
 
   const honeycomb = page.locator('[data-activity-field][data-layout="honeycomb"]');
   const honeycombToday = await honeycomb.locator('[data-today="true"]').boundingBox();
-  const honeycombBoxes = await honeycomb.locator('[data-activity-day]').evaluateAll((elements) =>
-    elements.map((element) => {
+  const honeycombBoxes = await honeycomb.locator('[data-activity-day]').evaluateAll(elements =>
+    elements.map(element => {
       const rect = element.getBoundingClientRect();
       return { x: rect.x, y: rect.y };
-    }),
+    })
   );
   expect(honeycombToday).toBeTruthy();
-  expect(honeycombToday!.y).toBeCloseTo(Math.min(...honeycombBoxes.map((box) => box.y)), 0);
+  expect(honeycombToday!.y).toBeCloseTo(Math.min(...honeycombBoxes.map(box => box.y)), 0);
   const honeycombTopRow = honeycombBoxes.filter(
-    (box) => Math.abs(box.y - honeycombToday!.y) < 2,
+    box => Math.abs(box.y - honeycombToday!.y) < 2
   );
-  expect(honeycombToday!.x).toBeCloseTo(Math.min(...honeycombTopRow.map((box) => box.x)), 0);
+  expect(honeycombToday!.x).toBeCloseTo(Math.min(...honeycombTopRow.map(box => box.x)), 0);
 
   const square = page.locator('[data-activity-field][data-layout="square"]');
   const squareToday = await square.locator('[data-today="true"]').boundingBox();
-  const squareBoxes = await square.locator('[data-activity-day]').evaluateAll((elements) =>
-    elements.map((element) => {
+  const squareBoxes = await square.locator('[data-activity-day]').evaluateAll(elements =>
+    elements.map(element => {
       const rect = element.getBoundingClientRect();
       return { x: rect.x, y: rect.y };
-    }),
+    })
   );
   expect(squareToday).toBeTruthy();
-  expect(squareToday!.y).toBeCloseTo(Math.max(...squareBoxes.map((box) => box.y)), 0);
-  const squareBottomRow = squareBoxes.filter((box) => Math.abs(box.y - squareToday!.y) < 2);
-  expect(squareToday!.x).toBeCloseTo(Math.max(...squareBottomRow.map((box) => box.x)), 0);
+  expect(squareToday!.y).toBeCloseTo(Math.max(...squareBoxes.map(box => box.y)), 0);
+  const squareBottomRow = squareBoxes.filter(box => Math.abs(box.y - squareToday!.y) < 2);
+  expect(squareToday!.x).toBeCloseTo(Math.max(...squareBottomRow.map(box => box.x)), 0);
 });
 
 test('keeps today, selected day, and keyboard focus independent', async ({ page }) => {
   await page.goto(route);
 
   const honeycombButtons = page.locator(
-    '[data-activity-field][data-layout="honeycomb"] [data-activity-day]',
+    '[data-activity-field][data-layout="honeycomb"] [data-activity-day]'
   );
   const selectedDay = honeycombButtons.nth(26);
   await selectedDay.click();
@@ -78,7 +78,7 @@ test('keeps today, selected day, and keyboard focus independent', async ({ page 
   await selectedDay.focus();
   await page.keyboard.press('ArrowLeft');
   const focusedDate = await page.evaluate(
-    () => (document.activeElement as HTMLElement | null)?.dataset.date,
+    () => (document.activeElement as HTMLElement | null)?.dataset.date
   );
   expect(focusedDate).toBe(chronologicalDates[25]);
   await expect(honeycombButtons.nth(25)).toHaveAttribute('aria-pressed', 'false');
@@ -87,8 +87,25 @@ test('keeps today, selected day, and keyboard focus independent', async ({ page 
   await page.keyboard.press('Enter');
   await expect(honeycombButtons.nth(25)).toHaveAttribute('aria-pressed', 'true');
   await expect(
-    page.locator('[data-activity-field][data-layout="square"] [data-activity-day]').nth(25),
+    page.locator('[data-activity-field][data-layout="square"] [data-activity-day]').nth(25)
   ).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('shows three counter treatments for the same daily value', async ({ page }) => {
+  await page.goto(route);
+
+  await expect(
+    page.getByRole('heading', { name: 'Three ways to retire the paper odometer' })
+  ).toBeVisible();
+  await expect(page.locator('[data-counter-candidate]')).toHaveCount(3);
+
+  for (const treatment of ['receipt', 'tickets', 'stamp']) {
+    const candidate = page.locator(`[data-counter-candidate="${treatment}"]`);
+    await expect(candidate).toBeVisible();
+    await expect(
+      candidate.locator(`[data-counter-treatment="${treatment}"]`)
+    ).toBeVisible();
+  }
 });
 
 test('preserves 44px touch targets and natural mobile overflow behaviour', async ({ page }) => {
@@ -102,13 +119,13 @@ test('preserves 44px touch targets and natural mobile overflow behaviour', async
     await page.goto(route);
     await expectNoHorizontalOverflow(page);
 
-    const smallestTarget = await page.locator('[data-activity-day]').evaluateAll((elements) =>
+    const smallestTarget = await page.locator('[data-activity-day]').evaluateAll(elements =>
       Math.min(
-        ...elements.flatMap((element) => {
+        ...elements.flatMap(element => {
           const rect = element.getBoundingClientRect();
           return [rect.width, rect.height];
-        }),
-      ),
+        })
+      )
     );
     expect(smallestTarget).toBeGreaterThanOrEqual(44);
   }

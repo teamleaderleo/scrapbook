@@ -1,3 +1,4 @@
+import { ActivityCounterLab } from '@/components/labs/activity-counter-lab';
 import { ActivityFieldLab } from '@/components/labs/activity-field-lab';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { ArrowLeft } from 'lucide-react';
@@ -6,7 +7,8 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Activity geometry lab · Scrapbook',
-  description: 'An isolated comparison of square, honeycomb, and stepped activity fields.',
+  description:
+    'An isolated comparison of activity calendar geometry and daily counter treatments.',
   robots: { index: false, follow: false },
 };
 
@@ -36,26 +38,32 @@ export default function ActivityLabPage() {
             Back to homepage
           </Link>
           <p className="mt-6 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            Issue #383 · isolated comparison prototype
+            Activity instrument lab
           </p>
           <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-            Present-first activity geometry
+            Calendar geometry and counter treatments
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-            The same 28 chronological days appear three ways. DOM and screen-reader order always run oldest to newest; only the visual coordinates change. Select any day to compare the same state across every candidate.
+            The same activity data gets a few different physical readings here.
+            Calendar experiments keep chronology explicit; counter experiments
+            ask how much machinery one daily number really needs.
           </p>
         </header>
 
         <div className="mt-7">
           <ActivityFieldLab />
+          <ActivityCounterLab />
         </div>
 
         <aside className="mx-auto mt-5 max-w-4xl rounded-[1.25rem] border border-border/70 bg-card/80 p-4 text-sm leading-relaxed text-muted-foreground shadow-[0_16px_38px_rgba(35,31,26,0.08)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.24)] sm:p-5">
           <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.16em] text-foreground">
-            Provisional recommendation
+            Working note
           </p>
           <p className="mt-2">
-            Carry the honeycomb into the later homepage reconciliation. It gives today a clear origin, preserves a predictable path, and occupies less field area than the square control. Keep this route as evidence until the compact homepage work in #389 settles the final surrounding dimensions.
+            The homepage can stay on the current four-week calendar while these
+            alternatives earn their keep. For the counter, the receipt strip is
+            the cleanest challenger; the ticket rack preserves more of the
+            existing paper personality; the stamp is the little gremlin option.
           </p>
         </aside>
       </main>
