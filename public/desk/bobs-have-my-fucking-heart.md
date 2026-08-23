@@ -4,7 +4,7 @@
 
 Bobs might be my favorite hairstyle.
 
-It sounds kind of ridiculous because there are so many ways for hair to be beautiful. Long hair can be spectacular. Bangs can completely change somebody's face. Ponytails, twin tails, wolf cuts, shoulder-length hair, all the little half-up things people do, whatever. There is an entire universe here.
+Which sounds kind of ridiculous because hair can be beautiful in a million directions. Long hair can be spectacular. Bangs can completely change somebody's face. Ponytails, twin tails, wolf cuts, shoulder-length hair, all the little half-up things people do, whatever.
 
 Then somebody gets a really good bob and you're sitting there like, holy fuck.
 
@@ -18,7 +18,7 @@ A really good chin-length cut can put this soft mass of hair around the head and
 
 Long hair has sensuality through abundance and movement; the bob has sensuality through framing and reveal.
 
-Once you notice that, the old shorthand of long hair as *the* feminine hairstyle starts looking kind of stupid. Length is one cue. A bob can turn up a whole pile of others at once: the face looks more concentrated, the jaw gets a line drawn around it, the neck is sitting right there, earrings suddenly have room to do something, makeup reads differently, the whole head can look incredibly groomed and deliberate. Jewel-like.
+Once you notice that, the old shorthand of long hair as *the* feminine hairstyle starts looking kind of stupid. Length is one cue. A bob can turn up a whole pile of other cues at once: the face looks more concentrated, the jaw gets a line drawn around it, the neck is sitting right there, earrings suddenly have room to do something, makeup reads differently, the whole head can look incredibly groomed and deliberate. Jewel-like.
 
 Long hair can make you think, beautiful hair.
 
@@ -28,7 +28,7 @@ A great bob can make you think, beautiful woman.
 
 Her bob keeps her from becoming visually heavy. It gives her this porcelain-doll softness, makes the blindfold read cleanly, leaves that little stretch of neck between white hair and black clothing exposed, and survives reduction beautifully. You could recognize that head from across the room.
 
-I also fucking love that the bob borrows some of the visual language of short hair. It's precise; somebody took the hair and made a decision about exactly where it ends. That can read cute, severe, expensive, efficient, artsy, whatever. The cut has an opinion.
+I also fucking love that the bob borrows from the visual language of short hair. It's precise; somebody took the hair and made a decision about exactly where it ends. That can read cute, severe, expensive, efficient, artsy, whatever. The cut has an opinion.
 
 Japan's relationship with the bob has history behind it. The modern bob became associated with the *moga*, the "modern girl" of the 1920s and early 1930s. The [National Diet Library's history of modern Japanese makeup and fashion](https://www.ndl.go.jp/kaleido/entry/29/2.html) describes the urban modern girl after the Great Kanto Earthquake through bobbed hair, Western clothing and makeup, work, education, and a more visibly modern public life. Cutting the hair could read as fashion, independence, modernity, even a tiny provocation.
 
@@ -44,7 +44,7 @@ Chinese, Korean, Japanese, whatever, plenty of women across all of them look inc
 
 Dark, straight hair makes the whole thing graphic. A dense black bob reads like one clean drawn mass around the face. Bangs become a horizontal line. The bottom edge becomes another. Skin, eyes, ears, neck, earrings, makeup, collar, all of it gets these crisp little boundaries to play against. The haircut translates beautifully into manga, anime, games, fashion illustration, character design, all of that. You get an absurd amount of identity out of a very small silhouette.
 
-A lot of this comes from subtraction. Glamour so often gets sold through abundance: more length, more volume, more movement, more hair. The bob takes some of that away and makes the remaining few inches do way more work.
+A lot of this comes from subtraction. Glamour so often gets sold through abundance: more length, more volume, more movement, more hair. The bob cuts away the excess and makes the remaining few inches do way more work.
 
 The exact endpoint starts carrying erotic weight. The jaw gets emphasized because the hair stops beside it. The neck gets emphasized because the hair leaves it alone. The cheekbones get emphasized because the volume sits next to them. The eyes get emphasized because there is less competing material around the face. Even the ears become part of the look. A small earring with a sharp bob can do an absurd amount of work.
 
