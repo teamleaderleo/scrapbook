@@ -8,7 +8,7 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
   forbidOnly: isAutomatedRun,
-  retries: isAutomatedRun ? 2 : 0,
+  retries: isAutomatedRun ? 1 : 0,
   workers: isAutomatedRun ? 2 : undefined,
   reporter: isHostedCi ? 'github' : 'list',
   use: {
