@@ -89,6 +89,15 @@ describe('CI change classifier', () => {
     });
   });
 
+  it('scopes a Workbench registry-only edit to home and desk', () => {
+    expect(classifyCiPaths(['lib/bot-desk.ts'])).toMatchObject({
+      mode: 'scoped-browser',
+      runVerify: true,
+      runBrowser: true,
+      browserGroups: ['desk', 'home'],
+    });
+  });
+
   it('unions known browser groups for cross-surface changes', () => {
     expect(
       classifyCiPaths([
