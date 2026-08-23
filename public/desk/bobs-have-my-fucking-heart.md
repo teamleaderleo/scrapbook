@@ -12,19 +12,19 @@ A bob does something incredibly simple: it gets the hair out of the way.
 
 Long hair can become one of the main visual objects on a person. You notice the length, the movement, the way it falls across the shoulders and down the back. A bob gives you less hair and somehow makes the woman herself more present. The face takes over. The cut ends around the jaw or upper neck and suddenly your eye gets this clean route through the eyes, cheekbones, mouth, jaw, neck, shoulders.
 
-That hard stop is a huge part of it. A bob has an edge. It ends somewhere definite.
+That hard stop is a huge part of it. A bob has an edge; it ends somewhere definite.
 
-A really good chin-length cut can put this soft mass of hair around the head and then simply stop, leaving the neck exposed underneath it. The contrast is almost stupidly effective. Hair, jaw, little column of neck. Tuck it behind one ear and it gets even better. Turn the head and let the hair swing away from the nape for a second and there is this tiny reveal built into the haircut every time she moves.
+A really good chin-length cut can put this soft mass of hair around the head and then simply stop, leaving the neck exposed underneath it. The contrast is stupidly effective. Hair, jaw, little column of neck. Tuck it behind one ear and it gets even better. Turn the head and let the hair swing away from the nape for a second and there is this tiny reveal built into the haircut every time she moves.
 
-Long hair has sensuality through abundance and movement. The bob has sensuality through framing and reveal.
+Long hair has sensuality through abundance and movement; the bob has sensuality through framing and reveal.
 
-Once you notice that, the old shorthand of long hair as *the* feminine hairstyle starts looking kind of stupid. Length is one cue. A bob can turn up a whole pile of others at once: the face looks more concentrated, the jaw gets a line drawn around it, the neck is sitting right there, earrings suddenly have room to do something, makeup reads differently, the whole head can look incredibly groomed and deliberate. Almost jewel-like.
+Once you notice that, the old shorthand of long hair as *the* feminine hairstyle starts looking kind of stupid. Length is one cue. A bob can turn up a whole pile of others at once: the face looks more concentrated, the jaw gets a line drawn around it, the neck is sitting right there, earrings suddenly have room to do something, makeup reads differently, the whole head can look incredibly groomed and deliberate. Jewel-like.
 
 Long hair can make you think, beautiful hair.
 
 A great bob can make you think, beautiful woman.
 
-2B is almost laboratory-perfect for this. Her hair is soft and rounded, pale against all the black in the rest of her design, and it stops right where the jaw and neck become interesting. Then you get the blindfold slicing across the face, the high collar, the dress, the gloves, the boots, the ridiculous weaponry underneath this very compact little head.
+2B is laboratory-perfect for this. Her hair is soft and rounded, pale against all the black in the rest of her design, and it stops right where the jaw and neck become interesting. Then you get the blindfold slicing across the face, the high collar, the dress, the gloves, the boots, the ridiculous weaponry underneath this very compact little head.
 
 Her bob keeps her from becoming visually heavy. It gives her this porcelain-doll softness, makes the blindfold read cleanly, leaves that little stretch of neck between white hair and black clothing exposed, and survives reduction beautifully. You could recognize that head from across the room.
 
@@ -36,28 +36,28 @@ Japan has had a very long time since then to get absurdly fluent in this haircut
 
 Cute bob. Severe bob. Schoolgirl bob. Art-school bob. Office bob. Idol bob. Fashion-editorial bob. Blunt bob. Round bob. Mini-bob. Jaw-line bob. Heavy bangs, wispy bangs, no bangs, center part, one side tucked behind the ear, inward curl, dead-straight ends, slightly messy ends. Tiny changes in length and weight can push the same haircut into completely different kinds of femininity.
 
-You can see that fluency in something as mundane as a salon catalog. Hot Pepper Beauty's Japanese hairstyle index has [hundreds of thousands of results tagged as mini-bobs](https://beauty.hotpepper.jp/catalog/ladys/word%E3%83%9F%E3%83%8B%E3%83%96/) and tens of thousands for combinations like [blunt-cut mini-bob](https://beauty.hotpepper.jp/catalog/ladys/word%E5%88%87%E3%82%8A%E3%81%A3%E3%81%B1%E3%81%AA%E3%81%97%E3%80%80%E3%83%9F%E3%83%8B%E3%83%96/). The counts are messy search-index numbers. The vocabulary is the fun part. You can keep subdividing the thing and everybody still knows what you mean.
+You can see that fluency in something as mundane as a salon catalog. Hot Pepper Beauty's Japanese hairstyle index has [hundreds of thousands of results tagged as mini-bobs](https://beauty.hotpepper.jp/catalog/ladys/word%E3%83%9F%E3%83%8B%E3%83%9C%E3%83%96/) and tens of thousands for combinations like [blunt-cut mini-bob](https://beauty.hotpepper.jp/catalog/ladys/word%E5%88%87%E3%82%8A%E3%81%A3%E3%81%B1%E3%81%AA%E3%81%97%E3%80%80%E3%83%9F%E3%83%8B%E3%83%96/). The counts are messy search-index numbers; the vocabulary is the fun part. You can keep subdividing the thing and everybody still knows what you mean.
 
 That's probably what I was reaching for when I kept thinking, man, the Japanese have perfected this.
 
 Chinese, Korean, Japanese, whatever, plenty of women across all of them look incredible with short hair. What changes is the cultural permission. Japan has spent generations treating the bob as an ordinary feminine option. Once a culture has dozens of familiar versions of a haircut, you are no longer making some giant statement called SHORT HAIR. You are choosing *which bob*.
 
-And dark, straight hair can make the whole thing almost graphic. A dense black bob reads like one clean drawn mass around the face. Bangs become a horizontal line. The bottom edge becomes another. Skin, eyes, ears, neck, earrings, makeup, collar, all of it gets these crisp little boundaries to play against. There is a reason the haircut translates so beautifully into manga, anime, games, fashion illustration, character design, all of that. You get an absurd amount of identity out of a very small silhouette.
+Dark, straight hair can make the whole thing graphic. A dense black bob reads like one clean drawn mass around the face. Bangs become a horizontal line. The bottom edge becomes another. Skin, eyes, ears, neck, earrings, makeup, collar, all of it gets these crisp little boundaries to play against. There is a reason the haircut translates so beautifully into manga, anime, games, fashion illustration, character design, all of that. You get an absurd amount of identity out of a very small silhouette.
 
 The funny part is how much of this comes from subtraction. Glamour so often gets sold through abundance: more length, more volume, more movement, more hair. The bob takes some of that away and makes the remaining few inches do way more work.
 
 The exact endpoint starts carrying erotic weight. The jaw gets emphasized because the hair stops beside it. The neck gets emphasized because the hair leaves it alone. The cheekbones get emphasized because the volume sits next to them. The eyes get emphasized because there is less competing material around the face. Even the ears can suddenly become part of the look. A small earring with a sharp bob can do an absurd amount of work.
 
-And yeah, a bob can be cute and hot at the same time, which is fucking lethal.
+A bob can be cute and hot at the same time, which is fucking lethal.
 
-The roundedness can be youthful. Bangs can make it sweeter. The shortness exposes more adult facial and bodily cues: jaw, neck, collarbones, earrings, makeup. A blunt line can add confidence. A little mess can make the whole thing intimate. It can move between sweet and severe in about half a second.
+The roundedness can be youthful; bangs can make it sweeter. The shortness exposes more adult facial and bodily cues: jaw, neck, collarbones, earrings, makeup. A blunt line can add confidence. A little mess can make the whole thing intimate. It can move between sweet and severe in about half a second.
 
 2B gets that for free every time she appears on screen. Doll-like head, severe blindfold, exposed neck, ridiculous gothic battle dress. Softness and danger packed into about six inches of hair.
 
-The part that keeps getting me, though, is how complete bobs look. A long hairstyle can trail away into the rest of the body. A bob feels composed, like somebody drew a circle around the whole idea and cut on the line.
+The part that keeps getting me, though, is how complete bobs look. A long hairstyle can trail away into the rest of the body; a bob feels composed, like somebody drew a circle around the whole idea and cut on the line.
 
 Which is probably why once you realize you love them, you start getting annoyingly specific. Chin-length versus jaw-length. Blunt versus feathered. A little inward turn at the ends. Hair tucked behind exactly one ear. Heavy bangs that almost touch the eyelashes. That one slightly longer piece in front. Suddenly "bob" is nowhere near precise enough because there are bobs, and then there is *that fucking bob*.
 
-And yeah.
+All that's to say.
 
 Bobs have my fucking heart.
