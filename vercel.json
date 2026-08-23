@@ -7,5 +7,6 @@
       "preview/**": true
     }
   },
+  "installCommand": "pnpm install --no-frozen-lockfile",
   "ignoreCommand": "node scripts/vercel-preview-policy.mjs"
 }
