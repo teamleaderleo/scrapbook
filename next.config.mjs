@@ -37,6 +37,7 @@ const nextConfig = {
 
   experimental: {
     turbopackFileSystemCacheForDev: true,
+    turbopackFileSystemCacheForBuild: true,
     optimizePackageImports: [
       'lucide-react',
       'react-markdown',

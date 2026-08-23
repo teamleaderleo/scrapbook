@@ -13,6 +13,8 @@ Pure Markdown changes skip the workflow. Pushes to `main` use the same lanes as 
 
 Do not add a separate hosted `pnpm typecheck` step beside `next build`. Next.js already runs TypeScript during the production build, so serializing another full TypeScript pass adds wall-clock time without adding a second independent gate. `pnpm typecheck` remains available when a focused type-only check is useful during authoring.
 
+The build lane restores `.next/cache` across commits with a key scoped to the pnpm lockfile. Next.js 16.3's `turbopackFileSystemCacheForBuild` then reuses production Turbopack compilation state. A lockfile change intentionally starts a fresh cache lineage; ordinary source edits reuse the latest compatible cache. The flag is experimental, so if a cached build ever produces stale or otherwise suspect output, remove the flag and the `.next/cache` Actions step first and rebuild cold.
+
 Hosted CI does not install a browser, start Playwright, upload screenshot artifacts, classify UI surfaces, or replay browser checks after merge.
 
 ## Browser checks are author-side
