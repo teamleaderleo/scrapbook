@@ -20,7 +20,7 @@ The release board now says there is no active general product-hardening wave. Th
 
 The first private signed Distribution rehearsal reached the real release machinery and exposed the now-repaired fixture defects before package assembly. A second private signed rehearsal is running against the repaired accepted `main` at the time of this refresh. These rehearsals prove release machinery; final package claims still belong to the retained tagged candidate generation and its native/package evidence.
 
-The controlled development headline remains the same-profile 83-mod campaign: **89.00s median baseline versus 15.53s median accelerated**, five accepted runs per condition in one interleaved session with no exclusions. The next important performance claim is the packaged-candidate benchmark, not another development-number rewrite.
+**Performance note refreshed 2026-08-24:** the current headline is **13.69s best observed startup** on the 83-mod M5 MacBook Air profile. For live perspective, use the freshest best observed run; current repeat behavior is tightly clustered enough that run-to-run differences are on the order of tens of milliseconds, with no meaningful lucky-cache regime. The 2026-08-15 **89.00s → 15.53s** same-profile campaign remains useful historical evidence, not the current performance headline.
 
 Career interpretation: Preflight remains the strongest owned engineering artifact, but its current phase should now be described as **release execution / candidate evidence**, not broad product convergence.
 
