@@ -93,6 +93,16 @@ for (const viewport of desktopViewports) {
     await expect(page.locator('[data-contribution-week-grid]')).toBeVisible();
     await expect(page.locator('[data-scrapbook-pet]')).toBeVisible();
     await expect(page.locator('[data-recent-systems]')).toBeVisible();
+    await expect(page.getByText('GitHub, still here', { exact: true })).toHaveCount(
+      0
+    );
+    await expect(page.locator('[data-home-repository]')).toHaveCount(2);
+    await expect(
+      page.locator('[data-home-repository="preflight"]')
+    ).toBeVisible();
+    await expect(
+      page.locator('[data-home-repository="stensibly"]')
+    ).toBeVisible();
 
     const footprint = await readHomepageFootprint(page);
     expect(footprint.document.width).toBeLessThanOrEqual(
@@ -145,16 +155,17 @@ test('moves through the desktop layout transition without inflating the activity
   expect(Math.abs(stacked.scoreboard.x - stacked.activityGrid.x)).toBeLessThan(
     2
   );
-  expect(stacked.activityGrid.y).toBeGreaterThan(stacked.scoreboard.bottom);
+  expect(stacked.scoreboard.y).toBeGreaterThan(stacked.activityGrid.bottom);
+  expect(stacked.pet.y).toBeGreaterThan(stacked.scoreboard.bottom);
 
   await page.setViewportSize({ width: 1040, height: 720 });
   const sideBySide = await readHomepageFootprint(page);
-  expect(sideBySide.activityGrid.x).toBeGreaterThan(
-    sideBySide.scoreboard.right
-  );
+  expect(sideBySide.scoreboard.x).toBeGreaterThan(sideBySide.activityGrid.right);
   expect(
     Math.abs(sideBySide.scoreboard.y - sideBySide.activityGrid.y)
   ).toBeLessThan(2);
+  expect(sideBySide.pet.y).toBeGreaterThanOrEqual(sideBySide.activityGrid.bottom);
+  expect(Math.abs(sideBySide.pet.x - sideBySide.activityGrid.x)).toBeLessThan(2);
   expect(
     Math.abs(stacked.activityCell.width - sideBySide.activityCell.width)
   ).toBeLessThanOrEqual(8);
@@ -163,7 +174,7 @@ test('moves through the desktop layout transition without inflating the activity
   );
 });
 
-test('keeps the scorecard planted and lets the visitor pet Scraplet', async ({
+test('keeps the scorecard planted and lets the visitor pet Scraplet over time', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
@@ -196,9 +207,6 @@ test('keeps the scorecard planted and lets the visitor pet Scraplet', async ({
     })
   ).toBe(true);
 
-  // The operator console intentionally leads the homepage now. Put the activity
-  // instrument in its interaction viewport before measuring hover motion so the
-  // browser's own scroll-into-view behavior is not mistaken for card movement.
   await scoreboard.scrollIntoViewIfNeeded();
   const scoreboardBefore = await scoreboard.boundingBox();
   expect(scoreboardBefore).not.toBeNull();
@@ -214,4 +222,9 @@ test('keeps the scorecard planted and lets the visitor pet Scraplet', async ({
 
   await pet.click();
   await expect(pet).toHaveAttribute('data-pets', '1');
+
+  await page.reload();
+  const reloadedPet = page.locator('[data-scrapbook-pet]');
+  await expect(reloadedPet).toBeVisible({ timeout: 15_000 });
+  await expect(reloadedPet).toHaveAttribute('data-pets', '1');
 });
