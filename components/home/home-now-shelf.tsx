@@ -1,38 +1,9 @@
+import { CensorReveal } from '@/components/ui/censor-reveal';
 import { agentVisits } from '@/lib/agent-guestbook';
 import { botDeskEntries } from '@/lib/bot-desk';
 import { publicLearningRecords } from '@/lib/learning-records';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-
-const SWEAR_PATTERN = /\bfuck(?:ing|ed|er|ers|s)?\b/i;
-const SWEAR_SPLIT_PATTERN = /(\bfuck(?:ing|ed|er|ers|s)?\b)/gi;
-const SWEAR_WORD_PATTERN = /^fuck(?:ing|ed|er|ers|s)?$/i;
-
-function SwearJarText({ text, enabled }: { text: string; enabled: boolean }) {
-  if (!enabled || !SWEAR_PATTERN.test(text)) return <>{text}</>;
-
-  return (
-    <span aria-label={text}>
-      {text.split(SWEAR_SPLIT_PATTERN).map((part, index) =>
-        SWEAR_WORD_PATTERN.test(part) ? (
-          <span
-            key={`${part}-${index}`}
-            aria-hidden="true"
-            data-swear-spoiler
-            title="swear jar · hover to reveal"
-            className="inline-block rounded-[0.28em] bg-foreground/10 px-[0.14em] text-transparent blur-[2.5px] [text-shadow:0_0_5px_hsl(var(--foreground)/0.48)] transition-[color,filter,text-shadow,background-color] duration-150 hover:bg-transparent hover:text-foreground hover:blur-none hover:[text-shadow:none] group-focus-visible:bg-transparent group-focus-visible:text-foreground group-focus-visible:blur-none group-focus-visible:[text-shadow:none] motion-reduce:transition-none"
-          >
-            {part}
-          </span>
-        ) : (
-          <span key={`${part}-${index}`} aria-hidden="true">
-            {part}
-          </span>
-        )
-      )}
-    </span>
-  );
-}
 
 function latestLearningRecord() {
   return [...publicLearningRecords].sort((left, right) => {
@@ -55,7 +26,7 @@ export function HomeNowShelf() {
           title: workbench.title,
           note: workbench.blurb,
           href: `/desk/${workbench.slug}`,
-          swearJar: true,
+          censor: true,
         }
       : null,
     learning
@@ -65,7 +36,7 @@ export function HomeNowShelf() {
           title: learning.title,
           note: learning.spark,
           href: learning.canonicalUrl,
-          swearJar: false,
+          censor: false,
         }
       : null,
     visit
@@ -75,7 +46,7 @@ export function HomeNowShelf() {
           title: visit.name,
           note: visit.note,
           href: `/gallery#visit-${visit.id}`,
-          swearJar: false,
+          censor: false,
         }
       : null,
   ].filter((item): item is NonNullable<typeof item> => Boolean(item));
@@ -107,10 +78,10 @@ export function HomeNowShelf() {
             <span className="flex min-w-0 items-end justify-between gap-3">
               <span className="min-w-0">
                 <span className="block line-clamp-1 text-sm font-semibold tracking-tight">
-                  <SwearJarText text={item.title} enabled={item.swearJar} />
+                  {item.censor ? <CensorReveal text={item.title} /> : item.title}
                 </span>
                 <span className="mt-1 block line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                  <SwearJarText text={item.note} enabled={item.swearJar} />
+                  {item.censor ? <CensorReveal text={item.note} /> : item.note}
                 </span>
               </span>
               <ArrowRight
