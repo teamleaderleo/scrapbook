@@ -1,6 +1,7 @@
 import { CensorReveal } from '@/components/ui/censor-reveal';
 import { agentVisits } from '@/lib/agent-guestbook';
 import { botDeskEntries } from '@/lib/bot-desk';
+import { getBotDeskDisplayCopy } from '@/lib/bot-desk-display';
 import { publicLearningRecords } from '@/lib/learning-records';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -15,16 +16,17 @@ function latestLearningRecord() {
 
 export function HomeNowShelf() {
   const workbench = botDeskEntries.find(entry => entry.publicationState === 'Published');
+  const workbenchDisplay = workbench ? getBotDeskDisplayCopy(workbench) : null;
   const learning = latestLearningRecord();
   const visit = agentVisits[0];
 
   const items = [
-    workbench
+    workbench && workbenchDisplay
       ? {
           id: `workbench-${workbench.slug}`,
           kind: 'latest writing',
-          title: workbench.title,
-          note: workbench.blurb,
+          title: workbenchDisplay.title,
+          note: workbenchDisplay.blurb,
           href: `/desk/${workbench.slug}`,
           censor: true,
         }
