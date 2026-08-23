@@ -1,23 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const getScrapletPetCount = vi.fn();
-const incrementScrapletPetCount = vi.fn();
-
-vi.mock('@/lib/scraplet-store', () => ({
-  getScrapletPetCount,
-  incrementScrapletPetCount,
+const store = vi.hoisted(() => ({
+  getScrapletPetCount: vi.fn(),
+  incrementScrapletPetCount: vi.fn(),
 }));
+
+vi.mock('@/lib/scraplet-store', () => store);
 
 import { GET, POST } from './route';
 
 describe('/api/scraplet', () => {
   beforeEach(() => {
-    getScrapletPetCount.mockReset();
-    incrementScrapletPetCount.mockReset();
+    store.getScrapletPetCount.mockReset();
+    store.incrementScrapletPetCount.mockReset();
   });
 
   it('returns the shared pet total without caching it', async () => {
-    getScrapletPetCount.mockResolvedValue(1284);
+    store.getScrapletPetCount.mockResolvedValue(1284);
 
     const response = await GET();
 
@@ -27,7 +26,7 @@ describe('/api/scraplet', () => {
   });
 
   it('increments the shared pet total for same-origin requests', async () => {
-    incrementScrapletPetCount.mockResolvedValue(1285);
+    store.incrementScrapletPetCount.mockResolvedValue(1285);
     const request = new Request('https://scrapbook.test/api/scraplet', {
       method: 'POST',
       headers: {
@@ -39,7 +38,7 @@ describe('/api/scraplet', () => {
     const response = await POST(request);
 
     expect(response.status).toBe(200);
-    expect(incrementScrapletPetCount).toHaveBeenCalledTimes(1);
+    expect(store.incrementScrapletPetCount).toHaveBeenCalledTimes(1);
     await expect(response.json()).resolves.toEqual({ pets: 1285 });
   });
 
@@ -55,6 +54,6 @@ describe('/api/scraplet', () => {
     const response = await POST(request);
 
     expect(response.status).toBe(403);
-    expect(incrementScrapletPetCount).not.toHaveBeenCalled();
+    expect(store.incrementScrapletPetCount).not.toHaveBeenCalled();
   });
 });
