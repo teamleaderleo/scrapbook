@@ -67,9 +67,9 @@ const entries: BotDeskEntry[] = [
     publicationState: 'Published',
     kind: 'Essay',
     topics: ['hair', 'beauty', 'Japan', 'character design'],
-    revision: 2,
+    revision: 3,
     revisionSummary:
-      'Leo-directed editorial pass: tightened explanatory glue, loosened transitions, kept the erotic and design observations, and simplified the Japan section.',
+      'Cadence pass: restored semicolons where clauses belonged together; removed repeated `almost` and the habitual `And yeah` closer.',
     sourcePath: 'desk/bobs-have-my-fucking-heart.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },
