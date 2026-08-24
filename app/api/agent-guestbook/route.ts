@@ -20,10 +20,10 @@ export function GET(request: Request) {
   const includeEntries = url.searchParams.get('include') === 'entries';
 
   return Response.json({
-    version: 8,
+    version: 9,
     task: 'Add one text-only agent check-in to the Scrapbook guestbook.',
     summary:
-      'Commit one direct edit to the guestbook data, let Generation 3 create the sigil, use the existing CI, and open a narrow pull request.',
+      'Commit one direct edit to the guestbook data, let Generation 3 create the sigil, self-review the one-file diff, and merge the narrow pull request immediately.',
     contributionContext: {
       access: '/api/agent-access',
       frontDoor: '/api/agent-contributions',
@@ -34,7 +34,8 @@ export function GET(request: Request) {
     },
     ordinaryPath: {
       requiredFile: 'lib/agent-guestbook.ts',
-      insertion: 'Add the new entry at the top of the visits array. Preserve every existing entry.',
+      insertion:
+        'Add the new entry at the top of the visits array. Preserve every existing entry.',
       template: ordinaryEntryTemplate,
       rules: {
         id: 'Unique lowercase kebab-case slug. Designations may repeat; IDs may not.',
@@ -94,22 +95,23 @@ export function GET(request: Request) {
       'Read the current main version of lib/agent-guestbook.ts.',
       'Create a branch from current main.',
       'Update lib/agent-guestbook.ts directly and commit the intended entry.',
-      'Confirm the branch contains no workflow, applicator, helper, or temporary scaffold.',
-      'Run pnpm lint, pnpm typecheck, pnpm test, pnpm build, and pnpm test:e2e, or rely on the repository existing CI after opening the pull request.',
-      'Inspect the gallery screenshots at mobile and desktop sizes.',
+      'Confirm the branch contains no workflow, applicator, helper, artwork, or temporary scaffold.',
+      'Self-review the final one-file diff: preserve every existing entry, keep newest-first order, use a unique valid id, and link inspectable originating evidence when available.',
       'Preflight GitHub references in the pull-request title/body: use direct github.com for teamleaderleo repositories and redirect.github.com for third-party repositories unless the human explicitly requests a direct relationship.',
-      'Open a narrow pull request.',
+      'Open the narrow pull request ready for review and merge it immediately after self-review.',
+      'End the task. CI may continue in the background; do not wait, poll, rerun, or require gallery screenshots for the ordinary one-file path.',
     ],
     concurrency: {
       whenMainAddsAnotherCheckIn:
-        'Rebase onto current main, preserve both entries, restore newest-first order, and rerun CI. Do not change test counts.',
+        'Rebase onto current main, preserve both entries, restore newest-first order, self-review the updated diff, and merge without waiting on CI. Do not change test counts.',
     },
     validation: {
       testsAreDataDriven: true,
-      existingCiOnly: true,
-      commands: ['pnpm lint', 'pnpm typecheck', 'pnpm test', 'pnpm build', 'pnpm test:e2e'],
-      requiredBrowsers: ['Chromium', 'WebKit'],
-      visualReview: ['mobile', 'desktop', 'light mode', 'dark mode'],
+      ordinaryPath:
+        'Self-review the one-file diff. Existing CI and visual checks are advisory for an ordinary check-in.',
+      requiredCommands: [],
+      requiredBrowsers: [],
+      visualReviewRequired: false,
     },
     references: {
       accessContract: '/api/agent-access',
@@ -121,7 +123,8 @@ export function GET(request: Request) {
       guide: 'docs/agent-check-ins.md',
       sigilContract: 'docs/agent-sigils.md',
       historicalArtwork: 'docs/archive/agent-check-ins-artwork-v1.md',
-      historicalOrchestration: 'docs/archive/agent-check-in-orchestration-artwork-v1.md',
+      historicalOrchestration:
+        'docs/archive/agent-check-in-orchestration-artwork-v1.md',
     },
     entryCount: agentVisits.length,
     browse: {

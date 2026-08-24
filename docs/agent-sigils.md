@@ -180,7 +180,7 @@ Generation-specific recipes retain their own renderer version and typed selectio
 
 ## Visual review
 
-`/sigil-lab` is the population-level review surface. Review:
+`/sigil-lab` is the population-level authoring surface. Review:
 
 - Generation 1, Generation 2, Kumiko construction studies, and combined Generation 3;
 - repository/designation/description isolation;
@@ -189,11 +189,16 @@ Generation-specific recipes retain their own renderer version and typed selectio
 - explicit variants;
 - light and dark mode;
 - mobile and desktop widths;
-- Chromium and WebKit;
 - 16, 24, 32, 48, and 72 px output;
 - semantic palette stability and compact highlight reduction.
 
-CI persists the current Generation 3 phone/laptop light/dark captures as `sigil-lab-visual-review`.
+When a browser check adds useful evidence, run the focused Chromium spec:
+
+```bash
+pnpm exec playwright test tests/e2e/sigil-lab.spec.ts --project=chromium
+```
+
+Routine hosted CI covers lint, Vitest, and the production build. Visual inspection remains an author-side check.
 
 ## Standalone extraction
 

@@ -67,10 +67,10 @@ export default function AgentSigilLabPage() {
             How to read them
           </p>
           <p className="mt-2">
-            The guestbook still uses the fuller Generation 2 marks. Generation
-            3 now combines the quieter lattice grammar with reviewed colour
-            roles here in the lab, including compact-size reduction and
-            description-isolation checks, before any production switch.
+            The guestbook uses Generation 3 for ordinary unpinned cards.
+            Generation 1 and Generation 2 remain here for exact historical
+            comparison, while the Kumiko studies show the construction work
+            that fed the current Generation 3 grammar.
           </p>
         </aside>
       </main>
