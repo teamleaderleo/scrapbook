@@ -74,9 +74,9 @@ Candidate receipts:
 
 > Removed repeated O(n) scans and allocations from campaign simulation by replacing sector-wide entity lookup scans with mutation-tracked indexes (**227,805 full-list validations → 0, 79.1M entity-reference checks → 0**), short-circuiting **117.9M unchanged commodity recomputations**, and skipping defensive list copies on **15.4M empty script calls**.
 
-> Rebuilt **Preflight's texture-cache preparation** to stream textures directly into the final pack instead of forcing thousands of rebuildable files, bringing preparation **200.77s → 16.21s** and storage **4.76 GB → ~1.1 GB**, then learned startup access order so the same Compact texture set launched **33.53s alphabetically vs 14.174s in observed order**.
+> Eliminated per-file durability for rebuildable texture intermediates and streamed them into one final pack, bringing preparation **200.77s → 16.21s** and storage **4.76 GB → ~1.1 GB**, then laid out the same Compact texture set in observed startup order, reducing launch **33.53s → 14.174s**.
 
-> Memoized **228 Janino compilation requests**, reducing their aggregate time **18.014s → 2.364s**, then collapsed **36,332 generated-class occurrences into 280 unique classes**, shrinking cached class maps **145.96 MiB → 1.13 MiB** and warm replay **1.501s → 29ms**.
+> Memoized **228 Janino compilation requests** (**18.014s → 2.364s**), then deduplicated **36,332 generated-class occurrences down to 280 unique classes**, shrinking cached class maps **145.96 MiB → 1.13 MiB** and warm replay **1.501s → 29ms**.
 
 > Built a Windows, macOS, and Linux desktop app in Rust, React, and Tauri with a bundled Java runtime, built-in before/after benchmarks, named mod profiles, automatic cache maintenance after game exit, recovery and diagnostics, and signed updates with rollback.
 
@@ -94,8 +94,8 @@ Why these stay in the pool:
 - The runtime-texture receipt carries the architectural discovery: the first texture cache was on the wrong side of a serialized prefetch wait. Moving the lookup before that queue changed the whole launch, while true-size uploads removed the VRAM padding separately.
 - The third-party callback receipt deliberately avoids name-dropping individual mods. The retained component measurements are **7.066–7.435s** from repeated hull/variant JSON reads, **4.821s** from compact replay of unresolved generated-texture work, and **650ms → 52ms** from a later paintjob-catalog cache. These are separate callback boundaries and together support `>12s` without folding in the common-loader memo that also benefits mods.
 - The campaign-runtime receipt is separate from startup and avoids an unsupported FPS claim. It names the repeated work directly: adjacent entity-index pilots moved **227,805 full-list validations → 0** and **79,131,653 entity-reference checks → 0**; the final commodity memo served **117,907,677** unchanged calls while delegating **223,330** changed states, and campaign maintenance skipped defensive list copies on **15,402,921** empty script lists.
-- The texture-cache receipt is Preflight's own storage/data-layout work. Publication, not worker count, dominated the slow preparation path, so rebuildable intermediates became a streamed final pack. The physical order result shows that logical cache contents alone were not enough.
-- The generated-bytecode receipt carries two optimization layers. First memoize repeated compiler requests, then normalize the cache after discovering that **36,332 class occurrences contained only 280 unique classes**.
+- The texture-cache receipt names the storage mistake directly: rebuildable intermediates were given per-file durability before the final pack was written. Streaming them into one durable pack fixed preparation/storage, while the same logical Compact corpus proved physical layout matters by moving launch **33.53s → 14.174s** when written in observed startup order.
+- The generated-bytecode receipt carries two optimization layers. First memoize repeated compiler requests, then deduplicate the persisted representation after discovering that **36,332 class occurrences contained only 280 unique classes**.
 - The desktop receipt proves end-to-end ownership without becoming a feature list: three-OS packaging, bundled runtime, measurement, profile/cache lifecycle, recovery, diagnostics, and signed update/rollback.
 - The linter receipt points the same investigation back at source material instead of routing around it at runtime. Lead with useful findings and resource costs, not calibration statistics.
 
