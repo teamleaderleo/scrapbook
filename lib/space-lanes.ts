@@ -7,6 +7,11 @@ export const SPACE_LANES = [
     description: 'Notes and practical studies outside the drill archive.',
   },
   {
+    id: 'interview',
+    label: 'Interview',
+    description: 'Implementation, review, design, deep dives, and interview scales.',
+  },
+  {
     id: 'fieldwork',
     label: 'From Fieldwork',
     description: 'Studies tied to Fieldwork and Linux Fieldwork.',
@@ -25,6 +30,7 @@ export const SPACE_LANES = [
 
 export type SpaceLaneId = (typeof SPACE_LANES)[number]['id'];
 
+const INTERVIEW_TAG = 'prep:interview';
 const SCALE_CATEGORIES = new Set(['leetcode', 'template', 'drill', 'typing']);
 const SCALE_TAGS = new Set([
   'type:leetcode',
@@ -65,7 +71,9 @@ export function itemMatchesSpaceLane(item: Item, lane: SpaceLaneId): boolean {
     url.includes('github.com/teamleaderleo/linux-fieldwork');
   const isScale =
     SCALE_CATEGORIES.has(category) || tags.some(tag => SCALE_TAGS.has(tag));
+  const isInterview = tags.includes(INTERVIEW_TAG);
 
+  if (lane === 'interview') return isInterview;
   if (lane === 'fieldwork') return fromFieldwork;
   if (lane === 'scales') return isScale;
 
