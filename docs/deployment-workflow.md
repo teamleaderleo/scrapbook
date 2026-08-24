@@ -8,7 +8,7 @@ Routine hosted CI answers the cheap repository questions: ESLint and Vitest run 
 
 | Source | Vercel behaviour |
 | --- | --- |
-| `main` | A tiny GitHub Actions signal requests production through the central deploy governor; Vercel Git auto-deploy is disabled. |
+| `main` | A tiny GitHub Actions OIDC signal requests production through the central deploy governor; Vercel Git auto-deploy is disabled. |
 | Ordinary feature, fix, docs, chore, internal, audit, or agent branches | Skip automatic Vercel deployment. |
 | Commit message containing `[preview]` | Promote that commit to `preview/opt-in/<source-branch>` and deploy it. |
 | Branch prefixed `preview/` | Deploy every push as a persistent preview branch. |
@@ -24,9 +24,9 @@ The normal path is event-driven:
 
 ```text
 Scrapbook main changes
-  -> the one-step Production deploy signal workflow completes
-  -> GitHub emits that workflow_run webhook
-  -> Stensibly verifies the signed GitHub webhook
+  -> the Production deploy signal job requests a short-lived GitHub OIDC token
+  -> the job posts that token directly to Stensibly
+  -> Stensibly verifies GitHub's signature and the signed repository / ref / SHA / workflow claims
   -> Stensibly sends the exact repo / branch / SHA to deploy-governor
   -> governor checks Vercel's rolling team-wide deployment history
   -> below the soft threshold: create one exact-SHA production deployment
@@ -34,9 +34,13 @@ Scrapbook main changes
   -> one global half-hour batch slot drains at most one queued project
 ```
 
-`.github/workflows/deploy-signal.yml` is deliberately tiny: it runs on every `main` push, carries no deployment secret, and only emits one successful GitHub Actions workflow run for the exact revision. Stensibly admits only a completed successful `workflow_run` named `Production deploy signal` that was triggered by `push`. Normal quality/build CI remains separate and can run in parallel, as it did when Vercel Git deployment was automatic.
+`.github/workflows/deploy-signal.yml` is deliberately tiny. It runs on every `main` push, requests GitHub's short-lived OIDC credential with `id-token: write`, and sends that credential to the fixed Stensibly audience. It has no stored deployment secret, performs no repository checkout, installs no dependencies, and does not call Vercel.
 
-Vercel supplies the governor with Scrapbook's existing project identity and production branch through the project's Git integration. The governor checks exact-SHA Vercel history before creating a deployment, so repeated event deliveries do not duplicate an already-attempted revision.
+Stensibly accepts only GitHub's RS256 OIDC issuer for the exact deploy-governor audience. It requires a branch push and an exact `.github/workflows/deploy-signal.yml` workflow ref, then takes repository, ref, and SHA from the signed token rather than a request body. The existing source allowlist is checked before any outbound deploy-governor authority is minted.
+
+Normal quality/build CI remains separate and can run in parallel, as it did when Vercel Git deployment was automatic.
+
+Vercel supplies the governor with Scrapbook's existing project identity and production branch through the project's Git integration. The governor checks exact-SHA Vercel history before creating a deployment, so repeated requests do not duplicate an already-attempted revision.
 
 There is no production-head polling loop.
 
@@ -89,7 +93,7 @@ Routine prose, tests, repository maintenance, and source-level changes stay on o
 
 ## Practical cadence
 
-Run local checks before pushing when local access is available. Let routine GitHub CI answer lint, unit-test, and production-build questions. Use an explicit browser check when the change needs one. Add `[preview]` to a commit when a deployed URL adds useful evidence, or use a `preview/…` branch for a longer preview session. Merge accepted work to `main`; the dedicated signal then asks the governor to handle production admission automatically.
+Run local checks before pushing when local access is available. Let routine GitHub CI answer lint, unit-test, and production-build questions. Use an explicit browser check when the change needs one. Add `[preview]` to a commit when a deployed URL adds useful evidence, or use a `preview/…` branch for a longer preview session. Merge accepted work to `main`; the OIDC signal immediately asks the governor to handle production admission.
 
 ## Quota accounting
 
@@ -101,7 +105,9 @@ Vercel's Ignored Build Step executes after a deployment has already been created
 
 ## Recovery
 
-If the event bridge or governor is unavailable, do not repeatedly create manual Vercel attempts. The current production deployment stays live. The repository-level rollback for the delivery path is to set `git.deploymentEnabled.main` back to `true`, restoring Vercel's normal Git production trigger.
+If Stensibly or the governor is unavailable, the signal job fails visibly instead of silently falling back to a timer. The current production deployment stays live. Re-running the failed signal is safe because the governor checks exact-SHA Vercel history before creating anything.
+
+The repository-level rollback for the delivery path is to set `git.deploymentEnabled.main` back to `true`, restoring Vercel's normal Git production trigger.
 
 A specific failed or canceled exact SHA is treated as already attempted by the governor rather than retried forever. Push a repaired revision or perform one deliberate recovery deployment when needed.
 
@@ -116,3 +122,4 @@ This policy applies to the existing Vercel project `setzen`. Production domains,
 - [Git configuration](https://vercel.com/docs/project-configuration/git-configuration)
 - [Project settings and Ignored Build Step accounting](https://vercel.com/docs/project-configuration/project-settings)
 - [System environment variables](https://vercel.com/docs/environment-variables/system-environment-variables)
+- [GitHub OpenID Connect reference](https://docs.github.com/en/actions/reference/security/oidc)
