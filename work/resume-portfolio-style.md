@@ -56,6 +56,8 @@ Avoid filler terms such as `actual`, `real`, `bounded`, and `narrow` in career-f
 
 Don't write implementation review language when a consequence is available. `Preserved caller-owned lastIndex` is useful in a PR. `Identical URL checks returned different answers across calls` is useful on a resume.
 
+Don't default every metric sentence to `cut`. Choose the verb that best describes the change. `Brought startup from 101s to 13.69s`, `reduced preparation from 200.77s to 16.21s`, `shrunk 145.96 MiB to 1.13 MiB`, and `removed a 27s wait` each tell a slightly different story.
+
 ## Prefer concrete nouns and verbs
 
 Prefer:
@@ -106,9 +108,9 @@ Strong examples include:
 - `3 hours to 15 minutes`
 - `83 enabled mods`
 
-Don't add a second measurement merely because it exists. Pair measurements when the combination is the accomplishment, such as cutting both preparation time and storage.
+Don't add a second measurement merely because it exists. Pair measurements when the combination is the accomplishment, such as reducing both preparation time and storage.
 
-For Preflight, the resume uses **101s to 13.69s**. Older campaign numbers belong in evidence records, not in the resume bullet.
+For Preflight, the resume uses **101s to 13.69s**. Older campaign numbers belong in evidence records, not in the headline result.
 
 ## Flagship projects need the whole problem
 
@@ -128,6 +130,28 @@ Productization also earns evidence. Cross-platform packaging, a native host, bun
 
 Public status still has to be precise. A public repository supports `public open-source project`. It doesn't turn a release candidate into a shipped binary release. Keep source availability, release status, and package status separate.
 
+## Give a flagship project a thesis before the receipts
+
+When the scope of the project is itself impressive, the opening line can explain the whole problem before the metric bullets begin.
+
+A useful thesis answers three questions in one pass:
+
+1. What changing system did this project have to work against?
+2. What kind of intervention did it build?
+3. What did the work become as a product?
+
+For Preflight, the useful thesis is that it works across Starsector plus a large independently maintained mod stack, traces performance and failures across code the project doesn't own, guards runtime interventions as that code changes, and packages the result as a public cross-platform application.
+
+The receipts underneath can then carry the numbers. Don't cram the thesis, every subsystem, and every benchmark into one opening bullet.
+
+## Keep a win inventory while drafting
+
+Flagship projects often have more strong measurements than a one-page resume can hold. Preserve those measurements in the working record before deciding which ones fit the page.
+
+The inventory should prefer meaningful before/afters and concrete consequences over subsystem names. A later editor can compare a 27-second wait, a 7-second callback reduction, a 15-second compilation reduction, a multi-gigabyte allocation removal, and a cross-platform release path without rediscovering the development history.
+
+This inventory is not resume prose. Its job is to stop a later compression pass from forgetting the strongest work.
+
 ## Flagship projects can use the development arc
 
 For a flagship optimization project, the beginning-to-end development arc can be more meaningful than a smaller local comparison inside the project.
@@ -137,6 +161,12 @@ Use the strongest retained endpoint the current implementation has demonstrated 
 The same applies to subsystem history. For Preflight texture preparation, the career-facing arc is **200.77s / 4.76 GB to 16.21s / about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch is useful evidence about disk order, but it should not replace the larger preparation story.
 
 A development arc still needs traceable endpoints. Current code and retained artifacts come first, development/evidence records reconstruct the path, and README prose is a later projection of those facts.
+
+## Analysis tools should lead with what they found
+
+Calibration can make a tool credible, but it usually isn't the accomplishment.
+
+If a linter or analyzer found meaningful costs or defects, lead with those findings. Counts such as `median zero findings` or `44 of 86 clean` can stay in the working record to show the tool wasn't firing indiscriminately. They should not displace the expensive assets, broken configuration, or other useful discoveries the tool surfaced.
 
 ## Independent projects need a different test
 
