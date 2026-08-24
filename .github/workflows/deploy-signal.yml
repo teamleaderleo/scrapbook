@@ -6,11 +6,27 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   signal:
     runs-on: ubuntu-latest
-    timeout-minutes: 1
+    timeout-minutes: 2
     steps:
-      - name: Mark main revision observable
-        run: echo "Production candidate $GITHUB_SHA"
+      - name: Request production admission
+        env:
+          OIDC_AUDIENCE: https://api.stensibly.com/internal/deploy-governor/candidate
+        run: |
+          set -euo pipefail
+          encoded_audience="$(jq -nr --arg value "$OIDC_AUDIENCE" '$value|@uri')"
+          token_response="$(curl --fail-with-body --silent --show-error \
+            --connect-timeout 5 --max-time 15 \
+            -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${encoded_audience}")"
+          oidc_token="$(jq -er '.value | select(type == "string" and length > 32)' <<<"$token_response")"
+          curl --fail-with-body --silent --show-error \
+            --connect-timeout 5 --max-time 20 \
+            --retry 2 --retry-all-errors --retry-delay 1 \
+            -X POST \
+            -H "Authorization: Bearer $oidc_token" \
+            "$OIDC_AUDIENCE"
