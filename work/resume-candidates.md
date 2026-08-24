@@ -78,7 +78,7 @@ Candidate receipts:
 
 > Memoized **228 Janino compilation requests** (**18.014s → 2.364s**), then deduplicated **36,332 generated-class occurrences down to 280 unique classes**, shrinking cached class maps **145.96 MiB → 1.13 MiB** and warm replay **1.501s → 29ms**.
 
-> Built a Windows, macOS, and Linux desktop app in Rust, React, and Tauri with a bundled Java runtime, built-in before/after benchmarks, named mod profiles, automatic cache maintenance after game exit, recovery and diagnostics, and signed updates with rollback.
+> Turned the Java performance engine into a self-contained Windows, macOS, and Linux desktop app with a React UI over a Rust/Tauri native host, bundled Java runtime, durable launch/playtime history, locally traced ship wireframes from installed game data, profile management, and signed updates with rollback.
 
 > Built a read-only mod linter that found **1,392 asset/configuration findings across 84 resource roots**, including **four broken released configs**, **771.9 MB of VRAM padding**, **687.9 MB decoded at load**, and progressive textures that decode **8.75× slower**.
 
@@ -96,7 +96,7 @@ Why these stay in the pool:
 - The campaign-runtime receipt is separate from startup and avoids an unsupported FPS claim. It names the repeated work directly: adjacent entity-index pilots moved **227,805 full-list validations → 0** and **79,131,653 entity-reference checks → 0**; the final commodity memo served **117,907,677** unchanged calls while delegating **223,330** changed states, and campaign maintenance skipped defensive list copies on **15,402,921** empty script lists.
 - The texture-cache receipt names the storage mistake directly: rebuildable intermediates were given per-file durability before the final pack was written. Streaming them into one durable pack fixed preparation/storage, while the same logical Compact corpus proved physical layout matters by moving launch **33.53s → 14.174s** when written in observed startup order.
 - The generated-bytecode receipt carries two optimization layers. First memoize repeated compiler requests, then deduplicate the persisted representation after discovering that **36,332 class occurrences contained only 280 unique classes**.
-- The desktop receipt proves end-to-end ownership without becoming a feature list: three-OS packaging, bundled runtime, measurement, profile/cache lifecycle, recovery, diagnostics, and signed update/rollback.
+- The desktop receipt proves product architecture and distinctive functionality rather than listing ordinary controls: the same Java engine powers CLI and desktop, React owns presentation over a narrow Rust/Tauri native host, native packages bundle their own Java runtime, the launch ledger produces durable playtime/history, the Hangar derives ship wireframes locally from installed game data, and signed updates preserve a rollback path.
 - The linter receipt points the same investigation back at source material instead of routing around it at runtime. Lead with useful findings and resource costs, not calibration statistics.
 
 Performance win inventory, not all of which belongs on the one-page resume:
