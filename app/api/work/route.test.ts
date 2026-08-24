@@ -22,8 +22,6 @@ describe('GET /api/work', () => {
       'cultist',
       'fieldwork',
     ]);
-    expect(body.records[0].evidence[0].href).toBe(
-      'https://teamleaderleo.com/work/preflight'
-    );
+    expect(body.records[0].evidence[0].href).toBe('/work/preflight');
   });
 });
