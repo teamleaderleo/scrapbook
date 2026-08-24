@@ -101,16 +101,18 @@ Use numbers when they make the accomplishment easier to understand or harder to 
 
 Strong examples include:
 
-- `101s to 13.69s`
-- `200.77s to 16.21s`
-- `4.76 GB to 1.1 GB`
-- `18.014s to 2.364s`
-- `3 hours to 15 minutes`
+- `101s → 13.69s`
+- `200.77s → 16.21s`
+- `4.76 GB → 1.1 GB`
+- `18.014s → 2.364s`
+- `3 hours → 15 minutes`
 - `83 enabled mods`
 
 Don't add a second measurement merely because it exists. Pair measurements when the combination is the accomplishment, such as reducing both preparation time and storage.
 
-For Preflight, the resume uses **101s to 13.69s**. Older campaign numbers belong in evidence records, not in the resume bullet.
+When one sentence carries multiple before/after measurements, keep each pair adjacent. Prefer `200.77s → 16.21s and 4.76 GB → about 1.1 GB` over `200.77s and 4.76 GB to 16.21s and 1.1 GB`. The reader should never have to map the first list onto the second.
+
+For Preflight, the resume uses **101s → 13.69s**. Older campaign numbers belong in evidence records, not in the resume bullet.
 
 Choose the verb for the accomplishment instead of defaulting to `cut`. `Reduced`, `removed`, `eliminated`, `shrunk`, `brought`, and `moved` each say something different. Repeating one punchy verb until it becomes a tic weakens the page.
 
@@ -118,21 +120,21 @@ Choose the verb for the accomplishment instead of defaulting to `cut`. `Reduced`
 
 Once a project thesis has been selected, keep one canonical opening in `resume-candidates.md`. Do not create a second heading-driven first bullet, a second thesis, or a chat-only replacement and call both current.
 
-A heading and first bullet should cooperate, but the heading does not automatically replace a thesis that already carries important scope. If the thesis says the project worked across third-party code, traced failures across the stack, and became a finished application, preserve that information unless a replacement clearly improves it.
+A heading and first bullet should cooperate, but the heading does not replace a thesis that carries the engineering scope. If the thesis says the project worked across third-party code, traced failures across the stack, and became a finished application, preserve that information unless a replacement clearly improves it.
 
 Proposals belong in the working file when they are meant to be iterated. Chat-only alternatives are discussion, not the current candidate.
 
-## Let a strong heading carry context
+## Let a strong heading carry context without stealing the lead
 
-A project heading can carry category, domain, platform scope, or public status so the first bullet does not waste its opening words restating them.
+A project heading can carry category, domain, platform scope, or public status so the first bullet does not waste its opening words restating them. Domain context does not have to lead when the broader engineering problem is stronger.
 
 For Preflight, the working heading is:
 
-> **Preflight — Performance launcher and mod analysis toolkit for Starsector** *(public open source)*
+> **Preflight — Cross-platform performance launcher and mod analysis toolkit** *(public open source, Starsector ecosystem)*
 
-The heading identifies the product. The first bullet still owns the project thesis and the **101s to 13.69s** result.
+The heading identifies the product and keeps the game as context. The first bullet owns the thesis: a third-party runtime spanning independently maintained code, stack-wide investigation, the **101s → 13.69s** result, fallback when external code changes, and the desktop product built around the work.
 
-Parentheses are useful for compact context such as public status, platforms, or an open PR. They should not become a second sentence of qualifications.
+Parentheses are useful for compact context such as public status, platforms, domain, or an open PR. They should not become a second sentence of qualifications.
 
 ## Flagship projects need the whole problem
 
@@ -144,9 +146,7 @@ For work against a third-party runtime, distinguish three things when they are a
 - the infrastructure the project itself built
 - the user-facing product that makes the work usable
 
-For Preflight, the 83-mod setup is part of the engineering scope. The startup result came from investigating Starsector and the installed mod stack as one runtime, then changing work in vanilla and third-party paths while letting changed code return to its original behavior. Texture preparation, cache publication, measurement tooling, and the desktop application are Preflight's own machinery around that environment.
-
-`Third-party runtime` is useful planning shorthand, but career copy can often say `the game and mod stack` or name the affected systems directly. Use the shorthand only when it is clearer than the concrete version.
+For Preflight, the 83-mod setup is part of the engineering scope. The startup result came from investigating a third-party runtime made up of the game and independently maintained mods, then changing repeated work across that stack while letting changed external code return to its original behavior. Texture preparation, cache publication, measurement tooling, and the desktop application are Preflight's own machinery around that environment.
 
 Don't flatten a project like that into `optimized a game` or `built a cache`. Those descriptions erase most of the engineering.
 
@@ -160,7 +160,7 @@ For a flagship optimization project, the beginning-to-end development arc can be
 
 Use the strongest retained endpoint the current implementation has demonstrated when that endpoint is the accomplishment. Don't downgrade a development result to a median or replace it with a cleaner but less meaningful sub-experiment just because the latter looks more formal.
 
-The same applies to subsystem history. For Preflight texture preparation, the career-facing arc is **200.77s / 4.76 GB to 16.21s / about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch is useful evidence about disk order, but it should not replace the larger preparation story.
+The same applies to subsystem history. For Preflight texture preparation, the career-facing arc is **200.77s → 16.21s** and **4.76 GB → about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch is useful evidence about disk order, but it should not replace the larger preparation story.
 
 A development arc still needs traceable endpoints. Current code and retained artifacts come first, development/evidence records reconstruct the path, and README prose is a later projection of those facts.
 
@@ -172,7 +172,7 @@ The inventory is allowed to mix whole-launch milestones, component reductions, m
 
 Do not confuse analysis with the accomplishment. If a linter found expensive or broken assets across an ecosystem, lead with what it found. Calibration statistics such as clean-directory counts can support credibility in the working record without becoming the headline.
 
-Likewise, when analysis led directly to a runtime repair, record the repair as engineering. Preflight's NPOT texture work is not merely `the linter found VRAM padding`: the runtime path removed **1.22 GiB** of unnecessary upload padding in a validated full load.
+Likewise, when analysis led directly to a runtime repair, record the repair as engineering. Preflight's NPOT texture work is not merely `the linter found padding`: the runtime path removed **1.22 GiB of VRAM padding** in a validated full load.
 
 ## Independent projects need a different test
 
