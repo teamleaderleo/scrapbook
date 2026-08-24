@@ -50,6 +50,10 @@ Avoid em dashes and semicolons in bullets. Commas, parentheses, and an extra wor
 
 Avoid adverbs that merely tell the reader the result was correct, reliable, proper, clean, or similar. State what happened instead.
 
+Treat modifiers as guilty until useful. If deleting an adjective or adverb leaves the engineering claim unchanged, delete it. `Targeted runtime bytecode rewrites` should usually be `runtime bytecode rewrites`. Keep modifiers such as `obfuscated`, `third-party`, `single-threaded`, or `read-only` when they materially change what the reader understands.
+
+Dense resume bullets can stay one sentence when the clauses form one causal story. Do not split a stable workload count into a second sentence merely to explain where the number came from. If **39,017 JSON reads / 8,378 paths** are part of what the memoization absorbed, fold them directly into the memoization clause.
+
 Avoid invented labels for ordinary engineering choices. Phrases such as `local-first`, `source-first`, `trust-tiered`, and similar compounds usually make the reader decode a taxonomy before they understand the work.
 
 Avoid filler terms such as `actual`, `real`, `bounded`, and `narrow` in career-facing prose.
@@ -138,7 +142,7 @@ For Preflight, the working heading is:
 
 > **Preflight — Cross-platform performance launcher and mod analysis toolkit** *(public open source, Starsector ecosystem)*
 
-The heading identifies the product and keeps the game as context. The first bullet owns the thesis: reverse-engineering a third-party JVM ecosystem spanning independently maintained code, measuring repeated work at scale, the **101s → 13.69s** result, and the product built from that investigation.
+The heading identifies the product and keeps the game as context. The first bullet owns the thesis: reverse-engineering an obfuscated JVM runtime spanning the base game and 83 third-party mods, the **101s → 13.69s** result, and the reusable memoization, prepared artifacts, and bytecode rewrites built from that investigation.
 
 Parentheses are useful for compact context such as public status, platforms, domain, or an open PR. They should not become a second sentence of qualifications.
 
@@ -152,7 +156,7 @@ For work against a third-party runtime, distinguish three things when they are a
 - the infrastructure the project itself built
 - the user-facing product that makes the work usable
 
-For Preflight, the 83-mod setup is part of the engineering scope. The startup result came from reverse-engineering obfuscated JVM bytecode across the game and independently maintained mods, then tracing repeated work with JFR and live instrumentation. Large counters such as **1.6M resource probes** and **36,090 JSON loads** can be useful because they communicate the scale of the runtime being investigated.
+For Preflight, the 83-mod setup is part of the engineering scope. The startup result came from reverse-engineering obfuscated JVM bytecode across the base game and third-party mods, then tracing repeated work with JFR and instrumentation. Large counters such as **1.6M resource probes** and **39,017 JSON reads across 8,378 paths** are useful when they communicate the scale of work that an optimization later removes.
 
 Do not inflate one counter into another. The million-scale retained number is resource probes; the retained JSON count is tens of thousands. Use both when useful rather than inventing `millions of JSON loads`.
 
@@ -170,7 +174,7 @@ For a flagship optimization project, the beginning-to-end development arc can be
 
 Use the strongest retained endpoint the current implementation has demonstrated when that endpoint is the accomplishment. Don't downgrade a development result to a median or replace it with a cleaner but less meaningful sub-experiment just because the latter looks more formal.
 
-The same applies to subsystem history. For Preflight texture preparation, the career-facing arc is **200.77s → 16.21s** and **4.76 GB → about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch is useful evidence about disk order, but it should not replace the larger preparation story.
+The same applies to subsystem history. For Preflight texture preparation, the career-facing arc is **200.77s → 16.21s** and **4.76 GB → about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch is useful evidence about physical layout and can accompany the larger preparation story when space allows.
 
 A development arc still needs traceable endpoints. Current code and retained artifacts come first, development/evidence records reconstruct the path, and README prose is a later projection of those facts.
 
