@@ -13,8 +13,9 @@ import { RawJsonEditor } from '@/components/space/raw-json-editor';
 import { MetadataJsonEditor } from '@/components/space/metadata-json-editor';
 import { ItemPreview } from '@/components/space/item-preview';
 import { SpaceHeader } from '@/components/space/space-header';
+import { ItemIntakeBar } from '@/components/space/item-intake-bar';
 import { addItemAction, updateItemAction } from '@/app/space/actions';
-import { Copy, Check, Plus, Trash2 } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 import { VersionTabs } from '@/components/space/version-tabs';
 
 // Singleton/Canonical shape for the item with only editable fields
@@ -96,9 +97,9 @@ export function ItemForm({ item, mode }: ItemFormProps) {
   const [metadataError, setMetadataError] = useState<string>('');
 
   // Who changed last? avoids echo/feedback loops across editors
-  const lastChangedBy = useRef<'json' | 'markdown' | 'code' | 'meta' | null>(
-    null
-  );
+  const lastChangedBy = useRef<
+    'json' | 'markdown' | 'code' | 'meta' | 'form' | null
+  >(null);
 
   // Is the raw JSON textarea currently focused?
   const [isEditingRaw, setIsEditingRaw] = useState(false);
@@ -278,8 +279,16 @@ export function ItemForm({ item, mode }: ItemFormProps) {
 
   // === Title input change =====================================================
   const onTitleChange = (val: string) => {
-    lastChangedBy.current = 'meta';
+    lastChangedBy.current = 'form';
     setModel(m => ({ ...m, title: val }));
+  };
+
+  const onIntakeChange = (next: {
+    tags: string[];
+    category: string | null;
+  }) => {
+    lastChangedBy.current = 'form';
+    setModel(m => ({ ...m, tags: next.tags, category: next.category }));
   };
 
   // === Markdown editor change ================================================
@@ -318,6 +327,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
     const nextNum =
       versionNumbers.length > 0 ? Math.max(...versionNumbers) + 1 : 1;
 
+    lastChangedBy.current = 'form';
     setModel(m => ({
       ...m,
       versions: [
@@ -334,6 +344,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
 
   const deleteVersion = (idx: number) => {
     if (model.versions.length === 1) return; // Don't delete last version
+    lastChangedBy.current = 'form';
     setModel(m => ({
       ...m,
       versions: m.versions.filter((_, i) => i !== idx),
@@ -347,16 +358,8 @@ export function ItemForm({ item, mode }: ItemFormProps) {
     }
   };
 
-  const renameVersion = (idx: number, newLabel: string) => {
-    setModel(m => ({
-      ...m,
-      versions: m.versions.map((v, i) =>
-        i === idx ? { ...v, label: newLabel } : v
-      ),
-    }));
-  };
-
   const setAsDefault = (idx: number) => {
+    lastChangedBy.current = 'form';
     setModel(m => ({ ...m, defaultIndex: idx }));
   };
 
@@ -430,6 +433,7 @@ export function ItemForm({ item, mode }: ItemFormProps) {
           onAdd={addVersion}
           onDelete={deleteVersion}
           onRename={(idx, label) => {
+            lastChangedBy.current = 'form';
             setModel(m => ({
               ...m,
               versions: m.versions.map((v, i) =>
@@ -439,6 +443,12 @@ export function ItemForm({ item, mode }: ItemFormProps) {
           }}
           onSetActive={setActiveVersionIdx}
           onSetDefault={setAsDefault}
+        />
+
+        <ItemIntakeBar
+          tags={model.tags}
+          category={model.category}
+          onChange={onIntakeChange}
         />
 
         {/* Top Row: Editors */}
