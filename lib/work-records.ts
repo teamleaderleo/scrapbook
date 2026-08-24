@@ -115,20 +115,27 @@ export const workRecords: readonly WorkRecord[] = [
   {
     id: 'stensibly',
     title: 'Stensibly',
-    kind: 'Agent coordination system',
+    kind: 'Durable human-agent coordination',
     status: 'Live hosted system · ongoing dogfood',
     summary:
-      'A responsibility and authority ledger for human-agent work. Shared state survives worker replacement; consequential effects stay behind current server-owned grants instead of inheriting authority from whoever happens to be running.',
+      'Work should survive the worker doing it. Stensibly keeps tasks, evidence, next actions, blockers, and handoffs in a server-owned ledger so a fresh human or agent can continue without reconstructing the project from one vanished chat or process.',
     accomplishments: [
-      'Runs a Convex-backed hosted path through Cloudflare Workers with browser sessions, scoped bearer clients, REST v1, remote MCP, durable claims/runs/reservations, idempotent writes, and guarded exact-CAS GitHub publication.',
-      'Real work crosses disposable sessions through durable handoffs and provider-backed continuation instead of relying on one chat or process to remember what happened.',
-      'Production dogfood now turns material GitHub repository attention into deterministic mail checkpoints, with project-owned continuation handles, automatic Gmail delivery for Quarry, and a bounded read-only public GitHub Events fallback feeding the same durable thread/publisher path.',
+      'The hosted Convex/Cloudflare system gives browser, REST, and MCP clients one durable project state with claims, runs, dependencies, reservations, artifacts, scoped tokens, idempotent writes, and guarded exact-CAS GitHub changes.',
+      'A worker can leave a summary, evidence, and an explicit next action, disappear, and hand the responsibility to a fresh session while current server-owned claims and leases decide who may still act.',
+      'Production dogfood now turns material GitHub repository attention into durable mail continuation for Quarry. Signed webhooks and a bounded public GitHub Events fallback feed the same thread and Gmail publisher path, with continuation state surviving Worker replacement.',
     ],
+    reversal:
+      'Assignment is not authority. A card can say who owns the work while a current server-owned grant decides whether that actor may still claim, complete, or cause a consequential external effect.',
     evidence: [
       {
         label: 'Repository',
         href: 'https://github.com/teamleaderleo/stensibly',
         kind: 'repository',
+      },
+      {
+        label: 'Product model',
+        href: 'https://github.com/teamleaderleo/stensibly/blob/main/docs/product-model.md',
+        kind: 'record',
       },
       {
         label: 'Current cross-repository state',
@@ -140,20 +147,27 @@ export const workRecords: readonly WorkRecord[] = [
   {
     id: 'smolrunner',
     title: 'SmolRunner',
-    kind: 'Trust-tiered Linux execution',
+    kind: 'Hot Linux execution for coding agents',
     status: 'Pre-alpha · live Apple-silicon acceptance',
     summary:
-      'A Rust execution layer for coding agents and GitHub Actions on operator-owned Apple-silicon Macs. Hostile work can stay disposable; trusted work can keep valuable Linux state resident when the identity, lease, and reuse policy permit it.',
+      'Fresh Linux when the work is untrusted; hot project state when it is trusted. SmolRunner runs coding agents and GitHub Actions on Apple-silicon Macs, keeping repositories, dependencies, compiler state, indexes, and services warm only where the trust and validity rules permit it.',
     accomplishments: [
-      'The strict disposable lane includes prepared Lima/VZ workers, official GitHub Runner Scale Set integration, durable assignment/no-replay handling, clone/JIT/teardown composition, LaunchAgent supervision, controller-death evidence, and exact worker ownership.',
-      'Landed M6 hot-state primitives include performance receipts, path-class policy, crash-safe project-disk leases, trusted OverlayFS task views/mount plans, immutable Git object-pool generations with fixed markers, and Git index stat patching for copy-on-write task materialization.',
-      'The current product question is end-to-end agent wall-clock latency: keep the expensive state hot where trust allows it, while keeping restart, isolation, and cleanup rules explicit.',
+      'The strict lane gives unknown work a prepared Lima/VZ worker, one bounded job, durable assignment/no-replay handling, official GitHub Runner Scale Set integration, exact teardown, and evidence that the worker is gone.',
+      'Trusted projects can keep the expensive substrate hot: persistent project disks, crash-safe leases, OverlayFS task views, immutable Git object-pool generations, and copy-on-write task materialization are already landed as M6 primitives.',
+      'The north-star metric is agent wall-clock latency: queue-to-first-useful-command, edit-to-first-test-result, final relevant verification, throughput under concurrent agents, and the CPU/RAM/disk cost of keeping useful state resident.',
     ],
+    reversal:
+      'The original instinct was to make every worker disposable. SmolRunner treats disposal as one capability instead: unknown work gets a fresh worker, while trusted projects can keep expensive Linux state hot without making that surviving state the source of execution truth.',
     evidence: [
       {
         label: 'Repository',
         href: 'https://github.com/teamleaderleo/smolrunner',
         kind: 'repository',
+      },
+      {
+        label: 'Blazingly hot execution',
+        href: 'https://github.com/teamleaderleo/smolrunner/blob/main/docs/BLAZINGLY_HOT.md',
+        kind: 'record',
       },
       {
         label: 'Current cross-repository state',
