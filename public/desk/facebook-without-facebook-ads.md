@@ -10,7 +10,7 @@ GitHub's network is its best product.
 
 The rest gets more awkward once you start pulling pieces away from it.
 
-The self-hosted Actions pricing idea ran straight into this. If I'm already running the runner, I've accepted a decent amount of operational work. I own the machine, or the Kubernetes cluster, or whatever we decided was a good idea six months ago. I'm handling images, caches, credentials, networking, scaling, GPUs if things have gotten weird. GitHub provides the coordination layer.
+When GitHub floated the self-hosted Actions charge, the accounting was easy enough to understand: self-hosted customers still consume the Actions control plane, and GitHub has real costs running it ([GitHub Changelog](https://github.blog/changelog/2025-12-16-coming-soon-simpler-pricing-and-a-better-experience-for-github-actions/)). If I'm already running the runner, though, I've accepted a decent amount of operational work. I own the machine, or the Kubernetes cluster, or whatever we decided was a good idea six months ago. I'm handling images, caches, credentials, networking, scaling, GPUs if things have gotten weird. GitHub provides the coordination layer.
 
 The coordination has value; a capable shop can reproduce it too.
 
