@@ -8,6 +8,7 @@ Scrapbook is a personal workshop with distinct rooms:
 
 - **Home** is a foyer and instrument panel.
 - **Space** is a workbench and reference console.
+- **Knowledge** is a linked technical atlas grown from reading, conversation, and real work.
 - **Time** is a calibrated dial.
 - **Gallery** is a pinboard and back room where scraps accumulate.
 - **Agent check-ins** are signed field notes tied to real repository work.
@@ -125,6 +126,17 @@ Space should keep the working context available while the central content moves.
 - Keep desktop side tools accessible around a naturally scrolling centre.
 - Use explicit mobile sheets and bottom actions.
 - Model-generated companion solutions retain prompt, restatement, solution, complexity, tests, ambiguity notes, model, time, source, and revision history.
+
+## Knowledge
+
+Knowledge is a repository-backed reader over living Markdown, not a separate application database.
+
+- Keep `knowledge/` canonical and useful directly on GitHub.
+- Let directories provide broad orientation while relative links carry the richer cross-trunk graph.
+- Prefer compact concept pages that can gain traces, counterexamples, pressure questions, and project evidence over encyclopedic one-shot articles.
+- Preserve ordinary document reading: reflowing prose, useful hierarchy, direct links, and no canvas-only graph navigation.
+- Show learning activity as quiet historical context. Daily `new`, `strengthened`, and `linked` counts describe edits to understanding without becoming scores, streaks, or completion percentages.
+- Let Git history preserve how explanations change; avoid a second registry or database mirror merely to render the site.
 
 ## Tactile laboratory
 
