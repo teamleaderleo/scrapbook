@@ -59,6 +59,7 @@ export const workRecords: readonly WorkRecord[] = [
       'In Vercel AI SDK, directly merged and published a deterministic URL-regex fix; two independently developed Web Streams repairs were adopted by AI SDK Factory into merged upstream commits with retained co-author credit, including maintained-release propagation.',
       'Cloud Hypervisor now has three merged fixes across exact VM shutdown lifecycle, typed ACPI boot-error propagation, and sparse VFIO BAR mapping semantics, with a deeper QCOW metadata-ownership repair still open.',
       'Vite has two merged lifecycle/correctness fixes plus an open repeated-config-resolution idempotence follow-on; Cloudflare Workers SDK has two merged fixes across Miniflare teardown and Access credential/cache freshness.',
+      'A React Fragment-ref repair is open with a positive submitted review: it checks Fragment listener ownership before destructive child traversal and makes omitted listener options share the DOM capture-false identity of explicit false.',
     ],
     reversal:
       'A real runc off-by-one was patched on the allocation side. Repository history showed the cleaner repair belonged in MaxCPU semantics instead, so the competing patch was closed rather than defended for its merge statistic.',
@@ -66,6 +67,11 @@ export const workRecords: readonly WorkRecord[] = [
       {
         label: 'AI SDK · deterministic URL matching',
         href: 'https://redirect.github.com/vercel/ai/pull/18570',
+        kind: 'pull-request',
+      },
+      {
+        label: 'React · Fragment listener identity',
+        href: 'https://redirect.github.com/react/react/pull/37251',
         kind: 'pull-request',
       },
       {
