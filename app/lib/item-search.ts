@@ -11,7 +11,9 @@ export function searchItems(items: Item[], q: ParsedQuery, nowMs: number): Item[
     res = res.filter(it => q.tags.every(t => hasTag(it, t)));
   }
 
-  // Namespaced operators
+  // Namespaced operators. Known operators may map to item fields or review
+  // state; every other namespace falls back to an exact tag match so new
+  // taxonomies do not require search-engine code changes.
   for (const [key, vals] of Object.entries(q.ops)) {
     switch (key) {
       case "diff":
@@ -42,6 +44,11 @@ export function searchItems(items: Item[], q: ParsedQuery, nowMs: number): Item[
       case "stability":
         res = res.filter(it => it.review && vals.every(v => compareNumber(it.review!.stability, v)));
         break;
+      default:
+        res = res.filter(it =>
+          vals.every(v => hasTagCaseInsensitive(it, `${key}:${v}`))
+        );
+        break;
     }
   }
 
@@ -68,11 +75,13 @@ export function searchItems(items: Item[], q: ParsedQuery, nowMs: number): Item[
 }
 
 function hasTag(it: Item, tag: string) {
+  const tagLower = tag.toLowerCase();
+
   // Check exact tag match
-  if (it.tags.includes(tag)) return true;
+  if (it.tags.some(value => value.toLowerCase() === tagLower)) return true;
   
   // Check category match
-  if (it.category === tag) return true;
+  if (it.category.toLowerCase() === tagLower) return true;
   
   // Check if tag appears in any tag value (after the colon)
   // e.g., searching "easy" should match "difficulty:easy"
@@ -81,10 +90,10 @@ function hasTag(it: Item, tag: string) {
     .join(' ')
     .toLowerCase();
   
-  if (tagValues.includes(tag)) return true;
+  if (tagValues.includes(tagLower)) return true;
   
   // Check if tag appears in title
-  if (it.title.toLowerCase().includes(tag)) return true;
+  if (it.title.toLowerCase().includes(tagLower)) return true;
   
   return false;
 }
