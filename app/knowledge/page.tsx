@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, GitBranch, Sprout } from 'lucide-react';
 import ViewportPageShell from '@/components/viewport-page-shell';
-import { getKnowledgeIndex } from '@/lib/knowledge';
+import { MarkdownContent } from '@/components/space/markdown-content';
+import { getKnowledgeHandoff, getKnowledgeIndex } from '@/lib/knowledge';
 
 export const metadata: Metadata = {
   title: 'Knowledge',
@@ -23,7 +24,10 @@ function activity(entry: {
 }
 
 export default async function KnowledgePage() {
-  const index = await getKnowledgeIndex();
+  const [index, handoff] = await Promise.all([
+    getKnowledgeIndex(),
+    getKnowledgeHandoff(),
+  ]);
   const latestLog = index.logs[0];
 
   return (
@@ -63,6 +67,35 @@ export default async function KnowledgePage() {
             ) : null}
           </div>
         </header>
+
+        <section
+          className="material-paper relative mt-7 overflow-hidden rounded-2xl border px-5 py-6 shadow-[0_14px_32px_rgba(38,33,27,0.09)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.24)] sm:px-7 sm:py-7"
+          aria-labelledby="knowledge-handoff-title"
+        >
+          <div className="flex flex-wrap items-baseline justify-between gap-3 border-b border-dashed border-[hsl(var(--material-paper-edge)/0.7)] pb-4">
+            <div>
+              <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-[hsl(var(--material-paper-ink)/0.52)]">
+                Start here
+              </p>
+              <h2
+                id="knowledge-handoff-title"
+                className="mt-1 text-2xl font-semibold tracking-[-0.03em]"
+              >
+                {handoff.title}
+              </h2>
+            </div>
+            {handoff.updated ? (
+              <span className="font-mono text-[9px] uppercase tracking-[0.11em] text-[hsl(var(--material-paper-ink)/0.45)]">
+                updated {handoff.updated}
+              </span>
+            ) : null}
+          </div>
+
+          <MarkdownContent
+            html={handoff.html}
+            className="prose prose-stone mt-5 max-w-3xl prose-headings:tracking-[-0.02em] prose-p:leading-7 prose-li:leading-7 prose-a:font-medium prose-a:underline-offset-4 dark:prose-invert"
+          />
+        </section>
 
         {latestLog ? (
           <section className="mt-7 grid gap-3 border-y border-border py-4 sm:grid-cols-[auto_1fr] sm:items-center">
