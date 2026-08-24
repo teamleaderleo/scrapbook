@@ -1,19 +1,8 @@
 # Resume candidates
 
-This is the working copy for the one-page resume. Source repositories and upstream pull requests own the facts. This file owns which facts deserve space and how the resume says them.
+This is the working copy for the one-page resume. Source repositories and upstream pull requests own the facts. This file owns which facts deserve space and how the current resume says them.
 
-## Writing rules
-
-- Sell the consequence before the implementation detail.
-- Contractions are normal. Write `don't` and `can't` when that is how the sentence wants to sound.
-- Put the PR number beside the clause it supports, in parentheses.
-- Keep GitHub status bookkeeping out of the sentence unless it changes what the sentence can claim.
-- Don't use em dashes or semicolons in resume bullets.
-- Don't invent labels for ordinary engineering choices. Avoid phrases such as `local-first`, `source-first`, `trust-tiered`, and similar taxonomy unless the distinction itself is the accomplishment.
-- Don't use `actual`, `real`, `bounded`, or `narrow` as filler.
-- Prefer the failure prevented, user-visible consequence, performance result, or operational result over function names and internal abstractions.
-- One repository can carry several repairs in one bullet. Each clause should earn its own PR reference.
-- Preflight uses **101s to 13.69s** on the resume. The older 89.00s / 15.53s experiment stays in the evidence record and does not belong in the resume bullet.
+Read [`resume-portfolio-style.md`](resume-portfolio-style.md) before revising this file. That guide owns the writing rules. The current upstream bullets below are the checkpoint to preserve unless a new version clearly improves consequence, density, readability, technical substance, or credibility.
 
 ## Selected open source engineering
 
