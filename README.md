@@ -104,20 +104,20 @@ pnpm typecheck
 pnpm test
 pnpm prettier:check
 pnpm build
-pnpm exec playwright test --project=chromium
+pnpm test:e2e
+pnpm test:e2e:full
+pnpm test:e2e:cross-browser
 ```
 
 The public homepage can render without database credentials or a GitHub token. Authentication, saved Space content, and proxy reporting require their corresponding environment variables and services.
 
-## Browser policy
+## Verification policy
 
-Chromium is the normal pull-request browser gate. It runs with two workers to use the available CI cores. WebKit compatibility runs weekly and can also be triggered manually through GitHub Actions:
+Ordinary hosted CI keeps the routine gate small: ESLint and Vitest run in the quality lane while a separate lane performs the production Next.js build. The build and lint caches are restored across Actions runs so repeated verification spends less time redoing unchanged work.
 
-```bash
-pnpm exec playwright test --project=webkit
-```
+Playwright remains an explicit author-side tool for browser-sensitive changes. `pnpm test:e2e` runs the focused Chromium smoke path, `pnpm test:e2e:full` runs the complete Chromium suite, and `pnpm test:e2e:cross-browser` exercises the configured browser matrix. Run the browser scope the change deserves and retain targeted visual evidence when a UI decision needs a durable review artifact.
 
-Failure diagnostics include browser traces and test results. Browser-relevant CI also preserves targeted successful visual-review artifacts for Home, Gallery, and the sigil lab so reviewed UI changes have durable phone/desktop and light/dark evidence without archiving every screenshot from the full suite.
+This keeps browser evidence available without making every ordinary hosted change pay for the complete browser suite.
 
 ## Current direction
 
