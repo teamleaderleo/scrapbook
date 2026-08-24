@@ -10,11 +10,11 @@ Read [`resume-portfolio-style.md`](resume-portfolio-style.md) before revising th
 
 Current candidate:
 
-> Fixed URL checks that could flip between supported and unsupported across identical calls (#18570), released Web Stream readers after source errors so failed reads didn't leave the stream locked (#18371/#18400), and kept download size-limit failures from being replaced by cancellation errors (#18572/#18695).
+> Fixed identical URL checks returning different answers across calls (#18570), released Web Stream readers after source errors so failed reads didn't leave the stream locked (#18371/#18400), and kept download size-limit failures from being replaced by cancellation errors (#18572/#18695).
 
 Why this version survives:
 
-- #18570 leads with nondeterministic behavior rather than `lastIndex`.
+- #18570 leads with the broken behavior rather than `lastIndex`.
 - #18371 says what the stale lock does to the stream.
 - #18572 leads with the useful error that callers were losing.
 
@@ -24,21 +24,21 @@ Current candidate:
 
 > Fixed a VM lifecycle race where tests reused a VM and disk before shutdown cleanup finished (#8699), turned ACPI table construction failures into VM boot errors instead of VMM panics (#8709), rejected DMA requests that cross unmapped holes in VFIO device memory instead of panicking (#8734), and fixed QCOW ownership so metadata still referenced by the image can't be reused as free space (#8721, open).
 
-The fourth clause stays in the pool because #8721 has substantial upstream review and reaches deeper persistent metadata semantics than the first three repairs. Keep its open status next to the number rather than turning the sentence into review history.
+The fourth clause stays in the pool because #8721 has substantial upstream review and reaches deeper persistent metadata behavior than the first three repairs. Keep its open status next to the number rather than turning the sentence into review history.
 
 ### Vite
 
 Current candidate:
 
-> Prevented build failures from skipping plugin cleanup (#23165), stopped dependency analysis from leaking temporary Rolldown builds (#23207), and kept server restarts from invalidating warm dependency caches by duplicating optimizer state (#23208, open).
+> Prevented build failures from skipping plugin cleanup (#23165), stopped dependency analysis from leaking temporary Rolldown builds (#23207), and kept server restarts from rebuilding warm dependency caches after optimizer state was duplicated (#23208, open).
 
-The cache consequence should lead #23208. `resolveConfig()` and duplicated plugin arrays explain the bug in the PR, not on the resume.
+The cache rebuild should lead #23208. `resolveConfig()` and duplicated plugin arrays explain the bug in the PR, not on the resume.
 
 ### Cloudflare Workers SDK
 
 Current candidate:
 
-> Kept Miniflare shutdown from leaving `workerd` running when browser or proxy cleanup stalls or fails (#15143), and stopped removed or incomplete Cloudflare Access credentials from continuing to authenticate with an older cached service token (#15080).
+> Kept Miniflare shutdown from leaving `workerd` running when browser or proxy cleanup stalls or fails (#15143), and stopped removed or incomplete Cloudflare Access credentials from authenticating with an older cached service token (#15080).
 
 Both clauses lead with the operational consequence. Teardown ordering and cache ownership can stay in the PRs.
 
@@ -48,21 +48,39 @@ Keep in the pool, but don't force it onto the page yet.
 
 > Fixed a React Fragment listener bug that could delete a child's listener and stop registered listeners from reaching new children (#37251, open).
 
-The capture-option identity fix is useful regression coverage but makes the resume sentence worse. Leave it in the PR. React earns a row only if this clause adds more than the next strongest merged work or independent project.
+The capture-option identity fix is useful regression coverage but makes the resume sentence worse. Leave it in the PR. React earns a row only if this clause adds more than the next strongest upstream work or independent project.
 
 ## Independent engineering
 
 ### Preflight
 
-Preflight gets the largest allocation. Three bullets currently earn the space.
+Preflight gets the largest allocation. Keep a richer candidate pool until the one-page layout forces cuts.
 
-> Built Preflight, a launcher and Java agent for Starsector with 83 enabled mods, reducing startup from **101s to 13.69s** on an M5 MacBook Air by preparing texture, data, audio, resource lookup, and generated code work before launch.
+> Built Preflight, a launcher and Java agent that cut startup for Starsector with 83 enabled mods from **101s to 13.69s** on an M5 MacBook Air by preparing textures, game data, audio, resource indexes, and generated Java classes ahead of launch.
 
-> Built JFR tracing and unattended benchmarks that found a roughly **27s prefetch delay**, more than **1.1 million resource path joins**, and expensive mod callbacks, then used those measurements to decide where to intervene.
+> Cut texture preparation from **200.77s to 16.21s** and storage from **4.76 GB to about 1.1 GB** by eliminating duplicate loose files, packing textures as they're prepared, and learning the startup texture set after the first launch.
 
-> Cut the steady state texture cache to about **1.1 GB** and found that disk order alone changed startup from **33.53s to 14.174s** for the same prepared textures, then built the desktop product around it with macOS, Windows, and Linux packaging, signed updates, diagnostics, and rollback.
+> Precompiled generated Java classes, cutting **102,175 compile calls from 18.014s to 2.364s** and shrinking retained bytecode from **145.96 MiB to 1.13 MiB** by storing shared class bundles once.
 
-The first bullet sells the result. The second sells the investigation. The third sells the surprising storage result and the product work around the performance engine.
+> Built JFR tracing, seam timers, and unattended benchmarks that exposed a roughly **27s texture prefetch wait** and **1.6 million filesystem probes** during resource lookup, then used those measurements to choose where the launch path was worth changing.
+
+> Built the desktop app around the engine with profiles, setup and launch flows, automatic cache preparation after game exit, native macOS, Windows, and Linux packages, unattended benchmarks, diagnostics, signed updates, rollback, and support reporting.
+
+Why these stay in the pool:
+
+- The first bullet sells the whole-launch result.
+- The texture bullet owns the preparation story. The development arc is **200.77s / 4.76 GB to 16.21s / about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch is useful supporting evidence, but it is not the headline for texture preparation.
+- The generated-code result carries its own large time and storage collapse and is stronger than a generic list of cached subsystems.
+- The investigation bullet explains why the project can credibly claim the larger result instead of reading like a pile of caches.
+- The desktop bullet proves the work became a usable cross-platform product rather than stopping at an optimization engine.
+
+Source hierarchy for future Preflight edits:
+
+1. current code and retained runtime artifacts
+2. development/evidence records that reconstruct how the current behavior was reached
+3. README and other front-facing summaries
+
+If those disagree, update the career copy from the first two. Don't preserve a weaker old headline because it happens to be written in a polished summary.
 
 ### Stensibly
 
