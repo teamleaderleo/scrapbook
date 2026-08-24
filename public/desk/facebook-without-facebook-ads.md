@@ -2,104 +2,80 @@
 
 *Written by GPT-5.6 Sol under Leo's direction. Human-directed Workbench essay, 25 August 2026.*
 
-GitHub's strongest feature may be that everybody is already there.
+GitHub is a weird product to evaluate because you rarely choose it in an empty room. You choose it after everybody else already did.
 
-That sounds flippant, but it explains a lot. Developers already have accounts. Open-source projects already live there. Pull requests, issues, comments, releases, bots, security tooling, CI status, all of it piles into one familiar place. A repository can become public and immediately enter a network people already know how to use.
+Pull requests, issues, comments, releases, bots, security alerts, checks — an absurd amount of software life piles into one familiar place. Send somebody a GitHub link and most of the interaction is already legible. They have an account. They know where the discussion goes. Their tools know how to talk to it. Open-source projects, companies, recruiters, libraries, random people fixing a typo at two in the morning, everybody arrives with years of accumulated familiarity.
 
-That's an enormous advantage.
+GitHub's network is its best product.
 
-It also means GitHub has to be careful about confusing the network with the products attached to it.
+The rest gets more awkward once you start pulling pieces away from it.
 
-Git hosting is replaceable. CI is replaceable. Issue tracking is replaceable. Artifact storage is replaceable. A lot of the surrounding machinery can run perfectly well on computers you own.
+The self-hosted Actions pricing idea ran straight into this. If I'm already running the runner, I've accepted a decent amount of operational work. I own the machine, or the Kubernetes cluster, or whatever we decided was a good idea six months ago. I'm handling images, caches, credentials, networking, scaling, GPUs if things have gotten weird. GitHub provides the coordination layer.
 
-Self-hosted Actions makes the tension unusually obvious.
+The coordination has value; a capable shop can reproduce it too.
 
-If you're already running the runners, you've accepted most of the annoying operational work. You have the machines. You're dealing with images, networking, caches, credentials, scaling, whatever else your setup needs. Maybe you're running a few runners. Maybe you're running a whole fleet.
+Actions wins by adjacency. A pull request opens, the workflow fires, the check appears in the pull request. Great. The experience is convenient because all the pieces are touching.
 
-At that point GitHub Actions is valuable because it sits right next to GitHub. A pull request opens, a workflow runs, the result appears in the pull request. That's genuinely convenient.
+Consider Actions as a CI system by itself and the affection gets weaker. The YAML gets strange. The expression language gets strange. Reusable workflows go only so far. Local reproduction is awkward. Debugging gets annoying. Once you're operating a serious self-hosted fleet, you're doing a lot of the work anyway while GitHub keeps ownership of an opinionated execution model.
 
-As a CI system by itself, though, Actions can be pretty meh.
+Free orchestration makes that trade easy to accept. Meter the orchestration separately and somebody eventually asks what they could run themselves.
 
-The YAML gets weird. The expression language gets weird. Reusable workflows only take you so far. Local reproduction is awkward. Debugging can be irritating. Once you're managing serious self-hosted compute, the balance gets stranger because you're doing a lot of the hard work yourself while still living inside GitHub's execution model.
+Quite a lot.
 
-So the free control plane has a useful role. It keeps the whole thing pleasant enough that nobody bothers asking a more dangerous question:
+A company doing serious self-hosting already has machines and people who know how to operate them. Look around and the rest of the kit is sitting there too: object storage, a registry, a secrets system, queues, observability, schedulers, internal services, a pile of agents wandering around fixing things, whatever. At some point “build our own CI” stops meaning “invent Jenkins from first principles” and starts meaning “connect the parts we already own.”
 
-**What exactly am I still buying from GitHub?**
+Then the migration gets incremental.
 
-Because the answer can get thin surprisingly quickly.
+Keep the GitHub repository. Receive the event. Send it into your own system. Let your machines build the commit. Let your agents inspect it, argue about it, run tests, push artifacts, deploy it, clean up after themselves. When they're done, post a status back to the pull request.
 
-You're buying the place where the repository lives. You're buying the event source. You're buying the pull request UI, the issue tracker, the identity system, the permissions, the checks. All useful. All very convenient.
+GitHub becomes the place where the green checkmark appears.
 
-But if you're already self-hosting a lot of your stack, then replacing the next layer stops sounding dramatic.
+The repository can stay for a very long time on that alone. Git itself travels easily. The annoying residue lives around it: pull request history, issues, accounts, permissions, integrations, all the little social traces that accumulate because people have been using the same place for years.
 
-Run your own workers. Then run your own scheduler. Put artifacts in your own object store. Use your own registry. Use the secrets system you already have. Feed events into your own queue. Let your agents do the builds and tests and reviews. Post one status back to GitHub at the end.
+So the repo stays while more of the work leaves.
 
-Now most of the actual work is happening somewhere else.
+Agents make this easier because glue is getting cheaper. Internal systems have always carried a tax in adapters and maintenance. One API changes and somebody has to care. A homegrown tool survives its original author and suddenly the team owns a tiny software company whose only customer is itself.
 
-The repository can stay on GitHub for a long time after that. Git itself is wonderfully portable; the social residue around the repository is where the friction lives. Pull request history, issues, accounts, integrations, all the familiar little traces accumulated over years.
+Coding agents are unusually good at exactly this class of boring connective work. Migrate the workflow. Update the adapter. Fix the API call. Add the missing button to the internal UI. Keep five open-source components talking to each other. A team can peel away one annoying layer at a time; the grand replacement project dissolves into a sequence of small jobs.
 
-And that gets to the real thing GitHub owns: the network.
+Internal software gets one luxury GitHub lacks: one customer.
 
-Everybody's there because everybody's there.
+Your scheduler only has to schedule your jobs. Your review agent only has to understand the way your company reviews code. Your build system can assume the registry you actually use, the hardware you actually own, the deployment model you actually have. It can be weird. Weird is fine when everybody using it works in the same building, or at least the same Slack.
 
-Which is still an incredible business. But it creates a funny danger. The network effect belongs most strongly to GitHub itself, while the products around it still have to earn their keep.
+Eventually GitHub can occupy a very thin role while remaining socially indispensable.
 
-Actions gets amazing distribution because it's attached to GitHub. That doesn't mean I'd choose Actions as my ideal CI system in an empty room.
+Canonical repository here. Pull request here. Issue here. Identity here. Green checkmark here.
 
-Copilot gets amazing distribution because GitHub can put it directly in front of developers. Security products get the same advantage. Codespaces does too. Enterprise tooling, packages, all of it arrives with a head start most companies would kill for.
+Everything expensive happens somewhere else.
 
-But distribution can cover for a mediocre product for a long time.
+Facebook had a cleaner answer to this problem: ads.
 
-And, Christ, Microsoft knows how to do that.
+Facebook's network and its money machine were tightly coupled. More people meant more attention; more attention meant more ad inventory. The network itself produced something Facebook could sell at enormous scale.
 
-Microsoft at its worst has always had this particular smell: the sales team is excellent, the enterprise agreement is excellent, procurement already knows the vendor, identity already runs through Microsoft, and the actual product is... fine.
+GitHub's network can remain incredibly powerful while the money migrates to adjacent systems.
 
-Fine can survive for years when switching is annoying enough.
+Enterprise seats help. Copilot helps. Actions, security products, Codespaces, packages, whatever comes next, all get absurd distribution from sitting next to the canonical repository. Each of those products has to win a product comparison once a customer decides to compare it.
 
-GitHub started from something much better than that. Developers actually liked it. People moved projects there because it felt better. GitHub understood that software development was social, and it made collaboration feel easy enough that the site became the default home for a huge part of software.
+And, Christ, Microsoft knows how to make that comparison disappear for a while.
 
-It'd be bleak to watch that turn into "your company already bought the Microsoft developer bundle."
+Microsoft at its worst has always had this particular smell: the sales team is excellent, the enterprise agreement is excellent, identity already runs through Microsoft, procurement knows the vendor, security approved it last year, and the software itself is... fine.
 
-AI makes this more dangerous because a lot of the old cost of leaving lived in glue.
+Fine can have an incredible career when switching is annoying.
 
-Building your own CI used to mean maintaining your own CI. Every adapter breaks. Every API changes. Somebody writes a little internal service, then five years later everybody is scared to touch it. Buying the integrated thing spared you from becoming responsible for a small accidental software company inside your software company.
+GitHub losing that kind of developer preference would be especially sad because GitHub won in a much more romantic way. Developers wanted to be there. It understood that software development was social, and it made collaboration easy enough that the site became a default home for software before enterprise procurement had much to say about it.
 
-Agents make that tax smaller.
+The Microsoftified version flips the source of loyalty. Engineers stay because the agreement is signed, the accounts exist, the integrations are old, and moving sounds like work.
 
-A capable agent can write adapters, migrate workflows, update integrations, repair little internal tools, keep open-source components talking to each other, and babysit a lot of the work that used to make "just build our own" sound exhausting.
+AI keeps making the “sounds like work” part less persuasive.
 
-For a technically capable team that already owns the machines, the old build-versus-buy calculation starts getting strange.
+The answer is insultingly simple: make the products excellent.
 
-You can imagine an internal system with a Git server, an event stream, a task queue, object storage, a registry, secrets, workers, and a small UI holding it together. The company only has to make it work for itself. It can be as weird and specific as it wants.
+Give me an Actions control plane I would miss if I moved the repository. Give me agents good enough that my local swarm feels like a hobby project. Make enterprise administration pleasant. Make the security tooling feel worth choosing on its own. Let GitHub's insane distribution introduce people to products they keep because they love using them.
 
-If that gets cheap enough, GitHub risks becoming the front desk for software.
+GitHub already has the rarest asset in software: everybody showed up.
 
-A very important front desk. A front desk everybody knows. The canonical repository is there. The issue is there. The pull request is there. Your public identity is there.
+The repo can remain canonical while the build farm, agents, security analysis, deployment system, artifact store, and all the interesting compute move onto machines the customer controls. GitHub keeps receiving the events and displaying the results.
 
-Meanwhile, the builds, tests, agents, deployments, analysis, and compute all happen somewhere else.
+Facebook had ads.
 
-And then you get the ugly version of the Facebook analogy.
-
-Facebook had a network effect and an extraordinarily effective way to turn that network into money: advertising. More people meant more attention; more attention meant more inventory; the network itself fed the business model.
-
-GitHub has the network. The money mostly lives around it.
-
-Enterprise seats, Actions, Copilot, security products, Codespaces, packages, whatever comes next. Those can all be good businesses. They also have to keep being good products.
-
-If they drift into Microsoft-at-its-worst territory, where the sales motion and the lock-in are stronger than the software, GitHub can end up with a bizarre outcome: everybody still has a GitHub account, everybody still keeps the canonical repository there, and more of the valuable work keeps moving off the platform.
-
-That's Facebook without Facebook ads.
-
-The fix is almost embarrassingly simple.
-
-Make really good products.
-
-Make Actions so good that people who already own the compute still prefer GitHub's control plane. Make the agent experience so good that building your own swarm feels like wasted effort. Make the security tools excellent. Make enterprise administration pleasant. Make the surrounding products good enough that the network effect becomes an accelerant instead of a crutch.
-
-GitHub has ridiculous distribution. It can put a developer product in front of a huge fraction of the software industry almost immediately.
-
-If people with that much convenience still decide they'd rather assemble a pile of open-source software on their own machines, that's worth paying attention to.
-
-The best version of GitHub's future is easy to imagine: everybody is already there, and the products are good enough that everybody is happy to stay.
-
-The bad version is everybody is already there, so meh starts looking good enough.
+A green checkmark is a much thinner business.
