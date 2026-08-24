@@ -112,7 +112,11 @@ Don't add a second measurement merely because it exists. Pair measurements when 
 
 When one sentence carries multiple before/after measurements, keep each pair adjacent. Prefer `200.77s → 16.21s and 4.76 GB → about 1.1 GB` over `200.77s and 4.76 GB to 16.21s and 1.1 GB`. The reader should never have to map the first list onto the second.
 
-For Preflight, the resume uses **101s → 13.69s**. Older campaign numbers belong in evidence records, not in the resume bullet.
+For a headline result that genuinely deserves emphasis, repeating the magnitude in two useful forms can help. Preflight's **101s → 13.69s** is also **86.4% less time** and a **7.38× speedup**. Do not apply this decoration mechanically to ordinary numbers.
+
+Don't make the reader care about the measurement protocol. Words such as `controlled`, `cohort`, `directional`, `gate`, and similar experiment bookkeeping usually belong in evidence records. On the resume, say `a sample launch`, `a launch`, or just state the result unless the protocol changes what the claim means.
+
+A small range can be more distracting than informative. If `7.1–7.4s` is only expressing run variation and the resume point is the size of the win, use a readable representative such as `~7.4s` when the retained evidence supports it. Keep meaningful ranges such as `3–10× across multiple loaders` when the range itself communicates breadth.
 
 Choose the verb for the accomplishment instead of defaulting to `cut`. `Reduced`, `removed`, `eliminated`, `shrunk`, `brought`, and `moved` each say something different. Repeating one punchy verb until it becomes a tic weakens the page.
 
@@ -132,7 +136,7 @@ For Preflight, the working heading is:
 
 > **Preflight — Cross-platform performance launcher and mod analysis toolkit** *(public open source, Starsector ecosystem)*
 
-The heading identifies the product and keeps the game as context. The first bullet owns the thesis: a third-party runtime spanning independently maintained code, stack-wide investigation, the **101s → 13.69s** result, fallback when external code changes, and the desktop product built around the work.
+The heading identifies the product and keeps the game as context. The first bullet owns the thesis: reverse-engineering a third-party JVM ecosystem spanning independently maintained code, measuring repeated work at scale, the **101s → 13.69s** result, and the product built from that investigation.
 
 Parentheses are useful for compact context such as public status, platforms, domain, or an open PR. They should not become a second sentence of qualifications.
 
@@ -146,7 +150,11 @@ For work against a third-party runtime, distinguish three things when they are a
 - the infrastructure the project itself built
 - the user-facing product that makes the work usable
 
-For Preflight, the 83-mod setup is part of the engineering scope. The startup result came from investigating a third-party runtime made up of the game and independently maintained mods, then changing repeated work across that stack while letting changed external code return to its original behavior. Texture preparation, cache publication, measurement tooling, and the desktop application are Preflight's own machinery around that environment.
+For Preflight, the 83-mod setup is part of the engineering scope. The startup result came from reverse-engineering obfuscated JVM bytecode across the game and independently maintained mods, then tracing repeated work with JFR and live instrumentation. Large counters such as **1.6M resource probes** and **36,090 JSON loads** can be useful because they communicate the scale of the runtime being investigated.
+
+Do not inflate one counter into another. The million-scale retained number is resource probes; the retained JSON count is tens of thousands. Use both when useful rather than inventing `millions of JSON loads`.
+
+The cache architecture also matters. Several domain-specific JSON/CSV caches converged on shared tagged-tree/full-data infrastructure, with a general merged-read cache catching misses and later post-startup JSON reads reusing the same prepared artifact. That architectural consolidation is stronger career evidence than listing every cache class separately.
 
 Don't flatten a project like that into `optimized a game` or `built a cache`. Those descriptions erase most of the engineering.
 
