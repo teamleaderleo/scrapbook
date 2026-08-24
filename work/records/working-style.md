@@ -1,146 +1,142 @@
 # Working style and retrieval model
 
-Updated: 2026-08-20
+Updated: 2026-08-24
 
-This record captures how Leo currently works and why `work/` exists. It is descriptive, not a claim that every future task should use the same process.
+This record describes a working model, not a ritual every task has to perform.
 
-## Current working model
+## Capture generously, reconcile when a decision needs it
 
-Leo tends to synthesize in real time and move on.
+Leo tends to synthesize quickly and move on. The useful default is therefore **capture first, reconcile on demand**.
 
-A useful default is therefore **append first, reconcile later**:
+Record observations, decisions, measurements, reversals, and useful interpretations while they're alive. Preserve enough provenance that a later reader can tell primary evidence from interpretation. Let later retrieval do the expensive sorting when a real question creates demand.
 
-- record concrete observations, decisions, measurements, reversals, and useful interpretations while they are fresh;
-- do not require every session to reorganize the complete corpus before new work can continue;
-- preserve provenance so later readers can distinguish primary evidence from interpretation;
-- let later agents retrieve, compare, deduplicate, challenge, and compress the accumulated record when a concrete question requires it.
+This habit predates the current agent-heavy period. Handwritten and digital notes could be effectively append-only for years: capture the thought, use it when needed, and spend very little life tending an immaculate archive.
 
-The human loop is intentionally asymmetric. Leo supplies direction, judgment, curiosity, and rapid synthesis; agents are expected to help retain the long tail, bring old evidence back into working memory, and prevent useful conclusions from being lost merely because attention moved elsewhere.
+Speech-to-text changed the economics because it became cheap to leave searchable language behind without stopping the thought to format it. Agents changed the economics again: a large archive can be searched, compared, challenged, and compressed when the decision arrives.
 
-`work/` is one retrieval surface for that arrangement. It should make it possible to ask later:
+The point is recoverability, not personal clerical perfection.
 
-- what have I actually done?
-- which results survived scrutiny?
-- which theories were killed and why?
-- what is strongest for this resume or company?
-- what technical axes have I already demonstrated?
-- what gaps are real versus artifacts of forgetting the existing evidence?
+## What deserves memory
 
-without reconstructing the answer from chat history.
+Different knowledge has different jobs.
 
-## Capture first, retrieve on demand
+Some things benefit from embodied recall: language syntax, core algorithms, common systems patterns, the ability to reason through code under time pressure. Some facts should live as durable searchable evidence. Some task detail only has to survive until the task is complete.
 
-This working style predates the current agent-heavy period.
+Treating all three as equally deserving rehearsal wastes attention.
 
-For years, Leo treated many notes as effectively append-only and close to write-only: capture the thought while it is alive, use or synthesize it when useful, and rarely spend time maintaining a perfectly organized archive. Strong baseline recall made that workable. Important ideas usually stayed available long enough to be applied; low-value material could fade without demanding another review pass.
+A good system lets low-value detail fade while keeping consequential facts recoverable.
 
-The tradeoff was retrieval. Handwritten notes could be dense, abbreviated, or intentionally difficult for anyone else to parse, and sometimes difficult for Leo to parse later. Digital notes accumulated in similar ways. The system favored thinking now over making every fragment pleasant for a hypothetical future reader.
+## The current toolchain has separate jobs
 
-High-quality speech-to-text changed that tradeoff. Dictation makes it cheap to leave far more searchable language behind without interrupting the thought to type, format, classify, or file it. The raw material still arrives messily, but text gives later tools a much better substrate for search, comparison, summarization, and resurfacing.
+The owned repositories increasingly turn that personal habit into software without collapsing everything into one mega-agent.
 
-Agents change the economics again. A large archive no longer requires Leo to remember where everything lives or personally review it on a schedule. When a concrete question arrives, an agent can search the residue, recover the useful parts, compare them with current evidence, and return the small subset that deserves attention.
+- [SmolRunner](https://github.com/teamleaderleo/smolrunner) owns trust-tiered Linux execution: disposable workers where isolation dominates, persistent trusted state where reuse earns the latency win.
+- [Renderprove](https://github.com/teamleaderleo/renderprove) produces rendered/browser evidence: receipts, screenshots, diagnostics, deterministic comparison, bounded interaction, and screenshot advisory packets.
+- [Proofwake](https://github.com/teamleaderleo/proofwake) remembers revision evidence and task-specific evaluation receipts without becoming the scheduler or approval authority.
+- [Cultist](https://github.com/teamleaderleo/cultist) asks which repository evidence a worker should see now, keeps provenance/counterexamples/unknowns visible, and tests whether the selected evidence changes the next action.
+- [Stensibly](https://github.com/teamleaderleo/stensibly) carries shared responsibility, authority, handoffs, continuation, provider reconciliation, and the next durable action across disposable workers and fresh chats.
+- [Fieldwork](https://github.com/teamleaderleo/fieldwork) and [Linux Fieldwork](https://github.com/teamleaderleo/linux-fieldwork) are code-first investigation workbenches: source, discriminators, negative controls, exact evidence, review, and deliberate upstream boundaries.
+- Scrapbook is the human synthesis/publication layer: what happened, what survived scrutiny, what deserves public space, and what should come back into active memory later.
 
-The resulting ethos is deliberately selective:
+Preflight is the deep owned product where many of these habits are tested against one demanding runtime over a long period.
 
-- capture generously when capture is cheap;
-- organize only when organization earns its cost;
-- retrieve when a real decision creates demand;
-- distill conclusions that survive repeated use or scrutiny;
-- practice the skills that benefit from embodied recall;
-- automate or forget the administrative remainder.
+The separation is useful. Execution evidence should not silently become approval. Repository context should not become authority. A mail continuation handle should not become permission to merge. A screenshot advisory should not change deterministic browser disposition.
 
-Different knowledge deserves different treatment. Some things belong in muscle memory or unaided recall. Some should live as durable searchable evidence. Some only need to exist long enough to complete one task. Treating all three categories as equally worthy of rehearsal wastes attention.
+## Agents are retrieval and reconciliation, too
 
-The goal is therefore less "be organized" than **keep important knowledge recoverable while spending as little life as possible tending low-value administration**.
+Implementation throughput is only part of the value.
 
-## Identity: slope over domain ownership
+A useful agent can enter the old records, recover the primary evidence, notice that two summaries disagree, compare both with current source, and return a small current answer. It can preserve a reversal instead of flattening history into a victory montage. It can also leave the records easier for the next worker to use.
 
-The current technical identity is not "expert in one domain" and should not be marketed as all-encompassing understanding.
+The loop looks more like:
 
-A better description is:
+```text
+capture residue
+→ retrieve when demanded
+→ compare with current source
+→ test / execute
+→ preserve evidence and decision
+→ compress the public story
+```
 
-> Domain-agnostic software engineer with a steep learning slope and unusually high codebase-entry velocity; strongest evidence is repeatedly getting useful in unfamiliar runtimes, tooling, infrastructure, and product systems, then following the problem until the actual ownership/performance/correctness boundary is clear.
+Worker and conversation loss are ordinary events in that model. The important question is whether the next competent worker can recover the facts, rationale, uncertainty, and evidence needed for the next consequential decision at an acceptable cost.
 
-The portfolio currently spans Java runtime instrumentation and game performance, TypeScript SDK/runtime correctness, Rust virtualization and compiler work, Linux/container lifecycle investigations, browser/build tooling, agent coordination, and product/application systems.
+## Source beats stale prose
 
-The important claim is not prior mastery of every one of those domains. It is that useful technical judgment has transferred across them.
+Engineering moves quicker than the summaries around it. That means a README, issue body, portfolio note, claim registry, or old essay can become the stale object.
 
-This is why a modern tooling company can be a strong fit even when the nominal product area changes. The relevant overlap is often the engineering shape:
+Current implementation and retained current evidence lead. Documentation is a projection of that reality.
 
-- TypeScript/JavaScript and modern runtime/tooling ecosystems;
-- SDK and API semantics;
-- caches, state, lifecycle, cancellation, retries, authority, and failure recovery;
-- instrumentation and performance work;
-- open-source collaboration;
-- AI-assisted development where human attention is spent on problem selection, verification, repair boundaries, and integration quality.
+When a summary disagrees with source, fix the summary. When a machine-readable claim index lags accepted evidence, bring the index forward. When one changing fact has been copied into five career files, pick one owner and make the others link to it.
 
-## Modern-tooling fit
+The recent Preflight performance cleanup is a good example: the current career headline is the observed **~101s → 13.69s** development arc, while the 89.00s → 15.53s same-session campaign remains a valuable experimental comparison. Those statements answer different questions. Letting an older claim registry force the old campaign back into the headline was the wrong direction of authority.
 
-There is a real market category now that was much less legible a few years ago: engineering environments where AI agents, modern TypeScript tooling, SDKs, sandboxed execution, durable workflows, MCP-style tool interfaces, and fast open-source iteration are normal parts of the product surface.
+## Writing should preserve the person and the evidence
 
-That environment maps unusually well to Leo's current working style.
+The technical-writing rules in Fieldwork and Linux Fieldwork and the Workbench voice rules now point in the same direction.
 
-This should not turn into a claim that any particular company or role is automatically a fit. The useful observation is that the *slope* and workflow are now more market-legible than they would have been in an older software market that treated one narrow framework or multi-year domain tenure as the main proxy for ability.
+Lead with the concrete question, mechanism, consequence, or decision. Explain the current model before drowning the reader in source paths. Use code, state traces, tables, and diagrams when they communicate the system quicker than prose.
 
-## Agents as retrieval and reconciliation layer
+Keep evidence classes exact: source behavior, executed result, interpretation, design choice, and remaining work can live next to each other without pretending to be the same kind of claim.
 
-Agents are not just implementation throughput in this workflow.
+Then write like a person.
 
-They also serve as an externalized retrieval layer:
+Contractions are welcome. Semicolons are welcome. Uneven lists are welcome. A blunt sentence is welcome. A longer sentence can wander a little when the clauses genuinely belong together. The reader does not need every result announced by “the key insight,” packaged into three reasons, and finished with a recap of the recap.
 
-1. read primary evidence and old records;
-2. bring relevant prior conclusions back when a new decision touches them;
-3. notice contradictions or stale claims;
-4. preserve reversals rather than flattening history into success-only marketing;
-5. independently rank the existing corpus for the immediate question;
-6. leave the durable record better than they found it when new evidence materially changes the picture.
+Protect passages that already work. Fix the vague noun, stale status, canned hinge, duplicated caveat, or padded ending instead of globally repainting everything into a house voice.
 
-This is the motivation for keeping factual work records separate from churny resume/application rankings.
+Technical accuracy comes from exact nouns, verbs, identities, evidence, and boundaries. Formal-sounding filler adds no authority.
 
-## The mess became an operating model
+## Identity: learning slope over narrow domain ownership
 
-The current repositories increasingly make the old personal habit explicit instead of trying to replace it with exhaustive personal organization.
+The strongest evidence is repeated codebase entry: get useful in an unfamiliar runtime/tool/repository, find the real owner of the behavior, build a test that can make the hypothesis lose, and follow the problem until the compatibility/performance/correctness boundary becomes clear.
 
-- [Preflight](https://github.com/teamleaderleo/preflight) tests whether agent-heavy execution can sustain a deep product whose claims are tied to measurement, compatibility gates, fallback behavior, and real runtime evidence.
-- [Fieldwork](https://github.com/teamleaderleo/fieldwork) and [Linux Fieldwork](https://github.com/teamleaderleo/linux-fieldwork) test whether the same investigation method transfers across unfamiliar codebases, with negative results and upstream review preserved as evidence instead of treated as wasted motion.
-- [Stensibly](https://github.com/teamleaderleo/stensibly) externalizes responsibility and authority so work can survive worker restarts, stale sessions, retries, handoffs, and replacement.
-- [Cultist](https://github.com/teamleaderleo/cultist) attacks rediscovery directly: recover bounded repository evidence before a worker edits, keep provenance/counterexamples/unknowns visible, and preserve earned rationale for the next worker. Its current behavioral pressure test asks whether selected evidence actually changes the next justified action or prevents a repeated wrong turn.
-- Scrapbook remains the synthesis and retrieval layer across those systems: what happened, what survived scrutiny, what belongs in public narrative, and what deserves to be brought back into active memory later.
+The current body of work spans Java/JVM performance and bytecode, TypeScript SDK/runtime correctness, Rust virtualization and execution, Linux/container work, browsers/build tooling, agent coordination, evidence systems, and product/application engineering.
 
-The common problem is human attention. Agent output can grow much faster than one person can read line by line, and a large archive can grow much faster than one person can periodically review. The response here is to move more of the burden into recoverability: exact evidence, bounded context, tests, handoffs, provenance, external checks, and selective retrieval at the moment a decision needs them.
+The claim is transfer of technical judgment, not prior mastery of every domain.
 
-That gives a more useful question than "does Leo understand every line?":
+That makes a modern tooling/agent environment legible: TypeScript and systems code, SDK semantics, caches and state, lifecycle/cancellation/retries, sandboxed execution, authority, evidence, open-source review, and agent-heavy development can all belong to one engineering identity without pretending they're one product.
 
-> Can a fresh competent worker recover the facts, rationale, uncertainty, and evidence needed for the next consequential decision at an acceptable cost?
+## Human attention is the scarce resource
 
-The method is still being tested. Preflight provides one deep owned-system case; Fieldwork and Linux Fieldwork broaden the domain sample and expose work to outside maintainers; Cultist's held-out-task evaluation is explicitly aimed at measuring whether repository memory changes worker behavior. The portfolio should keep those evidence levels separate.
+Agent output can grow much quicker than one person can read it. Archives can grow much quicker than one person can periodically review them.
 
-The underlying personal habit remains recognizable: **capture the useful residue, trust synthesis, let low-value detail fall away, and build retrieval around the moments where forgetting would become expensive**.
+So the system tries to spend human attention on the decisions that actually deserve judgment: which problem is worth solving, which contract should hold, which evidence is strong enough, which competing explanation survived, which external effect is authorized, and what deserves publication.
 
-## Recall practice / "Monkeytype but code"
+The rest should be recoverable.
 
-The same model motivates a code-recall practice surface in Scrapbook.
+This is why negative results matter. A rejected optimization, a maintainer choosing the other compatibility boundary, an experiment that failed to distinguish two hypotheses, or an evidence packet that changed nobody's action can save future attention when it remains easy to find.
 
-The problem is not merely typing speed. Heavy AI-assisted engineering can produce a wide and deep body of encountered code faster than unaided recall naturally consolidates it. Useful practice should therefore turn real encountered patterns back into fast human retrieval and implementation ability.
+## Recall practice still has a place
 
-The desired loop is roughly:
+Retrieval software does not replace human fluency.
 
-> real engineering work -> durable examples/patterns -> short active-recall/code-production drills -> faster unaided access during interviews, debugging, review, and ordinary implementation
+The useful code-recall loop is still:
 
-The source material should preferentially come from actual work rather than arbitrary syntax trivia: stream cleanup, state invalidation, Rust error propagation, cache keys, async races, data-structure choices, shell/process boundaries, common algorithms, C++/systems fundamentals when needed, and compact implementation patterns encountered repeatedly.
+```text
+real engineering work
+→ durable examples and patterns
+→ short active-recall / code-production drills
+→ quicker unaided access during interviews, debugging, review, and implementation
+```
 
-This complements rather than replaces open-ended engineering. The purpose is to make accumulated understanding callable under time pressure.
+Use actual encountered material: stream cleanup, invalidation, Rust error propagation, cache identity, async races, process boundaries, data structures, systems fundamentals, algorithms that keep recurring.
+
+The target is callable understanding under time pressure, not memorizing the archive.
 
 ## Career consequence
 
-The main career risk is currently less "insufficient technical material" than **compression and retrieval under hiring constraints**.
+The current problem is mostly compression.
 
-That means future preparation should increasingly ask:
+There is enough technical material. The hard part is choosing the few examples that a hiring process can absorb without turning the page into a logo wall or a compressed autobiography.
 
-- can Leo explain this in two minutes?
-- can Leo reproduce the core implementation without an LLM when required?
-- can Leo solve the bounded algorithm/system-design version under interview time?
-- can the resume surface the right four specimens without hiding the larger body of evidence?
-- can an agent retrieve the relevant old evidence when a role asks for something Leo has already done but no longer has in active memory?
+The active career files therefore have different jobs:
 
-This record should evolve as the working model changes. Preserve older snapshots when the change itself becomes informative.
+- [`../current-state.md`](../current-state.md) — moving status;
+- [`preflight-live-performance.md`](preflight-live-performance.md) — changing Preflight performance frontier;
+- [`open-source.md`](open-source.md) — durable external outcomes and review reversals;
+- [`../portfolio-inventory.md`](../portfolio-inventory.md) — retrieval index;
+- [`../resume-candidates.md`](../resume-candidates.md) — scarce-space selection;
+- `/work` — selected public projection.
+
+When a role asks for something already demonstrated, retrieval should recover the evidence. When a project moves, the owner record should change before another polished sentence gets copied outward.
