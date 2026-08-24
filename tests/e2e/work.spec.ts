@@ -9,9 +9,12 @@ test('Work presents a dense selected record with inspectable evidence', async ({
     page.getByRole('heading', { level: 1, name: 'Work' })
   ).toBeVisible();
   await expect(page.locator('main')).toHaveCount(1);
-  await expect(page.locator('[data-work-record]')).toHaveCount(5);
+  await expect(page.locator('[data-work-record]')).toHaveCount(6);
   await expect(page.locator('[data-work-record="preflight"]')).toContainText(
-    '89.00s baseline → 15.53s accelerated'
+    '101 seconds to a 13.69-second best run'
+  );
+  await expect(page.locator('[data-work-record="cultist"]')).toContainText(
+    'provider snapshot identity'
   );
   await expect(
     page.getByRole('link', { name: 'AI SDK · deterministic URL matching' })
