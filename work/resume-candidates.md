@@ -60,7 +60,7 @@ Preflight gets the largest allocation. Keep a richer candidate pool until the on
 
 > Cut texture preparation from **200.77s to 16.21s** and storage from **4.76 GB to about 1.1 GB** by eliminating duplicate loose files, packing textures as they're prepared, and learning the startup texture set after the first launch.
 
-> Precompiled generated Java classes, cutting **102,175 compile calls from 18.014s to 2.364s** and shrinking retained bytecode from **145.96 MiB to 1.13 MiB** by storing shared class bundles once.
+> Cached generated Java classes, cutting compilation from **18.014s to 2.364s**, then deduplicated the cache from **145.96 MiB to 1.13 MiB** and cut warm replay from **1.501s to 29ms**.
 
 > Built JFR tracing, seam timers, and unattended benchmarks that exposed a roughly **27s texture prefetch wait** and **1.6 million filesystem probes** during resource lookup, then used those measurements to choose where the launch path was worth changing.
 
