@@ -55,7 +55,7 @@
 - Do not add or run browser tests for facts that can be derived from source, covered by Vitest, checked at an API boundary, or proven by the production build.
 - Use a browser only when the question genuinely depends on browser behavior: rendered geometry, responsive overflow, CSS/computed styles, focus, pointer or keyboard interaction, browser storage/APIs, canvas, hydration, or deliberate visual review.
 - For visible UI work, run the application and inspect the affected route at the relevant viewport. A targeted Playwright spec is fine when it helps; direct inspection of a local run, preview deployment, or deployed site is also valid evidence. Capture a screenshot when the visual result needs durable review evidence.
-- Prefer `pnpm test:e2e` for the tiny browser canary or a single focused `pnpm exec playwright test <spec> --project=chromium` command. Run `pnpm test:e2e:full` or cross-browser sweeps only when the change justifies them.
+- Prefer `pnpm test:e2e` for the tiny browser canary or a single focused `pnpm exec playwright test <spec> --project=chromium` command. Run `pnpm test:e2e:full` only when the change justifies it.
 - Existing larger Playwright specs are opt-in diagnostic tools. When touching them, move assertions to Vitest whenever the browser itself adds no signal. Do not preserve a browser assertion merely because it already exists.
 - See `docs/ci-scope.md` for the command-level policy.
 
