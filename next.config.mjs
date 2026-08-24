@@ -8,43 +8,21 @@ const withBundleAnalyzer = bundleAnalyzer({
 const nextConfig = {
   cacheComponents: true,
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: `${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com`,
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: `${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}`,
-        port: '',
-        pathname: '/**',
-      },
-    ],
-    formats: ['image/avif', 'image/webp'], // Better image compression
+    formats: ['image/avif', 'image/webp'],
   },
-
-  // Remove console.log in production (keeps error/warn)
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error', 'warn'],
-    } : false,
+    removeConsole:
+      process.env.NODE_ENV === 'production'
+        ? {
+            exclude: ['error', 'warn'],
+          }
+        : false,
   },
-
-  // React Compiler is stable in Next.js 16!
   reactCompiler: true,
-
   experimental: {
     turbopackFileSystemCacheForDev: true,
     turbopackFileSystemCacheForBuild: true,
-    optimizePackageImports: [
-      'lucide-react',
-      'react-markdown',
-      '@/components',
-      '@/components/ui',
-      '@/components/space',
-    ],
+    optimizePackageImports: ['lucide-react', 'react-markdown'],
   },
 };
 
