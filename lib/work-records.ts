@@ -33,6 +33,11 @@ export const workRecords: readonly WorkRecord[] = [
       'A valid prepared-texture cache barely moved launch time until measurement found it sitting behind a roughly 27-second prefetch wait. Moving the intervention to the actual critical-path boundary turned the same prepared work into a major improvement.',
     evidence: [
       {
+        label: 'Site deep dive',
+        href: '/work/preflight',
+        kind: 'record',
+      },
+      {
         label: 'Repository',
         href: 'https://github.com/teamleaderleo/preflight',
         kind: 'repository',
