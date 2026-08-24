@@ -56,7 +56,7 @@ The capture-option identity fix is useful regression coverage but makes the resu
 
 Preflight gets the largest allocation. It is a public open-source release candidate, not just a performance experiment. The resume should show the whole system: the startup result, the changing game/mod runtime it had to survive, Preflight's own preparation machinery, and the cross-platform product built around the engine. Keep a richer candidate pool until the one-page layout forces cuts.
 
-> Built Preflight, a cross-platform Tauri desktop app and Java agent that cut startup for Starsector with 83 enabled mods from **101s to 13.69s** on an M5 MacBook Air, treating the game and mod stack as one runtime instead of optimizing one isolated plugin.
+> Built Preflight, a cross-platform Tauri desktop app and Java agent that cut startup for Starsector with 83 enabled mods from **101s to 13.69s** on an M5 MacBook Air, profiling the game and mod stack as one runtime instead of optimizing one isolated plugin.
 
 > Reverse-engineered and instrumented the game and 83-mod stack, finding a roughly **27s texture prefetch wait**, **1.6 million filesystem probes** during resource lookup, an **18–20s data-loading plateau**, and expensive AshLib, GraphicsLib, MagicLib, and Janino paths, then tied each runtime shortcut to the exact game or mod code it targets so updates fall back to the original path.
 
