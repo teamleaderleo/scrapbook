@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const retiredSourcePaths = [
+  '.github/workflows/import-gallery-asset.yml',
   '.github/workflows/signal-status-once.yml',
   '.github/workflows/webkit-compatibility.yml',
   '.hintrc',
@@ -19,16 +20,22 @@ const retiredSourcePaths = [
   'app/lib/data/cached-tag-data.ts',
   'app/lib/data/project-data.ts',
   'app/lib/data/tag-data.ts',
+  'app/lib/db/schema.ts',
   'app/lib/definitions/definitions.ts',
+  'app/lib/definitions/space.ts',
   'app/lib/external/s3-operations.ts',
   'app/lib/external/s3-resource-tracker.ts',
   'app/lib/hooks/useProjectBlocks.ts',
   'app/lib/hooks/useTags.ts',
   'app/lib/hooks/useToastMessages.ts',
-  'app/lib/db/schema.ts',
   'app/lib/image-processing/image-processing.ts',
+  'app/lib/leetcode-data.ts',
+  'app/lib/leetcode-search.ts',
   'app/lib/seed-items.ts',
+  'app/lib/seed-review.ts',
   'app/lib/stores/ui-store.ts',
+  'app/lib/utils/cards.ts',
+  'app/lib/utils/index.ts',
   'app/lib/utils-client.ts',
   'app/lib/utils-server.ts',
   'components/blocks/components/block-image.tsx',
@@ -44,6 +51,7 @@ const retiredSourcePaths = [
   'components/feature-showcase.tsx',
   'components/hardcoded-sticky-note.tsx',
   'components/minimal-site-nav.tsx',
+  'components/paper-critter.tsx',
   'components/portfolio/portfolio.css',
   'components/portfolio/portfolio-block.tsx',
   'components/portfolio/project-display.tsx',
@@ -64,9 +72,10 @@ const retiredSourcePaths = [
   'components/scrapbook/scrapbook-board.tsx',
   'components/scrapbook/scrapbook-data.ts',
   'components/scrapbook/scrapbook-entry.tsx',
+  'components/search-params-handler.tsx',
+  'components/simple-auth-modal.tsx',
   'components/suggestions/suggestedtags.tsx',
   'components/suggestions/suggestions.tsx',
-  'components/simple-auth-modal.tsx',
   'components/three-carousel',
   'components/ui/alert.tsx',
   'components/ui/assets/avatar.tsx',
@@ -100,6 +109,11 @@ const retiredSourcePaths = [
   'components/ui/table.tsx',
   'components/ui/textarea.tsx',
   'dist/socket-server.js',
+  'docs/agent-art-creation-and-research.md',
+  'docs/gallery-artwork.md',
+  'docs/gallery-asset-importer.md',
+  'docs/visual-review-artifacts.md',
+  'docs/visual-review-run.md',
   'drizzle.config.ts',
   'drizzle/meta/_journal.json',
   'public/blocks/app-wireframes.pdf',
@@ -125,12 +139,14 @@ const retiredSourcePaths = [
   'public/scrapbook/platform-vscode-overview.webp',
   'public/scrapbook/server-actions-example.webp',
   'public/scrapbook/tiptap-editor-demo.webp',
+  'scripts/import-gallery-asset.mjs',
   'scripts/patch-react-dom-class-compare.js',
   'server/socket-server.cjs',
   'tests/e2e/legacy-login-retirement.spec.ts',
   'tests/e2e/resume-retirement.spec.ts',
   'tests/e2e/retired-claude.spec.ts',
   'tests/e2e/retired-dashboard.spec.ts',
+  'tests/gallery-asset-importer.test.ts',
 ] as const;
 
 const preservedSourcePaths = [
@@ -179,13 +195,8 @@ const retiredDirectDependencies = [
 
 const preservedDirectDependencies = [
   '@shikijs/monaco',
-  'file-type',
-  'maath',
   'monaco-editor',
   'postgres',
-  'random-words',
-  'sharp',
-  'suspend-react',
 ] as const;
 
 const packageJson = JSON.parse(
