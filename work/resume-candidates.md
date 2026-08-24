@@ -54,25 +54,28 @@ The capture-option identity fix is useful regression coverage but makes the resu
 
 ### Preflight
 
-Preflight gets the largest allocation. Keep a richer candidate pool until the one-page layout forces cuts.
+Preflight gets the largest allocation. It is a public open-source release candidate, not just a performance experiment. The resume should show the whole system: the startup result, the changing game/mod runtime it had to survive, Preflight's own preparation machinery, and the cross-platform product built around the engine. Keep a richer candidate pool until the one-page layout forces cuts.
 
-> Built Preflight, a launcher and Java agent that cut startup for Starsector with 83 enabled mods from **101s to 13.69s** on an M5 MacBook Air by preparing textures, game data, audio, resource indexes, and generated Java classes ahead of launch.
+> Built Preflight, a cross-platform Tauri desktop app and Java agent that cut startup for Starsector with 83 enabled mods from **101s to 13.69s** on an M5 MacBook Air, treating the game and mod stack as one runtime instead of optimizing one isolated plugin.
 
-> Cut texture preparation from **200.77s to 16.21s** and storage from **4.76 GB to about 1.1 GB** by eliminating duplicate loose files, packing textures as they're prepared, and learning the startup texture set after the first launch.
+> Reverse-engineered and instrumented the game and 83-mod stack, finding a roughly **27s texture prefetch wait**, **1.6 million filesystem probes** during resource lookup, an **18–20s data-loading plateau**, and expensive AshLib, GraphicsLib, MagicLib, and Janino paths, then tied each runtime shortcut to the exact game or mod code it targets so updates fall back to the original path.
 
-> Cached generated Java classes, cutting compilation from **18.014s to 2.364s**, then deduplicated the cache from **145.96 MiB to 1.13 MiB** and cut warm replay from **1.501s to 29ms**.
+> Cut texture preparation from **200.77s to 16.21s** and storage from **4.76 GB to about 1.1 GB** by eliminating duplicate loose files, packing textures as they're prepared, and learning the startup texture set and order after the first launch.
 
-> Built JFR tracing, seam timers, and unattended benchmarks that exposed a roughly **27s texture prefetch wait** and **1.6 million filesystem probes** during resource lookup, then used those measurements to choose where the launch path was worth changing.
+> Cached generated Java output for mod scripts, cutting Janino work from **18.014s to 2.364s**, then deduplicated **145.96 MiB** of repeated class maps into a **1.13 MiB** pack with **29ms** warm replay.
 
-> Built the desktop app around the engine with profiles, setup and launch flows, automatic cache preparation after game exit, native macOS, Windows, and Linux packages, unattended benchmarks, diagnostics, signed updates, rollback, and support reporting.
+> Built native Windows, macOS, and Linux packages with Tauri 2, Rust, React, and a bundled Java runtime, plus named mod profiles, launch settings, built-in before/after benchmarks, automatic cache maintenance after game exit, recovery flows, signed updates and rollback, privacy-safe diagnostics, and support reporting.
+
+> Turned the profiling work into a read-only mod linter calibrated across **86 mod directories**, with a median of **0 findings** and **44/86 completely clean**, surfacing measured decode, video-memory, disk, and configuration problems without changing third-party files, plus setup analysis for missing dependencies, duplicate mod IDs, and broken references.
 
 Why these stay in the pool:
 
-- The first bullet sells the whole-launch result.
-- The texture bullet owns the preparation story. The development arc is **200.77s / 4.76 GB to 16.21s / about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch is useful supporting evidence, but it is not the headline for texture preparation.
-- The generated-code result carries its own large time and storage collapse and is stronger than a generic list of cached subsystems.
-- The investigation bullet explains why the project can credibly claim the larger result instead of reading like a pile of caches.
-- The desktop bullet proves the work became a usable cross-platform product rather than stopping at an optimization engine.
+- The first bullet sells the whole-launch result and says immediately that this is a cross-platform application around a heavily modded runtime, not a one-off game tweak.
+- The investigation bullet owns the third-party integration story. Much of the startup win comes from understanding and repairing repeated work in Starsector and the installed mod ecosystem, while each runtime change is tied to the code it was reviewed against and gives way to the original path when that code changes.
+- The texture bullet owns Preflight's preparation pipeline. The development arc is **200.77s / 4.76 GB to 16.21s / about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch is useful supporting evidence, but it is not the headline for texture preparation.
+- The generated-code result carries its own large time and storage collapse and shows that the optimization work reached mod runtime compilation, not just assets.
+- The desktop bullet proves the engine became a cohesive application with packaging, recovery, measurement, update, and support paths on all three desktop operating systems.
+- The linter/setup bullet shows the investigation feeding back into the wider mod ecosystem rather than only accelerating one local installation.
 
 Source hierarchy for future Preflight edits:
 
@@ -81,6 +84,8 @@ Source hierarchy for future Preflight edits:
 3. README and other front-facing summaries
 
 If those disagree, update the career copy from the first two. Don't preserve a weaker old headline because it happens to be written in a polished summary.
+
+Status wording matters. The repository is public. The desktop is currently a release candidate and the repository says public downloads still wait on the final package acceptance. `Public open-source project` is safe today. `Released desktop beta` is not yet safe.
 
 ### Stensibly
 
