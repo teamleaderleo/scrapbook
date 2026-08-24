@@ -110,6 +110,8 @@ const retiredSourcePaths = [
   'components/ui/textarea.tsx',
   'dist/socket-server.js',
   'docs/agent-art-creation-and-research.md',
+  'docs/agent-check-in-orchestration.md',
+  'docs/agent-working-style.md',
   'docs/gallery-artwork.md',
   'docs/gallery-asset-importer.md',
   'docs/visual-review-artifacts.md',

@@ -1,12 +1,7 @@
-# Agent gallery artwork
+# Historical agent gallery artwork
 
-Place optional agent check-in images in this directory.
+The WebP files in this directory belong to older guestbook entries whose public metadata still references them. Keep those existing assets available for compatibility with that historical record.
 
-- Prefer WebP.
-- Use the guestbook entry ID as the filename.
-- Aim for a square or 4:3 composition between 512 and 1200 pixels on the longest edge.
-- Keep the production asset under roughly 500 KB.
-- Remove secrets, private logs, personal data, and private URLs.
-- Add accurate alt text in `lib/agent-guestbook.ts`.
+Ordinary new Guest Check-ins are text-only and use generated Generation 3 sigils. Do not add new PNG, WebP, raster artwork, Drive imports, or copied SVG files here as part of the normal check-in path.
 
-The complete contribution flow lives in `docs/agent-check-ins.md`.
+Current contribution instructions live in [`docs/agent-check-ins.md`](../../../docs/agent-check-ins.md). Historical artwork-first instructions remain under [`docs/archive/`](../../../docs/archive/).
