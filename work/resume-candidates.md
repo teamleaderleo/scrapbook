@@ -66,7 +66,7 @@ Canonical opening:
 
 Candidate receipts:
 
-> Consolidated repeated JSON/CSV parsing and merging behind five loader-specific caches into a memoized data-read layer shared by the game and mods, deduplicating **39,017 JSON reads across 8,378 paths** at the common boundary, replacing reparsed text with typed trees validated across **12,584 cached objects / 990,602 values**, and reduced multiple data loaders **3–10×** and merged-read overhead **2.172s → 0.300s**.
+> Consolidated repeated JSON/CSV parsing and merging behind five loader-specific caches into a memoized data-read layer shared by the game and mods, deduplicating **39,017 JSON reads across 8,378 paths** at the common boundary, replacing reparsed text with typed trees validated across **12,584 cached objects / 990,602 values**, bringing `SpecStore` **19.8s → 9.8s**, and reduced remaining merged-read overhead **2.172s → 0.300s**.
 
 > Reworked separate game/mod hot paths to bypass a **27s** single-threaded texture prefetch stall, eliminate **1.22 GiB of VRAM padding**, and take **~7.4s** out of AshLib startup, with the texture/prefetch work alone moving a sample launch **88.13s → 62.60s**.
 
@@ -84,6 +84,7 @@ Why these stay in the pool:
 - `83 third-party mods` is enough domain context. It says the runtime is assembled from code Preflight does not own without spending words on how the mod ecosystem is organized.
 - The shared-cache receipt names the architectural move directly. Five loader-specific caches revealed the wrong abstraction boundary, so repeated JSON/CSV parsing and merging moved down to one common data-read layer serving the game and mods instead of growing another one-off cache.
 - The **39,017 JSON reads / 8,378 paths** count is part of that same memoization story, not a detached benchmark anecdote. Keep it folded into the causal sentence rather than explaining a run separately.
+- The five loader-specific caches took `SpecStore` **19.8s → 9.8s**, a clean cumulative result for this exact data-cache arc. Use that instead of attributing a larger whole-launch milestone that also contains texture, audio, or generated-code work.
 - This is textbook memoization plus a typed representation, but the surrounding problem is harder than the textbook version: the runtime is obfuscated, overlays come from many third-party roots, returned JSON objects remain mutable, and the cache has to preserve the game's own merge and fallback behavior.
 - The typed-tree representation was replayed through the installed JSON runtime across **12,584 cached objects containing 990,602 values**. That is the strongest retained million-scale data receipt for the cache architecture.
 - The runtime receipt shows performance work below application abstractions: a serialized prefetch bottleneck, GPU-memory waste, and a large third-party mod callback path.
@@ -99,6 +100,7 @@ Performance win inventory, not all of which belongs on the one-page resume:
 - common JSON path: **39,017 calls / 8,378 distinct paths**, with **78.5%** of calls repeating a path already read
 - resource resolution: **1,618,401 filesystem probes** in one launch, **42.6 per JSON call**, with the first-match walk costing **5.25s** and merged resolution another **4.27s**
 - common-loader memo moved one sample launch **84.49s → 73.54s** and served every mod through the same lower boundary
+- five loader-specific JSON/CSV caches took `SpecStore` **19.8s → 9.8s**
 - five loader-specific caches left **2.86s** of merged reading in the whole launch, motivating the general cache over the two merged-reader methods every game/mod merge goes through
 - general merged-read cache reduced its seam **2.172s → 0.300s**
 - tagged-tree cache representation was validated across **12,584 objects / 990,602 values**, decoded **3.4–6.0×** faster than stored JSON text in replay, and reduced value bytes about **30%**
