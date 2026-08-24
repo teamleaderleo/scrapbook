@@ -66,7 +66,7 @@ Canonical opening:
 
 Candidate receipts:
 
-> Consolidated the repeated JSON/CSV parsing and merging behind five loader-specific caches into one memoized data-read layer shared by the game and mods, deduplicating work across **39,017 JSON reads / 8,378 paths**, replacing reparsed text with typed trees validated across **12,584 cached objects / 990,602 values**, and reducing multiple data loaders **3–10×** and merged-read overhead **2.172s → 0.300s**.
+> Consolidated the repeated JSON/CSV parsing and merging behind five loader-specific caches into one memoized data-read layer shared by the game and mods, deduplicating **39,017 JSON reads across 8,378 paths** at the common boundary, replacing reparsed text with typed trees validated across **12,584 cached objects / 990,602 values**, and reducing multiple data loaders **3–10×** and merged-read overhead **2.172s → 0.300s**.
 
 > Reworked separate game/mod hot paths to bypass a **27s** single-threaded texture prefetch stall, eliminate **1.22 GiB of VRAM padding**, and take **~7.4s** out of AshLib startup, with the texture/prefetch work alone moving a sample launch **88.13s → 62.60s**.
 
@@ -96,7 +96,7 @@ Why these stay in the pool:
 Performance win inventory, not all of which belongs on the one-page resume:
 
 - startup development arc: **101s → 13.69s**, **86.4% less time**, **7.38× speedup**
-- stock-mod JSON path: **39,017 calls / 8,378 distinct paths**, with **78.5%** of calls repeating a path already read
+- common JSON path: **39,017 calls / 8,378 distinct paths**, with **78.5%** of calls repeating a path already read
 - resource resolution: **1,618,401 filesystem probes** in one launch, **42.6 per JSON call**, with the first-match walk costing **5.25s** and merged resolution another **4.27s**
 - common-loader memo moved one sample launch **84.49s → 73.54s** and served every mod through the same lower boundary
 - five loader-specific caches left **2.86s** of merged reading in the whole launch, motivating the general cache over the two merged-reader methods every game/mod merge goes through
