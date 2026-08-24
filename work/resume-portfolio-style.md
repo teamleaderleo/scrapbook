@@ -48,11 +48,9 @@ Don't make the prose sound formal because it is a resume. A clear sentence is mo
 
 Avoid em dashes and semicolons in bullets. Commas, parentheses, and an extra word or two usually read better.
 
+Treat modifiers as guilty until useful. If deleting an adjective or adverb leaves the engineering claim unchanged, delete it. `Runtime bytecode rewrites` stands on its own; `targeted runtime bytecode rewrites` usually does not gain anything from `targeted`. Keep modifiers that change the claim, such as `obfuscated`, `third-party`, `single-threaded`, or `read-only` when those distinctions matter.
+
 Avoid adverbs that merely tell the reader the result was correct, reliable, proper, clean, or similar. State what happened instead.
-
-Treat modifiers as guilty until useful. If deleting an adjective or adverb leaves the engineering claim unchanged, delete it. `Targeted runtime bytecode rewrites` should usually be `runtime bytecode rewrites`. Keep modifiers such as `obfuscated`, `third-party`, `single-threaded`, or `read-only` when they materially change what the reader understands.
-
-Dense resume bullets can stay one sentence when the clauses form one causal story. Do not split a stable workload count into a second sentence merely to explain where the number came from. If **39,017 JSON reads / 8,378 paths** are part of what the memoization absorbed, fold them directly into the memoization clause.
 
 Avoid invented labels for ordinary engineering choices. Phrases such as `local-first`, `source-first`, `trust-tiered`, and similar compounds usually make the reader decode a taxonomy before they understand the work.
 
@@ -99,6 +97,8 @@ Don't front-load a batch of PR numbers and make the reader map them back to the 
 
 The clauses don't need equal length. The strongest repair can take more words.
 
+For dense independent-project bullets, prefer one causal sentence when the clauses belong to one accomplishment. A stable workload count should be folded into the mechanism it explains, not broken out as `one run had N calls` in a second sentence. If the count is the workload the optimization absorbs, write the count inside that clause.
+
 ## Numbers should earn space
 
 Use numbers when they make the accomplishment easier to understand or harder to dismiss.
@@ -142,7 +142,7 @@ For Preflight, the working heading is:
 
 > **Preflight — Cross-platform performance launcher and mod analysis toolkit** *(public open source, Starsector ecosystem)*
 
-The heading identifies the product and keeps the game as context. The first bullet owns the thesis: reverse-engineering an obfuscated JVM runtime spanning the base game and 83 third-party mods, the **101s → 13.69s** result, and the reusable memoization, prepared artifacts, and bytecode rewrites built from that investigation.
+The heading identifies the product and keeps the game as context. The first bullet owns the thesis: reverse-engineering a third-party JVM ecosystem spanning independently maintained code, measuring repeated work at scale, the **101s → 13.69s** result, and the product built from that investigation.
 
 Parentheses are useful for compact context such as public status, platforms, domain, or an open PR. They should not become a second sentence of qualifications.
 
@@ -156,13 +156,15 @@ For work against a third-party runtime, distinguish three things when they are a
 - the infrastructure the project itself built
 - the user-facing product that makes the work usable
 
-For Preflight, the 83-mod setup is part of the engineering scope. The startup result came from reverse-engineering obfuscated JVM bytecode across the base game and third-party mods, then tracing repeated work with JFR and instrumentation. Large counters such as **1.6M resource probes** and **39,017 JSON reads across 8,378 paths** are useful when they communicate the scale of work that an optimization later removes.
+For Preflight, the 83-mod setup is part of the engineering scope. The startup result came from reverse-engineering obfuscated JVM bytecode across the game and independently maintained mods, then tracing repeated work with JFR and live instrumentation. Large counters such as **1.6M resource probes** and **36,090 JSON loads** can be useful because they communicate the scale of the runtime being investigated.
 
 Do not inflate one counter into another. The million-scale retained number is resource probes; the retained JSON count is tens of thousands. Use both when useful rather than inventing `millions of JSON loads`.
 
 The cache architecture also matters. Several domain-specific JSON/CSV caches converged on shared tagged-tree/full-data infrastructure, with a general merged-read cache catching misses and later post-startup JSON reads reusing the same prepared artifact. That architectural consolidation is stronger career evidence than listing every cache class separately.
 
 Don't flatten a project like that into `optimized a game` or `built a cache`. Those descriptions erase most of the engineering.
+
+Startup and gameplay are different accomplishments. Do not force campaign-runtime work into a startup bullet or attach an FPS claim when the retained evidence only proves operation counts, allocation removal, lookup behavior, or sampled attribution. A high-frequency gameplay receipt can be strong on its own: millions of calls, hundreds of millions of repeated accesses, mutation-tracked indexing, or allocation removal can demonstrate runtime engineering without inventing a frame-rate delta.
 
 Productization also earns evidence. Cross-platform packaging, a native host, bundled runtimes, recovery, measurement, updates, diagnostics, and ecosystem tools can belong in the candidate pool when they prove the work became a cohesive application instead of stopping at a benchmark or prototype.
 
@@ -174,7 +176,7 @@ For a flagship optimization project, the beginning-to-end development arc can be
 
 Use the strongest retained endpoint the current implementation has demonstrated when that endpoint is the accomplishment. Don't downgrade a development result to a median or replace it with a cleaner but less meaningful sub-experiment just because the latter looks more formal.
 
-The same applies to subsystem history. For Preflight texture preparation, the career-facing arc is **200.77s → 16.21s** and **4.76 GB → about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch is useful evidence about physical layout and can accompany the larger preparation story when space allows.
+The same applies to subsystem history. For Preflight texture preparation, the career-facing arc is **200.77s → 16.21s** and **4.76 GB → about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch is useful evidence about disk order, but it should not replace the larger preparation story.
 
 A development arc still needs traceable endpoints. Current code and retained artifacts come first, development/evidence records reconstruct the path, and README prose is a later projection of those facts.
 
@@ -182,7 +184,7 @@ A development arc still needs traceable endpoints. Current code and retained art
 
 Flagship projects often accumulate more strong receipts than the final resume can hold. Record the large wins before choosing the final three or four bullets.
 
-The inventory is allowed to mix whole-launch milestones, component reductions, memory and storage wins, and product capabilities. It exists so later editors can choose the best evidence instead of rediscovering the project from polished summaries.
+The inventory is allowed to mix whole-launch milestones, component reductions, memory and storage wins, gameplay-runtime operation counts, and product capabilities. It exists so later editors can choose the best evidence instead of rediscovering the project from polished summaries.
 
 Do not confuse analysis with the accomplishment. If a linter found expensive or broken assets across an ecosystem, lead with what it found. Calibration statistics such as clean-directory counts can support credibility in the working record without becoming the headline.
 
@@ -197,7 +199,7 @@ For owned work, repository existence has no career value by itself. A project ea
 - What unusual engineering problem did it solve?
 - What breadth does it add that the rest of the page lacks?
 
-Preflight gets more space because the performance result, investigation method, preparation/storage work, generated-code result, desktop product, and mod-ecosystem tooling each add different evidence.
+Preflight gets more space because the performance result, investigation method, preparation/storage work, generated-code result, gameplay-runtime work, desktop product, and mod-ecosystem tooling each add different evidence.
 
 Other projects should usually compress to one bullet. If a project needs a paragraph of terminology before the accomplishment makes sense, it probably belongs on the site or in an interview rather than on the default resume.
 
