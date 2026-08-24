@@ -15,6 +15,7 @@ Keep these words literal:
 - **landed / published** — the change merged or shipped upstream;
 - **adopted through another landing path** — the diagnosis or repair was taken upstream while another author/tool owns the final merge artifact;
 - **accepted / approved** — substantive external review exists, while merge may remain separate;
+- **positively reviewed** — a submitted review is favorable but does not itself amount to formal approval;
 - **submitted / open** — a public carrier exists and disposition is still live;
 - **owned product / system** — evidence comes from a repository Leo controls;
 - **research** — the mechanism and experiments are real; upstream contribution language waits for an actual upstream boundary crossing.
@@ -59,6 +60,18 @@ Detailed record: [`records/open-source.md`](records/open-source.md)
 Current cluster: three merged fixes across exact shutdown/reuse, typed ACPI boot failures, and sparse VFIO BAR mapping. A deeper QCOW L2 ownership/refcount repair remains open.
 
 Career use: **resume lock** for systems/platform work.
+
+### React
+
+Detailed current record: [`records/react-fragment-ref.md`](records/react-fragment-ref.md)
+
+**Use for:** React/frontend runtime semantics, DOM event identity, ownership before mutation, core-library regression design.
+
+Current state: React PR #37251 is **open with one positive submitted review**. The reviewer wrote “Solid PR. Tests cover the important paths.” GitHub records the review as `COMMENTED`, so do not promote that to approved or accepted.
+
+The repair checks that a Fragment owns a listener before traversing children to remove it. Unknown Fragment removals therefore become no-ops instead of deleting a child-owned listener or dropping the wrong retained Fragment registry entry through a `-1` lookup. The same patch normalizes omitted listener options to the same capture-false identity as `false` and `{capture: false}`.
+
+Career use: **strong open alternate**, especially for React/frontend-runtime roles. It gains substantially if formal approval or merge follows.
 
 ### Vite and Cloudflare Workers SDK
 
@@ -234,6 +247,6 @@ Keep the boundary explicit: owned-fork research and real runtime evidence; upstr
 
 ## How to use this index
 
-For a one-page resume, start with [`resume-candidates.md`](resume-candidates.md). For a live status question, start with [`current-state.md`](current-state.md). For Preflight numbers, start with [`records/preflight-live-performance.md`](records/preflight-live-performance.md). For upstream attribution/status, use [`records/open-source.md`](records/open-source.md) and the live upstream carrier.
+For a one-page resume, start with [`resume-candidates.md`](resume-candidates.md). For a live status question, start with [`current-state.md`](current-state.md). For Preflight numbers, start with [`records/preflight-live-performance.md`](records/preflight-live-performance.md). For React, use [`records/react-fragment-ref.md`](records/react-fragment-ref.md) plus the live upstream carrier. For other upstream attribution/status, use [`records/open-source.md`](records/open-source.md) and the live upstream carrier.
 
 A current source repository should only have to say a fact once. When engineering changes, update the owner and the small number of projections that people actually read; avoid growing another parallel summary merely because a new task needs context.
