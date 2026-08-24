@@ -168,3 +168,47 @@ I compiled the alternate locally with `pdflatex`. It renders as **1 page** on le
 - I like keeping all four upstream repository names visible even after shortening Vite and Cloudflare. A different reviewer could reasonably prefer three denser upstream rows.
 - I would personally keep the existing simple `Preflight | github.com/...` heading. The longer descriptive heading in the candidate pool is defensible, but the first bullet already supplies enough domain and scope context for this one-page version.
 - I am comfortable with the Technical Skills line wrapping to two lines. Compressing technologies solely to force a one-line skills row would optimize typography instead of candidate signal.
+
+## Arbitration follow-up
+
+These are forced choices for the default general-software-engineering one-page resume, using the same marginal-signal-per-line test as the original review.
+
+### 1. Default seventh Preflight bullet
+
+**Choice: A. Texture prefetch + VRAM.**
+
+With the six specified bullets locked, this is the seventh receipt I would add. It contributes two dimensions the locked set does not already show cleanly: finding a cache decision on the wrong side of a single-threaded queue, and removing GPU-memory waste in the upload path. The linter is credible tooling, but its marginal signal is lower once the page already proves investigation, performance work, and ecosystem breadth. Whitespace has real value on this resume, yet this bullet earns the slot when the page genuinely has room without harming scanability.
+
+I would use the compressed form: `Moved texture-cache lookup ahead of a single-threaded prefetch queue that blocked startup for ~27s, then removed 1.22 GiB of VRAM padding from texture uploads.`
+
+### 2. Texture storage tail
+
+**Choice: KEEP.**
+
+`200.77s → 16.21s` proves preparation-time improvement and `4.76 GB → ~1.1 GB` proves storage reduction. The `33.53s → 14.174s` same-corpus result adds a different idea: physical data layout chosen from observed access order. Because the logical texture corpus stays the same, the result isolates locality/order as the useful change. That is strong evidence of reasoning about access patterns and storage layout, rather than a third way of restating the preparation win.
+
+I would keep it compact: `then laid out the same texture corpus in observed startup order, reducing launch 33.53s → 14.174s.`
+
+### 3. JSON validation corpus
+
+**Choice: B. Keep only the ~990k value scale.**
+
+The typed-tree change creates a correctness question: did the new representation preserve the behavior and data fidelity of the installed JSON runtime? `validated across ~990k values` gives the reader a compact answer and makes the representation change harder to dismiss as an untested cache rewrite. The `12,584 cached objects` count adds much less once the recursively compared value scale is present.
+
+I consider the ~990k number useful resume evidence because it supports the credibility of a representation change. The detailed corpus composition and validation method belong in portfolio/interview material.
+
+### 4. Section order
+
+**Choice: A. Selected Open Source → Preflight → IBM.**
+
+For a general SWE screen, recognizable upstream repositories provide immediate third-party validation before the reader reaches the large self-owned project. Preflight then gets the center of gravity and enough space to establish depth. IBM closes the engineering evidence with conventional organizational experience, production workflows, and a security consequence. This sequence gives the reader external validation, owned depth, then enterprise context without making Preflight look like an isolated personal-project claim.
+
+### 5. Desktop bullet
+
+**Survives: signed updates with rollback.**
+
+I would cut durable launch/playtime history, locally traced ship wireframes, and profile management from the default resume sentence. They are legitimate product work, but after the cross-platform architecture, native host boundary, and bundled runtime are already stated, they become feature inventory. Signed updates with rollback adds a stronger engineering dimension: distribution, trust, failure recovery, and lifecycle ownership.
+
+Final proposed sentence:
+
+> Turned the Java performance engine into a self-contained Windows, macOS, and Linux desktop app with a React UI over a Rust/Tauri native host, bundled Java runtime, and signed updates with rollback.
