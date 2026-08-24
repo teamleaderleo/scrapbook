@@ -13,6 +13,7 @@ describe('sitemap', () => {
       'https://teamleaderleo.com/',
       'https://teamleaderleo.com/operator',
       'https://teamleaderleo.com/space',
+      'https://teamleaderleo.com/knowledge',
       'https://teamleaderleo.com/work',
       'https://teamleaderleo.com/gallery',
       'https://teamleaderleo.com/desk',

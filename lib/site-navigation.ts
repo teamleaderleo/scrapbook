@@ -75,6 +75,16 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         sitemap: { changeFrequency: 'weekly', priority: 0.8 },
       },
       {
+        id: 'knowledge',
+        href: '/knowledge',
+        label: 'Knowledge',
+        description: 'Linked technical concepts and learning trails.',
+        group: 'places',
+        surface: 'public',
+        homeShelf: true,
+        sitemap: { changeFrequency: 'weekly', priority: 0.8 },
+      },
+      {
         id: 'work',
         href: '/work',
         label: 'Work',
