@@ -158,3 +158,44 @@ The compiled variant is **1 page**. The page has clean wrapping and spare bottom
 - I like the two-line Preflight heading because it tells a generalist what the project is before the first bullet. The existing one-line repository heading is still clean and defensible.
 - I prefer six Preflight bullets for this page. Five would be even cleaner, while six preserves the Janino story, which I personally find unusually memorable.
 - I would keep skills at the bottom and compact. Their exact language ordering is low-value compared with the content decisions above.
+
+## Arbitration follow-up
+
+These choices assume the same strong general-software-engineering target as the original review and the six locked Preflight receipts in the arbitration prompt.
+
+### 1. Default seventh Preflight bullet: A. texture prefetch + VRAM
+
+**Choose A.** If the page has room for exactly one additional Preflight receipt without sacrificing typography or readability, the texture prefetch/VRAM bullet is the strongest seventh. Its best signal is the diagnosis: the first cache sat behind a single-threaded queue that consumed roughly 27 seconds, so moving the lookup across that boundary changed launch from **88.13s → 62.60s**. The **1.22 GiB of VRAM padding** removal adds a separate resource-efficiency result in the same receipt.
+
+This overlaps the retained startup and texture work, which is why it ranks seventh instead of entering the locked six. It still demonstrates a useful extra capability: finding that an apparently reasonable optimization lives on the wrong side of the actual bottleneck, then fixing both latency and memory waste. The linter is credible ecosystem tooling but carries weaker implementation signal after the six locked bullets. Whitespace is valuable, yet in this forced case a whole bullet fits cleanly, so I would spend it on A.
+
+### 2. Texture storage tail: CUT
+
+**CUT** the same-corpus **33.53s → 14.174s** physical-layout result from the default resume and keep it for portfolio/interview material.
+
+Its marginal signal is good: physical data order followed observed access order, so the candidate reasoned about locality and storage layout after fixing publication cost. After **200.77s → 16.21s** preparation and **4.76 GB → ~1.1 GB** storage, however, the bullet already proves substantial storage/I/O engineering with two immediately legible outcomes. The physical-layout pair becomes a third benchmark inside one receipt and makes the reader reconstruct another stage of the optimization story. It is excellent material for the interview question, “What did you do after preparation was cheap?”
+
+### 3. JSON validation corpus: C. remove both from the resume
+
+**Choose C.** Remove both **12,584 cached objects** and **990,602 values** from the one-page resume.
+
+The validation corpus is useful engineering evidence because replacing reparsed text with typed trees creates a semantic-correctness question, and the corpus shows that the representation was exercised at meaningful scale. On the resume, it functions primarily as verification/provenance. The same bullet already has **39,017 JSON reads across 8,378 paths**, `SpecStore` **19.8s → 9.8s**, and the remaining merged-read seam **2.172s → 0.300s**. Those numbers establish workload scale and consequence. Adding the validation counts increases number competition without materially changing the hiring-manager story. Keep the corpus ready for an interview explanation of how the cache was validated.
+
+### 4. Section order: B. Preflight → IBM → Selected Open Source
+
+**Choose B.** For a general SWE screen, lead with the strongest current owned work, follow immediately with recognizable professional-team experience, then use upstream work as external validation.
+
+Preflight first establishes ownership, technical depth, and product breadth. IBM second answers the conventional hiring question about operating inside an engineering organization and gives the RBAC hotfix and onboarding result visibility before another dense technical section. Selected Open Source third then confirms that the candidate can transfer the same debugging/correctness ability into important codebases they do not own. Order A makes external contribution history define the candidate before the resume reaches the stronger ownership story.
+
+### 5. Desktop bullet: keep durable history and signed updates with rollback
+
+From the four optional product details, I would retain exactly:
+
+- **durable launch/playtime history**
+- **signed updates with rollback**
+
+Durable history adds persistent-state and recovery/product-lifecycle signal. Signed updates with rollback adds distribution, integrity, upgrade, and failure-recovery signal. **Profile management** is ordinary application functionality and costs words without adding much engineering differentiation. **Locally traced ship wireframes** is distinctive and technically interesting, but it requires extra domain decoding and contributes less to a broad SWE screen than durable state and the update path.
+
+Final proposed desktop sentence:
+
+> Turned the Java performance engine into a self-contained Windows, macOS, and Linux desktop app with a React UI over a Rust/Tauri native host, bundled Java runtime, durable launch/playtime history, and signed updates with rollback.
