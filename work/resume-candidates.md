@@ -54,45 +54,49 @@ The capture-option identity fix is useful regression coverage but makes the resu
 
 ### Preflight
 
-Preflight gets the largest allocation. Treat the opening line as the project thesis, then let the remaining bullets act as receipts. The project is a public open-source release candidate built around a changing third-party runtime, not one isolated game tweak or one cache.
+Preflight gets the largest allocation. Let the project heading explain what the thing is, then make the first bullet the strongest result. The project is a public open-source release candidate built around a third-party game and mod runtime, not one isolated game tweak or one cache.
 
-Opening candidate:
+Working heading candidate:
 
-> Built Preflight around a changing third-party runtime spanning Starsector and 83 enabled mods, traced performance and failures across the whole stack, added guarded runtime interventions that fall back as third-party code changes, and turned the work into a public open-source cross-platform desktop app.
+> **Preflight — Cross-platform performance launcher for Starsector and its modding ecosystem** *(public open source)*
+
+The parenthetical can carry public/source status or platform detail later. Avoid spending the first bullet re-explaining the title.
 
 Candidate receipts:
 
-> Brought startup from **101s to 13.69s** on an M5 MacBook Air, with early milestones including a texture and prefetch change that moved the controlled launch from **88.13s to 62.60s** and moving repeatable preparation ahead of launch to roughly **35s**.
+> Reduced startup from **101s to 13.69s** on an 83-mod installation by tracing performance and failures across the game and mod stack, then building optimizations around third-party code that fall back to the original path when the game or a mod changes.
 
-> Reduced repeated Starsector data-loading work, taking variant loads from **3.289s to 0.324s**, weapons from **3.338s to 0.998s**, projectiles from **2.349s to 1.004s**, hulls from **2.653s to 0.754s**, and rules from **0.959s to 0.166s**, while separate mod work removed about **7.1–7.4s** from AshLib startup.
+> Reworked the texture path to bypass a roughly **27s prefetch stall** and eliminate **1.22 GiB of unused texture upload padding**, reduced Starsector's core data loaders by roughly **3–10×**, and removed about **7.1–7.4s** from AshLib startup. The first texture and prefetch composition alone moved the controlled launch from **88.13s to 62.60s**.
 
-> Reduced **Preflight's own texture preparation** from **200.77s to 16.21s** while shrinking the prepared cache from **4.76 GB to about 1.1 GB**, replacing duplicate loose file publication with streaming pack construction and learning the startup texture set and order after the first launch.
+> Reduced **Preflight's own prepared-texture pipeline** from **200.77s and 4.76 GB** to **16.21s and about 1.1 GB**, replacing duplicate loose-file publication with streaming pack construction and learning the startup texture set and order after the first launch.
 
 > Reduced repeated Janino compilation from **18.014s to 2.364s**, then deduplicated **145.96 MiB** of generated class maps into a **1.13 MiB** pack and brought warm replay to **29ms**.
 
 > Built native Windows, macOS, and Linux packages with Tauri 2, Rust, React, and a bundled Java runtime, plus named mod profiles, launch settings, a built-in before/after benchmark, automatic cache maintenance after game exit, recovery flows, signed updates and rollback, diagnostics, and support reporting.
 
-> Built a mod linter that found **1,392 measurable asset and configuration findings across 84 resource roots**, including **771.9 MB** of video memory padding, **687.9 MB** decoded at load, **100.8 MB** on disk, and four broken released configs while leaving third-party files untouched, plus setup analysis for missing dependencies, duplicate mod IDs, and broken references.
+> Built a read-only mod linter that found **1,392 asset and configuration findings across 84 resource roots**, including four broken released configs, progressive textures that decode about **8.75×** slower, oversampled and long-form audio, duplicate and shadowed assets, and large texture-padding costs, plus setup analysis for missing dependencies, duplicate mod IDs, and broken references.
 
 Why these stay in the pool:
 
-- The opening candidate explains the engineering problem and the finished product before any subsystem vocabulary appears.
-- The startup receipt owns the beginning-to-end launch result while preserving two large chronological waypoints from the development history.
-- The data/mod receipt shows that the result came from work across Starsector and independently maintained mods, not only Preflight's own preparation pipeline.
-- The texture receipt is explicitly about Preflight's own preparation machinery. Its development arc is **200.77s / 4.76 GB to 16.21s / about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch remains supporting evidence about physical order, not the preparation headline.
+- The heading carries product category, Starsector scope, mod-ecosystem scope, and cross-platform identity. The first bullet can therefore open directly on **101s to 13.69s**.
+- `Third-party runtime` is useful as a planning description, but the resume sentence is clearer when it says `game and mod stack` and then explains the fallback behavior.
+- The runtime-performance receipt keeps several of the largest wins together: the prefetch stall, NPOT texture-padding removal, core data loaders, and AshLib. The **1.22 GiB** result is a runtime texture optimization, not merely a linter finding.
+- The prepared-texture receipt is explicitly about Preflight's own machinery. Its development arc is **200.77s / 4.76 GB to 16.21s / about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch remains supporting evidence about physical order, not the preparation headline.
+- **16.21s** is the lowest retained complete Compact preparation currently supported by repository evidence. Nearby lower figures measure only a stage, a warm reuse path, or game startup rather than complete fresh Compact preparation.
 - The generated-code result shows a separate time and storage collapse in runtime compilation used by mods.
 - The desktop receipt proves the engine became a cohesive application with packaging, recovery, measurement, update, and support paths on all three desktop operating systems.
-- The linter/setup receipt leads with what the ecosystem analysis found. The 86-directory calibration and clean-mod counts remain credibility evidence, not the accomplishment itself.
+- The linter/setup receipt leads with problems found across the ecosystem rather than calibration statistics. Clean-directory counts remain credibility evidence, not the accomplishment.
 
 Performance win inventory, not all of which belongs on the one-page resume:
 
 - prepared textures plus the prefetch bypass moved the controlled launch from **88.13s to 62.60s**
 - moving repeatable preparation out of launch reached **34.66s / 35.54s**
-- Starsector's visible 0% data-loading plateau was roughly **18–20s**, with component reductions listed above
+- Starsector's visible 0% data-loading plateau was roughly **18–20s**
+- variants moved **3.289s to 0.324s**, weapons **3.338s to 0.998s**, projectiles **2.349s to 1.004s**, hulls **2.653s to 0.754s**, and rules **0.959s to 0.166s**
 - AshLib startup work fell by roughly **7.1–7.4s**
 - the first Janino cache pilot moved the whole launch by **5.37s**, while its direct repeated compilation fell **18.014s to 2.364s**
 - prepared audio removed **19.7 core-seconds** of Vorbis work and a measured **3.46s** main-thread wait
-- the texture path removed about **6.68s** of source-hashing CPU, about **9.65s** of decode and pixel conversion, and **1.22 GiB** of unused upload padding
+- the texture path removed about **6.68s** of source-hashing CPU, about **9.65s** of decode and pixel conversion, and **1.22 GiB** of unused texture upload padding
 - lazy texture carriers avoided a **2.116 GB** compatibility raster allocation, reducing 15,470 possible raster materializations to one
 - exact transformer targeting reduced the class inventory from **2,612 to 38** candidates, a **98.5%** reduction
 - resource reprioritization moved **558.257ms to 4.148ms**, shared path normalization improved **6.88×**, and the common data reader moved **761.978ms to 276.073ms** while avoiding roughly **1.3 GB** of scratch allocation
