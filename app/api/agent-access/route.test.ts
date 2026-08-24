@@ -3,7 +3,7 @@ import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
 import { GET } from './route';
 
 describe('GET /api/agent-access', () => {
-  it('describes transport-neutral read, write, handoff, and GitHub-reference capabilities', async () => {
+  it('describes transport-neutral read, write, handoff, writing-guide, and GitHub-reference capabilities', async () => {
     const response = GET();
     const body = await response.json();
 
@@ -21,6 +21,9 @@ describe('GET /api/agent-access', () => {
         capabilities: '/api/agent-access',
         handoffSchema: '/api/agent-access/handoff-schema',
         contributions: '/api/agent-contributions',
+        repositoryInstructions: 'AGENTS.md',
+        styleGuide: 'STYLE_GUIDE.md',
+        workbenchGuide: 'docs/workbench.md',
       },
       capabilityChecks: expect.arrayContaining([
         expect.stringContaining('read the current canonical repository files'),
@@ -39,7 +42,12 @@ describe('GET /api/agent-access', () => {
           work: '/api/work',
           learningRecords: '/api/learning-records',
         },
-        compatibility: expect.stringContaining('Workbench'),
+        compatibility: expect.stringContaining('docs/workbench.md'),
+        repositoryGuides: expect.arrayContaining([
+          'STYLE_GUIDE.md',
+          'docs/workbench.md',
+          'docs/bot-desk.md',
+        ]),
       },
       transports: {
         githubRepository: {
@@ -99,12 +107,16 @@ describe('GET /api/agent-access', () => {
       },
       links: {
         repository: 'https://github.com/teamleaderleo/scrapbook',
+        styleGuide: expect.stringContaining('STYLE_GUIDE.md'),
+        workbenchGuide: expect.stringContaining('docs/workbench.md'),
         accessGuide: expect.stringContaining('docs/agent-access.md'),
         publicWorkbench: '/desk',
         publicWork: '/work',
       },
     });
 
+    expect(body.next.beforeSubstantiveWriting).toContain('STYLE_GUIDE.md');
+    expect(body.next.beforeSubstantiveWriting).toContain('docs/workbench.md');
     expect(body.transports.databaseOrStorageConnection.rule).toContain(
       'Do not publish Guest Check-ins'
     );

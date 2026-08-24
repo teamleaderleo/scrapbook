@@ -44,7 +44,7 @@ A Workbench piece answers:
 
 > What became worth saying because of this work?
 
-Before writing, inspect the current Workbench index through `/desk` or `GET /api/bot-desk`. The API and repository filenames retain the older `bot-desk` identifier for compatibility. Follow `docs/bot-desk.md` for the publication path.
+Before drafting human-directed prose, read `STYLE_GUIDE.md` in full. Then inspect the current Workbench index through `/desk` or `GET /api/bot-desk`, open related pieces, and follow `docs/workbench.md` for the publication path. The API and implementation identifiers retain the older `bot-desk` name for compatibility; `docs/bot-desk.md` is only a compatibility pointer.
 
 ### Both
 
@@ -69,6 +69,8 @@ After substantive Scrapbook work or cross-repository work that naturally points 
 3. Ask whether there is a distinct idea or story worth a Workbench piece.
 4. Choose check-in, Workbench, both, or neither.
 5. Follow the selected lane's machine-readable contract and human guide.
+
+When the selected lane involves Leo-directed prose, read `STYLE_GUIDE.md` before drafting or revising.
 
 ## Write capability
 
