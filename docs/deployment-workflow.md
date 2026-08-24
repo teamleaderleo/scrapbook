@@ -1,8 +1,8 @@
 # Deployment workflow
 
-Scrapbook treats GitHub CI and Vercel deployment as separate signals.
+Scrapbook treats GitHub CI, browser review, and Vercel deployment as separate signals.
 
-GitHub CI is the required merge signal. It runs lint, typecheck, unit tests, the production build, and Chromium/WebKit regressions. A skipped Vercel preview is an intentional deployment decision, not a code failure.
+Routine hosted CI answers the cheap repository questions: ESLint and Vitest run in the quality lane, while a separate lane performs the production Next.js build. Browser checks are author-side tools for changes whose result depends on a browser. A skipped Vercel preview is an intentional deployment decision, not a code failure.
 
 ## Deployment policy
 
@@ -18,7 +18,7 @@ Use `[preview]` as the conventional spelling. Marker matching is case-insensitiv
 
 ## How the repository enforces the policy
 
-There are three small controls.
+Three controls handle different points in the path.
 
 ### 1. Git branch gate
 
@@ -28,7 +28,7 @@ The root `vercel.json` uses `git.deploymentEnabled` with a deny-by-default rule:
 - `preview/**` is enabled;
 - every other Git branch is disabled.
 
-This gate runs at the Git integration layer, before Vercel creates a routine feature-branch deployment. It is the quota-saving control.
+This runs at the Git integration layer, before Vercel creates a routine branch deployment. It is the quota-saving control.
 
 ### 2. Commit-marker promotion
 
@@ -55,25 +55,17 @@ It exits `0` for a routine branch so Vercel ignores the build, and exits `1` whe
 
 The decision function is pure and covered by unit tests. The ignored-build command is defence in depth; the branch gate does the quota-saving work for ordinary Git pushes.
 
-## When a preview is warranted
+## When a preview earns a deployment
 
-Request a preview when a shareable deployed URL will change the review decision, especially for:
+Ask for a preview when a shareable deployed URL can change the review decision: responsive layout, browser interaction, serverless/runtime behaviour, authentication and cookies, headers and redirects, Vercel routing or caching, or somebody outside the local environment who needs to review the exact deployment.
 
-- visual or responsive inspection;
-- serverless or runtime-environment behaviour;
-- authentication, cookies, headers, redirects, middleware, or edge behaviour;
-- Vercel routing, caching, image optimisation, or deployment configuration;
-- stakeholder review outside the local and CI environments.
+A browser question can still be answered locally. Use the smallest Playwright scope or direct browser inspection that exercises the behaviour. A Vercel preview earns its slot when the deployment environment or shareable URL adds evidence beyond that local check.
 
-Routine prose, tests, repository maintenance, and changes already covered by deterministic browser CI should stay on ordinary branches without a marker.
+Routine prose, tests, repository maintenance, and source-level changes stay on ordinary branches.
 
 ## Practical cadence
 
-1. Run local checks before pushing when local access is available.
-2. Accumulate related changes instead of pushing tiny deployment probes.
-3. Let GitHub CI answer lint, type, unit, build, and browser questions.
-4. Add `[preview]` to one commit when a deployed review URL adds useful evidence, or use a `preview/…` branch for a longer preview session.
-5. Merge accepted work to `main` for the automatic production deployment.
+Run local checks before pushing when local access is available. Accumulate related edits instead of turning every small correction into a remote deployment attempt. Let routine GitHub CI answer lint, unit-test, and production-build questions. Use an explicit browser check when the change needs one. Add `[preview]` to a commit when a deployed URL adds useful evidence, or use a `preview/…` branch for a longer preview session. Merge accepted work to `main` for the production deployment.
 
 ## Quota accounting
 
