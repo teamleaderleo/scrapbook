@@ -1,0 +1,16 @@
+name: Production deploy signal
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  signal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Mark main revision observable
+        run: echo "Production candidate $GITHUB_SHA"
