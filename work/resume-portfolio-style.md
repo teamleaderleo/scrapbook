@@ -24,7 +24,7 @@ Bad direction:
 
 Better direction:
 
-> Kept server restarts from invalidating warm dependency caches by duplicating optimizer state (#23208).
+> Kept server restarts from rebuilding warm dependency caches after optimizer state was duplicated (#23208).
 
 The implementation belongs in the PR if the consequence already carries the bullet.
 
@@ -54,7 +54,7 @@ Avoid invented labels for ordinary engineering choices. Phrases such as `local-f
 
 Avoid filler terms such as `actual`, `real`, `bounded`, and `narrow` in career-facing prose.
 
-Don't write implementation review language when a consequence is available. `Preserved caller-owned lastIndex` is useful in a PR. `Identical URL checks could return different answers across calls` is useful on a resume.
+Don't write implementation review language when a consequence is available. `Preserved caller-owned lastIndex` is useful in a PR. `Identical URL checks returned different answers across calls` is useful on a resume.
 
 ## Prefer concrete nouns and verbs
 
@@ -100,14 +100,25 @@ Use numbers when they make the accomplishment easier to understand or harder to 
 Strong examples include:
 
 - `101s to 13.69s`
-- `33.53s to 14.174s`
+- `200.77s to 16.21s`
+- `4.76 GB to 1.1 GB`
+- `18.014s to 2.364s`
 - `3 hours to 15 minutes`
 - `83 enabled mods`
-- `1.1 GB`
 
-Don't add a second measurement merely because it exists. Pick the number that carries the claim.
+Don't add a second measurement merely because it exists. Pair measurements when the combination is the accomplishment, such as cutting both preparation time and storage.
 
 For Preflight, the resume uses **101s to 13.69s**. Older campaign numbers belong in evidence records, not in the resume bullet.
+
+## Flagship projects can use the development arc
+
+For a flagship optimization project, the beginning-to-end development arc can be more meaningful than a smaller local comparison inside the project.
+
+Use the strongest retained endpoint the current implementation has demonstrated when that endpoint is the accomplishment. Don't downgrade a development result to a median or replace it with a cleaner but less meaningful sub-experiment just because the latter looks more formal.
+
+The same applies to subsystem history. For Preflight texture preparation, the career-facing arc is **200.77s / 4.76 GB to 16.21s / about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch is useful evidence about disk order, but it should not replace the larger preparation story.
+
+A development arc still needs traceable endpoints. Current code and retained artifacts come first, development/evidence records reconstruct the path, and README prose is a later projection of those facts.
 
 ## Independent projects need a different test
 
@@ -118,7 +129,7 @@ For owned work, repository existence has no career value by itself. A project ea
 - What unusual engineering problem did it solve?
 - What breadth does it add that the rest of the page lacks?
 
-Preflight gets more space because the performance result, investigation method, storage result, and desktop product each add different evidence.
+Preflight gets more space because the performance result, investigation method, preparation/storage work, generated-code result, and desktop product each add different evidence.
 
 Other projects should usually compress to one bullet. If a project needs a paragraph of terminology before the accomplishment makes sense, it probably belongs on the site or in an interview rather than on the default resume.
 
