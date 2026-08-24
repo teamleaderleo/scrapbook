@@ -54,17 +54,17 @@ The capture-option identity fix is useful regression coverage but makes the resu
 
 ### Preflight
 
-Preflight gets the largest allocation. Let the project heading explain what the thing is, then make the first bullet the strongest result. The project is a public open-source release candidate built around a third-party game and mod runtime, not one isolated game tweak or one cache.
+Preflight gets the largest allocation. This section has one canonical direction. The heading says what the product is, the first bullet gives the project thesis and strongest result, and the remaining bullets are receipts. Do not replace the thesis with a second heading-driven opening or keep competing first bullets in this file.
 
-Working heading candidate:
+Working heading:
 
-> **Preflight — Cross-platform performance launcher for Starsector and its modding ecosystem** *(public open source)*
+> **Preflight — Performance launcher and mod analysis toolkit for Starsector** *(public open source)*
 
-The parenthetical can carry public/source status or platform detail later. Avoid spending the first bullet re-explaining the title.
+Canonical opening:
+
+> Built Preflight around a third-party runtime spanning Starsector and 83 enabled mods, traced performance and failures across the whole stack, reduced startup from **101s to 13.69s** with optimizations that fall back to the original game or mod path when third-party code changes, and turned the work into a cross-platform desktop app.
 
 Candidate receipts:
-
-> Reduced startup from **101s to 13.69s** on an 83-mod installation by tracing performance and failures across the game and mod stack, then building optimizations around third-party code that fall back to the original path when the game or a mod changes.
 
 > Reworked the texture path to bypass a roughly **27s prefetch stall** and eliminate **1.22 GiB of unused texture upload padding**, reduced Starsector's core data loaders by roughly **3–10×**, and removed about **7.1–7.4s** from AshLib startup. The first texture and prefetch composition alone moved the controlled launch from **88.13s to 62.60s**.
 
@@ -78,8 +78,7 @@ Candidate receipts:
 
 Why these stay in the pool:
 
-- The heading carries product category, Starsector scope, mod-ecosystem scope, and cross-platform identity. The first bullet can therefore open directly on **101s to 13.69s**.
-- `Third-party runtime` is useful as a planning description, but the resume sentence is clearer when it says `game and mod stack` and then explains the fallback behavior.
+- The canonical opening preserves the complete Preflight thesis: a third-party game and mod runtime, investigation across that runtime, interventions that give way when third-party code changes, the **101s to 13.69s** result, and the desktop product built around the work.
 - The runtime-performance receipt keeps several of the largest wins together: the prefetch stall, NPOT texture-padding removal, core data loaders, and AshLib. The **1.22 GiB** result is a runtime texture optimization, not merely a linter finding.
 - The prepared-texture receipt is explicitly about Preflight's own machinery. Its development arc is **200.77s / 4.76 GB to 16.21s / about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch remains supporting evidence about physical order, not the preparation headline.
 - **16.21s** is the lowest retained complete Compact preparation currently supported by repository evidence. Nearby lower figures measure only a stage, a warm reuse path, or game startup rather than complete fresh Compact preparation.
@@ -115,7 +114,7 @@ Status wording matters. The repository is public. The desktop is currently a rel
 
 Current candidate:
 
-> Built and run Stensibly, a hosted coordination system for human and agent work with durable claims, handoffs across sessions, guarded GitHub changes, and repository activity that can continue into email after workers exit, using Cloudflare Workers, Convex, REST, and MCP.
+> Built and run Stensibly, a hosted coordination system for human and agent work with durable claims, handoffs across sessions, GitHub changes protected by exact preconditions, and repository activity that can continue into email after workers exit, using Cloudflare Workers, Convex, REST, and MCP.
 
 ### SmolRunner
 
