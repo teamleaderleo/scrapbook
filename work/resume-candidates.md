@@ -34,7 +34,15 @@ Candidate line:
 
 **Vite — strong alternate.** Two merged lifecycle/correctness fixes: temporary optimizer-analysis bundle cleanup and `closeBundle(error)` propagation after `buildEnd` failure. A repeated-`resolveConfig()` idempotence repair remains open.
 
-The resume does not need all four clusters. Pick the set that adds the most new signal for the target role.
+**React — strong open alternate.** PR #37251 fixes Fragment-ref event-listener registry identity. `FragmentInstance.removeEventListener()` currently mutates child listener state before proving the Fragment registered that listener; an unknown removal can therefore remove child-owned state or corrupt retained Fragment listener bookkeeping. The same repair makes omitted options share the DOM `capture: false` identity of explicit `false`/`{capture: false}`.
+
+The PR is open and has one positive submitted review: “Solid PR. Tests cover the important paths.” GitHub records that review as `COMMENTED`, not `APPROVED`, so use **positively reviewed** rather than approved/accepted/merged. Detailed record: [`records/react-fragment-ref.md`](records/react-fragment-ref.md).
+
+Candidate line if a React/frontend-runtime target benefits from an open reviewed specimen:
+
+> Repaired React Fragment-ref listener ownership/identity so unknown removals become no-ops before child mutation and omitted capture options match DOM listener identity; the open PR received a positive review covering the focused regressions.
+
+The general resume still does not need every cluster. React rises when the role values React/runtime semantics; merged/adopted clusters retain stronger default disposition evidence today.
 
 ### Independent engineering
 
@@ -110,7 +118,13 @@ Preflight dominates. Follow with Cloud Hypervisor, the best FEX research story, 
 
 ### Developer tools / AI runtime
 
-Lead with Vercel AI SDK, then Vite/Cloudflare, Preflight, Stensibly, and Cultist. Cloud Hypervisor stays useful because it proves the reasoning travels outside TypeScript/AI codebases.
+Lead with Vercel AI SDK, then Vite/Cloudflare, Preflight, Stensibly, and Cultist. React becomes a useful alternate when the role touches frontend runtime/state semantics. Cloud Hypervisor stays useful because it proves the reasoning travels outside TypeScript/AI codebases.
+
+### React / frontend runtime
+
+React #37251 is now the cleanest current React-core specimen: listener ownership before destructive mutation, retained Fragment registry identity, DOM capture normalization, and focused tests around new-child propagation and child-owned listener preservation.
+
+Pair it with Vite, selected Cloudflare/AI SDK runtime work, and Glossless/Scrapbook only when product/frontend breadth helps. Keep the PR status explicit until upstream disposition changes.
 
 ### Coding-agent evaluation / environments
 
@@ -130,9 +144,10 @@ Stensibly and SmolRunner lead the owned work. Proofwake/Renderprove/Cultist beco
 
 Keep the distinctions clean:
 
-- merged, adopted, approved, open, and research-only are different states;
+- merged, adopted, approved, positively reviewed, open, and research-only are different states;
 - component measurements do not add up to an end-to-end speedup;
 - the ~101s → 13.69s Preflight headline is a development arc, while 89.00s → 15.53s is the clean same-session A/B campaign;
+- React #37251 currently has a positive `COMMENTED` review, not formal approval or merge;
 - FEX remains owned-fork/runtime research under the upstream project's contribution policy;
 - recruiter outreach is targeting context, not an accomplishment;
 - a repository existing is not a reason to spend a line on it.
