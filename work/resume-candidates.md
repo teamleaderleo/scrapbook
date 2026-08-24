@@ -66,7 +66,7 @@ Canonical opening:
 
 Candidate receipts:
 
-> Consolidated the repeated JSON/CSV parsing and merging behind five loader-specific caches into one memoized data-read layer shared by the game and mods, deduplicating **39,017 JSON reads across 8,378 paths** at the common boundary, replacing reparsed text with typed trees validated across **12,584 cached objects / 990,602 values**, and reducing multiple data loaders **3–10×** and merged-read overhead **2.172s → 0.300s**.
+> Consolidated repeated JSON/CSV parsing and merging behind five loader-specific caches into a memoized data-read layer shared by the game and mods, deduplicating **39,017 JSON reads across 8,378 paths** at the common boundary, replacing reparsed text with typed trees validated across **12,584 cached objects / 990,602 values**, and reduced multiple data loaders **3–10×** and merged-read overhead **2.172s → 0.300s**.
 
 > Reworked separate game/mod hot paths to bypass a **27s** single-threaded texture prefetch stall, eliminate **1.22 GiB of VRAM padding**, and take **~7.4s** out of AshLib startup, with the texture/prefetch work alone moving a sample launch **88.13s → 62.60s**.
 
