@@ -110,6 +110,24 @@ Don't add a second measurement merely because it exists. Pair measurements when 
 
 For Preflight, the resume uses **101s to 13.69s**. Older campaign numbers belong in evidence records, not in the resume bullet.
 
+## Flagship projects need the whole problem
+
+A flagship project can look smaller than it is when the bullet names only the local mechanism. Give enough context to show what the system had to survive and what became usable at the end.
+
+For work against a changing third-party runtime, distinguish three things when they are all important:
+
+- the external system being investigated or repaired
+- the infrastructure the project itself built
+- the user-facing product that makes the work usable
+
+For Preflight, the 83-mod setup is part of the engineering scope. The startup result came from investigating Starsector and the installed mod stack as one runtime, then changing work in vanilla and third-party paths while letting changed code return to its original behavior. Texture preparation, cache publication, measurement tooling, and the desktop application are Preflight's own machinery around that environment.
+
+Don't flatten a project like that into `optimized a game` or `built a cache`. Those descriptions erase most of the engineering.
+
+Productization also earns evidence. Cross-platform packaging, a native host, bundled runtimes, recovery, measurement, updates, diagnostics, and ecosystem tools can belong in the candidate pool when they prove the work became a cohesive application instead of stopping at a benchmark or prototype.
+
+Public status still has to be precise. A public repository supports `public open-source project`. It doesn't turn a release candidate into a shipped binary release. Keep source availability, release status, and package status separate.
+
 ## Flagship projects can use the development arc
 
 For a flagship optimization project, the beginning-to-end development arc can be more meaningful than a smaller local comparison inside the project.
@@ -129,7 +147,7 @@ For owned work, repository existence has no career value by itself. A project ea
 - What unusual engineering problem did it solve?
 - What breadth does it add that the rest of the page lacks?
 
-Preflight gets more space because the performance result, investigation method, preparation/storage work, generated-code result, and desktop product each add different evidence.
+Preflight gets more space because the performance result, investigation method, preparation/storage work, generated-code result, desktop product, and mod-ecosystem tooling each add different evidence.
 
 Other projects should usually compress to one bullet. If a project needs a paragraph of terminology before the accomplishment makes sense, it probably belongs on the site or in an interview rather than on the default resume.
 
