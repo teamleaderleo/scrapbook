@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   getKnowledgeDocument,
+  getKnowledgeHandoff,
   getKnowledgeIndex,
   knowledgeSlugFromSourcePath,
   resolveKnowledgeLink,
@@ -44,6 +45,8 @@ describe('knowledge forest', () => {
         'ai-systems/inference-serving',
       ])
     );
+    expect(index.concepts.map(entry => entry.slug)).not.toContain('HANDOFF');
+    expect(index.concepts.map(entry => entry.slug)).not.toContain('LEARNING');
     expect(index.logs[0]?.date).toBe('2026-08-25');
   });
 
@@ -58,5 +61,14 @@ describe('knowledge forest', () => {
     expect(concept?.html).toContain('/knowledge/storage/transactions');
     expect(trunk?.kind).toBe('trunk');
     expect(trunk?.html).toContain('/knowledge/distributed-systems/idempotency');
+  });
+
+  it('loads the current handoff separately from the durable concept index', async () => {
+    const handoff = await getKnowledgeHandoff();
+
+    expect(handoff.title).toBe('Current handoff');
+    expect(handoff.updated).toBe('2026-08-25');
+    expect(handoff.html).toContain('/knowledge/computation/cancellation');
+    expect(handoff.html).toContain('/knowledge/distributed-systems/idempotency');
   });
 });

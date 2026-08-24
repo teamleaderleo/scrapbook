@@ -4,11 +4,30 @@ This directory is the canonical store for Scrapbook's linked technical knowledge
 
 The website is a reader over these files. Git is the history. Markdown stays useful on its own.
 
+## Getting started
+
+Open [`HANDOFF.md`](HANDOFF.md) first when you do not already know what you want to explore. It is deliberately disposable current context: one obvious starting walk, a few pressure questions, and nearby frontiers. Git history keeps old handoffs.
+
+[`LEARNING.md`](LEARNING.md) records the current learning-method defaults and the evidence behind them. It is guidance, not a ritual. We can revise it as actual use or better research changes what works.
+
+A normal day can be very light:
+
+1. read the current handoff;
+2. read one or two linked nodes at full reading speed;
+3. retrieve or explain something without looking, usually by voice;
+4. follow the connection that becomes interesting;
+5. strengthen only the Markdown whose understanding actually changed;
+6. update today's log and rewrite the handoff when there is a useful next move.
+
+Reading is the bandwidth path. Voice is useful for retrieval, explanation, interruption, and pressure. Typing is reserved for cases where exact production itself is worth practicing.
+
 ## Layout
 
 - Each top-level subject directory is a broad trunk.
 - `README.md` inside a trunk explains the territory and points at useful starting nodes.
 - Ordinary concept files are small enough to revise often. They can begin incomplete.
+- `HANDOFF.md` is the current cold-start context and is excluded from the concept count.
+- `LEARNING.md` is the current method guide and is excluded from the concept count.
 - `log/YYYY-MM-DD.md` records material learning activity for the day.
 - Relative Markdown links are the graph. Prefer a sentence that explains the relationship over a naked backlink.
 
@@ -78,7 +97,9 @@ linked: 9
 
 `new` counts concept nodes first created that day. `strengthened` counts existing nodes materially improved. `linked` counts meaningful new cross-concept relationships, not every Markdown link character.
 
-The body records what changed and any frontier that became interesting. The log is a memory aid, not a productivity scoreboard.
+The body records what changed, conversations or work that mattered, and any frontier worth returning to. The log is a memory aid, not a productivity scoreboard. Routine reading can happen without incrementing anything.
+
+At the end of a material session, rewrite [`HANDOFF.md`](HANDOFF.md) when tomorrow's best starting point has changed.
 
 ## Link convention
 
