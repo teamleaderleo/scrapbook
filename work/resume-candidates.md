@@ -54,7 +54,7 @@ The capture-option identity fix is useful regression coverage but makes the resu
 
 ### Preflight
 
-Preflight gets the largest allocation. Keep the thesis direction: the project is about reverse-engineering and improving a third-party JVM ecosystem spanning independently maintained code, then turning that work into a cohesive application. Starsector is domain context, not the lead.
+Preflight gets the largest allocation. Use the expert-reader model from the style guide: assume the reader understands JVMs, profiling, caching, storage, runtime instrumentation, and failure modes, but knows nothing about Starsector. Explain the ecosystem only enough to establish scope.
 
 Working heading:
 
@@ -62,33 +62,32 @@ Working heading:
 
 Canonical opening:
 
-> Reverse-engineered an obfuscated third-party JVM ecosystem spanning Starsector and 83 independently maintained mods, using JFR, bytecode analysis, and live instrumentation to trace **1.6M resource probes** and **36,090 JSON loads**, then built Preflight to eliminate repeated work across the stack and bring startup **101s → 13.69s (86.4% less time, 7.38× speedup)**.
+> Reduced startup **101s → 13.69s (86.4% less time, 7.38× speedup)** by reverse-engineering an obfuscated JVM ecosystem spanning 83 independently maintained mods, with JFR, bytecode analysis, and live instrumentation exposing **1.6M resource probes** and **36,090 JSON loads** across the stack.
 
 Candidate receipts:
 
-> Consolidated repeated JSON and CSV work through shared tagged-tree and full-data caches used across variants, weapons, projectiles, hulls, rules, merged reads, and post-startup JSON, reducing multiple Starsector data loaders **3–10×** and serving **99.73%** of eligible first post-startup JSON reads from prepared data.
+> Consolidated repeated JSON and CSV parsing and merging into shared tagged-tree and full-data caches reused across game data loaders and post-startup reads, reducing multiple loaders **3–10×**, merged-read overhead **2.172s → 0.300s**, and serving **99.73%** of eligible first post-startup JSON reads from prepared data.
 
-> Reworked the texture path to bypass a **27s prefetch stall**, remove **1.22 GiB of VRAM padding**, and remove **~7.4s** from AshLib startup. The first texture and prefetch composition alone moved a sample launch **88.13s → 62.60s**.
+> Reworked hot paths across game and mod code to bypass a **27s** single-threaded texture prefetch stall, remove **1.22 GiB of VRAM padding**, and remove **~7.4s** from AshLib startup, with one sample launch moving **88.13s → 62.60s**.
 
-> Reworked **Preflight's texture-cache preparation 200.77s → 16.21s** and **4.76 GB → ~1.1 GB**, replacing duplicate loose-file publication with streaming pack construction and learning the startup texture set and order after the first launch.
+> Reworked **Preflight's texture-cache preparation 200.77s → 16.21s** and **4.76 GB → ~1.1 GB** by streaming textures directly into final packs and learning the startup texture set and order after the first launch.
 
-> Reduced repeated Janino compilation **18.014s → 2.364s**, then deduplicated **145.96 MiB → 1.13 MiB** of generated class maps and brought warm replay to **29ms**.
+> Cached generated mod bytecode, reducing Janino compilation **18.014s → 2.364s**, generated class-map storage **145.96 MiB → 1.13 MiB**, and warm replay to **29ms**.
 
-> Built native Windows, macOS, and Linux packages with Tauri, Rust, React, and a bundled Java runtime, plus named mod profiles, launch settings, a built-in before/after benchmark, automatic cache maintenance after game exit, recovery flows, signed updates and rollback, diagnostics, and support reporting.
+> Built a native Windows, macOS, and Linux desktop product in Rust, React, and Tauri with a bundled Java runtime, named mod profiles, launch settings, a built-in before/after benchmark, automatic cache maintenance, recovery flows, signed updates and rollback, diagnostics, and support reporting.
 
-> Built a read-only mod linter that found **1,392 asset and configuration findings across 84 resource roots**, including four broken released configs, progressive textures that decode **8.75×** slower, oversampled and long-form audio, duplicate and shadowed assets, and large texture-padding costs, plus setup analysis for missing dependencies, duplicate mod IDs, and broken references.
+> Extended the same analysis into a read-only mod linter and setup analyzer that, across **84 resource roots**, found **1,392 asset and configuration findings**, four broken released configs, progressive textures that decode **8.75×** slower, and dependency/reference failures without modifying third-party files.
 
 Why these stay in the pool:
 
-- The canonical opening leads with the difficult engineering: obfuscated JVM bytecode across independently maintained game/mod code, direct measurement at large scale, and the **101s → 13.69s** result.
-- The **1.6M resource probes** and **36,090 JSON loads** are separate retained measurements from the same 83-mod development environment. They show the scale of the repeated work without implying one counter caused the whole speedup.
-- The data-cache receipt preserves the architectural step that got lost in earlier drafts: domain-specific caches converged on shared tagged-tree/full-data infrastructure, and the same prepared artifact later served post-startup JSON reads.
-- The runtime-performance receipt keeps the prefetch stall, NPOT VRAM removal, and AshLib win together. Use **~7.4s** rather than a 7.1–7.4s range in resume prose.
-- The texture-cache receipt is explicitly about Preflight's own machinery. Keep each before/after pair adjacent: **200.77s → 16.21s** and **4.76 GB → ~1.1 GB**.
+- The opening now leads with the flagship result, then immediately proves the difficulty: obfuscated JVM bytecode, independently maintained third-party code, JFR/bytecode/live instrumentation, and million-scale lookup behavior.
+- The cache receipt shows architectural consolidation rather than a pile of one-off caches. Several JSON/CSV domains converge on shared tagged-tree/full-data infrastructure, and the same prepared artifact later serves post-startup reads.
+- The runtime receipt shows performance work below application abstractions: a serialized prefetch bottleneck, GPU-memory waste, and a large third-party mod callback path.
+- The texture-cache receipt is explicitly Preflight's own storage/preparation engineering. Keep the pairs adjacent: **200.77s → 16.21s** and **4.76 GB → ~1.1 GB**.
 - **16.21s** is the lowest retained complete Compact preparation currently supported by repository evidence. Nearby lower figures measure only a stage, a warm reuse path, or game startup rather than complete fresh Compact preparation.
-- The generated-code result shows a separate time and storage collapse in runtime compilation used by mods.
-- The desktop receipt proves the engine became a cohesive application with packaging, recovery, measurement, update, and support paths on all three desktop operating systems.
-- The linter/setup receipt leads with problems found across the ecosystem rather than calibration statistics. Clean-directory counts remain credibility evidence, not the accomplishment.
+- The generated-bytecode receipt adds compiler/runtime work and another clean time/storage collapse.
+- The desktop receipt proves end-to-end ownership: the performance engine became a native cross-platform product with packaging, lifecycle, recovery, measurement, updates, diagnostics, and support.
+- The linter/setup receipt shows the investigation generalizing into tooling for the wider ecosystem rather than only accelerating one installation.
 
 Performance win inventory, not all of which belongs on the one-page resume:
 
