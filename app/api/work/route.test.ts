@@ -11,14 +11,15 @@ describe('GET /api/work', () => {
     expect(body).toMatchObject({
       version: 1,
       source: 'repository',
-      updatedAt: '2026-08-15',
-      recordCount: 5,
+      updatedAt: '2026-08-24',
+      recordCount: 6,
     });
     expect(body.records.map((record: { id: string }) => record.id)).toEqual([
       'preflight',
       'open-source',
       'stensibly',
       'smolrunner',
+      'cultist',
       'fieldwork',
     ]);
     expect(body.records[0].evidence[0].href).toBe(
