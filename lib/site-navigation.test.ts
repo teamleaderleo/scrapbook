@@ -17,6 +17,7 @@ describe('site navigation registry', () => {
         '/',
         '/operator',
         '/space',
+        '/knowledge',
         '/work',
         '/time',
         '/gallery',
@@ -38,10 +39,11 @@ describe('site navigation registry', () => {
     );
   });
 
-  it('keeps Operator, tools, the evidence journal, and labs out of the primary row', () => {
+  it('keeps Operator, Knowledge, tools, the evidence journal, and labs out of the primary row', () => {
     const primaryIds = primaryNavigationItems.map(item => item.id);
     expect(primaryIds).toEqual(['home', 'space', 'work', 'gallery', 'desk']);
     expect(primaryIds).not.toContain('operator');
+    expect(primaryIds).not.toContain('knowledge');
     expect(primaryIds).not.toContain('journal');
     expect(primaryIds).not.toContain('proxy');
     expect(primaryIds).not.toContain('snow-globe');
@@ -59,6 +61,9 @@ describe('site navigation registry', () => {
     expect(siteNavigationItems.find(item => item.id === 'space')?.surface).toBe(
       'public'
     );
+    expect(
+      siteNavigationItems.find(item => item.id === 'knowledge')?.surface
+    ).toBe('public');
     expect(siteNavigationItems.find(item => item.id === 'work')?.surface).toBe(
       'public'
     );
@@ -79,6 +84,7 @@ describe('site navigation registry', () => {
       'home',
       'operator',
       'space',
+      'knowledge',
       'work',
       'gallery',
       'desk',
@@ -88,6 +94,7 @@ describe('site navigation registry', () => {
     expect(nonPublicNavigationItems.map(item => item.id)).toEqual(['proxy']);
     expect(homeRoomNavigationItems.map(item => item.id)).toEqual([
       'space',
+      'knowledge',
       'work',
       'gallery',
       'desk',
@@ -99,13 +106,18 @@ describe('site navigation registry', () => {
   it('matches nested routes and trailing slashes', () => {
     const operator = siteNavigationItems.find(item => item.id === 'operator');
     const space = siteNavigationItems.find(item => item.id === 'space');
+    const knowledge = siteNavigationItems.find(item => item.id === 'knowledge');
     const desk = siteNavigationItems.find(item => item.id === 'desk');
     expect(operator).toBeDefined();
     expect(space).toBeDefined();
+    expect(knowledge).toBeDefined();
     expect(desk).toBeDefined();
     expect(isNavigationItemActive('/operator/', operator!)).toBe(true);
     expect(isNavigationItemActive('/space/review', space!)).toBe(true);
     expect(isNavigationItemActive('/space/edit/example/', space!)).toBe(true);
+    expect(
+      isNavigationItemActive('/knowledge/storage/mvcc/', knowledge!)
+    ).toBe(true);
     expect(isNavigationItemActive('/desk/example/', desk!)).toBe(true);
   });
 
@@ -122,6 +134,10 @@ describe('site navigation registry', () => {
   it('returns the active place for registered routes', () => {
     expect(getActiveNavigationItem('/operator')?.id).toBe('operator');
     expect(getActiveNavigationItem('/space/review')?.id).toBe('space');
+    expect(getActiveNavigationItem('/knowledge')?.id).toBe('knowledge');
+    expect(getActiveNavigationItem('/knowledge/storage/mvcc')?.id).toBe(
+      'knowledge'
+    );
     expect(getActiveNavigationItem('/work')?.id).toBe('work');
     expect(getActiveNavigationItem('/gallery')?.id).toBe('gallery');
     expect(getActiveNavigationItem('/desk')?.id).toBe('desk');
