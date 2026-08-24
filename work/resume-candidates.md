@@ -54,28 +54,48 @@ The capture-option identity fix is useful regression coverage but makes the resu
 
 ### Preflight
 
-Preflight gets the largest allocation. It is a public open-source release candidate, not just a performance experiment. The resume should show the whole system: the startup result, the changing game/mod runtime it had to survive, Preflight's own preparation machinery, and the cross-platform product built around the engine. Keep a richer candidate pool until the one-page layout forces cuts.
+Preflight gets the largest allocation. Treat the opening line as the project thesis, then let the remaining bullets act as receipts. The project is a public open-source release candidate built around a changing third-party runtime, not one isolated game tweak or one cache.
 
-> Built Preflight, a cross-platform Tauri desktop app and Java agent that cut startup for Starsector with 83 enabled mods from **101s to 13.69s** on an M5 MacBook Air, profiling the game and mod stack as one runtime instead of optimizing one isolated plugin.
+Opening candidate:
 
-> Reverse-engineered and instrumented the game and 83-mod stack, finding a roughly **27s texture prefetch wait**, **1.6 million filesystem probes** during resource lookup, an **18–20s data-loading plateau**, and expensive AshLib, GraphicsLib, MagicLib, and Janino paths, then tied each runtime shortcut to the exact game or mod code it targets so updates fall back to the original path.
+> Built Preflight around a changing third-party runtime spanning Starsector and 83 enabled mods, traced performance and failures across the whole stack, added guarded runtime interventions that fall back as third-party code changes, and turned the work into a public open-source cross-platform desktop app.
 
-> Cut texture preparation from **200.77s to 16.21s** and storage from **4.76 GB to about 1.1 GB** by eliminating duplicate loose files, packing textures as they're prepared, and learning the startup texture set and order after the first launch.
+Candidate receipts:
 
-> Cached generated Java output for mod scripts, cutting Janino work from **18.014s to 2.364s**, then deduplicated **145.96 MiB** of repeated class maps into a **1.13 MiB** pack with **29ms** warm replay.
+> Brought startup from **101s to 13.69s** on an M5 MacBook Air, with early milestones including a texture and prefetch change that moved the controlled launch from **88.13s to 62.60s** and moving repeatable preparation ahead of launch to roughly **35s**.
 
-> Built native Windows, macOS, and Linux packages with Tauri 2, Rust, React, and a bundled Java runtime, plus named mod profiles, launch settings, built-in before/after benchmarks, automatic cache maintenance after game exit, recovery flows, signed updates and rollback, privacy-safe diagnostics, and support reporting.
+> Reduced repeated Starsector data-loading work, taking variant loads from **3.289s to 0.324s**, weapons from **3.338s to 0.998s**, projectiles from **2.349s to 1.004s**, hulls from **2.653s to 0.754s**, and rules from **0.959s to 0.166s**, while separate mod work removed about **7.1–7.4s** from AshLib startup.
 
-> Turned the profiling work into a read-only mod linter calibrated across **86 mod directories**, with a median of **0 findings** and **44/86 completely clean**, surfacing measured decode, video-memory, disk, and configuration problems without changing third-party files, plus setup analysis for missing dependencies, duplicate mod IDs, and broken references.
+> Reduced **Preflight's own texture preparation** from **200.77s to 16.21s** while shrinking the prepared cache from **4.76 GB to about 1.1 GB**, replacing duplicate loose file publication with streaming pack construction and learning the startup texture set and order after the first launch.
+
+> Reduced repeated Janino compilation from **18.014s to 2.364s**, then deduplicated **145.96 MiB** of generated class maps into a **1.13 MiB** pack and brought warm replay to **29ms**.
+
+> Built native Windows, macOS, and Linux packages with Tauri 2, Rust, React, and a bundled Java runtime, plus named mod profiles, launch settings, a built-in before/after benchmark, automatic cache maintenance after game exit, recovery flows, signed updates and rollback, diagnostics, and support reporting.
+
+> Built a mod linter that found **1,392 measurable asset and configuration findings across 84 resource roots**, including **771.9 MB** of video memory padding, **687.9 MB** decoded at load, **100.8 MB** on disk, and four broken released configs while leaving third-party files untouched, plus setup analysis for missing dependencies, duplicate mod IDs, and broken references.
 
 Why these stay in the pool:
 
-- The first bullet sells the whole-launch result and says immediately that this is a cross-platform application around a heavily modded runtime, not a one-off game tweak.
-- The investigation bullet owns the third-party integration story. Much of the startup win comes from understanding and repairing repeated work in Starsector and the installed mod ecosystem, while each runtime change is tied to the code it was reviewed against and gives way to the original path when that code changes.
-- The texture bullet owns Preflight's preparation pipeline. The development arc is **200.77s / 4.76 GB to 16.21s / about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch is useful supporting evidence, but it is not the headline for texture preparation.
-- The generated-code result carries its own large time and storage collapse and shows that the optimization work reached mod runtime compilation, not just assets.
-- The desktop bullet proves the engine became a cohesive application with packaging, recovery, measurement, update, and support paths on all three desktop operating systems.
-- The linter/setup bullet shows the investigation feeding back into the wider mod ecosystem rather than only accelerating one local installation.
+- The opening candidate explains the engineering problem and the finished product before any subsystem vocabulary appears.
+- The startup receipt owns the beginning-to-end launch result while preserving two large chronological waypoints from the development history.
+- The data/mod receipt shows that the result came from work across Starsector and independently maintained mods, not only Preflight's own preparation pipeline.
+- The texture receipt is explicitly about Preflight's own preparation machinery. Its development arc is **200.77s / 4.76 GB to 16.21s / about 1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch remains supporting evidence about physical order, not the preparation headline.
+- The generated-code result shows a separate time and storage collapse in runtime compilation used by mods.
+- The desktop receipt proves the engine became a cohesive application with packaging, recovery, measurement, update, and support paths on all three desktop operating systems.
+- The linter/setup receipt leads with what the ecosystem analysis found. The 86-directory calibration and clean-mod counts remain credibility evidence, not the accomplishment itself.
+
+Performance win inventory, not all of which belongs on the one-page resume:
+
+- prepared textures plus the prefetch bypass moved the controlled launch from **88.13s to 62.60s**
+- moving repeatable preparation out of launch reached **34.66s / 35.54s**
+- Starsector's visible 0% data-loading plateau was roughly **18–20s**, with component reductions listed above
+- AshLib startup work fell by roughly **7.1–7.4s**
+- the first Janino cache pilot moved the whole launch by **5.37s**, while its direct repeated compilation fell **18.014s to 2.364s**
+- prepared audio removed **19.7 core-seconds** of Vorbis work and a measured **3.46s** main-thread wait
+- the texture path removed about **6.68s** of source-hashing CPU, about **9.65s** of decode and pixel conversion, and **1.22 GiB** of unused upload padding
+- lazy texture carriers avoided a **2.116 GB** compatibility raster allocation, reducing 15,470 possible raster materializations to one
+- exact transformer targeting reduced the class inventory from **2,612 to 38** candidates, a **98.5%** reduction
+- resource reprioritization moved **558.257ms to 4.148ms**, shared path normalization improved **6.88×**, and the common data reader moved **761.978ms to 276.073ms** while avoiding roughly **1.3 GB** of scratch allocation
 
 Source hierarchy for future Preflight edits:
 
@@ -117,7 +137,7 @@ Current candidates:
 
 > Built and refactored Java end to end tests for IBM Cloud AI/ML and data workflows across Kafka, Spark, Snowflake, hybrid cloud, and on premises environments, and identified a critical RBAC flaw that required a three team hotfix.
 
-> Cut developer onboarding from **3 hours to 15 minutes** by consolidating obsolete SDK and runtime setup.
+> Reduced developer onboarding from **3 hours to 15 minutes** by consolidating obsolete SDK and runtime setup.
 
 The older resume also claimed adoption of the test suite across teams. Keep that available if it is worth the extra words when the page is assembled.
 
