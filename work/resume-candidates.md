@@ -54,7 +54,7 @@ The capture-option identity fix is useful regression coverage but makes the resu
 
 ### Preflight
 
-Preflight gets the largest allocation. Keep the thesis direction: the project is about understanding and improving a third-party runtime spanning independently maintained code, then turning that work into a cohesive application. Starsector is domain context, not the lead.
+Preflight gets the largest allocation. Keep the thesis direction: the project is about reverse-engineering and improving a third-party JVM ecosystem spanning independently maintained code, then turning that work into a cohesive application. Starsector is domain context, not the lead.
 
 Working heading:
 
@@ -62,27 +62,29 @@ Working heading:
 
 Canonical opening:
 
-> Built Preflight around a third-party runtime spanning 83 independently maintained mods, traced performance and failures across the whole stack, reduced startup **101s → 13.69s (86.4% less time, 7.38× speedup)** with runtime interventions that fall back when external code changes, and turned the system into a polished cross-platform desktop app.
+> Reverse-engineered an obfuscated third-party JVM ecosystem spanning Starsector and 83 independently maintained mods, using JFR, bytecode analysis, and live instrumentation to trace **1.6M resource probes** and **36,090 JSON loads**, then built Preflight to eliminate repeated work across the stack and bring startup **101s → 13.69s (86.4% less time, 7.38× speedup)**.
 
 Candidate receipts:
 
-> Reworked the texture path to bypass a **27s prefetch stall** and remove **1.22 GiB of VRAM padding**, reduced multiple Starsector data loaders by **3–10×**, and removed **7.1–7.4s** from AshLib startup. The first texture and prefetch composition alone moved the controlled launch **88.13s → 62.60s**.
+> Consolidated repeated JSON and CSV work through shared tagged-tree and full-data caches used across variants, weapons, projectiles, hulls, rules, merged reads, and post-startup JSON, reducing multiple Starsector data loaders **3–10×** and serving **99.73%** of eligible first post-startup JSON reads from prepared data.
 
-> Reduced **Preflight's prepared-texture pipeline 200.77s → 16.21s** and **4.76 GB → ~1.1 GB**, replacing duplicate loose-file publication with streaming pack construction and learning the startup texture set and order after the first launch.
+> Reworked the texture path to bypass a **27s prefetch stall**, remove **1.22 GiB of VRAM padding**, and remove **~7.4s** from AshLib startup. The first texture and prefetch composition alone moved a sample launch **88.13s → 62.60s**.
+
+> Reworked **Preflight's texture-cache preparation 200.77s → 16.21s** and **4.76 GB → ~1.1 GB**, replacing duplicate loose-file publication with streaming pack construction and learning the startup texture set and order after the first launch.
 
 > Reduced repeated Janino compilation **18.014s → 2.364s**, then deduplicated **145.96 MiB → 1.13 MiB** of generated class maps and brought warm replay to **29ms**.
 
-> Built native Windows, macOS, and Linux packages with Tauri 2, Rust, React, and a bundled Java runtime, plus named mod profiles, launch settings, a built-in before/after benchmark, automatic cache maintenance after game exit, recovery flows, signed updates and rollback, diagnostics, and support reporting.
+> Built native Windows, macOS, and Linux packages with Tauri, Rust, React, and a bundled Java runtime, plus named mod profiles, launch settings, a built-in before/after benchmark, automatic cache maintenance after game exit, recovery flows, signed updates and rollback, diagnostics, and support reporting.
 
 > Built a read-only mod linter that found **1,392 asset and configuration findings across 84 resource roots**, including four broken released configs, progressive textures that decode **8.75×** slower, oversampled and long-form audio, duplicate and shadowed assets, and large texture-padding costs, plus setup analysis for missing dependencies, duplicate mod IDs, and broken references.
 
 Why these stay in the pool:
 
-- The canonical opening keeps the thesis first: one third-party runtime spanning independently maintained code, stack-wide investigation, the **101s → 13.69s** result, fallback when external code changes, and the desktop product built around the work.
-- The headline result deserves adornment: **101s → 13.69s** is **86.4% less time** and a **7.38× speedup**.
-- Starsector belongs in the heading parenthetical and technical receipts where it clarifies the work. It should not displace the broader systems story at the start.
-- The runtime-performance receipt keeps several of the largest wins together: the prefetch stall, NPOT texture-padding removal, multiple **3–10×** data-loader reductions, and AshLib. The **1.22 GiB** result is VRAM removed from the runtime texture path, not merely a linter finding.
-- The prepared-texture receipt is explicitly about Preflight's own machinery. Keep each before/after pair adjacent: **200.77s → 16.21s** and **4.76 GB → ~1.1 GB**. The 33.53s alphabetical-pack launch versus 14.174s learned-order launch remains supporting evidence about physical order, not the preparation headline.
+- The canonical opening leads with the difficult engineering: obfuscated JVM bytecode across independently maintained game/mod code, direct measurement at large scale, and the **101s → 13.69s** result.
+- The **1.6M resource probes** and **36,090 JSON loads** are separate retained measurements from the same 83-mod development environment. They show the scale of the repeated work without implying one counter caused the whole speedup.
+- The data-cache receipt preserves the architectural step that got lost in earlier drafts: domain-specific caches converged on shared tagged-tree/full-data infrastructure, and the same prepared artifact later served post-startup JSON reads.
+- The runtime-performance receipt keeps the prefetch stall, NPOT VRAM removal, and AshLib win together. Use **~7.4s** rather than a 7.1–7.4s range in resume prose.
+- The texture-cache receipt is explicitly about Preflight's own machinery. Keep each before/after pair adjacent: **200.77s → 16.21s** and **4.76 GB → ~1.1 GB**.
 - **16.21s** is the lowest retained complete Compact preparation currently supported by repository evidence. Nearby lower figures measure only a stage, a warm reuse path, or game startup rather than complete fresh Compact preparation.
 - The generated-code result shows a separate time and storage collapse in runtime compilation used by mods.
 - The desktop receipt proves the engine became a cohesive application with packaging, recovery, measurement, update, and support paths on all three desktop operating systems.
@@ -90,11 +92,14 @@ Why these stay in the pool:
 
 Performance win inventory, not all of which belongs on the one-page resume:
 
-- prepared textures plus the prefetch bypass moved the controlled launch **88.13s → 62.60s**
+- prepared textures plus the prefetch bypass moved a sample launch **88.13s → 62.60s**
 - moving repeatable preparation out of launch reached **34.66s / 35.54s**
 - Starsector's visible 0% data-loading plateau was **18–20s**
 - variants moved **3.289s → 0.324s**, weapons **3.338s → 0.998s**, projectiles **2.349s → 1.004s**, hulls **2.653s → 0.754s**, and rules **0.959s → 0.166s**
-- AshLib startup work fell **7.1–7.4s**
+- AshLib startup work fell by about **7.4s**
+- a live session made **36,090 `loadJSON` calls**, including **26,590** in-process memo hits, and the shared full-data artifact later served **99.73%** of eligible first post-startup JSON reads
+- the general merged-read cache reduced its seam **2.172s → 0.300s** and reused the same tagged-tree representation beneath the domain-specific caches
+- a resource-resolution experiment exercised **1.6M probes**, exposing both the scale of lookup work and subtle filesystem-equivalence failures
 - the first Janino cache pilot moved the whole launch by **5.37s**, while its direct repeated compilation fell **18.014s → 2.364s**
 - prepared audio removed **19.7 core-seconds** of Vorbis work and a measured **3.46s** main-thread wait
 - the texture path removed **6.68s** of source-hashing CPU, **9.65s** of decode and pixel conversion, and **1.22 GiB of VRAM padding**
