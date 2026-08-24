@@ -69,7 +69,7 @@ The repository also contains:
 
 ## Retired surfaces
 
-The old project/block/tag dashboard, legacy `/blog` publication runtime, decorative login route, standalone resume, public Claude endpoint, WebSocket presence server, and disconnected S3/image-processing prototypes are retired.
+The old project/block/tag dashboard, legacy `/blog` publication runtime, decorative login route, standalone resume, public Claude endpoint, WebSocket presence server, disconnected S3/image-processing prototypes, and old ThreeCarousel demo are retired.
 
 Their history remains available through Git and [`docs/deprecation-ledger.md`](docs/deprecation-ledger.md). Obsolete implementations are not kept as commented source files.
 
@@ -77,9 +77,9 @@ Their history remains available through Git and [`docs/deprecation-ledger.md`](d
 
 - Next.js 16 App Router, React 19, and TypeScript;
 - Tailwind CSS, Radix UI, Framer Motion, and Lucide;
-- Supabase/Postgres with Drizzle ORM;
-- React Three Fiber, Drei, and Three.js;
-- Tiptap, Monaco, Shiki, Markdown, and MDX tooling;
+- Supabase/Postgres with checked-in SQL migrations;
+- React Three Fiber and Three.js;
+- Tiptap, Monaco, Shiki, and Markdown tooling;
 - Vitest, Playwright, ESLint, and Prettier.
 
 ## Local development
@@ -106,7 +106,6 @@ pnpm prettier:check
 pnpm build
 pnpm test:e2e
 pnpm test:e2e:full
-pnpm test:e2e:cross-browser
 ```
 
 The public homepage can render without database credentials or a GitHub token. Authentication, saved Space content, and proxy reporting require their corresponding environment variables and services.
@@ -115,7 +114,7 @@ The public homepage can render without database credentials or a GitHub token. A
 
 Ordinary hosted CI keeps the routine gate small: ESLint and Vitest run in the quality lane while a separate lane performs the production Next.js build. The build and lint caches are restored across Actions runs so repeated verification spends less time redoing unchanged work.
 
-Playwright remains an explicit author-side tool for browser-sensitive changes. `pnpm test:e2e` runs the focused Chromium smoke path, `pnpm test:e2e:full` runs the complete Chromium suite, and `pnpm test:e2e:cross-browser` exercises the configured browser matrix. Run the browser scope the change deserves and retain targeted visual evidence when a UI decision needs a durable review artifact.
+Playwright remains an explicit author-side tool for browser-sensitive changes. `pnpm test:e2e` runs the focused Chromium smoke path and `pnpm test:e2e:full` runs the complete Chromium suite. Run the browser scope the change deserves and retain targeted visual evidence when a UI decision needs a durable review artifact.
 
 This keeps browser evidence available without making every ordinary hosted change pay for the complete browser suite.
 

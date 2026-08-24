@@ -192,6 +192,42 @@ Checked-in SQL files under `drizzle/` remain the migration ledger. No table or
 row was removed by this repository cleanup; the related live Data API grants
 were retired separately with a reversible SQL migration.
 
+## 2026-08-25 reconciliation
+
+### Completed: legacy project/block runtime retirement
+
+Issue #269 is closed as completed. The executable project/block/tag actions, data helpers, client remnants, Drizzle model, and related dormant runtime have been retired. Checked-in SQL migrations remain historical migration evidence; they are not an active product blocker. The July 31 `Retained / blocked` entry above records the state at that time and no longer describes current `main`.
+
+### Promoted: Generation 3 guestbook
+
+The archived #473 branch remains historical research. The useful Generation 3 direction was restarted from current `main`, promoted through #635 and #638, and now owns ordinary generated guestbook sigils. Historical Generation 1 and Generation 2 pins remain only for reproducibility.
+
+### Removed: dead ThreeCarousel source and demo assets
+
+The Gallery's live projected Tesseract scene moved to `components/gallery/tesseract-scene.tsx`. The unreachable carousel implementation, its drag/wrap helpers and stylesheet, and `public/img1.jpg` through `public/img10.jpg` were removed after repository-wide caller checks found no live owner. The August 9 note that retained those images is therefore superseded. Git history and old PR #641 remain the recovery path for the discarded demo.
+
+The direct package family that existed only for the dead carousel is separately tracked by #640 for lockfile regeneration. The active Gallery scene itself uses React Three Fiber and Three.js.
+
+### Removed: unused UI and workaround residue
+
+A second caller pass removed unused top-level UI wrappers for alert, badge, card, checkbox, dropdown menu, keyboard key, pagination, popover, select, switch, table, textarea, and the unused avatar asset wrapper. It also removed the caller-free `MinimalSiteNav`, old `home.module.css`, the unused React DOM class-order patch script, and the abandoned WebHint configuration.
+
+The live UI primitives with current callers remain. `lib/deprecation-boundaries.test.ts` now protects the new retired source paths from accidental restoration.
+
+### Removed: historical browser retirement canaries
+
+Playwright files whose only job was proving already-deleted `/login`, `/dashboard/*`, `/resume`, or `/api/claude` surfaces stayed absent were removed. The source/deprecation boundary owns those facts now. The browser suite remains for behavior that actually requires a browser, including hydration, layout, interaction, storage, and visual/canvas behavior.
+
+The scheduled WebKit compatibility workflow and WebKit Playwright project were also retired. Author-side browser work now uses the Chromium project deliberately; routine hosted and local CI remain browser-free.
+
+### Removed: completed one-shot deployment inspection
+
+The temporary `signal-status-once.yml` workflow and its `.smoke/signal-status.json` receipt were deleted after their one historical OIDC inspection completed. The workflow had a hard-coded target SHA and existed only to write that receipt. Git history preserves the diagnostic result without leaving write-enabled one-shot machinery in the active workflow directory.
+
+### Consolidated: formatter configuration
+
+The duplicate `.prettierrc` and `prettier.config.js` files were replaced by one explicit `prettier.config.mjs`. The old JavaScript config depended on `@vercel/style-guide/prettier` without declaring that package directly; the canonical config now contains Scrapbook's local formatting choices and Tailwind plugin directly.
+
 ## Recovery
 
 For deleted files, use the parent commit of the relevant cleanup merge or retrieve the exact path from Git history. Restore only into a fresh branch with a current caller and current authorization model; do not restore a retired cluster by default.

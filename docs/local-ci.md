@@ -1,30 +1,30 @@
 # Local CI
 
-Run the same confidence checks locally before waiting for GitHub Actions:
+Run the same broad confidence checks locally before waiting for GitHub Actions:
 
 ```bash
 pnpm ci:local
 ```
 
-This installs the locked dependency graph, runs lint and typechecking, executes
-unit tests, builds the production app, rejects whitespace errors, and runs the
-Chromium browser suite. It always substitutes inert Supabase credentials so a
-local verification run cannot read or mutate the live Space database.
+The command requires Node 22.x. It installs the locked dependency graph, runs ESLint and the full Vitest suite, builds the production app, and rejects whitespace errors with `git diff --check`. The production build owns the routine project-wide TypeScript validation.
 
-For the slower Safari-compatible browser pass:
+Local CI stays browser-free. Use Playwright separately when the question depends on browser behavior:
 
 ```bash
-pnpm exec playwright install webkit # one-time browser installation
-pnpm ci:local:full
+# tiny Chromium canary
+pnpm test:e2e
+
+# complete Chromium suite
+pnpm test:e2e:full
+
+# one focused browser check
+pnpm exec playwright test tests/e2e/time-picker.spec.ts --project=chromium
 ```
 
-Useful iteration flags can be passed after `--`:
+Skip the install step when the local dependency graph is already current:
 
 ```bash
 pnpm ci:local -- --skip-install
-pnpm ci:local -- --skip-e2e
 ```
 
-The command stops at the first broken boundary and prints the duration of every
-completed step. GitHub Actions remains the clean Linux verification environment;
-local CI is the faster default feedback loop.
+The command stops at the first broken boundary and prints the duration of every completed step. GitHub Actions remains the clean Linux verification environment; local CI is the quicker equivalent for routine checks.
