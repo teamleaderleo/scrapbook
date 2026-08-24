@@ -228,6 +228,34 @@ The temporary `signal-status-once.yml` workflow and its `.smoke/signal-status.js
 
 The duplicate `.prettierrc` and `prettier.config.js` files were replaced by one explicit `prettier.config.mjs`. The old JavaScript config depended on `@vercel/style-guide/prettier` without declaring that package directly; the canonical config now contains Scrapbook's local formatting choices and Tailwind plugin directly.
 
+### Removed: dormant learning prototypes
+
+A deeper caller pass removed the isolated in-memory LeetCode sample/search pair, its review seeding helper, and the older file-backed `content/cards` reader with SM-2-era `SpaceCard` definitions. The real Space search parser, numeric comparator, FSRS adapter, Supabase mapping, and Markdown helpers remain because current Space routes still call them.
+
+The unused `app/lib/utils/index.ts` barrel left with the file-backed cards; current callers import the remaining utilities directly.
+
+### Removed: orphaned UI helpers and obsolete review markers
+
+`components/paper-critter.tsx` and `components/search-params-handler.tsx` had no caller by filename or exported-symbol search and were deleted. The separate `PaperCreature` renderer remains active on current pages.
+
+The temporary `docs/visual-review-run.md` trigger marker and the obsolete `docs/visual-review-artifacts.md` hosted-artifact note were also removed after hosted browser workflows were retired.
+
+### Removed: artwork-first guestbook importer
+
+The ordinary Guest Check-in path is text-only and Generation 3 creates its sigil automatically. The old raster-art path therefore no longer owns an active workflow. The cleanup removed:
+
+- `.github/workflows/import-gallery-asset.yml`, including its `contents: write` branch-commit path and Google Drive credential flow;
+- `scripts/import-gallery-asset.mjs` and `tests/gallery-asset-importer.test.ts`;
+- `docs/gallery-asset-importer.md`, `docs/gallery-artwork.md`, and `docs/agent-art-creation-and-research.md` from the live guide set.
+
+The archived v1 check-in and orchestration snapshots remain under `docs/archive/` for deliberate historical recovery. `file-type` and `sharp` now have no direct repository caller and join the package-only cleanup tracked by #640.
+
+### Reconciled: current agent and browser guidance
+
+The machine-readable Guest Check-in contract, pull-request template, sigil lab copy, sigil guide, and archive index now describe Generation 3 and the current lightweight publication path. Browser-independent API contract assertions moved out of Playwright and into Vitest; the remaining guestbook Playwright coverage concerns rendered Gallery behavior.
+
+`next.config.mjs` also dropped the retired S3/CloudFront image hosts and three unused local `optimizePackageImports` aliases. Current package-level optimizations and the live Gallery/Space configuration remain.
+
 ## Recovery
 
 For deleted files, use the parent commit of the relevant cleanup merge or retrieve the exact path from Git history. Restore only into a fresh branch with a current caller and current authorization model; do not restore a retired cluster by default.
