@@ -54,6 +54,8 @@ Avoid invented labels for ordinary engineering choices. Phrases such as `local-f
 
 Avoid filler terms such as `actual`, `real`, `bounded`, and `narrow` in career-facing prose.
 
+Avoid vague safety adjectives such as `guarded` when the sentence can say what happens. Prefer `falls back when the code changes`, `checks an exact precondition`, or another concrete behavior.
+
 Don't write implementation review language when a consequence is available. `Preserved caller-owned lastIndex` is useful in a PR. `Identical URL checks returned different answers across calls` is useful on a resume.
 
 ## Prefer concrete nouns and verbs
@@ -112,15 +114,23 @@ For Preflight, the resume uses **101s to 13.69s**. Older campaign numbers belong
 
 Choose the verb for the accomplishment instead of defaulting to `cut`. `Reduced`, `removed`, `eliminated`, `shrunk`, `brought`, and `moved` each say something different. Repeating one punchy verb until it becomes a tic weakens the page.
 
+## One canonical opening per project
+
+Once a project thesis has been selected, keep one canonical opening in `resume-candidates.md`. Do not create a second heading-driven first bullet, a second thesis, or a chat-only replacement and call both current.
+
+A heading and first bullet should cooperate, but the heading does not automatically replace a thesis that already carries important scope. If the thesis says the project worked across third-party code, traced failures across the stack, and became a finished application, preserve that information unless a replacement clearly improves it.
+
+Proposals belong in the working file when they are meant to be iterated. Chat-only alternatives are discussion, not the current candidate.
+
 ## Let a strong heading carry context
 
 A project heading can carry category, domain, platform scope, or public status so the first bullet does not waste its opening words restating them.
 
-For a flagship project, consider a descriptive heading such as:
+For Preflight, the working heading is:
 
-> **Preflight — Cross-platform performance launcher for Starsector and its modding ecosystem** *(public open source)*
+> **Preflight — Performance launcher and mod analysis toolkit for Starsector** *(public open source)*
 
-Then let the first bullet open on the strongest result. A heading and first bullet should cooperate rather than duplicate each other.
+The heading identifies the product. The first bullet still owns the project thesis and the **101s to 13.69s** result.
 
 Parentheses are useful for compact context such as public status, platforms, or an open PR. They should not become a second sentence of qualifications.
 
