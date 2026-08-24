@@ -38,7 +38,7 @@ The cache rebuild should lead #23208. `resolveConfig()` and duplicated plugin ar
 
 Current candidate:
 
-> Kept Miniflare shutdown from leaving `workerd` running when browser or proxy cleanup stalls or fails (#15143), and stopped removed or incomplete Cloudflare Access credentials from authenticating with an older cached service token (#15080).
+> Kept Miniflare shutdown from leaving `workerd` running when browser or proxy cleanup stalls or fails (#15143), and prevented stale Access service tokens from authenticating after credentials were removed or incomplete (#15080).
 
 Both clauses lead with the operational consequence. Teardown ordering and cache ownership can stay in the PRs.
 
@@ -80,7 +80,7 @@ Candidate receipts:
 
 > Turned the Java performance engine into a self-contained Windows, macOS, and Linux desktop app with a React UI over a Rust/Tauri native host, bundled Java runtime, durable launch/playtime history, locally traced ship wireframes from installed game data, profile management, and signed updates with rollback.
 
-> Built a read-only mod linter that found **1,392 asset/configuration findings across 84 resource roots**, including **four broken released configs**, **771.9 MB of VRAM padding**, **687.9 MB decoded at load**, and progressive textures that decode **8.75× slower**.
+> Built a mod linter that found **1,392 asset/configuration findings across 84 resource roots**, including **four broken released configs**, **771.9 MB of VRAM padding**, **687.9 MB decoded at load**, and progressive textures that decode **8.75× slower**.
 
 Why these stay in the pool:
 
@@ -185,7 +185,7 @@ Keep skills compact and unsurprising.
 ## Disposition notes that are not resume prose
 
 - React #37251 is open and has a positive submitted review.
-- Cloud Hypervisor #8721 is open and has substantial upstream review, including an approval before later requested revisions.
+- Cloud Hypervisor #8721 is open and has current maintainer approval.
 - Vite #23208 is open.
 - AI SDK #18371 and #18572 are the contributor repairs. Equivalent implementations were merged through #18400 and #18695, which is why the bullet keeps both numbers beside those clauses.
 
