@@ -89,9 +89,9 @@ Each clause should do three things:
 2. include enough mechanism to distinguish the work from generic bug fixing
 3. place the PR number beside that clause
 
-Do not front-load a batch of PR numbers and make the reader map them back to the sentence.
+Don't front-load a batch of PR numbers and make the reader map them back to the sentence.
 
-The clauses do not need equal length. The strongest repair can take more words.
+The clauses don't need equal length. The strongest repair can take more words.
 
 ## Numbers should earn space
 
@@ -105,7 +105,7 @@ Strong examples include:
 - `83 enabled mods`
 - `1.1 GB`
 
-Do not add a second measurement merely because it exists. Pick the number that carries the claim.
+Don't add a second measurement merely because it exists. Pick the number that carries the claim.
 
 For Preflight, the resume uses **101s to 13.69s**. Older campaign numbers belong in evidence records, not in the resume bullet.
 
@@ -131,13 +131,13 @@ Portfolio material can explain the mechanism and the investigation path in more 
 3. evidence
 4. caveat or status when it changes the claim
 
-The portfolio can explain why a repair was difficult. It should not become a second issue tracker or copy every review turn.
+The portfolio can explain why a repair was difficult. It shouldn't become a second issue tracker or copy every review turn.
 
 ## Revision rule
 
 Protect sentences that already work.
 
-Do not rewrite a bullet because a new iterator has a different preferred vocabulary. Change it only when the new version clearly improves at least one of these without damaging the others:
+Don't rewrite a bullet because a new iterator has a different preferred vocabulary. Change it only when the new version clearly improves at least one of these without damaging the others:
 
 - consequence
 - density
@@ -161,4 +161,4 @@ If the current version already wins those checks, leave it alone.
 
 As of 2026-08-24, the Vercel AI SDK, Cloud Hypervisor, Vite, and Cloudflare bullets in `resume-candidates.md` are the checkpoint to preserve. Future editing should begin from those sentences rather than from older resume copies or from PR descriptions.
 
-Older resume files remain useful for facts, emphasis, and evidence of what has worked before. They do not override newer engineering results or this writing guide.
+Older resume files remain useful for facts, emphasis, and evidence of what has worked before. They don't override newer engineering results or this writing guide.
