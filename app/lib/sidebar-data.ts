@@ -19,10 +19,10 @@ export const shortcuts = [
   },
   {
     label: 'Project deep dives',
-    href: '/space?lane=interview&tags=mode:deep-dive',
+    href: '/work',
   },
   {
     label: 'Typing scales',
-    href: '/space?tags=mode:typing+order:recent',
+    href: '/space?lane=scales&tags=mode:typing+order:recent',
   },
 ];
