@@ -1,7 +1,10 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { WorkDeepDivePractice } from './work-deep-dive-practice';
+import {
+  buildWorkDeepDivePrompt,
+  WorkDeepDivePractice,
+} from './work-deep-dive-practice';
 
 describe('WorkDeepDivePractice', () => {
   it('renders a quiet project-rehearsal surface around the real work record', () => {
@@ -26,15 +29,19 @@ describe('WorkDeepDivePractice', () => {
   });
 
   it('uses a supplied reversal as the source for the reversal prompt', () => {
-    const html = renderToStaticMarkup(
-      createElement(WorkDeepDivePractice, {
-        recordId: 'preflight',
-        title: 'Preflight',
-        reversal: 'The first cache sat behind the real critical-path wait.',
-      })
+    expect(
+      buildWorkDeepDivePrompt(
+        'reversal',
+        'The first cache sat behind the real critical-path wait.'
+      ).prompt
+    ).toBe(
+      'Use the real reversal in the record as your starting point: The first cache sat behind the real critical-path wait. Then explain what evidence moved the repair boundary and what you learned.'
     );
+  });
 
-    expect(html).toContain('The first cache sat behind the real critical-path wait.');
-    expect(html).toContain('what evidence moved the repair boundary');
+  it('keeps a generic reversal question for records without one', () => {
+    expect(buildWorkDeepDivePrompt('reversal').prompt).toContain(
+      'plausible approach'
+    );
   });
 });
