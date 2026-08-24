@@ -110,7 +110,7 @@ Keep skills compact and unsurprising.
 ## Disposition notes that are not resume prose
 
 - React #37251 is open and has a positive submitted review.
-- Cloud Hypervisor #8721 is open and has substantive upstream review, including an approval before later requested revisions.
+- Cloud Hypervisor #8721 is open and has substantial upstream review, including an approval before later requested revisions.
 - Vite #23208 is open.
 - AI SDK #18371 and #18572 are the contributor repairs. Equivalent implementations were merged through #18400 and #18695, which is why the bullet keeps both numbers beside those clauses.
 
