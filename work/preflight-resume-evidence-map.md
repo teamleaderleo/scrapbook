@@ -94,7 +94,7 @@ Breadcrumbs:
 
 Current career story:
 
-> Removed **>12s** across three third-party startup callback boundaries without making one library name the point.
+> Removed **>12s of startup work across three third-party mod callbacks** by memoizing repeated hull/variant reads, deduplicating and replaying unresolved generated-texture requests, and caching rebuilt paintjob catalogs.
 
 The components are deliberately separate from the common-loader memo above:
 
@@ -115,7 +115,7 @@ The components are deliberately separate from the common-loader memo above:
 
 Recommended career wording:
 
-> Reworked high-frequency campaign runtime paths, replacing sector-wide linear entity scans with mutation-tracked indexes that reduced **227,805 deep validations → 0** and **79.1M entity-reference checks → 0**, memoizing **117.9M unchanged commodity updates**, and skipping defensive allocations on **15.4M empty script-list calls**.
+> Removed repeated O(n) scans and allocations from campaign simulation by replacing sector-wide entity lookup scans with mutation-tracked indexes (**227,805 full-list validations → 0, 79.1M entity-reference checks → 0**), short-circuiting **117.9M unchanged commodity recomputations**, and skipping defensive list copies on **15.4M empty script calls**.
 
 ### Entity lookup index
 
@@ -131,7 +131,7 @@ Final measurement lives in [`docs/evidence/2026-08-02-a-failed-lookup-scans-the-
 - first save/combat v3 pilot after the initial mutation-tracking implementation: **227,805 deep validations** walking **79,131,653 entity references**
 - repaired next live pilot: **229,924 fast validations, 0 deep validations, 0 validated references**, while tracking **74,751 live list mutations**
 
-The total number of lookups is not identical between the two adjacent pilots, so career copy should use the work that actually went to zero: **227,805 deep validations → 0** and **79.1M reference checks → 0**. Do not write `227,805 calls → 0 calls`; the lookups still happen and are answered through the index.
+The total number of lookups is not identical between the two adjacent pilots, so career copy should use the work that actually went to zero: **227,805 full-list validations → 0** and **79.1M reference checks → 0**. Do not write `227,805 calls → 0 calls`; the lookups still happen and are answered through the index.
 
 ### Economy, markets, and defensive snapshots
 
