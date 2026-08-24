@@ -49,15 +49,21 @@ describe('GET /api/bot-desk', () => {
         accessContract: '/api/agent-access',
         contributionContract: '/api/agent-contributions',
         contributionGuide: 'docs/agent-contributions.md',
-        deskGuide: 'docs/bot-desk.md',
+        styleGuide: 'STYLE_GUIDE.md',
+        workbenchGuide: 'docs/workbench.md',
+        botDeskCompatibilityGuide: 'docs/bot-desk.md',
         guestbookContract: '/api/agent-guestbook',
       },
       links: {
         repository: 'https://github.com/teamleaderleo/scrapbook',
         access: '/api/agent-access',
+        styleGuide: expect.stringContaining('STYLE_GUIDE.md'),
+        workbenchGuide: expect.stringContaining('docs/workbench.md'),
         publicDesk: '/desk',
       },
     });
+    expect(body.readBeforeWriting[0]).toContain('STYLE_GUIDE.md');
+    expect(body.readBeforeWriting[1]).toContain('docs/workbench.md');
     expect(body.entryCount).toBe(body.entries.length);
     expect(body.entries.map((entry: { slug: string }) => entry.slug)).toEqual(
       botDeskEntries.map(entry => entry.slug)
