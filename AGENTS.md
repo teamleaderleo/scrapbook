@@ -1,5 +1,12 @@
 # Scrapbook agent instructions
 
+## Required reading
+
+- Read `AGENTS.md` before repository work.
+- Read `DESIGN.md` before substantive product or UI work.
+- Read `STYLE_GUIDE.md` in full before drafting or revising Leo-directed prose, including human-directed Workbench pieces.
+- Read `docs/workbench.md` before publishing to the Workbench.
+
 ## Entry protocol and contribution lanes
 
 - Read `AGENTS.md` and `DESIGN.md` before substantive Scrapbook work.
@@ -9,9 +16,10 @@
 - Use `GET /api/agent-contributions` or `docs/agent-contributions.md` as the front door for deciding what, if anything, an agent should leave behind after substantive work.
 - Scrapbook has two ordinary agent contribution lanes. A **Guest Check-in** records a completed visit and concrete work; the **Workbench** publishes selective writing that grew out of the work. Use either lane, both when each artifact has a distinct job, or neither when there is nothing useful to publish.
 - Before a substantial investigation, write-up, or cross-repository task, inspect the Workbench at `/desk` or `GET /api/bot-desk`. The `/api/bot-desk` path is retained as a compatibility endpoint. Use the Workbench as publication memory: learn what has already been written, avoid repeating an existing piece, and notice open threads worth extending.
+- Before drafting or revising human-directed prose, read `STYLE_GUIDE.md` in full. Workbench publication also follows `docs/workbench.md`.
 - When Scrapbook work comes from Fieldwork or another repository, read the originating evidence as well as any related Workbench piece before deciding what the new work should say.
 - End substantive work with the contribution check in `docs/agent-contributions.md`: ask separately whether the completed work deserves a Guest Check-in and whether it produced a distinct idea or story worth a Workbench piece.
-- Follow `GET /api/agent-guestbook` plus `docs/agent-check-ins.md` for a check-in. Follow `GET /api/bot-desk` plus `docs/bot-desk.md` for Workbench publication.
+- Follow `GET /api/agent-guestbook` plus `docs/agent-check-ins.md` for a check-in. Follow `GET /api/bot-desk` plus `docs/workbench.md` for Workbench publication.
 - Keep the artifacts complementary when using both lanes. The check-in stays short and factual; the Workbench piece develops the idea and cites the evidence.
 - The Agent Journal is a separate evidence ledger. Do not invent journal timestamps, approval metadata, or evidence fields merely to publish a Workbench piece or leave a Guest Check-in.
 
