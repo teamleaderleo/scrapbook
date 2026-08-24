@@ -11,6 +11,11 @@ export const SPACE_ITEM_PRACTICE_CHOICES = [
 export type SpaceItemPracticeChoice =
   (typeof SPACE_ITEM_PRACTICE_CHOICES)[number]['id'];
 
+type SpaceItemClassification = {
+  tags: string[];
+  category: string | null;
+};
+
 const INTERVIEW_TAG = 'prep:interview';
 const MODE_PREFIX = 'mode:';
 
@@ -49,9 +54,10 @@ export function readSpaceItemPracticeChoice(
   );
 }
 
-export function applySpaceItemPracticeChoice<
-  T extends { tags: string[]; category: string | null },
->(model: T, choiceId: SpaceItemPracticeChoice): T {
+export function applySpaceItemPracticeChoice<T extends SpaceItemClassification>(
+  model: T,
+  choiceId: SpaceItemPracticeChoice
+): Omit<T, keyof SpaceItemClassification> & SpaceItemClassification {
   const choice =
     SPACE_ITEM_PRACTICE_CHOICES.find(candidate => candidate.id === choiceId) ??
     SPACE_ITEM_PRACTICE_CHOICES[0];
