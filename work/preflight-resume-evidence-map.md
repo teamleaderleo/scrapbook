@@ -200,13 +200,36 @@ Earlier substrate/history if an interview asks how the live cache was made safe:
 
 Current career story:
 
-> The performance engine became a self-contained native desktop application across Windows, macOS, and Linux rather than stopping at a benchmark harness.
+> Turned the Java performance engine into a self-contained Windows, macOS, and Linux desktop app with a React UI over a Rust/Tauri native host, bundled Java runtime, durable launch/playtime history, locally traced ship wireframes from installed game data, profile management, and signed updates with rollback.
 
-Breadcrumbs:
+Architecture and packaging:
 
-- [PR #322](https://github.com/teamleaderleo/preflight/pull/322) — main integration checkpoint for the CLI + desktop + cross-platform product boundary.
-- [`preflight-desktop/README.md`](https://github.com/teamleaderleo/preflight/blob/main/preflight-desktop/README.md) — current architecture: React UI, Rust/Tauri host, bundled Java engine/runtime, Windows NSIS, macOS DMG, Linux AppImage/deb, update/recovery/process boundaries.
-- Treat this as a product-ownership claim, not a released-binary claim. Check current release status before changing `public open source` to stronger distribution wording.
+- [`preflight-desktop/README.md`](https://github.com/teamleaderleo/preflight/blob/main/preflight-desktop/README.md) — current architecture: React renders the UI, the narrow Rust/Tauri host owns native/process operations, the browser layer has no shell/filesystem permission, and the package carries the Java engine plus a platform-native `jlink` runtime.
+- [PR #322](https://github.com/teamleaderleo/preflight/pull/322) — broad integration checkpoint for the Java engine, desktop host, native distribution, recovery, diagnostics, and update path.
+- [`docs/releases/0.1.0.md`](https://github.com/teamleaderleo/preflight/blob/main/docs/releases/0.1.0.md) — current product contract for profiles/settings, playtime/history, storage/recovery, native packages, signed updates/rollback, and package evidence.
+
+Durable playtime/history:
+
+- [`preflight-cli/src/main/java/dev/starsector/preflight/cli/Playtime.java`](https://github.com/teamleaderleo/preflight/blob/main/preflight-cli/src/main/java/dev/starsector/preflight/cli/Playtime.java) — playtime is derived from launch-ledger durations rather than stored as a second mutable counter; incomplete sessions and non-game launch attempts remain distinguishable.
+- [PR #485 — Make playtime history durable and truthful](https://github.com/teamleaderleo/preflight/pull/485) — serializes ledger/history work across threads/processes and preserves incomplete-session semantics.
+- [PR #488 — Show durable playtime in the desktop](https://github.com/teamleaderleo/preflight/pull/488) — brings the ledger-derived lifetime total into the native UI.
+- [PR #541 — Make launch history and failed-run support durable](https://github.com/teamleaderleo/preflight/pull/541), integrated in commit [`94b64a108ba60c8069e9f85c6942381e071db364`](https://github.com/teamleaderleo/preflight/commit/94b64a108ba60c8069e9f85c6942381e071db364) — process-bound heartbeat/recovery keeps history useful when the wrapper or machine is interrupted.
+- [PR #809 — Export portable play history](https://github.com/teamleaderleo/preflight/pull/809) — versioned read-only JSON/CSV history export without exposing run paths/logs/credentials.
+
+Locally derived Hangar:
+
+- [`987745237651bc4a338ccf9768e02c540b4b1bce`](https://github.com/teamleaderleo/preflight/commit/987745237651bc4a338ccf9768e02c540b4b1bce) — Hangar work converges on tracing the player's installed hull sprites/data at runtime rather than shipping a baked proprietary-art-derived catalog; the commit history explicitly removes a 7,112-line generated artifact once the runtime tracer can derive it locally.
+- [`docs/public-writing-sales-inventory.md`](https://github.com/teamleaderleo/preflight/blob/main/docs/public-writing-sales-inventory.md) — current product framing: installed hull definitions and sprites are traced locally into bounded wireframe contours/interior geometry so the app visually belongs beside the game without bundling its art.
+
+Responsiveness and footprint boundaries:
+
+- [PR #1104 — Show Home before background maintenance](https://github.com/teamleaderleo/preflight/pull/1104) — validates the remembered installation through a quick snapshot first and moves automatic cache/evidence housekeeping out of the opening interaction window. This supports an engineering claim about prioritizing interaction latency, not a numeric startup-speed claim.
+- No retained current-package measurement in this map establishes a **~200 MB desktop RSS** figure. Do not put that number on the resume until an exact package/process-set measurement is captured and its accounting boundary is defined.
+- Likewise, prefer concrete architectural/product evidence over adjectives such as `snappy`, `lightweight`, or `fast` unless a desktop-specific measurement is retained.
+
+The built-in before/after benchmark is useful product functionality, but it does not currently earn resume space over durable playtime/history, locally derived Hangar geometry, self-contained packaging, or signed update/rollback.
+
+Treat this as a product-ownership claim, not a released-binary claim. Check current release status before changing `public open source` to stronger distribution wording.
 
 ## Linter / source-side ecosystem analysis
 
