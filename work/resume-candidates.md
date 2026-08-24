@@ -2,7 +2,7 @@
 
 This is the working copy for the one-page resume. Source repositories and upstream pull requests own the facts. This file owns which facts deserve space and how the current resume says them.
 
-Read [`resume-portfolio-style.md`](resume-portfolio-style.md) before revising this file. That guide owns the writing rules. The current upstream bullets below are the checkpoint to preserve unless a new version clearly improves consequence, density, readability, technical substance, or credibility.
+Read [`resume-portfolio-style.md`](resume-portfolio-style.md) before revising this file. For Preflight claim provenance, implementation history, and measurement breadcrumbs, read [`preflight-resume-evidence-map.md`](preflight-resume-evidence-map.md). The current upstream bullets below are the checkpoint to preserve unless a new version clearly improves consequence, density, readability, technical substance, or credibility.
 
 ## Selected open source engineering
 
@@ -72,7 +72,7 @@ Candidate receipts:
 
 > Removed **>12s of startup work across three third-party mod callbacks** by memoizing repeated JSON loads, replaying stable generated state, and caching rebuilt catalogs.
 
-> Reworked high-frequency campaign runtime paths, replacing sector-wide linear entity scans with mutation-tracked indexes that served **~230k lookups with zero deep validations** in a live campaign, memoizing **117.9M unchanged commodity updates**, and skipping defensive allocations on **15.4M empty script-list calls**.
+> Reworked high-frequency campaign runtime paths, replacing sector-wide linear entity scans with mutation-tracked indexes that reduced **227,805 deep validations → 0** and **79.1M entity-reference checks → 0**, memoizing **117.9M unchanged commodity updates**, and skipping defensive allocations on **15.4M empty script-list calls**.
 
 > Rebuilt **Preflight's texture-cache preparation** to stream textures directly into the final pack instead of forcing thousands of rebuildable files, bringing preparation **200.77s → 16.21s** and storage **4.76 GB → ~1.1 GB**, then learned startup access order so the same Compact texture set launched **33.53s alphabetically vs 14.174s in observed order**.
 
@@ -93,7 +93,7 @@ Why these stay in the pool:
 - The typed-tree representation was replayed through the installed JSON runtime across **12,584 cached objects containing 990,602 values**. That is the strongest retained million-scale data receipt for the cache architecture.
 - The runtime-texture receipt carries the architectural discovery: the first texture cache was on the wrong side of a serialized prefetch wait. Moving the lookup before that queue changed the whole launch, while true-size uploads removed the VRAM padding separately.
 - The third-party callback receipt deliberately avoids name-dropping individual mods. The retained component measurements are **7.066–7.435s** from repeated ship JSON, **4.821s** from compact generated-state replay, and **650ms → 52ms** from a later catalog cache. These are separate callback boundaries and together support `>12s` without folding in the common-loader memo that also benefits mods.
-- The campaign-runtime receipt is separate from startup and avoids an unsupported FPS claim. The live entity-index path served **10,478 positive + 219,447 negative answers** with **229,924 fast validations, zero deep validations, and zero validated references** after tracking live mutations. The final commodity memo served **117,907,677** unchanged calls while delegating **223,330** changed states, and campaign maintenance skipped defensive list snapshots on **15,402,921** empty script lists.
+- The campaign-runtime receipt is separate from startup and avoids an unsupported FPS claim. The adjacent entity-index pilots moved **227,805 deep validations → 0** and **79,131,653 entity-reference checks → 0**; the repaired run handled **229,924 fast validations** while tracking **74,751** live list mutations. The final commodity memo served **117,907,677** unchanged calls while delegating **223,330** changed states, and campaign maintenance skipped defensive list snapshots on **15,402,921** empty script lists.
 - The texture-cache receipt is Preflight's own storage/data-layout work. Publication, not worker count, dominated the slow preparation path, so rebuildable intermediates became a streamed final pack. The physical order result shows that logical cache contents alone were not enough.
 - The generated-bytecode receipt carries two optimization layers. First memoize repeated compiler requests, then normalize the cache after discovering that **36,332 class occurrences contained only 280 unique classes**.
 - The desktop receipt proves end-to-end ownership without becoming a feature list: three-OS packaging, bundled runtime, measurement, profile/cache lifecycle, recovery, diagnostics, and signed update/rollback.
@@ -122,8 +122,8 @@ Performance win inventory, not all of which belongs on the one-page resume:
 - first pack-producing texture preparation spent **198.56s** on per-file durable intermediates; streaming rebuildable intermediates into one forced final pack moved the same publication problem to **44.62s Balanced / 16.51s Compact**, with current end-to-end Compact preparation at **16.21s**
 - the same Compact texture corpus launched **33.53s** in alphabetical order and **14.174s** in observed access order
 - campaign economy attribution observed **2,120,837 market advances / 15,109.8ms** in one run; a later drill-down counted **1,072,831 market advances / 9,924.5ms**, **483,766,272 commodity-stat accesses**, and **120,941,568 event-mod accesses**
+- entity-index adjacent live pilots moved **227,805 deep validations → 0** and **79,131,653 entity-reference checks → 0**; the repaired run used **229,924 fast validations** while tracking **74,751** live list mutations
 - the final commodity event-mod memo served **117,907,677** unchanged calls and delegated **223,330** real state changes
-- the campaign entity index's repaired live path served **10,478 positive + 219,447 negative answers** with **229,924 fast validations, zero deep validations, and zero validated references**, while safely tracking **74,751** live list mutations
 - campaign maintenance avoided defensive snapshots on **15,402,921 empty** script lists, **98.176%** of 15,689,139 observed calls
 - exact transformer targeting reduced the class inventory from **2,612 to 38** candidates, a **98.5%** reduction
 - resource reprioritization moved **558.257ms → 4.148ms**, shared path normalization improved **6.88×**, and the common data reader moved **761.978ms → 276.073ms** while avoiding **1.3 GB** of scratch allocation
