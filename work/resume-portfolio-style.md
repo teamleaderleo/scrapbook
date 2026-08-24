@@ -4,25 +4,6 @@ This guide owns the writing standard for career-facing material in Scrapbook. `r
 
 The goal is dense, legible substance. Sell the work hard enough that the consequence is obvious, while keeping enough mechanism that the claim feels earned.
 
-## Reader model: infinite intelligence, zero domain knowledge
-
-Assume the reader is an expert engineer who can reason through JVMs, bytecode, caches, storage layouts, profiling, failure modes, concurrency, and product architecture, but knows nothing about the specific game, mod, repository, or incident.
-
-Do not teach them the domain. Give them only enough domain nouns to anchor the problem, then spend the words on engineering depth and evidence.
-
-A strong flagship bullet should make it easy to infer several of these without saying them as labels:
-
-- the problem was technically difficult or poorly understood
-- the investigation went below ordinary application abstractions
-- measurements drove the design rather than decorating it afterward
-- the solution generalized into reusable infrastructure instead of one-off patches
-- correctness and failure behavior were considered where they changed the engineering
-- the work was carried through to a usable product or operational surface
-
-Prefer `obfuscated JVM ecosystem`, `83 independently maintained mods`, `1.6M resource probes`, `shared JSON/CSV caches`, `generated mod bytecode`, `texture cache`, and `native Windows/macOS/Linux app` over explaining game lore or internal class names.
-
-The reader does not need to know what a hull variant is to understand that several independent JSON/CSV-backed loaders were consolidated behind one reusable cache architecture and improved 3–10×.
-
 ## Start with why anyone should care
 
 Lead with one of these when it exists:
@@ -145,6 +126,8 @@ Once a project thesis has been selected, keep one canonical opening in `resume-c
 
 A heading and first bullet should cooperate, but the heading does not replace a thesis that carries the engineering scope. If the thesis says the project worked across third-party code, traced failures across the stack, and became a finished application, preserve that information unless a replacement clearly improves it.
 
+A flagship thesis should finish the thought. Investigation counters can establish scale, but they should not be the final clause if the accomplishment is the system built from that investigation. Prefer `found the shared boundary, moved the work, built the reusable cache/rewrite layer` over ending at `observed N calls`.
+
 Proposals belong in the working file when they are meant to be iterated. Chat-only alternatives are discussion, not the current candidate.
 
 ## Let a strong heading carry context without stealing the lead
@@ -155,7 +138,7 @@ For Preflight, the working heading is:
 
 > **Preflight — Cross-platform performance launcher and mod analysis toolkit** *(public open source, Starsector ecosystem)*
 
-The heading identifies the product and keeps the game as context. The first bullet owns the thesis: reverse-engineering a third-party JVM ecosystem spanning independently maintained code, measuring repeated work at scale, and the **101s → 13.69s** result.
+The heading identifies the product and keeps the game as context. The first bullet owns the thesis: reverse-engineering a third-party JVM ecosystem spanning independently maintained code, measuring repeated work at scale, the **101s → 13.69s** result, and the product built from that investigation.
 
 Parentheses are useful for compact context such as public status, platforms, domain, or an open PR. They should not become a second sentence of qualifications.
 
