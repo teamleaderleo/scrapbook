@@ -62,11 +62,11 @@ Working heading:
 
 Canonical opening:
 
-> Reduced startup **101s → 13.69s (86.4% less time, 7.38× speedup)** by reverse-engineering an obfuscated JVM runtime spanning the base game and 83 third-party mods, then moving repeated work out of the launch path with shared memoization, precomputed artifacts, and runtime bytecode rewrites.
+> Reduced startup **101s → 13.69s (86.4% less time, 7.38× speedup)** by reverse-engineering an obfuscated JVM runtime spanning the base game and 83 third-party mods, then moving repeated work out of the launch path with memoization, precomputed artifacts, and runtime bytecode rewrites.
 
 Candidate receipts:
 
-> Generalized the shared work behind five loader-specific caches into one common data-read layer used by the game and mods, then replaced reparsed JSON text with typed trees. A stock-mod launch made **39,017 JSON reads across 8,378 paths**, and the tree representation was validated across **12,584 cached objects / 990,602 values**, reducing multiple data loaders **3–10×** and merged-read overhead **2.172s → 0.300s**.
+> Consolidated repeated JSON/CSV parsing and merging from five loader-specific caches into one memoized data-read layer shared by the game and mods, replacing reparsed text with typed trees across **12,584 cached objects / 990,602 values** and reducing multiple data loaders **3–10×** and merged-read overhead **2.172s → 0.300s**.
 
 > Reworked separate game/mod hot paths to bypass a **27s** single-threaded texture prefetch stall, eliminate **1.22 GiB of VRAM padding**, and take **~7.4s** out of AshLib startup, with the texture/prefetch work alone moving a sample launch **88.13s → 62.60s**.
 
@@ -82,7 +82,7 @@ Why these stay in the pool:
 
 - The opening is the bowtie: flagship result first, then the opaque third-party JVM runtime, then the architecture Preflight built to move repeatable work out of startup. It stops there instead of narrating every optimization category.
 - `83 third-party mods` is enough domain context. It says the runtime is assembled from code Preflight does not own without spending words on how the mod ecosystem is organized.
-- The shared-cache receipt names the architectural move directly. Five loader-specific caches revealed the wrong abstraction boundary, so their shared work moved down to one common data-read layer serving the game and mods instead of growing another one-off cache.
+- The shared-cache receipt names the architectural move directly. Five loader-specific caches revealed the wrong abstraction boundary, so repeated JSON/CSV parsing and merging moved down to one common data-read layer serving the game and mods instead of growing another one-off cache.
 - This is textbook memoization plus a typed representation, but the surrounding problem is harder than the textbook version: the runtime is obfuscated, overlays come from many third-party roots, returned JSON objects remain mutable, and the cache has to preserve the game's own merge and fallback behavior.
 - The typed-tree representation was replayed through the installed JSON runtime across **12,584 cached objects containing 990,602 values**. That is the strongest retained million-scale data receipt for the cache architecture.
 - The runtime receipt shows performance work below application abstractions: a serialized prefetch bottleneck, GPU-memory waste, and a large third-party mod callback path.
