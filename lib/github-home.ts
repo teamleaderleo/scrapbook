@@ -31,7 +31,7 @@ const FEATURED_REPOSITORIES = [
   {
     name: 'smolrunner',
     url: 'https://github.com/teamleaderleo/smolrunner',
-    note: 'Disposable GitHub Actions runners.',
+    note: 'Trust-tiered Linux execution for coding agents and GitHub Actions.',
   },
   {
     name: 'cultist',
