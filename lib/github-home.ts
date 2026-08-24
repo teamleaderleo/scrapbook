@@ -21,7 +21,7 @@ const FEATURED_REPOSITORIES = [
   {
     name: 'preflight',
     url: 'https://github.com/teamleaderleo/preflight',
-    note: 'Starsector launch performance.',
+    note: 'Cross-platform performance launcher and mod analysis for Starsector.',
   },
   {
     name: 'stensibly',
