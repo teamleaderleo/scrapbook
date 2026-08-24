@@ -1,0 +1,130 @@
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage[top=0.38in,bottom=0.42in,left=0.52in,right=0.52in]{geometry}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage[T1]{fontenc}
+\usepackage{charter}
+\usepackage{microtype}
+\input{glyphtounicode}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\setlength{\footskip}{5pt}
+\setlength{\parindent}{0pt}
+\setlength{\tabcolsep}{0pt}
+\urlstyle{same}
+\raggedbottom
+\pdfgentounicode=1
+
+\titleformat{\section}{\large\bfseries\scshape}{}{0pt}{}[\titlerule]
+\titlespacing*{\section}{0pt}{3.5pt}{1.75pt}
+
+\newcommand{\resumeHeading}[4]{%
+  \begin{tabularx}{\textwidth}{@{}Xr@{}}
+    \textbf{#1} & #2 \\
+    \textit{\small #3} & \textit{\small #4}
+  \end{tabularx}\vspace{-2pt}
+}
+
+\newcommand{\resumeHeadingSimple}[2]{%
+  \begin{tabularx}{\textwidth}{@{}Xr@{}}
+    \textbf{#1} & #2
+  \end{tabularx}\vspace{-1pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{%
+  \vspace{1pt}
+  \begin{tabularx}{\textwidth}{@{}Xr@{}}
+    \hspace{0.10in}\textbf{#1} & \textit{\small #2}
+  \end{tabularx}\vspace{-3pt}
+}
+
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=0.23in,itemsep=0.4pt,parsep=0pt,topsep=0.5pt]}
+\newcommand{\resumeItem}[1]{\item\fontsize{10.2pt}{11.5pt}\selectfont #1}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-1.25pt}}
+
+\begin{document}
+
+\begin{center}
+  {\Huge\textbf{Leo Li}} \\[2pt]
+  \small
+  +1 778-779-2889 $|$
+  \href{mailto:cheerleaderleo@outlook.com}{cheerleaderleo@outlook.com} $|$
+  \href{https://www.linkedin.com/in/leoooli/}{linkedin.com/in/leoooli} $|$
+  \href{https://github.com/teamleaderleo}{github.com/teamleaderleo} $|$
+  \href{https://teamleaderleo.com/}{teamleaderleo.com}
+\end{center}
+\vspace{-10pt}
+
+\section{Selected Open Source Engineering}
+
+\resumeHeadingSimple
+  {Vercel AI SDK $|$ \href{https://redirect.github.com/vercel/ai}{vercel/ai}}
+  {2026}
+\resumeItemListStart
+  \resumeItem{Fixed identical URL checks returning different answers across calls (\href{https://redirect.github.com/vercel/ai/pull/18570}{\textbf{\#18570}}), released Web Stream readers after source errors so failed reads didn't leave the stream locked (\href{https://redirect.github.com/vercel/ai/pull/18371}{\textbf{\#18371}}/\href{https://redirect.github.com/vercel/ai/pull/18400}{\textbf{\#18400}}), and kept download size-limit failures from being replaced by cancellation errors (\href{https://redirect.github.com/vercel/ai/pull/18572}{\textbf{\#18572}}/\href{https://redirect.github.com/vercel/ai/pull/18695}{\textbf{\#18695}}).}
+\resumeItemListEnd
+
+\resumeHeadingSimple
+  {Cloud Hypervisor $|$ \href{https://redirect.github.com/cloud-hypervisor/cloud-hypervisor}{cloud-hypervisor/cloud-hypervisor}}
+  {2026}
+\resumeItemListStart
+  \resumeItem{Fixed a VM lifecycle race where tests reused a VM and disk before shutdown cleanup finished (\href{https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8699}{\textbf{\#8699}}), turned ACPI table construction failures into VM boot errors instead of VMM panics (\href{https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8709}{\textbf{\#8709}}), rejected DMA requests that cross unmapped holes in VFIO device memory instead of panicking (\href{https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8734}{\textbf{\#8734}}), and fixed QCOW ownership so metadata still referenced by the image can't be reused as free space (\href{https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8721}{\textbf{\#8721}}).}
+\resumeItemListEnd
+
+\resumeHeadingSimple
+  {Vite $|$ \href{https://redirect.github.com/vitejs/vite}{vitejs/vite}}
+  {2026}
+\resumeItemListStart
+  \resumeItem{Prevented build failures from skipping plugin cleanup (\href{https://redirect.github.com/vitejs/vite/pull/23165}{\textbf{\#23165}}), stopped dependency analysis from leaking temporary Rolldown builds (\href{https://redirect.github.com/vitejs/vite/pull/23207}{\textbf{\#23207}}), and kept server restarts from rebuilding warm dependency caches after optimizer state was duplicated (\href{https://redirect.github.com/vitejs/vite/pull/23208}{\textbf{\#23208}}, open).}
+\resumeItemListEnd
+
+\resumeHeadingSimple
+  {Cloudflare Workers SDK $|$ \href{https://redirect.github.com/cloudflare/workers-sdk}{cloudflare/workers-sdk}}
+  {2026}
+\resumeItemListStart
+  \resumeItem{Kept Miniflare shutdown from leaving \texttt{workerd} running when browser or proxy cleanup stalls or fails (\href{https://redirect.github.com/cloudflare/workers-sdk/pull/15143}{\textbf{\#15143}}), and prevented stale Access service tokens from authenticating after credentials were removed or incomplete (\href{https://redirect.github.com/cloudflare/workers-sdk/pull/15080}{\textbf{\#15080}}).}
+\resumeItemListEnd
+
+\section{Independent Engineering}
+
+\resumeHeadingSimple
+  {Preflight $|$ \normalfont{Cross-platform performance launcher \& mod analysis toolkit} $|$ \href{https://github.com/teamleaderleo/preflight}{GitHub}}
+  {2026 -- Present}
+\resumeItemListStart
+  \resumeItem{Reduced startup \textbf{101s $\rightarrow$ 13.69s} (\textbf{86.4\%} less time, \textbf{7.38$\times$} speedup) by reverse-engineering an obfuscated JVM runtime spanning the base game and 83 third-party mods, then moving repeated work out of the launch path with memoization, precomputed artifacts, and runtime bytecode rewrites.}
+  \resumeItem{Moved repeated JSON/CSV parsing and merging below five loader-specific caches into a shared memoized data-read layer, deduplicating \textbf{39,017} JSON reads across \textbf{8,378} paths and replacing reparsed text with typed trees validated across \textbf{\textasciitilde990k} values, bringing \texttt{SpecStore} \textbf{19.8s $\rightarrow$ 9.8s} and reducing remaining merged-read overhead \textbf{2.172s $\rightarrow$ 0.300s}.}
+  \resumeItem{Moved texture-cache lookup ahead of a single-threaded prefetch queue that blocked startup for \textbf{$\sim$27s}, then removed \textbf{1.22 GiB} of VRAM padding from texture uploads.}
+  \resumeItem{Removed repeated O(n) scans from campaign simulation with mutation-tracked indexes (\textbf{227,805} full-list validations $\rightarrow$ \textbf{0}, \textbf{79.1M} entity-reference checks $\rightarrow$ \textbf{0}) and short-circuited \textbf{117.9M} unchanged commodity recomputations.}
+  \resumeItem{Eliminated per-file durability for rebuildable texture intermediates and streamed them into one final pack, bringing preparation \textbf{200.77s $\rightarrow$ 16.21s} and storage \textbf{4.76 GB $\rightarrow$ $\sim$1.1 GB}, then laid out the same texture corpus in observed startup order, reducing launch \textbf{33.53s $\rightarrow$ 14.174s}.}
+  \resumeItem{Memoized \textbf{228} Janino compilation requests (\textbf{18.014s $\rightarrow$ 2.364s}), then deduplicated \textbf{36,332} generated-class occurrences to \textbf{280} unique classes, shrinking class maps \textbf{145.96 MiB $\rightarrow$ 1.13 MiB} and replay \textbf{1.501s $\rightarrow$ 29ms}.}
+  \resumeItem{Turned the Java performance engine into a self-contained Windows, macOS, and Linux desktop app with a React UI over a Rust/Tauri native host, bundled Java runtime, durable launch/playtime history, and signed updates with rollback.}
+\resumeItemListEnd
+
+\section{Experience}
+\resumeHeadingSimple
+  {IBM $|$ Software Developer Intern}
+  {Toronto, ON $|$ May 2021 -- August 2022}
+\resumeItemListStart
+  \resumeItem{Built and refactored Java end-to-end tests for IBM Cloud AI/ML and data workflows across Kafka, Spark, Snowflake, hybrid cloud, and on-premises environments, and identified a critical RBAC flaw that required a three-team hotfix.}
+  \resumeItem{Reduced developer onboarding from \textbf{3 hours to 15 minutes} by consolidating obsolete SDK and runtime setup.}
+\resumeItemListEnd
+
+\section{Education}
+\resumeHeadingSimple
+  {University of Toronto $|$ \normalfont{BSc in Mathematics, Statistics \& Computer Science}}
+  {Toronto, ON $|$ June 2024}
+\vspace{-3pt}
+\section{Technical Skills}
+\small
+\textbf{Languages:} TypeScript, JavaScript, Rust, Java, Python, Go, SQL, C \quad
+\textbf{Technologies:} Linux, React, Vite, Next.js, Node.js, Cloudflare Workers, Convex, PostgreSQL, AWS, Docker, Git
+
+\end{document}
