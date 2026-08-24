@@ -8,13 +8,32 @@ Routine hosted CI answers the cheap repository questions: ESLint and Vitest run 
 
 | Source | Vercel behaviour |
 | --- | --- |
-| `main` | Deploy automatically to production. |
+| `main` | Production is requested through the central deploy governor; Vercel Git auto-deploy is disabled. |
 | Ordinary feature, fix, docs, chore, internal, audit, or agent branches | Skip automatic Vercel deployment. |
 | Commit message containing `[preview]` | Promote that commit to `preview/opt-in/<source-branch>` and deploy it. |
 | Branch prefixed `preview/` | Deploy every push as a persistent preview branch. |
 | Manual or non-Git deployment with no Git ref | Continue the deployment. |
 
 Use `[preview]` as the conventional spelling. Marker matching is case-insensitive.
+
+## Production governor
+
+`teamleaderleo/deploy-governor` owns production admission across the operator's governed Vercel projects. Scrapbook does not store its Vercel credential and does not run a repository-local production deployment workflow.
+
+The normal path is:
+
+```text
+Scrapbook main changes
+  -> central governor observes the production branch head
+  -> governor checks Vercel's rolling team-wide deployment history
+  -> below the soft threshold: create one exact-SHA production deployment
+  -> at or above the threshold: retain the candidate without creating a Vercel deployment
+  -> one global half-hour batch slot drains at most one queued project
+```
+
+Vercel supplies the governor with Scrapbook's existing project identity and production branch through the project's Git integration. The governor checks exact-SHA Vercel history before creating a deployment, so repeated observations do not duplicate an already-attempted revision.
+
+The central poll is also a reconciliation path for missing webhook coverage. Its schedule is not a realtime guarantee; production may begin a few minutes after a merge instead of immediately. The existing production deployment remains live while the next revision is waiting.
 
 ## How the repository enforces the policy
 
@@ -24,11 +43,11 @@ Three controls handle different points in the path.
 
 The root `vercel.json` uses `git.deploymentEnabled` with a deny-by-default rule:
 
-- `main` is enabled;
+- `main` is disabled because the governor creates production deployments explicitly;
 - `preview/**` is enabled;
 - every other Git branch is disabled.
 
-This runs at the Git integration layer, before Vercel creates a routine branch deployment. It is the quota-saving control.
+This prevents Vercel's Git integration from creating a production deployment before the cross-project governor has made its quota decision.
 
 ### 2. Commit-marker promotion
 
@@ -46,14 +65,14 @@ A contributor who wants every push deployed can work directly on a `preview/…`
 
 `scripts/vercel-preview-policy.mjs` is the repository-owned final decision for any deployment that reaches Vercel's Ignored Build Step. It continues for:
 
-- `main`;
+- `main` when an explicit governor or manual deployment reaches Vercel;
 - `preview/…` branches;
 - a commit containing `[preview]`;
 - a deployment with no Git ref.
 
 It exits `0` for a routine branch so Vercel ignores the build, and exits `1` when the build should continue. The command prints one concise reason in the deployment log.
 
-The decision function is pure and covered by unit tests. The ignored-build command is defence in depth; the branch gate does the quota-saving work for ordinary Git pushes.
+The ignored-build command is defence in depth. It is not the production quota governor because Vercel has already created a deployment record by the time this command runs.
 
 ## When a preview earns a deployment
 
@@ -65,21 +84,25 @@ Routine prose, tests, repository maintenance, and source-level changes stay on o
 
 ## Practical cadence
 
-Run local checks before pushing when local access is available. Accumulate related edits instead of turning every small correction into a remote deployment attempt. Let routine GitHub CI answer lint, unit-test, and production-build questions. Use an explicit browser check when the change needs one. Add `[preview]` to a commit when a deployed URL adds useful evidence, or use a `preview/…` branch for a longer preview session. Merge accepted work to `main` for the production deployment.
+Run local checks before pushing when local access is available. Let routine GitHub CI answer lint, unit-test, and production-build questions. Use an explicit browser check when the change needs one. Add `[preview]` to a commit when a deployed URL adds useful evidence, or use a `preview/…` branch for a longer preview session. Merge accepted work to `main`; the governor then handles production admission automatically.
 
 ## Quota accounting
 
-Vercel Hobby accounts have rolling build and deployment limits. Vercel's Ignored Build Step executes after a deployment has already been created, and Vercel documents ignored or cancelled builds as counting toward deployment quotas and concurrent build slots.
+The governor counts Vercel deployments across the complete Vercel team, including preview deployments and projects that are not governed. The first 50 deployments in the rolling 24-hour window leave fresh governed production candidates in immediate mode. At or above that soft threshold, routine production candidates wait and the global half-hour scheduler deploys at most one queued project per slot.
 
-For that reason, this repository does not rely on the ignored-build command alone. `git.deploymentEnabled` blocks routine branches before deployment creation. The ignored-build script remains a readable safeguard for manual deployments and any deployment that reaches the build stage through another route.
+This preserves headroom below Vercel Hobby's 100-deployment rolling limit for previews, manual deployments, non-governed projects, and races around the threshold.
 
-## Retrying a blocked production deployment
+Vercel's Ignored Build Step executes after a deployment has already been created, so ignored or cancelled builds cannot provide the same quota protection.
 
-When a `main` deployment hits a rolling limit, wait until enough earlier activity leaves the quota window, then trigger one deliberate retry. Repeated rapid retries create more deployment attempts and extend the problem.
+## Recovery
+
+If the governor is unavailable, do not repeatedly create manual Vercel attempts. The current production deployment stays live. The repository-level rollback for the delivery path is to set `git.deploymentEnabled.main` back to `true`, restoring Vercel's normal Git production trigger.
+
+A specific failed or canceled exact SHA is treated as already attempted by the governor rather than retried forever. Push a repaired revision or perform one deliberate recovery deployment when needed.
 
 ## Project boundary
 
-This policy applies to the existing Vercel project `setzen`. It changes repository-controlled Git deployment behaviour only. Production domains, project environment variables, and runtime settings stay unchanged.
+This policy applies to the existing Vercel project `setzen`. Production domains, project environment variables, previews, and runtime settings stay unchanged.
 
 ## Sources
 
