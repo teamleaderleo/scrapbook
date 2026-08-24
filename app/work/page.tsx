@@ -1,4 +1,5 @@
 import ViewportPageShell from '@/components/viewport-page-shell';
+import { WorkDeepDivePractice } from '@/components/work/work-deep-dive-practice';
 import { workRecords, workRecordUpdatedAt } from '@/lib/work-records';
 import { ArrowUpRight } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -168,6 +169,12 @@ export default function WorkPage() {
                       </ul>
                     </aside>
                   </div>
+
+                  <WorkDeepDivePractice
+                    recordId={record.id}
+                    title={record.title}
+                    reversal={record.reversal}
+                  />
                 </article>
               </li>
             ))}
