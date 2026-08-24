@@ -19,22 +19,28 @@ export const workRecords: readonly WorkRecord[] = [
   {
     id: 'preflight',
     title: 'Preflight',
-    kind: 'Owned performance system',
+    kind: 'Performance launcher and companion app',
     status: 'Release candidate · ~101s → 13.69s development arc',
     summary:
-      'A performance launcher and desktop companion for heavily modded Starsector. It prepares repeatable work before launch and applies runtime shortcuts only when the exact game, mod, class-loader, and bytecode evidence still matches.',
+      'A cross-platform performance launcher and mod-analysis toolkit for heavily modded Starsector. The work combines reverse-engineering an obfuscated JVM runtime, moving deterministic work to reusable boundaries, exact fallback when those proofs stop holding, and a desktop product around the same Java engine.',
     accomplishments: [
-      'The current development arc runs from an observed early high around 101 seconds to a 13.69-second best run on the reviewed 83-mod M5 MacBook Air path; a separate same-session A/B campaign measured 89.00s ordinary versus 15.53s accelerated medians.',
-      'Current steady-state work includes learned Compact texture packs around 1.1 GB, physical access-order-sensitive pack publication, prepared data/audio/generated-code paths, adapter health, and original-path fallback for changed or unsupported inputs.',
-      'The product now includes native desktop packaging, profiles/settings, benchmarking, diagnostics, manual privacy-bounded support reporting, signed update/rollback machinery, and release-candidate evidence across macOS, Windows, and Linux.',
+      'The 83-mod development arc moved from an observed early high around 101 seconds to a 13.69-second best run. Five loader-specific data caches exposed a lower shared boundary, where repeated JSON/CSV work moved into one memoized read layer and typed-tree representation.',
+      'The storage/runtime work spans a ~27-second serialized texture-prefetch bottleneck, 1.22 GiB of removed VRAM padding, texture preparation from 200.77s to 16.21s with storage from 4.76 GB to ~1.1 GB, and the same texture corpus launching 33.53s alphabetically versus 14.174s in observed access order.',
+      'Generated-code work memoized 228 Janino compilation requests and then collapsed 36,332 generated-class occurrences to 280 unique classes. Campaign work replaced sector-wide scans with mutation-tracked indexes and short-circuited 117.9M unchanged commodity recomputations.',
+      'The same engine now powers a Windows/macOS/Linux desktop app with React over a Rust/Tauri host, a bundled Java runtime, durable launch/playtime history, storage and recovery tooling, diagnostics, and signed updates with rollback.',
     ],
     reversal:
-      'A valid prepared-pixel cache barely moved launch time until measurement found it sitting behind a roughly 27-second prefetch wait. Moving the intervention to the actual critical-path owner turned the same prepared work into a major improvement.',
+      'A valid prepared-texture cache barely moved launch time until measurement found it sitting behind a roughly 27-second prefetch wait. Moving the intervention to the actual critical-path boundary turned the same prepared work into a major improvement.',
     evidence: [
       {
         label: 'Repository',
         href: 'https://github.com/teamleaderleo/preflight',
         kind: 'repository',
+      },
+      {
+        label: 'Engineering overview',
+        href: 'https://github.com/teamleaderleo/preflight/blob/main/docs/engineering-overview.md',
+        kind: 'record',
       },
       {
         label: 'Current performance record',
@@ -52,14 +58,14 @@ export const workRecords: readonly WorkRecord[] = [
     id: 'open-source',
     title: 'Open-source repairs',
     kind: 'Upstream engineering',
-    status: 'Selected merged, adopted, and reviewed work',
+    status: 'Selected merged and reviewed work',
     summary:
-      'Repairs in unfamiliar systems, selected for the ownership boundary they clarify and the quality of external review or adoption instead of repository-name accumulation.',
+      'Repairs in unfamiliar systems, selected for the failure or ownership boundary they clarify rather than repository-name accumulation.',
     accomplishments: [
-      'In Vercel AI SDK, directly merged and published a deterministic URL-regex fix; two independently developed Web Streams repairs were adopted by AI SDK Factory into merged upstream commits with retained co-author credit, including maintained-release propagation.',
-      'Cloud Hypervisor now has three merged fixes across exact VM shutdown lifecycle, typed ACPI boot-error propagation, and sparse VFIO BAR mapping semantics, with a deeper QCOW metadata-ownership repair still open.',
-      'Vite has two merged lifecycle/correctness fixes plus an open repeated-config-resolution idempotence follow-on; Cloudflare Workers SDK has two merged fixes across Miniflare teardown and Access credential/cache freshness.',
-      'A React Fragment-ref repair is open with a positive submitted review: it checks Fragment listener ownership before destructive child traversal and makes omitted listener options share the DOM capture-false identity of explicit false.',
+      'Vercel AI SDK fixes cover deterministic URL matching, Web Stream reader release after source errors, and preserving useful download-size failures instead of replacing them with cancellation errors.',
+      'Cloud Hypervisor now includes four merged repairs across VM shutdown lifecycle, ACPI boot-error propagation, sparse VFIO DMA validation, and QCOW metadata ownership so referenced L2 tables cannot become reusable free space.',
+      'Vite has merged build-cleanup and temporary-bundle lifecycle fixes plus an open repeated-config-resolution idempotence repair; Cloudflare Workers SDK has merged fixes across Miniflare teardown and stale Access credential caching.',
+      'A React Fragment listener repair remains open with positive review, covering listener ownership during child traversal and DOM capture-option identity.',
     ],
     reversal:
       'A real runc off-by-one was patched on the allocation side. Repository history showed the cleaner repair belonged in MaxCPU semantics instead, so the competing patch was closed rather than defended for its merge statistic.',
@@ -70,8 +76,8 @@ export const workRecords: readonly WorkRecord[] = [
         kind: 'pull-request',
       },
       {
-        label: 'React · Fragment listener identity',
-        href: 'https://redirect.github.com/react/react/pull/37251',
+        label: 'Cloud Hypervisor · QCOW ownership',
+        href: 'https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8721',
         kind: 'pull-request',
       },
       {
@@ -85,8 +91,13 @@ export const workRecords: readonly WorkRecord[] = [
         kind: 'pull-request',
       },
       {
-        label: 'Cloudflare · Miniflare disposal lifecycle',
-        href: 'https://redirect.github.com/cloudflare/workers-sdk/pull/15143',
+        label: 'Cloudflare · Access credential freshness',
+        href: 'https://redirect.github.com/cloudflare/workers-sdk/pull/15080',
+        kind: 'pull-request',
+      },
+      {
+        label: 'React · Fragment listener identity',
+        href: 'https://redirect.github.com/react/react/pull/37251',
         kind: 'pull-request',
       },
       {
@@ -198,7 +209,7 @@ export const workRecords: readonly WorkRecord[] = [
   },
 ];
 
-export const workRecordUpdatedAt = '2026-08-24';
+export const workRecordUpdatedAt = '2026-08-25';
 
 export function getWorkRecord(id: string): WorkRecord | undefined {
   return workRecords.find(record => record.id === id);
