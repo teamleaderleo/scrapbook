@@ -63,10 +63,10 @@ This sequence is a default, not a ritual. For a brand-new hard mechanism, spend 
 
 The current method is informed by several broad findings, while avoiding the claim that any one technique dominates every kind of technical learning:
 
-- Retrieval practice improves retention relative to restudy, and smaller interspersed tests can improve later performance: [Don et al., 2024](https://pubmed.ncbi.nlm.nih.gov/39556402/) and a recent testing-effect meta-analysis, [Mulligan et al., 2026](https://pubmed.ncbi.nlm.nih.gov/42258276/).
+- Retrieval practice improves retention relative to restudy, and smaller interspersed tests can improve later performance: [Don et al., 2024](https://pubmed.ncbi.nlm.nih.gov/39556402/) and the 2026 meta-analysis [Research on "the testing effect" routinely conflates direct and forward testing effects](https://pubmed.ncbi.nlm.nih.gov/42258276/).
 - Spaced retrieval is a well-supported combination; variable contexts across retrieval attempts can add benefit in some tasks: [Butowska-Buczyńska et al., 2024](https://pubmed.ncbi.nlm.nih.gov/39453748/).
 - Interleaving has a moderate overall effect but depends strongly on the material and is especially useful when discrimination among similar categories matters: [Brunmair & Richter, 2019](https://pubmed.ncbi.nlm.nih.gov/31556629/).
-- Generating parts of an explanation or text can improve learning compared with reading alone when the generation task fits the material: [Bertsch et al. review / text-generation meta-analysis, 2023](https://link.springer.com/article/10.1007/s10648-023-09758-w).
-- Worked examples remain useful for novice learning of complex procedures, with guidance becoming less useful as expertise increases: [Sweller, 2024 discussion of cognitive load and worked examples](https://link.springer.com/article/10.1007/s10648-023-09817-2) and [Stark et al., 2025 systematic review of erroneous/worked examples](https://link.springer.com/article/10.1007/s10648-025-10071-x).
+- Generating parts of an explanation or text can improve learning compared with reading alone when the generation task fits the material: [Schindler & Richter, 2023](https://link.springer.com/article/10.1007/s10648-023-09758-w).
+- Worked examples remain useful for novice learning of complex procedures, with guidance becoming less useful as expertise increases: [Sweller, 2024](https://link.springer.com/article/10.1007/s10648-023-09817-2) and the 2025 systematic review by [Dieterich, Rumann & Rodemer](https://link.springer.com/article/10.1007/s10648-025-10071-x).
 
 Treat these as design evidence, not commandments. We should keep checking whether the method produces durable understanding in actual use.
