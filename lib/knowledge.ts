@@ -40,7 +40,11 @@ const KNOWLEDGE_ROOT = path.join(process.cwd(), 'knowledge');
 const SKIP_FILES = new Set(['AGENTS.md']);
 
 function asString(value: unknown) {
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+  if (typeof value === 'string' && value.trim()) return value.trim();
+  if (value instanceof Date && !Number.isNaN(value.valueOf())) {
+    return value.toISOString().slice(0, 10);
+  }
+  return undefined;
 }
 
 function asNumber(value: unknown) {
