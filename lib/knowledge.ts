@@ -139,6 +139,8 @@ async function readEntry(sourcePath: string): Promise<KnowledgeEntry> {
 }
 
 export async function getKnowledgeIndex(): Promise<KnowledgeIndex> {
+  'use cache';
+
   const files = (await walk(KNOWLEDGE_ROOT)).filter(
     file =>
       file.endsWith('.md') &&
@@ -194,6 +196,8 @@ async function existingSourcePath(parts: readonly string[]) {
 export async function getKnowledgeDocument(
   parts: readonly string[]
 ): Promise<KnowledgeDocument | undefined> {
+  'use cache';
+
   const sourcePath = await existingSourcePath(parts);
   if (!sourcePath) return undefined;
 
