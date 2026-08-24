@@ -8,7 +8,7 @@ Routine hosted CI answers the cheap repository questions: ESLint and Vitest run 
 
 | Source | Vercel behaviour |
 | --- | --- |
-| `main` | Production is requested through the central deploy governor after GitHub Actions CI succeeds; Vercel Git auto-deploy is disabled. |
+| `main` | A tiny GitHub Actions signal requests production through the central deploy governor; Vercel Git auto-deploy is disabled. |
 | Ordinary feature, fix, docs, chore, internal, audit, or agent branches | Skip automatic Vercel deployment. |
 | Commit message containing `[preview]` | Promote that commit to `preview/opt-in/<source-branch>` and deploy it. |
 | Branch prefixed `preview/` | Deploy every push as a persistent preview branch. |
@@ -18,14 +18,14 @@ Use `[preview]` as the conventional spelling. Marker matching is case-insensitiv
 
 ## Production governor
 
-`teamleaderleo/deploy-governor` owns production admission across the operator's governed Vercel projects. Scrapbook does not store its Vercel credential and does not run a repository-local production deployment workflow.
+`teamleaderleo/deploy-governor` owns production admission across the operator's governed Vercel projects. Scrapbook does not store its Vercel credential and does not perform the Vercel deployment itself.
 
 The normal path is event-driven:
 
 ```text
 Scrapbook main changes
-  -> GitHub Actions CI completes successfully
-  -> GitHub emits a completed successful check-suite webhook
+  -> the one-step Production deploy signal workflow completes
+  -> GitHub emits that workflow_run webhook
   -> Stensibly verifies the signed GitHub webhook
   -> Stensibly sends the exact repo / branch / SHA to deploy-governor
   -> governor checks Vercel's rolling team-wide deployment history
@@ -34,7 +34,7 @@ Scrapbook main changes
   -> one global half-hour batch slot drains at most one queued project
 ```
 
-GitHub check suites summarize the check runs created by one GitHub App for one commit. The Stensibly bridge admits only completed successful suites from the `github-actions` app. Failed or unfinished CI therefore does not request production deployment.
+`.github/workflows/deploy-signal.yml` is deliberately tiny: it runs on every `main` push, carries no deployment secret, and only emits one successful GitHub Actions workflow run for the exact revision. Stensibly admits only a completed successful `workflow_run` named `Production deploy signal` that was triggered by `push`. Normal quality/build CI remains separate and can run in parallel, as it did when Vercel Git deployment was automatic.
 
 Vercel supplies the governor with Scrapbook's existing project identity and production branch through the project's Git integration. The governor checks exact-SHA Vercel history before creating a deployment, so repeated event deliveries do not duplicate an already-attempted revision.
 
@@ -89,7 +89,7 @@ Routine prose, tests, repository maintenance, and source-level changes stay on o
 
 ## Practical cadence
 
-Run local checks before pushing when local access is available. Let routine GitHub CI answer lint, unit-test, and production-build questions. Use an explicit browser check when the change needs one. Add `[preview]` to a commit when a deployed URL adds useful evidence, or use a `preview/…` branch for a longer preview session. Merge accepted work to `main`; successful CI then emits the event that asks the governor to handle production admission.
+Run local checks before pushing when local access is available. Let routine GitHub CI answer lint, unit-test, and production-build questions. Use an explicit browser check when the change needs one. Add `[preview]` to a commit when a deployed URL adds useful evidence, or use a `preview/…` branch for a longer preview session. Merge accepted work to `main`; the dedicated signal then asks the governor to handle production admission automatically.
 
 ## Quota accounting
 
