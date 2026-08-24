@@ -36,8 +36,16 @@ export type KnowledgeDocument = KnowledgeEntry & {
   markdown: string;
 };
 
+export type KnowledgeHandoff = {
+  title: string;
+  updated?: string;
+  html: string;
+  markdown: string;
+  sourcePath: 'HANDOFF.md';
+};
+
 const KNOWLEDGE_ROOT = path.join(process.cwd(), 'knowledge');
-const SKIP_FILES = new Set(['AGENTS.md']);
+const SKIP_FILES = new Set(['AGENTS.md', 'HANDOFF.md', 'LEARNING.md']);
 
 function asString(value: unknown) {
   if (typeof value === 'string' && value.trim()) return value.trim();
@@ -167,6 +175,26 @@ export async function getKnowledgeIndex(): Promise<KnowledgeIndex> {
     }));
 
   return { trunks, concepts, logs };
+}
+
+export async function getKnowledgeHandoff(): Promise<KnowledgeHandoff> {
+  'use cache';
+
+  const sourcePath = 'HANDOFF.md' as const;
+  const source = await fs.readFile(path.join(KNOWLEDGE_ROOT, sourcePath), 'utf8');
+  const parsed = matter(source);
+  const data = parsed.data as Record<string, unknown>;
+  const markdown = parsed.content.trim().replace(/^#\s+.+\n+/, '');
+  const linkedMarkdown = rewriteKnowledgeLinks(markdown, sourcePath);
+  const html = await parseMarkdown(linkedMarkdown);
+
+  return {
+    title: asString(data.title) ?? 'Current handoff',
+    updated: asString(data.updated),
+    html,
+    markdown,
+    sourcePath,
+  };
 }
 
 function safeSlug(parts: readonly string[]) {
