@@ -8,7 +8,7 @@ Routine hosted CI answers the cheap repository questions: ESLint and Vitest run 
 
 | Source | Vercel behaviour |
 | --- | --- |
-| `main` | Production is requested through the central deploy governor; Vercel Git auto-deploy is disabled. |
+| `main` | Production is requested through the central deploy governor after GitHub Actions CI succeeds; Vercel Git auto-deploy is disabled. |
 | Ordinary feature, fix, docs, chore, internal, audit, or agent branches | Skip automatic Vercel deployment. |
 | Commit message containing `[preview]` | Promote that commit to `preview/opt-in/<source-branch>` and deploy it. |
 | Branch prefixed `preview/` | Deploy every push as a persistent preview branch. |
@@ -20,20 +20,25 @@ Use `[preview]` as the conventional spelling. Marker matching is case-insensitiv
 
 `teamleaderleo/deploy-governor` owns production admission across the operator's governed Vercel projects. Scrapbook does not store its Vercel credential and does not run a repository-local production deployment workflow.
 
-The normal path is:
+The normal path is event-driven:
 
 ```text
 Scrapbook main changes
-  -> central governor observes the production branch head
+  -> GitHub Actions CI completes successfully
+  -> GitHub emits a completed successful check-suite webhook
+  -> Stensibly verifies the signed GitHub webhook
+  -> Stensibly sends the exact repo / branch / SHA to deploy-governor
   -> governor checks Vercel's rolling team-wide deployment history
   -> below the soft threshold: create one exact-SHA production deployment
   -> at or above the threshold: retain the candidate without creating a Vercel deployment
   -> one global half-hour batch slot drains at most one queued project
 ```
 
-Vercel supplies the governor with Scrapbook's existing project identity and production branch through the project's Git integration. The governor checks exact-SHA Vercel history before creating a deployment, so repeated observations do not duplicate an already-attempted revision.
+GitHub check suites summarize the check runs created by one GitHub App for one commit. The Stensibly bridge admits only completed successful suites from the `github-actions` app. Failed or unfinished CI therefore does not request production deployment.
 
-The central poll is also a reconciliation path for missing webhook coverage. Its schedule is not a realtime guarantee; production may begin a few minutes after a merge instead of immediately. The existing production deployment remains live while the next revision is waiting.
+Vercel supplies the governor with Scrapbook's existing project identity and production branch through the project's Git integration. The governor checks exact-SHA Vercel history before creating a deployment, so repeated event deliveries do not duplicate an already-attempted revision.
+
+There is no production-head polling loop.
 
 ## How the repository enforces the policy
 
@@ -84,7 +89,7 @@ Routine prose, tests, repository maintenance, and source-level changes stay on o
 
 ## Practical cadence
 
-Run local checks before pushing when local access is available. Let routine GitHub CI answer lint, unit-test, and production-build questions. Use an explicit browser check when the change needs one. Add `[preview]` to a commit when a deployed URL adds useful evidence, or use a `preview/…` branch for a longer preview session. Merge accepted work to `main`; the governor then handles production admission automatically.
+Run local checks before pushing when local access is available. Let routine GitHub CI answer lint, unit-test, and production-build questions. Use an explicit browser check when the change needs one. Add `[preview]` to a commit when a deployed URL adds useful evidence, or use a `preview/…` branch for a longer preview session. Merge accepted work to `main`; successful CI then emits the event that asks the governor to handle production admission.
 
 ## Quota accounting
 
@@ -96,7 +101,7 @@ Vercel's Ignored Build Step executes after a deployment has already been created
 
 ## Recovery
 
-If the governor is unavailable, do not repeatedly create manual Vercel attempts. The current production deployment stays live. The repository-level rollback for the delivery path is to set `git.deploymentEnabled.main` back to `true`, restoring Vercel's normal Git production trigger.
+If the event bridge or governor is unavailable, do not repeatedly create manual Vercel attempts. The current production deployment stays live. The repository-level rollback for the delivery path is to set `git.deploymentEnabled.main` back to `true`, restoring Vercel's normal Git production trigger.
 
 A specific failed or canceled exact SHA is treated as already attempted by the governor rather than retried forever. Push a repaired revision or perform one deliberate recovery deployment when needed.
 
