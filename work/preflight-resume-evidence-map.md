@@ -71,7 +71,7 @@ General cache and typed representation:
   - one general artifact below the per-spec caches
   - evidence: [`docs/evidence/2026-08-04-merged-read-cache-launch.md`](https://github.com/teamleaderleo/preflight/blob/main/docs/evidence/2026-08-04-merged-read-cache-launch.md)
 - [PR #316 — Decode spec caches from tagged JSON trees](https://github.com/teamleaderleo/preflight/pull/316), merged as [`f63303d4799a306cdb12ea74d22195ba8441368e`](https://github.com/teamleaderleo/preflight/commit/f63303d4799a306cdb12ea74d22195ba8441368e)
-  - replaces text reparsing in the four prepared spec caches with the same typed representation
+  - replaces text reparsing in the four prepared spec JSON caches with the same typed representation
   - rehydration seam **394ms → 132/134ms**
   - evidence: [`docs/evidence/2026-08-04-tagged-spec-json.md`](https://github.com/teamleaderleo/preflight/blob/main/docs/evidence/2026-08-04-tagged-spec-json.md)
 
