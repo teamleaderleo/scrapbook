@@ -68,15 +68,15 @@ Candidate receipts:
 
 > Consolidated repeated JSON/CSV parsing and merging behind five loader-specific caches into a memoized data-read layer shared by the game and mods, deduplicating **39,017 JSON reads across 8,378 paths** at the common boundary, replacing reparsed text with typed trees validated across **12,584 cached objects / 990,602 values**, bringing `SpecStore` **19.8s → 9.8s**, and reduced remaining merged-read overhead **2.172s → 0.300s**.
 
-> Reworked separate game/mod hot paths to bypass a **27s** single-threaded texture prefetch stall, eliminate **1.22 GiB of VRAM padding**, and take **~7.4s** out of AshLib startup, with the texture/prefetch work alone moving a sample launch **88.13s → 62.60s**.
+> Moved texture-cache lookup ahead of a single-threaded prefetch queue that blocked startup for **~27s**, bringing launch **88.13s → 62.60s**, removed **1.22 GiB of VRAM padding** from texture uploads, and memoized repeated AshLib data reads to remove **~7.4s** from its startup callback.
 
-> Reworked **Preflight's texture-cache preparation 200.77s → 16.21s** and **4.76 GB → ~1.1 GB** by streaming textures directly into final packs and learning the startup texture set and physical order after the first launch.
+> Rebuilt **Preflight's texture-cache preparation** to stream textures directly into the final pack instead of forcing thousands of rebuildable files, bringing preparation **200.77s → 16.21s** and storage **4.76 GB → ~1.1 GB**, then learned startup access order so the same Compact texture set launched **33.53s alphabetically vs 14.174s in observed order**.
 
-> Cached generated mod bytecode, reducing Janino compilation **18.014s → 2.364s**, generated class-map storage **145.96 MiB → 1.13 MiB**, and warm replay **1.501s → 29ms**.
+> Memoized **228 Janino compilation requests**, reducing their aggregate time **18.014s → 2.364s**, then collapsed **36,332 generated-class occurrences into 280 unique classes**, shrinking cached class maps **145.96 MiB → 1.13 MiB** and warm replay **1.501s → 29ms**.
 
-> Turned the engine into a native Windows, macOS, and Linux desktop product in Rust, React, and Tauri with a bundled Java runtime, named mod profiles, launch settings, a built-in before/after benchmark, automatic cache maintenance, recovery flows, signed updates and rollback, diagnostics, and support reporting.
+> Built a Windows, macOS, and Linux desktop app in Rust, React, and Tauri with a bundled Java runtime, built-in before/after benchmarks, named mod profiles, automatic cache maintenance after game exit, recovery and diagnostics, and signed updates with rollback.
 
-> Extended the same analysis into a read-only mod linter and setup analyzer that, across **84 resource roots**, found **1,392 asset and configuration findings**, four broken released configs, progressive textures that decode **8.75×** slower, and dependency/reference failures without modifying third-party files.
+> Built a read-only mod linter that found **1,392 asset/configuration findings across 84 resource roots**, including **four broken released configs**, **771.9 MB of VRAM padding**, **687.9 MB decoded at load**, and progressive textures that decode **8.75× slower**.
 
 Why these stay in the pool:
 
@@ -87,12 +87,11 @@ Why these stay in the pool:
 - The five loader-specific caches took `SpecStore` **19.8s → 9.8s**, a clean cumulative result for this exact data-cache arc. Use that instead of attributing a larger whole-launch milestone that also contains texture, audio, or generated-code work.
 - This is textbook memoization plus a typed representation, but the surrounding problem is harder than the textbook version: the runtime is obfuscated, overlays come from many third-party roots, returned JSON objects remain mutable, and the cache has to preserve the game's own merge and fallback behavior.
 - The typed-tree representation was replayed through the installed JSON runtime across **12,584 cached objects containing 990,602 values**. That is the strongest retained million-scale data receipt for the cache architecture.
-- The runtime receipt shows performance work below application abstractions: a serialized prefetch bottleneck, GPU-memory waste, and a large third-party mod callback path.
-- The texture-cache receipt is explicitly Preflight's own storage/preparation engineering. Keep the pairs adjacent: **200.77s → 16.21s** and **4.76 GB → ~1.1 GB**.
-- **16.21s** is the lowest retained complete Compact preparation currently supported by repository evidence. Nearby lower figures measure only a stage, a warm reuse path, or game startup rather than complete fresh Compact preparation.
-- The generated-bytecode receipt adds compiler/runtime work and another clean time/storage collapse.
-- The desktop receipt proves end-to-end ownership: the performance engine became a native cross-platform product with packaging, lifecycle, recovery, measurement, updates, diagnostics, and support.
-- The linter/setup receipt shows the investigation generalizing into tooling for the wider ecosystem rather than only accelerating one installation.
+- The runtime-texture receipt now carries the architectural discovery: the first texture cache was on the wrong side of a serialized prefetch wait. Moving the lookup before that queue changed the whole launch, while the same reverse-engineering pass also removed GPU-memory padding and repeated AshLib reads.
+- The texture-cache receipt is Preflight's own storage/data-layout work. Publication, not worker count, dominated the slow preparation path, so rebuildable intermediates became a streamed final pack. The physical order result shows that logical cache contents alone were not enough.
+- The generated-bytecode receipt carries two optimization layers. First memoize repeated compiler requests, then normalize the cache after discovering that **36,332 class occurrences contained only 280 unique classes**.
+- The desktop receipt proves end-to-end ownership without becoming a feature list: three-OS packaging, bundled runtime, measurement, profile/cache lifecycle, recovery, diagnostics, and signed update/rollback.
+- The linter receipt points the same investigation back at source material instead of routing around it at runtime. Lead with useful findings and resource costs, not calibration statistics.
 
 Performance win inventory, not all of which belongs on the one-page resume:
 
@@ -109,12 +108,16 @@ Performance win inventory, not all of which belongs on the one-page resume:
 - Starsector's visible 0% data-loading plateau was **18–20s**
 - variants moved **3.289s → 0.324s**, weapons **3.338s → 0.998s**, projectiles **2.349s → 1.004s**, hulls **2.653s → 0.754s**, and rules **0.959s → 0.166s**
 - AshLib startup work fell by about **7.4s**
-- the first Janino cache pilot moved the whole launch by **5.37s**, while direct repeated compilation fell **18.014s → 2.364s**
+- 228 Janino compilation requests moved from **18.014s → 2.364s** inside the exact seam; the first live pair moved whole launch **34.83s → 29.46s**
+- Janino's persisted maps contained **36,332 class occurrences / 149,732,372 expanded bytecode bytes** but only **280 unique classes / 1,006,460 unique bytes**, shrinking **145.96 MiB → 1.13 MiB** and warm replay **1.501s → 29ms**
 - prepared audio removed **19.7 core-seconds** of Vorbis work and a measured **3.46s** main-thread wait
 - the texture path removed **6.68s** of source-hashing CPU, **9.65s** of decode and pixel conversion, and **1.22 GiB of VRAM padding**
 - lazy texture carriers avoided a **2.116 GB** compatibility raster allocation, reducing 15,470 possible raster materializations to one
+- first pack-producing texture preparation spent **198.56s** on per-file durable intermediates; streaming rebuildable intermediates into one forced final pack moved the same publication problem to **44.62s Balanced / 16.51s Compact**, with current end-to-end Compact preparation at **16.21s**
+- the same Compact texture corpus launched **33.53s** in alphabetical order and **14.174s** in observed access order
 - exact transformer targeting reduced the class inventory from **2,612 to 38** candidates, a **98.5%** reduction
 - resource reprioritization moved **558.257ms → 4.148ms**, shared path normalization improved **6.88×**, and the common data reader moved **761.978ms → 276.073ms** while avoiding **1.3 GB** of scratch allocation
+- the linter found **1,392 findings across 84 resource roots**, including **771.9 MB VRAM**, **687.9 MB decoded at load**, **100.8 MB disk**, six errors, and four broken released configs
 
 Source hierarchy for future Preflight edits:
 
