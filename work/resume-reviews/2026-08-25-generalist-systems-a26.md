@@ -162,3 +162,59 @@ I compiled the variant locally with `pdflatex`. It renders as **1 page** on lett
 - I prefer a short `GitHub` link label in a long project heading over showing the full repository URL. This is visual taste, not a substantive requirement.
 - I prefer the desktop/productization bullet as the late Preflight capstone even though I rank it second in importance. Ending the deep technical receipts with a shipped-application story gives the section a satisfying change of register.
 - I would happily keep the linter if the page has room, as this variant does. If another distinct project later earns the same space, the linter is the first strong Preflight receipt I would trade away.
+
+## Arbitration follow-up
+
+### 1. Default seventh Preflight bullet — B. Mod linter
+
+**Choice: B. Mod linter.**
+
+The six locked bullets already prove performance diagnosis, runtime optimization, data/cache design, storage work, generated-code work, and cross-platform product delivery. A seventh bullet should add a different engineering signal. The linter does that: it turns runtime investigation into source-side analysis tooling and shows the ability to identify broken released configurations and expensive third-party assets before runtime repair is needed.
+
+The texture-prefetch + VRAM result is excellent engineering, especially the discovery that the cache lookup sat behind the serialized queue. Its marginal signal overlaps two things the locked set already proves: startup-path diagnosis and texture-path optimization. The linter broadens the candidate story more per line.
+
+I would still keep the linter compact. The strongest pieces are **1,392 findings**, **4 broken released configs**, and representative resource consequences. The `84 resource roots` count is expendable.
+
+### 2. Texture storage tail — CUT
+
+**Choice: CUT.**
+
+The same-corpus **33.53s → 14.174s** result adds a real and interesting signal: physical data layout followed observed access order closely enough to more than halve launch time for the same logical texture corpus. That is strong evidence of data-locality and I/O reasoning.
+
+After **200.77s → 16.21s** preparation and **4.76 GB → ~1.1 GB** storage, though, the bullet already contains a complete accomplishment with a clear mechanism and two large consequences. Adding the physical-layout result makes the reader absorb a second optimization story inside the same bullet and introduces `Compact texture set` context. I would move the **33.53s → 14.174s** receipt to portfolio/interview material, where it is excellent discussion fodder.
+
+### 3. JSON validation corpus — C. Remove both from the resume
+
+**Choice: C. Remove both.**
+
+The **12,584 cached objects / 990,602 values** corpus is useful engineering evidence because it shows that replacing reparsed text with typed trees was validated at meaningful scale. It answers the skeptical question, “How did you know the representation preserved behavior?”
+
+On the resume, that evidence is mostly provenance. The shared JSON/CSV bullet already has the architectural move, the **39,017 calls / 8,378 paths** workload, `SpecStore` **19.8s → 9.8s**, and the merged-read seam **2.172s → 0.300s**. Another pair of counts increases number saturation without changing the accomplishment a reader remembers. Keep the validation corpus ready for the interview question about semantic fidelity.
+
+### 4. Section order — A. Selected Open Source → Preflight → IBM
+
+**Choice: A. Selected Open Source → Preflight → IBM.**
+
+For a general SWE screen, the recognizable upstream repositories provide external validation immediately. They show that the candidate can enter mature codebases, navigate review, and fix consequential behavior in code they do not own. That credibility makes the reader more willing to invest in the much larger independent-project section that follows.
+
+Putting Preflight first would make the densest owned project dominate before the reader sees third-party validation. IBM then works well after Preflight because it supplies a different form of credibility: professional-team experience, cloud/data workflows, security impact, and cross-team response. The sequence becomes **external codebase credibility → flagship technical depth → organizational experience**.
+
+### 5. Desktop bullet
+
+**Survive:**
+
+- durable launch/playtime history
+- signed updates with rollback
+
+**Cut from the default resume sentence:**
+
+- locally traced ship wireframes
+- profile management
+
+Durable history signals persistence and product state that survives beyond a demo session. Signed updates with rollback signals release engineering and failure recovery. Both extend the core React/Rust/Java packaging story in ways that general SWE readers can evaluate immediately.
+
+The locally traced wireframes are distinctive and technically interesting, but they pull the sentence toward domain-specific product detail. Profile management is useful product functionality with little marginal engineering signal once the cross-platform app architecture is established.
+
+Final proposed sentence:
+
+> Turned the Java performance engine into a self-contained Windows, macOS, and Linux desktop app with a React UI over a Rust/Tauri native host, bundled Java runtime, durable launch/playtime history, and signed updates with rollback.
