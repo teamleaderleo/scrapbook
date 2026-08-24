@@ -56,8 +56,6 @@ Avoid filler terms such as `actual`, `real`, `bounded`, and `narrow` in career-f
 
 Don't write implementation review language when a consequence is available. `Preserved caller-owned lastIndex` is useful in a PR. `Identical URL checks returned different answers across calls` is useful on a resume.
 
-Don't default every metric sentence to `cut`. Choose the verb that best describes the change. `Brought startup from 101s to 13.69s`, `reduced preparation from 200.77s to 16.21s`, `shrunk 145.96 MiB to 1.13 MiB`, and `removed a 27s wait` each tell a slightly different story.
-
 ## Prefer concrete nouns and verbs
 
 Prefer:
@@ -110,13 +108,27 @@ Strong examples include:
 
 Don't add a second measurement merely because it exists. Pair measurements when the combination is the accomplishment, such as reducing both preparation time and storage.
 
-For Preflight, the resume uses **101s to 13.69s**. Older campaign numbers belong in evidence records, not in the headline result.
+For Preflight, the resume uses **101s to 13.69s**. Older campaign numbers belong in evidence records, not in the resume bullet.
+
+Choose the verb for the accomplishment instead of defaulting to `cut`. `Reduced`, `removed`, `eliminated`, `shrunk`, `brought`, and `moved` each say something different. Repeating one punchy verb until it becomes a tic weakens the page.
+
+## Let a strong heading carry context
+
+A project heading can carry category, domain, platform scope, or public status so the first bullet does not waste its opening words restating them.
+
+For a flagship project, consider a descriptive heading such as:
+
+> **Preflight — Cross-platform performance launcher for Starsector and its modding ecosystem** *(public open source)*
+
+Then let the first bullet open on the strongest result. A heading and first bullet should cooperate rather than duplicate each other.
+
+Parentheses are useful for compact context such as public status, platforms, or an open PR. They should not become a second sentence of qualifications.
 
 ## Flagship projects need the whole problem
 
 A flagship project can look smaller than it is when the bullet names only the local mechanism. Give enough context to show what the system had to survive and what became usable at the end.
 
-For work against a changing third-party runtime, distinguish three things when they are all important:
+For work against a third-party runtime, distinguish three things when they are all important:
 
 - the external system being investigated or repaired
 - the infrastructure the project itself built
@@ -124,33 +136,13 @@ For work against a changing third-party runtime, distinguish three things when t
 
 For Preflight, the 83-mod setup is part of the engineering scope. The startup result came from investigating Starsector and the installed mod stack as one runtime, then changing work in vanilla and third-party paths while letting changed code return to its original behavior. Texture preparation, cache publication, measurement tooling, and the desktop application are Preflight's own machinery around that environment.
 
+`Third-party runtime` is useful planning shorthand, but career copy can often say `the game and mod stack` or name the affected systems directly. Use the shorthand only when it is clearer than the concrete version.
+
 Don't flatten a project like that into `optimized a game` or `built a cache`. Those descriptions erase most of the engineering.
 
 Productization also earns evidence. Cross-platform packaging, a native host, bundled runtimes, recovery, measurement, updates, diagnostics, and ecosystem tools can belong in the candidate pool when they prove the work became a cohesive application instead of stopping at a benchmark or prototype.
 
 Public status still has to be precise. A public repository supports `public open-source project`. It doesn't turn a release candidate into a shipped binary release. Keep source availability, release status, and package status separate.
-
-## Give a flagship project a thesis before the receipts
-
-When the scope of the project is itself impressive, the opening line can explain the whole problem before the metric bullets begin.
-
-A useful thesis answers three questions in one pass:
-
-1. What changing system did this project have to work against?
-2. What kind of intervention did it build?
-3. What did the work become as a product?
-
-For Preflight, the useful thesis is that it works across Starsector plus a large independently maintained mod stack, traces performance and failures across code the project doesn't own, guards runtime interventions as that code changes, and packages the result as a public cross-platform application.
-
-The receipts underneath can then carry the numbers. Don't cram the thesis, every subsystem, and every benchmark into one opening bullet.
-
-## Keep a win inventory while drafting
-
-Flagship projects often have more strong measurements than a one-page resume can hold. Preserve those measurements in the working record before deciding which ones fit the page.
-
-The inventory should prefer meaningful before/afters and concrete consequences over subsystem names. A later editor can compare a 27-second wait, a 7-second callback reduction, a 15-second compilation reduction, a multi-gigabyte allocation removal, and a cross-platform release path without rediscovering the development history.
-
-This inventory is not resume prose. Its job is to stop a later compression pass from forgetting the strongest work.
 
 ## Flagship projects can use the development arc
 
@@ -162,11 +154,15 @@ The same applies to subsystem history. For Preflight texture preparation, the ca
 
 A development arc still needs traceable endpoints. Current code and retained artifacts come first, development/evidence records reconstruct the path, and README prose is a later projection of those facts.
 
-## Analysis tools should lead with what they found
+## Preserve the win inventory before compressing it
 
-Calibration can make a tool credible, but it usually isn't the accomplishment.
+Flagship projects often accumulate more strong receipts than the final resume can hold. Record the large wins before choosing the final three or four bullets.
 
-If a linter or analyzer found meaningful costs or defects, lead with those findings. Counts such as `median zero findings` or `44 of 86 clean` can stay in the working record to show the tool wasn't firing indiscriminately. They should not displace the expensive assets, broken configuration, or other useful discoveries the tool surfaced.
+The inventory is allowed to mix whole-launch milestones, component reductions, memory and storage wins, and product capabilities. It exists so later editors can choose the best evidence instead of rediscovering the project from polished summaries.
+
+Do not confuse analysis with the accomplishment. If a linter found expensive or broken assets across an ecosystem, lead with what it found. Calibration statistics such as clean-directory counts can support credibility in the working record without becoming the headline.
+
+Likewise, when analysis led directly to a runtime repair, record the repair as engineering. Preflight's NPOT texture work is not merely `the linter found VRAM padding`: the runtime path removed **1.22 GiB** of unnecessary upload padding in a validated full load.
 
 ## Independent projects need a different test
 
