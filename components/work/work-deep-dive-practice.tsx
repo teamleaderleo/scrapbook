@@ -50,9 +50,26 @@ const BASE_PROMPTS = [
   },
 ] as const;
 
-type PromptId = (typeof BASE_PROMPTS)[number]['id'];
+export type WorkDeepDivePromptId = (typeof BASE_PROMPTS)[number]['id'];
 
-function draftKey(recordId: string, promptId: PromptId) {
+export function buildWorkDeepDivePrompt(
+  promptId: WorkDeepDivePromptId,
+  reversal?: string
+) {
+  const definition =
+    BASE_PROMPTS.find(prompt => prompt.id === promptId) ?? BASE_PROMPTS[0];
+
+  if (promptId === 'reversal' && reversal) {
+    return {
+      ...definition,
+      prompt: `Use the real reversal in the record as your starting point: ${reversal} Then explain what evidence moved the repair boundary and what you learned.`,
+    };
+  }
+
+  return definition;
+}
+
+function draftKey(recordId: string, promptId: WorkDeepDivePromptId) {
   return `work:deep-dive:${recordId}:${promptId}`;
 }
 
@@ -111,15 +128,10 @@ export function WorkDeepDivePractice({
   title: string;
   reversal?: string;
 }) {
-  const [promptId, setPromptId] = useState<PromptId>('overview');
-  const activePrompt =
-    BASE_PROMPTS.find(prompt => prompt.id === promptId) ?? BASE_PROMPTS[0];
+  const [promptId, setPromptId] = useState<WorkDeepDivePromptId>('overview');
+  const activePrompt = buildWorkDeepDivePrompt(promptId, reversal);
   const storageKey = draftKey(recordId, promptId);
   const [draft, setDraft] = useLocalDraft(storageKey);
-  const prompt =
-    promptId === 'reversal' && reversal
-      ? `Use the real reversal in the record as your starting point: ${reversal} Then explain what evidence moved the repair boundary and what you learned.`
-      : activePrompt.prompt;
 
   return (
     <details
@@ -181,7 +193,7 @@ export function WorkDeepDivePractice({
               {activePrompt.title}
             </p>
             <p className="mt-2 max-w-3xl text-sm font-medium leading-6 text-foreground/82">
-              {prompt}
+              {activePrompt.prompt}
             </p>
           </div>
 
