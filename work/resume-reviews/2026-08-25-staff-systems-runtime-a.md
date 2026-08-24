@@ -153,3 +153,57 @@ I compiled the variant with `pdflatex` and inspected the rendered page. It is **
 - I prefer the descriptive Preflight heading used in my variant. The bare repository URL is defensible and this is a hierarchy preference, not a correctness defect.
 - For a pure runtime/systems role, I personally value the serialized-prefetch receipt above desktop productization. For a broader product/platform role, the desktop bullet can move ahead of campaign runtime.
 - I would tolerate slightly fewer bold numeric fragments in Preflight because nearly every line currently has multiple visual anchors. The current numeric emphasis remains consistent with the house style, so I do not consider it a defect by itself.
+
+## Arbitration follow-up
+
+These choices optimize for the default general-software-engineering one-page resume, with the six specified Preflight bullets already locked.
+
+### 1. Default seventh Preflight bullet
+
+**Choice: A — texture prefetch + VRAM.**
+
+This earns the seventh slot because it adds a different kind of reasoning from the six locked bullets. The important move is placing the cache lookup ahead of a single-threaded queue on the startup critical path. That shows the candidate understood where latency was actually introduced and moved the reuse decision to the right boundary. The **1.22 GiB VRAM padding** result adds resource-accounting depth without becoming the sole reason to keep the bullet.
+
+The linter broadens the project into source-side analysis, but its leading **1,392 findings** count is weaker hiring evidence than the prefetch causal story. Leaving whitespace would improve visual calm, but this receipt is strong enough to spend the available line budget.
+
+### 2. Texture storage tail
+
+**Choice: KEEP.**
+
+The **200.77s → 16.21s** and **4.76 GB → ~1.1 GB** results prove a better persistence/publication policy for rebuildable intermediates. The same-corpus **33.53s → 14.174s** result adds a separate signal: physical locality and access order mattered even after the logical data set was fixed. That turns the bullet from a strong durability/storage optimization into a stronger storage-systems story about publication cost, footprint, and read layout.
+
+The phrase **same Compact texture set** is important because it makes the causal claim legible. The data stayed logically equivalent while physical order changed. That is unusually good resume evidence and deserves the extra metric pair.
+
+### 3. JSON validation corpus
+
+**Choice: B — keep only the ~990k value scale.**
+
+The typed-tree representation creates a real correctness question, so one validation receipt belongs on the resume. **990,602 recursively compared values** communicates that the replacement representation was exercised over a substantial fidelity corpus. **12,584 cached objects** adds denominator detail but little additional hiring signal once the value-scale number is present.
+
+I would prefer wording such as **“typed trees validated across 990,602 recursively compared values”**. The exact test harness, object count, installed-runtime replay method, and mismatch history are excellent portfolio/interview material. The resume needs one compact proof that correctness was tested at meaningful scale.
+
+### 4. Section order
+
+**Choice: C — Selected Open Source → IBM → Preflight.**
+
+For a general SWE screen, this gives the reader three useful signals in a deliberate sequence. Selected Open Source establishes recent third-party credibility in recognizable engineering codebases. IBM then keeps conventional industry experience visible before the much longer independent-project block. Preflight follows as the deepest demonstration of ownership and technical range.
+
+Putting IBM after Preflight makes it easy for a scanner to reach Education before registering the only conventional company experience. Leading with Preflight asks the reader to trust a large independent project before seeing external validation. **Selected Open Source → IBM → Preflight** gives the strongest credibility progression for this resume.
+
+### 5. Desktop bullet
+
+**Survive:**
+
+- durable launch/playtime history
+- signed updates with rollback
+
+**Move to portfolio/interview material:**
+
+- locally traced ship wireframes
+- profile management
+
+Durable history adds lifecycle, persistence, and recovery implications beyond the UI stack. Signed updates with rollback adds release and failure-recovery depth. Ship wireframes are distinctive product craft, but they compete for words with stronger engineering signals elsewhere. Profile management is expected application functionality and adds the least differentiation.
+
+Final proposed sentence:
+
+> Turned the Java performance engine into a self-contained Windows, macOS, and Linux desktop app with a React UI over a Rust/Tauri native host, bundled Java runtime, durable launch/playtime history, and signed updates with rollback.
