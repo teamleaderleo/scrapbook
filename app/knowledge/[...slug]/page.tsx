@@ -10,6 +10,13 @@ type KnowledgeDocumentPageProps = {
   params: Promise<{ slug: string[] }>;
 };
 
+export async function generateStaticParams() {
+  const index = await getKnowledgeIndex();
+  return [...index.trunks, ...index.concepts, ...index.logs].map(entry => ({
+    slug: entry.slug.split('/'),
+  }));
+}
+
 export async function generateMetadata({
   params,
 }: KnowledgeDocumentPageProps): Promise<Metadata> {
@@ -46,7 +53,10 @@ export default async function KnowledgeDocumentPage({
       contentClassName="min-h-[calc(100dvh-3rem)]"
     >
       <main className="mx-auto w-full max-w-6xl px-3 pb-24 pt-4 sm:px-6 sm:pt-7">
-        <nav className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground" aria-label="Knowledge breadcrumb">
+        <nav
+          className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
+          aria-label="Knowledge breadcrumb"
+        >
           <Link
             href="/knowledge"
             className="inline-flex min-h-10 items-center gap-2 rounded-full border border-border/70 bg-background/70 px-3 font-medium hover:bg-card hover:text-foreground"
@@ -99,11 +109,17 @@ export default async function KnowledgeDocumentPage({
           </div>
 
           {childNodes.length > 0 ? (
-            <section className="border-t border-dashed border-[hsl(var(--material-paper-edge)/0.7)] px-5 py-7 sm:px-9 sm:py-9" aria-labelledby="knowledge-trunk-nodes">
+            <section
+              className="border-t border-dashed border-[hsl(var(--material-paper-edge)/0.7)] px-5 py-7 sm:px-9 sm:py-9"
+              aria-labelledby="knowledge-trunk-nodes"
+            >
               <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-[hsl(var(--material-paper-ink)/0.5)]">
                 Local nodes
               </p>
-              <h2 id="knowledge-trunk-nodes" className="mt-2 text-xl font-semibold tracking-[-0.025em]">
+              <h2
+                id="knowledge-trunk-nodes"
+                className="mt-2 text-xl font-semibold tracking-[-0.025em]"
+              >
                 Continue through this trunk
               </h2>
               <ul className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -114,7 +130,10 @@ export default async function KnowledgeDocumentPage({
                       className="group flex min-h-12 items-center justify-between gap-3 rounded-xl border border-[hsl(var(--material-paper-edge)/0.65)] bg-[hsl(var(--material-paper-face)/0.4)] px-3 py-2 text-sm font-medium hover:bg-[hsl(var(--material-paper-face)/0.7)]"
                     >
                       <span>{node.title}</span>
-                      <ArrowRight className="h-3.5 w-3.5 shrink-0 opacity-55 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                      <ArrowRight
+                        className="h-3.5 w-3.5 shrink-0 opacity-55 transition-transform group-hover:translate-x-0.5"
+                        aria-hidden="true"
+                      />
                     </Link>
                   </li>
                 ))}
