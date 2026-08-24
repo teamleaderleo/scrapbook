@@ -19,6 +19,14 @@ The quality lane restores `.eslintcache` across commits, keyed by the pnpm lockf
 
 Hosted CI does not install a browser, start Playwright, upload screenshot artifacts, classify UI surfaces, or replay browser checks after merge.
 
+## Production deployment admission
+
+Scrapbook production deployments are governed centrally by `teamleaderleo/deploy-governor`. Stensibly's signed GitHub webhook path forwards the exact `main` repository and SHA to that governor; participating repository workflows do not carry a Vercel credential.
+
+The governor counts Vercel deployments across the account over a rolling 24-hour window. Fresh `main` pushes deploy immediately while the count is below 50. At 50 or more, routine pushes wait and repeated pushes coalesce to the newest SHA; one global batch slot runs every 30 minutes and can deploy at most one stale project.
+
+Vercel remains the build and hosting provider. The governor only decides when an exact production SHA is submitted. Preview branches remain under the normal Vercel preview policy and are not routed through the production batch queue.
+
 ## Browser checks are author-side
 
 Playwright remains available for questions that genuinely require a browser: rendered geometry, CSS behavior, hydration, pointer or keyboard interaction, browser APIs, responsive behavior, and deliberate visual inspection.
