@@ -12,13 +12,14 @@ describe('GET /api/work', () => {
       version: 1,
       source: 'repository',
       updatedAt: '2026-08-25',
-      recordCount: 6,
+      recordCount: 7,
     });
     expect(body.records.map((record: { id: string }) => record.id)).toEqual([
       'preflight',
       'open-source',
       'stensibly',
       'smolrunner',
+      'glossless',
       'cultist',
       'fieldwork',
     ]);
