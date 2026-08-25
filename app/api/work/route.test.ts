@@ -26,11 +26,9 @@ describe('GET /api/work', () => {
     expect(body.records[3]).toMatchObject({
       id: 'smolrunner',
       title: 'Glaeda',
-      evidence: [
-        {
-          href: 'https://github.com/teamleaderleo/smolrunner',
-        },
-      ],
+    });
+    expect(body.records[3].evidence[0]).toMatchObject({
+      href: 'https://github.com/teamleaderleo/smolrunner',
     });
     expect(body.records[0].evidence[0].href).toBe('/work/preflight');
   });
