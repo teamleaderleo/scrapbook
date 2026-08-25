@@ -4,6 +4,8 @@ This file keeps strong candidate language and story fragments that may later bec
 
 It is intentionally more generous than `resume-candidates.md`. The ranking file answers what earns scarce space today; this file preserves formulations worth revisiting without forcing them onto the page.
 
+**Authority warning — 2026-08-25:** this is a historical phrase reservoir, not a live status source. Do not treat words such as “current,” merge/review state, benchmark numbers, or project maturity below as authoritative. For the current one-page wording use `resume-current.md`; for ranked candidates and current status use `resume-candidates.md`; for Preflight measurements use `preflight-resume-evidence-map.md`. Reconcile any fragment here against those owners and the source repository before reuse. In particular, the old 15.88s Preflight formulation and the three-merged-plus-open Cloud Hypervisor wording below are superseded.
+
 Primary evidence remains in the originating repositories and the detailed records under `work/records/`.
 
 ## Working identity thesis
