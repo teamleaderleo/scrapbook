@@ -11,7 +11,7 @@ describe('GET /api/work', () => {
     expect(body).toMatchObject({
       version: 1,
       source: 'repository',
-      updatedAt: '2026-08-24',
+      updatedAt: '2026-08-25',
       recordCount: 6,
     });
     expect(body.records.map((record: { id: string }) => record.id)).toEqual([
@@ -22,8 +22,6 @@ describe('GET /api/work', () => {
       'cultist',
       'fieldwork',
     ]);
-    expect(body.records[0].evidence[0].href).toBe(
-      'https://github.com/teamleaderleo/preflight'
-    );
+    expect(body.records[0].evidence[0].href).toBe('/work/preflight');
   });
 });
