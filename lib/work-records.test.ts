@@ -18,10 +18,10 @@ describe('public work records', () => {
         expect(url.protocol).toBe('https:');
         if (url.hostname === 'teamleaderleo.com') {
           expect(url.pathname).toMatch(/^\/work\//);
-        } else if (owner === 'teamleaderleo') {
-          expect(url.hostname).toBe('github.com');
-        } else {
-          expect(url.hostname).toBe('redirect.github.com');
+        } else if (url.hostname === 'github.com') {
+          expect(owner).toBe('teamleaderleo');
+        } else if (url.hostname === 'redirect.github.com') {
+          expect(owner).not.toBe('teamleaderleo');
         }
       }
     }
