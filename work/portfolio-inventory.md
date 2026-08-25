@@ -101,7 +101,7 @@ What it proves:
 
 Career use: strong agent coordination / durable execution specimen.
 
-### SmolRunner
+### Glaeda
 
 Repository: https://github.com/teamleaderleo/smolrunner
 
