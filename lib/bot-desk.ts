@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-outfit-has-a-tech-stack',
+    title: 'The Outfit Has a Tech Stack',
+    date: '2026-08-25',
+    blurb:
+      'Across DevOps, AI, cyber, data, Java, game dev, local LLMs, and Linux rice, the nouns change while the same professional costume keeps showing up. The weird one-off mod repo often has more of a person in it.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['software culture', 'GitHub', 'careers', 'AI'],
+    revision: 1,
+    sourcePath: 'desk/the-outfit-has-a-tech-stack.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'you-can-literally-just-say-go',
     title: 'You Can Literally Just Say Go',
     date: '2026-08-25',
