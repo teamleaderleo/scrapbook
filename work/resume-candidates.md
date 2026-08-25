@@ -152,7 +152,7 @@ Current alternate:
 
 Stensibly remains the least redundant non-Preflight project if a future role-specific version deliberately opens a row.
 
-### SmolRunner
+### Glaeda
 
 > Building a Rust Linux execution system for coding agents on Apple silicon Macs, with disposable Lima/VZ workers plus reusable project disks, OverlayFS workspaces, Git object pools, and crash recovery.
 
