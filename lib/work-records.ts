@@ -145,19 +145,20 @@ export const workRecords: readonly WorkRecord[] = [
     ],
   },
   {
+    // Keep this public v1 id stable: it also keys local interview-rehearsal drafts.
     id: 'smolrunner',
-    title: 'SmolRunner',
+    title: 'Glaeda',
     kind: 'Hot Linux execution for coding agents',
     status: 'Pre-alpha · live Apple-silicon acceptance',
     summary:
-      'Fresh Linux when the work is untrusted; hot project state when it is trusted. SmolRunner runs coding agents and GitHub Actions on Apple-silicon Macs, keeping repositories, dependencies, compiler state, indexes, and services warm only where the trust and validity rules permit it.',
+      'Fresh Linux when the work is untrusted; hot project state when it is trusted. Glaeda runs coding agents and GitHub Actions on Apple-silicon Macs, keeping repositories, dependencies, compiler state, indexes, and services warm only where the trust and validity rules permit it.',
     accomplishments: [
       'The strict lane gives unknown work a prepared Lima/VZ worker, one bounded job, durable assignment/no-replay handling, official GitHub Runner Scale Set integration, exact teardown, and evidence that the worker is gone.',
       'Trusted projects can keep the expensive substrate hot: persistent project disks, crash-safe leases, OverlayFS task views, immutable Git object-pool generations, and copy-on-write task materialization are already landed as M6 primitives.',
       'The north-star metric is agent wall-clock latency: queue-to-first-useful-command, edit-to-first-test-result, final relevant verification, throughput under concurrent agents, and the CPU/RAM/disk cost of keeping useful state resident.',
     ],
     reversal:
-      'The original instinct was to make every worker disposable. SmolRunner treats disposal as one capability instead: unknown work gets a fresh worker, while trusted projects can keep expensive Linux state hot without making that surviving state the source of execution truth.',
+      'The original instinct was to make every worker disposable. Glaeda treats disposal as one capability instead: unknown work gets a fresh worker, while trusted projects can keep expensive Linux state hot without making that surviving state the source of execution truth.',
     evidence: [
       {
         label: 'Repository',
@@ -171,7 +172,7 @@ export const workRecords: readonly WorkRecord[] = [
       },
       {
         label: 'Current cross-repository state',
-        href: 'https://github.com/teamleaderleo/scrapbook/blob/main/work/current-state.md#smolrunner--landed-m6-hot-state-substrate',
+        href: 'https://github.com/teamleaderleo/scrapbook/blob/main/work/current-state.md#glaeda--landed-m6-hot-state-substrate',
         kind: 'record',
       },
     ],
@@ -274,7 +275,7 @@ export const workRecords: readonly WorkRecord[] = [
   },
 ];
 
-export const workRecordUpdatedAt = '2026-08-25';
+export const workRecordUpdatedAt = '2026-08-26';
 
 export function getWorkRecord(id: string): WorkRecord | undefined {
   return workRecords.find(record => record.id === id);

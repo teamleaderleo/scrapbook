@@ -220,10 +220,10 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         external: true,
       },
       {
-        id: 'smolrunner-repository',
+        id: 'glaeda-repository',
         href: 'https://github.com/teamleaderleo/smolrunner',
-        label: 'SmolRunner',
-        description: 'Disposable GitHub Actions runners.',
+        label: 'Glaeda',
+        description: 'Trust-tiered Linux execution for coding agents.',
         group: 'repositories',
         surface: 'external',
         external: true,

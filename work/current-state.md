@@ -1,4 +1,4 @@
-# Current state — 2026-08-25
+# Current state — 2026-08-26
 
 This is the source-first live-status overlay for the work record.
 
@@ -18,7 +18,7 @@ Current source also includes the learned Compact texture path, physical-order-se
 
 Private signing/package rehearsals have succeeded across Linux, macOS, and Windows. Remaining first-beta work belongs to one maintainer-authorized immutable candidate generation: native Windows/Linux licensed-install acceptance, package-bound startup/lifecycle/update/report evidence, the hands-on report-intake canary, and the final publication decision.
 
-## SmolRunner — landed M6 hot-state substrate
+## Glaeda — landed M6 hot-state substrate
 
 Repository: https://github.com/teamleaderleo/smolrunner
 

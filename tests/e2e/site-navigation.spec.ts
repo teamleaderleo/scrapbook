@@ -70,13 +70,16 @@ test('site atlas exposes rooms, repositories, experiments, and connections', asy
   for (const [id, href] of [
     ['preflight-repository', 'https://github.com/teamleaderleo/preflight'],
     ['stensibly-repository', 'https://github.com/teamleaderleo/stensibly'],
-    ['smolrunner-repository', 'https://github.com/teamleaderleo/smolrunner'],
+    ['glaeda-repository', 'https://github.com/teamleaderleo/smolrunner'],
     ['cultist-repository', 'https://github.com/teamleaderleo/cultist'],
   ] as const) {
     await expect(
       atlas.locator(`[data-site-atlas-link="${id}"]`)
     ).toHaveAttribute('href', href);
   }
+  await expect(
+    atlas.locator('[data-site-atlas-link="glaeda-repository"]')
+  ).toContainText('Glaeda');
 
   for (const id of [
     'scrapbook-repository',

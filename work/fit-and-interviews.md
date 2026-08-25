@@ -69,7 +69,7 @@ Current hypothesis: a team with strong technical review can be a positive fit ra
 
 Preflight changes the profile because it demonstrates sustained ownership beyond patch production: problem selection, instrumentation, design, implementation, benchmarking, compatibility, packaging, diagnostics, and a path to users.
 
-Glossless and Stensibly add different forms of whole-product ownership. SmolRunner adds control-plane/security/recovery design, even though the full product lifecycle is not yet complete.
+Glossless and Stensibly add different forms of whole-product ownership. Glaeda adds control-plane/security/recovery design, even though the full product lifecycle is not yet complete.
 
 Current hypothesis: the best roles probably combine deep technical work with an ability to own a meaningful outcome, rather than permanently separating investigation, implementation, testing, and product consequences into different people.
 
@@ -178,7 +178,7 @@ A useful interview question is what proportion of the target work is deep engine
 
 Current thesis:
 
-> Cloud Hypervisor is the cleanest external proof; Preflight demonstrates runtime depth; SmolRunner demonstrates security/reconciliation/control-plane taste; Linux Fieldwork shows the systems bench is much broader than two fortunate upstream patches.
+> Cloud Hypervisor is the cleanest external proof; Preflight demonstrates runtime depth; Glaeda demonstrates security/reconciliation/control-plane taste; Linux Fieldwork shows the systems bench is much broader than two fortunate upstream patches.
 
 A useful interview question is how much production operations/on-call/long-lived service ownership the role expects. That is an area where conventional tenure may contain experiences the current portfolio does not fully substitute for.
 
