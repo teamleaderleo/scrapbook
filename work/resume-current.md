@@ -68,7 +68,7 @@ These remain strong but are intentionally outside the default one-page cut:
 - Preflight mod linter and source-side ecosystem analysis
 - React Fragment listener fix (#37251, open)
 - Stensibly
-- SmolRunner
+- Glaeda
 - Glossless
 
 Use `resume-candidates.md` and `preflight-resume-evidence-map.md` before restoring or rewriting any of them.
