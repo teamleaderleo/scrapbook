@@ -79,7 +79,7 @@ Their history remains available through Git and [`docs/deprecation-ledger.md`](d
 - Tailwind CSS, Radix UI, Framer Motion, and Lucide;
 - Supabase/Postgres with checked-in SQL migrations;
 - React Three Fiber and Three.js;
-- Tiptap, Monaco, Shiki, and Markdown tooling;
+- Monaco, Shiki, and Markdown tooling;
 - Vitest, Playwright, ESLint, and Prettier.
 
 ## Local development
