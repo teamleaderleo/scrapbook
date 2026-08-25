@@ -37,6 +37,17 @@ describe('site navigation registry', () => {
     expect(hrefs).not.toContain(
       'https://github.com/teamleaderleo/linux-fieldwork'
     );
+
+    expect(
+      siteNavigationItems.find(item => item.id === 'glaeda-repository')
+    ).toMatchObject({
+      href: 'https://github.com/teamleaderleo/smolrunner',
+      label: 'Glaeda',
+      description: 'Trust-tiered Linux execution for coding agents.',
+    });
+    expect(
+      siteNavigationItems.find(item => item.id === 'smolrunner-repository')
+    ).toBeUndefined();
   });
 
   it('keeps Operator, Knowledge, tools, the evidence journal, and labs out of the primary row', () => {
