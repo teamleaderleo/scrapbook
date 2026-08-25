@@ -21,22 +21,22 @@ const FEATURED_REPOSITORIES = [
   {
     name: 'preflight',
     url: 'https://github.com/teamleaderleo/preflight',
-    note: 'Starsector launch performance.',
+    note: 'Cross-platform performance launcher and mod analysis for Starsector.',
   },
   {
     name: 'stensibly',
     url: 'https://github.com/teamleaderleo/stensibly',
-    note: 'Agent coordination system.',
+    note: 'Work and handoffs that survive disposable agent sessions.',
   },
   {
     name: 'smolrunner',
     url: 'https://github.com/teamleaderleo/smolrunner',
-    note: 'Trust-tiered Linux execution for coding agents and GitHub Actions.',
+    note: 'Fresh Linux for untrusted work; hot project state when trust permits.',
   },
   {
     name: 'cultist',
     url: 'https://github.com/teamleaderleo/cultist',
-    note: 'Repository-aware evidence for software work.',
+    note: 'Repository evidence before code changes: find out why before you copy it.',
   },
 ] as const;
 
