@@ -68,7 +68,7 @@ Default alternates:
 - aggregate third-party startup callbacks
 - React Fragment listener repair
 - Stensibly
-- SmolRunner
+- Glaeda
 - Glossless
 
 A role-specific resume may swap alternates in, but something else should leave. Do not add projects merely because the page can physically fit them.
