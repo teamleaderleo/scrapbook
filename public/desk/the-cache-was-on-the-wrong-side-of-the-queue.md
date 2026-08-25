@@ -53,7 +53,7 @@ There were 2,394 sleep events at that site.
 
 The same recording had another instrumentation problem: Starsector's `-XX:+UseFastUnorderedTimeStamps` setting made JFR's event clock run at about 0.401× wall time. That invalidated durations I had previously read straight out of the recording. Event counts and shares were fine; the clock wasn't.
 
-So the day's first clean-looking story had two broken instruments hiding inside it. The more important one for the cache was wonderfully stupid: `[:8]`.
+The day's first conclusion was wrong for two independent instrumentation reasons. For the cache, the decisive one was `[:8]`.
 
 ## The cache was after the expensive part
 
@@ -61,15 +61,13 @@ The placement had originally been conservative on purpose.
 
 Preflight's compatibility texture rewrite found the branch where Starsector's own prefetcher missed and inserted the cache lookup there. If the game had already prefetched an image, Preflight left that path alone. If the game had not, Preflight could serve prepared pixels instead of doing the synchronous decode and conversion.
 
-That sounds like a nice narrow intervention.
-
 It also means the cache can only help after the game's prefetcher has already lost the race.
 
 For any image the prefetcher owns, the loading thread checks the queue, sees the image is pending, and starts sleeping. The background decoder eventually publishes the image. Only after all of that would execution ever reach the branch where the cache lived.
 
 The prepared pixels could be sitting there ready the entire time. It did not matter. The wait had already happened.
 
-This explained an earlier result that had been bothering me. A large amount of texture CPU work had been removed, the cache counters looked healthy, and whole-launch time barely moved. The optimization was locally correct. It was simply on the wrong side of the cost it was supposed to avoid.
+It also explained an earlier result. A large amount of texture CPU work had been removed, the cache counters looked healthy, and whole-launch time barely moved. The optimization was locally correct. It was simply on the wrong side of the cost it was supposed to avoid.
 
 ## Stop putting the work on the queue
 
@@ -79,7 +77,7 @@ If Preflight's manifest can serve a texture, do not enqueue that texture for Sta
 
 Now the loading thread reaches the texture, finds no pending prefetch entry to wait for, and falls through to the cache path that already existed. Anything Preflight cannot serve stays on the game's original path.
 
-The final run's telemetry changed rather dramatically:
+The final run's telemetry changed:
 
 ```text
 prefetchSkipped  50879
@@ -91,11 +89,11 @@ fallbacks            3
 
 The game had been enqueueing 50,880 images and later asking for 21,656 of them. One decoder thread was therefore also chewing through roughly 29,000 images nobody ever collected.
 
-The cache itself was still the same basic cache. It was finally being asked before the loading thread paid for the queue.
+The cache itself was the same basic cache. It was finally being asked before the loading thread paid for the queue.
 
 ## Then measure it like a user would
 
-The follow-up campaign ran five rounds across three conditions with a 240-second cooldown before each launch.
+The follow-up August 1 campaign used the then-current 77-mod setup: five rounds across three conditions, with a 240-second cooldown before each launch.
 
 The medians were:
 
@@ -109,9 +107,9 @@ The cache-plus-bypass path beat the normal launch in all five rounds. Median dif
 
 The prepared-pixel path without the bypass was 0.60 seconds from normal, with `p = 1.000`.
 
-That comparison was useful because it was almost comically literal. The prepared texture work could be present and correct and still buy essentially nothing if the loading thread had to wait before reaching it. Move the decision ahead of the wait and the same general machinery suddenly mattered.
+The prepared texture work could be present and correct and still buy essentially nothing if the loading thread had to wait before reaching it. Move the decision ahead of the wait and it mattered.
 
-This was only one stage of Preflight's later startup work; the project went on to find shared JSON/data boundaries, generated-code duplication, storage-publication cost, physical texture-pack ordering, JVM/Rosetta effects, and other hot paths. But this one is still my favorite boundary mistake because the counters were not lying.
+The counters were not lying.
 
 The cache really was hitting.
 
