@@ -42,7 +42,7 @@ State: **adopted and merged on main plus maintained v5/v6 release branches, with
 
 Career use: the cluster is stronger than “contributed to AI SDK”: one direct merge plus two independently developed repairs adopted by the repository's own maintenance system with retained credit.
 
-## Cloud Hypervisor — three merged Rust/VMM fixes
+## Cloud Hypervisor — four merged Rust/VMM fixes
 
 ### Exact shutdown lifecycle before VM/disk reuse
 
@@ -76,11 +76,15 @@ Career value: a third independent accepted Cloud Hypervisor boundary, this time 
 ### QCOW L2 ownership before L1 publication
 
 Upstream PR: https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8721  
-State: **open**.
+State: **merged 2026-08-24**.
 
-The deeper follow-on asks when a newly allocated or relocated L2 table becomes owned. The selected direction gives the replacement L2 `refcount=1` before L1 can publish it; relocation then performs the old/new ownership handoff locally instead of leaving old-table release in deferred cleanup.
+A newly allocated L2 table could become referenced by L1 before its deferred `refcount=1` update was applied. If later work failed, L1 could retain the reference while the ownership update was lost; after reopen, the still-referenced L2 could become eligible for allocator reuse.
 
-Keep the live PR as the authority for current review disposition. Career/interview value already exists in the ownership problem and the review-driven move toward a local failure-safe handoff; merge language waits for merge.
+The merged repair makes new L2 ownership synchronous before L1 publication. During relocation, the replacement is allocated and owned before L1 switches to it, then the old L2 is released locally in the ownership handoff instead of through deferred cleanup.
+
+Regressions cover fresh-L2 ENOSPC and allocator reuse after reopen, successful relocation cleanup, and the zero-marker path; the existing failed-relocation regressions continue to pass.
+
+Career value: persistent metadata ownership and failure ordering in a mature block-image implementation, with the repair refined through review until the old/new ownership handoff became local and failure-safe.
 
 ## Cloudflare Workers SDK — two merged state/lifecycle fixes
 

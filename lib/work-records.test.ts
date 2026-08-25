@@ -12,14 +12,16 @@ describe('public work records', () => {
       expect(record.accomplishments.length).toBeGreaterThanOrEqual(2);
       expect(record.evidence.length).toBeGreaterThan(0);
       for (const evidence of record.evidence) {
-        const url = new URL(evidence.href);
+        const url = new URL(evidence.href, 'https://teamleaderleo.com');
         const owner = url.pathname.split('/').filter(Boolean)[0];
 
         expect(url.protocol).toBe('https:');
-        if (owner === 'teamleaderleo') {
-          expect(url.hostname).toBe('github.com');
-        } else {
-          expect(url.hostname).toBe('redirect.github.com');
+        if (url.hostname === 'teamleaderleo.com') {
+          expect(url.pathname).toMatch(/^\/work\//);
+        } else if (url.hostname === 'github.com') {
+          expect(owner).toBe('teamleaderleo');
+        } else if (url.hostname === 'redirect.github.com') {
+          expect(owner).not.toBe('teamleaderleo');
         }
       }
     }

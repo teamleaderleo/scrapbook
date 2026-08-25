@@ -11,19 +11,18 @@ describe('GET /api/work', () => {
     expect(body).toMatchObject({
       version: 1,
       source: 'repository',
-      updatedAt: '2026-08-24',
-      recordCount: 6,
+      updatedAt: '2026-08-25',
+      recordCount: 7,
     });
     expect(body.records.map((record: { id: string }) => record.id)).toEqual([
       'preflight',
       'open-source',
       'stensibly',
       'smolrunner',
+      'glossless',
       'cultist',
       'fieldwork',
     ]);
-    expect(body.records[0].evidence[0].href).toBe(
-      'https://github.com/teamleaderleo/preflight'
-    );
+    expect(body.records[0].evidence[0].href).toBe('/work/preflight');
   });
 });

@@ -61,7 +61,7 @@ The placement had originally been conservative on purpose.
 
 Preflight's compatibility texture rewrite found the branch where Starsector's own prefetcher missed and inserted the cache lookup there. If the game had already prefetched an image, Preflight left that path alone. If the game had not, Preflight could serve prepared pixels instead of doing the synchronous decode and conversion.
 
-It also means the cache can only help after the game's prefetcher has already lost the race.
+That meant the cache could only help after the game's prefetcher had already lost the race.
 
 For any image the prefetcher owns, the loading thread checks the queue, sees the image is pending, and starts sleeping. The background decoder eventually publishes the image. Only after all of that would execution ever reach the branch where the cache lived.
 
@@ -108,12 +108,6 @@ The cache-plus-bypass path beat the normal launch in all five rounds. Median dif
 The prepared-pixel path without the bypass was 0.60 seconds from normal, with `p = 1.000`.
 
 The prepared texture work could be present and correct and still buy essentially nothing if the loading thread had to wait before reaching it. Move the decision ahead of the wait and it mattered.
-
-The counters were not lying.
-
-The cache really was hitting.
-
-It was just being asked too late.
 
 ### Sources
 
