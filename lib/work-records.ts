@@ -179,20 +179,27 @@ export const workRecords: readonly WorkRecord[] = [
   {
     id: 'cultist',
     title: 'Cultist',
-    kind: 'Repository-evidence research',
+    kind: 'Repository evidence before code changes',
     status: 'Active prototype · sustained dogfood',
     summary:
-      'A repository-aware evidence tool that asks what a worker should know before changing code, keeps provenance and counterexamples visible, and measures whether selected evidence actually changes the next justified action.',
+      'Find out why before you copy it. Cultist recovers repository evidence, counterexamples, and concurrent-change context before a worker edits code, then measures whether that evidence actually changes the next justified action.',
     accomplishments: [
-      'The public cargo-cultist analyzers cover repository conventions, change-time evidence, concurrent-change preflight, historical companions, and CI selector analysis with deterministic local read-only behavior.',
-      'Research lanes add bounded evidence packets, compact representation, decision memory, promotion-receipt reuse, and retained behavioral episodes for both action-changing and quiet cases.',
-      'Current active-work dogfood binds provider-backed evidence to explicit provider snapshot identity, revalidates the frontier at consumption, preserves UNKNOWN for incomplete provider state, and only claims bounded file coverage when one response proves it.',
+      'The public cargo-cultist commands inspect repository conventions, changed code, concurrent work, historical companions, and CI selectors with deterministic local analysis and provenance-bearing human/JSON output.',
+      'The research loop now retains behavioral episodes for the real product question: whether selected evidence changed what a worker inspected, validated, coordinated, or preserved, including quiet cases where the right result was no interruption.',
+      'Active-work preflight can compare local refs or a bounded provider inventory, report direct path collisions, preserve UNKNOWN when coordination evidence is incomplete, and refuse to turn paginated or partial provider observations into fake complete coverage.',
     ],
+    reversal:
+      'Precedent is evidence, not policy. Cultist keeps counterexamples and UNKNOWN visible instead of turning majority spelling, historical co-change, or partial provider data into repository rules.',
     evidence: [
       {
         label: 'Repository',
         href: 'https://github.com/teamleaderleo/cultist',
         kind: 'repository',
+      },
+      {
+        label: 'Research roadmap',
+        href: 'https://github.com/teamleaderleo/cultist/blob/main/ROADMAP.md',
+        kind: 'record',
       },
       {
         label: 'Current cross-repository state',
@@ -204,20 +211,27 @@ export const workRecords: readonly WorkRecord[] = [
   {
     id: 'fieldwork',
     title: 'Fieldwork',
-    kind: 'Codebase research practice',
+    kind: 'Code-first upstream research',
     status: 'Ongoing',
     summary:
-      'A code-first method for entering real systems, finding the operation that owns a behavior, building a discriminator that can make the hypothesis lose, and retaining the evidence another reader needs to judge the result.',
+      'Understand the system deeply enough to make the hypothesis lose before asking its maintainers to spend time on a change. Fieldwork keeps reproductions, experiments, integration trials, negative results, decisions, and upstream packets around that standard.',
     accomplishments: [
-      'Carries investigations across runtimes, compilers, build tools, terminal software, HTTP libraries, VMMs, containers, and Linux userland while keeping third-party upstream mutation human-owned.',
-      'Keeps negative and superseded results when they explain why an attractive repair was wrong, too broad, already owned, or too expensive for its compatibility payoff.',
-      'The writing rules now explicitly favor concrete questions, diagrams/traces when they beat prose, human cadence, caveats beside claims, and concise endings over ritual templates and polished-sounding filler.',
+      'Programmes and target hubs cover SDKs, CLIs, web runtimes, data systems, VMMs, containers, compilers, terminal software, and Linux userland, with code/test reconnaissance preceding narrow hypotheses.',
+      'Owned testbeds and bounded experiments connect isolated behavior to real workflows before a result is promoted into an upstream campaign or contribution.',
+      'Negative and superseded results stay in the record when they show that an attractive repair was wrong, too broad, already owned elsewhere, or not worth the compatibility/review cost.',
     ],
+    reversal:
+      'A correct patch is not automatically an upstream contribution. If the evidence does not reduce maintainer uncertainty or show a concrete payoff, the useful result may be the reproduction, the negative finding, or the decision not to submit it.',
     evidence: [
       {
         label: 'Fieldwork repository',
         href: 'https://github.com/teamleaderleo/fieldwork',
         kind: 'repository',
+      },
+      {
+        label: 'Why Fieldwork',
+        href: 'https://github.com/teamleaderleo/fieldwork/blob/main/WHY_FIELDWORK.md',
+        kind: 'record',
       },
       {
         label: 'Linux Fieldwork repository',
