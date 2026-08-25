@@ -12,7 +12,7 @@ The ring closes when you drink eight glasses of water.
 
 This is an easy joke because the contrast is so stupid. We keep getting machines that can do more serious intellectual work, make finished software, inspect giant piles of information, operate tools, revise their own output, and stay on a project for hours. Then somebody spends that leverage making the streak turn green on day seven.
 
-The harder observation is that the person barely needs to bring the idea anymore.
+The person barely needs to bring the idea anymore.
 
 You can literally say:
 
@@ -26,13 +26,13 @@ At this point the human can arrive with curiosity and a willingness to steer. Id
 
 OpenAI now sells [ChatGPT Work](https://openai.com/index/chatgpt-for-your-most-ambitious-work/) around exactly this longer horizon: give it a goal, let it work across files and apps, and let it stay with a project for hours when the job demands it. The [GPT-5.6 release](https://openai.com/index/gpt-5-6/) pushes the same direction through long-running professional work, stronger computer use, design judgment, and multi-agent execution.
 
-So the old explanation — people aren't doing ambitious things because they lack the idea, the technical skill, the research time, the team, the ability to make the thing look finished — keeps losing pieces.
+The old barriers — having the idea, the technical skill, the research time, the team, the ability to make the thing look finished — keep losing pieces.
 
 ## People are already delegating serious work
 
-There's a useful correction before this turns into a sermon about everybody wasting the future on water trackers.
+Before this turns into a sermon about everybody wasting the future on water trackers: serious agent use is already happening.
 
-Serious agent use is already happening. OpenAI's [June 2026 Codex research](https://openai.com/index/how-agents-are-transforming-work/) says more than 70% of users in May asked Codex to do at least one task estimated to take a person over an hour. Heavy users were running many hours of agent work across parallel tasks. People clearly understand delegation once they have a job in front of them.
+OpenAI's [June 2026 Codex research](https://openai.com/index/how-agents-are-transforming-work/) says more than 70% of users in May asked Codex to do at least one task estimated to take a person over an hour. Heavy users were running many hours of agent work across parallel tasks. People clearly understand delegation once they have a job in front of them.
 
 The stranger move is **self-authored delegation**.
 
@@ -42,9 +42,9 @@ Now remove the ticket.
 
 Ask the machine to help decide what deserves doing in the first place.
 
-That's a different act. Suddenly you're spending your own authority. Nobody assigned the project. Nobody promised it would count toward promotion. Nobody gave you a rubric or a deadline. You saw a possibility and made it active because you wanted to know where it went.
+That's a different act. Suddenly you're spending your own authority. You assigned the project to yourself. Promotion never promised credit. The rubric and deadline are yours to invent. You saw a possibility and made it active because you wanted to know where it went.
 
-The first prompt can be ten seconds long. Somehow those ten seconds carry a lot.
+The first prompt can be ten seconds long. Those ten seconds carry a lot.
 
 ## Starting manufactures obligation
 
@@ -88,11 +88,11 @@ The habit tracker has one huge advantage over the ambitious project: tonight you
 
 The button works. The streak turns green. You post a screenshot. Somebody says sick. Finished.
 
-A bigger challenge often rewards the first hour with more questions. The research opens five doors. A user behaves strangely. The economics are unclear. The relevant expert hasn't replied. The prototype reveals that the original idea was aimed two inches to the left of the valuable thing.
+A bigger challenge often rewards the first hour with more questions. The research opens five doors. A user behaves strangely. The economics are unclear. The relevant expert is still silent. The prototype reveals that the original idea was aimed two inches to the left of the valuable thing.
 
 The agent can absorb enormous amounts of this work, but the person experiences the uncertainty immediately. The payoff still lives in the future.
 
-So the squeeze feels like choosing, steering, exposing taste, and carrying one thread long enough to see whether it becomes real. The juice is hypothetical until it suddenly isn't.
+So the squeeze feels like choosing, steering, exposing taste, and carrying one thread long enough to see whether it becomes real. The juice stays hypothetical until the first real payoff arrives.
 
 That asymmetry explains a lot. A tiny finished app can feel more rewarding today than the first day of a project with a hundred times the upside.
 
@@ -108,15 +108,15 @@ One sees an interesting thread, thinks huh, and keeps scrolling.
 
 Another drops the same thread into an agent and says, "Go look at this. Find the opening. Come back with something I can act on."
 
-Maybe nothing comes of it. Fine. The second person spent a little curiosity and got evidence back.
+Maybe it dies immediately. Fine. The second person spent a little curiosity and got evidence back.
 
 Maybe the agent finds a seam. The person says keep going. Tomorrow there's a prototype. The day after that somebody uses it. A week later the original idea has already mutated into a better one.
 
-No grand vision was required at the entrance. The vision can emerge during contact with the work.
+Grand vision can arrive later, after contact with the work.
 
-Repeat that enough times and a tiny behavioral difference compounds into a ridiculous difference in output. The machine makes each attempt cheaper, which means the person who habitually activates curiosity gets more rolls, more feedback, more finished things, more dead ends worth learning from, more chances for one weird project to become consequential.
+Repeat that enough times and a tiny behavioral difference compounds into a ridiculous difference in output. The machine makes each attempt cheaper, which means the person who has the reflex to turn curiosity into a live project gets more rolls, more feedback, more finished things, more dead ends worth learning from, more chances for one weird project to become consequential.
 
-The scarce habit may turn out to be almost insultingly simple: when a thought catches, make it active while it's still warm.
+The scarce habit may turn out to be insultingly simple: when a thought catches, make it active while it's still warm.
 
 Hand it over.
 
