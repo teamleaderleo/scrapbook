@@ -1,6 +1,6 @@
 # Portfolio inventory
 
-**Last broad refresh:** 2026-08-24
+**Last broad refresh:** 2026-08-25
 
 This is a retrieval index, not a second current-state file and not a draft resume.
 
@@ -57,7 +57,7 @@ Detailed record: [`records/open-source.md`](records/open-source.md)
 
 **Use for:** Rust/VMM systems work, lifecycle, error propagation, PCI/VFIO semantics, persistent metadata review.
 
-Current cluster: three merged fixes across exact shutdown/reuse, typed ACPI boot failures, and sparse VFIO BAR mapping. A deeper QCOW L2 ownership/refcount repair remains open.
+Current cluster: four merged fixes across exact shutdown/reuse, typed ACPI boot failures, sparse VFIO BAR mapping, and QCOW L2 metadata ownership/refcount ordering before publication.
 
 Career use: **resume lock** for systems/platform work.
 
