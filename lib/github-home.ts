@@ -29,9 +29,9 @@ const FEATURED_REPOSITORIES = [
     note: 'Work and handoffs that survive disposable agent sessions.',
   },
   {
-    name: 'smolrunner',
+    name: 'Glaeda',
     url: 'https://github.com/teamleaderleo/smolrunner',
-    note: 'Fresh Linux for untrusted work; hot project state when trust permits.',
+    note: 'Trust-tiered Linux execution; hot project state when trust permits.',
   },
   {
     name: 'cultist',
