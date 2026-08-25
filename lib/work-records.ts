@@ -177,6 +177,38 @@ export const workRecords: readonly WorkRecord[] = [
     ],
   },
   {
+    id: 'glossless',
+    title: 'Glossless',
+    kind: 'Artist pose and reference studio',
+    status: 'Live public editor · active development',
+    summary:
+      'An artist-first pose, light, silhouette, and reference-sheet tool. Bring in a photo or figure, establish or detect a pose, repair it directly in 2D or 3D, study useful camera and lighting views, then export a reference artifact. Core editing works locally without an account or hosted AI service.',
+    accomplishments: [
+      'The React/Vite editor keeps synchronized 2D and 3D study views with MediaPipe pose detection, editable keypoints, direct manipulation, undo/redo, camera presets, lighting controls, silhouette studies, and redline/blueline construction overlays.',
+      'Imported GLB/GLTF figures can be recognized across Quaternius, Khronos, MakeHuman, Mixamo, Rigify, VRM-style, and namespaced humanoid rigs, then driven live from the active pose with direct 3D handles on compatible skinned figures.',
+      'Local project files can preserve source images, raw PNG and composed 1800×1200 reference-sheet exports are available, and optional Convex/cloud or provider-neutral pose-assist paths remain additive to the local workflow.',
+    ],
+    reversal:
+      'The 3D renderer is not the editor availability boundary. The shell and 2D workflow load first, while WebGL failure or context loss is isolated so the rest of the editor remains usable.',
+    evidence: [
+      {
+        label: 'Public site',
+        href: 'https://glossless.app/',
+        kind: 'record',
+      },
+      {
+        label: 'Editor',
+        href: 'https://glossless.app/app',
+        kind: 'record',
+      },
+      {
+        label: 'Product docs',
+        href: 'https://glossless.app/docs',
+        kind: 'record',
+      },
+    ],
+  },
+  {
     id: 'cultist',
     title: 'Cultist',
     kind: 'Repository evidence before code changes',
