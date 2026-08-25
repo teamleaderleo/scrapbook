@@ -188,7 +188,6 @@ function headerInteger(headers: Headers, name: string): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-export function parseGitHubRateLimit(headers: Headers, name?: never): GitHubRateLimit | null;
 export function parseGitHubRateLimit(headers: Headers): GitHubRateLimit | null {
   const limit = headerInteger(headers, 'x-ratelimit-limit');
   const remaining = headerInteger(headers, 'x-ratelimit-remaining');
@@ -209,6 +208,10 @@ export function parseGitHubRateLimit(headers: Headers): GitHubRateLimit | null {
   };
 }
 
+function featuredRepositories(): GitHubHomeData['repositories'] {
+  return FEATURED_REPOSITORIES.map((repository) => ({ ...repository }));
+}
+
 export function createUnavailableGitHubHomeData(now = new Date()): GitHubUnavailableHomeData {
   return {
     username: GITHUB_USERNAME,
@@ -221,48 +224,62 @@ export function createUnavailableGitHubHomeData(now = new Date()): GitHubUnavail
     activeDays: null,
     currentStreak: null,
     days: [],
-    repositories: FEATURED_REPOSITORIES.map(repository => ({ ...repository })),
+    repositories: featuredRepositories(),
   };
 }
 
-async function fetchGitHubHomeData(now = new Date()): Promise<GitHubAvailableHomeData> {
-  const profileToken = process.env.GITHUB_PROFILE_TOKEN?.trim();
+function createUpstreamActivity(
+  counts: Map<string, number>,
+  total: number | null,
+  source: Exclude<ActivitySource, 'unavailable'>,
+  rateLimit: GitHubRateLimit | null,
+  now = new Date(),
+): UpstreamActivity {
+  const summary = summarizeCounts(counts, now, total);
+  return {
+    activity: {
+      username: GITHUB_USERNAME,
+      source,
+      generatedAt: now.toISOString(),
+      ...summary,
+      repositories: featuredRepositories(),
+    },
+    rateLimit,
+  };
+}
 
+async function loadGitHubHomeData(): Promise<UpstreamActivity> {
+  const profileToken = process.env.GITHUB_PROFILE_TOKEN?.trim();
   if (profileToken) {
     try {
       const result = await fetchGitHubContributionCalendar(GITHUB_USERNAME, profileToken);
-      const summary = summarizeCounts(result.counts, now, result.total);
-      return {
-        username: GITHUB_USERNAME,
-        source: 'github-graphql',
-        generatedAt: now.toISOString(),
-        ...summary,
-        repositories: FEATURED_REPOSITORIES.map(repository => ({ ...repository })),
-      };
+      return createUpstreamActivity(
+        result.counts,
+        result.total,
+        'github-graphql',
+        result.rateLimit,
+      );
     } catch (error) {
       console.warn('Authenticated GitHub contribution calendar failed; using public profile', error);
     }
   }
 
   const { counts, total } = await fetchPublicProfileCounts();
-  const summary = summarizeCounts(counts, now, total);
-  return {
-    username: GITHUB_USERNAME,
-    source: 'public-profile',
-    generatedAt: now.toISOString(),
-    ...summary,
-    repositories: FEATURED_REPOSITORIES.map(repository => ({ ...repository })),
-  };
+  return createUpstreamActivity(counts, total, 'public-profile', null);
 }
 
-const loadCachedGitHubHomeData = unstable_cache(
-  () => captureCacheLoad(() => fetchGitHubHomeData()),
-  ['github-home'],
+const getCachedUpstreamActivity = unstable_cache(
+  () => captureCacheLoad(loadGitHubHomeData),
+  ['github-homepage-v13'],
   { revalidate: GITHUB_ACTIVITY_UPSTREAM_FRESH_SECONDS },
 );
 
-const githubHomeCache = createStaleWhileErrorCache<GitHubHomeData>({
-  load: async () => unwrapCacheLoad(await loadCachedGitHubHomeData()),
+async function loadCachedUpstreamActivity(): Promise<UpstreamActivity> {
+  return unwrapCacheLoad(await getCachedUpstreamActivity());
+}
+
+const githubHomeCache = createStaleWhileErrorCache<UpstreamActivity>({
+  load: loadCachedUpstreamActivity,
   freshForMs: GITHUB_ACTIVITY_INSTANCE_FRESH_MS,
   staleForMs: GITHUB_ACTIVITY_STALE_SECONDS * 1_000,
   retryBaseMs: GITHUB_ACTIVITY_RETRY_BASE_MS,
@@ -271,7 +288,7 @@ const githubHomeCache = createStaleWhileErrorCache<GitHubHomeData>({
 
 export async function getGitHubHomeResult(): Promise<GitHubHomeResult> {
   const cached = await githubHomeCache.get();
-  const activity = cached.value ?? createUnavailableGitHubHomeData();
+  const activity = cached.value?.activity ?? createUnavailableGitHubHomeData();
 
   return {
     activity,
@@ -279,10 +296,10 @@ export async function getGitHubHomeResult(): Promise<GitHubHomeResult> {
       cacheStatus: cached.diagnostics.status,
       upstreamSource: activity.source,
       lastUpstreamAttempt: cached.diagnostics.lastAttemptAt,
-      lastUpstreamFetch: cached.value?.generatedAt ?? null,
+      lastUpstreamFetch: cached.value?.activity.generatedAt ?? null,
       consecutiveFailures: cached.diagnostics.consecutiveFailures,
       nextRetryAt: cached.diagnostics.nextRetryAt,
-      rateLimit: null,
+      rateLimit: cached.value?.rateLimit ?? null,
     },
   };
 }
