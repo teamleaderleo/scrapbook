@@ -30,7 +30,7 @@ A good system lets low-value detail fade while keeping consequential facts recov
 
 The owned repositories increasingly turn that personal habit into software without collapsing everything into one mega-agent.
 
-- [SmolRunner](https://github.com/teamleaderleo/smolrunner) owns trust-tiered Linux execution: disposable workers where isolation dominates, persistent trusted state where reuse earns the latency win.
+- [Glaeda](https://github.com/teamleaderleo/smolrunner) owns trust-tiered Linux execution: disposable workers where isolation dominates, persistent trusted state where reuse earns the latency win.
 - [Renderprove](https://github.com/teamleaderleo/renderprove) produces rendered/browser evidence: receipts, screenshots, diagnostics, deterministic comparison, bounded interaction, and screenshot advisory packets.
 - [Proofwake](https://github.com/teamleaderleo/proofwake) remembers revision evidence and task-specific evaluation receipts without becoming the scheduler or approval authority.
 - [Cultist](https://github.com/teamleaderleo/cultist) asks which repository evidence a worker should see now, keeps provenance/counterexamples/unknowns visible, and tests whether the selected evidence changes the next action.
