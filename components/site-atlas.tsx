@@ -67,7 +67,7 @@ function ItemIcon({ id }: { id: string }) {
       return <LibraryBig className={className} aria-hidden="true" />;
     case 'fieldwork-repository':
     case 'linux-fieldwork-repository':
-    case 'smolrunner-repository':
+    case 'glaeda-repository':
       return <BookOpenText className={className} aria-hidden="true" />;
     case 'github':
       return <GitHubIcon className={className} aria-hidden="true" />;
