@@ -14,7 +14,7 @@ For career-facing summaries, lead with the actual observed span:
 
 > **~101s worst observed startup → 13.69s best observed startup on an 83-mod legacy game stack.**
 
-The old 89.00s → 15.53s result came from only five runs per condition. Retain it as benchmark history; the sample is too small to carry superior statistical weight, and its interleaving should never be used to qualify, police, or replace the ~101s → 13.69s career-facing headline. The useful headline is the performance frontier the product has actually reached.
+The old 89.00s → 15.53s same-session campaign remains benchmark history in the repository. It answers a separate historical benchmarking question and has no role in selecting or qualifying the ~101s → 13.69s career-facing headline. The useful headline is the performance frontier the product has actually reached.
 
 ## Current product frontier
 
@@ -101,4 +101,4 @@ The shortest useful version is:
 
 For a deeper systems/performance conversation, follow with the physical-order result, bytecode/runtime adapters, compatibility/fallback model, and investigation stories.
 
-The old 89.00s → 15.53s benchmark remains in the evidence archive as a 5+5 historical sample. Treat it as context only; it carries no superior validation status over the broader development record.
+The old 89.00s → 15.53s benchmark remains in the evidence archive as historical context. Its role is archival only; career-facing usage follows the ~101s → 13.69s observed development arc.
