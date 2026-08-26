@@ -85,13 +85,9 @@ The label can remain in technical records. The resume should say what happened.
 
 ## One repository can carry several receipts
 
-A strong upstream repository usually gets one bullet, even when it contains several repairs.
+A strong upstream repository can often carry several repairs in one bullet. That is a compression tactic, not a quota.
 
-Each clause should do three things:
-
-1. state the consequence or failure
-2. include enough mechanism to distinguish the work from generic bug fixing
-3. place the PR number beside that clause
+A clause is strongest when it states the consequence or failure, includes enough mechanism to distinguish the work from generic bug fixing, and keeps the supporting PR number beside the claim it proves. Use fewer or more of those elements when the sentence reads better and remains inspectable.
 
 Don't front-load a batch of PR numbers and make the reader map them back to the sentence.
 
@@ -150,11 +146,7 @@ Parentheses are useful for compact context such as public status, platforms, dom
 
 A flagship project can look smaller than it is when the bullet names only the local mechanism. Give enough context to show what the system had to survive and what became usable at the end.
 
-For work against a third-party runtime, distinguish three things when they are all important:
-
-- the external system being investigated or repaired
-- the infrastructure the project itself built
-- the user-facing product that makes the work usable
+For work against a third-party runtime, distinguish the external system being investigated or repaired, the machinery the project itself built, and the user-facing product when those distinctions help the reader understand the scope. Do not force all of them into every sentence.
 
 For Preflight, the 83-mod setup is part of the engineering scope. The startup result came from reverse-engineering obfuscated JVM bytecode across the game and independently maintained mods, then tracing repeated work with JFR and live instrumentation. Large counters such as **1.6M resource probes** and **36,090 JSON loads** can be useful because they communicate the scale of the runtime being investigated.
 
@@ -182,7 +174,7 @@ A development arc still needs traceable endpoints. Current code and retained art
 
 ## Preserve the win inventory before compressing it
 
-Flagship projects often accumulate more strong receipts than the final resume can hold. Record the large wins before choosing the final three or four bullets.
+Flagship projects often accumulate more strong receipts than the final resume can hold. Record the large wins before choosing the final cut. The number of bullets is an output of the page and the role, not a target to hit in advance.
 
 The inventory is allowed to mix whole-launch milestones, component reductions, memory and storage wins, gameplay-runtime operation counts, and product capabilities. It exists so later editors can choose the best evidence instead of rediscovering the project from polished summaries.
 
@@ -201,16 +193,11 @@ For owned work, repository existence has no career value by itself. A project ea
 
 Preflight gets more space because the performance result, investigation method, preparation/storage work, generated-code result, gameplay-runtime work, desktop product, and mod-ecosystem tooling each add different evidence.
 
-Other projects should usually compress to one bullet. If a project needs a paragraph of terminology before the accomplishment makes sense, it probably belongs on the site or in an interview rather than on the default resume.
+Compress other projects aggressively. One bullet is often enough, but use the space the project actually earns rather than enforcing a fixed count. If a project needs a paragraph of terminology before the accomplishment makes sense, it probably belongs on the site or in an interview rather than on the default resume.
 
 ## Portfolio prose can breathe more
 
-Portfolio material can explain the mechanism and the investigation path in more depth, but it should keep the same ordering:
-
-1. consequence
-2. mechanism
-3. evidence
-4. caveat or status when it changes the claim
+Portfolio material can explain the mechanism and the investigation path in more depth. A useful default is consequence → mechanism → evidence, with caveat or status only when it changes the claim. Change the order when another sequence makes the story clearer.
 
 The portfolio can explain why a repair was difficult. It shouldn't become a second issue tracker or copy every review turn.
 
