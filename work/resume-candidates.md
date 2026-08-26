@@ -4,6 +4,20 @@ This is the larger reservoir for resume and portfolio material. [`resume-current
 
 Read [`resume-portfolio-style.md`](resume-portfolio-style.md) before revising career copy. For Preflight claim provenance, implementation history, and measurement breadcrumbs, read [`preflight-resume-evidence-map.md`](preflight-resume-evidence-map.md). Check current upstream state before restoring a candidate to the default resume.
 
+Planning and resume state use different thresholds. When deciding where scarce engineering time is worth spending, compare a live candidate against the current page **as if it merged cleanly**. When writing the actual resume, keep the real upstream disposition literal and promote only after the relevant external result exists. This keeps high-upside candidates visible without turning owned-fork or in-review work into fictional resume receipts.
+
+## Live upstream challengers — planning view
+
+These are the current candidates most capable of displacing scarce one-page material if they convert cleanly. This section is for effort allocation and future cuts, not current-status wording.
+
+- **Cloud Hypervisor QCOW failed-eviction atomicity — Linux Fieldwork #645.** After #8721 fixed L2 ownership-before-publication, the follow-on proves a separate persistent-metadata failure: a failed dirty-cache eviction can discard the only retryable in-memory copy while a replacement pointer has already changed. The green candidate keeps the dirty victim resident until its write succeeds and delays dependent pointer publication. It has also been composed successfully with the final #8721 ordering: `allocate -> refcount=1 -> successful cache insertion -> publish L1`. If this lands, treat Cloud Hypervisor as a deeper five-result cluster rather than mechanically appending another equal-weight clause.
+- **SWC `instanceof` constant folding — public PR [#12110](https://redirect.github.com/swc-project/swc/pull/12110).** The surviving maintainer-reconciled contribution fixes used-result `instanceof` folds that can manufacture the wrong boolean from operand category alone. Discarded-result/Terser behavior remains unchanged. If merged, this is unusually additive compiler/language-semantics evidence and can plausibly jostle Vite or Workers SDK depending on the role.
+- **FEX runtime candidates.** The strongest projected results are callback-sensitive Vulkan proc-address routing and the deeper generated-thunk/callback lifetime work spanning cross-ISA ABI mediation, executable bridge lifetime, code-cache invalidation, and guest mapping transitions. Upstream FEX currently disallows AI/LLM code contributions, so any submission must be independently understood and human-authored. If either lands, judge the merged result on its runtime depth rather than discounting it because the current evidence lives in the owned fork.
+- **DuckDB sparse Arrow union type-ID mapping.** The current-main candidate preserves Arrow logical type-ID to physical-child mapping, including non-sequential/reordered IDs, parent offsets, malformed schema/runtime controls, and external-producer interoperability. DuckDB currently asks contributors not to submit LLM-generated PRs, so an upstream attempt requires an independently human-authored implementation. If merged, this is one of the strongest additive C++/database-engine candidates in the reservoir.
+- **runc read-only-rootfs validation.** The ready candidate rejects an OCI `root.readonly` request when there is no mount namespace capable of enforcing the remount, rather than silently accepting a configuration whose root remains writable. If merged, this adds a clean Linux/OCI/namespaces specimen with very little overlap with the current TypeScript-heavy OSS rows.
+
+Do not let this planning list turn into a second backlog. Its purpose is to keep the few candidates with real displacement potential visible while applications, Preflight release work, and already-open upstream review continue.
+
 ## Open source engineering reservoir
 
 ### Vercel AI SDK
@@ -28,6 +42,8 @@ Default wording currently lives in `resume-current.md`.
 
 #8721 merged into `main` on 2026-08-24. The QCOW clause remains one of the strongest upstream receipts because it reaches persistent metadata ownership rather than another surface-level failure path.
 
+High-value fifth-result candidate: Linux Fieldwork #645 fixes a separate QCOW durability boundary where failed dirty-cache eviction can discard retryable metadata and allow later flushes to succeed over already-lost state. The clean candidate retains a dirty victim until its fallible write succeeds and delays replacement-pointer publication until the cache insertion succeeds. Its final composition experiment with #8721 passed the required ordering `allocate -> refcount=1 -> successful cache insertion -> publish L1`. Keep this as a live candidate until an upstream result exists; if it lands, consider rewriting the Cloud Hypervisor row around sustained lifecycle/device/storage depth rather than adding a fifth comma clause.
+
 ### Vite
 
 Default wording currently lives in `resume-current.md`.
@@ -51,6 +67,18 @@ Keep in the reservoir. Do not force it onto the default page.
 > Fixed a React Fragment listener bug that could delete a child's listener and stop registered listeners from reaching new children (#37251, open).
 
 The capture-option identity fix is useful regression coverage but makes the resume sentence worse. Leave it in the PR.
+
+### SWC
+
+Public contribution: [swc-project/swc#12110](https://redirect.github.com/swc-project/swc/pull/12110).
+
+Current maintainer-reconciled boundary:
+
+> Avoid incorrect `instanceof` constant folding that infers a boolean from operand category alone when JavaScript semantics do not justify that result; retain the existing Terser-compatible treatment of discarded `instanceof` expressions.
+
+The larger research campaign found several effect-analysis/dead-result owners, but maintainer review narrowed this contribution to the cleanest correctness boundary: **used-result constant folding**. The current owned-fork head has reconciled the latest clarification, keeps `tests/terser` unchanged, and has no remaining implementation action from that review comment.
+
+Career use if merged: strong compiler/devtools alternate. It adds Rust compiler optimization and JavaScript language-semantics evidence rather than another async/resource-lifecycle specimen, so it can plausibly displace a stronger raw contribution when the role benefits from breadth.
 
 ## Independent engineering reservoir
 
@@ -193,6 +221,8 @@ The older resume also claimed adoption of the test suite across teams. Keep that
 
 - React #37251 is open.
 - Cloud Hypervisor #8721 merged into `main` on 2026-08-24.
+- Cloud Hypervisor #645 is a green internal follow-on candidate that composes with #8721 but has no upstream result yet.
+- SWC #12110 is an open public contribution at the maintainer-reconciled fold-only boundary.
 - Vite #23208 is open.
 - AI SDK #18371 and #18572 are the contributor repairs. Equivalent implementations were merged through #18400 and #18695, which is why the default bullet keeps both numbers beside those clauses.
 
