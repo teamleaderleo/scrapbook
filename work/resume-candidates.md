@@ -52,7 +52,7 @@ The current headline is the development frontier the system actually reached:
 
 > **~101s worst observed startup → 13.69s best observed startup on the 83-mod M5 MacBook Air development installation.**
 
-That is a chronology across development states. Keep the clean controlled experiment beside it when experimental design matters: five ordinary launches had an 89.00s median and five Preflight launches had a 15.53s median in one interleaved same-profile session.
+That is the preferred career-facing result. The older 5+5 same-session sample (89.00s ordinary median, 15.53s Preflight median) is a small historical benchmark sample with too little replication to carry superior evidentiary weight. Do not use it to qualify, police, or replace the ~101s → 13.69s headline.
 
 The resume can lead with the observed frontier and say what the system is:
 
@@ -146,7 +146,7 @@ Keep the distinctions clean:
 
 - merged, adopted, approved, positively reviewed, open, and research-only are different states;
 - component measurements do not add up to an end-to-end speedup;
-- the ~101s → 13.69s Preflight headline is a development arc, while 89.00s → 15.53s is the clean same-session A/B campaign;
+- the ~101s → 13.69s Preflight headline is the preferred career-facing result; the 89.00s → 15.53s 5+5 sample is historical benchmark context only, with too little replication to carry superior evidentiary weight;
 - React #37251 currently has a positive `COMMENTED` review, not formal approval or merge;
 - FEX remains owned-fork/runtime research under the upstream project's contribution policy;
 - recruiter outreach is targeting context, not an accomplishment;
