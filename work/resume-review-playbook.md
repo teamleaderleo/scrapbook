@@ -88,7 +88,7 @@ Role-specific changes should keep the one-page resume legible and make additions
 
 - Lead with the failure prevented, behavior changed, or system result. Do not lead with internal invariants or implementation variables.
 - Consequence → fix → number → receipt is a useful default when that order reads naturally, not a required template.
-- No semicolons in resume bullets. Avoid em dashes.
+- Use punctuation that keeps a dense bullet easy to parse. Semicolons and em dashes are fine when they improve the sentence; do not ban or add them mechanically.
 - Delete modifiers when removing them leaves the engineering claim unchanged.
 - Keep modifiers only when they add technical meaning or scope (`obfuscated`, `third-party`, `single-threaded` can matter).
 - Prefer one dense causal sentence to a benchmark mini-paragraph when the evidence belongs to one causal arc.
