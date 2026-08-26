@@ -8,7 +8,7 @@ This is the current career-facing performance overlay for Preflight. Use this fi
 
 Preflight takes an 83-mod Starsector installation on an M5 MacBook Air from an observed historical worst around **101 seconds** to **13.69 seconds**.
 
-That is approximately **7.38× faster**, or an **86.4% reduction in elapsed startup time**. The accumulated current run history clusters around a roughly **13.8-second median**; that describes the surrounding current regime and does not replace the **13.69-second** headline observation.
+That is approximately **7.38× faster**, or an **86.4% reduction in elapsed startup time**. Repeated current launches remain in the same low-14-second regime with ordinary sub-second run-to-run movement; that repeatability supports the endpoint rather than supplying a replacement headline.
 
 For career-facing summaries, lead with:
 
@@ -20,7 +20,7 @@ The old 89.00s → 15.53s same-session campaign remains benchmark history in the
 
 The steady-state Compact path is now roughly:
 
-- **13.69s headline current observation**, with the accumulated current run history around a **13.8s median**;
+- **13.69s current career-facing endpoint**;
 - **~15s preparation** on the current working path;
 - **~1.1 GB retained Compact data** (the documented pack is 1,087,894,442 bytes);
 - **83 enabled mods** on the current M5 MacBook Air profile;
@@ -34,8 +34,8 @@ The preparation number is moving quickly. The August 23 committed evidence recor
 
 - Historical observed high end: roughly **101s**.
 - Earlier optimized states moved through the 40s, 30s, 20s, and low-15s.
-- Current accumulated runs cluster around a **~13.8s median**.
-- Headline current observation: **13.69s**.
+- Current career-facing endpoint: **13.69s**.
+- Repeated current runs remain in the same low-14-second regime with ordinary sub-second variation.
 
 ### Preparation and storage
 
@@ -101,4 +101,4 @@ The shortest useful version is:
 
 For a deeper systems/performance conversation, follow with the physical-order result, bytecode/runtime adapters, compatibility/fallback model, and investigation stories.
 
-The accumulated current median around 13.8s is useful supporting context for repeatability. It does not replace the 13.69s headline. The old 89.00s → 15.53s benchmark remains in the evidence archive as historical comparison context only.
+Repeatability context belongs in the evidence record; it does not replace the 13.69s headline. The old 89.00s → 15.53s benchmark remains in the evidence archive as historical comparison context only.
