@@ -24,17 +24,21 @@ The operating idea is simple:
 ## Files
 
 - [`current-state.md`](current-state.md) — short live-status overlay across the current body of work; read this first when repository status has moved faster than the deeper records.
+- [`resume-current.md`](resume-current.md) — current default one-page résumé selection and wording.
+- [`records/preflight-live-performance.md`](records/preflight-live-performance.md) — current career-facing Preflight performance headline and moving performance numbers.
+- [`resume-candidates.md`](resume-candidates.md) — larger, intentionally churny reservoir of strong résumé alternates and role-specific material; it does not override `resume-current.md`.
+- [`preflight-resume-evidence-map.md`](preflight-resume-evidence-map.md) — provenance and implementation/measurement breadcrumbs for Preflight career claims; it does not override the live performance record.
 - [`portfolio-inventory.md`](portfolio-inventory.md) — unified retrieval index across owned systems, upstream contributions, adopted findings, reversals, reports, and research-only work.
-- [`resume-candidates.md`](resume-candidates.md) — intentionally churny ranking of the strongest current resume material.
 - [`resume-language-bank.md`](resume-language-bank.md) — richer candidate bullets, application theses, and interview story formulations that are worth preserving even when they do not fit the current one-page cut.
+- [`resume-review-playbook.md`](resume-review-playbook.md) — current résumé-review handoff and authority map; historical reviewer outputs are subordinate to it.
 - [`fit-and-interviews.md`](fit-and-interviews.md) — living hypotheses about role/team/interview fit, questions that can discriminate those hypotheses, and signals to retain after hiring processes.
-- [`interview-calibration.md`](interview-calibration.md) — preparation-sensitive interpretation of interview/test performance and how to make future interview targets legible enough to train for deliberately.
-- [`records/preflight.md`](records/preflight.md) — detailed Preflight performance/product evidence and candidate stories.
+- [`interview-calibration.md`](interview-calibration.md) — preparation-sensitive interpretation of interview/test performance and the rule to prepare the actual evaluation instrument rather than an invented generic packet.
+- [`records/preflight.md`](records/preflight.md) — durable Preflight engineering stories and deeper mechanism context; moving performance numbers live in `records/preflight-live-performance.md`.
 - [`records/open-source.md`](records/open-source.md) — selected open-source engineering evidence and the larger bench.
 - [`archive/2026-08-11-signal-audit.md`](archive/2026-08-11-signal-audit.md) — first broad snapshot of the current body of work and the narrative it supports.
 - [`AGENTS.md`](AGENTS.md) — local instructions for agents updating this record.
 
-For current status, read `current-state.md` first. The inventory remains the central durable retrieval index rather than a second source of technical truth. Detailed records own the deeper story; source repositories and upstream threads own the facts.
+For current status, read `current-state.md` first. For the default résumé, read `resume-current.md`. For current Preflight career performance, read `records/preflight-live-performance.md`. The inventory remains the central durable retrieval index rather than a second source of technical truth. Detailed records own the deeper story; source repositories and upstream threads own the facts.
 
 ## What belongs here
 
