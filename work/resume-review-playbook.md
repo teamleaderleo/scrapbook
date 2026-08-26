@@ -14,6 +14,16 @@ Use these in order:
 
 Source repositories and retained evidence outrank all career copy when facts change. The LaTeX draft is not a second wording authority. If the default wording changes, update `resume-current.md` and then carry the accepted wording into the next numbered draft.
 
+## Preflight measurement rule
+
+The selected career-facing headline is **101s → 13.69s**. Preserve it exactly unless Leo explicitly chooses a new headline.
+
+The accumulated current run history may be used to show that the current regime is repeatable, but **do not replace 13.69s with a median or rounded value**. Likewise, do not replace the headline with the historical 89.00s → 15.53s same-session A/B pair.
+
+Every startup run measured with the same game-log clock is an elapsed-time observation of the same quantity. A named campaign may make a pair useful for a causal comparison, and its permutation statistics may help answer that comparison question, but neither the campaign label nor the statistics give those elapsed times a privileged status for resume wording.
+
+Archived reviewer notes that question whether 13.69s is the “right” endpoint because it is a best/low run are superseded on this editorial point. They remain useful for their other resume feedback.
+
 ## Current baseline: V10
 
 `2026-08-25-v10.tex` is the current one-page checkpoint after the first independent review/Thunderdome round.
