@@ -1,6 +1,6 @@
 # Current resume
 
-This is the current one-page resume selection. It mirrors [`resume-drafts/2026-08-26-v11.tex`](resume-drafts/2026-08-26-v11.tex) and owns the default content selection. `resume-candidates.md` remains the larger reservoir of alternates and supporting material. Source repositories and evidence still outrank career copy when facts change.
+This is the current one-page resume selection. It mirrors [`resume-drafts/2026-08-26-v12.tex`](resume-drafts/2026-08-26-v12.tex) and owns the default content selection. `resume-candidates.md` remains the larger reservoir of alternates and supporting material. Source repositories and evidence still outrank career copy when facts change.
 
 ## Open Source Engineering
 
@@ -39,7 +39,7 @@ This is the current one-page resume selection. It mirrors [`resume-drafts/2026-0
 ### Preflight
 
 **Cross-platform performance launcher & mod analysis toolkit**  
-`github.com/teamleaderleo/preflight` | 2026–Present
+`github.com/teamleaderleo/preflight` | Jul 2026–Present
 
 > Reduced startup **101s → 13.69s (86.4% less time, 7.38× speedup)** by reverse-engineering an obfuscated JVM runtime spanning the base game and 83 third-party mods, then moving repeated work out of the launch path with memoization, precomputed artifacts, and runtime bytecode rewrites.
 
