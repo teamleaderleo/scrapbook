@@ -50,7 +50,7 @@ Strong convergence:
 
 - Keep all four current upstream repository rows by default: Vercel AI SDK, Cloud Hypervisor, Vite, Cloudflare Workers SDK.
 - Do not force React onto the default page.
-- Protect both IBM bullets.
+- V10 kept both IBM bullets; future target-specific or space-driven edits may revisit that choice.
 - Preflight's default core is the flagship opening, shared JSON/data architecture, texture preparation/storage, campaign runtime, Janino, and desktop/productization.
 - The aggregate `>12s` third-party callback receipt was the unanimous first Preflight cut. It remains strong portfolio/interview material.
 - Texture prefetch + VRAM won the default seventh Preflight slot 3–1 over the linter or whitespace.
