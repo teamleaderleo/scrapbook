@@ -4,7 +4,7 @@ This file keeps strong candidate language and story fragments that may later bec
 
 It is intentionally more generous than `resume-candidates.md`. The ranking file answers what earns scarce space today; this file preserves formulations worth revisiting without forcing them onto the page.
 
-**Authority warning — 2026-08-25:** this is a historical phrase reservoir, not a live status source. Do not treat words such as “current,” merge/review state, benchmark numbers, or project maturity below as authoritative. For the current one-page wording use `resume-current.md`; for ranked candidates and current status use `resume-candidates.md`; for Preflight measurements use `preflight-resume-evidence-map.md`. Reconcile any fragment here against those owners and the source repository before reuse. In particular, the old 15.88s Preflight formulation and the three-merged-plus-open Cloud Hypervisor wording below are superseded.
+**Authority warning — 2026-08-26:** this is a historical phrase reservoir, not a live status source. Do not treat words such as “current,” merge/review state, benchmark numbers, or project maturity below as authoritative. For the current one-page wording use `resume-current.md`; for ranked candidates and current status use `resume-candidates.md`; for Preflight measurements use `preflight-resume-evidence-map.md`. Reconcile any fragment here against those owners and the source repository before reuse. The selected Preflight career headline is **101s → 13.69s**. Do not replace 13.69s with a median, same-session A/B result, or packaged-candidate statistic unless Leo explicitly changes the headline. Historical text below that recommends such a substitution is superseded. The old 15.88s formulation and the three-merged-plus-open Cloud Hypervisor wording are also superseded.
 
 Primary evidence remains in the originating repositories and the detailed records under `work/records/`.
 
@@ -92,11 +92,11 @@ Preflight should receive the largest owned-work allocation. The strongest story 
 
 ### Outcome / product
 
-Current safe formulation before the fresh release cohort:
+Current career formulation:
 
-> Built a Java-agent performance layer for an 80+ mod Starsector installation; current development builds reach the main menu in a 15.88s fresh-warm record while retaining exact compatibility gates and original-runtime fallbacks.
+> Built a Java-agent performance layer for an 80+ mod Starsector installation, reducing startup **101s → 13.69s** while retaining exact compatibility gates and original-runtime fallbacks.
 
-After a clean same-profile release cohort, replace this with the actual interleaved before/after distribution rather than comparing endpoints from different development states.
+The old 89.00s → 15.53s same-session A/B campaign is useful when the question is specifically that before/after comparison. It does not replace or qualify the selected **101s → 13.69s** career headline. Likewise, a packaged release benchmark adds release-package evidence; it does not silently rewrite the development headline.
 
 ### Runtime / bytecode compatibility
 
@@ -130,7 +130,7 @@ Keep direct component savings distinct from whole-launch movement.
 
 Interview wording:
 
-> One of the harder parts was learning to distrust my profiler. I found measurement defects that made earlier timing interpretations wrong, corrected the instruments, voided or reclassified the affected claims, and reran the campaigns instead of defending the prettier number.
+> One of the harder parts was learning to distrust my profiler. I found measurement defects that made earlier timing interpretations wrong, corrected the instruments, voided or reclassified the affected claims, and reran the measurements instead of defending the prettier number.
 
 Related examples worth keeping available:
 
@@ -142,7 +142,7 @@ Related examples worth keeping available:
 
 The meta-story is stronger than any one reversal:
 
-> Preflight was not built by stacking every plausible optimization. It was built by repeatedly killing optimizations that failed controlled measurement.
+> Preflight was not built by stacking every plausible optimization. It was built by repeatedly killing optimizations that failed measurement, correctness, or validation.
 
 ### Productization
 
@@ -188,7 +188,7 @@ Do not present either thesis as proof that a company owes an interview. They are
 
 ## Interview story bank
 
-Strong stories should usually have four parts: the initial model, the discriminator, what the evidence showed, and the resulting repair or reversal.
+There is no mandatory story template or quota. For an actual interview question, use the minimum technical arc needed to answer it clearly: what you believed, what evidence could falsify it, what you found, what you changed, and whatever consequence is relevant. Skip any of those when they do not help the answer.
 
 Current high-value examples:
 
