@@ -4,7 +4,7 @@ This file keeps strong candidate language and story fragments that may later bec
 
 It is intentionally more generous than `resume-candidates.md`. The ranking file answers what earns scarce space today; this file preserves formulations worth revisiting without forcing them onto the page.
 
-**Authority warning — 2026-08-26:** this is a historical phrase reservoir, not a live status source. Do not treat words such as “current,” merge/review state, benchmark numbers, or project maturity below as authoritative. For the current one-page wording use `resume-current.md`; for ranked candidates and current status use `resume-candidates.md`; for Preflight measurements use `preflight-resume-evidence-map.md`. Reconcile any fragment here against those owners and the source repository before reuse. The selected Preflight career headline is **101s → 13.69s**. Do not replace 13.69s with a median, same-session A/B result, or packaged-candidate statistic unless Leo explicitly changes the headline. Historical text below that recommends such a substitution is superseded. The old 15.88s formulation and the three-merged-plus-open Cloud Hypervisor wording are also superseded.
+**Authority warning — 2026-08-26:** this is a historical phrase reservoir, not a live status source. Do not treat words such as “current,” merge/review state, benchmark numbers, or project maturity below as authoritative. For the current one-page wording use `resume-current.md`; for ranked candidates use `resume-candidates.md`; for the current Preflight performance headline and moving numbers use `records/preflight-live-performance.md`; use `preflight-resume-evidence-map.md` for provenance and breadcrumbs. Reconcile any fragment here against those owners and the source repository before reuse. The selected Preflight career headline is **101s → 13.69s**. Do not replace 13.69s with a median, same-session A/B result, or packaged-candidate statistic unless Leo explicitly changes the headline. Historical text below that recommends such a substitution is superseded. The old 15.88s formulation and the three-merged-plus-open Cloud Hypervisor wording are also superseded.
 
 Primary evidence remains in the originating repositories and the detailed records under `work/records/`.
 
@@ -209,12 +209,6 @@ These are stronger than generic STAR stories because each contains a technical d
 
 ## Editing rule
 
-When a new contribution or product result arrives, do not ask only whether it is impressive. Ask:
-
-1. Does it prove something the current page does not already prove?
-2. Is the mechanism legible in one or two lines?
-3. Is there external validation or a concrete measurable consequence?
-4. Is it stronger than the specimen it would displace?
-5. Does the target role change the answer?
+When a new contribution or product result arrives, do not ask only whether it is impressive. Compare it against what the current page already proves, whether the mechanism is legible, what external validation or measurable consequence exists, what it would displace, and whether the target role changes the trade. These are prompts for judgment, not a checklist that every item must satisfy.
 
 The durable record can be rich. The one-page resume should remain ruthless.
