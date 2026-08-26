@@ -30,7 +30,7 @@ Detailed historical record: [`records/preflight.md`](records/preflight.md)
 
 **Use for:** runtime/performance, Java instrumentation, compatibility, measurement, release/product engineering.
 
-Preflight is the strongest owned artifact. The current career-facing performance headline is the observed development arc **~101s → 13.69s** on the 83-mod M5 MacBook Air installation. The clean 89.00s → 15.53s same-session campaign remains supporting experimental evidence. Keep those two claims distinct and let the live performance record own the changing frontier.
+Preflight is the strongest owned artifact. The current career-facing performance headline is the observed development arc **~101s → 13.69s** on the 83-mod M5 MacBook Air installation. The older 89.00s → 15.53s same-session result used only five runs per condition and belongs as historical benchmark context; that sample is too small to carry superior evidentiary weight. Let the live performance record own the changing frontier.
 
 What it proves:
 
