@@ -90,17 +90,20 @@ The useful question is whether the recurring work and operating model reward the
 
 ## The chronology mismatch
 
-Working market framing remains:
+For internal career synthesis, it can be useful to describe roughly three years of substantive software-engineering work: about sixteen months of conventional industry employment plus roughly two years of independent/open-source/product engineering.
 
-> Roughly three years of substantive software-engineering experience: about sixteen months of conventional industry employment plus roughly two years of independent/open-source/product engineering.
+That sentence is **not** a claim of three years of conventional professional employment, and it should not be silently converted into one on an application form.
 
-That does **not** mean three years of conventional post-graduate full-time company tenure.
+Answer the field the employer actually asks:
 
-The fit question is therefore partly organizational: does the hiring process have enough technical resolution to evaluate unusual evidence, or does it rely almost entirely on title/tenure as a proxy?
+- if it explicitly asks for full-time, post-graduate, paid, or professional employment, use the conventional employment chronology that satisfies that wording;
+- if it explicitly includes self-directed, open-source, freelance, self-employed, research, or equivalent engineering work, include the applicable work and make the composition clear;
+- if the field is ambiguous and gives no place to explain, do not assume the employer means the broadest possible definition. Prefer the conservative interpretation rather than turning independent work into employment by implication;
+- when there is room for context, let the resume or a short explanation distinguish conventional employment from independent/open-source/product engineering.
+
+The fit question is partly organizational: does the hiring process have enough technical resolution to evaluate unusual evidence, or does it rely almost entirely on title/tenure as a proxy?
 
 Neither choice is morally wrong. It simply changes expected conversion.
-
-For generic application forms asking ordinary software-engineering experience, "about three years" is defensible. For questions explicitly limited to post-graduate full-time professional employment, answer the narrower chronology truthfully.
 
 ## Interview fit
 
@@ -124,7 +127,7 @@ Processes that allow some combination of:
 
 A strong fit with the eventual work does not guarantee a strong fit with every interview instrument.
 
-Keep separate practice for:
+Prepare the instrument the company actually uses. That may include:
 
 - timed algorithmic coding when the process uses it;
 - concise verbal communication under interview pressure;
@@ -132,7 +135,7 @@ Keep separate practice for:
 - behavioral examples involving collaboration, disagreement, mistakes, and long-lived ownership;
 - explaining agent-assisted workflows without either hiding the tooling or making the tooling sound like the engineer.
 
-The correct response to a narrow interview instrument is preparation, not arguing that the instrument should have inferred capability from GitHub.
+The correct response to a narrow interview instrument is preparation, not arguing that the instrument should have inferred capability from GitHub. Do not manufacture a generic interview packet before the process is known; `interview-calibration.md` owns that rule.
 
 ## Talking about AI-assisted engineering
 
@@ -226,19 +229,9 @@ The last question is especially useful when the conversation is candid enough fo
 
 ## Signals to record after interviews
 
-After each meaningful process, preserve observations rather than only "passed/failed."
+After a meaningful process, preserve only the observations that could change future preparation, targeting, or fit hypotheses. Do not fill a checklist for completeness.
 
-Useful fields:
-
-- role and team;
-- what the interview actually tested;
-- which work examples generated follow-up interest;
-- which claims required too much explanation;
-- places where chronology or title proxies dominated;
-- technical areas the interview exposed as weak;
-- whether the team seemed to reward investigation or primarily execution throughput;
-- how review/autonomy/AI-tooling questions were answered;
-- anything that changed the current fit hypothesis.
+Useful things to retain when they matter include what the interview actually tested, which work examples generated follow-up interest, claims that required too much explanation, technical areas exposed as weak, whether chronology/title proxies dominated, and anything the team said that materially changed the current fit model.
 
 Do not turn every rejection into a theory about the company. Multiple observations are needed before treating a pattern as real.
 
