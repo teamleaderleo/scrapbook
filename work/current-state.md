@@ -1,4 +1,4 @@
-# Current state — 2026-08-24
+# Current state — 2026-08-26
 
 This is the source-first live-status overlay for the work record.
 
@@ -18,7 +18,7 @@ Current source also includes the learned Compact texture path, physical-order-se
 
 Private signing/package rehearsals have succeeded across Linux, macOS, and Windows. Remaining first-beta work belongs to one maintainer-authorized immutable candidate generation: native Windows/Linux licensed-install acceptance, package-bound startup/lifecycle/update/report evidence, the hands-on report-intake canary, and the final publication decision.
 
-## SmolRunner — landed M6 hot-state substrate
+## Glaeda — landed M6 hot-state substrate
 
 Repository: https://github.com/teamleaderleo/smolrunner
 
@@ -117,9 +117,9 @@ Transient GitHub mergeability belongs to the live upstream PR; the durable recor
 
 ### Cloud Hypervisor
 
-State: **three merged Rust/VMM fixes plus the deeper open QCOW L2 ownership thread**.
+State: **four merged Rust/VMM fixes across lifecycle, boot errors, VFIO mapping, and QCOW metadata ownership**.
 
-The merged work spans VMM shutdown completion, ACPI error propagation and sparse VFIO BAR mapping semantics. The open QCOW work covers replacement L2 ownership/refcount ordering across publication and relocation.
+The merged work spans exact VMM shutdown completion, ACPI error propagation, sparse VFIO BAR mapping semantics, and QCOW L2 ownership/refcount ordering. PR #8721 merged on 2026-08-24 after moving new/replacement L2 ownership before L1 publication and keeping the relocation ownership handoff local rather than deferring it to later cleanup.
 
 ## FEX — owned-fork runtime research
 

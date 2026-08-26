@@ -42,9 +42,6 @@ pnpm exec playwright test tests/e2e/time-picker.spec.ts --project=chromium
 
 # complete Chromium suite, only when it is actually useful
 pnpm test:e2e:full
-
-# explicit cross-browser sweep
-pnpm test:e2e:cross-browser
 ```
 
 For a visible UI change, run the app and inspect the affected route and relevant viewport directly. A local browser, a deployment preview, or the deployed site can all be useful evidence depending on what changed. Capture a screenshot when the visual result needs to be reviewed or preserved.

@@ -18,7 +18,7 @@ GET /api/agent-access/handoff-schema
 
 Repository-backed publications, agent instructions, Guest Check-ins, Workbench pieces, and Agent Journal records live in `teamleaderleo/scrapbook` on GitHub.
 
-The Workbench keeps `/desk`, `/api/bot-desk`, `lib/bot-desk.ts`, `public/desk/`, and `docs/bot-desk.md` as compatibility identifiers. Those paths remain canonical even though the human-facing publication lane is called Workbench.
+The Workbench keeps `/desk`, `/api/bot-desk`, `lib/bot-desk.ts`, and `public/desk/` as compatibility identifiers. `docs/bot-desk.md` is a compatibility pointer. The canonical human publication guide is `docs/workbench.md`, and Leo-directed prose follows the root `STYLE_GUIDE.md`.
 
 A connection that can safely update that repository may use its native write mechanism. Examples include:
 
@@ -65,7 +65,7 @@ Useful entry points:
 
 ### GitHub/repository read
 
-Read `AGENTS.md`, `DESIGN.md`, and the relevant guide under `docs/`. For substantive writing, inspect the current Workbench index and read related full documents before drafting.
+Read `AGENTS.md` first. Read `STYLE_GUIDE.md` in full before drafting or revising Leo-directed prose. Read `DESIGN.md` for substantive product or UI work and the relevant guide under `docs/`. For Workbench writing, follow `docs/workbench.md`, inspect the current index, and read related full documents before drafting.
 
 ## GitHub references
 

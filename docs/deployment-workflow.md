@@ -8,13 +8,42 @@ Routine hosted CI answers the cheap repository questions: ESLint and Vitest run 
 
 | Source | Vercel behaviour |
 | --- | --- |
-| `main` | Deploy automatically to production. |
+| Deploy-relevant `main` change | A tiny GitHub Actions OIDC signal requests production through the central deploy governor; Vercel Git auto-deploy is disabled. |
+| `main` change only under `work/**` | No production signal. Internal records such as resume drafts can land without consuming a Vercel deployment. |
 | Ordinary feature, fix, docs, chore, internal, audit, or agent branches | Skip automatic Vercel deployment. |
 | Commit message containing `[preview]` | Promote that commit to `preview/opt-in/<source-branch>` and deploy it. |
 | Branch prefixed `preview/` | Deploy every push as a persistent preview branch. |
 | Manual or non-Git deployment with no Git ref | Continue the deployment. |
 
 Use `[preview]` as the conventional spelling. Marker matching is case-insensitive.
+
+## Production governor
+
+`teamleaderleo/deploy-governor` owns production admission across the operator's governed Vercel projects. Scrapbook does not store its Vercel credential and does not perform the Vercel deployment itself.
+
+The normal path is event-driven:
+
+```text
+Scrapbook deploy-relevant main changes
+  -> the Production deploy signal job requests a short-lived GitHub OIDC token
+  -> the job posts that token directly to Stensibly
+  -> Stensibly verifies GitHub's signature and the signed repository / ref / SHA / workflow claims
+  -> Stensibly sends the exact repo / branch / SHA to deploy-governor
+  -> governor checks Vercel's rolling team-wide deployment history
+  -> below the soft threshold: create one exact-SHA production deployment
+  -> at or above the threshold: retain the candidate without creating a Vercel deployment
+  -> one global half-hour batch slot drains at most one queued project
+```
+
+`.github/workflows/deploy-signal.yml` requests GitHub's short-lived OIDC credential with `id-token: write` and sends that credential to the fixed Stensibly audience. Its `main` push trigger ignores changes confined to `work/**`, plus changes confined to the signal workflow and this policy document themselves. It has no stored deployment secret, performs no repository checkout, installs no dependencies, and does not call Vercel.
+
+Stensibly accepts only GitHub's RS256 OIDC issuer for the exact deploy-governor audience. It requires a branch push and an exact `.github/workflows/deploy-signal.yml` workflow ref, then takes repository, ref, and SHA from the signed token rather than a request body. The existing source allowlist is checked before any outbound deploy-governor authority is minted.
+
+Normal quality/build CI remains separate and can run in parallel, as it did when Vercel Git deployment was automatic.
+
+Vercel supplies the governor with Scrapbook's existing project identity and production branch through the project's Git integration. The governor checks exact-SHA Vercel history before creating a deployment, so repeated requests do not duplicate an already-attempted revision.
+
+There is no production-head polling loop.
 
 ## How the repository enforces the policy
 
@@ -24,11 +53,11 @@ Three controls handle different points in the path.
 
 The root `vercel.json` uses `git.deploymentEnabled` with a deny-by-default rule:
 
-- `main` is enabled;
+- `main` is disabled because the governor creates production deployments explicitly;
 - `preview/**` is enabled;
 - every other Git branch is disabled.
 
-This runs at the Git integration layer, before Vercel creates a routine branch deployment. It is the quota-saving control.
+This prevents Vercel's Git integration from creating a production deployment before the cross-project governor has made its quota decision.
 
 ### 2. Commit-marker promotion
 
@@ -46,14 +75,14 @@ A contributor who wants every push deployed can work directly on a `preview/…`
 
 `scripts/vercel-preview-policy.mjs` is the repository-owned final decision for any deployment that reaches Vercel's Ignored Build Step. It continues for:
 
-- `main`;
+- `main` when an explicit governor or manual deployment reaches Vercel;
 - `preview/…` branches;
 - a commit containing `[preview]`;
 - a deployment with no Git ref.
 
 It exits `0` for a routine branch so Vercel ignores the build, and exits `1` when the build should continue. The command prints one concise reason in the deployment log.
 
-The decision function is pure and covered by unit tests. The ignored-build command is defence in depth; the branch gate does the quota-saving work for ordinary Git pushes.
+The ignored-build command is defence in depth. It is not the production quota governor because Vercel has already created a deployment record by the time this command runs.
 
 ## When a preview earns a deployment
 
@@ -65,21 +94,27 @@ Routine prose, tests, repository maintenance, and source-level changes stay on o
 
 ## Practical cadence
 
-Run local checks before pushing when local access is available. Accumulate related edits instead of turning every small correction into a remote deployment attempt. Let routine GitHub CI answer lint, unit-test, and production-build questions. Use an explicit browser check when the change needs one. Add `[preview]` to a commit when a deployed URL adds useful evidence, or use a `preview/…` branch for a longer preview session. Merge accepted work to `main` for the production deployment.
+Run local checks before pushing when local access is available. Let routine GitHub CI answer lint, unit-test, and production-build questions. Use an explicit browser check when the change needs one. Add `[preview]` to a commit when a deployed URL adds useful evidence, or use a `preview/…` branch for a longer preview session. Merge accepted deploy-relevant work to `main`; the OIDC signal asks the governor to handle production admission. Internal records under `work/**` can merge to `main` without requesting production.
 
 ## Quota accounting
 
-Vercel Hobby accounts have rolling build and deployment limits. Vercel's Ignored Build Step executes after a deployment has already been created, and Vercel documents ignored or cancelled builds as counting toward deployment quotas and concurrent build slots.
+The governor counts Vercel deployments across the complete Vercel team, including preview deployments and projects that are not governed. The first 50 deployments in the rolling 24-hour window leave fresh governed production candidates in immediate mode. At or above that soft threshold, routine production candidates wait and the global half-hour scheduler deploys at most one queued project per slot.
 
-For that reason, this repository does not rely on the ignored-build command alone. `git.deploymentEnabled` blocks routine branches before deployment creation. The ignored-build script remains a readable safeguard for manual deployments and any deployment that reaches the build stage through another route.
+This preserves headroom below Vercel Hobby's 100-deployment rolling limit for previews, manual deployments, non-governed projects, and races around the threshold.
 
-## Retrying a blocked production deployment
+Vercel's Ignored Build Step executes after a deployment has already been created, so ignored or cancelled builds cannot provide the same quota protection.
 
-When a `main` deployment hits a rolling limit, wait until enough earlier activity leaves the quota window, then trigger one deliberate retry. Repeated rapid retries create more deployment attempts and extend the problem.
+## Recovery
+
+If Stensibly or the governor is unavailable, the signal job fails visibly instead of silently falling back to a timer. The current production deployment stays live. Re-running the failed signal is safe because the governor checks exact-SHA Vercel history before creating anything.
+
+The repository-level rollback for the delivery path is to set `git.deploymentEnabled.main` back to `true`, restoring Vercel's normal Git production trigger.
+
+A specific failed or canceled exact SHA is treated as already attempted by the governor rather than retried forever. Push a repaired revision or perform one deliberate recovery deployment when needed.
 
 ## Project boundary
 
-This policy applies to the existing Vercel project `setzen`. It changes repository-controlled Git deployment behaviour only. Production domains, project environment variables, and runtime settings stay unchanged.
+This policy applies to the existing Vercel project `setzen`. Production domains, project environment variables, previews, and runtime settings stay unchanged.
 
 ## Sources
 
@@ -88,3 +123,4 @@ This policy applies to the existing Vercel project `setzen`. It changes reposito
 - [Git configuration](https://vercel.com/docs/project-configuration/git-configuration)
 - [Project settings and Ignored Build Step accounting](https://vercel.com/docs/project-configuration/project-settings)
 - [System environment variables](https://vercel.com/docs/environment-variables/system-environment-variables)
+- [GitHub OpenID Connect reference](https://docs.github.com/en/actions/reference/security/oidc)

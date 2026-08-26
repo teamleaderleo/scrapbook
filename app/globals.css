@@ -270,6 +270,13 @@ input[type='number']::-webkit-outer-spin-button {
     0 6px 18px rgb(0 0 0 / 0.42);
 }
 
+@media (min-width: 1024px) {
+  [data-space-lanes],
+  [data-space-loading-lanes] {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
 @layer components {
   .skeleton-surface {
     position: relative;

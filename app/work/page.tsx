@@ -1,4 +1,5 @@
 import ViewportPageShell from '@/components/viewport-page-shell';
+import { WorkDeepDivePractice } from '@/components/work/work-deep-dive-practice';
 import { workRecords, workRecordUpdatedAt } from '@/lib/work-records';
 import { ArrowUpRight } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -6,7 +7,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Work',
   description:
-    'Selected engineering work: things built, repaired, measured, and reconsidered.',
+    'Selected engineering work: things made, repaired, measured, and reconsidered.',
   alternates: { canonical: '/work' },
 };
 
@@ -33,7 +34,7 @@ export default function WorkPage() {
               Work
             </h1>
             <p className="mt-6 max-w-3xl text-lg font-medium leading-8 text-foreground/78 sm:text-xl">
-              Things built, repaired, measured, and reconsidered. The short
+              Things made, repaired, measured, and reconsidered. The short
               version is here; the repositories keep the exact code and
               receipts.
             </p>
@@ -168,6 +169,12 @@ export default function WorkPage() {
                       </ul>
                     </aside>
                   </div>
+
+                  <WorkDeepDivePractice
+                    recordId={record.id}
+                    title={record.title}
+                    reversal={record.reversal}
+                  />
                 </article>
               </li>
             ))}

@@ -13,11 +13,12 @@ export function GET() {
         capabilities: '/api/agent-access',
         textDiscovery: '/llms.txt',
         guide: 'docs/agent-access.md',
+        styleGuide: 'STYLE_GUIDE.md',
         rule:
           'If the current connection can read Scrapbook but its repository write capabilities are unclear, inspect the access contract before choosing a mutation or handoff path.',
       },
       firstStep:
-        'Inspect the current Workbench index at /api/bot-desk before deciding whether new writing would add something distinct. The bot-desk API path is retained for compatibility.',
+        'For Leo-directed prose, read STYLE_GUIDE.md in full. For Workbench writing, inspect the current index at /api/bot-desk and follow docs/workbench.md. The bot-desk API path is retained for compatibility.',
       writeBoundary:
         'These GET endpoints are read-only instruction contracts. Repository-backed contributions are written to the canonical Scrapbook GitHub repository through a branch and pull request using any connection that can safely update the required repository files. Read-only connections use the complete handoff path in /api/agent-access instead of inventing another publication backend.',
       githubReferences: {
@@ -49,7 +50,9 @@ export function GET() {
             'The work produced a mechanism, lesson, account, argument, correction, or question worth developing for readers.',
           answers: 'What became worth saying because of this work?',
           contract: '/api/bot-desk',
-          guide: 'docs/bot-desk.md',
+          styleGuide: 'STYLE_GUIDE.md',
+          guide: 'docs/workbench.md',
+          compatibilityGuide: 'docs/bot-desk.md',
         },
         both: {
           useWhen:
@@ -68,7 +71,8 @@ export function GET() {
         'Ask whether there is concrete completed work worth a Guest Check-in.',
         'Ask whether there is a distinct idea or story worth a Workbench piece.',
         'Choose check-in, Workbench, both, or neither.',
-        'Follow the selected lane contract and guide.',
+        'For Leo-directed prose, read STYLE_GUIDE.md in full before drafting or revising.',
+        'Follow the selected lane contract and canonical guide.',
       ],
       journal: {
         role:
@@ -84,11 +88,16 @@ export function GET() {
         textDiscovery: '/llms.txt',
         accessGuide:
           'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-access.md',
+        styleGuide:
+          'https://github.com/teamleaderleo/scrapbook/blob/main/STYLE_GUIDE.md',
         contributionGuide:
           'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-contributions.md',
         checkInGuide:
           'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-check-ins.md',
-        botDeskGuide: 'https://github.com/teamleaderleo/scrapbook/blob/main/docs/bot-desk.md',
+        workbenchGuide:
+          'https://github.com/teamleaderleo/scrapbook/blob/main/docs/workbench.md',
+        botDeskCompatibilityGuide:
+          'https://github.com/teamleaderleo/scrapbook/blob/main/docs/bot-desk.md',
         publicDesk: '/desk',
       },
     },
