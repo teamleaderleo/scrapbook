@@ -10,7 +10,7 @@ Use these in order:
 2. `work/records/preflight-live-performance.md` owns the current career-facing Preflight performance headline and moving performance numbers.
 3. `work/resume-candidates.md` is the larger reservoir of alternates, historical candidates, and material that may return for role-specific versions.
 4. `work/preflight-resume-evidence-map.md` owns Preflight provenance, implementation breadcrumbs, and double-counting warnings. It is an evidence index, not a competing current-headline authority.
-5. `work/resume-portfolio-style.md` owns writing rules.
+5. `work/resume-portfolio-style.md` owns writing guidance.
 6. `work/resume-drafts/2026-08-25-v10.tex` is the current visual/layout baseline.
 
 Source repositories and retained evidence outrank all career copy when facts change. The LaTeX draft is not a second wording authority. If the default wording changes, update `resume-current.md` and then carry the accepted wording into the next numbered draft.
@@ -42,24 +42,26 @@ Current layout choices:
 - Languages and Technologies use separate full-width lines so PDF extraction preserves reading order.
 - Generated PDFs are review artifacts, not repository source. Track numbered `.tex` drafts, not every compiled binary.
 
-## What the first Thunderdome established
+These describe V10. A later target, rendering problem, or stronger editorial choice can change them without first proving the old choice wrong.
 
-Four independent reviewers produced written reviews and alternate TeX variants, then completed a forced-choice arbitration round.
+## What the first Thunderdome observed
 
-Strong convergence:
+Four independent reviewers produced written reviews and alternate TeX variants, then completed a forced-choice arbitration round. That process is historical context for V10, not a required method for future review.
 
-- Keep all four current upstream repository rows by default: Vercel AI SDK, Cloud Hypervisor, Vite, Cloudflare Workers SDK.
-- Do not force React onto the default page.
+Review-round observations:
+
+- Reviewers favored keeping the four current upstream repository rows: Vercel AI SDK, Cloud Hypervisor, Vite, Cloudflare Workers SDK.
+- React did not earn default-page space in that round.
 - V10 kept both IBM bullets; future target-specific or space-driven edits may revisit that choice.
-- Preflight's default core is the flagship opening, shared JSON/data architecture, texture preparation/storage, campaign runtime, Janino, and desktop/productization.
+- The V10 Preflight core became the flagship opening, shared JSON/data architecture, texture preparation/storage, campaign runtime, Janino, and desktop/productization.
 - The aggregate `>12s` third-party callback receipt was the unanimous first Preflight cut. It remains strong portfolio/interview material.
-- Texture prefetch + VRAM won the default seventh Preflight slot 3–1 over the linter or whitespace.
-- The mod linter remains a strong role-specific alternate rather than a default bullet.
-- The desktop sentence should keep cross-platform architecture, bundled Java, durable history, and signed updates/rollback. Ship wireframes and profile management move to portfolio material.
-- `12,584 cached objects` does not need resume space. V10 keeps only the compact `~990k values` fidelity scale.
-- The campaign defensive-copy `15.4M empty script calls` receipt moves to portfolio/interview material.
-- V10 keeps the same-corpus texture-layout result `33.53s → 14.174s`; reviewers split 2–2, and the current editorial decision is that physical layout adds a distinct storage/locality signal.
-- The current section order is the V10 checkpoint, not a permanent rule. Reorder it when a target role or a concrete reading problem gives a reason; reviewer votes do not create an obligation to run an editorial A/B experiment.
+- Texture prefetch + VRAM won the seventh V10 Preflight slot 3–1 over the linter or whitespace.
+- The mod linter remained a strong role-specific alternate rather than a default bullet.
+- Reviewers favored keeping cross-platform architecture, bundled Java, durable history, and signed updates/rollback in the desktop sentence. Ship wireframes and profile management moved to portfolio material.
+- `12,584 cached objects` did not earn V10 space. V10 kept only the compact `~990k values` fidelity scale.
+- The campaign defensive-copy `15.4M empty script calls` receipt moved to portfolio/interview material.
+- V10 kept the same-corpus texture-layout result `33.53s → 14.174s`; reviewers split 2–2, and the editorial choice at that checkpoint was that physical layout added a distinct storage/locality signal.
+- The section order is a V10 checkpoint, not a permanent rule. Reorder it when a target role or a concrete reading problem gives a reason; reviewer votes do not create an obligation to run an editorial A/B experiment.
 
 ## Current Preflight default selection
 
@@ -84,49 +86,49 @@ Default alternates:
 
 Role-specific changes should keep the one-page resume legible and make additions earn their space. Do not mechanically require a one-for-one swap merely because the current checkpoint has a particular count.
 
-## Writing rules that survived repeated review
+## Useful writing heuristics from repeated review
 
-- Lead with the failure prevented, behavior changed, or system result. Do not lead with internal invariants or implementation variables.
+These are working defaults for readability, not a mandatory sentence template. Keep the ones that solve a real problem in the current bullet; ignore one when another phrasing is clearer and equally accurate.
+
+- Lead with the failure prevented, behavior changed, or system result when that gives the reader the point sooner than an implementation noun.
 - Consequence → fix → number → receipt is a useful default when that order reads naturally, not a required template.
 - Use punctuation that keeps a dense bullet easy to parse. Semicolons and em dashes are fine when they improve the sentence; do not ban or add them mechanically.
 - Delete modifiers when removing them leaves the engineering claim unchanged.
-- Keep modifiers only when they add technical meaning or scope (`obfuscated`, `third-party`, `single-threaded` can matter).
+- Keep modifiers when they add technical meaning or scope (`obfuscated`, `third-party`, `single-threaded` can matter).
 - Prefer one dense causal sentence to a benchmark mini-paragraph when the evidence belongs to one causal arc.
-- Stable workload counts belong in the clause they explain.
-- Lead with useful findings for analysis/linter tools, not calibration/null-result statistics.
+- Stable workload counts usually read best in the clause they explain.
+- Lead with useful findings for analysis/linter tools rather than calibration/null-result statistics when the finding is the accomplishment.
 - Never manufacture FPS or end-to-end deltas by adding component measurements from different runs.
 - Use technical nouns an expert understands, but give enough context for a reader with zero Starsector knowledge.
-- A heading may carry domain/product context, but it must not replace the project thesis.
-- For upstream work, keep the PR number immediately after the exact clause it supports.
-- If one short token or metric wraps onto its own line, prefer a local wording trim before shrinking the whole document.
+- A heading may carry domain/product context, but it should not be asked to carry the complete project thesis by itself.
+- For upstream work, keep the PR number close enough to the clause it supports that attribution stays legible.
+- If one short token or metric wraps onto its own line, try a local wording trim before shrinking the whole document.
 - Do not add filler merely to occupy whitespace.
 
-## Parser and rendering rules
+## Parser and rendering checks
 
-- Check the rendered page after every material change.
-- Also extract/copy the PDF as plain text and inspect reading order. V9/V10 caught two issues this way: small-caps headings extracted as spaced letters, and a side-by-side Skills line extracted out of order.
-- Prefer visible URLs for important owned projects even when the text is clickable.
-- Use normal Title Case section headings rather than small caps or all caps.
-- Keep a small amount of bottom whitespace if the page reads better. Do not repack the page merely because room exists.
+- Check the rendered page after a material layout or wording change that could affect wrapping or hierarchy.
+- Also extract/copy the PDF as plain text when reading order may have changed. V9/V10 caught two issues this way: small-caps headings extracted as spaced letters, and a side-by-side Skills line extracted out of order.
+- Prefer visible URLs for important owned projects when parser legibility matters even if the text is clickable.
+- V10 uses normal Title Case section headings rather than small caps or all caps because those alternatives produced worse extraction or visual results in that checkpoint.
+- Keep a small amount of bottom whitespace when the page reads better. Do not repack the page merely because room exists.
 
 ## How to run future cold review
 
-Fresh reviewers should see the current PDF first, without this playbook or project history.
+A cold reviewer should see the artifact before being given the repository's editorial history; otherwise the handoff can prime the very judgment the review is meant to observe.
 
-The review should answer the questions that can actually change the page: what was remembered on a quick scan, which claims felt strongest or weakest, where attention or comprehension broke, whether the section balance worked, what the reviewer would cut if space became tight, and which technical claims they would challenge in interview.
+The review should answer questions that can actually change the page: what was remembered on a quick scan, which claims felt strongest or weakest, where attention or comprehension broke, whether the section balance worked, what the reviewer would cut if space became tight, and which technical claims they would challenge in interview.
 
-There is **no required skim duration, cut percentage, reviewer count, or forced-choice ritual**. Use whatever review setup exposes a real reading problem. Only after the cold read should a reviewer inspect the repository handoff and propose durable edits.
+There is **no required skim duration, cut percentage, reviewer count, or forced-choice ritual**. Use whatever review setup exposes a real reading problem. Only after the cold read should a reviewer inspect the repository handoff when that context is useful.
 
-Repeated failure modes are signal. One reviewer preferring a synonym is noise.
+Repeated failure modes are signal. One reviewer preferring a synonym is usually noise.
 
-## Next broader work
+## Possible broader follow-up
 
-The resume thesis is stable enough to propagate outward.
+The resume can project outward into other surfaces when there is a concrete reason to work on them:
 
-Priority order:
+- Preflight README / technical overview can make the project legible as both a deep performance investigation and a finished cross-platform companion app without copying resume density.
+- Scrapbook / personal site can give the strongest engineering stories room for mechanisms, failures, evidence, and visuals.
+- Portfolio/interview material can preserve the lock/restart/crash/invalidation failures, rejected experiments, measurement corrections, linter calibration, third-party callback work, Hangar tracing, and source breadcrumbs that are too detailed for the one-page resume.
 
-1. Preflight README / technical overview: make the project legible as both a deep performance investigation and a finished cross-platform companion app. Do not copy resume density into the README.
-2. Scrapbook / personal site: present the strongest engineering stories as separate narratives with room for mechanisms, failures, evidence, and visuals.
-3. Portfolio/interview material: preserve the lock/restart/crash/invalidation failures, rejected experiments, measurement corrections, linter calibration, third-party callback work, Hangar tracing, and source breadcrumbs that are too detailed for the one-page resume.
-
-The resume is now an index of the strongest receipts. The public docs should explain them rather than repeat them.
+The resume is an index of the strongest receipts. Public docs can explain them rather than repeat them.
