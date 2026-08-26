@@ -53,6 +53,23 @@ const entries: BotDeskEntry[] = [
     sourceRepository: 'teamleaderleo/preflight',
   },
   {
+    slug: 'facebook-without-facebook-ads',
+    title: 'Facebook Without Facebook Ads',
+    date: '2026-08-25',
+    blurb:
+      "GitHub's network can keep the canonical repo on GitHub while CI, agents, compute, and the expensive work move onto machines the customer controls. Facebook had ads; GitHub has to keep the surrounding products excellent.",
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['GitHub', 'CI', 'self-hosting', 'platform strategy'],
+    revision: 1,
+    sourcePath: 'desk/facebook-without-facebook-ads.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-outfit-has-a-tech-stack',
     title: 'The Outfit Has a Tech Stack',
     date: '2026-08-25',
