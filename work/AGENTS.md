@@ -64,6 +64,18 @@ Useful questions:
 
 Never delete a durable record merely because it falls out of the current resume ranking.
 
+## Preflight startup headline
+
+The current career-facing Preflight startup headline is **~101s → 13.69s** on the 83-mod M5 MacBook Air development installation.
+
+- **Do not replace 13.69s** with a rounded median, a different campaign median, the old 89.00s → 15.53s A/B pair, or a future package number unless Leo explicitly chooses a new headline.
+- A broader current median around 13.8s is optional repeatability context for the same current regime. It is not a substitute headline.
+- A startup run measured with the same game-log clock is the same kind of elapsed-time observation regardless of whether it came from an ad-hoc run or a named campaign.
+- Campaign shuffling, p-values, acceptance flags, and same-session pairing are useful for **causal A/B questions about an intervention**. They do not give those elapsed times a higher status when reporting current product speed.
+- Do not demote 13.69s merely because it is a low run. The resume and career records intentionally use that retained endpoint.
+
+When historical review notes, old claims files, or benchmark prose conflict with this editorial rule, keep the historical material as evidence for the question it answered and preserve **101s → 13.69s** in career-facing copy.
+
 ## Evidence links
 
 Follow the root repository's blanket GitHub-link rule here too; durable career records are not an exception.
