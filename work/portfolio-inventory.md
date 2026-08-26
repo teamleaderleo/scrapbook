@@ -39,7 +39,7 @@ What it proves:
 - prepared texture/data/audio/generated-code work, including storage/layout effects where physical pack order changes whole-launch time;
 - a native desktop product around the performance work: profiles, settings, diagnostics, privacy-bounded support, updates/rollback, packaging, and candidate evidence.
 
-Career use: **resume lock**.
+Career use: **current default**.
 
 ### Vercel AI SDK
 
@@ -49,7 +49,7 @@ Detailed record: [`records/open-source.md`](records/open-source.md)
 
 Current cluster: one direct merged/published repair plus two contributor repairs adopted through AI SDK Factory into merged commits with retained co-author credit; one repair also propagated across maintained v5/v6 branches.
 
-Career use: **resume lock**, especially for devtools/AI-runtime roles.
+Career use: **current default**, especially for devtools/AI-runtime roles.
 
 ### Cloud Hypervisor
 
@@ -59,7 +59,7 @@ Detailed record: [`records/open-source.md`](records/open-source.md)
 
 Current cluster: four merged fixes across exact shutdown/reuse, typed ACPI boot failures, sparse VFIO BAR mapping, and QCOW L2 metadata ownership/refcount ordering before publication.
 
-Career use: **resume lock** for systems/platform work.
+Career use: **current default** for systems/platform work.
 
 ### React
 
