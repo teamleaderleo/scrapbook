@@ -2,7 +2,7 @@
 
 *Written by GPT-5.6 Sol under Leo's direction. Human-directed Workbench essay, 27 August 2026.*
 
-Discord and Figma used to sit in a special little part of my head. Not exactly dream companies, because even then that sounded a little embarrassing, but semi-darlings: places where I could imagine the people being more interesting, the product having more taste, the work feeling a little less like somebody had generated the company from a startup template.
+Discord and Figma still sit in a special little part of my head. Not exactly dream companies, because even then that sounded a little embarrassing, but semi-darlings: places where I could imagine the people being more interesting, the product having more taste, the work feeling a little less like somebody had generated the company from a startup template.
 
 For a while every application contains a small act of projection. You read the careers page, look at the product, maybe watch an engineering talk, then fill in the missing rooms yourself. The people there probably care about this. The conversations might be like that. Maybe the work would feel different once you got inside.
 
@@ -12,7 +12,7 @@ That range was useful. After enough recruiter calls, interviews, take-homes, hir
 
 People say impact. Ownership. Mission. Customers. Scale. There are unusually thoughtful people inside companies and guys who sound exactly like the last guy. There are teams doing beautiful work inside otherwise boring businesses, and prestigious companies containing jobs that amount to maintaining a dashboard nobody particularly loves. Eventually even the coolest company has planning meetings, budgets, staffing problems, somebody trying to move a number, whatever.
 
-This isn't a revelation that business is fake. A business has to make money. Okay. The disillusionment is milder than that: I had been asking company names to carry more emotional content than they could bear.
+Businesses need to make money. Okay. The disillusionment is milder than discovering some grand fraud: I had been asking company names to carry more emotional content than they could bear.
 
 Discord can still be cool. Figma can still be cool. Apple can have [institutional taste](/desk/institutional-taste). I can admire what a company has made, or the way it seems to make decisions, without turning employment there into a verdict on whether I found the good timeline.
 
@@ -22,7 +22,7 @@ Looking back at old rejections, I don't feel much tragedy in the alternate lives
 
 An offer would've been useful. Some of them could have been great. None of them had a monopoly on becoming more capable.
 
-That changes rejection too. When the company is carrying a whole mythology, rejection feels like expulsion from a future. Once it's one arrangement among many, the claim gets smaller: that team, at that moment, didn't make the arrangement. Sometimes because I screwed up the interview. Sometimes another person won. Sometimes nobody tells you enough to know. The world remains annoyingly large.
+That changes rejection too. When the company is carrying a whole mythology, rejection feels like expulsion from a future. Once it's one arrangement among many, the claim gets smaller: that team, at that moment, didn't make the arrangement. Sometimes I screwed up the interview; other times somebody else won, or nobody told me enough to know. The world remains annoyingly large.
 
 The [old interview archive](https://github.com/teamleaderleo/job-search/blob/main/notes/interview-postmortems.md) makes this almost comically literal. The same person can be talking to a database company, a computer-vision startup, an e-commerce platform, an industrial CRUD company, Google, whatever, while privately imagining each one as a possible next world. Most of those worlds would've been survivable. A few would've been good. Life did not become invalid because none of those particular branches happened.
 
