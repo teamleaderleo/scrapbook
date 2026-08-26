@@ -8,7 +8,8 @@ Routine hosted CI answers the cheap repository questions: ESLint and Vitest run 
 
 | Source | Vercel behaviour |
 | --- | --- |
-| `main` | A tiny GitHub Actions OIDC signal requests production through the central deploy governor; Vercel Git auto-deploy is disabled. |
+| Deploy-relevant `main` change | A tiny GitHub Actions OIDC signal requests production through the central deploy governor; Vercel Git auto-deploy is disabled. |
+| `main` change only under `work/**` | No production signal. Internal records such as resume drafts can land without consuming a Vercel deployment. |
 | Ordinary feature, fix, docs, chore, internal, audit, or agent branches | Skip automatic Vercel deployment. |
 | Commit message containing `[preview]` | Promote that commit to `preview/opt-in/<source-branch>` and deploy it. |
 | Branch prefixed `preview/` | Deploy every push as a persistent preview branch. |
@@ -23,7 +24,7 @@ Use `[preview]` as the conventional spelling. Marker matching is case-insensitiv
 The normal path is event-driven:
 
 ```text
-Scrapbook main changes
+Scrapbook deploy-relevant main changes
   -> the Production deploy signal job requests a short-lived GitHub OIDC token
   -> the job posts that token directly to Stensibly
   -> Stensibly verifies GitHub's signature and the signed repository / ref / SHA / workflow claims
@@ -34,7 +35,7 @@ Scrapbook main changes
   -> one global half-hour batch slot drains at most one queued project
 ```
 
-`.github/workflows/deploy-signal.yml` is deliberately tiny. It runs on every `main` push, requests GitHub's short-lived OIDC credential with `id-token: write`, and sends that credential to the fixed Stensibly audience. It has no stored deployment secret, performs no repository checkout, installs no dependencies, and does not call Vercel.
+`.github/workflows/deploy-signal.yml` requests GitHub's short-lived OIDC credential with `id-token: write` and sends that credential to the fixed Stensibly audience. Its `main` push trigger ignores changes confined to `work/**`, plus changes confined to the signal workflow and this policy document themselves. It has no stored deployment secret, performs no repository checkout, installs no dependencies, and does not call Vercel.
 
 Stensibly accepts only GitHub's RS256 OIDC issuer for the exact deploy-governor audience. It requires a branch push and an exact `.github/workflows/deploy-signal.yml` workflow ref, then takes repository, ref, and SHA from the signed token rather than a request body. The existing source allowlist is checked before any outbound deploy-governor authority is minted.
 
@@ -93,7 +94,7 @@ Routine prose, tests, repository maintenance, and source-level changes stay on o
 
 ## Practical cadence
 
-Run local checks before pushing when local access is available. Let routine GitHub CI answer lint, unit-test, and production-build questions. Use an explicit browser check when the change needs one. Add `[preview]` to a commit when a deployed URL adds useful evidence, or use a `preview/…` branch for a longer preview session. Merge accepted work to `main`; the OIDC signal immediately asks the governor to handle production admission.
+Run local checks before pushing when local access is available. Let routine GitHub CI answer lint, unit-test, and production-build questions. Use an explicit browser check when the change needs one. Add `[preview]` to a commit when a deployed URL adds useful evidence, or use a `preview/…` branch for a longer preview session. Merge accepted deploy-relevant work to `main`; the OIDC signal asks the governor to handle production admission. Internal records under `work/**` can merge to `main` without requesting production.
 
 ## Quota accounting
 
