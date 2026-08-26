@@ -69,7 +69,7 @@ Current implementation and retained current evidence lead. Documentation is a pr
 
 When a summary disagrees with source, fix the summary. When a machine-readable claim index lags accepted evidence, bring the index forward. When one changing fact has been copied into five career files, pick one owner and make the others link to it.
 
-The recent Preflight performance cleanup is a good example: the current career headline is the observed **~101s → 13.69s** development arc, while the 89.00s → 15.53s same-session campaign remains a valuable experimental comparison. Those statements answer different questions. Letting an older claim registry force the old campaign back into the headline was the wrong direction of authority.
+The recent Preflight performance cleanup is a good example: the current career headline is the observed **~101s → 13.69s** development arc. The older 89.00s → 15.53s same-session campaign belongs to archived benchmark history and has no role in selecting or qualifying that headline. Letting an older claim registry force the archived campaign back into the headline was the wrong direction of authority.
 
 ## Writing should preserve the person and the evidence
 
