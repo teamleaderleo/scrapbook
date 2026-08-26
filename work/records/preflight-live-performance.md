@@ -6,21 +6,21 @@ This is the current career-facing performance overlay for Preflight. Use this fi
 
 ## Current headline
 
-On the 83-mod M5 MacBook Air installation, current Preflight launches cluster around a **~13.8-second median** across the retained run history. **13.69 seconds** is one observed low run in that same current regime. Earlier development reached roughly **101 seconds** at its slowest.
+Preflight takes an 83-mod Starsector installation on an M5 MacBook Air from an observed historical worst around **101 seconds** to **13.69 seconds**.
 
-For career-facing summaries, use the observed performance change directly:
+That is approximately **7.38× faster**, or an **86.4% reduction in elapsed startup time**. The accumulated current run history clusters around a roughly **13.8-second median**; that describes the surrounding current regime and does not replace the **13.69-second** headline observation.
 
-> **~101s historical worst → ~13.8s current median on an 83-mod legacy game stack.**
+For career-facing summaries, lead with:
 
-That is roughly a **7.3× speedup** and an **86% reduction in elapsed startup time**. Ordinary current run-to-run movement is only a few tenths of a second; campaign labels, run grouping, or benchmark protocol do not create a second class of startup time.
+> **~101s historical worst → 13.69s on an 83-mod legacy game stack.**
 
-Older comparison campaigns remain in the evidence archive because they answer specific historical questions about individual interventions. They have no role in selecting or qualifying the current product speed.
+The old 89.00s → 15.53s same-session campaign remains benchmark history in the repository. It answers a separate historical comparison question and has no role in selecting or qualifying the 101s → 13.69s career-facing headline. A run measured with the same startup clock is a run; campaign labels describe why launches were collected, not a different class of elapsed time.
 
 ## Current product frontier
 
 The steady-state Compact path is now roughly:
 
-- **~13.8s median current startup**, with 13.69s among the retained low runs;
+- **13.69s headline current observation**, with the accumulated current run history around a **13.8s median**;
 - **~15s preparation** on the current working path;
 - **~1.1 GB retained Compact data** (the documented pack is 1,087,894,442 bytes);
 - **83 enabled mods** on the current M5 MacBook Air profile;
@@ -33,9 +33,9 @@ The preparation number is moving quickly. The August 23 committed evidence recor
 ### Startup
 
 - Historical observed high end: roughly **101s**.
-- Intermediate optimized states moved through the 40s, 30s, 20s, and low-15s.
-- Current retained runs center around a **~13.8s median**.
-- One retained low run: **13.69s**.
+- Earlier optimized states moved through the 40s, 30s, 20s, and low-15s.
+- Current accumulated runs cluster around a **~13.8s median**.
+- Headline current observation: **13.69s**.
 
 ### Preparation and storage
 
@@ -97,6 +97,8 @@ The speedup sits inside a larger desktop/tooling product:
 
 The shortest useful version is:
 
-> Built a cross-platform performance and compatibility layer for an 83-mod legacy game stack, cutting startup from a historical worst of roughly 101s to a current median around 13.8s (~7.3×) while shrinking the steady-state prepared footprint to ~1.1 GB and preparation to roughly 15s.
+> Built a cross-platform performance and compatibility layer for an 83-mod legacy game stack, cutting observed startup from roughly 101s to 13.69s (~7.4×) while shrinking the steady-state prepared footprint to ~1.1 GB and preparation to roughly 15s.
 
 For a deeper systems/performance conversation, follow with the physical-order result, bytecode/runtime adapters, compatibility/fallback model, and investigation stories.
+
+The accumulated current median around 13.8s is useful supporting context for repeatability. It does not replace the 13.69s headline. The old 89.00s → 15.53s benchmark remains in the evidence archive as historical comparison context only.
