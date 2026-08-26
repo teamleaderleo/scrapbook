@@ -1,6 +1,6 @@
 # Preflight resume evidence map
 
-This file is the breadcrumb index from career-facing Preflight claims back to the engineering that supports them. `resume-candidates.md` owns the current wording. This file owns provenance: which Preflight PRs, commits, evidence notes, and measurements a future editor should read before changing a claim.
+This file is the breadcrumb index from career-facing Preflight claims back to the engineering that supports them. `resume-current.md` owns the current default resume wording. `records/preflight-live-performance.md` owns the current career-facing Preflight performance headline and moving performance numbers. This file owns provenance: which Preflight PRs, commits, evidence notes, and measurements a future editor should read before changing a claim. It is not a competing wording or headline authority.
 
 ## Source rule
 
@@ -24,12 +24,12 @@ Career claim:
 
 Primary measurement breadcrumbs:
 
-- [`docs/evidence/2026-08-23-storage-to-fourteen-seconds.md`](https://github.com/teamleaderleo/preflight/blob/main/docs/evidence/2026-08-23-storage-to-fourteen-seconds.md) — current storage/launch chronology, the five-run G1 campaign with **14.04s median / 13.69s best**, Compact preparation, and the later **16.21s** fresh Compact transition.
-- [PR #1078 — Recover low-15s startup and correct preparation storage](https://github.com/teamleaderleo/preflight/pull/1078) — establishes the reviewed G1 path and records **14.04s median / 13.69s best** plus the learned Compact pack.
+- [`docs/evidence/2026-08-23-storage-to-fourteen-seconds.md`](https://github.com/teamleaderleo/preflight/blob/main/docs/evidence/2026-08-23-storage-to-fourteen-seconds.md) — current storage/launch chronology, the five-run G1 condition with a **14.04s median and retained 13.69s endpoint**, Compact preparation, and the later **16.21s** fresh Compact transition.
+- [PR #1078 — Recover low-15s startup and correct preparation storage](https://github.com/teamleaderleo/preflight/pull/1078) — establishes the reviewed G1 path and records the **14.04s median and 13.69s retained endpoint** plus the learned Compact pack.
 - [PR #408 — Measure the numbers the beta promises](https://github.com/teamleaderleo/preflight/pull/408) — earlier same-profile campaign and first measured **200.77s** cold preparation; useful chronology, not the current 13.69 endpoint.
 - [PR #322](https://github.com/teamleaderleo/preflight/pull/322) — older integrated 15.88s checkpoint and the broad set of optimizations that became the product.
 
-Do not replace the **101s → 13.69s** development arc with the older 89.00s → 15.53s campaign unless the resume intentionally changes from chronological headline to one same-profile comparison.
+`records/preflight-live-performance.md` owns the selected **101s → 13.69s** career headline. The older 89.00s → 15.53s same-profile campaign remains useful A/B evidence for the comparison question it was designed to answer; same-profile pairing does not give it editorial priority over the retained development endpoint. Change the career headline only through an explicit new decision, not by preferring one benchmark protocol over another.
 
 ## JSON/CSV memoization and typed-tree architecture
 
@@ -247,10 +247,11 @@ Calibration counts are evidence quality, not resume lead material.
 
 ## Maintenance checklist
 
-When a Preflight resume bullet changes:
+When a Preflight career claim changes:
 
-1. update `resume-candidates.md` first so there is one canonical career sentence;
-2. update this file if the claim, endpoint, implementation chain, or source authority changed;
-3. update Scrapbook PR #684's summary when the change is material enough that a future reader would otherwise see stale provenance;
-4. if Preflight itself later changes the implementation, re-read current code and retained artifacts before trusting an older evidence note;
-5. never infer an FPS result from campaign operation counts or an end-to-end launch result by adding component savings from different runs.
+1. if current default resume wording changes, update `resume-current.md` first; use `resume-candidates.md` for alternates and reservoir material;
+2. if the current Preflight performance headline or a moving performance number changes, update `records/preflight-live-performance.md` first;
+3. update this file when the claim, endpoint, implementation chain, or source authority changes;
+4. update any current public or review projection that would otherwise show stale provenance; do not hard-code an old PR as a permanent synchronization target;
+5. if Preflight itself changes the implementation, re-read current code and retained artifacts before trusting an older evidence note;
+6. never infer an FPS result from campaign operation counts or an end-to-end launch result by adding component savings from different runs.
