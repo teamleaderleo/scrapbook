@@ -10,7 +10,7 @@ Use this guide for human-directed essays, Workbench pieces, public prose, and ot
 
 Workbench publication mechanics live in [`docs/workbench.md`](docs/workbench.md). This file owns voice.
 
-Repeated line-level corrections are evidence about voice. Carry them forward instead of relearning them sentence by sentence.
+Repeated corrections are useful evidence about voice, but classify them before generalizing them. A recurring diction or cadence correction can belong here. A one-off edit made for one sentence, artifact, audience, layout, benchmark, or moment stays local unless the same preference is actually demonstrated elsewhere. Do not turn a successful local choice into a blanket ban, quota, template, or ceremony merely because it worked once.
 
 ## Voice
 
@@ -36,8 +36,18 @@ Repeated line-level corrections are evidence about voice. Carry them forward ins
 - Let a thought end after it lands. Cut recap sentences, circular closers, and little explanatory bows that restate what the reader already understood.
 - During revision, preserve the parts Leo already likes. Patch the nagging phrase, transition, or ending instead of globally rewriting a draft that already has the right voice.
 
+## Guidance is not a ritual
+
+- Distinguish a voice preference from an artifact-specific decision. `Don't use this canned hinge` may generalize; `this résumé currently has seven bullets` does not become a seven-bullet rule.
+- Do not invent quotas, percentages, reviewer counts, timing windows, templates, stages, or validation ceremonies to make an editorial choice look rigorous. Use a number when the number answers a real question or an external process actually requires it.
+- Examples illustrate a move; they do not prescribe a mandatory form. A useful sentence order, review method, list length, or interview answer can remain one option among several.
+- Words such as `must`, `always`, `never`, `required`, `canonical`, `default`, and `locked` should have an identifiable owner or reason. When the reason is local, state the local scope instead of promoting it to repository-wide law.
+- Historical reviews and old drafts preserve what somebody thought at the time. They are evidence, not current authority, unless an active owner explicitly adopts the old decision.
+- Do not confuse formal-looking process with better evidence. If a comparison, benchmark, review round, or editorial exercise answered one narrow question, keep it attached to that question instead of granting it general authority over unrelated claims.
+- When newer evidence or a direct human correction changes the interpretation, fix the active owner and the projections people actually read. Do not keep a stale rule alive merely because several downstream files copied it.
+
 ## Revision check
 
-Before calling Leo-directed prose ready, scan for the recurring failure modes above. In particular, search for canned hinge phrases, tidy recap endings, sentence-opening `Still,`, vague placeholders, unnecessary adverbs, gratuitous triplets, and places where the prose has become managerial or consultant-like.
+Before calling Leo-directed prose ready, scan for the recurring failure modes above. In particular, search for canned hinge phrases, tidy recap endings, sentence-opening `Still,`, vague placeholders, unnecessary adverbs, gratuitous triplets, places where the prose has become managerial or consultant-like, and local choices that have accidentally been promoted into universal rules.
 
 The target is edited prose that still feels as though a person arrived at the thought while speaking: coherent, specific, occasionally messy in a useful way, and willing to leave a little air around the implication.
