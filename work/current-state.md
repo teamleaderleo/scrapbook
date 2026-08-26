@@ -4,13 +4,13 @@ This is the source-first live-status overlay for the work record.
 
 Use current implementation and retained current evidence as the authority for what exists and what has been demonstrated. README files, portfolio prose, issue summaries, and claim indexes are projections of that reality and should be updated when they lag it. For career/editorial context, read `portfolio-inventory.md` after this file.
 
-## Preflight — ~101s historical worst → ~13.8s current median; candidate execution
+## Preflight — ~101s → 13.69s development arc; candidate execution
 
 Repository: https://github.com/teamleaderleo/preflight
 
 State: **source and rendered-UI convergence complete; first-beta candidate execution active**.
 
-On the 83-mod M5 MacBook Air development installation, current launches cluster around a **~13.8-second median** across the retained run history, with **13.69 seconds** among the low runs. Earlier development reached roughly **101 seconds** at its slowest. Comparison campaigns answer questions about individual interventions; the product speed comes from the accumulated launch record under the same startup clock. The current macOS Rosetta path uses the reviewed G1/deferred-heap-commit policy.
+The current development headline is **~101 seconds → 13.69 seconds** on the 83-mod M5 MacBook Air development installation: roughly 101 seconds is the retained early observed high end, while 13.69 seconds is the best retained run from the later G1/deferred-heap-commit development condition. That JVM policy became the current macOS Rosetta path. The broader current run history sits in the same low-14-second regime; it supports the headline rather than replacing it.
 
 Current source also includes the learned Compact texture path, physical-order-sensitive pack publication, desktop/navigation refinements, dependency/setup checks, manual privacy-bounded support reporting, signed update/package machinery, and release-scoped CI refinements.
 
