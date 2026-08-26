@@ -133,10 +133,12 @@ There is enough technical material. The hard part is choosing the few examples t
 The active career files therefore have different jobs:
 
 - [`../current-state.md`](../current-state.md) — moving status;
-- [`preflight-live-performance.md`](preflight-live-performance.md) — changing Preflight performance frontier;
+- [`preflight-live-performance.md`](preflight-live-performance.md) — current career-facing Preflight performance headline and moving numbers;
 - [`open-source.md`](open-source.md) — durable external outcomes and review reversals;
 - [`../portfolio-inventory.md`](../portfolio-inventory.md) — retrieval index;
-- [`../resume-candidates.md`](../resume-candidates.md) — scarce-space selection;
+- [`../resume-current.md`](../resume-current.md) — current default one-page résumé selection and wording;
+- [`../resume-candidates.md`](../resume-candidates.md) — alternate/reservoir material for role-specific or future cuts;
+- [`../preflight-resume-evidence-map.md`](../preflight-resume-evidence-map.md) — provenance and breadcrumbs for Preflight career claims;
 - `/work` — selected public projection.
 
 When a role asks for something already demonstrated, retrieval should recover the evidence. When a project moves, the owner record should change before another polished sentence gets copied outward.
