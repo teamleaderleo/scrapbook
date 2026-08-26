@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'infinite-information-doesnt-give-you-infinite-energy',
+    title: "Infinite Information Doesn't Give You Infinite Energy",
+    date: '2026-08-27',
+    blurb:
+      "A better map can expose hidden jobs and fake gates; it still can't supply the time, diagnosis, or commitment required to cross a real learning curve.",
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['information asymmetry', 'careers', 'learning', 'agency'],
+    revision: 1,
+    sourcePath: 'desk/infinite-information-doesnt-give-you-infinite-energy.md',
+    sourceRepository: 'teamleaderleo/job-search',
+  },
+  {
     slug: 'the-epistemic-human-centipede',
     title: 'The Epistemic Human Centipede',
     date: '2026-08-27',
