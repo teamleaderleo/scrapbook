@@ -1,26 +1,26 @@
 # Preflight — live performance record
 
-**Updated:** 2026-08-24
+**Updated:** 2026-08-26
 
 This is the current career-facing performance overlay for Preflight. Use this file ahead of older timing language in `preflight.md`, `portfolio-inventory.md`, and `resume-candidates.md` when the numbers conflict.
 
 ## Current headline
 
-Preflight takes an 83-mod Starsector installation on an M5 MacBook Air from an observed historical worst around **101 seconds** to a current best of **13.69 seconds**.
+On the 83-mod M5 MacBook Air installation, current Preflight launches cluster around a **~13.8-second median** across the retained run history. **13.69 seconds** is one observed low run in that same current regime. Earlier development reached roughly **101 seconds** at its slowest.
 
-That is approximately **7.38× faster**, or an **86.4% reduction in elapsed startup time**. The older ~89-second figure remains useful history for the former ordinary regime; it is no longer the preferred ceiling for describing the size of the improvement.
+For career-facing summaries, use the observed performance change directly:
 
-For career-facing summaries, lead with the actual observed span:
+> **~101s historical worst → ~13.8s current median on an 83-mod legacy game stack.**
 
-> **~101s worst observed startup → 13.69s best observed startup on an 83-mod legacy game stack.**
+That is roughly a **7.3× speedup** and an **86% reduction in elapsed startup time**. Ordinary current run-to-run movement is only a few tenths of a second; campaign labels, run grouping, or benchmark protocol do not create a second class of startup time.
 
-The old 89.00s → 15.53s same-session campaign remains benchmark history in the repository. It answers a separate historical benchmarking question and has no role in selecting or qualifying the ~101s → 13.69s career-facing headline. The useful headline is the performance frontier the product has actually reached.
+Older comparison campaigns remain in the evidence archive because they answer specific historical questions about individual interventions. They have no role in selecting or qualifying the current product speed.
 
 ## Current product frontier
 
 The steady-state Compact path is now roughly:
 
-- **13.69s best observed launch**;
+- **~13.8s median current startup**, with 13.69s among the retained low runs;
 - **~15s preparation** on the current working path;
 - **~1.1 GB retained Compact data** (the documented pack is 1,087,894,442 bytes);
 - **83 enabled mods** on the current M5 MacBook Air profile;
@@ -32,10 +32,10 @@ The preparation number is moving quickly. The August 23 committed evidence recor
 
 ### Startup
 
-- Earlier accepted development states reached roughly **101s**.
-- The older ordinary regime was around **89s**.
-- Earlier optimized states moved through the 40s, 30s, 20s, and low-15s.
-- Current best observed startup: **13.69s**.
+- Historical observed high end: roughly **101s**.
+- Intermediate optimized states moved through the 40s, 30s, 20s, and low-15s.
+- Current retained runs center around a **~13.8s median**.
+- One retained low run: **13.69s**.
 
 ### Preparation and storage
 
@@ -97,8 +97,6 @@ The speedup sits inside a larger desktop/tooling product:
 
 The shortest useful version is:
 
-> Built a cross-platform performance and compatibility layer for an 83-mod legacy game stack, cutting observed startup from roughly 101s to 13.69s (~7.4×) while shrinking the steady-state prepared footprint to ~1.1 GB and preparation to roughly 15s.
+> Built a cross-platform performance and compatibility layer for an 83-mod legacy game stack, cutting startup from a historical worst of roughly 101s to a current median around 13.8s (~7.3×) while shrinking the steady-state prepared footprint to ~1.1 GB and preparation to roughly 15s.
 
 For a deeper systems/performance conversation, follow with the physical-order result, bytecode/runtime adapters, compatibility/fallback model, and investigation stories.
-
-The old 89.00s → 15.53s benchmark remains in the evidence archive as historical context. Its role is archival only; career-facing usage follows the ~101s → 13.69s observed development arc.
