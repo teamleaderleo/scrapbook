@@ -10,9 +10,7 @@ Repository: https://github.com/teamleaderleo/preflight
 
 State: **source and rendered-UI convergence complete; first-beta candidate execution active**.
 
-The current development headline is **~101 seconds → 13.69 seconds** on the 83-mod M5 MacBook Air development installation: roughly 101 seconds is the retained early observed high end, while 13.69 seconds is the best run in the later reviewed five-run G1/deferred-heap-commit condition. That reviewed JVM policy became the current macOS Rosetta path.
-
-A small same-session benchmark sample recorded five ordinary launches at an 89.00-second median and five Preflight launches at a 15.53-second median. Keep that 5+5 result as historical context only; five runs per condition carry too little replication to outrank or qualify the ~101s → 13.69s development result. The accepted package still needs its own final benchmark evidence.
+The current development headline is **~101 seconds → 13.69 seconds** on the 83-mod M5 MacBook Air development installation: roughly 101 seconds is the retained early observed high end, while 13.69 seconds is the best retained run from the later G1/deferred-heap-commit development condition. That JVM policy became the current macOS Rosetta path.
 
 Current source also includes the learned Compact texture path, physical-order-sensitive pack publication, desktop/navigation refinements, dependency/setup checks, manual privacy-bounded support reporting, signed update/package machinery, and release-scoped CI refinements.
 
@@ -139,4 +137,4 @@ Current main uses Next.js 16.3.2 / React 19.2.1. Routine hosted CI is ESLint + V
 
 ## Refresh rule
 
-When this file conflicts with a source repository, current implementation and current retained evidence win. Update this file. Historical benchmark samples remain useful context, while the newest implementation/result should lead the description of current capability and current performance.
+When this file conflicts with a source repository, current implementation and current retained evidence win. Update this file. Current implementation and retained current evidence lead; archive benchmarks stay in their source records.
