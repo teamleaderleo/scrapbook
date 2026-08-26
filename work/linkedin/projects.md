@@ -33,6 +33,8 @@ Keep these four projects, in this order. Remove or hide the remaining low-signal
 
 **Link:** https://github.com/teamleaderleo/stensibly
 
+**Dates:** Jul 2026–Present
+
 - Hosted coordination system for human and agent work with durable claims, cross-session handoffs,
   exact preconditions around GitHub changes, and repository activity that can continue into email
   after workers exit.
