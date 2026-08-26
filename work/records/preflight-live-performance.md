@@ -6,15 +6,15 @@ This is the current career-facing performance overlay for Preflight. Use this fi
 
 ## Current headline
 
-Preflight takes an 83-mod Starsector installation on an M5 MacBook Air from an observed historical worst around **101 seconds** to **13.69 seconds**.
+Preflight takes an 83-mod Starsector installation on an M5 MacBook Air from a recently observed ordinary launch of **112.17 seconds** to a retained accelerated launch of **13.69 seconds**.
 
-That is approximately **7.38× faster**, or an **86.4% reduction in elapsed startup time**. Repeated current launches remain in the same low-14-second regime with ordinary sub-second run-to-run movement; that repeatability supports the endpoint rather than supplying a replacement headline.
+That is approximately **8.19× faster**, or an **87.8% reduction in elapsed startup time**. Machine state can move individual development launches around the mid-teens while the low-usage/cool accelerated runs remain in the same low-14-second regime; that variance is useful context rather than a replacement headline.
 
 For career-facing summaries, lead with:
 
-> **~101s historical worst → 13.69s on an 83-mod legacy game stack.**
+> **112.17s → 13.69s on an 83-mod legacy game stack.**
 
-The old 89.00s → 15.53s same-session campaign remains benchmark history in the repository. It answers a separate historical comparison question and has no role in selecting or qualifying the 101s → 13.69s career-facing headline. A run measured with the same startup clock is a run; campaign labels describe why launches were collected, not a different class of elapsed time.
+The earlier roughly 101-second observed high and the old 89.00s → 15.53s same-session campaign remain benchmark history in the repository. They answer earlier measurement questions and do not outrank the current development observations simply because they were collected under different machine states or comparison protocols. A run measured with the same startup clock is a run; campaign labels describe why launches were collected, not a different class of elapsed time.
 
 ## Current product frontier
 
@@ -32,10 +32,11 @@ The preparation number is moving quickly. The August 23 committed evidence recor
 
 ### Startup
 
-- Historical observed high end: roughly **101s**.
+- Earlier retained high in the development history: roughly **101s**.
+- Recent ordinary development launch: **112.17s**.
 - Earlier optimized states moved through the 40s, 30s, 20s, and low-15s.
 - Current career-facing endpoint: **13.69s**.
-- Repeated current runs remain in the same low-14-second regime with ordinary sub-second variation.
+- Low-usage/cool accelerated runs remain in the same low-14-second regime; active development and machine state can move individual runs into the mid-teens.
 
 ### Preparation and storage
 
@@ -97,8 +98,8 @@ The speedup sits inside a larger desktop/tooling product:
 
 The shortest useful version is:
 
-> Built a cross-platform performance and compatibility layer for an 83-mod legacy game stack, cutting observed startup from roughly 101s to 13.69s (~7.4×) while shrinking the steady-state prepared footprint to ~1.1 GB and preparation to roughly 15s.
+> Built a cross-platform performance and compatibility layer for an 83-mod legacy game stack, cutting observed startup from 112.17s to 13.69s (~8.19×) while shrinking the steady-state prepared footprint to ~1.1 GB and preparation to roughly 15s.
 
 For a deeper systems/performance conversation, follow with the physical-order result, bytecode/runtime adapters, compatibility/fallback model, and investigation stories.
 
-Repeatability context belongs in the evidence record; it does not replace the 13.69s headline. The old 89.00s → 15.53s benchmark remains in the evidence archive as historical comparison context only.
+Run-to-run machine-state context belongs in the evidence record; it does not replace the 13.69s endpoint or the current 112.17s ordinary-launch headline. The old 89.00s → 15.53s benchmark remains in the evidence archive as historical comparison context only.
