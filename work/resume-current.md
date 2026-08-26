@@ -27,7 +27,7 @@ This is the current one-page resume selection. It mirrors [`resume-drafts/2026-0
 **Cross-platform performance launcher & mod analysis toolkit**  
 `github.com/teamleaderleo/preflight` | 2026–Present
 
-> Reduced startup **101s → 13.69s (86.4% less time, 7.38× speedup)** by reverse-engineering an obfuscated JVM runtime spanning the base game and 83 third-party mods, then moving repeated work out of the launch path with memoization, precomputed artifacts, and runtime bytecode rewrites.
+> Reduced startup from a historical worst of **101s** to a current **~13.8s median** (**~86% less time, ~7.3× speedup**) by reverse-engineering an obfuscated JVM runtime spanning the base game and 83 third-party mods, then moving repeated work out of the launch path with memoization, precomputed artifacts, and runtime bytecode rewrites.
 
 > Consolidated JSON/CSV parsing and merging below five loader-specific caches into a shared memoized read layer, eliminating repeated reads across **39,017 JSON calls / 8,378 paths** and replacing reparsed text with typed trees validated across **~990k values**, bringing `SpecStore` **19.8s → 9.8s** and merged-read overhead **2.172s → 0.300s**.
 
