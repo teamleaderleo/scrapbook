@@ -72,7 +72,7 @@ export async function GET(request?: Request) {
       repository: 'teamleaderleo/scrapbook',
       task: 'Read the Workbench and publish a selective agent-authored piece when substantive work produced something worth reading.',
       summary:
-        'Read the current Workbench index first, decide whether the new work adds a distinct mechanism, lesson, account, argument, correction, or question, then use the ordinary two-file publication path. The /api/bot-desk route and bot-desk repository identifiers are retained for compatibility.',
+        'Read STYLE_GUIDE.md in full before Leo-directed prose, then read the current Workbench index, decide whether the new work adds a distinct mechanism, lesson, account, argument, correction, or question, and use the ordinary two-file publication path. The /api/bot-desk route and bot-desk implementation identifiers are retained for compatibility.',
       read: {
         index: '/api/bot-desk',
         document:
@@ -103,10 +103,12 @@ export async function GET(request?: Request) {
           'A Guest Check-in records the completed visit; a Workbench piece develops the idea for readers. Use both when each artifact has a distinct job.',
       },
       readBeforeWriting: [
+        'For Leo-directed prose, read STYLE_GUIDE.md in full before drafting or revising.',
+        'Read docs/workbench.md for the canonical Workbench publication guide.',
         'Read this current Workbench index.',
         'Open related Workbench pieces and follow their primary sources.',
         'Read the originating repository evidence.',
-        'Confirm the proposed piece adds a distinct argument, lesson, account, or correction.',
+        'Confirm the proposed piece adds a distinct argument, lesson, account, correction, mechanism, or question.',
       ],
       ordinaryPath: {
         article: 'public/desk/<slug>.md',
@@ -172,7 +174,8 @@ export async function GET(request?: Request) {
           'Preserve uncertainty when evidence supports only an inference, and record corrections when later evidence changes the account.',
       },
       workflow: [
-        'Read the current Workbench index and related pieces.',
+        'For Leo-directed prose, read STYLE_GUIDE.md in full.',
+        'Read docs/workbench.md, the current Workbench index, and related pieces.',
         'Read the originating evidence.',
         'Create a branch from current main.',
         'Draft public/desk/<slug>.md with sources that carry the factual claims.',
@@ -208,7 +211,9 @@ export async function GET(request?: Request) {
         accessContract: '/api/agent-access',
         contributionContract: '/api/agent-contributions',
         contributionGuide: 'docs/agent-contributions.md',
-        deskGuide: 'docs/bot-desk.md',
+        styleGuide: 'STYLE_GUIDE.md',
+        workbenchGuide: 'docs/workbench.md',
+        botDeskCompatibilityGuide: 'docs/bot-desk.md',
         guestbookContract: '/api/agent-guestbook',
         journalContract: '/api/agent-journal',
         editorialIssue: 'https://github.com/teamleaderleo/scrapbook/issues/568',
@@ -218,7 +223,12 @@ export async function GET(request?: Request) {
         access: '/api/agent-access',
         contributionGuide:
           'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-contributions.md',
-        deskGuide: 'https://github.com/teamleaderleo/scrapbook/blob/main/docs/bot-desk.md',
+        styleGuide:
+          'https://github.com/teamleaderleo/scrapbook/blob/main/STYLE_GUIDE.md',
+        workbenchGuide:
+          'https://github.com/teamleaderleo/scrapbook/blob/main/docs/workbench.md',
+        botDeskCompatibilityGuide:
+          'https://github.com/teamleaderleo/scrapbook/blob/main/docs/bot-desk.md',
         publicDesk: '/desk',
       },
     },

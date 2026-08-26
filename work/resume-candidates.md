@@ -1,155 +1,199 @@
 # Resume candidates
 
-This file is intentionally churny. It answers one question: **if Leo had to ship a one-page resume today, which evidence earns the space?**
+This is the larger reservoir for resume and portfolio material. [`resume-current.md`](resume-current.md) owns the current default one-page selection. Source repositories and upstream pull requests own the facts. This file preserves strong alternates, historical candidates, and evidence-rich material that may return for role-specific versions.
 
-Read [`current-state.md`](current-state.md) first for moving project status. For Preflight performance, [`records/preflight-live-performance.md`](records/preflight-live-performance.md) owns the current career-facing numbers. Source repositories and upstream review remain authoritative for the underlying work.
+Read [`resume-portfolio-style.md`](resume-portfolio-style.md) before revising career copy. For Preflight claim provenance, implementation history, and measurement breadcrumbs, read [`preflight-resume-evidence-map.md`](preflight-resume-evidence-map.md). Check current upstream state before restoring a candidate to the default resume.
 
-## Current market framing
+## Open source engineering reservoir
 
-The page should read like an engineer with a strange amount of current evidence, not like somebody trying to turn every repository into employment history.
+### Vercel AI SDK
 
-A quiet descriptor still fits:
+Default wording currently lives in `resume-current.md`.
 
-> Software Engineer — Runtimes, Developer Tools & Performance
+Strong alternate/full form:
 
-No summary paragraph by default. Name, contact, GitHub, site, LinkedIn; let the work do the arguing.
+> Fixed identical URL checks returning different answers across calls (#18570), released Web Stream readers after source errors so failed reads didn't leave the stream locked (#18371/#18400), and kept download size-limit failures from being replaced by cancellation errors (#18572/#18695).
 
-## General one-page cut
+Why this version survives:
 
-### Selected open-source engineering
+- #18570 leads with the broken behavior rather than `lastIndex`.
+- #18371 says what the stale lock does to the stream.
+- #18572 leads with the useful error that callers were losing.
 
-**Vercel AI SDK — lock.** One direct merged/published repair plus two independently developed Web Streams repairs adopted through AI SDK Factory with retained co-author credit. One of those repairs propagated across maintained v5/v6 release branches.
+### Cloud Hypervisor
 
-Candidate line:
+Default wording currently lives in `resume-current.md`.
 
-> Fixed stateful URL matching in `@ai-sdk/provider-utils` and developed two Web Streams cleanup/error-precedence repairs later adopted by Vercel's AI SDK Factory into merged commits with co-author credit; one repair propagated across maintained v5/v6 branches.
+> Fixed a VM lifecycle race where tests reused a VM and disk before shutdown cleanup finished (#8699), turned ACPI table construction failures into VM boot errors instead of VMM panics (#8709), rejected DMA requests that cross unmapped holes in VFIO device memory instead of panicking (#8734), and fixed QCOW ownership so metadata still referenced by the image can't be reused as free space (#8721).
 
-**Cloud Hypervisor — lock for systems breadth.** Three merged Rust/VMM fixes now cover exact shutdown lifecycle, typed ACPI boot-error propagation, and sparse VFIO BAR mapping semantics. The open QCOW follow-on reaches persistent L2 metadata ownership/refcount ordering.
+#8721 merged into `main` on 2026-08-24. The QCOW clause remains one of the strongest upstream receipts because it reaches persistent metadata ownership rather than another surface-level failure path.
 
-Candidate line:
+### Vite
 
-> Landed three Cloud Hypervisor fixes across VM shutdown/reuse, typed ACPI boot failures, and sparse VFIO BAR mapping; a deeper reviewed follow-on addresses QCOW L2 ownership before metadata publication.
+Default wording currently lives in `resume-current.md`.
 
-**Cloudflare Workers SDK — strong alternate.** Two merged fixes: Miniflare teardown ordering and Cloudflare Access credential/cache freshness.
+> Prevented build failures from skipping plugin cleanup (#23165), stopped dependency analysis from leaking temporary Rolldown builds (#23207), and kept server restarts from rebuilding warm dependency caches after optimizer state was duplicated (#23208, open).
 
-**Vite — strong alternate.** Two merged lifecycle/correctness fixes: temporary optimizer-analysis bundle cleanup and `closeBundle(error)` propagation after `buildEnd` failure. A repeated-`resolveConfig()` idempotence repair remains open.
+The cache rebuild should lead #23208. `resolveConfig()` and duplicated plugin arrays explain the bug in the PR, not on the resume.
 
-**React — strong open alternate.** PR #37251 fixes Fragment-ref event-listener registry identity. `FragmentInstance.removeEventListener()` currently mutates child listener state before proving the Fragment registered that listener; an unknown removal can therefore remove child-owned state or corrupt retained Fragment listener bookkeeping. The same repair makes omitted options share the DOM `capture: false` identity of explicit `false`/`{capture: false}`.
+### Cloudflare Workers SDK
 
-The PR is open and has one positive submitted review: “Solid PR. Tests cover the important paths.” GitHub records that review as `COMMENTED`, not `APPROVED`, so use **positively reviewed** rather than approved/accepted/merged. Detailed record: [`records/react-fragment-ref.md`](records/react-fragment-ref.md).
+Default wording currently lives in `resume-current.md`.
 
-Candidate line if a React/frontend-runtime target benefits from an open reviewed specimen:
+> Kept Miniflare shutdown from leaving `workerd` running when cleanup stalls or fails (#15143), and prevented stale Access service tokens from authenticating after credentials were removed or incomplete (#15080).
 
-> Repaired React Fragment-ref listener ownership/identity so unknown removals become no-ops before child mutation and omitted capture options match DOM listener identity; the open PR received a positive review covering the focused regressions.
+Both clauses lead with operational consequence. Teardown ordering and cache ownership can stay in the PRs.
 
-The general resume still does not need every cluster. React rises when the role values React/runtime semantics; merged/adopted clusters retain stronger default disposition evidence today.
+### React
 
-### Independent engineering
+Keep in the reservoir. Do not force it onto the default page.
 
-#### Preflight — absolute lock, largest allocation
+> Fixed a React Fragment listener bug that could delete a child's listener and stop registered listeners from reaching new children (#37251, open).
 
-The current headline is the development frontier the system actually reached:
+The capture-option identity fix is useful regression coverage but makes the resume sentence worse. Leave it in the PR.
 
-> **~101s worst observed startup → 13.69s best observed startup on the 83-mod M5 MacBook Air development installation.**
+## Independent engineering reservoir
 
-That is a chronology across development states. Keep the clean controlled experiment beside it when experimental design matters: five ordinary launches had an 89.00s median and five Preflight launches had a 15.53s median in one interleaved same-profile session.
+### Preflight
 
-The resume can lead with the observed frontier and say what the system is:
+Preflight gets the largest allocation. Use the expert-reader model from the style guide: assume the reader understands JVMs, profiling, caching, storage, runtime instrumentation, and failure modes, but knows nothing about Starsector. Explain the ecosystem only enough to establish scope.
 
-> Built a cross-platform Java-agent performance and compatibility layer for an 83-mod legacy game stack, cutting observed startup from roughly 101s to 13.69s while preserving exact source/classloader/bytecode gates and original-path fallback for changed inputs.
+Working heading:
 
-A second line should explain the engineering rather than pile on another number:
+> **Preflight — Cross-platform performance launcher and mod analysis toolkit** *(public open source, Starsector ecosystem)*
 
-> Precompute and replay texture, data, audio, resource-index, and generated-bytecode work; learned Compact packs retain roughly 1.1 GB on the measured profile, and physical pack order itself produced a whole-launch difference from 33.53s alphabetic to 14.174s learned order.
+Canonical opening:
 
-A third line can carry the investigation method:
+> Reduced startup **101s → 13.69s (86.4% less time, 7.38× speedup)** by reverse-engineering an obfuscated JVM runtime spanning the base game and 83 third-party mods, then moving repeated work out of the launch path with memoization, precomputed artifacts, and runtime bytecode rewrites.
 
-> Built JFR, seam-level timing, replay, and unattended benchmark tooling that exposed hidden critical-path owners—including a ~27s prefetch wait and million-scale resource-path work—and repeatedly let attractive optimization theories lose before implementation.
+The accumulated run history can describe the surrounding current regime separately. It does not replace the **13.69s** headline measurement.
 
-For release/product roles, swap the third line toward native macOS/Windows/Linux packaging, signed update/rollback, support/privacy boundaries, profiles/settings, and candidate evidence.
+### Default one-page receipts
 
-#### Stensibly — one dense line in the general cut
+These are currently selected in `resume-current.md` / V10.
 
-> Built and operate a hosted human-agent responsibility/authority ledger across Cloudflare Workers, Convex, REST and MCP, with durable claims/leases, idempotent commands, exact-CAS GitHub effects, provider reconciliation, and repository-attention → mail continuation through disposable worker sessions.
+> Consolidated JSON/CSV parsing and merging below five loader-specific caches into a shared memoized read layer, eliminating repeated reads across **39,017 JSON calls / 8,378 paths** and replacing reparsed text with typed trees validated across **~990k values**, bringing `SpecStore` **19.8s → 9.8s** and merged-read overhead **2.172s → 0.300s**.
 
-This can take more space for agent coordination, durable execution, or reliability roles.
+> Moved texture-cache lookup ahead of a single-threaded prefetch queue that blocked startup for **~27s**, then removed **1.22 GiB of VRAM padding** from texture uploads.
 
-#### SmolRunner — strong systems/agent-execution alternate
+> Replaced sector-wide O(n) entity scans with mutation-tracked indexes (**227,805 full-list validations → 0, 79.1M entity-reference checks → 0**) and short-circuited **117.9M unchanged commodity recomputations**.
 
-The old “disposable runner controller” line is too narrow now.
+> Eliminated per-file durability for rebuildable texture intermediates and streamed them into one final pack, bringing preparation **200.77s → 16.21s** and storage **4.76 GB → ~1.1 GB**, then laid out the same texture corpus in observed startup order, reducing launch **33.53s → 14.174s**.
 
-> Building a Rust trust-tiered Linux execution layer on Apple-silicon Macs: disposable Lima/VZ workers for hostile CI plus persistent trusted lanes with crash-safe project leases, OverlayFS task views, immutable Git object pools, exact ownership, and recovery state.
+> Memoized **228 Janino compilation requests (18.014s → 2.364s)**, then deduplicated **36,332 generated-class occurrences to 280 unique classes**, shrinking class maps **145.96 MiB → 1.13 MiB** and replay **1.501s → 29ms**.
 
-For coding-agent environment roles, SmolRunner can outrank a fourth upstream logo.
+> Turned the Java performance engine into a self-contained Windows/macOS/Linux desktop app with a React UI over a Rust/Tauri host, bundled Java runtime, durable launch/playtime history, and signed updates with rollback.
 
-#### Cultist — role-specific research/devtools alternate
+### Strong Preflight alternates
 
-> Building deterministic repository-evidence tooling for coding agents: change-time analysis, concurrent-work preflight, historical companions, bounded context packets, provider-snapshot correctness, and behavioral trials measuring whether surfaced evidence changes the next action.
+These remain strong engineering stories but are currently outside the default one-page cut.
 
-This is especially useful for evaluation, review intelligence, coding-agent context, and research-engineering roles.
+> Removed **>12s of startup work across three third-party mod callbacks** by memoizing repeated hull/variant reads, deduplicating and replaying unresolved generated-texture requests, and caching rebuilt paintjob catalogs.
 
-#### Glossless — frontend/product/graphics alternate
+> Built a mod linter that found **1,392 asset/configuration findings across 84 resource roots**, including **four broken released configs**, **771.9 MB of VRAM padding**, **687.9 MB decoded at load**, and progressive textures that decode **8.75× slower**.
 
-Keep for creator-tool, UI, browser, or graphics-oriented applications. It earns space when visual/product breadth adds more than another systems tool.
+Other evidence-rich alternates that belong primarily in portfolio/interview material:
 
-### Industry experience
+- `12,584 cached objects / 990,602 values` full typed-tree fidelity corpus
+- campaign defensive-copy avoidance on `15.4M` empty script calls
+- sample texture/preload launch `88.13s → 62.60s`
+- AshLib / GraphicsLib / MagicLib callback components behind the `>12s` aggregate
+- Hangar wireframe tracing from installed game data
+- release/update/restart/crash/invalidation edge cases
 
-IBM stays compact. It proves conventional team/employer experience; it no longer has to carry the technical identity of the page.
+### Why the current Preflight cut survives
 
-Candidate material:
+- The opening is the bowtie: flagship result first, then opaque third-party JVM scope, then the high-level mechanisms.
+- Shared JSON/CSV work shows abstraction-boundary judgment rather than one more local cache.
+- The prefetch/VRAM bullet shows critical-path placement plus resource accounting.
+- Campaign work adds data-structure and high-frequency runtime reasoning outside startup.
+- Texture preparation/storage/layout adds persistence, I/O, and locality.
+- Janino adds compiler/runtime representation work.
+- Desktop productization keeps the project from reading as a benchmark harness.
+- The callback aggregate was the unanimous first Preflight cut in the first independent review round because its marginal resume signal overlapped stronger retained receipts.
+- The linter remains a strong role-specific alternate for tooling/ecosystem-analysis roles.
 
-- Java E2E/integration work across IBM Cloud AI/ML and data paths with Kafka/Spark/Snowflake and hybrid/on-prem environments; a critical RBAC issue required coordination across three teams.
-- Onboarding/setup reduced from roughly 3h to 15m through a consolidated maintained workflow/documentation path.
+## Performance and evidence inventory
 
-### Education and skills
+Not all of this belongs on the one-page resume.
 
-> University of Toronto — BSc, Mathematics, Statistics & Computer Science — 2024
+- startup headline: **101s → 13.69s**, **86.4% less time**, **7.38× speedup**
+- common JSON path: **39,017 calls / 8,378 distinct paths**, with **78.5%** of calls repeating a path already read
+- resource resolution: **1,618,401 filesystem probes** in one launch, **42.6 per JSON call**, with the first-match walk costing **5.25s** and merged resolution another **4.27s**
+- common-loader memo moved one sample launch **84.49s → 73.54s**
+- five loader-specific JSON/CSV caches took `SpecStore` **19.8s → 9.8s**
+- general merged-read cache reduced its seam **2.172s → 0.300s**
+- tagged-tree representation was validated across **12,584 objects / 990,602 values**, decoded **3.4–6.0×** faster than stored JSON text in replay, and reduced value bytes about **30%**
+- prepared textures plus the prefetch bypass moved a sample launch **88.13s → 62.60s**
+- third-party startup callbacks support **>12s** removed across three separate callback boundaries
+- 228 Janino compilation requests moved **18.014s → 2.364s**
+- Janino representation collapsed **36,332 class occurrences** to **280 unique classes**, shrinking **145.96 MiB → 1.13 MiB** and replay **1.501s → 29ms**
+- texture path removed **1.22 GiB of VRAM padding**
+- current Compact preparation reaches **16.21s** with retained storage around **1.1 GB**
+- same Compact logical corpus launched **33.53s** alphabetically vs **14.174s** in observed access order
+- entity-index adjacent pilots moved **227,805 deep validations → 0** and **79,131,653 reference checks → 0**
+- final commodity memo served **117,907,677 unchanged calls** while delegating **223,330** changed states
+- campaign maintenance skipped snapshots on **15,402,921 empty** script lists
+- linter found **1,392 findings across 84 roots**, including four broken released configs and substantial VRAM/decode costs
 
-Keep skills boring and target-specific.
+Source hierarchy for future Preflight edits:
 
-> **Languages:** TypeScript/JavaScript, Rust, Java, Python, Go, SQL  
-> **Technologies:** Linux, React, Node.js, Cloudflare Workers, Docker, AWS, PostgreSQL, Git
+1. current code and retained runtime artifacts
+2. Preflight evidence records
+3. implementation PRs/commits
+4. README/front-facing docs
+5. career copy
 
-## Role cuts
+Status wording matters. The repository is public. The desktop remains a release candidate until current package acceptance/publication proves otherwise.
 
-### Runtime / game / performance
+### Stensibly
 
-Preflight dominates. Follow with Cloud Hypervisor, the best FEX research story, SmolRunner, and one graphics/product specimen if useful. The pitch is runtime investigation and productization around a system whose source ecosystem you do not own.
+Current alternate:
 
-### Developer tools / AI runtime
+> Built and run Stensibly, a hosted coordination system for human and agent work with durable claims, handoffs across sessions, GitHub changes protected by exact preconditions, and repository activity that can continue into email after workers exit, using Cloudflare Workers, Convex, REST, and MCP.
 
-Lead with Vercel AI SDK, then Vite/Cloudflare, Preflight, Stensibly, and Cultist. React becomes a useful alternate when the role touches frontend runtime/state semantics. Cloud Hypervisor stays useful because it proves the reasoning travels outside TypeScript/AI codebases.
+Stensibly remains the least redundant non-Preflight project if a future role-specific version deliberately opens a row.
 
-### React / frontend runtime
+### Glaeda
 
-React #37251 is now the cleanest current React-core specimen: listener ownership before destructive mutation, retained Fragment registry identity, DOM capture normalization, and focused tests around new-child propagation and child-owned listener preservation.
+> Building a Rust Linux execution system for coding agents on Apple silicon Macs, with disposable Lima/VZ workers plus reusable project disks, OverlayFS workspaces, Git object pools, and crash recovery.
 
-Pair it with Vite, selected Cloudflare/AI SDK runtime work, and Glossless/Scrapbook only when product/frontend breadth helps. Keep the PR status explicit until upstream disposition changes.
+Strong project, but Rust/virtualization signal overlaps Cloud Hypervisor and Preflight more than Stensibly does.
 
-### Coding-agent evaluation / environments
+### Glossless
 
-Preflight, SmolRunner, Cultist, Renderprove, Proofwake, Stensibly, and the upstream repair record finally read as one coherent body of work: execution, evidence production, evidence selection, durable memory, coordination, and real repository repair.
+> Built a React/Vite artist reference editor with synchronized 2D and 3D pose editing, MediaPipe detection, editable keypoints, GLB/GLTF rig driving, lighting and silhouette studies, project files, reference sheet exports, and WebGL recovery that keeps 2D editing usable if 3D rendering fails.
 
-Do not put all six owned systems on one page. Pick the few whose mechanisms match the job.
+Strong portfolio material. Preflight now carries enough frontend/product signal that Glossless does not need the default resume row.
 
-### Systems / platform
+### Cultist, Proofwake, Renderprove, Quarry, Scrapbook, Fieldwork
 
-Cloud Hypervisor first; Preflight runtime work and SmolRunner next. BuildKit/FEX research can replace application-layer OSS when the role benefits from deeper Linux/runtime context.
+Keep these off the default one-page cut for now. A repository existing is not a reason to spend a line on it.
 
-### Agent coordination / durable execution
+## Professional experience
 
-Stensibly and SmolRunner lead the owned work. Proofwake/Renderprove/Cultist become supporting evidence for how execution, observation, memory, and context stay separate instead of collapsing into one giant agent platform.
+### IBM
 
-## Things to keep out of the resume
+Default wording:
 
-Keep the distinctions clean:
+> Identified a critical RBAC flaw that required a three-team hotfix while building and refactoring Java end-to-end tests for IBM Cloud AI/ML and data workflows across Kafka, Spark, Snowflake, hybrid cloud, and on-premises environments.
 
-- merged, adopted, approved, positively reviewed, open, and research-only are different states;
-- component measurements do not add up to an end-to-end speedup;
-- the ~101s → 13.69s Preflight headline is a development arc, while 89.00s → 15.53s is the clean same-session A/B campaign;
-- React #37251 currently has a positive `COMMENTED` review, not formal approval or merge;
-- FEX remains owned-fork/runtime research under the upstream project's contribution policy;
-- recruiter outreach is targeting context, not an accomplishment;
-- a repository existing is not a reason to spend a line on it.
+> Reduced developer onboarding from **3 hours to 15 minutes** by consolidating obsolete SDK and runtime setup.
 
-Before exporting a bullet, reread current source and the exact evidence it relies on. If the engineering moved, update this file instead of preserving the prettier old sentence.
+The older resume also claimed adoption of the test suite across teams. Keep that available if it becomes worth the extra words.
+
+## Education and skills
+
+> University of Toronto | BSc in Mathematics, Statistics & Computer Science | 2024
+
+> **Languages:** TypeScript, JavaScript, Rust, Java, Python, Go, SQL, C  
+> **Technologies:** Linux, React, Vite, Next.js, Node.js, Cloudflare Workers, Convex, PostgreSQL, AWS, Docker, Git
+
+## Disposition notes that are not resume prose
+
+- React #37251 is open.
+- Cloud Hypervisor #8721 merged into `main` on 2026-08-24.
+- Vite #23208 is open.
+- AI SDK #18371 and #18572 are the contributor repairs. Equivalent implementations were merged through #18400 and #18695, which is why the default bullet keeps both numbers beside those clauses.
+
+When an upstream state changes, update `resume-current.md` first. Do not rewrite the engineering sentence unless the engineering changed.

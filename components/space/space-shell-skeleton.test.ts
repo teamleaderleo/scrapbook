@@ -1,6 +1,7 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
+import { SPACE_LANES } from '@/lib/space-lanes';
 import { SpaceShellSkeleton } from './space-shell-skeleton';
 
 describe('SpaceShellSkeleton', () => {
@@ -13,7 +14,9 @@ describe('SpaceShellSkeleton', () => {
     expect(html).toContain('h-[100dvh]');
     expect(html).toContain('min-h-[100dvh]');
     expect(html).toContain('overflow-hidden');
-    expect(html.match(/data-space-loading-lane="true"/g)).toHaveLength(4);
+    expect(html.match(/data-space-loading-lane="true"/g)).toHaveLength(
+      SPACE_LANES.length
+    );
     expect(html.match(/data-space-loading-row="true"/g)).toHaveLength(5);
     expect((html.match(/data-skeleton="true"/g) ?? []).length).toBeGreaterThanOrEqual(20);
   });

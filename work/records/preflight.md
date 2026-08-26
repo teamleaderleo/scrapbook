@@ -10,7 +10,7 @@ That split is deliberate. Preflight changes too quickly for several Scrapbook fi
 
 Preflight is a performance launcher and desktop companion for heavily modded Starsector. It prepares deterministic work before launch, applies runtime shortcuts only when exact evidence still authorizes them, and falls back to the game's original path when a build, mod, class, or prepared artifact no longer matches.
 
-The current development performance arc is roughly **101 seconds → 13.69 seconds** on the 83-mod M5 MacBook Air installation. The clean same-session A/B campaign measured 89.00s ordinary versus 15.53s accelerated medians. See the live performance record for the current frontier and its exact caveats.
+The current development performance arc is roughly **101 seconds → 13.69 seconds** on the 83-mod M5 MacBook Air installation. See the live performance record for the current frontier and career-facing usage; older benchmark campaigns remain in the evidence archive.
 
 ## Why this is a strong engineering artifact
 

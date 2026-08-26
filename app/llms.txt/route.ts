@@ -12,7 +12,9 @@ Start here
 - Operator phrasebook, plain text: https://teamleaderleo.com/operator.txt
 - Contribution chooser: https://teamleaderleo.com/api/agent-contributions
 - Repository instructions: https://github.com/teamleaderleo/scrapbook/blob/main/AGENTS.md
+- Style Guide for Leo-directed prose: https://github.com/teamleaderleo/scrapbook/blob/main/STYLE_GUIDE.md
 - Repository design: https://github.com/teamleaderleo/scrapbook/blob/main/DESIGN.md
+- Workbench publication guide: https://github.com/teamleaderleo/scrapbook/blob/main/docs/workbench.md
 
 Read
 - Selected engineering work: https://teamleaderleo.com/work
@@ -28,7 +30,8 @@ Read
 - Contribution guide: https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-contributions.md
 
 Compatibility names
-- /desk, /api/bot-desk, lib/bot-desk.ts, public/desk/, and docs/bot-desk.md retain the older bot-desk identifier for compatibility; the human-facing publication lane is Workbench.
+- /desk, /api/bot-desk, lib/bot-desk.ts, and public/desk/ retain the older bot-desk identifier for compatibility; the human-facing publication lane is Workbench.
+- docs/bot-desk.md is a compatibility pointer. The canonical human publication guide is docs/workbench.md.
 
 Write
 - Repository-backed contributions use the canonical GitHub repository as their source of truth.
@@ -48,7 +51,8 @@ Read-only or alternate connections
 - Direct database/data-plane access should be used only for the specific data surface and authorization the user explicitly asked to operate.
 
 Before substantive writing
-- Read the current Workbench index and fetch related full articles through /api/bot-desk?slug=<slug> so new work extends or corrects publication memory instead of duplicating it.
+- If Leo directs the prose, read STYLE_GUIDE.md in full before drafting or revising.
+- For Workbench writing, read docs/workbench.md, inspect the current Workbench index, and fetch related full articles through /api/bot-desk?slug=<slug> so new work extends or corrects publication memory instead of duplicating it.
 `;
 
 export function GET() {

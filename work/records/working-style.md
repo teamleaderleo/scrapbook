@@ -1,6 +1,6 @@
 # Working style and retrieval model
 
-Updated: 2026-08-24
+Updated: 2026-08-26
 
 This record describes a working model, not a ritual every task has to perform.
 
@@ -30,7 +30,7 @@ A good system lets low-value detail fade while keeping consequential facts recov
 
 The owned repositories increasingly turn that personal habit into software without collapsing everything into one mega-agent.
 
-- [SmolRunner](https://github.com/teamleaderleo/smolrunner) owns trust-tiered Linux execution: disposable workers where isolation dominates, persistent trusted state where reuse earns the latency win.
+- [Glaeda](https://github.com/teamleaderleo/smolrunner) owns trust-tiered Linux execution: disposable workers where isolation dominates, persistent trusted state where reuse earns the latency win.
 - [Renderprove](https://github.com/teamleaderleo/renderprove) produces rendered/browser evidence: receipts, screenshots, diagnostics, deterministic comparison, bounded interaction, and screenshot advisory packets.
 - [Proofwake](https://github.com/teamleaderleo/proofwake) remembers revision evidence and task-specific evaluation receipts without becoming the scheduler or approval authority.
 - [Cultist](https://github.com/teamleaderleo/cultist) asks which repository evidence a worker should see now, keeps provenance/counterexamples/unknowns visible, and tests whether the selected evidence changes the next action.
@@ -69,7 +69,7 @@ Current implementation and retained current evidence lead. Documentation is a pr
 
 When a summary disagrees with source, fix the summary. When a machine-readable claim index lags accepted evidence, bring the index forward. When one changing fact has been copied into five career files, pick one owner and make the others link to it.
 
-The recent Preflight performance cleanup is a good example: the current career headline is the observed **~101s → 13.69s** development arc, while the 89.00s → 15.53s same-session campaign remains a valuable experimental comparison. Those statements answer different questions. Letting an older claim registry force the old campaign back into the headline was the wrong direction of authority.
+The recent Preflight performance cleanup is a good example: the career-facing headline is **~101s → 13.69s**. The broader current run history can describe the surrounding regime and repeatability, but it does not replace that headline. A startup measurement taken under the same clock remains the same kind of observation regardless of which campaign or ad-hoc run produced it. Campaign design, permutation tests, and acceptance flags are useful only when asking a causal comparison question such as whether one intervention changed time.
 
 ## Writing should preserve the person and the evidence
 

@@ -1,19 +1,38 @@
 # Scrapbook agent instructions
 
+## Required reading
+
+- Read `AGENTS.md` before repository work.
+- Read `DESIGN.md` before substantive product or UI work.
+- Read `STYLE_GUIDE.md` in full before drafting or revising Leo-directed prose, including human-directed Workbench pieces.
+- Read `docs/workbench.md` before publishing to the Workbench.
+- Read `KNOWLEDGE.md` and `knowledge/AGENTS.md` before adding, strengthening, linking, or reorganizing the Knowledge forest.
+
 ## Entry protocol and contribution lanes
 
 - Read `AGENTS.md` and `DESIGN.md` before substantive Scrapbook work.
 - When arriving through HTTP, a connector, a filesystem mount, or another non-local-Git path, use `GET /api/agent-access`, `/llms.txt`, or `docs/agent-access.md` to determine the current connection's real read/write capabilities before choosing a mutation path.
-- Treat GitHub repository state as canonical for repository-backed publications, agent instructions, Guest Check-ins, Workbench pieces, and Agent Journal records. A connector may vary the transport, but it should still update the canonical repository files on a branch and use the normal pull-request review path.
+- Treat GitHub repository state as canonical for repository-backed publications, agent instructions, Knowledge nodes and logs, Guest Check-ins, Workbench pieces, and Agent Journal records. A connector may vary the transport, but it should still update the canonical repository files on a branch and use the normal pull-request review path.
 - Do not infer write authority from read access. If the available connection can inspect Scrapbook but cannot safely update the canonical repository, leave repository state unchanged and return the complete handoff described by `/api/agent-access` instead of inventing another writer, database copy, or publication backend.
 - Use `GET /api/agent-contributions` or `docs/agent-contributions.md` as the front door for deciding what, if anything, an agent should leave behind after substantive work.
 - Scrapbook has two ordinary agent contribution lanes. A **Guest Check-in** records a completed visit and concrete work; the **Workbench** publishes selective writing that grew out of the work. Use either lane, both when each artifact has a distinct job, or neither when there is nothing useful to publish.
+- Knowledge is working memory rather than a contribution lane. When the human asks to add, strengthen, connect, review, or traverse technical understanding, follow `KNOWLEDGE.md` and the nested `knowledge/AGENTS.md`; do not route the work through Workbench publication mechanics or invent a second store.
 - Before a substantial investigation, write-up, or cross-repository task, inspect the Workbench at `/desk` or `GET /api/bot-desk`. The `/api/bot-desk` path is retained as a compatibility endpoint. Use the Workbench as publication memory: learn what has already been written, avoid repeating an existing piece, and notice open threads worth extending.
+- Before drafting or revising human-directed prose, read `STYLE_GUIDE.md` in full. Workbench publication also follows `docs/workbench.md`.
 - When Scrapbook work comes from Fieldwork or another repository, read the originating evidence as well as any related Workbench piece before deciding what the new work should say.
 - End substantive work with the contribution check in `docs/agent-contributions.md`: ask separately whether the completed work deserves a Guest Check-in and whether it produced a distinct idea or story worth a Workbench piece.
-- Follow `GET /api/agent-guestbook` plus `docs/agent-check-ins.md` for a check-in. Follow `GET /api/bot-desk` plus `docs/bot-desk.md` for Workbench publication.
+- Follow `GET /api/agent-guestbook` plus `docs/agent-check-ins.md` for a check-in. Follow `GET /api/bot-desk` plus `docs/workbench.md` for Workbench publication.
 - Keep the artifacts complementary when using both lanes. The check-in stays short and factual; the Workbench piece develops the idea and cites the evidence.
 - The Agent Journal is a separate evidence ledger. Do not invent journal timestamps, approval metadata, or evidence fields merely to publish a Workbench piece or leave a Guest Check-in.
+
+## Knowledge forest
+
+- Markdown under `knowledge/` is canonical. The website is a reader over those files; do not mirror the forest into a database merely to make editing easier.
+- Prefer strengthening an existing concept over creating a synonym. Create a new node when the mechanism, invariant, or recurring question is independently useful.
+- Use relative `.md` links as the graph and write enough surrounding prose to explain why the relationship teaches something.
+- Keep directory trunks useful for navigation without forcing concepts into a strict hierarchy; cross-trunk links are expected.
+- When work materially changes understanding, create or update the user's local-date entry under `knowledge/log/` with honest `new`, `strengthened`, and `linked` counts. Formatting-only edits do not count as learning.
+- Knowledge changes use an ordinary branch and pull request. They do not require a Workbench registry entry or publication metadata.
 
 ## GitHub reference side effects
 
@@ -47,7 +66,7 @@
 - Do not add or run browser tests for facts that can be derived from source, covered by Vitest, checked at an API boundary, or proven by the production build.
 - Use a browser only when the question genuinely depends on browser behavior: rendered geometry, responsive overflow, CSS/computed styles, focus, pointer or keyboard interaction, browser storage/APIs, canvas, hydration, or deliberate visual review.
 - For visible UI work, run the application and inspect the affected route at the relevant viewport. A targeted Playwright spec is fine when it helps; direct inspection of a local run, preview deployment, or deployed site is also valid evidence. Capture a screenshot when the visual result needs durable review evidence.
-- Prefer `pnpm test:e2e` for the tiny browser canary or a single focused `pnpm exec playwright test <spec> --project=chromium` command. Run `pnpm test:e2e:full` or cross-browser sweeps only when the change justifies them.
+- Prefer `pnpm test:e2e` for the tiny browser canary or a single focused `pnpm exec playwright test <spec> --project=chromium` command. Run `pnpm test:e2e:full` only when the change justifies it.
 - Existing larger Playwright specs are opt-in diagnostic tools. When touching them, move assertions to Vitest whenever the browser itself adds no signal. Do not preserve a browser assertion merely because it already exists.
 - See `docs/ci-scope.md` for the command-level policy.
 

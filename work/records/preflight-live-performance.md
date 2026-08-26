@@ -1,26 +1,26 @@
 # Preflight — live performance record
 
-**Updated:** 2026-08-24
+**Updated:** 2026-08-26
 
 This is the current career-facing performance overlay for Preflight. Use this file ahead of older timing language in `preflight.md`, `portfolio-inventory.md`, and `resume-candidates.md` when the numbers conflict.
 
 ## Current headline
 
-Preflight takes an 83-mod Starsector installation on an M5 MacBook Air from an observed historical worst around **101 seconds** to a current best of **13.69 seconds**.
+Preflight takes an 83-mod Starsector installation on an M5 MacBook Air from an observed historical worst around **101 seconds** to **13.69 seconds**.
 
-That is approximately **7.38× faster**, or an **86.4% reduction in elapsed startup time**. The older ~89-second figure remains useful history for the former ordinary regime; it is no longer the preferred ceiling for describing the size of the improvement.
+That is approximately **7.38× faster**, or an **86.4% reduction in elapsed startup time**. Repeated current launches remain in the same low-14-second regime with ordinary sub-second run-to-run movement; that repeatability supports the endpoint rather than supplying a replacement headline.
 
-For career-facing summaries, lead with the actual observed span:
+For career-facing summaries, lead with:
 
-> **~101s worst observed startup → 13.69s best observed startup on an 83-mod legacy game stack.**
+> **~101s historical worst → 13.69s on an 83-mod legacy game stack.**
 
-The old 89.00s → 15.53s campaign remains benchmark history in the repository. Its experimental format should not dominate the current portfolio summary. The useful headline is the performance frontier the product has actually reached.
+The old 89.00s → 15.53s same-session campaign remains benchmark history in the repository. It answers a separate historical comparison question and has no role in selecting or qualifying the 101s → 13.69s career-facing headline. A run measured with the same startup clock is a run; campaign labels describe why launches were collected, not a different class of elapsed time.
 
 ## Current product frontier
 
 The steady-state Compact path is now roughly:
 
-- **13.69s best observed launch**;
+- **13.69s current career-facing endpoint**;
 - **~15s preparation** on the current working path;
 - **~1.1 GB retained Compact data** (the documented pack is 1,087,894,442 bytes);
 - **83 enabled mods** on the current M5 MacBook Air profile;
@@ -32,10 +32,10 @@ The preparation number is moving quickly. The August 23 committed evidence recor
 
 ### Startup
 
-- Earlier accepted development states reached roughly **101s**.
-- The older ordinary regime was around **89s**.
+- Historical observed high end: roughly **101s**.
 - Earlier optimized states moved through the 40s, 30s, 20s, and low-15s.
-- Current best observed startup: **13.69s**.
+- Current career-facing endpoint: **13.69s**.
+- Repeated current runs remain in the same low-14-second regime with ordinary sub-second variation.
 
 ### Preparation and storage
 
@@ -101,4 +101,4 @@ The shortest useful version is:
 
 For a deeper systems/performance conversation, follow with the physical-order result, bytecode/runtime adapters, compatibility/fallback model, and investigation stories.
 
-The old 89.00s → 15.53s benchmark remains in the evidence archive. It should not dominate the current portfolio summary.
+Repeatability context belongs in the evidence record; it does not replace the 13.69s headline. The old 89.00s → 15.53s benchmark remains in the evidence archive as historical comparison context only.

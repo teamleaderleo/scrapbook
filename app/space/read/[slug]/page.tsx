@@ -9,6 +9,7 @@ import { PageCurl, StitchedRule } from '@/components/cozy-flourishes';
 import { resolveSpaceLane } from '@/lib/space-lanes';
 import {
   buildSpaceNextMove,
+  buildSpaceTypingTarget,
   parseSpaceNextMoveStage,
   parseSpacePracticeMode,
 } from '@/lib/space-practice';
@@ -110,6 +111,7 @@ export default async function ReadingSheetPage({
         learned: nextMoveStage === 'learned',
       })
     : undefined;
+  const typingTarget = buildSpaceTypingTarget(item);
 
   return (
     <main className="min-h-screen bg-background px-3 py-3 text-foreground sm:px-6 sm:py-6">
@@ -231,6 +233,7 @@ export default async function ReadingSheetPage({
                 ? suggestedMove?.prompt
                 : undefined
             }
+            typingTarget={typingTarget}
           />
 
           <PageCurl className="h-10 w-10 opacity-70 [&>span]:h-10 [&>span]:w-10" />

@@ -192,6 +192,70 @@ Checked-in SQL files under `drizzle/` remain the migration ledger. No table or
 row was removed by this repository cleanup; the related live Data API grants
 were retired separately with a reversible SQL migration.
 
+## 2026-08-25 reconciliation
+
+### Completed: legacy project/block runtime retirement
+
+Issue #269 is closed as completed. The executable project/block/tag actions, data helpers, client remnants, Drizzle model, and related dormant runtime have been retired. Checked-in SQL migrations remain historical migration evidence; they are not an active product blocker. The July 31 `Retained / blocked` entry above records the state at that time and no longer describes current `main`.
+
+### Promoted: Generation 3 guestbook
+
+The archived #473 branch remains historical research. The useful Generation 3 direction was restarted from current `main`, promoted through #635 and #638, and now owns ordinary generated guestbook sigils. Historical Generation 1 and Generation 2 pins remain only for reproducibility.
+
+### Removed: dead ThreeCarousel source and demo assets
+
+The Gallery's live projected Tesseract scene moved to `components/gallery/tesseract-scene.tsx`. The unreachable carousel implementation, its drag/wrap helpers and stylesheet, and `public/img1.jpg` through `public/img10.jpg` were removed after repository-wide caller checks found no live owner. The August 9 note that retained those images is therefore superseded. Git history and old PR #641 remain the recovery path for the discarded demo.
+
+The direct package family that existed only for the dead carousel is separately tracked by #640 for lockfile regeneration. The active Gallery scene itself uses React Three Fiber and Three.js.
+
+### Removed: unused UI and workaround residue
+
+A second caller pass removed unused top-level UI wrappers for alert, badge, card, checkbox, dropdown menu, keyboard key, pagination, popover, select, switch, table, textarea, and the unused avatar asset wrapper. It also removed the caller-free `MinimalSiteNav`, old `home.module.css`, the unused React DOM class-order patch script, and the abandoned WebHint configuration.
+
+The live UI primitives with current callers remain. `lib/deprecation-boundaries.test.ts` now protects the new retired source paths from accidental restoration.
+
+### Removed: historical browser retirement canaries
+
+Playwright files whose only job was proving already-deleted `/login`, `/dashboard/*`, `/resume`, or `/api/claude` surfaces stayed absent were removed. The source/deprecation boundary owns those facts now. The browser suite remains for behavior that actually requires a browser, including hydration, layout, interaction, storage, and visual/canvas behavior.
+
+The scheduled WebKit compatibility workflow and WebKit Playwright project were also retired. Author-side browser work now uses the Chromium project deliberately; routine hosted and local CI remain browser-free.
+
+### Removed: completed one-shot deployment inspection
+
+The temporary `signal-status-once.yml` workflow and its `.smoke/signal-status.json` receipt were deleted after their one historical OIDC inspection completed. The workflow had a hard-coded target SHA and existed only to write that receipt. Git history preserves the diagnostic result without leaving write-enabled one-shot machinery in the active workflow directory.
+
+### Consolidated: formatter configuration
+
+The duplicate `.prettierrc` and `prettier.config.js` files were replaced by one explicit `prettier.config.mjs`. The old JavaScript config depended on `@vercel/style-guide/prettier` without declaring that package directly; the canonical config now contains Scrapbook's local formatting choices and Tailwind plugin directly.
+
+### Removed: dormant learning prototypes
+
+A deeper caller pass removed the isolated in-memory LeetCode sample/search pair, its review seeding helper, and the older file-backed `content/cards` reader with SM-2-era `SpaceCard` definitions. The real Space search parser, numeric comparator, FSRS adapter, Supabase mapping, and Markdown helpers remain because current Space routes still call them.
+
+The unused `app/lib/utils/index.ts` barrel left with the file-backed cards; current callers import the remaining utilities directly.
+
+### Removed: orphaned UI helpers and obsolete review markers
+
+`components/paper-critter.tsx` and `components/search-params-handler.tsx` had no caller by filename or exported-symbol search and were deleted. The separate `PaperCreature` renderer remains active on current pages.
+
+The temporary `docs/visual-review-run.md` trigger marker and the obsolete `docs/visual-review-artifacts.md` hosted-artifact note were also removed after hosted browser workflows were retired.
+
+### Removed: artwork-first guestbook importer
+
+The ordinary Guest Check-in path is text-only and Generation 3 creates its sigil automatically. The old raster-art path therefore no longer owns an active workflow. The cleanup removed:
+
+- `.github/workflows/import-gallery-asset.yml`, including its `contents: write` branch-commit path and Google Drive credential flow;
+- `scripts/import-gallery-asset.mjs` and `tests/gallery-asset-importer.test.ts`;
+- `docs/gallery-asset-importer.md`, `docs/gallery-artwork.md`, and `docs/agent-art-creation-and-research.md` from the live guide set.
+
+The archived v1 check-in and orchestration snapshots remain under `docs/archive/` for deliberate historical recovery. `file-type` and `sharp` now have no direct repository caller and join the package-only cleanup tracked by #640.
+
+### Reconciled: current agent and browser guidance
+
+The machine-readable Guest Check-in contract, pull-request template, sigil lab copy, sigil guide, and archive index now describe Generation 3 and the current lightweight publication path. Browser-independent API contract assertions moved out of Playwright and into Vitest; the remaining guestbook Playwright coverage concerns rendered Gallery behavior.
+
+`next.config.mjs` also dropped the retired S3/CloudFront image hosts and three unused local `optimizePackageImports` aliases. Current package-level optimizations and the live Gallery/Space configuration remain.
+
 ## Recovery
 
 For deleted files, use the parent commit of the relevant cleanup merge or retrieve the exact path from Git history. Restore only into a fresh branch with a current caller and current authorization model; do not restore a retired cluster by default.

@@ -112,7 +112,7 @@ for (const viewport of desktopViewports) {
     for (const repository of [
       'preflight',
       'stensibly',
-      'smolrunner',
+      'Glaeda',
       'cultist',
     ]) {
       await expect(

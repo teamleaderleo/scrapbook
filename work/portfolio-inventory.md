@@ -1,6 +1,6 @@
 # Portfolio inventory
 
-**Last broad refresh:** 2026-08-24
+**Last broad refresh:** 2026-08-26
 
 This is a retrieval index, not a second current-state file and not a draft resume.
 
@@ -30,7 +30,7 @@ Detailed historical record: [`records/preflight.md`](records/preflight.md)
 
 **Use for:** runtime/performance, Java instrumentation, compatibility, measurement, release/product engineering.
 
-Preflight is the strongest owned artifact. The current career-facing performance headline is the observed development arc **~101s → 13.69s** on the 83-mod M5 MacBook Air installation. The clean 89.00s → 15.53s same-session campaign remains supporting experimental evidence. Keep those two claims distinct and let the live performance record own the changing frontier.
+Preflight is the strongest owned artifact. The career-facing performance headline is **~101s → 13.69s** on the 83-mod M5 MacBook Air installation. The broader current run history can be used as supporting repeatability context; it does not replace the **13.69s** headline. Older comparison campaigns belong in the evidence archive, and the live performance record owns the changing frontier.
 
 What it proves:
 
@@ -57,7 +57,7 @@ Detailed record: [`records/open-source.md`](records/open-source.md)
 
 **Use for:** Rust/VMM systems work, lifecycle, error propagation, PCI/VFIO semantics, persistent metadata review.
 
-Current cluster: three merged fixes across exact shutdown/reuse, typed ACPI boot failures, and sparse VFIO BAR mapping. A deeper QCOW L2 ownership/refcount repair remains open.
+Current cluster: four merged fixes across exact shutdown/reuse, typed ACPI boot failures, sparse VFIO BAR mapping, and QCOW L2 metadata ownership/refcount ordering before publication.
 
 Career use: **resume lock** for systems/platform work.
 
@@ -101,7 +101,7 @@ What it proves:
 
 Career use: strong agent coordination / durable execution specimen.
 
-### SmolRunner
+### Glaeda
 
 Repository: https://github.com/teamleaderleo/smolrunner
 

@@ -16,7 +16,9 @@ export function GET() {
         handoffSchema: '/api/agent-access/handoff-schema',
         contributions: '/api/agent-contributions',
         repositoryInstructions: 'AGENTS.md',
+        styleGuide: 'STYLE_GUIDE.md',
         repositoryDesign: 'DESIGN.md',
+        workbenchGuide: 'docs/workbench.md',
       },
       capabilityChecks: [
         'Can this connection read the current canonical repository files?',
@@ -47,13 +49,15 @@ export function GET() {
           learningRecords: '/api/learning-records',
         },
         compatibility:
-          'The Workbench keeps /desk, /api/bot-desk, lib/bot-desk.ts, public/desk/, and docs/bot-desk.md as compatibility identifiers.',
+          'The Workbench keeps /desk, /api/bot-desk, lib/bot-desk.ts, and public/desk/ as compatibility identifiers. docs/bot-desk.md is a compatibility pointer; docs/workbench.md is the canonical human publication guide.',
         repositoryGuides: [
           'AGENTS.md',
+          'STYLE_GUIDE.md',
           'DESIGN.md',
           'docs/agent-access.md',
           'docs/agent-contributions.md',
           'docs/agent-check-ins.md',
+          'docs/workbench.md',
           'docs/bot-desk.md',
           'docs/agent-journal.md',
           'work/README.md',
@@ -188,12 +192,16 @@ export function GET() {
         afterDiscovery:
           'For ordinary agent contributions, call /api/agent-contributions and then follow the selected lane contract.',
         beforeSubstantiveWriting:
-          'Read the Workbench index at /api/bot-desk and fetch related full documents with /api/bot-desk?slug=<slug> so new writing extends the existing publication memory.',
+          'For Leo-directed prose, read STYLE_GUIDE.md in full before drafting or revising. For Workbench writing, follow docs/workbench.md, read the index at /api/bot-desk, and fetch related full documents with /api/bot-desk?slug=<slug>.',
       },
       links: {
         repository: 'https://github.com/teamleaderleo/scrapbook',
         repositoryInstructions:
           'https://github.com/teamleaderleo/scrapbook/blob/main/AGENTS.md',
+        styleGuide:
+          'https://github.com/teamleaderleo/scrapbook/blob/main/STYLE_GUIDE.md',
+        workbenchGuide:
+          'https://github.com/teamleaderleo/scrapbook/blob/main/docs/workbench.md',
         accessGuide:
           'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-access.md',
         contributionGuide:

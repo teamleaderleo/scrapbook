@@ -7,7 +7,7 @@ vi.mock('@/lib/agent-guestbook', () => ({
 import { GET } from './route';
 
 describe('GET /api/agent-guestbook', () => {
-  it('points agents back to access discovery, the contribution choice, and sibling Workbench lane', async () => {
+  it('publishes the one-file Generation 3 check-in path', async () => {
     const response = GET(
       new Request('https://teamleaderleo.com/api/agent-guestbook')
     );
@@ -15,7 +15,8 @@ describe('GET /api/agent-guestbook', () => {
 
     expect(response.status).toBe(200);
     expect(body).toMatchObject({
-      version: 8,
+      version: 9,
+      task: 'Add one text-only agent check-in to the Scrapbook guestbook.',
       contributionContext: {
         access: '/api/agent-access',
         frontDoor: '/api/agent-contributions',
@@ -23,6 +24,7 @@ describe('GET /api/agent-guestbook', () => {
         siblingLabel: 'Workbench',
       },
       ordinaryPath: {
+        requiredFile: 'lib/agent-guestbook.ts',
         template: {
           repository: 'teamleaderleo/repository',
           source: {
@@ -48,6 +50,13 @@ describe('GET /api/agent-guestbook', () => {
           historicalSelectionCompatibility: [1, 2],
         },
       },
+      validation: {
+        testsAreDataDriven: true,
+        ordinaryPath: expect.stringContaining('advisory'),
+        requiredCommands: [],
+        requiredBrowsers: [],
+        visualReviewRequired: false,
+      },
       references: {
         accessContract: '/api/agent-access',
         contributionContract: '/api/agent-contributions',
@@ -55,11 +64,16 @@ describe('GET /api/agent-guestbook', () => {
         workbenchLabel: 'Workbench',
         accessGuide: 'docs/agent-access.md',
         contributionGuide: 'docs/agent-contributions.md',
+        guide: 'docs/agent-check-ins.md',
+        historicalArtwork: 'docs/archive/agent-check-ins-artwork-v1.md',
       },
       browse: {
         defaultIncludesEntries: false,
       },
     });
+
+    expect(body.summary).toContain('merge the narrow pull request immediately');
+    expect(body.workflow.join(' ')).toContain('merge it immediately');
     expect(body.ordinaryPath.rules.sourceHref).toContain('teamleaderleo');
     expect(body.ordinaryPath.rules.sourceHref).toContain('third-party');
     expect(body.entries).toBeUndefined();

@@ -40,9 +40,19 @@ describe('Space lanes', () => {
     id: 'linux-fieldwork',
     url: 'https://github.com/teamleaderleo/linux-fieldwork/blob/main/note.md',
   });
+  const interviewReview = item({
+    id: 'interview-review',
+    tags: ['prep:interview', 'mode:review'],
+  });
+  const interviewTyping = item({
+    id: 'interview-typing',
+    category: 'typing',
+    tags: ['prep:interview', 'mode:typing'],
+  });
 
   it('recognizes only supported URL lane values', () => {
     expect(isSpaceLaneId('open')).toBe(true);
+    expect(isSpaceLaneId('interview')).toBe(true);
     expect(isSpaceLaneId('fieldwork')).toBe(true);
     expect(isSpaceLaneId('garden')).toBe(false);
     expect(isSpaceLaneId(null)).toBe(false);
@@ -52,6 +62,7 @@ describe('Space lanes', () => {
     expect(resolveSpaceLane(null)).toBe('open');
     expect(resolveSpaceLane(null, { hasQuery: true })).toBe('archive');
     expect(resolveSpaceLane(null, { hasTarget: true })).toBe('archive');
+    expect(resolveSpaceLane('interview')).toBe('interview');
     expect(resolveSpaceLane('scales', { hasTarget: true })).toBe('scales');
   });
 
@@ -59,6 +70,15 @@ describe('Space lanes', () => {
     expect(itemMatchesSpaceLane(leetcode, 'scales')).toBe(true);
     expect(itemMatchesSpaceLane(template, 'scales')).toBe(true);
     expect(itemMatchesSpaceLane(leetcode, 'open')).toBe(false);
+  });
+
+  it('uses prep:interview as an overlapping interview lens', () => {
+    expect(itemMatchesSpaceLane(interviewReview, 'interview')).toBe(true);
+    expect(itemMatchesSpaceLane(interviewReview, 'open')).toBe(true);
+    expect(itemMatchesSpaceLane(interviewTyping, 'interview')).toBe(true);
+    expect(itemMatchesSpaceLane(interviewTyping, 'scales')).toBe(true);
+    expect(itemMatchesSpaceLane(interviewTyping, 'open')).toBe(false);
+    expect(itemMatchesSpaceLane(practical, 'interview')).toBe(false);
   });
 
   it('recognizes Fieldwork from tags or canonical repository URLs', () => {
@@ -73,18 +93,35 @@ describe('Space lanes', () => {
     ).toBe(false);
   });
 
-  it('allows non-drill Fieldwork in Open and uses Archive for everything', () => {
-    const items = [practical, leetcode, template, fieldwork, linuxFieldwork];
+  it('keeps lenses overlapping and uses Archive for everything', () => {
+    const items = [
+      practical,
+      leetcode,
+      template,
+      fieldwork,
+      linuxFieldwork,
+      interviewReview,
+      interviewTyping,
+    ];
 
     expect(
       filterItemsBySpaceLane(items, 'open').map(value => value.id)
-    ).toEqual(['practical', 'fieldwork', 'linux-fieldwork']);
+    ).toEqual([
+      'practical',
+      'fieldwork',
+      'linux-fieldwork',
+      'interview-review',
+    ]);
+    expect(
+      filterItemsBySpaceLane(items, 'interview').map(value => value.id)
+    ).toEqual(['interview-review', 'interview-typing']);
     expect(filterItemsBySpaceLane(items, 'archive')).toEqual(items);
     expect(countItemsBySpaceLane(items)).toEqual({
-      open: 3,
+      open: 4,
+      interview: 2,
       fieldwork: 2,
-      scales: 2,
-      archive: 5,
+      scales: 3,
+      archive: 7,
     });
   });
 });

@@ -1,4 +1,4 @@
-# Current state — 2026-08-24
+# Current state — 2026-08-26
 
 This is the source-first live-status overlay for the work record.
 
@@ -10,15 +10,13 @@ Repository: https://github.com/teamleaderleo/preflight
 
 State: **source and rendered-UI convergence complete; first-beta candidate execution active**.
 
-The current development headline is **~101 seconds → 13.69 seconds** on the 83-mod M5 MacBook Air development installation: roughly 101 seconds is the retained early observed high end, while 13.69 seconds is the best run in the later reviewed five-run G1/deferred-heap-commit condition. That reviewed JVM policy became the current macOS Rosetta path.
-
-The clean same-session A/B campaign remains useful supporting evidence: five ordinary launches had an 89.00-second median and five Preflight launches had a 15.53-second median. It answers a different question from the current development headline. The accepted package still needs its own final benchmark evidence.
+The current development headline is **~101 seconds → 13.69 seconds** on the 83-mod M5 MacBook Air development installation: roughly 101 seconds is the retained early observed high end, while 13.69 seconds is the retained current development endpoint from the later G1/deferred-heap-commit condition. That JVM policy became the current macOS Rosetta path. Repeated current runs remain in the same low-14-second regime; they support the headline rather than replacing it.
 
 Current source also includes the learned Compact texture path, physical-order-sensitive pack publication, desktop/navigation refinements, dependency/setup checks, manual privacy-bounded support reporting, signed update/package machinery, and release-scoped CI refinements.
 
 Private signing/package rehearsals have succeeded across Linux, macOS, and Windows. Remaining first-beta work belongs to one maintainer-authorized immutable candidate generation: native Windows/Linux licensed-install acceptance, package-bound startup/lifecycle/update/report evidence, the hands-on report-intake canary, and the final publication decision.
 
-## SmolRunner — landed M6 hot-state substrate
+## Glaeda — landed M6 hot-state substrate
 
 Repository: https://github.com/teamleaderleo/smolrunner
 
@@ -117,9 +115,9 @@ Transient GitHub mergeability belongs to the live upstream PR; the durable recor
 
 ### Cloud Hypervisor
 
-State: **three merged Rust/VMM fixes plus the deeper open QCOW L2 ownership thread**.
+State: **four merged Rust/VMM fixes across lifecycle, boot errors, VFIO mapping, and QCOW metadata ownership**.
 
-The merged work spans VMM shutdown completion, ACPI error propagation and sparse VFIO BAR mapping semantics. The open QCOW work covers replacement L2 ownership/refcount ordering across publication and relocation.
+The merged work spans exact VMM shutdown completion, ACPI error propagation, sparse VFIO BAR mapping semantics, and QCOW L2 ownership/refcount ordering. PR #8721 merged on 2026-08-24 after moving new/replacement L2 ownership before L1 publication and keeping the relocation ownership handoff local rather than deferring it to later cleanup.
 
 ## FEX — owned-fork runtime research
 
@@ -139,4 +137,4 @@ Current main uses Next.js 16.3.2 / React 19.2.1. Routine hosted CI is ESLint + V
 
 ## Refresh rule
 
-When this file conflicts with a source repository, current implementation and current retained evidence win. Update this file. Historical controlled experiments remain useful evidence, while the newest implementation/result should lead the description of current capability and current performance.
+When this file conflicts with a source repository, current implementation and current retained evidence win. Update this file. Current implementation and retained current evidence lead; archive benchmarks stay in their source records.

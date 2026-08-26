@@ -3,7 +3,7 @@ import { REPOSITORY_PUBLIC_CACHE_CONTROL } from '@/lib/repository-public-cache';
 import { GET } from './route';
 
 describe('GET /llms.txt', () => {
-  it('points agents to the canonical capability, Workbench, and reference contracts', async () => {
+  it('points agents to the canonical capability, writing, Workbench, and reference contracts', async () => {
     const response = GET();
     const text = await response.text();
 
@@ -26,8 +26,15 @@ describe('GET /llms.txt', () => {
     expect(text).toContain(
       'https://teamleaderleo.com/api/bot-desk?slug=<slug>'
     );
+    expect(text).toContain(
+      'https://github.com/teamleaderleo/scrapbook/blob/main/STYLE_GUIDE.md'
+    );
+    expect(text).toContain(
+      'https://github.com/teamleaderleo/scrapbook/blob/main/docs/workbench.md'
+    );
     expect(text).toContain('Workbench index/publication contract');
-    expect(text).toContain('retain the older bot-desk identifier for compatibility');
+    expect(text).toContain('docs/bot-desk.md is a compatibility pointer');
+    expect(text).toContain('read STYLE_GUIDE.md in full');
     expect(text).toContain('redirect.github.com');
     expect(text).toContain('repositories owned by teamleaderleo');
     expect(text).toContain('every third-party GitHub repository');
