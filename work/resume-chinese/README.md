@@ -19,6 +19,8 @@ The current English résumé baseline is **V13, dated 2026-08-26**.
 
 The first Chinese seed is [`2026-08-27-mainland-game-tech-v13-seed.md`](2026-08-27-mainland-game-tech-v13-seed.md). It deliberately tests a mainland game/runtime/tooling presentation and leads with Preflight instead of copying the English section order.
 
+After the independent review round, [`2026-08-27-mainland-game-tech-v13-consolidated.md`](2026-08-27-mainland-game-tech-v13-consolidated.md) is the first consolidated, sendable-content candidate. It keeps Preflight first, uses short Chinese scan labels, emphasizes runtime/performance/tooling evidence, compresses the open-source section for game-tech readers, and preserves the current C++/engine experience boundary. It is still a Chinese projection; English V13 and the evidence records remain authoritative.
+
 ## How old chats and other reviewers should contribute
 
 Old conversations may have useful Chinese terminology, recruiter context, and earlier résumé decisions. Preserve that memory as editorial input while refreshing every factual claim against the current sources above.
