@@ -1,24 +1,38 @@
 # Current resume
 
-This is the current one-page resume selection. It mirrors [`resume-drafts/2026-08-25-v10.tex`](resume-drafts/2026-08-25-v10.tex) and owns the default content selection. `resume-candidates.md` remains the larger reservoir of alternates and supporting material. Source repositories and evidence still outrank career copy when facts change.
+This is the current one-page resume selection. It mirrors [`resume-drafts/2026-08-26-v11.tex`](resume-drafts/2026-08-26-v11.tex) and owns the default content selection. `resume-candidates.md` remains the larger reservoir of alternates and supporting material. Source repositories and evidence still outrank career copy when facts change.
 
 ## Open Source Engineering
 
 ### Vercel AI SDK
 
+*Aug 2026*
+
 > Fixed identical URL checks returning different answers across calls (#18570), released Web Stream readers after source errors so failed reads didn't leave the stream locked (#18371/#18400), and kept download size-limit failures from being replaced by cancellation errors (#18572/#18695).
 
 ### Cloud Hypervisor
+
+*Aug 2026*
 
 > Fixed a VM lifecycle race where tests reused a VM and disk before shutdown cleanup finished (#8699), turned ACPI table construction failures into VM boot errors instead of VMM panics (#8709), rejected DMA requests that cross unmapped holes in VFIO device memory instead of panicking (#8734), and fixed QCOW ownership so metadata still referenced by the image can't be reused as free space (#8721).
 
 ### Vite
 
+*Aug 2026*
+
 > Prevented build failures from skipping plugin cleanup (#23165), stopped dependency analysis from leaking temporary Rolldown builds (#23207), and kept server restarts from rebuilding warm dependency caches after optimizer state was duplicated (#23208, open).
 
 ### Cloudflare Workers SDK
 
+*Aug 2026*
+
 > Kept Miniflare shutdown from leaving `workerd` running when cleanup stalls or fails (#15143), and prevented stale Access service tokens from authenticating after credentials were removed or incomplete (#15080).
+
+### React
+
+*Aug 2026*
+
+> Fixed Fragment listener identity so omitted and explicit capture-false options remove the same listener (#37251, merged).
 
 ## Independent Engineering
 
@@ -66,7 +80,6 @@ These remain strong but are intentionally outside the default one-page cut:
 
 - Preflight aggregate third-party callback work (>12s removed)
 - Preflight mod linter and source-side ecosystem analysis
-- React Fragment listener fix (#37251, open)
 - Stensibly
 - Glaeda
 - Glossless
