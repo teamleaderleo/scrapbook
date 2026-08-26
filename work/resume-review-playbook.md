@@ -58,7 +58,7 @@ Strong convergence:
 - `12,584 cached objects` does not need resume space. V10 keeps only the compact `~990k values` fidelity scale.
 - The campaign defensive-copy `15.4M empty script calls` receipt moves to portfolio/interview material.
 - V10 keeps the same-corpus texture-layout result `33.53s → 14.174s`; reviewers split 2–2, and the current editorial decision is that physical layout adds a distinct storage/locality signal.
-- The current section order survived the arbitration plurality. Do not reorder sections casually without a real A/B test.
+- The current section order is the V10 checkpoint, not a permanent rule. Reorder it when a target role or a concrete reading problem gives a reason; reviewer votes do not create an obligation to run an editorial A/B experiment.
 
 ## Current Preflight default selection
 
@@ -81,12 +81,12 @@ Default alternates:
 - Glaeda
 - Glossless
 
-A role-specific resume may swap alternates in, but something else should leave. Do not add projects merely because the page can physically fit them.
+Role-specific changes should keep the one-page resume legible and make additions earn their space. Do not mechanically require a one-for-one swap merely because the current checkpoint has a particular count.
 
 ## Writing rules that survived repeated review
 
 - Lead with the failure prevented, behavior changed, or system result. Do not lead with internal invariants or implementation variables.
-- Consequence → fix → number → receipt is a strong default order.
+- Consequence → fix → number → receipt is a useful default when that order reads naturally, not a required template.
 - No semicolons in resume bullets. Avoid em dashes.
 - Delete modifiers when removing them leaves the engineering claim unchanged.
 - Keep modifiers only when they add technical meaning or scope (`obfuscated`, `third-party`, `single-threaded` can matter).
@@ -112,16 +112,9 @@ A role-specific resume may swap alternates in, but something else should leave. 
 
 Fresh reviewers should see the current PDF first, without this playbook or project history.
 
-Ask for:
+The review should answer the questions that can actually change the page: what was remembered on a quick scan, which claims felt strongest or weakest, where attention or comprehension broke, whether the section balance worked, what the reviewer would cut if space became tight, and which technical claims they would challenge in interview.
 
-1. a 20–30 second skim and memory test
-2. strongest and weakest claims
-3. where close reading stopped
-4. whether Preflight overwhelms upstream/IBM
-5. a forced 15–20% cut
-6. technical claims they would challenge in interview
-
-Only after the cold review should a reviewer read the repository handoff and propose durable edits.
+There is **no required skim duration, cut percentage, reviewer count, or forced-choice ritual**. Use whatever review setup exposes a real reading problem. Only after the cold read should a reviewer inspect the repository handoff and propose durable edits.
 
 Repeated failure modes are signal. One reviewer preferring a synonym is noise.
 
