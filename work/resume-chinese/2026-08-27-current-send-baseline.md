@@ -18,6 +18,8 @@ This is a role-facing projection of English V13, not a claim that the English r�
 
 Use [`2026-08-27-mainland-game-tech-v13-consolidated.md`](2026-08-27-mainland-game-tech-v13-consolidated.md) as the content baseline for the current PDF.
 
+The exact LaTeX source for the visually selected one-page A4 render is [`2026-08-27-mainland-game-tech-v13-balanced.tex`](2026-08-27-mainland-game-tech-v13-balanced.tex). It is the durable render source for the current cousin-send PDF and is intended to be compiled with XeLaTeX and the Noto Serif / Noto Sans CJK fonts named in the file.
+
 The newer Preflight automation work remains Thunderdome input for a later résumé revision. Do not delay the current send merely to force it into this version.
 
 ## Rendering notes learned from the visual pass
