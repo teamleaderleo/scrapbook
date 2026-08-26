@@ -6,6 +6,8 @@
 - [ ] Confirm the visible profile location remains **San Francisco, California**.
 - [ ] Confirm Open to Work is **Recruiters only** before changing its preferences.
 
+Current read-only check: profile-update sharing is off; the visible location is San Francisco; Open to Work is recruiters-only and includes California, but does not name the San Francisco Bay Area specifically.
+
 ## Core profile
 
 - [ ] Replace the headline with `Software Engineer | Runtime, Performance & Developer Tools | Rust, Java, TypeScript`.
