@@ -113,11 +113,23 @@ State: **two merged lifecycle/correctness fixes plus one open repeated-config-re
 
 Transient GitHub mergeability belongs to the live upstream PR; the durable record should describe the technical/status boundary.
 
+### SWC
+
+State: **public compiler-correctness contribution open at a maintainer-reconciled fold-only boundary**.
+
+Public contribution: [swc-project/swc#12110](https://redirect.github.com/swc-project/swc/pull/12110).
+
+The surviving contribution fixes used-result `instanceof` constant folding that can infer a boolean from operand category without a valid JavaScript semantic proof. Maintainer review narrowed the larger research campaign: discarded-result/Terser behavior remains unchanged, `tests/terser` remains unchanged, and the current head has reconciled the latest clarification. No further implementation change is currently required by that review comment; remaining work is public review/communication and whatever later maintainer feedback requests.
+
+This lane matters career-wise because it adds compiler optimization and language-semantics evidence rather than another async/resource-lifecycle specimen.
+
 ### Cloud Hypervisor
 
-State: **four merged Rust/VMM fixes across lifecycle, boot errors, VFIO mapping, and QCOW metadata ownership**.
+State: **four merged Rust/VMM fixes across lifecycle, boot errors, VFIO mapping, and QCOW metadata ownership; a separate fifth QCOW durability candidate is green after #8721**.
 
 The merged work spans exact VMM shutdown completion, ACPI error propagation, sparse VFIO BAR mapping semantics, and QCOW L2 ownership/refcount ordering. PR #8721 merged on 2026-08-24 after moving new/replacement L2 ownership before L1 publication and keeping the relocation ownership handoff local rather than deferring it to later cleanup.
+
+Near-ready follow-on: Linux Fieldwork #645 demonstrates a separate QCOW failure-atomicity bug. Current cache eviction can remove a dirty metadata victim before its fallible write succeeds, while dependent replacement pointers can become visible before the cache operation they rely on has succeeded. The clean candidate keeps failed dirty victims resident and retryable and delays pointer publication. A final composition experiment against the #8721 ownership handoff passed with the order `allocate -> refcount=1 -> successful cache insertion -> publish L1`. Keep this as a candidate, not a fifth merged result, until an upstream boundary is crossed.
 
 ## FEX — owned-fork runtime research
 
