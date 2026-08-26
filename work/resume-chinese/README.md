@@ -21,6 +21,8 @@ The first Chinese seed is [`2026-08-27-mainland-game-tech-v13-seed.md`](2026-08-
 
 After the independent review round, [`2026-08-27-mainland-game-tech-v13-consolidated.md`](2026-08-27-mainland-game-tech-v13-consolidated.md) is the first consolidated, sendable-content candidate. It keeps Preflight first, uses short Chinese scan labels, emphasizes runtime/performance/tooling evidence, compresses the open-source section for game-tech readers, and preserves the current C++/engine experience boundary. It is still a Chinese projection; English V13 and the evidence records remain authoritative.
 
+[`2026-08-27-preflight-automation-resume-thunder.md`](2026-08-27-preflight-automation-resume-thunder.md) is a newer evidence addendum for the deterministic end-to-end game-automation work. It links the current Preflight implementation/history, separates repository-backed capability from moving live-acceptance status, proposes English and Chinese candidate bullets, and asks later reviewers to decide which existing Preflight line it should displace rather than simply making the project section longer.
+
 ## How old chats and other reviewers should contribute
 
 Old conversations may have useful Chinese terminology, recruiter context, and earlier résumé decisions. Preserve that memory as editorial input while refreshing every factual claim against the current sources above.
