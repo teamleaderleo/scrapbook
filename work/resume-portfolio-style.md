@@ -1,6 +1,6 @@
 # Resume and portfolio writing guide
 
-This guide owns the writing standard for career-facing material in Scrapbook. `resume-candidates.md` owns the current selection. Source repositories and upstream pull requests own the facts.
+This guide owns the writing standard for career-facing material in Scrapbook. `resume-current.md` owns the current default one-page selection and wording; `resume-candidates.md` is the larger reservoir of alternates and supporting material. Source repositories and upstream pull requests own the facts.
 
 The goal is dense, legible substance. Sell the work hard enough that the consequence is obvious, while keeping enough mechanism that the claim feels earned.
 
