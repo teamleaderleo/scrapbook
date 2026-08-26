@@ -16,7 +16,7 @@ I started looking for unusually good engineering teams inside companies I would 
 
 The answer kept being everywhere.
 
-[Westinghouse has software engineers working on nuclear safety I&C, operator HMIs, RTOS code, SCADE, and independent verification](https://github.com/teamleaderleo/job-search/blob/main/research/hidden-physical-software-atlas-2026-08-27.md). Caterpillar has autonomy engineers writing the software for mining and construction machines. Ericsson has people implementing 5G/6G baseband behavior in C++. Illumina has instrument software whose job is keeping sequencing data correct through power loss, retries, and restarts. Teradyne writes calibration software for the machines that test memory chips. Hexagon has one group estimating position from GNSS error models and another turning geometry into CNC instructions. Keysight has engineers inventing measurements over sampled optical and electrical waveforms.
+The [physical-software atlas](https://github.com/teamleaderleo/job-search/blob/main/research/hidden-physical-software-atlas-2026-08-27.md) found Westinghouse engineers working on nuclear safety I&C, operator HMIs, RTOS code, SCADE, and independent verification; Caterpillar autonomy engineers writing the software for mining and construction machines; Ericsson implementing 5G/6G baseband behavior in C++; and Illumina instrument software whose job is keeping sequencing data correct through power loss, retries, and restarts. A [later pass](https://github.com/teamleaderleo/job-search/blob/main/research/hidden-technical-worlds-continuation-2026-08-27.md) found Teradyne calibration software for the machines that test memory chips and Hexagon software turning geometry into CNC instructions. The [measurement addendum](https://github.com/teamleaderleo/job-search/blob/main/research/hidden-technical-worlds-medical-measurement-addendum-2026-08-27.md) found Keysight engineers inventing measurements over sampled optical and electrical waveforms.
 
 None of this was secret.
 
@@ -36,7 +36,7 @@ It also runs directly into the strongest counterargument to my own information-a
 
 Suppose I publish the entire map.
 
-Here are the jobs. Here are the teams. Here are the skills that recur. Here are the hard gates. Here are the fake-looking gates that turn out to be surprisingly permeable. Here are the exact names to search. Here is a nuclear-software job that says C++ coursework counts. Here is the graphics team inside Garmin. Here is the geometry kernel inside Dassault. Here is a signal-processing job that explicitly accepts Applied Mathematics.
+Here are the jobs. Here are the teams. Here are the skills that recur. Here are the hard gates. Here are the fake-looking gates that turn out to be surprisingly permeable. Here are the exact names to search. Here is a nuclear-software job that says C++ coursework counts. Here are the [graphics and geometric-kernel teams hiding inside Garmin and Dassault](https://github.com/teamleaderleo/job-search/blob/main/research/large-company-exceptions-deep-pass-2026-08-27.md). Here is a signal-processing job that explicitly accepts Applied Mathematics.
 
 Great.
 
