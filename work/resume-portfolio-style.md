@@ -46,7 +46,7 @@ Use contractions. Write `don't`, `can't`, `didn't`, and `wasn't` when they fit.
 
 Don't make the prose sound formal because it is a resume. A clear sentence is more professional than a stiff one.
 
-Avoid em dashes and semicolons in bullets. Commas, parentheses, and an extra word or two usually read better.
+Use punctuation for readability. Semicolons and em dashes are fine when they make a dense sentence easier to understand; commas and parentheses are often enough, but there is no blanket punctuation ban.
 
 Treat modifiers as guilty until useful. If deleting an adjective or adverb leaves the engineering claim unchanged, delete it. `Runtime bytecode rewrites` stands on its own; `targeted runtime bytecode rewrites` usually does not gain anything from `targeted`. Keep modifiers that change the claim, such as `obfuscated`, `third-party`, `single-threaded`, or `read-only` when those distinctions matter.
 
