@@ -68,7 +68,7 @@ Never delete a durable record merely because it falls out of the current resume 
 
 `records/preflight-live-performance.md` owns the current career-facing Preflight performance headline and moving performance numbers.
 
-The selected startup headline is **~101s → 13.69s** on the 83-mod M5 MacBook Air development installation.
+The selected startup headline is **112.17s → 13.69s** on the 83-mod M5 MacBook Air development installation.
 
 - **Do not replace 13.69s** with a rounded value, a different campaign statistic, the old 89.00s → 15.53s A/B pair, or a future package number unless Leo explicitly chooses a new headline.
 - A startup run measured with the same game-log clock is the same kind of elapsed-time observation regardless of whether it came from an ad-hoc run or a named campaign.
@@ -77,7 +77,7 @@ The selected startup headline is **~101s → 13.69s** on the 83-mod M5 MacBook A
 
 `preflight-resume-evidence-map.md` is the provenance index. It does not compete with the live-performance record for the current headline.
 
-When historical review notes, old claims files, or benchmark prose conflict with this editorial rule, keep the historical material as evidence for the question it answered and preserve **101s → 13.69s** in career-facing copy.
+When historical review notes, old claims files, or benchmark prose conflict with this editorial rule, keep the historical material as evidence for the question it answered and preserve **112.17s → 13.69s** in career-facing copy.
 
 ## Evidence links
 
