@@ -1,6 +1,6 @@
 # Working style and retrieval model
 
-Updated: 2026-08-24
+Updated: 2026-08-26
 
 This record describes a working model, not a ritual every task has to perform.
 
@@ -69,7 +69,7 @@ Current implementation and retained current evidence lead. Documentation is a pr
 
 When a summary disagrees with source, fix the summary. When a machine-readable claim index lags accepted evidence, bring the index forward. When one changing fact has been copied into five career files, pick one owner and make the others link to it.
 
-The recent Preflight performance cleanup is a good example: the current career headline is the observed **~101s → 13.69s** development arc. The older 89.00s → 15.53s same-session campaign belongs to archived benchmark history and has no role in selecting or qualifying that headline. Letting an older claim registry force the archived campaign back into the headline was the wrong direction of authority.
+The recent Preflight performance cleanup is a good example. The installation reached roughly **101s** at its slowest and current launches center around a **~13.8s median**, with **13.69s** among the retained low runs. A startup measurement taken under the same clock remains the same kind of observation regardless of which campaign or ad-hoc run produced it. Campaign design, permutation tests, and acceptance flags are useful when asking a causal comparison question such as whether one intervention changed time; they do not define the product's current speed.
 
 ## Writing should preserve the person and the evidence
 
