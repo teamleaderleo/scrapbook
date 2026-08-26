@@ -120,15 +120,15 @@ A small range can be more distracting than informative. If `7.1–7.4s` is only 
 
 Choose the verb for the accomplishment instead of defaulting to `cut`. `Reduced`, `removed`, `eliminated`, `shrunk`, `brought`, and `moved` each say something different. Repeating one punchy verb until it becomes a tic weakens the page.
 
-## One canonical opening per project
+## Keep one current opening per project
 
-Once a project thesis has been selected, keep one canonical opening in `resume-candidates.md`. Do not create a second heading-driven first bullet, a second thesis, or a chat-only replacement and call both current.
+`resume-current.md` carries the current default opening for every project selected onto the one-page resume. `resume-candidates.md` may preserve alternate formulations and role-specific versions; that reservoir does not make each alternative current.
 
 A heading and first bullet should cooperate, but the heading does not replace a thesis that carries the engineering scope. If the thesis says the project worked across third-party code, traced failures across the stack, and became a finished application, preserve that information unless a replacement clearly improves it.
 
 A flagship thesis should finish the thought. Investigation counters can establish scale, but they should not be the final clause if the accomplishment is the system built from that investigation. Prefer `found the shared boundary, moved the work, built the reusable cache/rewrite layer` over ending at `observed N calls`.
 
-Proposals belong in the working file when they are meant to be iterated. Chat-only alternatives are discussion, not the current candidate.
+Proposals and alternates belong in `resume-candidates.md` while they are being considered. Chat-only alternatives are discussion, not the current default.
 
 ## Let a strong heading carry context without stealing the lead
 
@@ -227,6 +227,6 @@ If the current version already wins those checks, leave it alone.
 
 ## Current quality bar
 
-As of 2026-08-24, the Vercel AI SDK, Cloud Hypervisor, Vite, and Cloudflare bullets in `resume-candidates.md` are the checkpoint to preserve. Future editing should begin from those sentences rather than from older resume copies or from PR descriptions.
+The current default wording lives in `resume-current.md`; begin there when editing the one-page resume. `resume-candidates.md` preserves alternates and richer variants, and older drafts/reviews remain useful for evidence about what readers noticed without becoming current wording authority.
 
-Older resume files remain useful for facts, emphasis, and evidence of what has worked before. They don't override newer engineering results or this writing guide.
+Source and status changes can still make a current sentence stale. Preserve a strong sentence against gratuitous vocabulary churn, not against newer facts or a better target-specific choice.
