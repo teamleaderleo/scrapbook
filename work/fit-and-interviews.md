@@ -34,7 +34,25 @@ Current hypothesis: roles involving runtimes, developer tooling, performance, in
 
 This is not a claim that ordinary product work is beneath the profile. It is a claim about where the evidence is currently most discriminating.
 
-### 2. Operating fit
+### 2. Investigation-selection fit: consequence × proofability
+
+Fieldwork and Linux Fieldwork are useful evidence about problem selection, not rules that every future role has to imitate. Their current selection guidance nevertheless captures a pattern that is already visible in the accepted work: Leo tends to get traction when a problem combines a consequential invariant with a relatively cheap discriminator.
+
+A useful current heuristic is:
+
+> Prefer problems where a wrong answer can corrupt state, violate ownership or authority, leak resources, break recovery, misreport success, or dominate a real critical path — and where the claim can be made legible to a reviewer with a small reproduction, a negative control, and a repair whose reasoning radius stays local enough to inspect.
+
+The strongest external fixes repeatedly land in that territory. Cloud Hypervisor's shutdown repair replaces an SSH symptom with the event that actually owns shutdown completion; the VFIO fix rejects a logical BAR range that crosses an unmapped hole; the QCOW repair establishes metadata ownership before publishing the pointer that depends on it. The AI SDK work keeps caller-visible errors and stream ownership correct across cleanup failures. Cloudflare's Access repair prevents stale cached credentials from outliving the current credential state.
+
+Glaeda and Preflight extend the same preference from patches into owned systems. Glaeda makes execution identity, admission, teardown, recovery, trust and reusable state explicit because getting those boundaries wrong can leave ambiguous or incorrectly reusable compute. Preflight keeps asking which work actually owns startup wall time and discards attractive local wins that do not move the full path enough.
+
+There is also a persistence component. Candidate generation is cheap in an agent-heavy workflow; carrying one question through source reading, a discriminator, failed theories, exact-head execution, review, compatibility checks, and a clean final boundary is not. A recurring strength is willingness to stay with that second part after the first plausible answer appears.
+
+Do not turn persistence into indiscriminate completionism. FEX is a useful counterexample: the owned fork produced validated runtime/ABI/Vulkan work, but the external contribution boundary and competing priorities changed its expected value while Preflight became the A1 product priority. Good selection includes parking a technically interesting lane when another problem deserves the time more.
+
+Current role implication: prefer systems where correctness, isolation, recovery, ordering, state ownership, or whole-path performance has a concrete consequence and an engineer can get close enough to the mechanism to prove what is wrong. Compute/runtime control planes, storage and metadata paths, distributed coordination, SRE, security/authority boundaries, compilers/build systems, and browser/runtime performance all fit that description. The label matters less than whether the team actually owns those failure modes.
+
+### 3. Operating fit
 
 The recent work suggests unusually high comfort with:
 
@@ -52,7 +70,7 @@ A likely poor environment would make independent investigation mostly irrelevant
 
 These are hypotheses to test in interviews, not reasons to dismiss a company in advance.
 
-### 3. Review fit
+### 4. Review fit
 
 Leo's strongest recent work is not "I had the first correct idea." Much of it is "I could expose my idea to a discriminator, review, or contrary history and move the repair boundary when needed."
 
@@ -65,7 +83,7 @@ Useful examples:
 
 Current hypothesis: a team with strong technical review can be a positive fit rather than a threat to autonomy, provided review is about models/evidence and not merely conformance or status.
 
-### 4. Product/ownership fit
+### 5. Product/ownership fit
 
 Preflight changes the profile because it demonstrates sustained ownership beyond patch production: problem selection, instrumentation, design, implementation, benchmarking, compatibility, packaging, diagnostics, and a path to users.
 
@@ -181,7 +199,9 @@ A useful interview question is what proportion of the target work is deep engine
 
 Current thesis:
 
-> Cloud Hypervisor is the cleanest external proof; Preflight demonstrates runtime depth; Glaeda demonstrates security/reconciliation/control-plane taste; Linux Fieldwork shows the systems bench is much broader than two fortunate upstream patches.
+> Cloud Hypervisor is the cleanest external proof; Preflight demonstrates runtime depth; Glaeda demonstrates compute control-plane, trust, recovery, admission, and reusable-state reasoning; Cultist adds deterministic developer-tooling and concurrent-change evidence; Elatura adds browser/runtime intervention under performance and safety constraints. Fieldwork and Linux Fieldwork make the selection pattern visible across a wider bench rather than turning a few successful patches into the whole story.
+
+The strongest target is not generic systems prestige. Prefer teams where a bug can cross a real consequence boundary — compute lifecycle, isolation, storage ownership, distributed coordination, service recovery, security authority, compiler/runtime correctness, or whole-path performance — and where an individual engineer can investigate deeply enough to make the repair legible.
 
 A useful interview question is how much production operations/on-call/long-lived service ownership the role expects. That is an area where conventional tenure may contain experiences the current portfolio does not fully substitute for.
 
