@@ -6,11 +6,12 @@ This file is the handoff for future resume-review sessions. It records the curre
 
 Use these in order:
 
-1. `work/resume-current.md` owns the current default one-page content selection.
-2. `work/resume-candidates.md` is the larger reservoir of alternates, historical candidates, and material that may return for role-specific versions.
-3. `work/preflight-resume-evidence-map.md` owns Preflight provenance, implementation breadcrumbs, measurement authority, and double-counting warnings.
-4. `work/resume-portfolio-style.md` owns writing rules.
-5. `work/resume-drafts/2026-08-25-v10.tex` is the current visual/layout baseline.
+1. `work/resume-current.md` owns the current default one-page content selection and wording.
+2. `work/records/preflight-live-performance.md` owns the current career-facing Preflight performance headline and moving performance numbers.
+3. `work/resume-candidates.md` is the larger reservoir of alternates, historical candidates, and material that may return for role-specific versions.
+4. `work/preflight-resume-evidence-map.md` owns Preflight provenance, implementation breadcrumbs, and double-counting warnings. It is an evidence index, not a competing current-headline authority.
+5. `work/resume-portfolio-style.md` owns writing rules.
+6. `work/resume-drafts/2026-08-25-v10.tex` is the current visual/layout baseline.
 
 Source repositories and retained evidence outrank all career copy when facts change. The LaTeX draft is not a second wording authority. If the default wording changes, update `resume-current.md` and then carry the accepted wording into the next numbered draft.
 
