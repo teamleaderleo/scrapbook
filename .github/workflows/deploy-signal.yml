@@ -3,6 +3,10 @@ name: Production deploy signal
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'work/**'
+      - '.github/workflows/deploy-signal.yml'
+      - 'docs/deployment-workflow.md'
 
 permissions:
   contents: read
