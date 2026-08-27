@@ -4,7 +4,7 @@ kind: concept
 trunk: ai-systems
 summary: Model serving trades latency, throughput, memory, batching, and hardware utilization while preserving the requested model behavior.
 created: 2026-08-25
-updated: 2026-08-25
+updated: 2026-08-27
 ---
 # Inference serving
 
@@ -14,17 +14,26 @@ Serving a large model turns matrix-heavy computation into a scheduling and memor
 
 Prefill processes the prompt and is often compute-heavy. Decode produces tokens incrementally and repeatedly reads model state plus the growing key/value cache. Batching improves hardware utilization but couples requests with different lifetimes. The KV cache consumes device memory per active sequence, so concurrency competes directly with context length.
 
+## Throughput accounting
+
+Treat `tokens/second` as a family of measurements. Recorded input volume, cache-hit input, fresh-prefill throughput, aggregate generated-token throughput, and per-user decode speed answer different questions.
+
+A long-lived agent session can repeatedly report a huge prompt prefix in its token accounting while prefix caching reuses previously computed state. The recorded token counter can therefore grow much more quickly than fresh prefill work. Generated tokens remain sequential decode work, and long contexts continue to consume cache/state memory and can raise per-token decode cost.
+
+For capacity planning, partition input into fresh and cache-hit categories and keep generated output separate. Then size prefill, decode, cache memory, and latency headroom against their own peaks. [Frontier inference economics](frontier-inference-economics.md) works through a dated multi-billion-token example and compares API-equivalent and self-host replacement costs.
+
 ## Failure modes
 
 Large batches can raise time-to-first-token. Long contexts can exhaust memory and evict useful capacity. Uneven generation lengths create stragglers. Cross-device parallelism adds communication whose cost can dominate if partitioning is poorly matched to the model and hardware.
 
 ## Connections
 
-[Latency and tails](../performance/latency-throughput-tail.md) describe the user-visible tradeoff. [Memory hierarchy](../performance/memory-hierarchy.md) extends naturally into GPU memory bandwidth and transfer. [Measurement](../engineering-judgment/measurement.md) distinguishes tokens/second, time-to-first-token, inter-token latency, and fleet utilization instead of collapsing them into one benchmark. [Agent loops](agent-loops.md) add application-level latency and tool waiting around the model.
+[Latency and tails](../performance/latency-throughput-tail.md) describe the user-visible tradeoff. [Memory hierarchy](../performance/memory-hierarchy.md) extends naturally into GPU memory bandwidth and transfer. [Measurement](../engineering-judgment/measurement.md) distinguishes tokens/second, time-to-first-token, inter-token latency, and fleet utilization instead of collapsing them into one benchmark. [Agent loops](agent-loops.md) add application-level latency and tool waiting around the model. [Frontier inference economics](frontier-inference-economics.md) turns those distinctions into workload and replacement-cost arithmetic.
 
 ## Pressure questions
 
 - What limits concurrency first: compute, memory capacity, or memory bandwidth?
 - Why can batching improve throughput while hurting an individual request?
 - How does context length affect KV-cache pressure?
+- Which token-rate metric answers the question you are actually asking: accounting volume, fresh prefill, aggregate decode, or per-user generation speed?
 - Which metric would you optimize for an interactive coding agent versus an offline batch job?
