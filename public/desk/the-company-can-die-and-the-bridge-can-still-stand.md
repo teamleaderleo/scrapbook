@@ -4,7 +4,7 @@
 
 Imagine the most miserable finance guy alive.
 
-He hates the hype. He hates the founders. He hates the keynote music. He has never once said "changing the world" without feeling embarrassed afterward. Give him a choice between a beautiful story and a basis point and he will kill the story with his bare hands.
+He hates the hype. He hates the founders. He hates the keynote music. He says "changing the world" like an accusation. Give him a choice between a beautiful story and a basis point and he will kill the story with his bare hands.
 
 Then you show him frontier AI.
 
@@ -22,7 +22,7 @@ At that point the Grinch has a portfolio problem.
 
 The easy version of the AI investment case says the companies will make a lot of money.
 
-The stranger version begins after you stop requiring that conclusion.
+The stranger version begins once you release that conclusion.
 
 Suppose machine intelligence becomes a general-purpose input to work: something bought by the unit, routed into whatever problem currently deserves more cognition. OpenAI now describes its own ambition in explicitly general-purpose terms, comparing AI with electrification and arguing that the point is what people can do once capable intelligence becomes abundant and affordable. Its July 2026 economics essay puts the loop plainly: when the cost of useful intelligence falls, more work becomes worth doing. ([Built to benefit everyone](https://openai.com/index/built-to-benefit-everyone-our-plan/); [Building abundant intelligence](https://openai.com/index/building-abundant-intelligence/).)
 
@@ -36,7 +36,7 @@ That is why the most cynical allocator and the most enthusiastic technologist ca
 
 One says: this could be wonderful.
 
-The other says: if this is wonderful, I cannot afford to have missed all of it.
+The other says: if this is wonderful, missing all of it is unacceptable.
 
 ## Pascal wanders into the datacenter
 
@@ -50,17 +50,17 @@ The machine in front of you already does things. It does them unevenly, with biz
 
 That still leaves plenty of room for a bubble. A real technology can attract stupid prices. A correct directional thesis can finance terrible projects. The internet changed everything and still managed to vaporize fortunes. Railways could be socially transformative while particular rail companies went bankrupt. A bridge can be useful while the toll operator is financially ruined.
 
-The possibility of enormous upside raises the amount of experimentation worth tolerating. It does not make every experiment good.
+The possibility of enormous upside raises the amount of experimentation worth tolerating. Bad experiments stay bad.
 
 ## Money is an extremely weird object
 
-This gets stranger when you stop looking at money as the thing being consumed.
+This gets stranger once you look past the dollar figure and ask what physically moves.
 
-A billion dollars does not perform a trillion matrix multiplications. It does not pour concrete, package HBM, wind a transformer, design a compiler, or sit awake debugging a failed interconnect at 3:14 in the morning.
+A billion dollars is a routing instruction written in a language civilization agrees to honor. The matrix multiplications happen on chips. Crews pour the concrete. Engineers design the compiler. Fabs package the HBM. Somebody still sits awake debugging a failed interconnect at 3:14 in the morning.
 
-Money routes claims on those things.
+Money routes claims on all of that.
 
-I do work now and receive a transferable claim against future production. I can save the claim, hand it to somebody on another continent, combine it with the claims of ten thousand strangers, and eventually all of us can — through several layers of funds, banks, companies, contracts, suppliers and payroll — tell a group of people to spend three years building a semiconductor plant none of us could barter for directly.
+I do work now and receive a transferable claim against future production. I can save the claim, hand it to somebody on another continent, combine it with the claims of ten thousand strangers, and eventually all of us can — through several layers of funds, banks, companies, contracts, suppliers and payroll — tell a group of people to spend three years building a semiconductor plant beyond any direct barter we could arrange.
 
 Barter at civilization scale would be fucking impossible.
 
@@ -88,7 +88,7 @@ Everybody else may have inherited cheaper cognition.
 
 This distinction between private return and social return is old, but AI makes it unusually vivid because cognition itself can spill into so many other activities. The original investor can fail to capture the value while customers, competitors and unrelated industries capture enormous amounts of it.
 
-The telecom bust left a lot of fiber in the ground. Railway manias could leave rails after equity disappeared. A factory financed under a bad capital model can keep making useful objects after the original capital stack is restructured.
+The telecom bust left a lot of fiber in the ground. Railway manias could leave rails after equity disappeared. A factory financed under a bad capital model can keep making useful objects after the original capital stack is reworked.
 
 Financial loss is a statement about who captured the return.
 
@@ -96,11 +96,11 @@ Physical waste asks a different question: what useful capacity, knowledge or out
 
 Those questions overlap. They are miles from identical.
 
-This is why "the company could die and the project could succeed" is a coherent outcome rather than a consolation prize invented after bankruptcy.
+The company can die while the project succeeds. That outcome has its own logic long before bankruptcy ever arrives.
 
-If an AI company spends a fortune and leaves behind nothing useful, wonderful, we have discovered an expensive failure.
+An AI company can spend a fortune and produce mostly heat and regret. Great, we have discovered an expensive failure.
 
-If it spends a fortune and helps turn capable machine reasoning into a commodity used everywhere, the fact that its own shareholders captured too little of that surplus would be financially tragic and historically kind of hilarious.
+It can also spend a fortune and help turn capable machine reasoning into a commodity used everywhere. If its own shareholders capture too little of that surplus, the result is financially tragic and historically kind of hilarious.
 
 The bridge is still there.
 
@@ -116,11 +116,11 @@ General machine intelligence carries a more abstract promise: increase the suppl
 
 That is the meta-bet.
 
-You do not need to know in advance whether the highest-return use of the next million units of cognition is protein design, battery chemistry, logistics, compiler optimization, tutoring, fraud detection, mathematical research, clinical administration, software engineering or a category nobody has named yet. You are betting on making the problem-solving input cheaper enough that people closer to each problem can decide.
+The highest-return use of the next million units of cognition can remain unknown in advance. Maybe it is protein design, battery chemistry, logistics, compiler optimization, tutoring, fraud detection, mathematical research, clinical administration, software engineering, or a category nobody has named yet. The wager is that the problem-solving input becomes cheap enough for people closer to each problem to decide.
 
-This is also why "why don't we spend it on cancer instead?" becomes less clean than it first appears. Better general reasoning tools can themselves be pointed at biology, experimental design, literature synthesis, imaging, trial operations and manufacturing. The choice can become "fund one problem directly" versus "fund a tool that may increase the effective labor available to that problem and many others."
+This is also why "why don't we spend it on cancer instead?" becomes less clean than it first appears. Better general reasoning tools can themselves be pointed at biology, experimental design, literature synthesis, imaging, trial operations and manufacturing. One pool of capital can fund the immediate problem; another can fund a tool that increases the effective labor available to that problem and many others.
 
-Sometimes the direct intervention wins. Sometimes the general tool wins. The point is that the categories overlap.
+Sometimes the direct intervention wins. Sometimes the general tool wins. The categories overlap.
 
 And once the tool starts helping improve the tool, the bet becomes even stranger.
 
@@ -130,15 +130,15 @@ There is an ugly way to tell this story where dollars become magical and every g
 
 The real economy refuses to cooperate.
 
-A wafer spent on a useless accelerator cannot simultaneously become a medical device. An engineer building a doomed datacenter is unavailable for another project. A turbine, a transmission line, a year of someone's life: these are real opportunity costs. Money can route claims; it cannot repeal scarcity.
+A wafer spent on a useless accelerator is a wafer unavailable for a medical device. An engineer building a doomed datacenter is unavailable for another project. A turbine, a transmission line, a year of someone's life: these are real opportunity costs. Money routes claims; scarcity stays physical.
 
-So the high-upside argument should make allocation more demanding, not less.
+So the high-upside argument makes allocation more demanding.
 
 If machine cognition is genuinely one of the highest-leverage uses of scarce resources, then wasting those resources on bad AI projects is especially painful. You want competition. You want ugly cost accounting. You want people measuring useful work per watt, per chip, per dollar, per month of construction, per unit of human supervision. You want cheaper models humiliating expensive ones when they can do the same job. You want giant frontier systems earning their giant footprint by solving work the smaller ones cannot.
 
 "What if it works?" earns permission to explore aggressively.
 
-It does not earn immunity from the question "did this particular thing work?"
+Every project still has to answer: did this particular thing work?
 
 ## The Grinch and the philanthropist meet at the same check
 
@@ -158,7 +158,7 @@ Maybe demand keeps expanding every time inference gets cheaper because people re
 
 And maybe the most ambitious version is directionally right: capable machine intelligence becomes a general productive input, closer to electricity in its breadth than to another application category.
 
-In that world the finance bro and the idealist do not need to agree about humanity.
+In that world the finance bro and the idealist can disagree completely about humanity and still sign the same check.
 
 The idealist says: more problem-solving capacity could do an extraordinary amount of good.
 
