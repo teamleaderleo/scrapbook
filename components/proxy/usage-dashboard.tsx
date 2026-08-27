@@ -95,14 +95,24 @@ function formatRelativeTime(value: string | null | undefined) {
   return `${Math.round(absolute / DAY_MS)}d ${suffix}`;
 }
 
-function formatDate(value: string | null | undefined) {
+function formatResetDateTime(
+  value: string | null | undefined,
+  timeZone: 'UTC' | 'America/Los_Angeles',
+  hourCycle: 'h12' | 'h23'
+) {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
-    timeZone: 'UTC',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle,
+    timeZone,
+    timeZoneName: 'short',
   });
 }
 
@@ -755,8 +765,23 @@ function Hero({
             <div className="mt-2 text-xl font-semibold tracking-[-0.025em] sm:text-3xl">
               {providerSummary(provider)}
             </div>
-            <div className="mt-1.5 text-xs text-muted-foreground">
-              Next reset · {formatDate(provider?.resetAt)}
+            <div className="mt-1.5 grid gap-0.5 text-xs text-muted-foreground">
+              <div>
+                Next reset ·{' '}
+                <span className="font-mono tabular-nums text-foreground">
+                  {formatResetDateTime(provider?.resetAt, 'UTC', 'h23')}
+                </span>
+              </div>
+              <div>
+                Pacific ·{' '}
+                <span className="font-mono tabular-nums text-foreground">
+                  {formatResetDateTime(
+                    provider?.resetAt,
+                    'America/Los_Angeles',
+                    'h12'
+                  )}
+                </span>
+              </div>
             </div>
           </div>
         </div>
