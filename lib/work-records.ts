@@ -113,12 +113,60 @@ export const workRecords: readonly WorkRecord[] = [
     ],
   },
   {
+    id: 'agent-systems',
+    title: 'Agent systems',
+    kind: 'Durable work across replaceable workers',
+    status: 'Current cross-project thread · Aug 2026',
+    summary:
+      'A family of experiments built around one increasingly stubborn rule: the current model, chat, process, browser, or VM can disappear; the facts required to continue should not disappear with it. Durable external state owns work and evidence, consequential effects require current authority, and recovery starts by reconciling fresh observations instead of trusting a remembered story.',
+    accomplishments: [
+      'Stensibly keeps task state, handoffs, authority grants, leases, and effect receipts outside disposable agent sessions; Glaeda applies the same separation to Linux execution, where isolated workers and hot project state can be replaced without becoming the durable execution truth.',
+      'Cultist treats repository context as evidence with provenance, counterexamples, partial coverage, and explicit UNKNOWN; Elatura keeps the genuine authenticated application authoritative while browser projections and working sets can be discarded and reacquired.',
+      'Alàlana keeps provider bridges deterministic and model-free at the effect boundary: a model may inspect and author an explicit request while allowlists, idempotency, provider calls, and receipts stay in ordinary code.',
+      'Fieldwork and Linux Fieldwork carry the method into unfamiliar external systems: exact source identity, reproducible probes, negative controls, limits, and durable decisions survive the chat, while mature upstream fixes in AI SDK, Cloud Hypervisor, Vite, and Workers SDK test the same ownership/lifecycle instincts outside owned projects.',
+    ],
+    reversal:
+      'The agent stopped being the durable object. Continuity got easier once fresh sessions were allowed to be fresh and repositories, ledgers, provider state, and explicit receipts were made responsible for remembering what actually matters.',
+    evidence: [
+      {
+        label: 'Current synthesis',
+        href: 'https://github.com/teamleaderleo/scrapbook/blob/main/work/agent-systems-snapshot-2026-08-27.md',
+        kind: 'record',
+      },
+      {
+        label: 'Stensibly',
+        href: 'https://github.com/teamleaderleo/stensibly',
+        kind: 'repository',
+      },
+      {
+        label: 'Glaeda',
+        href: 'https://github.com/teamleaderleo/glaeda',
+        kind: 'repository',
+      },
+      {
+        label: 'Cultist',
+        href: 'https://github.com/teamleaderleo/cultist',
+        kind: 'repository',
+      },
+      {
+        label: 'Elatura',
+        href: 'https://github.com/teamleaderleo/elatura',
+        kind: 'repository',
+      },
+      {
+        label: 'Alàlana',
+        href: 'https://github.com/teamleaderleo/alalana',
+        kind: 'repository',
+      },
+    ],
+  },
+  {
     id: 'stensibly',
     title: 'Stensibly',
     kind: 'Durable human-agent coordination',
     status: 'Live hosted system · ongoing dogfood',
     summary:
-      'Work should survive the worker doing it. Stensibly keeps tasks, evidence, next actions, blockers, and handoffs in a server-owned ledger so a fresh human or agent can continue without reconstructing the project from one vanished chat or process.',
+      'Work should survive the worker doing it. Stensibly keeps tasks, evidence, next actions, blockers, handoffs, authority, and effect receipts in server-owned state so a fresh human or agent can continue without reconstructing the project from one vanished chat or process.',
     accomplishments: [
       'The hosted Convex/Cloudflare system gives browser, REST, and MCP clients one durable project state with claims, runs, dependencies, reservations, artifacts, scoped tokens, idempotent writes, and guarded exact-CAS GitHub changes.',
       'A worker can leave a summary, evidence, and an explicit next action, disappear, and hand the responsibility to a fresh session while current server-owned claims and leases decide who may still act.',
@@ -162,12 +210,12 @@ export const workRecords: readonly WorkRecord[] = [
     evidence: [
       {
         label: 'Repository',
-        href: 'https://github.com/teamleaderleo/smolrunner',
+        href: 'https://github.com/teamleaderleo/glaeda',
         kind: 'repository',
       },
       {
         label: 'Blazingly hot execution',
-        href: 'https://github.com/teamleaderleo/smolrunner/blob/main/docs/BLAZINGLY_HOT.md',
+        href: 'https://github.com/teamleaderleo/glaeda/blob/main/docs/BLAZINGLY_HOT.md',
         kind: 'record',
       },
       {
@@ -275,7 +323,7 @@ export const workRecords: readonly WorkRecord[] = [
   },
 ];
 
-export const workRecordUpdatedAt = '2026-08-26';
+export const workRecordUpdatedAt = '2026-08-27';
 
 export function getWorkRecord(id: string): WorkRecord | undefined {
   return workRecords.find(record => record.id === id);
