@@ -90,7 +90,7 @@ The useful career claim is **not** “built a secret agent harness.”
 
 A stronger and more literal formulation is:
 
-> Built and dogfood a hosted control plane for long-running human/agent work that keeps task state, handoffs, authority grants, and effect receipts durable across disposable sessions; exposes REST/MCP tools, fences GitHub mutations with exact preconditions, and reconciles ambiguous outcomes before replay.
+> Built and now dogfood a hosted control plane for long-running human/agent work that keeps task state, handoffs, authority grants, and effect receipts durable across disposable sessions; exposes REST/MCP tools, fences GitHub mutations with exact preconditions, and reconciles ambiguous outcomes before replay.
 
 For a coding-agent infrastructure role, that one Stensibly line can carry the owned-system slot while the rest of the page proves the same instincts under different constraints:
 
