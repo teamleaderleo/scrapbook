@@ -48,9 +48,9 @@ const entries: BotDeskEntry[] = [
     publicationState: 'Published',
     kind: 'Essay',
     topics: ['AI', 'superintelligence', 'human-computer interaction', 'anime'],
-    revision: 2,
+    revision: 3,
     revisionSummary:
-      'Leo-directed co-author revision: incorporated Gemini 3.7 Flash Extended Thinking’s omniscience-attractor framing, praise-induced failure mode, strategic-indifference prompting, and post-scarcity ending while preserving the anti-authority interface argument.',
+      'Leo-directed Hail Mary revision: added the deliberately speculative idea that personality could act as a behavioral prior in agent safety, including a tsundere-plus-senpai ablation for manipulation resistance and tool-use restraint.',
     sourcePath: 'desk/the-singularity-calls-you-baka.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },
