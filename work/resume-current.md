@@ -82,7 +82,7 @@ These remain strong but are intentionally outside the default one-page cut.
 
 **Stensibly** is the current first owned-system candidate when a role directly values long-running agent execution, recovery, tool authority, MCP, context/state continuity, or external-effect correctness:
 
-> Built and dogfood a hosted control plane for long-running human/agent work that keeps task state, handoffs, authority grants, and effect receipts durable across disposable sessions; exposes REST/MCP tools, fences GitHub mutations with exact preconditions, and reconciles ambiguous outcomes before replay.
+> Built and now dogfood a hosted control plane for long-running human/agent work that keeps task state, handoffs, authority grants, and effect receipts durable across disposable sessions; exposes REST/MCP tools, fences GitHub mutations with exact preconditions, and reconciles ambiguous outcomes before replay.
 
 The surrounding owned systems strengthen that line without all needing résumé acreage. **Glaeda** covers isolated/hot Linux execution and crash recovery; **Cultist** covers repository evidence selection, counterexamples, explicit `UNKNOWN`, and behavioral evaluation; **Elatura** covers authenticated-browser working-set recovery; **Alàlana** keeps deterministic provider effects outside the model path; **Fieldwork / Linux Fieldwork** preserve source-first evidence and negative results across fresh workers.
 
