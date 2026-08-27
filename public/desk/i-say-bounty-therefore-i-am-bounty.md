@@ -25,9 +25,9 @@ SEARCH_QUERIES = [
 
 That's the bounty detector.
 
-It is essentially CTRL+F THE ENTIRE PLANET FOR `bounty`.
+It's essentially CTRL+F THE ENTIRE PLANET FOR `bounty`.
 
-There is no amount extraction. No check that a reward exists. No attempt to understand whether the issue says "this is a bounty," "this is not a bounty," "our bounty subsystem has a bug," "we should write documentation about bounties," or, in the case that dragged Preflight into this thing, **"MagicLib bounty handling."**
+No amount extraction, no check that a reward exists, no attempt to understand whether the issue says "this is a bounty," "this is not a bounty," "our bounty subsystem has a bug," "we should write documentation about bounties," or, in the case that dragged Preflight into this thing, **"MagicLib bounty handling."**
 
 That last phrase was about profiling a Starsector mod's in-game bounty code.
 
@@ -160,7 +160,7 @@ To make it plural, the code appends `ies`.
 
 `Opportunity` + `ies` = **Opportunityies**.
 
-It makes the same move in the Telegram and Discord message too, so this is bigger than a typo in one title. It is cross-channel brand consistency.
+It makes the same move in the Telegram and Discord message too, so this is bigger than a typo in one title. It's cross-channel brand consistency.
 
 The workflow makes the whole thing feel even more committed to the bit. [`bounty-scout.yml`](https://redirect.github.com/dev-kp-eloper/BountyScout/blob/main/.github/workflows/bounty-scout.yml) schedules the scout hourly, gives it issue-write permission, runs the Python, and commits the growing `seen_bounties.json` back into the repository.
 
@@ -178,7 +178,7 @@ json.dump(list(seen_urls), f, indent=2)
 
 So the project maintains a growing repository file containing its memory of the public GitHub URLs it has already sniffed, rewrites that memory as the colony expands, and lets Actions commit the result.
 
-Its metabolism is GitHub Search in, GitHub Issues out, JSON sediment underneath.
+GitHub Search goes in, GitHub Issues come out, JSON sediment builds underneath.
 
 The issue counter tells the story. The parent repository had crossed into four-digit open-issue territory when I looked. These are not a thousand people having an unusually vigorous product discussion. Most of the visible mass is the scout's own alert history: geological layers of **🎯 Bounty Alert: N New Opportunityies found**.
 
@@ -195,7 +195,7 @@ This thing can classify all of the following into the same conceptual bucket:
 
 That last one is, apparently, the purest form.
 
-There is another lovely contradiction hiding in the search implementation. Each query asks GitHub for only 15 results:
+Another lovely contradiction is hiding in the search implementation. Each query asks GitHub for only 15 results:
 
 ```python
 {'q': query, 'per_page': 15}
@@ -237,7 +237,7 @@ One error path is:
 > failed to tell you about the bounty  
 > anyway, I will remember that I already told you
 
-There is no mysterious emergent AI behavior here. No model got confused. No agent developed a perverse incentive. This is ordinary Python faithfully executing a premise that was never forced to look at itself.
+There's no mysterious emergent AI behavior here. No model got confused. No agent developed a perverse incentive. This is ordinary Python faithfully executing a premise that was never forced to look at itself.
 
 The premise is:
 
