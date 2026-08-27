@@ -30,13 +30,23 @@ const FEATURED_REPOSITORIES = [
   },
   {
     name: 'Glaeda',
-    url: 'https://github.com/teamleaderleo/smolrunner',
+    url: 'https://github.com/teamleaderleo/glaeda',
     note: 'Trust-tiered Linux execution; hot project state when trust permits.',
   },
   {
     name: 'cultist',
     url: 'https://github.com/teamleaderleo/cultist',
     note: 'Repository evidence before code changes: find out why before you copy it.',
+  },
+  {
+    name: 'Elatura',
+    url: 'https://github.com/teamleaderleo/elatura',
+    note: 'Adaptive working sets for heavyweight authenticated apps used by humans and agents.',
+  },
+  {
+    name: 'Fieldwork',
+    url: 'https://github.com/teamleaderleo/fieldwork',
+    note: 'Code-first research, real-behaviour probes, negative results, and upstream-ready evidence.',
   },
 ] as const;
 
