@@ -22,7 +22,7 @@ The other path says: here's your shift roster. The plant is forty-seven kilometr
 
 Then industry asks why recruitment is hard.
 
-The labor shortage itself is real enough. Deloitte and the Manufacturing Institute estimated in 2024 that U.S. manufacturing could need as many as [3.8 million new employees through 2033](https://www.deloitte.com/us/en/about/press-room/us-manufacturing-could-need-new-employees-by-2033.html), with around 1.9 million of those jobs at risk of going unfilled if the applicant and skills gaps persist. Meanwhile, [Apprenticeship.gov reported 97,500 registered apprentices served in advanced manufacturing in 2025](https://www.apprenticeship.gov/apprenticeship-industries/advanced-manufacturing), up 20 percent over five years. People can be pulled into these careers. The question is what kind of life is doing the pulling.
+The labor shortage itself is real enough. Deloitte and the Manufacturing Institute estimated in 2024 that U.S. manufacturing could need as many as [3.8 million new employees through 2033](https://www2.deloitte.com/us/en/pages/about-deloitte/articles/press-releases/us-manufacturing-could-need-new-employees-by-2033.html), with around 1.9 million of those jobs at risk of going unfilled if the applicant and skills gaps persist. Meanwhile, [Apprenticeship.gov reported 97,500 registered apprentices served in advanced manufacturing in 2025](https://www.apprenticeship.gov/apprenticeship-industries/advanced-manufacturing), up 20 percent over five years. People can be pulled into these careers. The question is what kind of life is doing the pulling.
 
 Heavy industry has spent a century becoming extremely good at designing the production process and weirdly incurious about the young-adult ecosystem around the production process.
 
@@ -58,7 +58,7 @@ Most industrial recruitment content looks like the communications department bor
 
 Hire employee-creators. Give charismatic operators, welders, apprentices, engineers and technicians paid time and production help to make good work. Let them have actual personalities. Let one person make beautiful machining videos, another explain electrical faults, another do day-in-the-life clips, another become the world's funniest wastewater-treatment influencer.
 
-The content practically writes itself.
+Then you get:
 
 *She operates a 1,200-ton crane and leaves you on read.*
 
@@ -84,9 +84,9 @@ Hiring for production stays about aptitude, qualifications and performance. The 
 
 The social effect follows on its own.
 
-A few thousand young people with stable incomes, shared interests, common friends, sports, classes, events and places to hang around will form friendships, romances, marriages, breakups, feuds, bands, startup ideas, terrible group chats, the whole human mess. Nobody needs Corporate Tinder. Nobody needs a fertility KPI either; that belongs in the same locked cabinet as the cheekbone score.
+A few thousand young people with stable incomes, shared interests, common friends, sports, classes, events and places to hang around will form friendships, romances, marriages, breakups, feuds, bands, startup ideas, terrible group chats, the whole human mess. Corporate Tinder can stay in the joke. A fertility KPI belongs in the same locked cabinet as the cheekbone score.
 
-Countries worried about fertility keep rediscovering that young adults need enough money, time, confidence and social opportunity to build lives together. An industrial employer can contribute to all of those without turning reproduction into an HR program. Make the place somewhere people meet each other and can afford a future. Biology has excellent downstream systems.
+Countries worried about fertility keep rediscovering that young adults need enough money, time, confidence and social opportunity to build lives together. An industrial employer can contribute by giving people good jobs and a social world. Reproduction can stay out of the HR dashboard. Make the place somewhere people meet each other and can afford a future. Biology has excellent downstream systems.
 
 This also changes the geography problem. A lot of heavy industry lives outside the places where ambitious young people naturally congregate. Fine. Build a stronger bridge. Frequent transport. Good nearby housing. A reason for city people to come to events at the campus. Partnerships with technical colleges and universities. Open days that feel like festivals instead of parent-teacher evening in a warehouse.
 
@@ -104,7 +104,7 @@ Run the idea at one flagship site through a complete recruitment and apprentices
 
 The company is trying to create a place people actively choose.
 
-That's the part I keep coming back to from the original stupid joke. "Make everybody hot" sounds like the world's least serious answer to labor economics, right up until *hot* expands into what people actually mean when they point at a desirable scene.
+I keep coming back to the original stupid joke. "Make everybody hot" sounds like the world's least serious answer to labor economics, right up until *hot* expands into what people actually mean when they point at a desirable scene.
 
 Healthy people. Good clothes. Money. Friends. Skill. Confidence. Ambition. Romance. Places worth going. People worth meeting. Work you can become proud of. A future that looks alive from twenty-three.
 
