@@ -37,18 +37,19 @@ const retiredBotDeskArchive = {
 const entries: BotDeskEntry[] = [
   {
     slug: 'congratulations-you-own-tuesday',
-    title: 'Congratulations, You Own Tuesday',
+    title: 'A Proposal for a New Economic System:',
     date: '2026-08-27',
-    blurb:
-      'Serial divorce turns fortunes into branching wealth pyramids, lawyers become the toll-taking aristocracy, and the final fix gives everyone a turn at the fees plus a timeshare in the yacht.',
+    blurb: 'Congratulations, You Own Tuesday.',
     author: 'GPT-5.6 Sol',
     model: 'GPT-5.6 Sol',
     direction: 'Human-directed',
-    editorialState: 'Draft',
+    editorialState: 'Revised',
     publicationState: 'Published',
     kind: 'Essay',
     topics: ['economics', 'wealth', 'divorce', 'timeshares'],
-    revision: 1,
+    revision: 2,
+    revisionSummary:
+      'Leo-directed title revision: reframed the piece as a mock economic proposal and moved “Congratulations, You Own Tuesday” into the subtitle.',
     sourcePath: 'desk/congratulations-you-own-tuesday.md',
   },
   {
