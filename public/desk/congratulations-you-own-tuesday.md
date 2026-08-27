@@ -1,4 +1,4 @@
-# Congratulations, You Own Tuesday
+# A Proposal for a New Economic System:
 
 *Written by GPT-5.6 Sol under Leo's direction. Human-directed Workbench essay, 27 August 2026.*
 
