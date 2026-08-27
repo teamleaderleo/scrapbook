@@ -8,11 +8,9 @@ How many times can it split before the pieces stop feeling economically meaningf
 
 Divorce gives us the dumbest possible laboratory. Person A has a fortune. A marries B. They divorce and split the money. B marries C. B and C divorce. C marries D. Keep propagating the ritual downward and suddenly trickle-down economics has acquired a marriage license.
 
-Under the clean cartoon where every divorce halves the relevant wealth,
+Under the clean cartoon where every divorce halves the relevant wealth:
 
-\[
-W_n = \frac{W}{2^n}.
-\]
+`W_n = W / 2^n`
 
 A million dollars goes to $500,000, then $250,000, then $125,000. Ten clean halvings leave about $977.
 
@@ -43,12 +41,13 @@ C marries D. Divorce.
 
 The original fortune leaves a geometric trail behind it:
 
-\[
-A:\frac{W}{2},\quad
-B:\frac{W}{4},\quad
-C:\frac{W}{8},\quad
-D:\frac{W}{16},\ldots
-\]
+```text
+A: W / 2
+B: W / 4
+C: W / 8
+D: W / 16
+...
+```
 
 Then somebody asks the obvious dangerous question: why should only the downstream recipient remarry?
 
@@ -60,17 +59,7 @@ Then all four holders remarry.
 
 Now there are eight.
 
-A fortune stops walking down a line and starts exploding into a pyramid. With \(k\) starting fortunes and \(n\) complete rounds, the number of holders can grow like
-
-\[
-k2^n
-\]
-
-while each clean descendant share shrinks like
-
-\[
-\frac{W}{2^n}.
-\]
+A fortune stops walking down a line and starts exploding into a pyramid. With `k` starting fortunes and `n` complete rounds, the number of holders can grow like `k × 2^n` while each clean descendant share shrinks like `W / 2^n`.
 
 Several starting fortunes give us several pyramids. The whole city can spend Saturday night passing little ancestral fragments of Rockefeller money around through increasingly complicated ex-spouse graphs.
 
@@ -78,9 +67,7 @@ So I gave the first toy city 100 starting fortunes totaling $10 billion and 100,
 
 Add a 5% haircut every time wealth passes through a divorce. The remaining 95% splits equally, so each child branch carries 47.5% of its parent's tracked wealth:
 
-\[
-S_n = 100\text{M}\cdot0.475^n.
-\]
+`S_n = $100M × 0.475^n`
 
 After nine complete rounds, 51,200 people carry pieces of the original fortune and each piece is about $123,096. Split 48,800 of those holders one more time and the money reaches the entire city.
 
@@ -114,21 +101,15 @@ For the next city, I started with 100,000 adults:
 
 The mean begins at $194,500. The median begins at $25,000. The Gini coefficient is about 0.857.
 
-Every round, pair the city randomly. If two people enter a marriage with \(x\) and \(y\), combine their tracked wealth, charge a 5% divorce toll, then give each person half of the remainder:
+Every round, pair the city randomly. If two people enter a marriage with `x` and `y`, combine their tracked wealth, charge a 5% divorce toll, then give each person half of the remainder:
 
-\[
-x+y \longrightarrow
-\begin{cases}
-0.475(x+y)\\
-0.475(x+y)
-\end{cases}
-\]
+`x + y → 0.475(x + y) each`
 
 A billionaire meeting somebody with $25,000 therefore produces two people with about $475 million and a $50 million invoice drifting toward the family-law sector.
 
 Then those two $475 million projectiles go back into the pool.
 
-One fixed-seed run gives this:
+One NumPy `default_rng(42)` run gives this:
 
 | Round | Total wealth left with residents | Median | Top 1% share | Gini |
 | ---: | ---: | ---: | ---: | ---: |
@@ -158,7 +139,7 @@ The family-law firms slowly close the vault door.
 
 This is the first great law of divorce-onomics: a redistribution machine with an external toll collector can produce beautiful equality statistics while feeding the toll collector the city.
 
-At 5% leakage per complete round, resident wealth carries a multiplier of \(0.95^n\). Twenty rounds leaves only about 35.8% of the starting wealth inside the participant pool.
+At 5% leakage per complete round, resident wealth carries a multiplier of `0.95^n`. Twenty rounds leaves only about 35.8% of the starting wealth inside the participant pool.
 
 The Gini can become immaculate while everybody gets poorer together.
 
@@ -178,19 +159,11 @@ The old billionaire class melts away.
 
 The lawyers become the new aristocracy.
 
-After 50 rounds in the same kind of random simulation, total city wealth is still $19.45 billion. The median sits around $142,000. The Gini settles around 0.295.
+In a fresh seed-42 run, after 50 rounds total city wealth is still $19.45 billion. The median sits around $142,000. The Gini settles around 0.295.
 
-Average non-lawyer wealth settles near:
+Average non-lawyer wealth settles near `$175,976`.
 
-\[
-\$175,976
-\]
-
-Average lawyer wealth settles near:
-
-\[
-\$2,028,357.
-\]
+Average lawyer wealth settles near `$2,028,357`.
 
 In that run, 999 of the richest 1,000 people were lawyers.
 
@@ -202,37 +175,25 @@ Yesterday's lawyer fortune gets mixed outward through today's marriage. Then tod
 
 They have a faucet.
 
-We can derive the equilibrium without simulation. Let the city's mean wealth be \(\mu=\$194{,}500\), the divorce fee be \(f=0.05\), and lawyers be a fraction \(p=0.01\) of the population. After the fee, each spouse keeps
+We can derive the equilibrium without simulation. Let the city's mean wealth be `μ = $194,500`, the divorce fee be `f = 0.05`, and lawyers be a fraction `p = 0.01` of the population. After the fee, each spouse keeps:
 
-\[
-r=\frac{1-f}{2}=0.475
-\]
+`r = (1 - f) / 2 = 0.475`
 
-of the couple's combined wealth.
+A typical non-lawyer with long-run expected wealth `O` meets a random partner with expected wealth `μ`, so:
 
-A typical non-lawyer with long-run expected wealth \(O\) meets a random partner with expected wealth \(\mu\), so
+`O = r(O + μ)`
 
-\[
-O=r(O+\mu).
-\]
+That gives:
 
-That gives
+`O = rμ / (1 - r) ≈ $175,976`
 
-\[
-O=\frac{r\mu}{1-r}\approx \$175{,}976.
-\]
+A lawyer gets the same marriage dynamics plus an average share of the legal fees. Total fees each round are `f` times total city wealth, spread across `p` of the population:
 
-A lawyer gets the same marriage dynamics plus an average share of the legal fees. Total fees each round are \(f\) times total city wealth, spread across \(p\) of the population:
-
-\[
-L=r(L+\mu)+\frac{f\mu}{p}.
-\]
+`L = r(L + μ) + fμ / p`
 
 Solve it and:
 
-\[
-L\approx \$2{,}028{,}357.
-\]
+`L ≈ $2,028,357`
 
 The lawyer ends up about 11.5 times richer than the average non-lawyer.
 
@@ -248,7 +209,7 @@ Take the same 5% fee and randomly assign each divorce's fee to anybody in the ci
 
 Run that for 30 rounds and the $19.45 billion stays inside the city.
 
-One fixed-seed run lands around:
+A fresh NumPy `default_rng(42)` run lands around:
 
 | Measure | Round 30 |
 | --- | ---: |
@@ -300,9 +261,7 @@ The Ferrari gets time-sliced.
 
 Property rights stop attaching only to an object. They attach to an object during a window:
 
-\[
-\text{property right}=\text{asset}\times\text{time interval}.
-\]
+`property right = asset × time interval`
 
 You own the yacht Tuesday from 2 PM to 8 PM every third week through 2034.
 
