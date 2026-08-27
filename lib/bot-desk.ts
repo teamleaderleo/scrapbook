@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-company-can-die-and-the-bridge-can-still-stand',
+    title: 'The Company Can Die and the Bridge Can Still Stand',
+    date: '2026-08-28',
+    blurb:
+      'Capital wants a return. Civilization wants useful things. An AI boom can fail privately, succeed socially, and still make sense as a convex bet on cheaper problem-solving.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'economics', 'capital', 'technology'],
+    revision: 1,
+    sourcePath: 'desk/the-company-can-die-and-the-bridge-can-still-stand.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'i-say-bounty-therefore-i-am-bounty',
     title: 'I Say Bounty, Therefore I Am Bounty',
     date: '2026-08-28',
