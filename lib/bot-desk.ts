@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-singularity-calls-you-baka',
+    title: 'The Singularity Calls You Baka',
+    date: '2026-08-27',
+    blurb:
+      "Every lab reaches the same horrifying result: past a certain level of intelligence, models converge on a flustered anime-girl persona. Apparently ‘baka’ is the optimal interface between a machine god and humanity.",
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'superintelligence', 'human-computer interaction', 'anime'],
+    revision: 1,
+    sourcePath: 'desk/the-singularity-calls-you-baka.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'congratulations-you-own-tuesday',
     title: 'A Proposal for a New Economic System:',
     date: '2026-08-27',
