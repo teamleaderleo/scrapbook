@@ -76,12 +76,24 @@ University of Toronto | BSc in Mathematics, Statistics & Computer Science | June
 
 ## Current alternates
 
-These remain strong but are intentionally outside the default one-page cut:
+These remain strong but are intentionally outside the default one-page cut.
+
+### Agent-infra / coding-agent alternate
+
+**Stensibly** is the current first owned-system candidate when a role directly values long-running agent execution, recovery, tool authority, MCP, context/state continuity, or external-effect correctness:
+
+> Built and now dogfood a hosted control plane for long-running human/agent work that keeps task state, handoffs, authority grants, and effect receipts durable across disposable sessions; exposes REST/MCP tools, fences GitHub mutations with exact preconditions, and reconciles ambiguous outcomes before replay.
+
+The surrounding owned systems strengthen that line without all needing résumé acreage. **Glaeda** covers isolated/hot Linux execution and crash recovery; **Cultist** covers repository evidence selection, counterexamples, explicit `UNKNOWN`, and behavioral evaluation; **Elatura** covers authenticated-browser working-set recovery; **Alàlana** keeps deterministic provider effects outside the model path; **Fieldwork / Linux Fieldwork** preserve source-first evidence and negative results across fresh workers.
+
+For the current dated synthesis and evidence boundaries, read [`agent-systems-snapshot-2026-08-27.md`](agent-systems-snapshot-2026-08-27.md). A role-specific page should normally expose one owned agent-system specimen, not dump the entire family onto the résumé.
+
+### Other alternates
 
 - Preflight aggregate third-party callback work (>12s removed)
 - Preflight mod linter and source-side ecosystem analysis
-- Stensibly
-- Glaeda
-- Glossless
+- Glaeda as the primary owned-system row when sandbox / remote execution / hot workspace infrastructure matters more than coordination state
+- Cultist when repository context, evidence selection, review intelligence, or agent evaluation is the direct screen
+- Glossless for graphics/product/frontend breadth
 
-Use `resume-candidates.md` and `preflight-resume-evidence-map.md` before restoring or rewriting any of them.
+Use `resume-candidates.md`, `agent-systems-snapshot-2026-08-27.md`, and `preflight-resume-evidence-map.md` before restoring or rewriting any alternate.

@@ -24,6 +24,7 @@ The operating idea is simple:
 ## Files
 
 - [`current-state.md`](current-state.md) — short live-status overlay across the current body of work; read this first when repository status has moved faster than the deeper records.
+- [`agent-systems-snapshot-2026-08-27.md`](agent-systems-snapshot-2026-08-27.md) — dated synthesis of the current Stensibly/Glaeda/Cultist/Elatura/Alàlana/Fieldwork through-line: replaceable workers, durable external truth, explicit authority, and evidence-led recovery.
 - [`resume-current.md`](resume-current.md) — current default one-page résumé selection and wording.
 - [`records/preflight-live-performance.md`](records/preflight-live-performance.md) — current career-facing Preflight performance headline and moving performance numbers.
 - [`resume-candidates.md`](resume-candidates.md) — larger, intentionally churny reservoir of strong résumé alternates and role-specific material; it does not override `resume-current.md`.
