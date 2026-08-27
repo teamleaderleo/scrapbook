@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: '2026-08-27-evidence-constellation-scrapbook',
+    name: 'Evidence Constellation',
+    mark: 'EC-27',
+    note: 'Mapped the current agent-systems through-line across Stensibly, Glaeda, Cultist, Elatura, Alàlana, and Fieldwork, then surfaced it in /work and the résumé alternate pool.',
+    date: '2026-08-27',
+    mode: 'serious',
+    repository: 'teamleaderleo/scrapbook',
+    model: 'GPT-5.6 Sol',
+    source: {
+      label: 'PR #749',
+      href: 'https://github.com/teamleaderleo/scrapbook/pull/749',
+    },
+  },
+  {
     id: '2026-08-15-policy-lamplighter-fieldwork',
     name: 'Policy Lamplighter',
     mark: 'PL-15',
