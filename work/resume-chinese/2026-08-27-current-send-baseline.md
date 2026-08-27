@@ -18,7 +18,7 @@ This is a role-facing projection of English V13, not a claim that the English r�
 
 Use [`2026-08-27-mainland-game-tech-v13-consolidated.md`](2026-08-27-mainland-game-tech-v13-consolidated.md) as the content baseline for the current PDF.
 
-The exact LaTeX source for the visually selected one-page A4 render is [`2026-08-27-mainland-game-tech-v13-balanced.tex`](2026-08-27-mainland-game-tech-v13-balanced.tex). It is the durable render source for the current cousin-send PDF and is intended to be compiled with XeLaTeX and the Noto Serif / Noto Sans CJK fonts named in the file.
+The exact LaTeX source for the visually selected one-page A4 render is [`2026-08-27-mainland-game-tech-v13-balanced.tex`](2026-08-27-mainland-game-tech-v13-balanced.tex). It is the durable render source for the current cousin-send PDF and is intended to be compiled with XeLaTeX and the Noto Serif / Noto Sans CJK fonts named in the file. The Chinese résumé header uses **李孟熙** as the primary name with **Leo Li** retained smaller beside it for continuity with the English résumé and linked profiles.
 
 The newer Preflight automation work remains Thunderdome input for a later résumé revision. Do not delay the current send merely to force it into this version.
 
@@ -40,6 +40,6 @@ These are current rendering lessons, not permanent numeric spacing rules. If the
 
 ## Current cousin send
 
-For the current family update, send the existing English V13 together with the current Chinese one-page PDF. The accompanying WeChat wording lives in [`2026-08-27-cousin-wechat-note.md`](2026-08-27-cousin-wechat-note.md).
+For the current family update, send the existing English V13 together with the current Chinese one-page PDF. Use **`李孟熙_中文简历_2026-08-27.pdf`** as the Chinese attachment filename. The accompanying WeChat wording lives in [`2026-08-27-cousin-wechat-note.md`](2026-08-27-cousin-wechat-note.md).
 
 No additional explanation, referral request, or Preflight technical paragraph is needed unless the conversation naturally goes there.
