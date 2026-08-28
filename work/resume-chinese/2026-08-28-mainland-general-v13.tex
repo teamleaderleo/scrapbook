@@ -1,0 +1,116 @@
+\documentclass[UTF8,a4paper,11pt,fontset=none]{ctexart}
+\usepackage[top=5.3mm,bottom=14.4mm,left=9.8mm,right=9.8mm]{geometry}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{ragged2e}
+
+\setmainfont{Noto Serif}[BoldFont=Noto Serif SemiBold]
+\setCJKmainfont[BoldFont=Noto Serif CJK SC Bold]{Noto Serif CJK SC}
+\setsansfont{Noto Sans}[BoldFont=Noto Sans Bold]
+\setCJKsansfont[BoldFont=Noto Sans CJK SC Bold]{Noto Sans CJK SC}
+\setmonofont{DejaVu Sans Mono}
+\setCJKmonofont{Noto Sans Mono CJK SC}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\tabcolsep}{0pt}
+\setlength{\parskip}{0pt}
+\urlstyle{same}
+\raggedbottom
+
+\titleformat{\section}{\sffamily\bfseries\fontsize{12.2pt}{13.8pt}\selectfont}{}{0pt}{}[\vspace{0.3pt}{\color{black!55}\titlerule[0.35pt]}]
+\titlespacing*{\section}{0pt}{0.55pt}{0.05pt}
+
+\newcommand{\roleline}[2]{%
+  \begin{tabularx}{\textwidth}{@{}Xr@{}}
+    {\sffamily\bfseries\fontsize{10.78pt}{12.05pt}\selectfont #1} & {\sffamily\fontsize{8.8pt}{10.2pt}\selectfont #2}
+  \end{tabularx}\vspace{-0.05pt}
+}
+
+\newcommand{\subroleline}[2]{%
+  \vspace{-0.35pt}%
+  \begin{tabularx}{\textwidth}{@{}Xr@{}}
+    {\sffamily\bfseries\fontsize{10.2pt}{11.45pt}\selectfont #1} & {\sffamily\fontsize{8.65pt}{10.1pt}\selectfont #2}
+  \end{tabularx}\vspace{-0.2pt}
+}
+
+\newcommand{\resumeliststart}{\begin{itemize}[leftmargin=1.42em,label=\textbullet,itemsep=0pt,parsep=0pt,topsep=-0.05pt,partopsep=0pt]}
+\newcommand{\resumeitem}[1]{\item\fontsize{10.12pt}{10.68pt}\selectfont\RaggedRight #1}
+\newcommand{\resumelistend}{\end{itemize}\vspace{0pt}}
+
+\begin{document}
+
+\begin{center}
+  {\sffamily\bfseries\fontsize{18.6pt}{20.5pt}\selectfont 李孟熙}\hspace{0.55em}{\sffamily\bfseries\fontsize{11.2pt}{13.2pt}\selectfont Leo Li}\\[0.65pt]
+  {\sffamily\fontsize{8.35pt}{9.35pt}\selectfont
+  +1 778-779-2889 \;|\;
+  \href{mailto:cheerleaderleo@outlook.com}{cheerleaderleo@outlook.com} \;|\;
+  \href{https://www.linkedin.com/in/leoooli/}{linkedin.com/in/leoooli} \;|\;
+  \href{https://github.com/teamleaderleo}{github.com/teamleaderleo} \;|\;
+  \href{https://teamleaderleo.com/}{teamleaderleo.com}}
+\end{center}
+\vspace{-3.0pt}
+
+\section{开源工程}
+
+\subroleline{Vercel AI SDK ｜ TypeScript / Web Runtime}{2026.08}
+\resumeliststart
+  \resumeitem{修复 global / sticky 正则导致同一 URL 多次检查结果不一致的问题（\href{https://redirect.github.com/vercel/ai/pull/18570}{\textbf{\#18570}}），在 Web Stream 源读取失败后释放 reader，避免失败读取遗留 locked stream（\href{https://redirect.github.com/vercel/ai/pull/18371}{\textbf{\#18371}}/\href{https://redirect.github.com/vercel/ai/pull/18400}{\textbf{\#18400}}），并避免下载超限错误被后续 cancel 失败覆盖（\href{https://redirect.github.com/vercel/ai/pull/18572}{\textbf{\#18572}}/\href{https://redirect.github.com/vercel/ai/pull/18695}{\textbf{\#18695}}）。}
+\resumelistend
+
+\subroleline{Cloud Hypervisor ｜ Rust / VMM / 虚拟化与存储}{2026.08}
+\resumeliststart
+  \resumeitem{修复 VM 生命周期竞态，避免测试在 shutdown 清理完成前复用 VM 与磁盘（\href{https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8699}{\textbf{\#8699}}），将 ACPI 表构建失败转换为 VM 启动错误而不是 VMM panic（\href{https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8709}{\textbf{\#8709}}），拒绝跨越 VFIO 未映射区间的 DMA 请求（\href{https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8734}{\textbf{\#8734}}），并修复 QCOW 元数据所有权，使仍被镜像引用的元数据不会被当作空闲空间再次分配（\href{https://redirect.github.com/cloud-hypervisor/cloud-hypervisor/pull/8721}{\textbf{\#8721}}）。}
+\resumelistend
+
+\subroleline{Vite ｜ 构建工具链 / 依赖生命周期}{2026.08}
+\resumeliststart
+  \resumeitem{修复构建失败后跳过插件清理（\href{https://redirect.github.com/vitejs/vite/pull/23165}{\textbf{\#23165}}），释放依赖分析中的临时 Rolldown build（\href{https://redirect.github.com/vitejs/vite/pull/23207}{\textbf{\#23207}}），并避免 server restart 在 optimizer state 重复后重建已经预热的依赖缓存（\href{https://redirect.github.com/vitejs/vite/pull/23208}{\textbf{\#23208}}，open）。}
+\resumelistend
+
+\subroleline{Cloudflare Workers SDK ｜ Miniflare / workerd}{2026.08}
+\resumeliststart
+  \resumeitem{修复 Miniflare 清理卡住或失败时 \texttt{workerd} 进程残留（\href{https://redirect.github.com/cloudflare/workers-sdk/pull/15143}{\textbf{\#15143}}），并避免 Cloudflare Access 凭据被删除或不完整后继续使用陈旧 service token 认证（\href{https://redirect.github.com/cloudflare/workers-sdk/pull/15080}{\textbf{\#15080}}）。}
+\resumelistend
+
+\subroleline{React ｜ JavaScript / DOM Events}{2026.08}
+\resumeliststart
+  \resumeitem{修复 Fragment 事件监听器的 capture 选项身份判断，使省略 capture 与显式 false 时都能移除同一个 listener（\href{https://redirect.github.com/react/react/pull/37251}{\textbf{\#37251}}）。}
+\resumelistend
+
+\section{个人项目}
+\roleline{Preflight ｜ 跨平台性能启动器与 Mod 分析工具}{2026.07 -- 至今}
+{\sffamily\fontsize{9.0pt}{10.08pt}\selectfont\href{https://github.com/teamleaderleo/preflight}{github.com/teamleaderleo/preflight}}\vspace{0.15pt}
+\resumeliststart
+  \resumeitem{\textsf{\bfseries 整体性能：}分析经过混淆的 JVM 游戏运行时及 \textbf{83 个第三方 Mod} 的启动链路，通过缓存、预计算与运行时字节码改写将启动时间从 \textbf{112.17s 降至 13.69s}，减少 \textbf{87.8\%}，提速 \textbf{8.19×}。}
+  \resumeitem{\textsf{\bfseries 数据加载：}将 5 套加载器中重复的 JSON/CSV 读取与合并收敛到共享缓存层，覆盖 \textbf{39,017 次 JSON 调用 / 8,378 条路径}，并以解析后的对象树替代重复解析文本，在约 \textbf{99 万个值}上验证结果，使 \texttt{SpecStore} 从 \textbf{19.8s 降至 9.8s}，合并读取耗时从 \textbf{2.172s 降至 0.300s}。}
+  \resumeitem{\textsf{\bfseries 纹理与显存：}将纹理缓存命中判断移到曾阻塞启动约 \textbf{27s} 的单线程预取队列之前，并移除纹理上传中的 \textbf{1.22 GiB} 无效显存填充。}
+  \resumeitem{\textsf{\bfseries 运行时索引：}以变更跟踪索引替代高频全局 O(n) 实体扫描，消除 \textbf{227,805 次全量校验}和 \textbf{7,910 万次实体引用检查}，并短路 \textbf{1.179 亿次}未变化的重复计算。}
+  \resumeitem{\textsf{\bfseries 存储布局：}取消可重建纹理中间产物的逐文件持久化并流式写入一个最终 pack，使准备时间从 \textbf{200.77s 降至 16.21s}、存储从 \textbf{4.76 GB 降至约 1.1 GB}，再按实际启动访问顺序重排同一纹理集，使启动时间从 \textbf{33.53s 降至 14.174s}。}
+  \resumeitem{\textsf{\bfseries 动态编译：}缓存 \textbf{228 次} Janino 动态编译请求，使耗时从 \textbf{18.014s 降至 2.364s}，再将 \textbf{36,332} 个生成类条目去重为 \textbf{280} 个唯一类，使 class map 从 \textbf{145.96 MiB 降至 1.13 MiB}、重放从 \textbf{1.501s 降至 29ms}。}
+  \resumeitem{\textsf{\bfseries 产品化：}将 Java 性能核心做成 Windows / macOS / Linux 桌面应用，采用 React UI 与 Rust/Tauri host，内置 Java 运行时、启动与游玩记录，以及带回滚的签名更新。}
+\resumelistend
+
+\section{实习经历}
+\subroleline{IBM ｜ Software Developer Intern}{Toronto, ON · 2021.05 -- 2022.08}
+\resumeliststart
+  \resumeitem{\textsf{\bfseries 故障处理：}在 IBM Cloud AI/ML 与数据工作流的 Java 端到端测试与重构中覆盖 Kafka、Spark、Snowflake、混合云与本地部署环境，发现关键 RBAC 权限缺陷并推动三个团队完成紧急修复。}
+  \resumeitem{\textsf{\bfseries 开发效率：}整理并替换过时的 SDK 与 runtime 配置流程，将开发环境搭建时间从 \textbf{3 小时缩短至 15 分钟}。}
+\resumelistend
+
+\section{教育背景}
+\subroleline{多伦多大学（University of Toronto）｜理学学士｜数学、统计学与计算机科学}{2024.06}
+
+\vspace{-4.2pt}\section{技能}
+{\fontsize{9.72pt}{10.64pt}\selectfont
+\textbf{编程语言：}TypeScript、JavaScript、Rust、Java、Python、Go、SQL、C\\[0pt]
+\textbf{技术：}Linux、React、Vite、Next.js、Node.js、Cloudflare Workers、Convex、PostgreSQL、AWS、Docker、Git}
+
+\end{document}
