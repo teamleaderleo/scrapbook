@@ -15,6 +15,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+export const instant = false;
+
 export default async function Page() {
   const secret = proxyDashboardSecret();
 
