@@ -84,7 +84,9 @@ describe('machine health dashboard', () => {
     expect(html).toContain('RDP');
     expect(html).toContain('Idle');
     expect(html).toContain('Agent routes');
-    expect(html).toContain('0/18 scoped · 3 roots · 129 MiB · partial');
+    expect(html).toContain('Process scopes');
+    expect(html).toContain('0 / 18');
+    expect(html).toContain('3 roots · 129 MiB · partial visibility');
     expect(html).toContain('3 jobs · 17 proc · 512 MiB');
     expect(html).toContain(
       '384 MiB memory · 192 MiB job peak · 2.5 s CPU · I/O —'

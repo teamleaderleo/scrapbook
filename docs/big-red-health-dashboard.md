@@ -47,7 +47,7 @@ Big Red already runs Ubuntu's `sysstat` accounting every 10 minutes. The collect
 
 The reuse path has no new resident process. A five-run same-machine comparison measured 934 ms mean before route status and 945 ms after it, a 10.5 ms difference inside the observed run-to-run spread. The compact payload grew by 181 bytes. Existing local sysstat history occupied 624 KiB after about 15 hours, independent of this dashboard.
 
-Route activity is a point observation at report time. The current card shows active routes, active jobs, tagged descendant processes, aggregate RSS, residue jobs, and unknown ownership records. Historical bins show the highest tagged process count observed in each hour or day; they do not imply continuous runtime between reports. Token-route activity remains a separate previous-complete-hour measurement because it answers a different question.
+Route activity is a point observation at report time. The hygiene panel shows exact-scoped versus discoverable Codex processes beside active routes, jobs, tagged descendants, aggregate RSS, residue, and unknown ownership records. Historical bins show the highest tagged process count observed in each hour or day; they do not imply continuous runtime between reports. Token-route activity remains a separate previous-complete-hour measurement because it answers a different question.
 
 An independent `sar` read of the same six intervals reconciled the collector output after rounding: CPU 7.25%, memory 12.44%, network 0.059/0.045 MiB/s, disk 1.989/11.043 MiB/s, and PSI CPU/memory/I/O 0.193/0.015/0.345%. The Python regression test separately verifies interval weighting, loopback/loop-device exclusion, UTC handling, and the labeled point-sample fallback.
 
