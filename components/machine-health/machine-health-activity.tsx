@@ -29,6 +29,8 @@ type ActivityBin = {
   rebootCount: number;
   browserRoots: number | null;
   browserRssMib: number | null;
+  buildStateGib: number | null;
+  codexStateMib: number | null;
   codexWorkers: number | null;
   routeTaggedProcesses: number | null;
   routeTaggedMemoryMib: number | null;
@@ -155,6 +157,20 @@ export function buildActivityBins(
         included.length === 0
           ? null
           : Math.max(...included.map(sample => sample.browserRssBytes / MIB)),
+      buildStateGib:
+        included.length === 0 ||
+        !included.some(sample => sample.buildStateGib !== null)
+          ? null
+          : Math.max(...included.map(sample => sample.buildStateGib ?? 0)),
+      codexStateMib:
+        included.length === 0 ||
+        !included.some(sample => sample.codexStateAllocatedBytes !== null)
+          ? null
+          : Math.max(
+              ...included.map(
+                sample => (sample.codexStateAllocatedBytes ?? 0) / MIB
+              )
+            ),
       codexWorkers:
         included.length === 0
           ? null
@@ -446,6 +462,22 @@ export function MachineHealthActivity({
           bins={bins}
           previousBins={previousBins}
           value={bin => bin.browserRssMib}
+          unit="MiB"
+          summary="maximum"
+        />
+        <ObservationChart
+          label="Build state high"
+          bins={bins}
+          previousBins={previousBins}
+          value={bin => bin.buildStateGib}
+          unit="GiB"
+          summary="maximum"
+        />
+        <ObservationChart
+          label="Codex state high"
+          bins={bins}
+          previousBins={previousBins}
+          value={bin => bin.codexStateMib}
           unit="MiB"
           summary="maximum"
         />

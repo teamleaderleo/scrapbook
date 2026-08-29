@@ -59,7 +59,11 @@ describe('machine health activity bins', () => {
     const bins = buildActivityBins(
       [
         sample('2026-08-29T06:05:00.000Z', { cpuUsedPercent: 10 }),
-        sample('2026-08-29T06:25:00.000Z', { cpuUsedPercent: 30 }),
+        sample('2026-08-29T06:25:00.000Z', {
+          cpuUsedPercent: 30,
+          buildStateGib: 51.65,
+          codexStateAllocatedBytes: 1_849_430_016,
+        }),
       ],
       '24h',
       now
@@ -73,6 +77,8 @@ describe('machine health activity bins', () => {
       diskMibS: 3,
       pressurePercent: 0.5,
       browserRssMib: 1024,
+      buildStateGib: 51.65,
+      codexStateMib: 1763.75390625,
     });
   });
 
@@ -175,5 +181,31 @@ describe('machine health activity bins', () => {
 
     expect(bins.at(-1)?.routeTaggedMemoryMib).toBe(384);
     expect(bins.at(-2)?.routeTaggedMemoryMib).toBeNull();
+  });
+
+  it('keeps storage gauge highs without turning unavailable data into zero', () => {
+    const bins = buildActivityBins(
+      [
+        sample('2026-08-29T06:05:00.000Z', {
+          buildStateGib: 48,
+          codexStateAllocatedBytes: 1_024 ** 3,
+        }),
+        sample('2026-08-29T06:25:00.000Z', {
+          buildStateGib: 52,
+          codexStateAllocatedBytes: 2 * 1_024 ** 3,
+        }),
+      ],
+      '24h',
+      now
+    );
+
+    expect(bins.at(-1)).toMatchObject({
+      buildStateGib: 52,
+      codexStateMib: 2048,
+    });
+    expect(bins.at(-2)).toMatchObject({
+      buildStateGib: null,
+      codexStateMib: null,
+    });
   });
 });

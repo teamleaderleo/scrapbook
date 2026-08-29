@@ -74,6 +74,12 @@ Remote-client classification reuses the existing Tailscale status document, so i
 
 Route activity, process tags, and Codex state are point observations at report time. The hygiene panel shows exact-scoped versus discoverable Codex processes beside active routes, jobs, tagged descendants, aggregate memory, residue, unknown ownership records, and local state growth. Hook tags add main-root and subagent rollups without exposing their identities. Historical bins show the highest lease-tagged process count observed in each hour or day; they do not imply continuous runtime between reports. Token-route activity remains a separate previous-complete-hour measurement because it answers a different question.
 
+Build/cache state and Codex state are gauges rather than activity totals. Their charts keep the
+highest observed value in each hour or day and compare the current range high with the same-length
+prior range. Missing source data stays empty instead of becoming zero. The existing current value
+and seven-day point delta remain in Workspace hygiene; the charts show when growth or cleanup was
+observed.
+
 An independent `sar` read of the same six intervals reconciled the collector output after rounding: CPU 7.25%, memory 12.44%, network 0.059/0.045 MiB/s, disk 1.989/11.043 MiB/s, and PSI CPU/memory/I/O 0.193/0.015/0.345%. The Python regression test separately verifies interval weighting, loopback/loop-device exclusion, UTC handling, and the labeled point-sample fallback.
 
 The collector also reads battery/AC state and the Intel iGPU's current/max activity clocks from sysfs when those files are available. Big Red does not currently expose a user-readable GPU busy percentage, so the dashboard labels the clock honestly and does not invent utilization or install another package.

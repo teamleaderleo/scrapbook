@@ -71,6 +71,8 @@ describe('machine health dashboard', () => {
     expect(html).not.toContain('No configured guardrail');
     expect(html).toContain('4 stored observations');
     expect(html).toContain('Activity');
+    expect(html).toContain('Build state high');
+    expect(html).toContain('Codex state high');
     expect(html).toContain('Codex');
     expect(html).toContain('Cache reads');
     expect(html).toContain('Cache writes');
