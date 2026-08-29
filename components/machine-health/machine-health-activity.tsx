@@ -18,6 +18,9 @@ type ActivityBin = {
   networkMibS: number | null;
   diskMibS: number | null;
   pressurePercent: number | null;
+  fallbackCount: number;
+  undercoveredCount: number;
+  rebootCount: number;
   browserRoots: number | null;
   codexWorkers: number | null;
 };
@@ -45,6 +48,17 @@ export function buildActivityBins(
   const { bins, binMs } = RANGE_CONFIG[range];
   const alignedEnd = Math.ceil(now / binMs) * binMs;
   const start = alignedEnd - bins * binMs;
+  const ordered = [...samples].sort(
+    (left, right) => Date.parse(left.checkedAt) - Date.parse(right.checkedAt)
+  );
+  const rebootTimestamps = new Set(
+    ordered
+      .filter(
+        (sample, index) =>
+          index > 0 && sample.uptimeSeconds < ordered[index - 1].uptimeSeconds
+      )
+      .map(sample => sample.checkedAt)
+  );
 
   return Array.from({ length: bins }, (_, index) => {
     const binStart = start + index * binMs;
@@ -79,6 +93,17 @@ export function buildActivityBins(
       ),
       diskMibS: average(diskThroughput),
       pressurePercent: pressure.length === 0 ? null : Math.max(...pressure),
+      fallbackCount: included.filter(
+        sample => sample.activitySource === 'point'
+      ).length,
+      undercoveredCount: included.filter(
+        sample =>
+          sample.activitySource === 'sysstat-10m' &&
+          (sample.activitySampleCount < 6 || sample.activityWindowMinutes < 55)
+      ).length,
+      rebootCount: included.filter(sample =>
+        rebootTimestamps.has(sample.checkedAt)
+      ).length,
       browserRoots:
         included.length === 0
           ? null
@@ -169,6 +194,15 @@ export function MachineHealthActivity({
   const observedBins = bins.filter(bin => bin.sampleCount > 0).length;
   const browserHigh = Math.max(0, ...bins.map(bin => bin.browserRoots ?? 0));
   const workerHigh = Math.max(0, ...bins.map(bin => bin.codexWorkers ?? 0));
+  const fallbackCount = bins.reduce(
+    (total, bin) => total + bin.fallbackCount,
+    0
+  );
+  const undercoveredCount = bins.reduce(
+    (total, bin) => total + bin.undercoveredCount,
+    0
+  );
+  const rebootCount = bins.reduce((total, bin) => total + bin.rebootCount, 0);
   const pressureSummary = [
     latestActivity.cpu_pressure_some_percent,
     latestActivity.memory_pressure_full_percent,
@@ -264,6 +298,10 @@ export function MachineHealthActivity({
             : 'point-sample fallback'}
         </span>
         <span>PSI CPU / memory / I/O: {pressureSummary}</span>
+        <span>
+          Coverage: {fallbackCount} fallback · {undercoveredCount} partial ·{' '}
+          {rebootCount} reboot{rebootCount === 1 ? '' : 's'}
+        </span>
         <span>
           {observedBins}/{bins.length} {RANGE_CONFIG[range].description} bins
           observed

@@ -22,6 +22,10 @@ function sample(
     diskReadMibS: 1,
     diskWriteMibS: 2,
     pressurePercent: 0.5,
+    activitySource: 'sysstat-10m',
+    activitySampleCount: 6,
+    activityWindowMinutes: 60,
+    uptimeSeconds: 86_400,
     browserRoots: 1,
     codexWorkers: 2,
     failedUnits: 0,
@@ -61,5 +65,28 @@ describe('machine health activity bins', () => {
     expect(bins).toHaveLength(7);
     expect(bins.filter(bin => bin.sampleCount === 0)).toHaveLength(6);
     expect(bins.at(-1)?.sampleCount).toBe(1);
+  });
+
+  it('marks fallback, partial coverage, and uptime discontinuities', () => {
+    const bins = buildActivityBins(
+      [
+        sample('2026-08-29T05:05:00.000Z', {
+          activitySampleCount: 4,
+          activityWindowMinutes: 40,
+          uptimeSeconds: 10_000,
+        }),
+        sample('2026-08-29T06:05:00.000Z', {
+          activitySource: 'point',
+          activitySampleCount: 1,
+          activityWindowMinutes: 0,
+          uptimeSeconds: 100,
+        }),
+      ],
+      '24h',
+      now
+    );
+
+    expect(bins.at(-2)).toMatchObject({ undercoveredCount: 1 });
+    expect(bins.at(-1)).toMatchObject({ fallbackCount: 1, rebootCount: 1 });
   });
 });

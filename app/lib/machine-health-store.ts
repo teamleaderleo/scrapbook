@@ -109,6 +109,10 @@ export type MachineHealthSample = {
   diskReadMibS: number | null;
   diskWriteMibS: number | null;
   pressurePercent: number | null;
+  activitySource: MachineHealthPayload['activity']['source'];
+  activitySampleCount: number;
+  activityWindowMinutes: number;
+  uptimeSeconds: number;
   browserRoots: number;
   codexWorkers: number;
   failedUnits: number;
@@ -237,6 +241,10 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         disk_read_mib_s,
         disk_write_mib_s,
         pressure_percent,
+        activity_source,
+        activity_sample_count,
+        activity_window_minutes,
+        uptime_seconds,
         browser_roots,
         codex_workers,
         failed_units,
@@ -258,6 +266,10 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         ${payload.activity.disk_read_mib_s},
         ${payload.activity.disk_write_mib_s},
         ${pressurePercent},
+        ${payload.activity.source},
+        ${payload.activity.sample_count},
+        ${payload.activity.window_minutes},
+        ${payload.uptime_seconds},
         ${payload.hygiene.browser_roots},
         ${payload.hygiene.codex_workers},
         ${failedUnits},
@@ -278,6 +290,10 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         disk_read_mib_s = EXCLUDED.disk_read_mib_s,
         disk_write_mib_s = EXCLUDED.disk_write_mib_s,
         pressure_percent = EXCLUDED.pressure_percent,
+        activity_source = EXCLUDED.activity_source,
+        activity_sample_count = EXCLUDED.activity_sample_count,
+        activity_window_minutes = EXCLUDED.activity_window_minutes,
+        uptime_seconds = EXCLUDED.uptime_seconds,
         browser_roots = EXCLUDED.browser_roots,
         codex_workers = EXCLUDED.codex_workers,
         failed_units = EXCLUDED.failed_units,
@@ -337,6 +353,10 @@ export async function readMachineHealth(
           disk_read_mib_s: number | string | null;
           disk_write_mib_s: number | string | null;
           pressure_percent: number | string | null;
+          activity_source: MachineHealthPayload['activity']['source'];
+          activity_sample_count: number | string;
+          activity_window_minutes: number | string;
+          uptime_seconds: number | string | bigint;
           browser_roots: number | string;
           codex_workers: number | string;
           failed_units: number | string;
@@ -356,6 +376,10 @@ export async function readMachineHealth(
           disk_read_mib_s,
           disk_write_mib_s,
           pressure_percent,
+          activity_source,
+          activity_sample_count,
+          activity_window_minutes,
+          uptime_seconds,
           browser_roots,
           codex_workers,
           failed_units,
@@ -404,6 +428,10 @@ export async function readMachineHealth(
           row.disk_write_mib_s === null ? null : toNumber(row.disk_write_mib_s),
         pressurePercent:
           row.pressure_percent === null ? null : toNumber(row.pressure_percent),
+        activitySource: row.activity_source,
+        activitySampleCount: toNumber(row.activity_sample_count),
+        activityWindowMinutes: toNumber(row.activity_window_minutes),
+        uptimeSeconds: toNumber(row.uptime_seconds),
         browserRoots: toNumber(row.browser_roots),
         codexWorkers: toNumber(row.codex_workers),
         failedUnits: toNumber(row.failed_units),
