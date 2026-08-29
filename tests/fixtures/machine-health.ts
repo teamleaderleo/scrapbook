@@ -22,7 +22,12 @@ export const healthyMachineReport: MachineHealthPayload = {
     tailscale_backend: 'running',
     tailscale_self_online: true,
   },
-  power: { profile: 'balanced', sleep_targets_masked: true },
+  power: {
+    profile: 'balanced',
+    idle_suspend_ac: 'nothing',
+    idle_suspend_battery: 'nothing',
+    hibernate_targets_masked: true,
+  },
   hygiene: {
     browser_roots: 1,
     codex_workers: 2,

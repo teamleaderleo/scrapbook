@@ -7,6 +7,13 @@ const percent = z.number().finite().min(0).max(100);
 const nonnegative = z.number().finite().min(0);
 const nonnegativeInteger = z.number().int().min(0);
 const serviceState = z.enum(['active', 'inactive', 'missing', 'unknown']);
+const idleSleepAction = z.enum([
+  'nothing',
+  'suspend',
+  'hibernate',
+  'shutdown',
+  'unknown',
+]);
 
 export const machineHealthPayloadSchema = z.object({
   schema_version: z.literal(1),
@@ -45,7 +52,9 @@ export const machineHealthPayloadSchema = z.object({
   }),
   power: z.object({
     profile: z.enum(['performance', 'balanced', 'power-saver', 'unknown']),
-    sleep_targets_masked: z.boolean(),
+    idle_suspend_ac: idleSleepAction,
+    idle_suspend_battery: idleSleepAction,
+    hibernate_targets_masked: z.boolean(),
   }),
   hygiene: z.object({
     browser_roots: nonnegativeInteger,
@@ -117,8 +126,15 @@ export function evaluateMachineHealth(payload: MachineHealthPayload) {
     );
   if (payload.network.tailscale_backend !== 'running')
     reasons.push('Tailscale is not in the running state.');
-  if (!payload.power.sleep_targets_masked)
-    reasons.push('One or more protected sleep targets are not masked.');
+  if (
+    payload.power.idle_suspend_ac !== 'nothing' ||
+    payload.power.idle_suspend_battery !== 'nothing'
+  )
+    reasons.push(
+      'Automatic idle suspend is not disabled on both power sources.'
+    );
+  if (!payload.power.hibernate_targets_masked)
+    reasons.push('Hibernate or hybrid-sleep is no longer masked.');
   if (payload.hygiene.unexpected_dev_listeners > 0)
     reasons.push(
       `${payload.hygiene.unexpected_dev_listeners} unexpected development listener${payload.hygiene.unexpected_dev_listeners === 1 ? '' : 's'} detected.`

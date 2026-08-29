@@ -11,7 +11,7 @@ The page starts with the questions that matter when Leo is away from the machine
 - Is the snapshot fresh, and did a configured guardrail trip?
 - Are root disk, memory, load per logical CPU, and peak sensor temperature moving in a bad direction?
 - Are SSH, Tailscale, NetworkManager, and time sync active?
-- Are the protected sleep targets still masked?
+- Is automatic idle suspend still disabled while deliberate lid-close suspend remains available, and are hibernate targets still masked?
 - Are there failed systemd units, unexpected development listeners, or an implausible number of browser/Codex roots?
 
 The last three counts are intentionally coarse. They support cleanup without turning the dashboard into process surveillance.
@@ -44,7 +44,8 @@ These are operator thresholds rather than hardware safety limits:
 - memory at 90%: watch;
 - any failed system or user unit: attention;
 - anything other than full NetworkManager connectivity or running Tailscale: watch;
-- any protected sleep target no longer masked: watch;
+- automatic idle suspend no longer disabled on AC or battery: watch;
+- hibernate or hybrid-sleep no longer masked: watch;
 - any detected development listener: watch;
 - report older than 36 hours: watch.
 

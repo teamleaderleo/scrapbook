@@ -52,5 +52,14 @@ describe('machine health contract', () => {
         services: { ...healthyMachineReport.services, failed_user_units: 1 },
       }).state
     ).toBe('attention');
+    expect(
+      evaluateMachineHealth({
+        ...healthyMachineReport,
+        power: {
+          ...healthyMachineReport.power,
+          idle_suspend_ac: 'suspend',
+        },
+      }).state
+    ).toBe('watch');
   });
 });

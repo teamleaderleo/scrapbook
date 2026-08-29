@@ -129,9 +129,20 @@ def power_profile() -> str:
     return value if value in {"performance", "balanced", "power-saver"} else "unknown"
 
 
-def sleep_targets_masked() -> bool:
-    targets = ("sleep.target", "suspend.target", "hibernate.target", "hybrid-sleep.target")
+def hibernate_targets_masked() -> bool:
+    targets = ("hibernate.target", "hybrid-sleep.target")
     return all(run("systemctl", "is-enabled", target)[1] == "masked" for target in targets)
+
+
+def idle_suspend_action(power_source: str) -> str:
+    _, output = run(
+        "gsettings",
+        "get",
+        "org.gnome.settings-daemon.plugins.power",
+        f"sleep-inactive-{power_source}-type",
+    )
+    value = output.strip("'\"").lower()
+    return value if value in {"nothing", "suspend", "hibernate", "shutdown"} else "unknown"
 
 
 def process_table() -> dict[int, tuple[int, str, str]]:
@@ -218,7 +229,9 @@ def build_report() -> dict[str, Any]:
         },
         "power": {
             "profile": power_profile(),
-            "sleep_targets_masked": sleep_targets_masked(),
+            "idle_suspend_ac": idle_suspend_action("ac"),
+            "idle_suspend_battery": idle_suspend_action("battery"),
+            "hibernate_targets_masked": hibernate_targets_masked(),
         },
         "hygiene": {
             "browser_roots": browser_roots,

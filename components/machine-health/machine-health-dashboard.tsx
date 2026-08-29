@@ -154,6 +154,9 @@ export function MachineHealthDashboard({
         : 'Needs attention';
   const failedUnits =
     payload.services.failed_system_units + payload.services.failed_user_units;
+  const idleSuspendDisabled =
+    payload.power.idle_suspend_ac === 'nothing' &&
+    payload.power.idle_suspend_battery === 'nothing';
   const serviceRows = [
     ['SSH', payload.services.ssh],
     ['Tailscale', payload.services.tailscale],
@@ -267,9 +270,12 @@ export function MachineHealthDashboard({
             <Pill good={payload.network.tailscale_backend === 'running'}>
               Tailnet: {payload.network.tailscale_backend}
             </Pill>
-            <Pill good={payload.power.sleep_targets_masked}>
-              Sleep targets:{' '}
-              {payload.power.sleep_targets_masked ? 'masked' : 'changed'}
+            <Pill good={idleSuspendDisabled}>
+              Idle suspend: {idleSuspendDisabled ? 'off' : 'changed'}
+            </Pill>
+            <Pill good={payload.power.hibernate_targets_masked}>
+              Hibernate:{' '}
+              {payload.power.hibernate_targets_masked ? 'masked' : 'changed'}
             </Pill>
             <Pill good={failedUnits === 0}>Failed units: {failedUnits}</Pill>
           </div>
