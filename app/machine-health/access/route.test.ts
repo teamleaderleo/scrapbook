@@ -30,7 +30,7 @@ describe('machine dashboard token exchange', () => {
         body: 'token=correct-secret',
       })
     );
-    expect(response.status).toBe(307);
+    expect(response.status).toBe(303);
     expect(response.headers.get('location')).toBe(
       'https://example.com/machine-health'
     );

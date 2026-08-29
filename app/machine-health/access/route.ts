@@ -69,7 +69,8 @@ export async function POST(request: NextRequest) {
     );
 
   const response = NextResponse.redirect(
-    new URL('/machine-health', request.url)
+    new URL('/machine-health', request.url),
+    303
   );
   response.cookies.set({
     name: MACHINE_DASHBOARD_COOKIE,

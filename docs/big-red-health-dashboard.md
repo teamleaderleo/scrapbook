@@ -43,7 +43,8 @@ RDP acceleration state is bound to the current `gnome-remote-desktop.service` in
 
 The default proposal is one report per hour, with manual runs whenever a change needs a before/after check.
 
-- The dashboard reads the latest 30 days and offers 24-hour, 7-day, and 30-day views.
+- The server reads 60 days so equal-window comparisons have a prior period; the dashboard shows
+  24-hour, 7-day, and 30-day views.
 - Every successful ingest deletes samples older than 90 days, so retention needs no second scheduled job.
 - Retry posts with the same host and timestamp update one sample instead of duplicating it, and an older delayed report cannot replace the latest status row.
 - The current exact-head live report measured 2,961 bytes as compact JSON and 3,747–3,748 bytes pretty-printed. Ninety days at hourly frequency is 2,160 rows and roughly 6.1 MiB of raw compact payload; a conservative database budget remains under 16 MiB after allowing for JSONB, scalar columns, row overhead, and the index.
@@ -90,7 +91,8 @@ CPU/memory peaks, disk/network throughput, PSI, load, and the iGPU clock are dis
 
 ## Website configuration
 
-Apply `drizzle/0016_machine_health.sql` through the normal Scrapbook migration process, then set:
+Apply `drizzle/0016_machine_health.sql` and `drizzle/0017_machine_health_hygiene.sql` in order
+through the normal Scrapbook migration process, then set:
 
 ```text
 MACHINE_HEALTH_INGEST_SECRET=<long random ingest-only secret>
@@ -110,6 +112,8 @@ POST /api/machine-health/ingest
 Production `/machine-health` verifies its signed, seven-day HttpOnly cookie before reading the database. Invalid or unconfigured access returns the ordinary not-found page. The access form sends the token in a POST body rather than a query string.
 
 Ingestion accepts reports no more than 48 hours old and no more than 10 minutes in the future. The collector refuses to send its credential over plain HTTP except to loopback during local testing.
+It refuses every redirect, so a response cannot forward the ingest bearer token to another origin
+or downgrade an HTTPS request to HTTP.
 
 ## Manual collector check
 
@@ -119,7 +123,10 @@ From the Scrapbook checkout on Big Red:
 scripts/big-red-health-report.py --print-only
 ```
 
-This performs read-only local checks, prints the exact sanitized payload, and never sends it. With neither reporting environment variable set, the default invocation also stays local.
+This performs read-only local checks, prints the exact sanitized payload, and never sends it. With
+neither reporting environment variable set, the default invocation also prints locally and sends
+nothing. A configured successful send is quiet, so the hourly service does not copy every snapshot
+into the user journal.
 
 The route section expects the authoritative helper at `~/Projects/leo-workspace/tools/codex_route_job.py`. If it is absent, fails, or changes its aggregate contract, the report marks route activity unavailable. Restoring that exact helper restores the section; no dashboard-side ownership fallback exists.
 

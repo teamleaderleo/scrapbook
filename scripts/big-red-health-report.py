@@ -18,6 +18,7 @@ import shutil
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -58,6 +59,19 @@ RELIABILITY_EVENT_LIMIT = 4_096
 GRD_ACCELERATION_EVENT_LIMIT = 512
 SYSTEMD_PROCESS_EXIT_MESSAGE_ID = "98e322203f7a4ed290d09fe03c09fe15"
 SYSTEMD_RESTART_MESSAGE_ID = "5eb03494b6584870a536b337290809b3"
+
+
+class RejectRedirects(urllib.request.HTTPRedirectHandler):
+    def redirect_request(
+        self,
+        request: urllib.request.Request,
+        file_pointer: Any,
+        code: int,
+        message: str,
+        headers: Any,
+        new_url: str,
+    ) -> None:
+        return None
 
 
 def run(*command: str) -> tuple[int, str]:
@@ -1484,9 +1498,18 @@ def post_report(report: dict[str, Any], endpoint: str, token: str) -> None:
         },
         method="POST",
     )
-    with urllib.request.urlopen(request, timeout=15) as response:
-        if response.status // 100 != 2:
-            raise RuntimeError(f"Health endpoint returned HTTP {response.status}")
+    opener = urllib.request.build_opener(RejectRedirects())
+    try:
+        with opener.open(request, timeout=15) as response:
+            if response.status // 100 != 2:
+                raise RuntimeError(
+                    f"Health endpoint returned HTTP {response.status}"
+                )
+    except urllib.error.HTTPError as exc:
+        exc.close()
+        if 300 <= exc.code < 400:
+            raise RuntimeError("Health endpoint redirects are refused") from None
+        raise RuntimeError(f"Health endpoint returned HTTP {exc.code}") from None
 
 
 def main() -> int:
@@ -1496,13 +1519,14 @@ def main() -> int:
     )
     args = parser.parse_args()
     report = build_report()
-    print(json.dumps(report, indent=2, sort_keys=True))
 
     if args.print_only:
+        print(json.dumps(report, indent=2, sort_keys=True))
         return 0
     endpoint = os.environ.get("MACHINE_HEALTH_INGEST_URL", "").strip()
     token = os.environ.get("MACHINE_HEALTH_INGEST_SECRET", "").strip()
     if not endpoint and not token:
+        print(json.dumps(report, indent=2, sort_keys=True))
         return 0
     if not endpoint or not token:
         raise SystemExit(

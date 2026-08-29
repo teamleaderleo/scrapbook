@@ -3,11 +3,15 @@
 
 from __future__ import annotations
 
-import importlib.util
+import contextlib
 import datetime as dt
+import http.server
+import importlib.util
+import io
 import json
 import os
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -729,6 +733,130 @@ class BuildStateTest(unittest.TestCase):
 
         self.assertEqual(state["source"], "unavailable")
         self.assertIsNone(state["total_gib"])
+
+
+class ReportDeliveryTest(unittest.TestCase):
+    def test_cross_origin_redirect_does_not_receive_bearer_token(self) -> None:
+        destination_authorization: list[str | None] = []
+        source_authorization: list[str | None] = []
+
+        class Destination(http.server.BaseHTTPRequestHandler):
+            def do_POST(self) -> None:
+                destination_authorization.append(self.headers.get("Authorization"))
+                self.send_response(204)
+                self.end_headers()
+
+            def log_message(self, _format: str, *_args: object) -> None:
+                return
+
+        destination = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Destination)
+        destination_url = f"http://127.0.0.1:{destination.server_port}/capture"
+
+        class Redirect(http.server.BaseHTTPRequestHandler):
+            def do_POST(self) -> None:
+                source_authorization.append(self.headers.get("Authorization"))
+                self.send_response(302)
+                self.send_header("Location", destination_url)
+                self.end_headers()
+
+            def log_message(self, _format: str, *_args: object) -> None:
+                return
+
+        source = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Redirect)
+        threads = [
+            threading.Thread(target=destination.serve_forever, daemon=True),
+            threading.Thread(target=source.serve_forever, daemon=True),
+        ]
+        for thread in threads:
+            thread.start()
+        try:
+            with self.assertRaisesRegex(RuntimeError, "redirects are refused"):
+                REPORT.post_report(
+                    {"host": "big-red"},
+                    f"http://127.0.0.1:{source.server_port}/ingest",
+                    "private-ingest-token",
+                )
+        finally:
+            source.shutdown()
+            destination.shutdown()
+            source.server_close()
+            destination.server_close()
+            for thread in threads:
+                thread.join(timeout=2)
+
+        self.assertEqual(source_authorization, ["Bearer private-ingest-token"])
+        self.assertEqual(destination_authorization, [])
+
+    def test_https_downgrade_redirect_is_rejected_by_the_same_handler(self) -> None:
+        request = REPORT.urllib.request.Request("https://example.invalid/ingest")
+        self.assertIsNone(
+            REPORT.RejectRedirects().redirect_request(
+                request,
+                None,
+                302,
+                "Found",
+                {},
+                "http://example.invalid/capture",
+            )
+        )
+
+    def test_configured_send_is_quiet(self) -> None:
+        report = {"host": "big-red"}
+        output = io.StringIO()
+        with (
+            patch.object(REPORT, "build_report", return_value=report),
+            patch.object(REPORT, "post_report") as post,
+            patch.object(REPORT.sys, "argv", ["big-red-health-report.py"]),
+            patch.dict(
+                REPORT.os.environ,
+                {
+                    "MACHINE_HEALTH_INGEST_URL": "https://example.invalid/ingest",
+                    "MACHINE_HEALTH_INGEST_SECRET": "private-ingest-token",
+                },
+                clear=True,
+            ),
+            contextlib.redirect_stdout(output),
+        ):
+            self.assertEqual(REPORT.main(), 0)
+
+        self.assertEqual(output.getvalue(), "")
+        post.assert_called_once_with(
+            report,
+            "https://example.invalid/ingest",
+            "private-ingest-token",
+        )
+
+    def test_print_only_never_posts(self) -> None:
+        output = io.StringIO()
+        with (
+            patch.object(REPORT, "build_report", return_value={"host": "big-red"}),
+            patch.object(REPORT, "post_report") as post,
+            patch.object(
+                REPORT.sys,
+                "argv",
+                ["big-red-health-report.py", "--print-only"],
+            ),
+            patch.dict(REPORT.os.environ, {}, clear=True),
+            contextlib.redirect_stdout(output),
+        ):
+            self.assertEqual(REPORT.main(), 0)
+
+        self.assertIn('"host": "big-red"', output.getvalue())
+        post.assert_not_called()
+
+    def test_unconfigured_default_prints_locally(self) -> None:
+        output = io.StringIO()
+        with (
+            patch.object(REPORT, "build_report", return_value={"host": "big-red"}),
+            patch.object(REPORT, "post_report") as post,
+            patch.object(REPORT.sys, "argv", ["big-red-health-report.py"]),
+            patch.dict(REPORT.os.environ, {}, clear=True),
+            contextlib.redirect_stdout(output),
+        ):
+            self.assertEqual(REPORT.main(), 0)
+
+        self.assertIn('"host": "big-red"', output.getvalue())
+        post.assert_not_called()
 
 
 if __name__ == "__main__":
