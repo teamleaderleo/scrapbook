@@ -72,6 +72,30 @@ export const machineHealthPayloadSchema = z.object({
       active_routes: nonnegativeInteger,
     })
     .optional(),
+  route_activity: z
+    .discriminatedUnion('source', [
+      z.object({
+        source: z.literal('codex-route-leases-v2'),
+        active_routes: nonnegativeInteger,
+        active_jobs: nonnegativeInteger,
+        tagged_processes: nonnegativeInteger,
+        tagged_rss_bytes: nonnegativeInteger,
+        residue_jobs: nonnegativeInteger,
+        unknown_routes: nonnegativeInteger,
+        unknown_jobs: nonnegativeInteger,
+      }),
+      z.object({
+        source: z.literal('unavailable'),
+        active_routes: z.null(),
+        active_jobs: z.null(),
+        tagged_processes: z.null(),
+        tagged_rss_bytes: z.null(),
+        residue_jobs: z.null(),
+        unknown_routes: z.null(),
+        unknown_jobs: z.null(),
+      }),
+    ])
+    .optional(),
   services: z.object({
     failed_system_units: nonnegativeInteger,
     failed_user_units: nonnegativeInteger,
@@ -162,6 +186,12 @@ export type MachineHealthSample = {
   codexReasoningOutputTokens: number | null;
   codexModelCalls: number | null;
   codexActiveRoutes: number | null;
+  routeActiveRoutes: number | null;
+  routeActiveJobs: number | null;
+  routeTaggedProcesses: number | null;
+  routeTaggedRssBytes: number | null;
+  routeResidueJobs: number | null;
+  routeUnknownCount: number | null;
   buildStateGib: number | null;
   buildTargetCount: number | null;
   activeBuildProcesses: number | null;
@@ -231,6 +261,24 @@ export function evaluateMachineHealth(payload: MachineHealthPayload) {
     reasons.push(
       `${payload.hygiene.unexpected_dev_listeners} unexpected development listener${payload.hygiene.unexpected_dev_listeners === 1 ? '' : 's'} detected.`
     );
+  if (payload.route_activity?.source === 'unavailable')
+    reasons.push('Agent route status is unavailable.');
+  if (
+    payload.route_activity?.source === 'codex-route-leases-v2' &&
+    (payload.route_activity.residue_jobs ?? 0) > 0
+  )
+    reasons.push(
+      `${payload.route_activity.residue_jobs} agent job${payload.route_activity.residue_jobs === 1 ? '' : 's'} left process residue.`
+    );
+  if (payload.route_activity?.source === 'codex-route-leases-v2') {
+    const unknownRouteItems =
+      (payload.route_activity.unknown_routes ?? 0) +
+      (payload.route_activity.unknown_jobs ?? 0);
+    if (unknownRouteItems > 0)
+      reasons.push(
+        `${unknownRouteItems} agent route item${unknownRouteItems === 1 ? ' needs' : 's need'} ownership inspection.`
+      );
+  }
   if (
     payload.reliability?.source === 'journal-24h' &&
     payload.reliability.crash_exits > 0
@@ -487,6 +535,11 @@ export async function readMachineHealth(
           parsedSample.data.build_state?.source === 'filesystem'
             ? parsedSample.data.build_state
             : null;
+        const routeActivity =
+          parsedSample.success &&
+          parsedSample.data.route_activity?.source === 'codex-route-leases-v2'
+            ? parsedSample.data.route_activity
+            : null;
         return {
           checkedAt: new Date(row.checked_at).toISOString(),
           cpuUsedPercent: toNumber(row.cpu_used_percent),
@@ -531,6 +584,15 @@ export async function readMachineHealth(
             codexUsage?.reasoning_output_tokens ?? null,
           codexModelCalls: codexUsage?.model_calls ?? null,
           codexActiveRoutes: codexUsage?.active_routes ?? null,
+          routeActiveRoutes: routeActivity?.active_routes ?? null,
+          routeActiveJobs: routeActivity?.active_jobs ?? null,
+          routeTaggedProcesses: routeActivity?.tagged_processes ?? null,
+          routeTaggedRssBytes: routeActivity?.tagged_rss_bytes ?? null,
+          routeResidueJobs: routeActivity?.residue_jobs ?? null,
+          routeUnknownCount: routeActivity
+            ? (routeActivity.unknown_routes ?? 0) +
+              (routeActivity.unknown_jobs ?? 0)
+            : null,
           buildStateGib: buildState?.total_gib ?? null,
           buildTargetCount: buildState?.target_count ?? null,
           activeBuildProcesses: buildState?.active_build_processes ?? null,

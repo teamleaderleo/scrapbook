@@ -30,6 +30,7 @@ type ActivityBin = {
   browserRoots: number | null;
   browserRssMib: number | null;
   codexWorkers: number | null;
+  routeTaggedProcesses: number | null;
 };
 
 const MIB = 1_024 ** 2;
@@ -157,6 +158,14 @@ export function buildActivityBins(
         included.length === 0
           ? null
           : Math.max(...included.map(sample => sample.codexWorkers)),
+      routeTaggedProcesses:
+        included.length === 0
+          ? null
+          : included.some(sample => sample.routeTaggedProcesses !== null)
+            ? Math.max(
+                ...included.map(sample => sample.routeTaggedProcesses ?? 0)
+              )
+            : null,
     };
   });
 }
@@ -171,6 +180,8 @@ function formatValue(value: number | null, unit: string) {
       notation: 'compact',
       maximumFractionDigits: 1,
     }).format(value);
+  if (unit === 'processes')
+    return `${Math.round(value)} ${Math.round(value) === 1 ? 'process' : 'processes'}`;
   return `${value.toFixed(value < 10 ? 2 : 1)} ${unit}`;
 }
 
@@ -325,6 +336,10 @@ export function MachineHealthActivity({
   const observedBins = bins.filter(bin => bin.sampleCount > 0).length;
   const browserHigh = Math.max(0, ...bins.map(bin => bin.browserRoots ?? 0));
   const workerHigh = Math.max(0, ...bins.map(bin => bin.codexWorkers ?? 0));
+  const taggedProcessHigh = Math.max(
+    0,
+    ...bins.map(bin => bin.routeTaggedProcesses ?? 0)
+  );
   const fallbackCount = bins.reduce(
     (total, bin) => total + bin.fallbackCount,
     0
@@ -423,6 +438,14 @@ export function MachineHealthActivity({
           unit="MiB"
           summary="maximum"
         />
+        <ObservationChart
+          label="Agent processes high"
+          bins={bins}
+          previousBins={previousBins}
+          value={bin => bin.routeTaggedProcesses}
+          unit="processes"
+          summary="maximum"
+        />
       </div>
 
       <CodexActivity
@@ -449,6 +472,7 @@ export function MachineHealthActivity({
         </span>
         <span>Browser-root high {browserHigh}</span>
         <span>Codex-worker high {workerHigh}</span>
+        <span>Tagged-process high {taggedProcessHigh}</span>
         <span>Empty bins stay visible</span>
       </div>
     </section>

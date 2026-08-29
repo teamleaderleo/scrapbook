@@ -15,6 +15,10 @@ describe('machine health contract', () => {
         ...healthyMachineReport.hygiene,
         process_arguments: ['must-not-survive'],
       },
+      route_activity: {
+        ...healthyMachineReport.route_activity,
+        route_id: 'must-not-survive',
+      },
     });
 
     expect(parsed).toEqual(healthyMachineReport);
@@ -40,6 +44,27 @@ describe('machine health contract', () => {
     const parsed = machineHealthPayloadSchema.parse(olderReport);
 
     expect(parsed.reliability).toBeUndefined();
+  });
+
+  it('accepts a snapshot from before route ownership was added', () => {
+    const { route_activity: _routeActivity, ...olderReport } =
+      healthyMachineReport;
+    const parsed = machineHealthPayloadSchema.parse(olderReport);
+
+    expect(parsed.route_activity).toBeUndefined();
+  });
+
+  it('does not accept numeric route counts from an unavailable source', () => {
+    const unavailableWithCounts: unknown = {
+      ...healthyMachineReport,
+      route_activity: {
+        ...healthyMachineReport.route_activity,
+        source: 'unavailable',
+      },
+    };
+    expect(
+      machineHealthPayloadSchema.safeParse(unavailableWithCounts).success
+    ).toBe(false);
   });
 
   it('rejects a host name or payload shape outside the single-machine contract', () => {
@@ -95,6 +120,27 @@ describe('machine health contract', () => {
     ).toEqual({
       state: 'watch',
       reasons: ['2 service crashes recorded in the last 24 hours.'],
+    });
+    expect(
+      evaluateMachineHealth({
+        ...healthyMachineReport,
+        route_activity: {
+          source: 'codex-route-leases-v2',
+          active_routes: 2,
+          active_jobs: 3,
+          tagged_processes: 17,
+          tagged_rss_bytes: 536_870_912,
+          residue_jobs: 1,
+          unknown_routes: 1,
+          unknown_jobs: 0,
+        },
+      })
+    ).toEqual({
+      state: 'watch',
+      reasons: [
+        '1 agent job left process residue.',
+        '1 agent route item needs ownership inspection.',
+      ],
     });
   });
 });
