@@ -43,6 +43,7 @@ function sample(
     routeActiveJobs: null,
     routeTaggedProcesses: null,
     routeTaggedRssBytes: null,
+    routeTaggedMemoryBytes: null,
     routeResidueJobs: null,
     routeUnknownCount: null,
     buildStateGib: null,
@@ -155,5 +156,23 @@ describe('machine health activity bins', () => {
 
     expect(bins.at(-1)?.routeTaggedProcesses).toBe(17);
     expect(bins.at(-2)?.routeTaggedProcesses).toBeNull();
+  });
+
+  it('keeps the highest current tagged cgroup memory in each bin', () => {
+    const bins = buildActivityBins(
+      [
+        sample('2026-08-29T06:05:00.000Z', {
+          routeTaggedMemoryBytes: 128 * 1_024 ** 2,
+        }),
+        sample('2026-08-29T06:25:00.000Z', {
+          routeTaggedMemoryBytes: 384 * 1_024 ** 2,
+        }),
+      ],
+      '24h',
+      now
+    );
+
+    expect(bins.at(-1)?.routeTaggedMemoryMib).toBe(384);
+    expect(bins.at(-2)?.routeTaggedMemoryMib).toBeNull();
   });
 });

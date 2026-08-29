@@ -7,6 +7,42 @@ const percent = z.number().finite().min(0).max(100);
 const nonnegative = z.number().finite().min(0);
 const nullableNonnegative = nonnegative.nullable();
 const nonnegativeInteger = z.number().int().min(0);
+const routeResourceFields = {
+  tagged_resource_jobs: nonnegativeInteger.nullable().optional(),
+  tagged_memory_observed_jobs: nonnegativeInteger.nullable().optional(),
+  tagged_cpu_observed_jobs: nonnegativeInteger.nullable().optional(),
+  tagged_io_observed_jobs: nonnegativeInteger.nullable().optional(),
+  tagged_pressure_observed_jobs: nonnegativeInteger.nullable().optional(),
+  tagged_memory_current_bytes: nonnegativeInteger.nullable().optional(),
+  largest_tagged_job_memory_peak_bytes: nonnegativeInteger
+    .nullable()
+    .optional(),
+  tagged_cpu_usage_usec: nonnegativeInteger.nullable().optional(),
+  tagged_io_read_bytes: nonnegativeInteger.nullable().optional(),
+  tagged_io_write_bytes: nonnegativeInteger.nullable().optional(),
+  tagged_cpu_pressure_some_usec: nonnegativeInteger.nullable().optional(),
+  tagged_memory_pressure_some_usec: nonnegativeInteger.nullable().optional(),
+  tagged_memory_pressure_full_usec: nonnegativeInteger.nullable().optional(),
+  tagged_io_pressure_some_usec: nonnegativeInteger.nullable().optional(),
+  tagged_io_pressure_full_usec: nonnegativeInteger.nullable().optional(),
+};
+const unavailableRouteResourceFields = {
+  tagged_resource_jobs: z.null().optional(),
+  tagged_memory_observed_jobs: z.null().optional(),
+  tagged_cpu_observed_jobs: z.null().optional(),
+  tagged_io_observed_jobs: z.null().optional(),
+  tagged_pressure_observed_jobs: z.null().optional(),
+  tagged_memory_current_bytes: z.null().optional(),
+  largest_tagged_job_memory_peak_bytes: z.null().optional(),
+  tagged_cpu_usage_usec: z.null().optional(),
+  tagged_io_read_bytes: z.null().optional(),
+  tagged_io_write_bytes: z.null().optional(),
+  tagged_cpu_pressure_some_usec: z.null().optional(),
+  tagged_memory_pressure_some_usec: z.null().optional(),
+  tagged_memory_pressure_full_usec: z.null().optional(),
+  tagged_io_pressure_some_usec: z.null().optional(),
+  tagged_io_pressure_full_usec: z.null().optional(),
+};
 const serviceState = z.enum(['active', 'inactive', 'missing', 'unknown']);
 const idleSleepAction = z.enum([
   'nothing',
@@ -83,6 +119,7 @@ export const machineHealthPayloadSchema = z.object({
         residue_jobs: nonnegativeInteger,
         unknown_routes: nonnegativeInteger,
         unknown_jobs: nonnegativeInteger,
+        ...routeResourceFields,
       }),
       z.object({
         source: z.literal('unavailable'),
@@ -93,6 +130,7 @@ export const machineHealthPayloadSchema = z.object({
         residue_jobs: z.null(),
         unknown_routes: z.null(),
         unknown_jobs: z.null(),
+        ...unavailableRouteResourceFields,
       }),
     ])
     .optional(),
@@ -221,6 +259,7 @@ export type MachineHealthSample = {
   routeActiveJobs: number | null;
   routeTaggedProcesses: number | null;
   routeTaggedRssBytes: number | null;
+  routeTaggedMemoryBytes: number | null;
   routeResidueJobs: number | null;
   routeUnknownCount: number | null;
   buildStateGib: number | null;
@@ -619,6 +658,8 @@ export async function readMachineHealth(
           routeActiveJobs: routeActivity?.active_jobs ?? null,
           routeTaggedProcesses: routeActivity?.tagged_processes ?? null,
           routeTaggedRssBytes: routeActivity?.tagged_rss_bytes ?? null,
+          routeTaggedMemoryBytes:
+            routeActivity?.tagged_memory_current_bytes ?? null,
           routeResidueJobs: routeActivity?.residue_jobs ?? null,
           routeUnknownCount: routeActivity
             ? (routeActivity.unknown_routes ?? 0) +

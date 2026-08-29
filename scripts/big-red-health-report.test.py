@@ -178,6 +178,21 @@ class RouteActivityTest(unittest.TestCase):
             "unknown_jobs": 1,
             "tagged_processes": 17,
             "tagged_rss_bytes": 512 * REPORT.MIB,
+            "tagged_resource_jobs": 3,
+            "tagged_memory_observed_jobs": 3,
+            "tagged_cpu_observed_jobs": 3,
+            "tagged_io_observed_jobs": 0,
+            "tagged_pressure_observed_jobs": 3,
+            "tagged_memory_current_bytes": 384 * REPORT.MIB,
+            "largest_tagged_job_memory_peak_bytes": 192 * REPORT.MIB,
+            "tagged_cpu_usage_usec": 2_500_000,
+            "tagged_io_read_bytes": None,
+            "tagged_io_write_bytes": None,
+            "tagged_cpu_pressure_some_usec": 198,
+            "tagged_memory_pressure_some_usec": 0,
+            "tagged_memory_pressure_full_usec": 0,
+            "tagged_io_pressure_some_usec": 0,
+            "tagged_io_pressure_full_usec": 0,
             "route_id": "must-not-escape",
         }
         with patch.object(REPORT, "run", return_value=(0, json.dumps(status))):
@@ -188,6 +203,9 @@ class RouteActivityTest(unittest.TestCase):
         self.assertEqual(activity["active_jobs"], 3)
         self.assertEqual(activity["residue_jobs"], 1)
         self.assertEqual(activity["tagged_processes"], 17)
+        self.assertEqual(activity["tagged_memory_current_bytes"], 384 * REPORT.MIB)
+        self.assertEqual(activity["tagged_cpu_usage_usec"], 2_500_000)
+        self.assertIsNone(activity["tagged_io_read_bytes"])
         self.assertNotIn("route_id", activity)
         self.assertNotIn("must-not-escape", json.dumps(activity))
 
@@ -218,6 +236,28 @@ class RouteActivityTest(unittest.TestCase):
                     activity = REPORT.route_activity(Path("/private/helper"))
                 self.assertEqual(activity["source"], "unavailable")
                 self.assertIsNone(activity["active_routes"])
+
+    def test_withholds_inconsistent_resource_telemetry_only(self) -> None:
+        status = {
+            "source": "codex-route-leases-v2",
+            "active_routes": 2,
+            "active_jobs": 3,
+            "complete_residue_jobs": 0,
+            "unknown_routes": 0,
+            "unknown_jobs": 0,
+            "tagged_processes": 17,
+            "tagged_rss_bytes": 512 * REPORT.MIB,
+            "tagged_resource_jobs": 1,
+            "tagged_memory_observed_jobs": 2,
+            "tagged_memory_current_bytes": 384 * REPORT.MIB,
+        }
+        with patch.object(REPORT, "run", return_value=(0, json.dumps(status))):
+            activity = REPORT.route_activity(Path("/private/helper"))
+
+        self.assertEqual(activity["source"], "codex-route-leases-v2")
+        self.assertEqual(activity["active_jobs"], 3)
+        self.assertIsNone(activity["tagged_resource_jobs"])
+        self.assertIsNone(activity["tagged_memory_current_bytes"])
 
 
 class ProcessCoverageTest(unittest.TestCase):

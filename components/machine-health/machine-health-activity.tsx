@@ -31,6 +31,7 @@ type ActivityBin = {
   browserRssMib: number | null;
   codexWorkers: number | null;
   routeTaggedProcesses: number | null;
+  routeTaggedMemoryMib: number | null;
 };
 
 const MIB = 1_024 ** 2;
@@ -164,6 +165,16 @@ export function buildActivityBins(
           : included.some(sample => sample.routeTaggedProcesses !== null)
             ? Math.max(
                 ...included.map(sample => sample.routeTaggedProcesses ?? 0)
+              )
+            : null,
+      routeTaggedMemoryMib:
+        included.length === 0
+          ? null
+          : included.some(sample => sample.routeTaggedMemoryBytes !== null)
+            ? Math.max(
+                ...included.map(
+                  sample => (sample.routeTaggedMemoryBytes ?? 0) / MIB
+                )
               )
             : null,
     };
@@ -439,11 +450,11 @@ export function MachineHealthActivity({
           summary="maximum"
         />
         <ObservationChart
-          label="Agent processes high"
+          label="Agent memory high"
           bins={bins}
           previousBins={previousBins}
-          value={bin => bin.routeTaggedProcesses}
-          unit="processes"
+          value={bin => bin.routeTaggedMemoryMib}
+          unit="MiB"
           summary="maximum"
         />
       </div>

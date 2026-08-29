@@ -48,6 +48,7 @@ const samples = Array.from({ length: 4 }, (_, index) => ({
   routeActiveJobs: 3,
   routeTaggedProcesses: 17,
   routeTaggedRssBytes: 536_870_912,
+  routeTaggedMemoryBytes: 402_653_184,
   routeResidueJobs: 0,
   routeUnknownCount: 0,
   buildStateGib: index === 0 ? 49.2 : 51.65,
@@ -85,7 +86,12 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Agent routes');
     expect(html).toContain('0/18 scoped · 3 roots · 129 MiB · partial');
     expect(html).toContain('3 jobs · 17 proc · 512 MiB');
-    expect(html).toContain('Agent processes high');
+    expect(html).toContain(
+      '384 MiB memory · 192 MiB job peak · 2.5 s CPU · I/O —'
+    );
+    expect(html).toContain('I/O 0/3');
+    expect(html).toContain('Agent memory high');
+    expect(html).toContain('Tagged-process high');
     expect(html).toContain('Crashes · 24h: 0');
     expect(html).toContain('Auto restarts · 24h: 0');
     expect(html).not.toContain('private_ip');
@@ -108,6 +114,21 @@ describe('machine health dashboard', () => {
               residue_jobs: 1,
               unknown_routes: 0,
               unknown_jobs: 2,
+              tagged_resource_jobs: 3,
+              tagged_memory_observed_jobs: 3,
+              tagged_cpu_observed_jobs: 3,
+              tagged_io_observed_jobs: 0,
+              tagged_pressure_observed_jobs: 3,
+              tagged_memory_current_bytes: 402_653_184,
+              largest_tagged_job_memory_peak_bytes: 201_326_592,
+              tagged_cpu_usage_usec: 2_500_000,
+              tagged_io_read_bytes: null,
+              tagged_io_write_bytes: null,
+              tagged_cpu_pressure_some_usec: 198,
+              tagged_memory_pressure_some_usec: 0,
+              tagged_memory_pressure_full_usec: 0,
+              tagged_io_pressure_some_usec: 0,
+              tagged_io_pressure_full_usec: 0,
             },
           },
         },

@@ -458,6 +458,23 @@ def codex_usage_window(
 def route_activity(
     helper: Path = CODEX_ROUTE_STATUS_HELPER,
 ) -> dict[str, Any]:
+    resource_fields = (
+        "tagged_resource_jobs",
+        "tagged_memory_observed_jobs",
+        "tagged_cpu_observed_jobs",
+        "tagged_io_observed_jobs",
+        "tagged_pressure_observed_jobs",
+        "tagged_memory_current_bytes",
+        "largest_tagged_job_memory_peak_bytes",
+        "tagged_cpu_usage_usec",
+        "tagged_io_read_bytes",
+        "tagged_io_write_bytes",
+        "tagged_cpu_pressure_some_usec",
+        "tagged_memory_pressure_some_usec",
+        "tagged_memory_pressure_full_usec",
+        "tagged_io_pressure_some_usec",
+        "tagged_io_pressure_full_usec",
+    )
     unavailable = {
         "source": "unavailable",
         "active_routes": None,
@@ -467,6 +484,7 @@ def route_activity(
         "residue_jobs": None,
         "unknown_routes": None,
         "unknown_jobs": None,
+        **dict.fromkeys(resource_fields),
     }
     code, output = run(sys.executable, str(helper), "status")
     if code != 0 or not output:
@@ -487,12 +505,69 @@ def route_activity(
     }
     if not isinstance(status, dict) or status.get("source") != "codex-route-leases-v2":
         return unavailable
-    values: dict[str, int] = {}
+    values: dict[str, int | None] = {}
     for public_name, status_name in fields.items():
         value = status.get(status_name)
         if isinstance(value, bool) or not isinstance(value, int) or value < 0:
             return unavailable
         values[public_name] = value
+    for field in resource_fields:
+        value = status.get(field)
+        values[field] = (
+            value
+            if value is None
+            or (
+                not isinstance(value, bool)
+                and isinstance(value, int)
+                and value >= 0
+            )
+            else None
+        )
+    resource_jobs = values["tagged_resource_jobs"]
+    observed_fields = (
+        "tagged_memory_observed_jobs",
+        "tagged_cpu_observed_jobs",
+        "tagged_io_observed_jobs",
+        "tagged_pressure_observed_jobs",
+    )
+    if resource_jobs is None or any(
+        values[field] is not None and values[field] > resource_jobs
+        for field in observed_fields
+    ):
+        for field in resource_fields:
+            values[field] = None
+    else:
+        families = (
+            (
+                "tagged_memory_observed_jobs",
+                (
+                    "tagged_memory_current_bytes",
+                    "largest_tagged_job_memory_peak_bytes",
+                ),
+            ),
+            ("tagged_cpu_observed_jobs", ("tagged_cpu_usage_usec",)),
+            (
+                "tagged_io_observed_jobs",
+                ("tagged_io_read_bytes", "tagged_io_write_bytes"),
+            ),
+            (
+                "tagged_pressure_observed_jobs",
+                (
+                    "tagged_cpu_pressure_some_usec",
+                    "tagged_memory_pressure_some_usec",
+                    "tagged_memory_pressure_full_usec",
+                    "tagged_io_pressure_some_usec",
+                    "tagged_io_pressure_full_usec",
+                ),
+            ),
+        )
+        for observed_field, metric_fields in families:
+            observed_jobs = values[observed_field]
+            if observed_jobs != resource_jobs:
+                for field in metric_fields:
+                    values[field] = None
+            elif any(values[field] is None for field in metric_fields):
+                values[observed_field] = None
     return {"source": "codex-route-leases-v2", **values}
 
 

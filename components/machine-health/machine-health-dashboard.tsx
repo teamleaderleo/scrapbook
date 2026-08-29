@@ -36,6 +36,14 @@ function formatMemoryDelta(bytes: number) {
   return `${sign}${formatMemory(Math.abs(bytes))} / 7d`;
 }
 
+function formatCpuTime(microseconds: number) {
+  if (microseconds < 1_000_000) return `${Math.round(microseconds / 1_000)} ms`;
+  const seconds = microseconds / 1_000_000;
+  if (seconds < 60) return `${seconds.toFixed(seconds < 10 ? 1 : 0)} s`;
+  const minutes = seconds / 60;
+  return `${minutes.toFixed(minutes < 10 ? 1 : 0)} min`;
+}
+
 function Metric({
   label,
   value,
@@ -154,7 +162,7 @@ export function MachineHealthDashboard({
     ? [
         `${routeActivity.active_jobs ?? 0} jobs`,
         `${routeActivity.tagged_processes ?? 0} proc`,
-        formatMemory(routeActivity.tagged_rss_bytes ?? 0),
+        `${formatMemory(routeActivity.tagged_rss_bytes ?? 0)} RSS`,
         (routeActivity.residue_jobs ?? 0) > 0
           ? `${routeActivity.residue_jobs} residue`
           : null,
@@ -163,6 +171,50 @@ export function MachineHealthDashboard({
         .filter(Boolean)
         .join(' · ')
     : 'unavailable';
+  const routeResourceJobs = routeActivity?.tagged_resource_jobs ?? null;
+  const routeResourceNote =
+    routeActivity && routeResourceJobs !== null && routeResourceJobs > 0
+      ? [
+          routeActivity.tagged_memory_current_bytes === null ||
+          routeActivity.tagged_memory_current_bytes === undefined
+            ? null
+            : `${formatMemory(routeActivity.tagged_memory_current_bytes)} memory`,
+          routeActivity.largest_tagged_job_memory_peak_bytes === null ||
+          routeActivity.largest_tagged_job_memory_peak_bytes === undefined
+            ? null
+            : `${formatMemory(routeActivity.largest_tagged_job_memory_peak_bytes)} job peak`,
+          routeActivity.tagged_cpu_usage_usec === null ||
+          routeActivity.tagged_cpu_usage_usec === undefined
+            ? null
+            : `${formatCpuTime(routeActivity.tagged_cpu_usage_usec)} CPU`,
+          routeActivity.tagged_io_read_bytes === null ||
+          routeActivity.tagged_io_read_bytes === undefined ||
+          routeActivity.tagged_io_write_bytes === null ||
+          routeActivity.tagged_io_write_bytes === undefined
+            ? 'I/O —'
+            : `${formatMemory(
+                routeActivity.tagged_io_read_bytes +
+                  routeActivity.tagged_io_write_bytes
+              )} I/O`,
+        ]
+          .filter(Boolean)
+          .join(' · ')
+      : null;
+  const routeCoverageNote =
+    routeActivity && routeResourceJobs !== null && routeResourceJobs > 0
+      ? [
+          ['memory', routeActivity.tagged_memory_observed_jobs],
+          ['CPU', routeActivity.tagged_cpu_observed_jobs],
+          ['I/O', routeActivity.tagged_io_observed_jobs],
+          ['pressure', routeActivity.tagged_pressure_observed_jobs],
+        ]
+          .filter(([, observed]) => observed !== routeResourceJobs)
+          .map(
+            ([label, observed]) =>
+              `${label} ${observed ?? '—'}/${routeResourceJobs}`
+          )
+          .join(' · ')
+      : '';
   const buildStateBaseline = [...samples]
     .reverse()
     .find(
@@ -378,6 +430,16 @@ export function MachineHealthDashboard({
               <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
                 {routeNote}
               </dd>
+              {routeResourceNote ? (
+                <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
+                  {routeResourceNote}
+                </dd>
+              ) : null}
+              {routeCoverageNote ? (
+                <dd className="mt-1 text-[0.68rem] tabular-nums text-amber-800 dark:text-amber-200">
+                  {routeCoverageNote}
+                </dd>
+              ) : null}
             </div>
             <div>
               <dt className="opacity-55 text-xs">Dev listeners</dt>
