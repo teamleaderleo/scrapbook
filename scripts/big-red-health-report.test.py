@@ -170,6 +170,58 @@ class CodexUsageTest(unittest.TestCase):
         self.assertEqual(usage["source"], "unavailable")
         self.assertEqual(usage["model_calls"], 0)
 
+    def test_excludes_history_replayed_at_fork_start(self) -> None:
+        now = dt.datetime(2026, 8, 29, 7, 23, tzinfo=dt.timezone.utc)
+        usage = {
+            "input_tokens": 100,
+            "cached_input_tokens": 80,
+            "cache_write_input_tokens": 5,
+            "output_tokens": 20,
+            "reasoning_output_tokens": 7,
+            "total_tokens": 120,
+        }
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            directory = Path(temporary_directory)
+            session = directory / "forked-route.jsonl"
+            records = [
+                {
+                    "timestamp": "2026-08-29T06:15:00.000Z",
+                    "payload": {"forked_from_id": "parent-route"},
+                },
+                {
+                    "timestamp": "2026-08-29T06:15:00.001Z",
+                    "payload": {
+                        "type": "token_count",
+                        "info": {"last_token_usage": usage},
+                    },
+                },
+                {
+                    "timestamp": "2026-08-29T06:15:00.002Z",
+                    "payload": {
+                        "type": "token_count",
+                        "info": {"last_token_usage": usage},
+                    },
+                },
+                {
+                    "timestamp": "2026-08-29T06:15:08Z",
+                    "payload": {
+                        "type": "token_count",
+                        "info": {"last_token_usage": usage},
+                    },
+                },
+            ]
+            session.write_text(
+                "\n".join(json.dumps(record) for record in records), encoding="utf-8"
+            )
+            os.utime(session, (now.timestamp(), now.timestamp()))
+
+            result = REPORT.codex_usage_window(now, directory)
+
+        self.assertEqual(result["input_tokens"], 100)
+        self.assertEqual(result["total_tokens"], 120)
+        self.assertEqual(result["model_calls"], 1)
+        self.assertEqual(result["active_routes"], 1)
+
 
 class RouteActivityTest(unittest.TestCase):
     def test_accepts_only_bounded_aggregate_status(self) -> None:

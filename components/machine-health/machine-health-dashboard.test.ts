@@ -37,13 +37,15 @@ const samples = Array.from({ length: 4 }, (_, index) => ({
   failedUnits: 0,
   unexpectedDevListeners: 0,
   rdpConnections: 0,
-  codexUsageWindowStartedAt: null,
-  codexInputTokens: null,
-  codexCachedInputTokens: null,
-  codexOutputTokens: null,
-  codexReasoningOutputTokens: null,
-  codexModelCalls: null,
-  codexActiveRoutes: null,
+  codexUsageWindowStartedAt: index === 3 ? '2026-08-29T05:00:00.000Z' : null,
+  codexInputTokens: index === 3 ? 12_500_000 : null,
+  codexCachedInputTokens: index === 3 ? 11_875_000 : null,
+  codexCacheWriteInputTokens: index === 3 ? 0 : null,
+  codexOutputTokens: index === 3 ? 42_000 : null,
+  codexReasoningOutputTokens: index === 3 ? 13_000 : null,
+  codexTotalTokens: index === 3 ? 12_542_000 : null,
+  codexModelCalls: index === 3 ? 110 : null,
+  codexActiveRoutes: index === 3 ? 4 : null,
   routeActiveRoutes: 2,
   routeActiveJobs: 3,
   routeTaggedProcesses: 17,
@@ -74,6 +76,8 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Build state high');
     expect(html).toContain('Codex state high');
     expect(html).toContain('Codex');
+    expect(html).toContain('10 complete hours · 1 hourly record');
+    expect(html).toContain('12,542,000 tokens');
     expect(html).toContain('Cache reads');
     expect(html).toContain('Cache writes');
     expect(html).toContain('CPU');

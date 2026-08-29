@@ -6,7 +6,7 @@ import type {
 } from '@/app/lib/machine-health-store';
 import { useMemo, useState } from 'react';
 
-export type ActivityRange = '24h' | '7d' | '30d';
+export type ActivityRange = '10h' | '24h' | '7d' | '30d';
 
 type ActivityBin = {
   start: number;
@@ -20,10 +20,13 @@ type ActivityBin = {
   pressurePercent: number | null;
   codexInputTokens: number | null;
   codexCachedInputTokens: number | null;
+  codexCacheWriteInputTokens: number | null;
   codexOutputTokens: number | null;
   codexReasoningOutputTokens: number | null;
+  codexTotalTokens: number | null;
   codexModelCalls: number | null;
   codexActiveRoutes: number | null;
+  codexWindowCount: number;
   fallbackCount: number;
   undercoveredCount: number;
   rebootCount: number;
@@ -37,12 +40,14 @@ type ActivityBin = {
 };
 
 const MIB = 1_024 ** 2;
+const HOUR_MS = 60 * 60_000;
 
 const RANGE_CONFIG: Record<
   ActivityRange,
   { bins: number; binMs: number; description: string }
 > = {
-  '24h': { bins: 24, binMs: 60 * 60_000, description: 'hourly' },
+  '10h': { bins: 10, binMs: HOUR_MS, description: 'hourly' },
+  '24h': { bins: 24, binMs: HOUR_MS, description: 'hourly' },
   '7d': { bins: 7, binMs: 24 * 60 * 60_000, description: 'daily' },
   '30d': { bins: 30, binMs: 24 * 60 * 60_000, description: 'daily' },
 };
@@ -131,13 +136,18 @@ export function buildActivityBins(
       pressurePercent: pressure.length === 0 ? null : Math.max(...pressure),
       codexInputTokens: sum(codexValues('codexInputTokens')),
       codexCachedInputTokens: sum(codexValues('codexCachedInputTokens')),
+      codexCacheWriteInputTokens: sum(
+        codexValues('codexCacheWriteInputTokens')
+      ),
       codexOutputTokens: sum(codexValues('codexOutputTokens')),
       codexReasoningOutputTokens: sum(
         codexValues('codexReasoningOutputTokens')
       ),
+      codexTotalTokens: sum(codexValues('codexTotalTokens')),
       codexModelCalls: sum(codexValues('codexModelCalls')),
       codexActiveRoutes:
         activeRoutes.length === 0 ? null : Math.max(...activeRoutes),
+      codexWindowCount: includedCodex.length,
       fallbackCount: included.filter(
         sample => sample.activitySource === 'point'
       ).length,
@@ -195,6 +205,15 @@ export function buildActivityBins(
             : null,
     };
   });
+}
+
+export function buildCodexActivityBins(
+  samples: MachineHealthSample[],
+  range: ActivityRange,
+  now: number
+) {
+  const completeHourEnd = Math.floor(now / HOUR_MS) * HOUR_MS;
+  return buildActivityBins(samples, range, completeHourEnd);
 }
 
 function formatValue(value: number | null, unit: string) {
@@ -342,15 +361,13 @@ export function MachineHealthActivity({
   now,
   graphicsMaxClockMhz,
   latestActivity,
-  latestCodexUsage,
 }: {
   samples: MachineHealthSample[];
   now: number;
   graphicsMaxClockMhz: number | null;
   latestActivity: MachineHealthPayload['activity'];
-  latestCodexUsage: MachineHealthPayload['codex_usage'];
 }) {
-  const [range, setRange] = useState<ActivityRange>('24h');
+  const [range, setRange] = useState<ActivityRange>('10h');
   const bins = useMemo(
     () => buildActivityBins(samples, range, now),
     [samples, range, now]
@@ -358,6 +375,14 @@ export function MachineHealthActivity({
   const rangeDuration = RANGE_CONFIG[range].bins * RANGE_CONFIG[range].binMs;
   const previousBins = useMemo(
     () => buildActivityBins(samples, range, now - rangeDuration),
+    [samples, range, now, rangeDuration]
+  );
+  const codexBins = useMemo(
+    () => buildCodexActivityBins(samples, range, now),
+    [samples, range, now]
+  );
+  const previousCodexBins = useMemo(
+    () => buildCodexActivityBins(samples, range, now - rangeDuration),
     [samples, range, now, rangeDuration]
   );
   const observedBins = bins.filter(bin => bin.sampleCount > 0).length;
@@ -392,7 +417,7 @@ export function MachineHealthActivity({
           className="bg-white/45 inline-flex self-start rounded-full border border-black/10 p-0.5 dark:border-white/10 dark:bg-black/20"
           aria-label="Activity history range"
         >
-          {(['24h', '7d', '30d'] as const).map(option => (
+          {(['10h', '24h', '7d', '30d'] as const).map(option => (
             <button
               key={option}
               type="button"
@@ -492,9 +517,9 @@ export function MachineHealthActivity({
       </div>
 
       <CodexActivity
-        bins={bins}
-        previousBins={previousBins}
-        usage={latestCodexUsage}
+        bins={codexBins}
+        previousBins={previousCodexBins}
+        range={range}
       />
 
       <div className="opacity-55 mt-4 flex flex-wrap gap-x-5 gap-y-1 border-t border-black/10 pt-3 text-xs dark:border-white/10">
@@ -525,59 +550,115 @@ export function MachineHealthActivity({
 function CodexActivity({
   bins,
   previousBins,
-  usage,
+  range,
 }: {
   bins: ActivityBin[];
   previousBins: ActivityBin[];
-  usage: MachineHealthPayload['codex_usage'];
+  range: ActivityRange;
 }) {
-  if (!usage || usage.source !== 'session-jsonl')
+  const observedWindows = bins.reduce(
+    (total, bin) => total + bin.codexWindowCount,
+    0
+  );
+  if (observedWindows === 0)
     return (
       <div className="mt-4 border-t border-black/10 pt-4 dark:border-white/10">
         <p className="text-sm font-black">Codex</p>
         <p className="opacity-55 mt-1 text-xs">
-          Aggregate token counters are unavailable in this snapshot.
+          No hourly token records in this window.
         </p>
       </div>
     );
 
+  const totalInput = sum(
+    bins
+      .map(bin => bin.codexInputTokens)
+      .filter((value): value is number => value !== null)
+  );
+  const totalCachedInput = sum(
+    bins
+      .map(bin => bin.codexCachedInputTokens)
+      .filter((value): value is number => value !== null)
+  );
+  const totalCacheWriteInput = sum(
+    bins
+      .map(bin => bin.codexCacheWriteInputTokens)
+      .filter((value): value is number => value !== null)
+  );
+  const totalOutput = sum(
+    bins
+      .map(bin => bin.codexOutputTokens)
+      .filter((value): value is number => value !== null)
+  );
+  const totalReasoningOutput = sum(
+    bins
+      .map(bin => bin.codexReasoningOutputTokens)
+      .filter((value): value is number => value !== null)
+  );
+  const totalModelCalls = sum(
+    bins
+      .map(bin => bin.codexModelCalls)
+      .filter((value): value is number => value !== null)
+  );
+  const activeRoutes = bins
+    .map(bin => bin.codexActiveRoutes)
+    .filter((value): value is number => value !== null);
+  const totalTokens = sum(
+    bins
+      .map(bin => bin.codexTotalTokens)
+      .filter((value): value is number => value !== null)
+  );
   const cacheShare =
-    usage.input_tokens === 0
+    totalInput === null || totalInput === 0 || totalCachedInput === null
       ? null
-      : (usage.cached_input_tokens / usage.input_tokens) * 100;
+      : (totalCachedInput / totalInput) * 100;
+  const rangeLabel =
+    range === '10h' ? '10 complete hours' : `${range} selected`;
 
   return (
     <div className="mt-5 border-t border-black/10 pt-4 dark:border-white/10">
       <div className="flex flex-col justify-between gap-1 sm:flex-row sm:items-end">
         <h3 className="text-base font-black">Codex</h3>
-        <p className="text-[0.68rem] opacity-50">Previous complete UTC hour</p>
+        <p className="text-[0.68rem] opacity-50">
+          {rangeLabel} · {observedWindows} hourly record
+          {observedWindows === 1 ? '' : 's'}
+        </p>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-5">
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
+        <CodexMetric
+          label="Total"
+          value={formatValue(totalTokens, 'tokens')}
+          note={
+            totalTokens === null
+              ? 'input + output'
+              : `${totalTokens.toLocaleString('en-US')} tokens`
+          }
+        />
         <CodexMetric
           label="Input"
-          value={formatValue(usage.input_tokens, 'tokens')}
+          value={formatValue(totalInput, 'tokens')}
           note="cached portion included"
         />
         <CodexMetric
           label="Cache reads"
           value={cacheShare === null ? '—' : `${cacheShare.toFixed(1)}%`}
-          note={`${formatValue(usage.cached_input_tokens, 'tokens')} of input`}
+          note={`${formatValue(totalCachedInput, 'tokens')} of input`}
         />
         <CodexMetric
           label="Cache writes"
-          value={formatValue(usage.cache_write_input_tokens, 'tokens')}
+          value={formatValue(totalCacheWriteInput, 'tokens')}
           note="input tokens"
         />
         <CodexMetric
           label="Output"
-          value={formatValue(usage.output_tokens, 'tokens')}
-          note={`${formatValue(usage.reasoning_output_tokens, 'tokens')} reasoning subset`}
+          value={formatValue(totalOutput, 'tokens')}
+          note={`${formatValue(totalReasoningOutput, 'tokens')} reasoning subset`}
         />
         <CodexMetric
           label="Model calls"
-          value={usage.model_calls.toLocaleString('en-US')}
-          note={`${usage.active_routes} active route${usage.active_routes === 1 ? '' : 's'}`}
+          value={totalModelCalls?.toLocaleString('en-US') ?? '—'}
+          note={`${activeRoutes.length === 0 ? '—' : Math.max(...activeRoutes)} route high`}
         />
       </div>
 

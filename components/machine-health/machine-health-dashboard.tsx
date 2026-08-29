@@ -465,7 +465,6 @@ export function MachineHealthDashboard({
         now={now}
         graphicsMaxClockMhz={payload.graphics.max_clock_mhz}
         latestActivity={payload.activity}
-        latestCodexUsage={payload.codex_usage}
       />
 
       <section className="grid gap-3 lg:grid-cols-[1.25fr_1fr]">

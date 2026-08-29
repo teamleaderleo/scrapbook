@@ -20,7 +20,13 @@ The page starts with the questions that matter when Leo is away from the machine
 - How many agent routes, jobs, and descendant processes are explicitly owned, how much RSS do they account for, and did any ownership record become unknown or leave residue?
 - How much local Codex state is allocated, how much is active or unknown, did the scan finish cleanly, and how did the total change over seven days?
 
-The dashboard defaults to 24 hourly bins and offers 7- and 30-day daily rollups. Its time control starts in the browser's own time zone and can switch to UTC. Browser/Codex counts, tagged route/process counts, aggregate memory, and the active RDP connection count stay coarse. The current workspace view also splits hook-owned execution into chat roots, main-root jobs, subagent jobs, processes, and memory. It keeps opaque route and agent IDs out of the snapshot.
+The dashboard defaults to the last 10 complete hourly bins and also offers 24-hour, 7-day, and
+30-day views. One hour always remains one normalized hour; UTC fixes the storage boundary, while the
+browser's time zone changes only the labels. Token cards sum the selected hourly records, and the
+10-hour view excludes the current partial hour. Browser/Codex counts, tagged route/process counts,
+aggregate memory, and the active RDP connection count stay coarse. The current workspace view also
+splits hook-owned execution into chat roots, main-root jobs, subagent jobs, processes, and memory. It
+keeps opaque route and agent IDs out of the snapshot.
 
 Each stored row also carries its accounting source, interval count, window length, and uptime. The activity footer therefore distinguishes full sysstat windows, partial coverage, point-sample fallbacks, and reboot discontinuities instead of drawing equally authoritative bars from unlike data.
 
@@ -82,7 +88,13 @@ The exact-head collector took 10.43 seconds and 54,208 KiB peak RSS in a live pr
 
 Remote-client classification reuses the existing Tailscale status document, so it adds no second Tailscale command or network probe. Acceleration classification adds two bounded local reads: the service invocation ID and up to 512 journal records from that invocation. Those two reads took 5.1 ms median and 8.1 ms maximum across 20 live probes.
 
-Route activity, process tags, and Codex state are point observations at report time. The hygiene panel shows exact-scoped versus discoverable Codex processes beside active routes, jobs, tagged descendants, aggregate memory, residue, unknown ownership records, and local state growth. Hook tags add main-root and subagent rollups without exposing their identities. Historical bins show the highest lease-tagged process count observed in each hour or day; they do not imply continuous runtime between reports. Token-route activity remains a separate previous-complete-hour measurement because it answers a different question.
+Route activity, process tags, and Codex state are point observations at report time. The hygiene panel shows exact-scoped versus discoverable Codex processes beside active routes, jobs, tagged descendants, aggregate memory, residue, unknown ownership records, and local state growth. Hook tags add main-root and subagent rollups without exposing their identities. Historical bins show the highest lease-tagged process count observed in each hour or day; they do not imply continuous runtime between reports. Token usage is stored as one previous-complete-hour record per report, deduplicated by its hour, and summed in the selected dashboard window. Full-history subagent forks replay old session events at creation; the collector drops that startup replay before accounting so a fork cannot manufacture a token spike.
+
+An Aug. 29 live reconciliation covered the ten complete hours ending at 22:00 UTC. The raw session
+sum was 2,184,178,104 tokens, but 7,077 counter events came from two full-history fork startup
+replays. Removing those replays left 1,235,555,859 tokens across 8,992 counter events, with a
+seven-route hourly high. The test fixture reproduces the fork shape so the inflated result cannot
+quietly return.
 
 Build/cache state and Codex state are gauges rather than activity totals. Their charts keep the
 highest observed value in each hour or day and compare the current range high with the same-length

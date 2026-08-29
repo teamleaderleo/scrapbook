@@ -41,6 +41,7 @@ CODEX_TOKEN_FIELDS = (
     "reasoning_output_tokens",
     "total_tokens",
 )
+CODEX_FORK_REPLAY_SECONDS = 2
 GLAEDA_REPOSITORY = Path.home() / "Projects" / "glaeda"
 GLAEDA_CACHE = Path.home() / ".cache" / "glaeda"
 CODEX_ROUTE_STATUS_HELPER = (
@@ -447,18 +448,24 @@ def codex_usage_window(
         try:
             if path.stat().st_mtime < window_start.timestamp():
                 continue
-            route_active = False
+            session_started_at: dt.datetime | None = None
+            forked_session = False
+            events: list[tuple[dt.datetime, dict[str, int]]] = []
             with path.open("r", encoding="utf-8") as session:
                 for line in session:
                     try:
                         record = json.loads(line)
                         payload = record.get("payload") or {}
-                        info = payload.get("info") or {}
-                        if payload.get("type") != "token_count":
-                            continue
                         timestamp = dt.datetime.fromisoformat(
                             str(record.get("timestamp", "")).replace("Z", "+00:00")
                         ).astimezone(dt.timezone.utc)
+                        if session_started_at is None:
+                            session_started_at = timestamp
+                        if payload.get("forked_from_id"):
+                            forked_session = True
+                        info = payload.get("info") or {}
+                        if payload.get("type") != "token_count":
+                            continue
                         usage = info.get("last_token_usage")
                     except (AttributeError, json.JSONDecodeError, ValueError):
                         continue
@@ -480,11 +487,26 @@ def codex_usage_window(
                         values[field] = value
                     if not valid:
                         continue
-                    for field, value in values.items():
-                        totals[field] += value
-                    model_calls += 1
-                    route_active = True
-            if route_active:
+                    events.append((timestamp, values))
+
+            if forked_session and session_started_at is not None:
+                # Full-history forks rewrite copied counters at session startup.
+                replay_cutoff = session_started_at + dt.timedelta(
+                    seconds=CODEX_FORK_REPLAY_SECONDS
+                )
+                replay_events = sum(
+                    timestamp < replay_cutoff for timestamp, _ in events
+                )
+                if replay_events > 1:
+                    events = [
+                        event for event in events if event[0] >= replay_cutoff
+                    ]
+
+            for _, values in events:
+                for field, value in values.items():
+                    totals[field] += value
+                model_calls += 1
+            if events:
                 active_routes += 1
         except (FileNotFoundError, PermissionError, OSError):
             continue

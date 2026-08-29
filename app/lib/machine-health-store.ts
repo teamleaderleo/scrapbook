@@ -441,8 +441,10 @@ export type MachineHealthSample = {
   codexUsageWindowStartedAt: string | null;
   codexInputTokens: number | null;
   codexCachedInputTokens: number | null;
+  codexCacheWriteInputTokens: number | null;
   codexOutputTokens: number | null;
   codexReasoningOutputTokens: number | null;
+  codexTotalTokens: number | null;
   codexModelCalls: number | null;
   codexActiveRoutes: number | null;
   routeActiveRoutes: number | null;
@@ -864,9 +866,12 @@ export async function readMachineHealth(
           codexUsageWindowStartedAt: codexUsage?.window_started_at ?? null,
           codexInputTokens: codexUsage?.input_tokens ?? null,
           codexCachedInputTokens: codexUsage?.cached_input_tokens ?? null,
+          codexCacheWriteInputTokens:
+            codexUsage?.cache_write_input_tokens ?? null,
           codexOutputTokens: codexUsage?.output_tokens ?? null,
           codexReasoningOutputTokens:
             codexUsage?.reasoning_output_tokens ?? null,
+          codexTotalTokens: codexUsage?.total_tokens ?? null,
           codexModelCalls: codexUsage?.model_calls ?? null,
           codexActiveRoutes: codexUsage?.active_routes ?? null,
           routeActiveRoutes: routeActivity?.active_routes ?? null,

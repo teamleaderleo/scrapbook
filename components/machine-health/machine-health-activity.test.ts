@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import type { MachineHealthSample } from '@/app/lib/machine-health-store';
-import { buildActivityBins } from './machine-health-activity';
+import {
+  buildActivityBins,
+  buildCodexActivityBins,
+} from './machine-health-activity';
 
 const now = Date.parse('2026-08-29T06:30:00.000Z');
 
@@ -35,8 +38,10 @@ function sample(
     codexUsageWindowStartedAt: null,
     codexInputTokens: null,
     codexCachedInputTokens: null,
+    codexCacheWriteInputTokens: null,
     codexOutputTokens: null,
     codexReasoningOutputTokens: null,
+    codexTotalTokens: null,
     codexModelCalls: null,
     codexActiveRoutes: null,
     routeActiveRoutes: null,
@@ -55,6 +60,39 @@ function sample(
 }
 
 describe('machine health activity bins', () => {
+  it('builds 10 complete hourly bins without the current partial hour', () => {
+    const bins = buildCodexActivityBins(
+      [
+        sample('2026-08-29T06:05:00.000Z'),
+        sample('2026-08-29T05:05:00.000Z', {
+          codexUsageWindowStartedAt: '2026-08-29T05:00:00.000Z',
+          codexInputTokens: 1_000,
+          codexCachedInputTokens: 800,
+          codexCacheWriteInputTokens: 100,
+          codexOutputTokens: 50,
+          codexReasoningOutputTokens: 20,
+          codexTotalTokens: 1_050,
+          codexModelCalls: 4,
+          codexActiveRoutes: 2,
+        }),
+      ],
+      '10h',
+      now
+    );
+
+    expect(bins).toHaveLength(10);
+    expect(bins.at(-1)).toMatchObject({
+      start: Date.parse('2026-08-29T05:00:00.000Z'),
+      codexInputTokens: 1_000,
+      codexCacheWriteInputTokens: 100,
+      codexTotalTokens: 1_050,
+      codexWindowCount: 1,
+    });
+    expect(
+      bins.some(bin => bin.start === Date.parse('2026-08-29T06:00:00.000Z'))
+    ).toBe(false);
+  });
+
   it('builds 24 fixed hourly bins and averages samples in the same hour', () => {
     const bins = buildActivityBins(
       [
@@ -122,8 +160,10 @@ describe('machine health activity bins', () => {
       codexUsageWindowStartedAt: '2026-08-29T05:00:00.000Z',
       codexInputTokens: 1_000,
       codexCachedInputTokens: 800,
+      codexCacheWriteInputTokens: 100,
       codexOutputTokens: 50,
       codexReasoningOutputTokens: 20,
+      codexTotalTokens: 1_050,
       codexModelCalls: 4,
       codexActiveRoutes: 2,
     };
@@ -139,10 +179,13 @@ describe('machine health activity bins', () => {
     expect(bins.at(-2)).toMatchObject({
       codexInputTokens: 1_000,
       codexCachedInputTokens: 800,
+      codexCacheWriteInputTokens: 100,
       codexOutputTokens: 50,
       codexReasoningOutputTokens: 20,
+      codexTotalTokens: 1_050,
       codexModelCalls: 4,
       codexActiveRoutes: 2,
+      codexWindowCount: 1,
     });
     expect(bins.at(-1)?.codexInputTokens).toBeNull();
   });
