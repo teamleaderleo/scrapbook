@@ -57,6 +57,21 @@ export const machineHealthPayloadSchema = z.object({
     disk_read_mib_s: nullableNonnegative,
     disk_write_mib_s: nullableNonnegative,
   }),
+  codex_usage: z
+    .object({
+      source: z.enum(['session-jsonl', 'unavailable']),
+      window_started_at: z.string().datetime({ offset: true }),
+      window_ended_at: z.string().datetime({ offset: true }),
+      input_tokens: nonnegativeInteger,
+      cached_input_tokens: nonnegativeInteger,
+      cache_write_input_tokens: nonnegativeInteger,
+      output_tokens: nonnegativeInteger,
+      reasoning_output_tokens: nonnegativeInteger,
+      total_tokens: nonnegativeInteger,
+      model_calls: nonnegativeInteger,
+      active_routes: nonnegativeInteger,
+    })
+    .optional(),
   services: z.object({
     failed_system_units: nonnegativeInteger,
     failed_user_units: nonnegativeInteger,
@@ -117,6 +132,13 @@ export type MachineHealthSample = {
   codexWorkers: number;
   failedUnits: number;
   unexpectedDevListeners: number;
+  codexUsageWindowStartedAt: string | null;
+  codexInputTokens: number | null;
+  codexCachedInputTokens: number | null;
+  codexOutputTokens: number | null;
+  codexReasoningOutputTokens: number | null;
+  codexModelCalls: number | null;
+  codexActiveRoutes: number | null;
 };
 
 export type StoredMachineHealth = {
@@ -361,6 +383,7 @@ export async function readMachineHealth(
           codex_workers: number | string;
           failed_units: number | string;
           unexpected_dev_listeners: number | string;
+          payload: unknown;
         }[]
       >`
         SELECT
@@ -383,7 +406,8 @@ export async function readMachineHealth(
           browser_roots,
           codex_workers,
           failed_units,
-          unexpected_dev_listeners
+          unexpected_dev_listeners,
+          payload
         FROM machine_health_samples
         WHERE host = 'big-red'
           AND checked_at >= now() - (${Math.max(1, Math.min(90, Math.floor(days)))}::int * interval '1 day')
@@ -406,37 +430,57 @@ export async function readMachineHealth(
         updatedAt: new Date(latest.updated_at).toISOString(),
       },
       observedAt: new Date().toISOString(),
-      samples: sampleRows.map(row => ({
-        checkedAt: new Date(row.checked_at).toISOString(),
-        cpuUsedPercent: toNumber(row.cpu_used_percent),
-        rootUsedPercent: toNumber(row.root_used_percent),
-        memoryUsedPercent: toNumber(row.memory_used_percent),
-        loadPerCpu: toNumber(row.load_per_cpu),
-        peakSensorTemperatureC:
-          row.peak_sensor_temperature_c === null
-            ? null
-            : toNumber(row.peak_sensor_temperature_c),
-        graphicsClockMhz:
-          row.graphics_clock_mhz === null
-            ? null
-            : toNumber(row.graphics_clock_mhz),
-        networkRxMibS: toNumber(row.network_rx_mib_s),
-        networkTxMibS: toNumber(row.network_tx_mib_s),
-        diskReadMibS:
-          row.disk_read_mib_s === null ? null : toNumber(row.disk_read_mib_s),
-        diskWriteMibS:
-          row.disk_write_mib_s === null ? null : toNumber(row.disk_write_mib_s),
-        pressurePercent:
-          row.pressure_percent === null ? null : toNumber(row.pressure_percent),
-        activitySource: row.activity_source,
-        activitySampleCount: toNumber(row.activity_sample_count),
-        activityWindowMinutes: toNumber(row.activity_window_minutes),
-        uptimeSeconds: toNumber(row.uptime_seconds),
-        browserRoots: toNumber(row.browser_roots),
-        codexWorkers: toNumber(row.codex_workers),
-        failedUnits: toNumber(row.failed_units),
-        unexpectedDevListeners: toNumber(row.unexpected_dev_listeners),
-      })),
+      samples: sampleRows.map(row => {
+        const parsedSample = machineHealthPayloadSchema.safeParse(row.payload);
+        const codexUsage =
+          parsedSample.success &&
+          parsedSample.data.codex_usage?.source === 'session-jsonl'
+            ? parsedSample.data.codex_usage
+            : null;
+        return {
+          checkedAt: new Date(row.checked_at).toISOString(),
+          cpuUsedPercent: toNumber(row.cpu_used_percent),
+          rootUsedPercent: toNumber(row.root_used_percent),
+          memoryUsedPercent: toNumber(row.memory_used_percent),
+          loadPerCpu: toNumber(row.load_per_cpu),
+          peakSensorTemperatureC:
+            row.peak_sensor_temperature_c === null
+              ? null
+              : toNumber(row.peak_sensor_temperature_c),
+          graphicsClockMhz:
+            row.graphics_clock_mhz === null
+              ? null
+              : toNumber(row.graphics_clock_mhz),
+          networkRxMibS: toNumber(row.network_rx_mib_s),
+          networkTxMibS: toNumber(row.network_tx_mib_s),
+          diskReadMibS:
+            row.disk_read_mib_s === null ? null : toNumber(row.disk_read_mib_s),
+          diskWriteMibS:
+            row.disk_write_mib_s === null
+              ? null
+              : toNumber(row.disk_write_mib_s),
+          pressurePercent:
+            row.pressure_percent === null
+              ? null
+              : toNumber(row.pressure_percent),
+          activitySource: row.activity_source,
+          activitySampleCount: toNumber(row.activity_sample_count),
+          activityWindowMinutes: toNumber(row.activity_window_minutes),
+          uptimeSeconds: toNumber(row.uptime_seconds),
+          browserRoots: toNumber(row.browser_roots),
+          codexWorkers: toNumber(row.codex_workers),
+          failedUnits: toNumber(row.failed_units),
+          unexpectedDevListeners: toNumber(row.unexpected_dev_listeners),
+          codexUsageWindowStartedAt: codexUsage?.window_started_at ?? null,
+          codexInputTokens: codexUsage?.input_tokens ?? null,
+          codexCachedInputTokens: codexUsage?.cached_input_tokens ?? null,
+          codexOutputTokens: codexUsage?.output_tokens ?? null,
+          codexReasoningOutputTokens:
+            codexUsage?.reasoning_output_tokens ?? null,
+          codexModelCalls: codexUsage?.model_calls ?? null,
+          codexActiveRoutes: codexUsage?.active_routes ?? null,
+        };
+      }),
     };
   } catch (error) {
     console.error('Unable to read machine health data', { requestId, error });

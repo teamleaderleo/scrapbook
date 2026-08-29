@@ -27,7 +27,7 @@ function StateCard({
 
 export async function MachineHealthDashboardContainer() {
   await headers();
-  const result = await readMachineHealth(30);
+  const result = await readMachineHealth(60);
   if (result.status === 'configuration-error')
     return (
       <StateCard

@@ -30,6 +30,13 @@ function sample(
     codexWorkers: 2,
     failedUnits: 0,
     unexpectedDevListeners: 0,
+    codexUsageWindowStartedAt: null,
+    codexInputTokens: null,
+    codexCachedInputTokens: null,
+    codexOutputTokens: null,
+    codexReasoningOutputTokens: null,
+    codexModelCalls: null,
+    codexActiveRoutes: null,
     ...overrides,
   };
 }
@@ -88,5 +95,35 @@ describe('machine health activity bins', () => {
 
     expect(bins.at(-2)).toMatchObject({ undercoveredCount: 1 });
     expect(bins.at(-1)).toMatchObject({ fallbackCount: 1, rebootCount: 1 });
+  });
+
+  it('places Codex counters in their fixed usage hour and deduplicates retries', () => {
+    const usage = {
+      codexUsageWindowStartedAt: '2026-08-29T05:00:00.000Z',
+      codexInputTokens: 1_000,
+      codexCachedInputTokens: 800,
+      codexOutputTokens: 50,
+      codexReasoningOutputTokens: 20,
+      codexModelCalls: 4,
+      codexActiveRoutes: 2,
+    };
+    const bins = buildActivityBins(
+      [
+        sample('2026-08-29T06:05:00.000Z', usage),
+        sample('2026-08-29T06:10:00.000Z', usage),
+      ],
+      '24h',
+      now
+    );
+
+    expect(bins.at(-2)).toMatchObject({
+      codexInputTokens: 1_000,
+      codexCachedInputTokens: 800,
+      codexOutputTokens: 50,
+      codexReasoningOutputTokens: 20,
+      codexModelCalls: 4,
+      codexActiveRoutes: 2,
+    });
+    expect(bins.at(-1)?.codexInputTokens).toBeNull();
   });
 });

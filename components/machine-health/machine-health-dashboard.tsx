@@ -120,11 +120,6 @@ export function MachineHealthDashboard({
             <h2 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
               {stateLabel}
             </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 opacity-70">
-              Sanitized workstation signals only. No IP addresses, URLs, tab
-              titles, command lines, ports, peer names, or secrets are
-              collected.
-            </p>
           </div>
           <MachineHealthTimestamp
             checkedAt={report.checkedAt}
@@ -197,10 +192,17 @@ export function MachineHealthDashboard({
         now={now}
         graphicsMaxClockMhz={payload.graphics.max_clock_mhz}
         latestActivity={payload.activity}
+        latestCodexUsage={payload.codex_usage}
       />
 
       <section className="grid gap-3 lg:grid-cols-[1.25fr_1fr]">
-        <div className="dark:bg-black/12 rounded-2xl border border-black/10 bg-white/50 p-5 dark:border-white/10">
+        <div
+          className="rounded-2xl border border-black/10 p-5 dark:border-white/10"
+          style={{
+            backgroundColor:
+              'light-dark(rgba(255,255,255,0.5), rgba(0,0,0,0.15))',
+          }}
+        >
           <h2 className="text-lg font-black">Guardrails</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             {serviceRows.map(([name, value]) => (
@@ -224,7 +226,13 @@ export function MachineHealthDashboard({
             <Pill good={failedUnits === 0}>Failed units: {failedUnits}</Pill>
           </div>
         </div>
-        <div className="dark:bg-black/12 rounded-2xl border border-black/10 bg-white/50 p-5 dark:border-white/10">
+        <div
+          className="rounded-2xl border border-black/10 p-5 dark:border-white/10"
+          style={{
+            backgroundColor:
+              'light-dark(rgba(255,255,255,0.5), rgba(0,0,0,0.15))',
+          }}
+        >
           <h2 className="text-lg font-black">Workspace hygiene</h2>
           <dl className="mt-4 grid grid-cols-3 gap-3 text-center">
             <div>
@@ -247,16 +255,13 @@ export function MachineHealthDashboard({
             </div>
           </dl>
           <p className="opacity-55 mt-4 text-xs leading-5">
-            Counts are aggregate and intentionally omit names, arguments, ports,
-            and ownership details. Uptime is{' '}
-            {formatDuration(payload.uptime_seconds)}.
+            Uptime {formatDuration(payload.uptime_seconds)}.
           </p>
         </div>
       </section>
 
       <footer className="px-2 py-1 text-xs opacity-50">
-        Hourly snapshots, 90-day retention, no client polling. Empty history
-        bins remain visible instead of implying continuous coverage.
+        Hourly snapshots · 90-day history
       </footer>
     </div>
   );

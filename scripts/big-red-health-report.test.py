@@ -5,6 +5,9 @@ from __future__ import annotations
 
 import importlib.util
 import datetime as dt
+import json
+import os
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -91,6 +94,77 @@ class SysstatParsingTest(unittest.TestCase):
         self.assertEqual(activity["sample_count"], 1)
         self.assertEqual(activity["cpu_used_percent"], 12.5)
         self.assertIsNone(activity["cpu_pressure_some_percent"])
+
+
+class CodexUsageTest(unittest.TestCase):
+    def test_aggregates_only_the_previous_complete_hour(self) -> None:
+        now = dt.datetime(2026, 8, 29, 7, 23, tzinfo=dt.timezone.utc)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            directory = Path(temporary_directory)
+            session = directory / "route.jsonl"
+            records = [
+                {
+                    "timestamp": "2026-08-29T05:59:59Z",
+                    "payload": {
+                        "type": "token_count",
+                        "info": {
+                            "last_token_usage": {
+                                field: 999 for field in REPORT.CODEX_TOKEN_FIELDS
+                            }
+                        },
+                    },
+                },
+                {
+                    "timestamp": "2026-08-29T06:15:00Z",
+                    "payload": {
+                        "type": "token_count",
+                        "info": {
+                            "last_token_usage": {
+                                "input_tokens": 100,
+                                "cached_input_tokens": 80,
+                                "cache_write_input_tokens": 5,
+                                "output_tokens": 20,
+                                "reasoning_output_tokens": 7,
+                                "total_tokens": 120,
+                            }
+                        },
+                    },
+                },
+                {
+                    "timestamp": "2026-08-29T07:01:00Z",
+                    "payload": {
+                        "type": "token_count",
+                        "info": {
+                            "last_token_usage": {
+                                field: 999 for field in REPORT.CODEX_TOKEN_FIELDS
+                            }
+                        },
+                    },
+                },
+            ]
+            session.write_text(
+                "\n".join(json.dumps(record) for record in records), encoding="utf-8"
+            )
+            os.utime(session, (now.timestamp(), now.timestamp()))
+
+            usage = REPORT.codex_usage_window(now, directory)
+
+        self.assertEqual(usage["source"], "session-jsonl")
+        self.assertEqual(usage["window_started_at"], "2026-08-29T06:00:00Z")
+        self.assertEqual(usage["window_ended_at"], "2026-08-29T07:00:00Z")
+        self.assertEqual(usage["input_tokens"], 100)
+        self.assertEqual(usage["cached_input_tokens"], 80)
+        self.assertEqual(usage["output_tokens"], 20)
+        self.assertEqual(usage["reasoning_output_tokens"], 7)
+        self.assertEqual(usage["model_calls"], 1)
+        self.assertEqual(usage["active_routes"], 1)
+
+    def test_marks_a_missing_source_unavailable(self) -> None:
+        now = dt.datetime(2026, 8, 29, 7, 23, tzinfo=dt.timezone.utc)
+        usage = REPORT.codex_usage_window(now, Path("/definitely/not/present"))
+
+        self.assertEqual(usage["source"], "unavailable")
+        self.assertEqual(usage["model_calls"], 0)
 
 
 if __name__ == "__main__":

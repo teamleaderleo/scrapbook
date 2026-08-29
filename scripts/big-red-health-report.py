@@ -28,6 +28,14 @@ COMMAND_TIMEOUT_SECONDS = 4
 ACTIVITY_SAMPLE_SECONDS = 0.25
 SYSSTAT_WINDOW_RECORDS = 6
 SYSSTAT_MAX_AGE_MINUTES = 90
+CODEX_TOKEN_FIELDS = (
+    "input_tokens",
+    "cached_input_tokens",
+    "cache_write_input_tokens",
+    "output_tokens",
+    "reasoning_output_tokens",
+    "total_tokens",
+)
 
 
 def run(*command: str) -> tuple[int, str]:
@@ -353,6 +361,83 @@ def activity_window(now: dt.datetime) -> dict[str, Any]:
     }
 
 
+def codex_usage_window(
+    now: dt.datetime, session_directory: Path | None = None
+) -> dict[str, Any]:
+    """Aggregate the previous complete UTC hour without retaining content."""
+    window_end = now.astimezone(dt.timezone.utc).replace(
+        minute=0, second=0, microsecond=0
+    )
+    window_start = window_end - dt.timedelta(hours=1)
+    directory = session_directory or Path.home() / ".codex" / "sessions"
+    totals = {field: 0 for field in CODEX_TOKEN_FIELDS}
+    model_calls = 0
+    active_routes = 0
+
+    try:
+        paths = list(directory.rglob("*.jsonl"))
+    except (FileNotFoundError, PermissionError):
+        paths = []
+        available = False
+    else:
+        available = directory.is_dir()
+
+    for path in paths:
+        try:
+            if path.stat().st_mtime < window_start.timestamp():
+                continue
+            route_active = False
+            with path.open("r", encoding="utf-8") as session:
+                for line in session:
+                    try:
+                        record = json.loads(line)
+                        payload = record.get("payload") or {}
+                        info = payload.get("info") or {}
+                        if payload.get("type") != "token_count":
+                            continue
+                        timestamp = dt.datetime.fromisoformat(
+                            str(record.get("timestamp", "")).replace("Z", "+00:00")
+                        ).astimezone(dt.timezone.utc)
+                        usage = info.get("last_token_usage")
+                    except (AttributeError, json.JSONDecodeError, ValueError):
+                        continue
+                    if not isinstance(usage, dict) or not (
+                        window_start <= timestamp < window_end
+                    ):
+                        continue
+                    values: dict[str, int] = {}
+                    valid = True
+                    for field in CODEX_TOKEN_FIELDS:
+                        value = usage.get(field, 0)
+                        if (
+                            isinstance(value, bool)
+                            or not isinstance(value, int)
+                            or value < 0
+                        ):
+                            valid = False
+                            break
+                        values[field] = value
+                    if not valid:
+                        continue
+                    for field, value in values.items():
+                        totals[field] += value
+                    model_calls += 1
+                    route_active = True
+            if route_active:
+                active_routes += 1
+        except (FileNotFoundError, PermissionError, OSError):
+            continue
+
+    return {
+        "source": "session-jsonl" if available else "unavailable",
+        "window_started_at": window_start.isoformat().replace("+00:00", "Z"),
+        "window_ended_at": window_end.isoformat().replace("+00:00", "Z"),
+        **totals,
+        "model_calls": model_calls,
+        "active_routes": active_routes,
+    }
+
+
 def read_number(path: Path) -> float | None:
     try:
         return float(path.read_text(encoding="utf-8").strip())
@@ -553,6 +638,7 @@ def build_report() -> dict[str, Any]:
     load_one, load_five, load_fifteen = os.getloadavg()
     logical_cpus = os.cpu_count() or 1
     activity = activity_window(now)
+    codex_usage = codex_usage_window(now)
     _, total_gib = memory()
     disk = shutil.disk_usage("/")
     graphics_clock_mhz, graphics_max_clock_mhz = graphics_clock()
@@ -607,6 +693,7 @@ def build_report() -> dict[str, Any]:
             "disk_read_mib_s": activity["disk_read_mib_s"],
             "disk_write_mib_s": activity["disk_write_mib_s"],
         },
+        "codex_usage": codex_usage,
         "services": {
             "failed_system_units": failed_unit_count(),
             "failed_user_units": failed_unit_count(user=True),

@@ -35,6 +35,13 @@ const samples = Array.from({ length: 4 }, (_, index) => ({
   codexWorkers: 2,
   failedUnits: 0,
   unexpectedDevListeners: 0,
+  codexUsageWindowStartedAt: null,
+  codexInputTokens: null,
+  codexCachedInputTokens: null,
+  codexOutputTokens: null,
+  codexReasoningOutputTokens: null,
+  codexModelCalls: null,
+  codexActiveRoutes: null,
 }));
 
 describe('machine health dashboard', () => {
@@ -49,14 +56,12 @@ describe('machine health dashboard', () => {
 
     expect(html).toContain('Looks good');
     expect(html).toContain('No configured guardrail is currently tripped.');
-    expect(html).toContain('4 observations · 30d loaded');
-    expect(html).toContain('Observed, not surveilled');
+    expect(html).toContain('4 stored observations');
+    expect(html).toContain('Activity');
+    expect(html).toContain('Codex');
     expect(html).toContain('CPU');
     expect(html).toContain('Contention high');
     expect(html).toContain('iGPU clock');
-    expect(html).toContain(
-      'No IP addresses, URLs, tab titles, command lines, ports'
-    );
     expect(html).not.toContain('private_ip');
     expect(html).not.toContain('process_arguments');
   });

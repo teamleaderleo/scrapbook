@@ -14,7 +14,6 @@ function formatTimestamp(value: string, timeZone: string) {
     hour: 'numeric',
     minute: '2-digit',
     timeZone,
-    timeZoneName: 'short',
   }).format(new Date(value));
 }
 
@@ -62,7 +61,7 @@ export function MachineHealthTimestamp({
       </p>
       <p className="opacity-55 mt-0.5">{zoneLabel}</p>
       <p className="opacity-55 mt-2 font-mono">
-        {sampleCount} observations · 30d loaded
+        {sampleCount} stored observations
       </p>
     </div>
   );
