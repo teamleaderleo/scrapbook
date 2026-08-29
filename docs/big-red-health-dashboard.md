@@ -41,7 +41,7 @@ The default proposal is one report per hour, with manual runs whenever a change 
 - Every successful ingest deletes samples older than 90 days, so retention needs no second scheduled job.
 - Retry posts with the same host and timestamp update one sample instead of duplicating it, and an older delayed report cannot replace the latest status row.
 - A measured expanded report is 2,009 bytes as compact JSON and 2,581 bytes pretty-printed. Ninety days at hourly frequency is 2,160 rows and roughly 4.1 MiB of raw compact payload; a conservative database budget remains under 12 MiB after allowing for JSONB, scalar columns, row overhead, and the index.
-- There is no daemon, polling loop, Prometheus, Grafana, log drain, or client-side refresh.
+- The page has a manual refresh control and refreshes its server data once per hour while the tab is visible. Returning to a tab refreshes it only when the last page refresh is at least an hour old.
 
 Big Red already runs Ubuntu's `sysstat` accounting every 10 minutes. The collector reuses the six newest records to produce time-weighted 60-minute averages for CPU, memory, aggregate non-loopback network throughput, and non-loop disk I/O, plus CPU/memory/I/O [Pressure Stall Information](https://docs.kernel.org/accounting/psi.html). It emits only the aggregate result; host names, device names, and interface names parsed from `sadf` never enter the report. If readable accounting data is unavailable, the collector fails soft to the original 250 ms `/proc` point sample and labels the source accordingly.
 
