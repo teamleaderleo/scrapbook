@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
+import hmac
 import json
 import math
 import os
@@ -424,7 +426,9 @@ def activity_window(now: dt.datetime) -> dict[str, Any]:
 
 
 def codex_usage_window(
-    now: dt.datetime, session_directory: Path | None = None
+    now: dt.datetime,
+    session_directory: Path | None = None,
+    fingerprint_key: bytes | None = None,
 ) -> dict[str, Any]:
     """Aggregate the previous complete UTC hour without retaining content."""
     window_end = now.astimezone(dt.timezone.utc).replace(
@@ -435,6 +439,8 @@ def codex_usage_window(
     totals = {field: 0 for field in CODEX_TOKEN_FIELDS}
     model_calls = 0
     active_routes = 0
+    session_fingerprints: set[str] = set()
+    fingerprints_complete = fingerprint_key is not None
 
     try:
         paths = list(directory.rglob("*.jsonl"))
@@ -449,6 +455,7 @@ def codex_usage_window(
             if path.stat().st_mtime < window_start.timestamp():
                 continue
             session_started_at: dt.datetime | None = None
+            session_id: str | None = None
             forked_session = False
             events: list[tuple[dt.datetime, dict[str, int]]] = []
             with path.open("r", encoding="utf-8") as session:
@@ -461,6 +468,10 @@ def codex_usage_window(
                         ).astimezone(dt.timezone.utc)
                         if session_started_at is None:
                             session_started_at = timestamp
+                        if record.get("type") == "session_meta":
+                            candidate = payload.get("id") or payload.get("session_id")
+                            if isinstance(candidate, str) and candidate:
+                                session_id = candidate
                         if payload.get("forked_from_id"):
                             forked_session = True
                         info = payload.get("info") or {}
@@ -508,7 +519,18 @@ def codex_usage_window(
                 model_calls += 1
             if events:
                 active_routes += 1
+                if fingerprint_key is None or session_id is None:
+                    fingerprints_complete = False
+                else:
+                    session_fingerprints.add(
+                        hmac.new(
+                            fingerprint_key,
+                            session_id.encode("utf-8"),
+                            hashlib.sha256,
+                        ).hexdigest()[:32]
+                    )
         except (FileNotFoundError, PermissionError, OSError):
+            fingerprints_complete = False
             continue
 
     return {
@@ -518,6 +540,8 @@ def codex_usage_window(
         **totals,
         "model_calls": model_calls,
         "active_routes": active_routes,
+        "session_fingerprints": sorted(session_fingerprints),
+        "fingerprints_complete": fingerprints_complete,
     }
 
 
@@ -1662,7 +1686,13 @@ def build_report() -> dict[str, Any]:
     load_one, load_five, load_fifteen = os.getloadavg()
     logical_cpus = os.cpu_count() or 1
     activity = activity_window(now)
-    codex_usage = codex_usage_window(now)
+    fingerprint_secret = os.environ.get("MACHINE_HEALTH_INGEST_SECRET", "")
+    codex_usage = codex_usage_window(
+        now,
+        fingerprint_key=(
+            fingerprint_secret.encode("utf-8") if fingerprint_secret else None
+        ),
+    )
     routes = route_activity()
     tags = process_tags()
     coverage = process_coverage()

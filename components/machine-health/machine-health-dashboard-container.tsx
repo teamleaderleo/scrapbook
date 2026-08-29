@@ -55,6 +55,7 @@ export async function MachineHealthDashboardContainer() {
     <MachineHealthDashboard
       report={result.report}
       samples={result.samples}
+      codexSamples={result.codexSamples}
       now={Date.parse(result.observedAt)}
     />
   );

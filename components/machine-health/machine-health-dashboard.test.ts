@@ -58,6 +58,36 @@ const samples = Array.from({ length: 4 }, (_, index) => ({
   buildTargetCount: 11,
   activeBuildProcesses: 3,
 }));
+const codexSamples = [
+  {
+    source: 'big-red' as const,
+    accountingState: 'counted' as const,
+    windowStartedAt: '2026-08-29T05:00:00.000Z',
+    windowEndedAt: '2026-08-29T06:00:00.000Z',
+    inputTokens: 12_500_000,
+    cachedInputTokens: 11_875_000,
+    cacheWriteInputTokens: 0,
+    outputTokens: 42_000,
+    reasoningOutputTokens: 13_000,
+    totalTokens: 12_542_000,
+    modelCalls: 110,
+    activeRoutes: 4,
+  },
+  {
+    source: 'macbook-air' as const,
+    accountingState: 'counted' as const,
+    windowStartedAt: '2026-08-29T05:00:00.000Z',
+    windowEndedAt: '2026-08-29T06:00:00.000Z',
+    inputTokens: 2_500_000,
+    cachedInputTokens: 2_000_000,
+    cacheWriteInputTokens: 100_000,
+    outputTokens: 8_000,
+    reasoningOutputTokens: 3_000,
+    totalTokens: 2_508_000,
+    modelCalls: 25,
+    activeRoutes: 2,
+  },
+];
 
 describe('machine health dashboard', () => {
   it('renders a summary-first healthy snapshot without sensitive detail fields', () => {
@@ -65,6 +95,7 @@ describe('machine health dashboard', () => {
       createElement(MachineHealthDashboard, {
         report,
         samples,
+        codexSamples,
         now: Date.parse(checkedAt) + 20 * 60_000,
       })
     );
@@ -76,9 +107,12 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Build state high');
     expect(html).toContain('Codex state high');
     expect(html).toContain('Codex');
-    expect(html).toContain('10 complete hours · 1 hourly record');
-    expect(html).toContain('12,542,000 tokens');
-    expect(html).toContain('Cache reads');
+    expect(html).toContain(
+      '10 complete hours · 1 recorded · Big Red 1h · MacBook Air 1h'
+    );
+    expect(html).toContain('15,050,000 tokens');
+    expect(html).toContain('Cached input');
+    expect(html).toContain('92.5%');
     expect(html).toContain('Cache writes');
     expect(html).toContain('CPU');
     expect(html).toContain('Contention high');
@@ -143,6 +177,24 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Mac offline');
     expect(html).toContain('Seen 6h ago · GRD active · VA-API ready');
     expect(html).toContain('Looks good');
+  });
+
+  it('shows a skipped cross-device overlap without adding it to totals', () => {
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report,
+        samples,
+        codexSamples: [
+          codexSamples[0],
+          { ...codexSamples[1], accountingState: 'overlap-skipped' as const },
+        ],
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('1 source-hour skipped');
+    expect(html).toContain('12,542,000 tokens');
+    expect(html).not.toContain('15,050,000 tokens');
   });
 
   it('surfaces a current software-encode fallback', () => {

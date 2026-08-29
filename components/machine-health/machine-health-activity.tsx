@@ -1,6 +1,8 @@
 'use client';
 
 import type {
+  CodexTokenSample,
+  CodexTokenSource,
   MachineHealthPayload,
   MachineHealthSample,
 } from '@/app/lib/machine-health-store';
@@ -27,6 +29,8 @@ type ActivityBin = {
   codexModelCalls: number | null;
   codexActiveRoutes: number | null;
   codexWindowCount: number;
+  codexSkippedCount: number;
+  codexSources: CodexTokenSource[];
   fallbackCount: number;
   undercoveredCount: number;
   rebootCount: number;
@@ -148,6 +152,8 @@ export function buildActivityBins(
       codexActiveRoutes:
         activeRoutes.length === 0 ? null : Math.max(...activeRoutes),
       codexWindowCount: includedCodex.length,
+      codexSkippedCount: 0,
+      codexSources: includedCodex.length === 0 ? [] : ['big-red'],
       fallbackCount: included.filter(
         sample => sample.activitySource === 'point'
       ).length,
@@ -208,12 +214,50 @@ export function buildActivityBins(
 }
 
 export function buildCodexActivityBins(
-  samples: MachineHealthSample[],
+  samples: CodexTokenSample[],
   range: ActivityRange,
   now: number
 ) {
   const completeHourEnd = Math.floor(now / HOUR_MS) * HOUR_MS;
-  return buildActivityBins(samples, range, completeHourEnd);
+  const emptyBins = buildActivityBins([], range, completeHourEnd);
+  return emptyBins.map(bin => {
+    const included = samples.filter(sample => {
+      const windowStartedAt = Date.parse(sample.windowStartedAt);
+      return windowStartedAt >= bin.start && windowStartedAt < bin.end;
+    });
+    const counted = included.filter(
+      sample => sample.accountingState === 'counted'
+    );
+    const activeRoutesByHour = new Map<string, number>();
+    for (const sample of counted)
+      activeRoutesByHour.set(
+        sample.windowStartedAt,
+        (activeRoutesByHour.get(sample.windowStartedAt) ?? 0) +
+          sample.activeRoutes
+      );
+    const activeRoutes = [...activeRoutesByHour.values()];
+    return {
+      ...bin,
+      codexInputTokens: sum(counted.map(sample => sample.inputTokens)),
+      codexCachedInputTokens: sum(
+        counted.map(sample => sample.cachedInputTokens)
+      ),
+      codexCacheWriteInputTokens: sum(
+        counted.map(sample => sample.cacheWriteInputTokens)
+      ),
+      codexOutputTokens: sum(counted.map(sample => sample.outputTokens)),
+      codexReasoningOutputTokens: sum(
+        counted.map(sample => sample.reasoningOutputTokens)
+      ),
+      codexTotalTokens: sum(counted.map(sample => sample.totalTokens)),
+      codexModelCalls: sum(counted.map(sample => sample.modelCalls)),
+      codexActiveRoutes:
+        activeRoutes.length === 0 ? null : Math.max(...activeRoutes),
+      codexWindowCount: counted.length,
+      codexSkippedCount: included.length - counted.length,
+      codexSources: [...new Set(counted.map(sample => sample.source))],
+    };
+  });
 }
 
 function formatValue(value: number | null, unit: string) {
@@ -358,11 +402,13 @@ function CodexMetric({
 
 export function MachineHealthActivity({
   samples,
+  codexSamples,
   now,
   graphicsMaxClockMhz,
   latestActivity,
 }: {
   samples: MachineHealthSample[];
+  codexSamples: CodexTokenSample[];
   now: number;
   graphicsMaxClockMhz: number | null;
   latestActivity: MachineHealthPayload['activity'];
@@ -378,12 +424,12 @@ export function MachineHealthActivity({
     [samples, range, now, rangeDuration]
   );
   const codexBins = useMemo(
-    () => buildCodexActivityBins(samples, range, now),
-    [samples, range, now]
+    () => buildCodexActivityBins(codexSamples, range, now),
+    [codexSamples, range, now]
   );
   const previousCodexBins = useMemo(
-    () => buildCodexActivityBins(samples, range, now - rangeDuration),
-    [samples, range, now, rangeDuration]
+    () => buildCodexActivityBins(codexSamples, range, now - rangeDuration),
+    [codexSamples, range, now, rangeDuration]
   );
   const observedBins = bins.filter(bin => bin.sampleCount > 0).length;
   const browserHigh = Math.max(0, ...bins.map(bin => bin.browserRoots ?? 0));
@@ -414,7 +460,7 @@ export function MachineHealthActivity({
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
         <h2 className="text-lg font-black">Activity</h2>
         <div
-          className="bg-white/45 inline-flex self-start rounded-full border border-black/10 p-0.5 dark:border-white/10 dark:bg-black/20"
+          className="bg-white/45 grid w-full grid-cols-4 rounded-full border border-black/10 p-0.5 dark:border-white/10 dark:bg-black/20 sm:inline-flex sm:w-auto sm:self-start"
           aria-label="Activity history range"
         >
           {(['10h', '24h', '7d', '30d'] as const).map(option => (
@@ -423,7 +469,7 @@ export function MachineHealthActivity({
               type="button"
               aria-pressed={range === option}
               onClick={() => setRange(option)}
-              className={`rounded-full px-3 py-1.5 text-xs font-black transition-colors ${
+              className={`min-h-[44px] rounded-full px-3 py-2 text-xs font-black transition-colors sm:min-h-0 sm:py-1.5 ${
                 range === option
                   ? 'bg-[#a53b34] text-white shadow-sm'
                   : 'opacity-55 hover:opacity-90'
@@ -556,11 +602,12 @@ function CodexActivity({
   previousBins: ActivityBin[];
   range: ActivityRange;
 }) {
-  const observedWindows = bins.reduce(
-    (total, bin) => total + bin.codexWindowCount,
+  const observedBins = bins.filter(bin => bin.codexWindowCount > 0).length;
+  const skippedWindows = bins.reduce(
+    (total, bin) => total + bin.codexSkippedCount,
     0
   );
-  if (observedWindows === 0)
+  if (observedBins === 0 && skippedWindows === 0)
     return (
       <div className="mt-4 border-t border-black/10 pt-4 dark:border-white/10">
         <p className="text-sm font-black">Codex</p>
@@ -614,14 +661,30 @@ function CodexActivity({
       : (totalCachedInput / totalInput) * 100;
   const rangeLabel =
     range === '10h' ? '10 complete hours' : `${range} selected`;
+  const sourceLabels: Record<CodexTokenSource, string> = {
+    'big-red': 'Big Red',
+    'macbook-air': 'MacBook Air',
+  };
+  const sourceCoverage = (['big-red', 'macbook-air'] as const)
+    .map(source => ({
+      source,
+      bins: bins.filter(bin => bin.codexSources.includes(source)).length,
+    }))
+    .filter(item => item.bins > 0)
+    .map(
+      item =>
+        `${sourceLabels[item.source]} ${item.bins}${range === '10h' || range === '24h' ? 'h' : 'd'}`
+    )
+    .join(' · ');
 
   return (
     <div className="mt-5 border-t border-black/10 pt-4 dark:border-white/10">
       <div className="flex flex-col justify-between gap-1 sm:flex-row sm:items-end">
         <h3 className="text-base font-black">Codex</h3>
         <p className="text-[0.68rem] opacity-50">
-          {rangeLabel} · {observedWindows} hourly record
-          {observedWindows === 1 ? '' : 's'}
+          {rangeLabel} · {observedBins} recorded
+          {sourceCoverage ? ` · ${sourceCoverage}` : ''}
+          {skippedWindows > 0 ? ` · ${skippedWindows} source-hour skipped` : ''}
         </p>
       </div>
 
@@ -631,7 +694,7 @@ function CodexActivity({
           value={formatValue(totalTokens, 'tokens')}
           note={
             totalTokens === null
-              ? 'input + output'
+              ? '—'
               : `${totalTokens.toLocaleString('en-US')} tokens`
           }
         />
@@ -641,9 +704,9 @@ function CodexActivity({
           note="cached portion included"
         />
         <CodexMetric
-          label="Cache reads"
+          label="Cached input"
           value={cacheShare === null ? '—' : `${cacheShare.toFixed(1)}%`}
-          note={`${formatValue(totalCachedInput, 'tokens')} of input`}
+          note={`${formatValue(totalCachedInput, 'tokens')} / ${formatValue(totalInput, 'tokens')}`}
         />
         <CodexMetric
           label="Cache writes"

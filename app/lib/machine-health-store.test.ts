@@ -1,12 +1,63 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  codexTokenReportSchema,
   evaluateMachineHealth,
   machineHealthPayloadSchema,
 } from './machine-health-store';
 import { healthyMachineReport } from '@/tests/fixtures/machine-health';
 
 describe('machine health contract', () => {
+  it('requires exact complete-hour token windows and collision fingerprints', () => {
+    const window = {
+      source: 'session-jsonl',
+      window_started_at: '2026-08-29T05:00:00.000Z',
+      window_ended_at: '2026-08-29T06:00:00.000Z',
+      input_tokens: 1_000,
+      cached_input_tokens: 800,
+      cache_write_input_tokens: 100,
+      output_tokens: 50,
+      reasoning_output_tokens: 20,
+      total_tokens: 1_100,
+      model_calls: 4,
+      active_routes: 2,
+      session_fingerprints: ['0123456789abcdef0123456789abcdef'],
+      fingerprints_complete: true,
+    };
+    const report = {
+      schema_version: 1,
+      source: 'macbook-air',
+      collected_at: '2026-08-29T06:05:00.000Z',
+      windows: [window],
+    };
+
+    expect(codexTokenReportSchema.safeParse(report).success).toBe(true);
+    expect(
+      codexTokenReportSchema.safeParse({
+        ...report,
+        windows: [{ ...window, fingerprints_complete: false }],
+      }).success
+    ).toBe(false);
+    expect(
+      codexTokenReportSchema.safeParse({
+        ...report,
+        windows: [{ ...window, cached_input_tokens: 1_001 }],
+      }).success
+    ).toBe(false);
+    expect(
+      codexTokenReportSchema.safeParse({
+        ...report,
+        windows: [
+          {
+            ...window,
+            window_started_at: '2026-08-29T05:30:00.000Z',
+            window_ended_at: '2026-08-29T06:30:00.000Z',
+          },
+        ],
+      }).success
+    ).toBe(false);
+  });
+
   it('accepts the bounded report and strips unknown fields at every level', () => {
     const parsed = machineHealthPayloadSchema.parse({
       ...healthyMachineReport,

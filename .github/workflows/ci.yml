@@ -42,7 +42,9 @@ jobs:
       - name: Lint
         run: pnpm lint
       - name: Collector tests
-        run: python3 scripts/big-red-health-report.test.py
+        run: |
+          python3 scripts/big-red-health-report.test.py
+          python3 scripts/codex-token-report.test.py
       - name: Unit tests
         run: pnpm test
 

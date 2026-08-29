@@ -1,4 +1,5 @@
 import {
+  type CodexTokenSample,
   evaluateMachineHealth,
   type MachineHealthSample,
   type StoredMachineHealth,
@@ -89,10 +90,12 @@ function Pill({
 export function MachineHealthDashboard({
   report,
   samples,
+  codexSamples = [],
   now,
 }: {
   report: StoredMachineHealth;
   samples: MachineHealthSample[];
+  codexSamples?: CodexTokenSample[];
   now: number;
 }) {
   const payload = report.payload;
@@ -462,6 +465,7 @@ export function MachineHealthDashboard({
 
       <MachineHealthActivity
         samples={samples}
+        codexSamples={codexSamples}
         now={now}
         graphicsMaxClockMhz={payload.graphics.max_clock_mhz}
         latestActivity={payload.activity}

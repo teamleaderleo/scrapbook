@@ -1,6 +1,6 @@
 # Big Red health dashboard
 
-`/machine-health` is a private, lightweight health check for the Big Red Ubuntu workstation. It is deliberately smaller than a monitoring stack: one short-lived collector process, one compact POST per hour, and one Postgres row per run.
+`/machine-health` is a private, lightweight health check for the Big Red Ubuntu workstation. One short-lived collector sends a compact hourly health report. Codex token accounting uses one row per device and complete UTC hour so Big Red and the MacBook Air can share the same view.
 
 This change only provides the code and operating plan. It does **not** apply the database migration, set credentials, install a user service or timer, or deploy Scrapbook.
 
@@ -19,11 +19,14 @@ The page starts with the questions that matter when Leo is away from the machine
   animation state, and configured mirror/extend mode?
 - How many agent routes, jobs, and descendant processes are explicitly owned, how much RSS do they account for, and did any ownership record become unknown or leave residue?
 - How much local Codex state is allocated, how much is active or unknown, did the scan finish cleanly, and how did the total change over seven days?
+- How many Codex tokens came from Big Red and the MacBook Air, and what share of input was served from cache?
 
 The dashboard defaults to the last 10 complete hourly bins and also offers 24-hour, 7-day, and
 30-day views. One hour always remains one normalized hour; UTC fixes the storage boundary, while the
-browser's time zone changes only the labels. Token cards sum the selected hourly records, and the
-10-hour view excludes the current partial hour. Browser/Codex counts, tagged route/process counts,
+browser's time zone changes only the labels. Token cards sum the selected device-hour records, and
+the 10-hour view excludes the current partial hour. Cached input percent is
+`cached_input_tokens / input_tokens`; the card shows both counts with the percentage. The source
+line shows how many bins each device supplied. Browser/Codex counts, tagged route/process counts,
 aggregate memory, and the active RDP connection count stay coarse. The current workspace view also
 splits hook-owned execution into chat roots, main-root jobs, subagent jobs, processes, and memory. It
 keeps opaque route and agent IDs out of the snapshot.
@@ -43,6 +46,13 @@ The ingestion schema is an allowlist and strips unknown keys at every object lev
 - usernames, home-directory paths, serial numbers, or raw command output.
 
 The collector parses local command output and emits only enum values, booleans, percentages, byte totals, and aggregate counts. Its legacy Codex count observes code-mode worker leaves while excluding persistent desktop and remote-control daemons. The route view calls the v2 ownership tool's aggregate `status` contract; the process-tag view calls the hook adapter's aggregate `status` contract. Scrapbook does not repeat either cgroup classifier or read route receipts directly. It checks the root/job/process/memory sums before accepting a tag snapshot. Malformed, missing, inconsistent, or version-mismatched status becomes `unavailable` instead of a guessed zero. Browser RSS sums the browser process trees and is a trend signal rather than unique physical memory because shared pages can appear in more than one process. RDP visibility counts established local connections without emitting the peer or endpoint.
+
+Token reports never send session IDs. Each reporter HMACs the local session ID with the shared
+ingest secret and sends a truncated 128-bit fingerprint used only for collision detection. A retry
+replaces the same source-hour row. If Big Red and the MacBook Air report the same session in the
+same hour, the later source-hour is marked `overlap-skipped` and omitted from totals instead of being
+counted twice. A report without complete fingerprint evidence is marked `unverified-skipped`. The
+dashboard shows the skipped source-hour count. Fingerprints are not returned by the dashboard query.
 
 The desktop readout calls the repository-owned GNOME polish snapshot and keeps only version, pixel
 dimensions, refresh, logical scale, screen-shield state, animation state, and mirror/extend mode.
@@ -69,6 +79,10 @@ The default proposal is one report per hour, with manual runs whenever a change 
 - The current exact-head live report measured 3,987 bytes as compact JSON and 5,015 bytes pretty-printed. Ninety days at hourly frequency is 2,160 rows and roughly 8.2 MiB of raw compact payload; a conservative database budget remains under 20 MiB after allowing for JSONB, scalar columns, row overhead, and the index.
 - The page has a manual refresh control and refreshes its server data once per hour while the tab is visible. Returning to a tab refreshes it only when the last page refresh is at least an hour old.
 
+A live 30-day Big Red token backfill scanned 720 complete hours in 2.24 seconds at 50,704 KiB peak
+RSS. Its compact report was 244,226 bytes, below the 512 KiB ingest limit; only 24 hours contained
+model calls. Routine runs scan from the last successful hour and exit after posting.
+
 Big Red already runs Ubuntu's `sysstat` accounting every 10 minutes. The collector reuses the six newest records to produce time-weighted 60-minute averages for CPU, memory, aggregate non-loopback network throughput, and non-loop disk I/O, plus CPU/memory/I/O [Pressure Stall Information](https://docs.kernel.org/accounting/psi.html). It emits only the aggregate result; host names, device names, and interface names parsed from `sadf` never enter the report. If readable accounting data is unavailable, the collector fails soft to the original 250 ms `/proc` point sample and labels the source accordingly.
 
 The reuse path has no new resident process. A five-run same-machine comparison measured 934 ms mean before route status and 945 ms after it, a 10.5 ms difference inside the observed run-to-run spread. The compact payload grew by 181 bytes. Existing local sysstat history occupied 624 KiB after about 15 hours, independent of this dashboard.
@@ -88,13 +102,13 @@ The exact-head collector took 10.43 seconds and 54,208 KiB peak RSS in a live pr
 
 Remote-client classification reuses the existing Tailscale status document, so it adds no second Tailscale command or network probe. Acceleration classification adds two bounded local reads: the service invocation ID and up to 512 journal records from that invocation. Those two reads took 5.1 ms median and 8.1 ms maximum across 20 live probes.
 
-Route activity, process tags, and Codex state are point observations at report time. The hygiene panel shows exact-scoped versus discoverable Codex processes beside active routes, jobs, tagged descendants, aggregate memory, residue, unknown ownership records, and local state growth. Hook tags add main-root and subagent rollups without exposing their identities. Historical bins show the highest lease-tagged process count observed in each hour or day; they do not imply continuous runtime between reports. Token usage is stored as one previous-complete-hour record per report, deduplicated by its hour, and summed in the selected dashboard window. Full-history subagent forks replay old session events at creation; the collector drops that startup replay before accounting so a fork cannot manufacture a token spike.
+Route activity, process tags, and Codex state are point observations at report time. The hygiene panel shows exact-scoped versus discoverable Codex processes beside active routes, jobs, tagged descendants, aggregate memory, residue, unknown ownership records, and local state growth. Hook tags add main-root and subagent rollups without exposing their identities. Historical bins show the highest lease-tagged process count observed in each hour or day; they do not imply continuous runtime between reports. Token usage is stored by source and complete hour, summed across Big Red and the MacBook Air, and deduplicated on source plus hour. Full-history subagent forks replay old session events at creation; both collectors drop that startup replay before accounting so a fork cannot manufacture a token spike.
 
 An Aug. 29 live reconciliation covered the ten complete hours ending at 22:00 UTC. The raw session
 sum was 2,184,178,104 tokens, but 7,077 counter events came from two full-history fork startup
 replays. Removing those replays left 1,235,555,859 tokens across 8,992 counter events, with a
-seven-route hourly high. The test fixture reproduces the fork shape so the inflated result cannot
-quietly return.
+seven-route hourly high. Cached input was 1,204,553,728 of 1,229,555,057 input tokens, or 97.97%.
+The test fixture reproduces the fork shape so the inflated result cannot quietly return.
 
 Build/cache state and Codex state are gauges rather than activity totals. Their charts keep the
 highest observed value in each hour or day and compare the current range high with the same-length
@@ -124,7 +138,8 @@ CPU/memory peaks, disk/network throughput, PSI, load, and the iGPU clock are dis
 
 ## Website configuration
 
-Apply `drizzle/0016_machine_health.sql` and `drizzle/0017_machine_health_hygiene.sql` in order
+Apply `drizzle/0016_machine_health.sql`, `drizzle/0017_machine_health_hygiene.sql`, and
+`drizzle/0018_codex_token_samples.sql` in order
 through the normal Scrapbook migration process, then set:
 
 ```text
@@ -140,6 +155,7 @@ Paths:
 GET  /machine-health/access
 GET  /machine-health
 POST /api/machine-health/ingest
+POST /api/machine-health/codex-usage/ingest
 ```
 
 Production `/machine-health` verifies its signed, seven-day HttpOnly cookie before reading the database. Invalid or unconfigured access returns the ordinary not-found page. The access form sends the token in a POST body rather than a query string.
@@ -162,6 +178,25 @@ nothing. A configured successful send is quiet, so the hourly service does not c
 into the user journal.
 
 The route section expects the authoritative helper at `~/Projects/leo-workspace/tools/codex_route_job.py`. If it is absent, fails, or changes its aggregate contract, the report marks route activity unavailable. Restoring that exact helper restores the section; no dashboard-side ownership fallback exists.
+
+The portable token collector runs on macOS or Linux and reads only `~/.codex/sessions`:
+
+```bash
+python3 scripts/codex-token-report.py --source macbook-air --hours 720 --print-only
+```
+
+The first approved production run can use `--hours 720` to backfill the latest 30 days. Later runs
+omit `--hours`; a small local success cursor makes the next run cover every complete hour since the
+last accepted post, capped at 30 days. The cursor advances only after a successful response.
+
+```bash
+CODEX_TOKEN_INGEST_URL=https://teamleaderleo.com/api/machine-health/codex-usage/ingest \
+MACHINE_HEALTH_INGEST_SECRET='<ingest secret>' \
+python3 scripts/codex-token-report.py --source macbook-air
+```
+
+No Mac LaunchAgent is installed by this change. An approved rollout can schedule that command hourly
+and at login; sleep or offline gaps are recovered from the success cursor.
 
 The Codex-state section expects `~/Projects/leo-workspace/tools/codex_state_inventory.py`. Missing, slow, malformed, privileged, mutating, or cleanup-authoritative output becomes unavailable. The collector allows 12 seconds for this read and rejects output above 64 KiB.
 
@@ -210,10 +245,10 @@ The randomized delay avoids making the exact workstation schedule externally vis
 
 Each layer can be removed independently:
 
-1. Disable and remove the user timer/service, collector copy, and local environment file. This stops all new reports without affecting the workstation's network or power configuration.
+1. Disable and remove the Big Red user timer/service, Mac LaunchAgent if installed, collector copies, local success cursor, and environment files. This stops all new reports without affecting either machine's network or power configuration.
 2. Remove the website environment variables and deploy. The access and ingest routes become unavailable.
-3. Revert the route-activity fields to remove only the ownership view, or remove the route, component, store, collector, and documentation files to retire the complete dashboard.
-4. Only if history should be erased, separately approve dropping `machine_health_status` and `machine_health_samples`. Leaving the tiny, inaccessible tables in place is the more reversible default.
+3. Revert the route-activity fields to remove only the ownership view, or remove the route, component, store, collectors, and documentation files to retire the complete dashboard.
+4. Only if history should be erased, separately approve dropping `machine_health_status`, `machine_health_samples`, and `codex_token_samples`. Leaving the tiny, inaccessible tables in place is the more reversible default.
 
 No rollback step requires firmware, boot, disk, network, login, SSH, Tailscale, or sleep-policy changes.
 

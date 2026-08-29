@@ -7,6 +7,79 @@ const percent = z.number().finite().min(0).max(100);
 const nonnegative = z.number().finite().min(0);
 const nullableNonnegative = nonnegative.nullable();
 const nonnegativeInteger = z.number().int().min(0);
+export const codexTokenSourceSchema = z.enum(['big-red', 'macbook-air']);
+export const codexUsageWindowSchema = z
+  .object({
+    source: z.literal('session-jsonl'),
+    window_started_at: z.string().datetime({ offset: true }),
+    window_ended_at: z.string().datetime({ offset: true }),
+    input_tokens: nonnegativeInteger,
+    cached_input_tokens: nonnegativeInteger,
+    cache_write_input_tokens: nonnegativeInteger,
+    output_tokens: nonnegativeInteger,
+    reasoning_output_tokens: nonnegativeInteger,
+    total_tokens: nonnegativeInteger,
+    model_calls: nonnegativeInteger,
+    active_routes: nonnegativeInteger,
+    session_fingerprints: z
+      .array(z.string().regex(/^[0-9a-f]{32}$/))
+      .max(1_024)
+      .optional(),
+    fingerprints_complete: z.boolean().optional(),
+  })
+  .superRefine((usage, context) => {
+    const start = Date.parse(usage.window_started_at);
+    const end = Date.parse(usage.window_ended_at);
+    if (start % (60 * 60 * 1_000) !== 0 || end - start !== 60 * 60 * 1_000)
+      context.addIssue({
+        code: 'custom',
+        message: 'Codex usage windows must be exact UTC hours',
+      });
+    if (usage.cached_input_tokens > usage.input_tokens)
+      context.addIssue({
+        code: 'custom',
+        message: 'Cached input cannot exceed input tokens',
+      });
+    if (usage.reasoning_output_tokens > usage.output_tokens)
+      context.addIssue({
+        code: 'custom',
+        message: 'Reasoning output cannot exceed output tokens',
+      });
+  });
+
+export const codexTokenReportSchema = z
+  .object({
+    schema_version: z.literal(1),
+    source: codexTokenSourceSchema,
+    collected_at: z.string().datetime({ offset: true }),
+    windows: z.array(codexUsageWindowSchema).min(1).max(720),
+  })
+  .superRefine((report, context) => {
+    const starts = report.windows.map(window => window.window_started_at);
+    if (new Set(starts).size !== starts.length)
+      context.addIssue({
+        code: 'custom',
+        message: 'Codex usage windows must be unique within a report',
+      });
+    for (const [index, window] of report.windows.entries()) {
+      if (window.fingerprints_complete !== true || !window.session_fingerprints)
+        context.addIssue({
+          code: 'custom',
+          path: ['windows', index, 'fingerprints_complete'],
+          message: 'Cross-device reports require complete session fingerprints',
+        });
+      if (
+        window.session_fingerprints &&
+        new Set(window.session_fingerprints).size !==
+          window.session_fingerprints.length
+      )
+        context.addIssue({
+          code: 'custom',
+          path: ['windows', index, 'session_fingerprints'],
+          message: 'Session fingerprints must be unique within a window',
+        });
+    }
+  });
 const routeResourceFields = {
   tagged_resource_jobs: nonnegativeInteger.nullable().optional(),
   tagged_memory_observed_jobs: nonnegativeInteger.nullable().optional(),
@@ -145,19 +218,24 @@ export const machineHealthPayloadSchema = z.object({
     disk_write_mib_s: nullableNonnegative,
   }),
   codex_usage: z
-    .object({
-      source: z.enum(['session-jsonl', 'unavailable']),
-      window_started_at: z.string().datetime({ offset: true }),
-      window_ended_at: z.string().datetime({ offset: true }),
-      input_tokens: nonnegativeInteger,
-      cached_input_tokens: nonnegativeInteger,
-      cache_write_input_tokens: nonnegativeInteger,
-      output_tokens: nonnegativeInteger,
-      reasoning_output_tokens: nonnegativeInteger,
-      total_tokens: nonnegativeInteger,
-      model_calls: nonnegativeInteger,
-      active_routes: nonnegativeInteger,
-    })
+    .union([
+      codexUsageWindowSchema,
+      z.object({
+        source: z.literal('unavailable'),
+        window_started_at: z.string().datetime({ offset: true }),
+        window_ended_at: z.string().datetime({ offset: true }),
+        input_tokens: z.literal(0),
+        cached_input_tokens: z.literal(0),
+        cache_write_input_tokens: z.literal(0),
+        output_tokens: z.literal(0),
+        reasoning_output_tokens: z.literal(0),
+        total_tokens: z.literal(0),
+        model_calls: z.literal(0),
+        active_routes: z.literal(0),
+        session_fingerprints: z.array(z.never()).optional(),
+        fingerprints_complete: z.boolean().optional(),
+      }),
+    ])
     .optional(),
   route_activity: z
     .discriminatedUnion('source', [
@@ -414,6 +492,9 @@ export const machineHealthPayloadSchema = z.object({
 });
 
 export type MachineHealthPayload = z.infer<typeof machineHealthPayloadSchema>;
+export type CodexTokenSource = z.infer<typeof codexTokenSourceSchema>;
+export type CodexUsageWindow = z.infer<typeof codexUsageWindowSchema>;
+export type CodexTokenReport = z.infer<typeof codexTokenReportSchema>;
 
 export type MachineHealthSample = {
   checkedAt: string;
@@ -467,11 +548,27 @@ export type StoredMachineHealth = {
   updatedAt: string;
 };
 
+export type CodexTokenSample = {
+  source: CodexTokenSource;
+  accountingState: 'counted' | 'overlap-skipped' | 'unverified-skipped';
+  windowStartedAt: string;
+  windowEndedAt: string;
+  inputTokens: number;
+  cachedInputTokens: number;
+  cacheWriteInputTokens: number;
+  outputTokens: number;
+  reasoningOutputTokens: number;
+  totalTokens: number;
+  modelCalls: number;
+  activeRoutes: number;
+};
+
 export type MachineHealthReadResult =
   | {
       status: 'ok';
       report: StoredMachineHealth;
       samples: MachineHealthSample[];
+      codexSamples: CodexTokenSample[];
       observedAt: string;
     }
   | { status: 'empty' }
@@ -695,14 +792,227 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         created_at = now()
     `;
 
+    if (payload.codex_usage?.source === 'session-jsonl') {
+      const usage = payload.codex_usage;
+      await sql`
+        SELECT pg_advisory_xact_lock(1129270341)
+      `;
+      const otherSources = await sql<
+        {
+          session_fingerprints: string[];
+          fingerprints_complete: boolean;
+        }[]
+      >`
+        SELECT session_fingerprints, fingerprints_complete
+        FROM codex_token_samples
+        WHERE source <> 'big-red'
+          AND window_started_at = ${usage.window_started_at}
+          AND accounting_state = 'counted'
+        FOR UPDATE
+      `;
+      const usageFingerprints = new Set(usage.session_fingerprints ?? []);
+      const overlapsOtherSource = otherSources.some(
+        row =>
+          !row.fingerprints_complete ||
+          row.session_fingerprints.some(fingerprint =>
+            usageFingerprints.has(fingerprint)
+          )
+      );
+      const accountingState =
+        usage.fingerprints_complete !== true
+          ? 'unverified-skipped'
+          : overlapsOtherSource
+            ? 'overlap-skipped'
+            : 'counted';
+      await sql`
+          INSERT INTO codex_token_samples (
+            source,
+            window_started_at,
+            window_ended_at,
+            input_tokens,
+            cached_input_tokens,
+            cache_write_input_tokens,
+            output_tokens,
+            reasoning_output_tokens,
+            total_tokens,
+            model_calls,
+            active_routes,
+            accounting_state,
+            session_fingerprints,
+            fingerprints_complete,
+            collected_at
+          )
+          VALUES (
+            'big-red',
+            ${usage.window_started_at},
+            ${usage.window_ended_at},
+            ${usage.input_tokens},
+            ${usage.cached_input_tokens},
+            ${usage.cache_write_input_tokens},
+            ${usage.output_tokens},
+            ${usage.reasoning_output_tokens},
+            ${usage.total_tokens},
+            ${usage.model_calls},
+            ${usage.active_routes},
+            ${accountingState},
+            ${sql.array(usage.session_fingerprints ?? [], 25)}::text[],
+            ${usage.fingerprints_complete === true},
+            ${checkedAt}
+          )
+          ON CONFLICT (source, window_started_at)
+          DO UPDATE SET
+            window_ended_at = EXCLUDED.window_ended_at,
+            input_tokens = EXCLUDED.input_tokens,
+            cached_input_tokens = EXCLUDED.cached_input_tokens,
+            cache_write_input_tokens = EXCLUDED.cache_write_input_tokens,
+            output_tokens = EXCLUDED.output_tokens,
+            reasoning_output_tokens = EXCLUDED.reasoning_output_tokens,
+            total_tokens = EXCLUDED.total_tokens,
+            model_calls = EXCLUDED.model_calls,
+            active_routes = EXCLUDED.active_routes,
+            accounting_state = EXCLUDED.accounting_state,
+            session_fingerprints = EXCLUDED.session_fingerprints,
+            fingerprints_complete = EXCLUDED.fingerprints_complete,
+            collected_at = GREATEST(
+              codex_token_samples.collected_at,
+              EXCLUDED.collected_at
+            )
+      `;
+    }
+
     await sql`
       DELETE FROM machine_health_samples
       WHERE host = 'big-red'
         AND checked_at < now() - interval '90 days'
     `;
+    await sql`
+      DELETE FROM codex_token_samples
+      WHERE window_started_at < now() - interval '90 days'
+    `;
   });
 
   return { host: 'big-red' as const, checkedAt };
+}
+
+export async function saveCodexTokenReport(report: CodexTokenReport) {
+  const collectedAt = new Date(report.collected_at).toISOString();
+  const rows = report.windows.map(window => ({
+    source: report.source,
+    window_started_at: new Date(window.window_started_at).toISOString(),
+    window_ended_at: new Date(window.window_ended_at).toISOString(),
+    input_tokens: window.input_tokens,
+    cached_input_tokens: window.cached_input_tokens,
+    cache_write_input_tokens: window.cache_write_input_tokens,
+    output_tokens: window.output_tokens,
+    reasoning_output_tokens: window.reasoning_output_tokens,
+    total_tokens: window.total_tokens,
+    model_calls: window.model_calls,
+    active_routes: window.active_routes,
+    accounting_state: 'counted' as const,
+    session_fingerprints: window.session_fingerprints ?? [],
+    fingerprints_complete: window.fingerprints_complete === true,
+    collected_at: collectedAt,
+  }));
+
+  const skipped = await client.begin(async sql => {
+    const starts = rows.map(row => row.window_started_at);
+    await sql`
+      SELECT pg_advisory_xact_lock(1129270341)
+    `;
+    const existing = await sql<
+      {
+        window_started_at: Date | string;
+        session_fingerprints: string[];
+        fingerprints_complete: boolean;
+      }[]
+    >`
+      SELECT
+        window_started_at,
+        session_fingerprints,
+        fingerprints_complete
+      FROM codex_token_samples
+      WHERE source <> ${report.source}
+        AND window_started_at = ANY(${sql.array(starts, 25)}::timestamptz[])
+        AND accounting_state = 'counted'
+      FOR UPDATE
+    `;
+    const skippedStarts = new Set<string>();
+    for (const row of existing) {
+      const startedAt = new Date(row.window_started_at).toISOString();
+      const incoming = rows.find(item => item.window_started_at === startedAt);
+      if (!incoming) continue;
+      if (!row.fingerprints_complete || !incoming.fingerprints_complete) {
+        skippedStarts.add(startedAt);
+        continue;
+      }
+      const incomingFingerprints = new Set(incoming.session_fingerprints);
+      if (
+        row.session_fingerprints.some(fingerprint =>
+          incomingFingerprints.has(fingerprint)
+        )
+      )
+        skippedStarts.add(startedAt);
+    }
+
+    const databaseRows = rows.map(row => ({
+      ...row,
+      accounting_state: skippedStarts.has(row.window_started_at)
+        ? ('overlap-skipped' as const)
+        : ('counted' as const),
+      session_fingerprints: sql.array(row.session_fingerprints, 25),
+    }));
+    await sql`
+      INSERT INTO codex_token_samples ${sql(
+        databaseRows,
+        'source',
+        'window_started_at',
+        'window_ended_at',
+        'input_tokens',
+        'cached_input_tokens',
+        'cache_write_input_tokens',
+        'output_tokens',
+        'reasoning_output_tokens',
+        'total_tokens',
+        'model_calls',
+        'active_routes',
+        'accounting_state',
+        'session_fingerprints',
+        'fingerprints_complete',
+        'collected_at'
+      )}
+      ON CONFLICT (source, window_started_at)
+      DO UPDATE SET
+        window_ended_at = EXCLUDED.window_ended_at,
+        input_tokens = EXCLUDED.input_tokens,
+        cached_input_tokens = EXCLUDED.cached_input_tokens,
+        cache_write_input_tokens = EXCLUDED.cache_write_input_tokens,
+        output_tokens = EXCLUDED.output_tokens,
+        reasoning_output_tokens = EXCLUDED.reasoning_output_tokens,
+        total_tokens = EXCLUDED.total_tokens,
+        model_calls = EXCLUDED.model_calls,
+        active_routes = EXCLUDED.active_routes,
+        accounting_state = EXCLUDED.accounting_state,
+        session_fingerprints = EXCLUDED.session_fingerprints,
+        fingerprints_complete = EXCLUDED.fingerprints_complete,
+        collected_at = GREATEST(
+          codex_token_samples.collected_at,
+          EXCLUDED.collected_at
+        )
+    `;
+    await sql`
+      DELETE FROM codex_token_samples
+      WHERE window_started_at < now() - interval '90 days'
+    `;
+    return skippedStarts.size;
+  });
+
+  return {
+    source: report.source,
+    windows: rows.length,
+    counted: rows.length - skipped,
+    skipped,
+    collectedAt,
+  };
 }
 
 export async function readMachineHealth(
@@ -718,7 +1028,7 @@ export async function readMachineHealth(
   }
 
   try {
-    const [latestRows, sampleRows] = await Promise.all([
+    const [latestRows, sampleRows, codexRows] = await Promise.all([
       client<
         {
           host: 'big-red';
@@ -788,6 +1098,42 @@ export async function readMachineHealth(
           AND checked_at >= now() - (${Math.max(1, Math.min(90, Math.floor(days)))}::int * interval '1 day')
         ORDER BY checked_at ASC
       `,
+      client<
+        {
+          source: CodexTokenSource;
+          accounting_state:
+            | 'counted'
+            | 'overlap-skipped'
+            | 'unverified-skipped';
+          window_started_at: Date | string;
+          window_ended_at: Date | string;
+          input_tokens: number | string | bigint;
+          cached_input_tokens: number | string | bigint;
+          cache_write_input_tokens: number | string | bigint;
+          output_tokens: number | string | bigint;
+          reasoning_output_tokens: number | string | bigint;
+          total_tokens: number | string | bigint;
+          model_calls: number | string;
+          active_routes: number | string;
+        }[]
+      >`
+        SELECT
+          source,
+          accounting_state,
+          window_started_at,
+          window_ended_at,
+          input_tokens,
+          cached_input_tokens,
+          cache_write_input_tokens,
+          output_tokens,
+          reasoning_output_tokens,
+          total_tokens,
+          model_calls,
+          active_routes
+        FROM codex_token_samples
+        WHERE window_started_at >= now() - (${Math.max(1, Math.min(90, Math.floor(days)))}::int * interval '1 day')
+        ORDER BY window_started_at ASC, source ASC
+      `,
     ]);
 
     const latest = latestRows[0];
@@ -805,6 +1151,20 @@ export async function readMachineHealth(
         updatedAt: new Date(latest.updated_at).toISOString(),
       },
       observedAt: new Date().toISOString(),
+      codexSamples: codexRows.map(row => ({
+        source: row.source,
+        accountingState: row.accounting_state,
+        windowStartedAt: new Date(row.window_started_at).toISOString(),
+        windowEndedAt: new Date(row.window_ended_at).toISOString(),
+        inputTokens: toNumber(row.input_tokens),
+        cachedInputTokens: toNumber(row.cached_input_tokens),
+        cacheWriteInputTokens: toNumber(row.cache_write_input_tokens),
+        outputTokens: toNumber(row.output_tokens),
+        reasoningOutputTokens: toNumber(row.reasoning_output_tokens),
+        totalTokens: toNumber(row.total_tokens),
+        modelCalls: toNumber(row.model_calls),
+        activeRoutes: toNumber(row.active_routes),
+      })),
       samples: sampleRows.map(row => {
         const parsedSample = machineHealthPayloadSchema.safeParse(row.payload);
         const codexUsage =

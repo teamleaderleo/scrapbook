@@ -170,6 +170,46 @@ class CodexUsageTest(unittest.TestCase):
         self.assertEqual(usage["source"], "unavailable")
         self.assertEqual(usage["model_calls"], 0)
 
+    def test_uses_keyed_session_fingerprints_without_emitting_ids(self) -> None:
+        now = dt.datetime(2026, 8, 29, 7, 23, tzinfo=dt.timezone.utc)
+        token_usage = {
+            "input_tokens": 100,
+            "cached_input_tokens": 80,
+            "cache_write_input_tokens": 5,
+            "output_tokens": 20,
+            "reasoning_output_tokens": 7,
+            "total_tokens": 120,
+        }
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            directory = Path(temporary_directory)
+            session = directory / "route.jsonl"
+            records = [
+                {
+                    "timestamp": "2026-08-29T06:00:00Z",
+                    "type": "session_meta",
+                    "payload": {"id": "private-session-id"},
+                },
+                {
+                    "timestamp": "2026-08-29T06:15:00Z",
+                    "payload": {
+                        "type": "token_count",
+                        "info": {"last_token_usage": token_usage},
+                    },
+                },
+            ]
+            session.write_text(
+                "\n".join(json.dumps(record) for record in records), encoding="utf-8"
+            )
+            os.utime(session, (now.timestamp(), now.timestamp()))
+
+            result = REPORT.codex_usage_window(
+                now, directory, fingerprint_key=b"test-key"
+            )
+
+        self.assertTrue(result["fingerprints_complete"])
+        self.assertEqual(len(result["session_fingerprints"]), 1)
+        self.assertNotIn("private-session-id", json.dumps(result))
+
     def test_excludes_history_replayed_at_fork_start(self) -> None:
         now = dt.datetime(2026, 8, 29, 7, 23, tzinfo=dt.timezone.utc)
         usage = {

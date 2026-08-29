@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import type { MachineHealthSample } from '@/app/lib/machine-health-store';
+import type {
+  CodexTokenSample,
+  MachineHealthSample,
+} from '@/app/lib/machine-health-store';
 import {
   buildActivityBins,
   buildCodexActivityBins,
@@ -59,21 +62,41 @@ function sample(
   };
 }
 
+function tokenSample(
+  source: CodexTokenSample['source'],
+  overrides: Partial<CodexTokenSample> = {}
+): CodexTokenSample {
+  return {
+    source,
+    accountingState: 'counted',
+    windowStartedAt: '2026-08-29T05:00:00.000Z',
+    windowEndedAt: '2026-08-29T06:00:00.000Z',
+    inputTokens: 1_000,
+    cachedInputTokens: 800,
+    cacheWriteInputTokens: 100,
+    outputTokens: 50,
+    reasoningOutputTokens: 20,
+    totalTokens: 1_050,
+    modelCalls: 4,
+    activeRoutes: 2,
+    ...overrides,
+  };
+}
+
 describe('machine health activity bins', () => {
   it('builds 10 complete hourly bins without the current partial hour', () => {
     const bins = buildCodexActivityBins(
       [
-        sample('2026-08-29T06:05:00.000Z'),
-        sample('2026-08-29T05:05:00.000Z', {
-          codexUsageWindowStartedAt: '2026-08-29T05:00:00.000Z',
-          codexInputTokens: 1_000,
-          codexCachedInputTokens: 800,
-          codexCacheWriteInputTokens: 100,
-          codexOutputTokens: 50,
-          codexReasoningOutputTokens: 20,
-          codexTotalTokens: 1_050,
-          codexModelCalls: 4,
-          codexActiveRoutes: 2,
+        tokenSample('big-red'),
+        tokenSample('macbook-air', {
+          inputTokens: 500,
+          cachedInputTokens: 400,
+          cacheWriteInputTokens: 0,
+          outputTokens: 25,
+          reasoningOutputTokens: 10,
+          totalTokens: 525,
+          modelCalls: 2,
+          activeRoutes: 1,
         }),
       ],
       '10h',
@@ -83,10 +106,14 @@ describe('machine health activity bins', () => {
     expect(bins).toHaveLength(10);
     expect(bins.at(-1)).toMatchObject({
       start: Date.parse('2026-08-29T05:00:00.000Z'),
-      codexInputTokens: 1_000,
+      codexInputTokens: 1_500,
+      codexCachedInputTokens: 1_200,
       codexCacheWriteInputTokens: 100,
-      codexTotalTokens: 1_050,
-      codexWindowCount: 1,
+      codexTotalTokens: 1_575,
+      codexActiveRoutes: 3,
+      codexWindowCount: 2,
+      codexSkippedCount: 0,
+      codexSources: ['big-red', 'macbook-air'],
     });
     expect(
       bins.some(bin => bin.start === Date.parse('2026-08-29T06:00:00.000Z'))
@@ -117,6 +144,31 @@ describe('machine health activity bins', () => {
       browserRssMib: 1024,
       buildStateGib: 51.65,
       codexStateMib: 1763.75390625,
+    });
+  });
+
+  it('does not add a cross-device overlap to token totals', () => {
+    const bins = buildCodexActivityBins(
+      [
+        tokenSample('big-red'),
+        tokenSample('macbook-air', {
+          accountingState: 'overlap-skipped',
+          inputTokens: 9_999,
+          cachedInputTokens: 9_999,
+          totalTokens: 10_000,
+        }),
+      ],
+      '10h',
+      now
+    );
+
+    expect(bins.at(-1)).toMatchObject({
+      codexInputTokens: 1_000,
+      codexCachedInputTokens: 800,
+      codexTotalTokens: 1_050,
+      codexWindowCount: 1,
+      codexSkippedCount: 1,
+      codexSources: ['big-red'],
     });
   });
 
