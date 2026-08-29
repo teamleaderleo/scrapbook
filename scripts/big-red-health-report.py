@@ -38,6 +38,10 @@ CODEX_TOKEN_FIELDS = (
 )
 GLAEDA_REPOSITORY = Path.home() / "Projects" / "glaeda"
 GLAEDA_CACHE = Path.home() / ".cache" / "glaeda"
+RELIABILITY_WINDOW_HOURS = 24
+RELIABILITY_EVENT_LIMIT = 4_096
+SYSTEMD_PROCESS_EXIT_MESSAGE_ID = "98e322203f7a4ed290d09fe03c09fe15"
+SYSTEMD_RESTART_MESSAGE_ID = "5eb03494b6584870a536b337290809b3"
 
 
 def run(*command: str) -> tuple[int, str]:
@@ -653,6 +657,59 @@ def configured_rdp_port() -> int:
     return 3389
 
 
+def reliability_window(now: dt.datetime | None = None) -> dict[str, Any]:
+    observed_at = now or dt.datetime.now(dt.timezone.utc)
+    since = observed_at - dt.timedelta(hours=RELIABILITY_WINDOW_HOURS)
+    code, output = run(
+        "journalctl",
+        "--quiet",
+        "--no-pager",
+        "--output=json",
+        "--since",
+        since.isoformat(),
+        "--lines",
+        str(RELIABILITY_EVENT_LIMIT + 1),
+        f"MESSAGE_ID={SYSTEMD_PROCESS_EXIT_MESSAGE_ID}",
+        f"MESSAGE_ID={SYSTEMD_RESTART_MESSAGE_ID}",
+    )
+    if code != 0:
+        return {
+            "source": "unavailable",
+            "window_hours": RELIABILITY_WINDOW_HOURS,
+            "crash_exits": 0,
+            "automatic_restarts": 0,
+            "truncated": False,
+        }
+
+    try:
+        records = [json.loads(line) for line in output.splitlines() if line]
+    except (json.JSONDecodeError, TypeError):
+        return {
+            "source": "unavailable",
+            "window_hours": RELIABILITY_WINDOW_HOURS,
+            "crash_exits": 0,
+            "automatic_restarts": 0,
+            "truncated": False,
+        }
+
+    truncated = len(records) > RELIABILITY_EVENT_LIMIT
+    records = records[-RELIABILITY_EVENT_LIMIT:]
+    return {
+        "source": "journal-24h",
+        "window_hours": RELIABILITY_WINDOW_HOURS,
+        "crash_exits": sum(
+            record.get("MESSAGE_ID") == SYSTEMD_PROCESS_EXIT_MESSAGE_ID
+            and record.get("EXIT_CODE") == "dumped"
+            for record in records
+        ),
+        "automatic_restarts": sum(
+            record.get("MESSAGE_ID") == SYSTEMD_RESTART_MESSAGE_ID
+            for record in records
+        ),
+        "truncated": truncated,
+    }
+
+
 def hygiene_counts() -> tuple[int, int, int, int, int]:
     rows = process_table()
     browser_names = {"firefox", "chrome", "chromium", "msedge", "brave"}
@@ -918,6 +975,7 @@ def build_report() -> dict[str, Any]:
             "unexpected_dev_listeners": dev_listeners,
             "rdp_connections": rdp_connections,
         },
+        "reliability": reliability_window(now),
         "build_state": build_state(),
     }
 

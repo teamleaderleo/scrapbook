@@ -35,6 +35,13 @@ describe('machine health contract', () => {
     expect(parsed.hygiene.rdp_connections).toBe(0);
   });
 
+  it('accepts a snapshot from before reliability history was added', () => {
+    const { reliability: _reliability, ...olderReport } = healthyMachineReport;
+    const parsed = machineHealthPayloadSchema.parse(olderReport);
+
+    expect(parsed.reliability).toBeUndefined();
+  });
+
   it('rejects a host name or payload shape outside the single-machine contract', () => {
     expect(
       machineHealthPayloadSchema.safeParse({
@@ -76,5 +83,18 @@ describe('machine health contract', () => {
         },
       }).state
     ).toBe('watch');
+    expect(
+      evaluateMachineHealth({
+        ...healthyMachineReport,
+        reliability: {
+          ...healthyMachineReport.reliability!,
+          crash_exits: 2,
+          automatic_restarts: 3,
+        },
+      })
+    ).toEqual({
+      state: 'watch',
+      reasons: ['2 service crashes recorded in the last 24 hours.'],
+    });
   });
 });

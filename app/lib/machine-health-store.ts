@@ -109,6 +109,15 @@ export const machineHealthPayloadSchema = z.object({
     unexpected_dev_listeners: nonnegativeInteger,
     rdp_connections: nonnegativeInteger.default(0),
   }),
+  reliability: z
+    .object({
+      source: z.enum(['journal-24h', 'unavailable']),
+      window_hours: z.literal(24),
+      crash_exits: nonnegativeInteger,
+      automatic_restarts: nonnegativeInteger,
+      truncated: z.boolean(),
+    })
+    .optional(),
   build_state: z
     .object({
       source: z.enum(['filesystem', 'unavailable']),
@@ -222,6 +231,15 @@ export function evaluateMachineHealth(payload: MachineHealthPayload) {
     reasons.push(
       `${payload.hygiene.unexpected_dev_listeners} unexpected development listener${payload.hygiene.unexpected_dev_listeners === 1 ? '' : 's'} detected.`
     );
+  if (
+    payload.reliability?.source === 'journal-24h' &&
+    payload.reliability.crash_exits > 0
+  )
+    reasons.push(
+      `${payload.reliability.crash_exits} service crash${payload.reliability.crash_exits === 1 ? '' : 'es'} recorded in the last 24 hours.`
+    );
+  if (payload.reliability?.truncated)
+    reasons.push('Reliability event count exceeded the collector limit.');
 
   const critical = payload.disk.root_used_percent >= 90 || failedUnits > 0;
   return {

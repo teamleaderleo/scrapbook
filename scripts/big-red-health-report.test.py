@@ -213,6 +213,61 @@ class HygieneTest(unittest.TestCase):
         self.assertEqual(port, 3391)
 
 
+class ReliabilityTest(unittest.TestCase):
+    def test_counts_structured_crashes_and_restarts_without_unit_detail(self) -> None:
+        records = [
+            {
+                "MESSAGE_ID": REPORT.SYSTEMD_PROCESS_EXIT_MESSAGE_ID,
+                "EXIT_CODE": "dumped",
+                "MESSAGE": "private.service crashed",
+            },
+            {
+                "MESSAGE_ID": REPORT.SYSTEMD_PROCESS_EXIT_MESSAGE_ID,
+                "EXIT_CODE": "killed",
+                "MESSAGE": "another-private.service was stopped",
+            },
+            {
+                "MESSAGE_ID": REPORT.SYSTEMD_RESTART_MESSAGE_ID,
+                "MESSAGE": "private.service restarted",
+            },
+        ]
+        with patch.object(
+            REPORT,
+            "run",
+            return_value=(0, "\n".join(json.dumps(record) for record in records)),
+        ):
+            reliability = REPORT.reliability_window(
+                dt.datetime(2026, 8, 29, 12, tzinfo=dt.timezone.utc)
+            )
+
+        self.assertEqual(reliability["source"], "journal-24h")
+        self.assertEqual(reliability["window_hours"], 24)
+        self.assertEqual(reliability["crash_exits"], 1)
+        self.assertEqual(reliability["automatic_restarts"], 1)
+        self.assertFalse(reliability["truncated"])
+        self.assertNotIn("private.service", json.dumps(reliability))
+
+    def test_marks_missing_or_malformed_journal_data_unavailable(self) -> None:
+        for response in ((127, ""), (0, "not json")):
+            with self.subTest(response=response):
+                with patch.object(REPORT, "run", return_value=response):
+                    reliability = REPORT.reliability_window()
+                self.assertEqual(reliability["source"], "unavailable")
+                self.assertEqual(reliability["crash_exits"], 0)
+                self.assertEqual(reliability["automatic_restarts"], 0)
+
+    def test_caps_pathological_event_volume(self) -> None:
+        record = json.dumps({"MESSAGE_ID": REPORT.SYSTEMD_RESTART_MESSAGE_ID})
+        with (
+            patch.object(REPORT, "RELIABILITY_EVENT_LIMIT", 2),
+            patch.object(REPORT, "run", return_value=(0, "\n".join([record] * 3))),
+        ):
+            reliability = REPORT.reliability_window()
+
+        self.assertEqual(reliability["automatic_restarts"], 2)
+        self.assertTrue(reliability["truncated"])
+
+
 class BuildStateTest(unittest.TestCase):
     def test_measures_glaeda_targets_and_cache_without_exposing_paths(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

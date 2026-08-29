@@ -67,6 +67,13 @@ export const healthyMachineReport: MachineHealthPayload = {
     unexpected_dev_listeners: 0,
     rdp_connections: 0,
   },
+  reliability: {
+    source: 'journal-24h',
+    window_hours: 24,
+    crash_exits: 0,
+    automatic_restarts: 0,
+    truncated: false,
+  },
   build_state: {
     source: 'filesystem',
     total_gib: 51.65,

@@ -74,8 +74,37 @@ describe('machine health dashboard', () => {
     expect(html).toContain('2.5 GiB');
     expect(html).toContain('RDP');
     expect(html).toContain('Idle');
+    expect(html).toContain('Crashes · 24h: 0');
+    expect(html).toContain('Auto restarts · 24h: 0');
     expect(html).not.toContain('private_ip');
     expect(html).not.toContain('process_arguments');
+  });
+
+  it('surfaces recovered crashes even when failed units returned to zero', () => {
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report: {
+          ...report,
+          payload: {
+            ...report.payload,
+            reliability: {
+              source: 'journal-24h',
+              window_hours: 24,
+              crash_exits: 2,
+              automatic_restarts: 3,
+              truncated: false,
+            },
+          },
+        },
+        samples,
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('Worth a look');
+    expect(html).toContain('2 service crashes recorded in the last 24 hours.');
+    expect(html).toContain('Crashes · 24h: 2');
+    expect(html).toContain('Auto restarts · 24h: 3');
   });
 
   it('turns an otherwise healthy but stale report into a visible watch state', () => {

@@ -103,6 +103,8 @@ export function MachineHealthDashboard({
   const idleSuspendDisabled =
     payload.power.idle_suspend_ac === 'nothing' &&
     payload.power.idle_suspend_battery === 'nothing';
+  const reliability =
+    payload.reliability?.source === 'journal-24h' ? payload.reliability : null;
   const serviceRows = [
     ['SSH', payload.services.ssh],
     ['Tailscale', payload.services.tailscale],
@@ -283,6 +285,18 @@ export function MachineHealthDashboard({
               {payload.power.hibernate_targets_masked ? 'masked' : 'changed'}
             </Pill>
             <Pill good={failedUnits === 0}>Failed units: {failedUnits}</Pill>
+            {reliability ? (
+              <>
+                <Pill good={reliability.crash_exits === 0}>
+                  Crashes · 24h: {reliability.crash_exits}
+                </Pill>
+                <Pill good={reliability.automatic_restarts === 0}>
+                  Auto restarts · 24h: {reliability.automatic_restarts}
+                </Pill>
+              </>
+            ) : (
+              <Pill good={false}>Crash history: unavailable</Pill>
+            )}
           </div>
         </div>
         <div
