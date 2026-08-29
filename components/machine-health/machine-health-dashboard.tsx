@@ -127,6 +127,26 @@ export function MachineHealthDashboard({
       : `${Math.round(payload.graphics.clock_mhz)} MHz`;
   const buildState =
     payload.build_state?.source === 'filesystem' ? payload.build_state : null;
+  const routeActivity =
+    payload.route_activity?.source === 'codex-route-leases-v2'
+      ? payload.route_activity
+      : null;
+  const routeUnknown = routeActivity
+    ? (routeActivity.unknown_routes ?? 0) + (routeActivity.unknown_jobs ?? 0)
+    : null;
+  const routeNote = routeActivity
+    ? [
+        `${routeActivity.active_jobs ?? 0} jobs`,
+        `${routeActivity.tagged_processes ?? 0} proc`,
+        formatMemory(routeActivity.tagged_rss_bytes ?? 0),
+        (routeActivity.residue_jobs ?? 0) > 0
+          ? `${routeActivity.residue_jobs} residue`
+          : null,
+        routeUnknown && routeUnknown > 0 ? `${routeUnknown} unknown` : null,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : 'unavailable';
   const buildStateBaseline = [...samples]
     .reverse()
     .find(
@@ -307,7 +327,7 @@ export function MachineHealthDashboard({
           }}
         >
           <h2 className="text-lg font-black">Workspace hygiene</h2>
-          <dl className="mt-4 grid grid-cols-2 gap-3 text-center sm:grid-cols-5">
+          <dl className="mt-4 grid grid-cols-2 gap-3 text-center sm:grid-cols-3">
             <div>
               <dt className="opacity-55 text-xs">Browser apps</dt>
               <dd className="mt-1 text-xl font-black tabular-nums">
@@ -329,6 +349,15 @@ export function MachineHealthDashboard({
               <dt className="opacity-55 text-xs">Codex workers</dt>
               <dd className="mt-1 text-xl font-black tabular-nums">
                 {payload.hygiene.codex_workers}
+              </dd>
+            </div>
+            <div>
+              <dt className="opacity-55 text-xs">Agent routes</dt>
+              <dd className="mt-1 text-xl font-black tabular-nums">
+                {routeActivity?.active_routes ?? '—'}
+              </dd>
+              <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
+                {routeNote}
               </dd>
             </div>
             <div>

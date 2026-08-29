@@ -39,6 +39,12 @@ function sample(
     codexReasoningOutputTokens: null,
     codexModelCalls: null,
     codexActiveRoutes: null,
+    routeActiveRoutes: null,
+    routeActiveJobs: null,
+    routeTaggedProcesses: null,
+    routeTaggedRssBytes: null,
+    routeResidueJobs: null,
+    routeUnknownCount: null,
     buildStateGib: null,
     buildTargetCount: null,
     activeBuildProcesses: null,
@@ -131,5 +137,23 @@ describe('machine health activity bins', () => {
       codexActiveRoutes: 2,
     });
     expect(bins.at(-1)?.codexInputTokens).toBeNull();
+  });
+
+  it('keeps the highest tagged process count in each observation bin', () => {
+    const bins = buildActivityBins(
+      [
+        sample('2026-08-29T06:05:00.000Z', {
+          routeTaggedProcesses: 3,
+        }),
+        sample('2026-08-29T06:25:00.000Z', {
+          routeTaggedProcesses: 17,
+        }),
+      ],
+      '24h',
+      now
+    );
+
+    expect(bins.at(-1)?.routeTaggedProcesses).toBe(17);
+    expect(bins.at(-2)?.routeTaggedProcesses).toBeNull();
   });
 });

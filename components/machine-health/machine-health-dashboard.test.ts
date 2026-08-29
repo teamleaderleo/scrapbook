@@ -44,6 +44,12 @@ const samples = Array.from({ length: 4 }, (_, index) => ({
   codexReasoningOutputTokens: null,
   codexModelCalls: null,
   codexActiveRoutes: null,
+  routeActiveRoutes: 2,
+  routeActiveJobs: 3,
+  routeTaggedProcesses: 17,
+  routeTaggedRssBytes: 536_870_912,
+  routeResidueJobs: 0,
+  routeUnknownCount: 0,
   buildStateGib: index === 0 ? 49.2 : 51.65,
   buildTargetCount: 11,
   activeBuildProcesses: 3,
@@ -74,10 +80,44 @@ describe('machine health dashboard', () => {
     expect(html).toContain('2.5 GiB');
     expect(html).toContain('RDP');
     expect(html).toContain('Idle');
+    expect(html).toContain('Agent routes');
+    expect(html).toContain('3 jobs · 17 proc · 512 MiB');
+    expect(html).toContain('Agent processes high');
     expect(html).toContain('Crashes · 24h: 0');
     expect(html).toContain('Auto restarts · 24h: 0');
     expect(html).not.toContain('private_ip');
     expect(html).not.toContain('process_arguments');
+  });
+
+  it('surfaces route residue and unknown ownership without exposing IDs', () => {
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report: {
+          ...report,
+          payload: {
+            ...report.payload,
+            route_activity: {
+              source: 'codex-route-leases-v2',
+              active_routes: 2,
+              active_jobs: 3,
+              tagged_processes: 17,
+              tagged_rss_bytes: 536_870_912,
+              residue_jobs: 1,
+              unknown_routes: 0,
+              unknown_jobs: 2,
+            },
+          },
+        },
+        samples,
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('Worth a look');
+    expect(html).toContain('1 agent job left process residue.');
+    expect(html).toContain('2 agent route items need ownership inspection.');
+    expect(html).toContain('1 residue · 2 unknown');
+    expect(html).not.toContain('route_id');
   });
 
   it('surfaces recovered crashes even when failed units returned to zero', () => {

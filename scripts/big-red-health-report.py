@@ -15,6 +15,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import time
 import urllib.parse
 import urllib.request
@@ -38,6 +39,9 @@ CODEX_TOKEN_FIELDS = (
 )
 GLAEDA_REPOSITORY = Path.home() / "Projects" / "glaeda"
 GLAEDA_CACHE = Path.home() / ".cache" / "glaeda"
+CODEX_ROUTE_STATUS_HELPER = (
+    Path.home() / "Projects" / "leo-workspace" / "tools" / "codex_route_job.py"
+)
 RELIABILITY_WINDOW_HOURS = 24
 RELIABILITY_EVENT_LIMIT = 4_096
 SYSTEMD_PROCESS_EXIT_MESSAGE_ID = "98e322203f7a4ed290d09fe03c09fe15"
@@ -442,6 +446,47 @@ def codex_usage_window(
         "model_calls": model_calls,
         "active_routes": active_routes,
     }
+
+
+def route_activity(
+    helper: Path = CODEX_ROUTE_STATUS_HELPER,
+) -> dict[str, Any]:
+    unavailable = {
+        "source": "unavailable",
+        "active_routes": None,
+        "active_jobs": None,
+        "tagged_processes": None,
+        "tagged_rss_bytes": None,
+        "residue_jobs": None,
+        "unknown_routes": None,
+        "unknown_jobs": None,
+    }
+    code, output = run(sys.executable, str(helper), "status")
+    if code != 0 or not output:
+        return unavailable
+    try:
+        status = json.loads(output)
+    except (json.JSONDecodeError, TypeError):
+        return unavailable
+
+    fields = {
+        "active_routes": "active_routes",
+        "active_jobs": "active_jobs",
+        "tagged_processes": "tagged_processes",
+        "tagged_rss_bytes": "tagged_rss_bytes",
+        "residue_jobs": "complete_residue_jobs",
+        "unknown_routes": "unknown_routes",
+        "unknown_jobs": "unknown_jobs",
+    }
+    if not isinstance(status, dict) or status.get("source") != "codex-route-leases-v2":
+        return unavailable
+    values: dict[str, int] = {}
+    for public_name, status_name in fields.items():
+        value = status.get(status_name)
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            return unavailable
+        values[public_name] = value
+    return {"source": "codex-route-leases-v2", **values}
 
 
 def read_number(path: Path) -> float | None:
@@ -875,6 +920,7 @@ def build_report() -> dict[str, Any]:
     logical_cpus = os.cpu_count() or 1
     activity = activity_window(now)
     codex_usage = codex_usage_window(now)
+    routes = route_activity()
     _, total_gib = memory()
     disk = shutil.disk_usage("/")
     graphics_clock_mhz, graphics_max_clock_mhz = graphics_clock()
@@ -936,6 +982,7 @@ def build_report() -> dict[str, Any]:
             "disk_write_mib_s": activity["disk_write_mib_s"],
         },
         "codex_usage": codex_usage,
+        "route_activity": routes,
         "services": {
             "failed_system_units": failed_unit_count(),
             "failed_user_units": failed_unit_count(user=True),

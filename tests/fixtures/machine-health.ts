@@ -36,6 +36,16 @@ export const healthyMachineReport: MachineHealthPayload = {
     model_calls: 110,
     active_routes: 4,
   },
+  route_activity: {
+    source: 'codex-route-leases-v2',
+    active_routes: 2,
+    active_jobs: 3,
+    tagged_processes: 17,
+    tagged_rss_bytes: 536_870_912,
+    residue_jobs: 0,
+    unknown_routes: 0,
+    unknown_jobs: 0,
+  },
   services: {
     failed_system_units: 0,
     failed_user_units: 0,

@@ -167,6 +167,59 @@ class CodexUsageTest(unittest.TestCase):
         self.assertEqual(usage["model_calls"], 0)
 
 
+class RouteActivityTest(unittest.TestCase):
+    def test_accepts_only_bounded_aggregate_status(self) -> None:
+        status = {
+            "source": "codex-route-leases-v2",
+            "active_routes": 2,
+            "active_jobs": 3,
+            "complete_residue_jobs": 1,
+            "unknown_routes": 0,
+            "unknown_jobs": 1,
+            "tagged_processes": 17,
+            "tagged_rss_bytes": 512 * REPORT.MIB,
+            "route_id": "must-not-escape",
+        }
+        with patch.object(REPORT, "run", return_value=(0, json.dumps(status))):
+            activity = REPORT.route_activity(Path("/private/helper"))
+
+        self.assertEqual(activity["source"], "codex-route-leases-v2")
+        self.assertEqual(activity["active_routes"], 2)
+        self.assertEqual(activity["active_jobs"], 3)
+        self.assertEqual(activity["residue_jobs"], 1)
+        self.assertEqual(activity["tagged_processes"], 17)
+        self.assertNotIn("route_id", activity)
+        self.assertNotIn("must-not-escape", json.dumps(activity))
+
+    def test_marks_missing_malformed_or_invalid_status_unavailable(self) -> None:
+        responses = (
+            (127, ""),
+            (0, "not json"),
+            (0, json.dumps({"source": "wrong"})),
+            (
+                0,
+                json.dumps(
+                    {
+                        "source": "codex-route-leases-v2",
+                        "active_routes": True,
+                        "active_jobs": 0,
+                        "complete_residue_jobs": 0,
+                        "unknown_routes": 0,
+                        "unknown_jobs": 0,
+                        "tagged_processes": 0,
+                        "tagged_rss_bytes": 0,
+                    }
+                ),
+            ),
+        )
+        for response in responses:
+            with self.subTest(response=response):
+                with patch.object(REPORT, "run", return_value=response):
+                    activity = REPORT.route_activity(Path("/private/helper"))
+                self.assertEqual(activity["source"], "unavailable")
+                self.assertIsNone(activity["active_routes"])
+
+
 class HygieneTest(unittest.TestCase):
     def test_aggregates_browser_descendant_rss_without_process_detail(self) -> None:
         rows = {

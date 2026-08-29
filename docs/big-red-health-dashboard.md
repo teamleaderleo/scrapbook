@@ -13,8 +13,9 @@ The page starts with the questions that matter when Leo is away from the machine
 - Are SSH, Tailscale, NetworkManager, and time sync active?
 - Is automatic idle suspend still disabled while deliberate lid-close suspend remains available, and are hibernate targets still masked?
 - Is the machine on AC, what is the aggregate battery state, and are there failed systemd units, unexpected development listeners, excess browser memory, or active RDP connections?
+- How many agent routes, jobs, and descendant processes are explicitly owned, how much RSS do they account for, and did any ownership record become unknown or leave residue?
 
-The dashboard defaults to 24 hourly bins and offers 7- and 30-day daily rollups. Its time control starts in the browser's own time zone and can switch to UTC. Browser/Codex counts, aggregate browser RSS, and the active RDP connection count stay coarse. They support cleanup and remote-session awareness without turning the dashboard into process surveillance.
+The dashboard defaults to 24 hourly bins and offers 7- and 30-day daily rollups. Its time control starts in the browser's own time zone and can switch to UTC. Browser/Codex counts, tagged route/process counts, aggregate RSS, and the active RDP connection count stay coarse. They support cleanup and remote-session awareness without turning the dashboard into process surveillance.
 
 Each stored row also carries its accounting source, interval count, window length, and uptime. The activity footer therefore distinguishes full sysstat windows, partial coverage, point-sample fallbacks, and reboot discontinuities instead of drawing equally authoritative bars from unlike data.
 
@@ -26,11 +27,11 @@ The ingestion schema is an allowlist and strips unknown keys at every object lev
 
 - IP addresses, interface names, SSIDs, routes, or open port numbers (network throughput is summed across non-loopback interfaces);
 - Tailscale peer names, identities, or tailnet addresses;
-- process IDs, executable paths, command arguments, environment variables, or package lists;
+- process IDs, route IDs, executable paths, command arguments, environment variables, or package lists;
 - browser URLs, titles, history, cookies, profiles, tab contents, or per-process memory;
 - usernames, home-directory paths, serial numbers, or raw command output.
 
-The collector parses local command output and emits only enum values, booleans, percentages, byte totals, and aggregate counts. Its Codex count observes code-mode worker leaves while excluding persistent desktop and remote-control daemons. Browser RSS sums the browser process trees and is a trend signal rather than unique physical memory because shared pages can appear in more than one process. RDP visibility counts established local connections without emitting the peer or endpoint. The public repository contains the contract and collector code, but no machine snapshot or credential.
+The collector parses local command output and emits only enum values, booleans, percentages, byte totals, and aggregate counts. Its legacy Codex count observes code-mode worker leaves while excluding persistent desktop and remote-control daemons. The route view calls the v2 ownership tool's aggregate `status` contract; Scrapbook does not repeat its cgroup classifier or read route receipts directly. Malformed, missing, or version-mismatched status becomes `unavailable` instead of a guessed zero. Browser RSS sums the browser process trees and is a trend signal rather than unique physical memory because shared pages can appear in more than one process. RDP visibility counts established local connections without emitting the peer or endpoint. The public repository contains the contract and collector code, but no machine snapshot or credential.
 
 ## Frequency, history, and cost
 
@@ -39,12 +40,14 @@ The default proposal is one report per hour, with manual runs whenever a change 
 - The dashboard reads the latest 30 days and offers 24-hour, 7-day, and 30-day views.
 - Every successful ingest deletes samples older than 90 days, so retention needs no second scheduled job.
 - Retry posts with the same host and timestamp update one sample instead of duplicating it, and an older delayed report cannot replace the latest status row.
-- A measured expanded report is 1,730 bytes as compact JSON and 2,210 bytes pretty-printed. Ninety days at hourly frequency is 2,160 rows and roughly 3.6 MiB of raw compact payload; a conservative database budget remains under 12 MiB after allowing for JSONB, scalar columns, row overhead, and the index.
+- A measured expanded report is 2,009 bytes as compact JSON and 2,581 bytes pretty-printed. Ninety days at hourly frequency is 2,160 rows and roughly 4.1 MiB of raw compact payload; a conservative database budget remains under 12 MiB after allowing for JSONB, scalar columns, row overhead, and the index.
 - There is no daemon, polling loop, Prometheus, Grafana, log drain, or client-side refresh.
 
 Big Red already runs Ubuntu's `sysstat` accounting every 10 minutes. The collector reuses the six newest records to produce time-weighted 60-minute averages for CPU, memory, aggregate non-loopback network throughput, and non-loop disk I/O, plus CPU/memory/I/O [Pressure Stall Information](https://docs.kernel.org/accounting/psi.html). It emits only the aggregate result; host names, device names, and interface names parsed from `sadf` never enter the report. If readable accounting data is unavailable, the collector fails soft to the original 250 ms `/proc` point sample and labels the source accordingly.
 
-The reuse path has no new resident process. With browser RSS, RDP visibility, Codex usage, and eleven live Glaeda worktrees included, five current collector runs took 0.74–1.01 seconds with a 0.78-second median and at most 45,184 KiB RSS. The underlying `sadf` extraction itself completed in under 0.01 seconds. Existing local sysstat history occupied 624 KiB after about 15 hours, independent of this dashboard.
+The reuse path has no new resident process. A five-run same-machine comparison measured 934 ms mean before route status and 945 ms after it, a 10.5 ms difference inside the observed run-to-run spread. The compact payload grew by 181 bytes. Existing local sysstat history occupied 624 KiB after about 15 hours, independent of this dashboard.
+
+Route activity is a point observation at report time. The current card shows active routes, active jobs, tagged descendant processes, aggregate RSS, residue jobs, and unknown ownership records. Historical bins show the highest tagged process count observed in each hour or day; they do not imply continuous runtime between reports. Token-route activity remains a separate previous-complete-hour measurement because it answers a different question.
 
 An independent `sar` read of the same six intervals reconciled the collector output after rounding: CPU 7.25%, memory 12.44%, network 0.059/0.045 MiB/s, disk 1.989/11.043 MiB/s, and PSI CPU/memory/I/O 0.193/0.015/0.345%. The Python regression test separately verifies interval weighting, loopback/loop-device exclusion, UTC handling, and the labeled point-sample fallback.
 
@@ -59,6 +62,7 @@ These are operator thresholds rather than hardware safety limits:
 - automatic idle suspend no longer disabled on AC or battery: watch;
 - hibernate or hybrid-sleep no longer masked: watch;
 - any detected development listener: watch;
+- unavailable route ownership status, any residue job, or any unknown route/job record: watch;
 - report older than 3 hours: watch.
 
 CPU/memory peaks, disk/network throughput, PSI, load, and the iGPU clock are displayed but do not yet alert. Pressure is a better contention signal than utilization alone, but thresholds should be based on an observed Big Red baseline instead of imported folklore.
@@ -95,6 +99,8 @@ scripts/big-red-health-report.py --print-only
 ```
 
 This performs read-only local checks, prints the exact sanitized payload, and never sends it. With neither reporting environment variable set, the default invocation also stays local.
+
+The route section expects the authoritative helper at `~/Projects/leo-workspace/tools/codex_route_job.py`. If it is absent, fails, or changes its aggregate contract, the report marks route activity unavailable. Restoring that exact helper restores the section; no dashboard-side ownership fallback exists.
 
 After the website migration, secrets, and deployment are separately approved, a one-time post would use:
 
@@ -143,7 +149,7 @@ Each layer can be removed independently:
 
 1. Disable and remove the user timer/service, collector copy, and local environment file. This stops all new reports without affecting the workstation's network or power configuration.
 2. Remove the website environment variables and deploy. The access and ingest routes become unavailable.
-3. Remove the route, component, store, collector, and documentation files in a revert commit.
+3. Revert the route-activity fields to remove only the ownership view, or remove the route, component, store, collector, and documentation files to retire the complete dashboard.
 4. Only if history should be erased, separately approve dropping `machine_health_status` and `machine_health_samples`. Leaving the tiny, inaccessible tables in place is the more reversible default.
 
 No rollback step requires firmware, boot, disk, network, login, SSH, Tailscale, or sleep-policy changes.
