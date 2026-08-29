@@ -51,6 +51,7 @@ const samples = Array.from({ length: 4 }, (_, index) => ({
   routeTaggedMemoryBytes: 402_653_184,
   routeResidueJobs: 0,
   routeUnknownCount: 0,
+  codexStateAllocatedBytes: 1_849_430_016,
   buildStateGib: index === 0 ? 49.2 : 51.65,
   buildTargetCount: 11,
   activeBuildProcesses: 3,
@@ -81,6 +82,10 @@ describe('machine health dashboard', () => {
     expect(html).toContain('11 targets · 1.2 GiB cache · 3 building');
     expect(html).toContain('Browser RSS');
     expect(html).toContain('2.5 GiB');
+    expect(html).toContain('Codex state');
+    expect(html).toContain('1.7 GiB');
+    expect(html).toContain('876 MiB active · 888 MiB unknown');
+    expect(html).toContain('partial · 0 MiB reclaimable · 7.4 s');
     expect(html).toContain('Remote');
     expect(html).toContain('Direct');
     expect(html).toContain('GRD active · VA-API ready');
@@ -301,5 +306,26 @@ describe('machine health dashboard', () => {
     );
 
     expect(html).toContain('+512 MiB / 7d');
+  });
+
+  it('shows the seven-day Codex-state delta when history is available', () => {
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report,
+        samples: [
+          {
+            ...samples[0],
+            checkedAt: new Date(
+              Date.parse(checkedAt) - 8 * 86_400_000
+            ).toISOString(),
+            codexStateAllocatedBytes: 1_534_857_216,
+          },
+          ...samples,
+        ],
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('+300 MiB / 7d');
   });
 });

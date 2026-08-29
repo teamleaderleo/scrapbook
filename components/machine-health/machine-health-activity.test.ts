@@ -46,6 +46,7 @@ function sample(
     routeTaggedMemoryBytes: null,
     routeResidueJobs: null,
     routeUnknownCount: null,
+    codexStateAllocatedBytes: null,
     buildStateGib: null,
     buildTargetCount: null,
     activeBuildProcesses: null,

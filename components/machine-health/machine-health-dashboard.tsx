@@ -135,6 +135,10 @@ export function MachineHealthDashboard({
       : `${Math.round(payload.graphics.clock_mhz)} MHz`;
   const buildState =
     payload.build_state?.source === 'filesystem' ? payload.build_state : null;
+  const codexState =
+    payload.codex_state?.source === 'codex-state-inventory-v1'
+      ? payload.codex_state
+      : null;
   const routeActivity =
     payload.route_activity?.source === 'codex-route-leases-v2'
       ? payload.route_activity
@@ -320,6 +324,29 @@ export function MachineHealthDashboard({
         .filter(Boolean)
         .join(' · ')
     : 'awaiting snapshot';
+  const codexStateBaseline = [...samples]
+    .reverse()
+    .find(
+      sample =>
+        Date.parse(sample.checkedAt) <= now - 7 * 24 * HOUR_MS &&
+        sample.codexStateAllocatedBytes !== null
+    );
+  const codexStateDelta =
+    codexState && codexStateBaseline?.codexStateAllocatedBytes != null
+      ? codexState.allocated_bytes - codexStateBaseline.codexStateAllocatedBytes
+      : null;
+  const codexStateNote = codexState
+    ? `${formatMemory(codexState.active_bytes)} active · ${formatMemory(codexState.unknown_bytes)} unknown`
+    : 'unavailable';
+  const codexStateEvidence = codexState
+    ? [
+        codexState.snapshot_evidence === 'partial' ? 'partial' : null,
+        `${formatMemory(codexState.reclaimable_bytes)} reclaimable`,
+        `${(codexState.scan_duration_ms / 1_000).toFixed(1)} s`,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : null;
   const browserRssBaseline = [...samples]
     .reverse()
     .find(sample => Date.parse(sample.checkedAt) <= now - 7 * 24 * HOUR_MS);
@@ -503,6 +530,25 @@ export function MachineHealthDashboard({
               {browserRssDelta === null ? null : (
                 <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
                   {formatMemoryDelta(browserRssDelta)}
+                </dd>
+              )}
+            </div>
+            <div>
+              <dt className="opacity-55 text-xs">Codex state</dt>
+              <dd className="mt-1 text-xl font-black tabular-nums">
+                {codexState ? formatMemory(codexState.allocated_bytes) : '—'}
+              </dd>
+              <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
+                {codexStateNote}
+              </dd>
+              {codexStateEvidence ? (
+                <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
+                  {codexStateEvidence}
+                </dd>
+              ) : null}
+              {codexStateDelta === null ? null : (
+                <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
+                  {formatMemoryDelta(codexStateDelta)}
                 </dd>
               )}
             </div>

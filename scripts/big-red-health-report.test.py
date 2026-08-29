@@ -416,6 +416,100 @@ class ProcessCoverageTest(unittest.TestCase):
                 self.assertIsNone(coverage["discoverable_processes"])
 
 
+class CodexStateTest(unittest.TestCase):
+    @staticmethod
+    def status() -> dict[str, object]:
+        return {
+            "schema_version": 1,
+            "document_type": "big-red-codex-state-aggregate-report",
+            "observed_at": "2026-08-29T06:00:00.000Z",
+            "installed_build": {"package": "chatgpt", "version": "26.825.31414"},
+            "scan_duration_ms": 7_391,
+            "snapshot_stable": True,
+            "manifest_scan_complete": True,
+            "process_scan_complete": False,
+            "relevant_process_count": 31,
+            "content_files_opened": 0,
+            "privileged_process_observation": False,
+            "privileged_link_reads": 0,
+            "privileged_fd_table_reads": 0,
+            "network_used": False,
+            "mutation_performed": False,
+            "retention_authority": False,
+            "reconstructible_bytes": 0,
+            "reclaimable_bytes": 0,
+            "class_count": 48,
+            "file_count": 9_792,
+            "allocated_bytes": 1_849_430_016,
+            "classifications": {
+                "active": 11,
+                "authoritative": 0,
+                "manifest-referenced": 0,
+                "unknown": 37,
+            },
+            "files_by_classification": {
+                "active": 3_450,
+                "authoritative": 0,
+                "manifest-referenced": 0,
+                "unknown": 6_342,
+            },
+            "allocated_bytes_by_classification": {
+                "active": 918_818_816,
+                "authoritative": 0,
+                "manifest-referenced": 0,
+                "unknown": 930_611_200,
+            },
+            "private_path": "must-not-escape",
+        }
+
+    def test_accepts_only_content_blind_reconciled_aggregates(self) -> None:
+        with patch.object(
+            REPORT, "run_codex_state", return_value=(0, json.dumps(self.status()))
+        ):
+            state = REPORT.codex_state(Path("/private/helper"))
+
+        self.assertEqual(state["source"], "codex-state-inventory-v1")
+        self.assertEqual(state["snapshot_evidence"], "partial")
+        self.assertEqual(state["allocated_bytes"], 1_849_430_016)
+        self.assertEqual(state["active_bytes"], 918_818_816)
+        self.assertEqual(state["unknown_bytes"], 930_611_200)
+        self.assertEqual(state["reclaimable_bytes"], 0)
+        self.assertFalse(state["retention_authority"])
+        self.assertNotIn("private_path", state)
+        self.assertNotIn("must-not-escape", json.dumps(state))
+
+    def test_marks_malformed_inconsistent_or_authoritative_results_unavailable(
+        self,
+    ) -> None:
+        valid = self.status()
+        cases = (
+            (127, ""),
+            (0, "not json"),
+            (0, json.dumps({**valid, "schema_version": 2})),
+            (0, json.dumps({**valid, "allocated_bytes": True})),
+            (0, json.dumps({**valid, "reclaimable_bytes": 1})),
+            (0, json.dumps({**valid, "retention_authority": True})),
+            (
+                0,
+                json.dumps(
+                    {
+                        **valid,
+                        "allocated_bytes_by_classification": {
+                            **valid["allocated_bytes_by_classification"],
+                            "unknown": 1,
+                        },
+                    }
+                ),
+            ),
+        )
+        for response in cases:
+            with self.subTest(response=response[0:1]):
+                with patch.object(REPORT, "run_codex_state", return_value=response):
+                    state = REPORT.codex_state(Path("/private/helper"))
+                self.assertEqual(state["source"], "unavailable")
+                self.assertIsNone(state["allocated_bytes"])
+
+
 class RemoteClientTest(unittest.TestCase):
     NOW = dt.datetime(2026, 8, 29, 18, 0, tzinfo=dt.timezone.utc)
 

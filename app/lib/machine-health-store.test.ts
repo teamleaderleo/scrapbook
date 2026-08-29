@@ -28,6 +28,10 @@ describe('machine health contract', () => {
         ...healthyMachineReport.process_coverage,
         process_identity: 'must-not-survive',
       },
+      codex_state: {
+        ...healthyMachineReport.codex_state,
+        cache_path: 'must-not-survive',
+      },
     });
 
     expect(parsed).toEqual(healthyMachineReport);
@@ -174,6 +178,35 @@ describe('machine health contract', () => {
     const parsed = machineHealthPayloadSchema.parse(olderReport);
 
     expect(parsed.process_tags).toBeUndefined();
+  });
+
+  it('accepts a snapshot from before Codex state inventory was added', () => {
+    const { codex_state: _codexState, ...olderReport } = healthyMachineReport;
+    const parsed = machineHealthPayloadSchema.parse(olderReport);
+
+    expect(parsed.codex_state).toBeUndefined();
+  });
+
+  it('rejects inconsistent or authoritative Codex state aggregates', () => {
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        codex_state: {
+          ...healthyMachineReport.codex_state,
+          unknown_bytes:
+            (healthyMachineReport.codex_state?.unknown_bytes ?? 0) + 1,
+        },
+      }).success
+    ).toBe(false);
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        codex_state: {
+          ...healthyMachineReport.codex_state,
+          retention_authority: true,
+        },
+      }).success
+    ).toBe(false);
   });
 
   it('rejects inconsistent process tag aggregates', () => {

@@ -247,6 +247,86 @@ export const machineHealthPayloadSchema = z.object({
       }),
     ])
     .optional(),
+  codex_state: z
+    .union([
+      z
+        .object({
+          source: z.literal('codex-state-inventory-v1'),
+          observed_at: z.string().datetime({ offset: true }),
+          installed_build: z.string().regex(/^[0-9A-Za-z.+:~_-]{1,64}$/),
+          scan_duration_ms: nonnegativeInteger.max(60_000),
+          snapshot_evidence: z.enum(['complete', 'partial']),
+          allocated_bytes: nonnegativeInteger,
+          file_count: nonnegativeInteger,
+          class_count: nonnegativeInteger,
+          relevant_process_count: nonnegativeInteger,
+          active_bytes: nonnegativeInteger,
+          active_files: nonnegativeInteger,
+          active_classes: nonnegativeInteger,
+          authoritative_bytes: nonnegativeInteger,
+          authoritative_files: nonnegativeInteger,
+          authoritative_classes: nonnegativeInteger,
+          manifest_referenced_bytes: nonnegativeInteger,
+          manifest_referenced_files: nonnegativeInteger,
+          manifest_referenced_classes: nonnegativeInteger,
+          unknown_bytes: nonnegativeInteger,
+          unknown_files: nonnegativeInteger,
+          unknown_classes: nonnegativeInteger,
+          reconstructible_bytes: z.literal(0),
+          reclaimable_bytes: z.literal(0),
+          retention_authority: z.literal(false),
+        })
+        .superRefine((value, context) => {
+          if (
+            value.active_bytes +
+              value.authoritative_bytes +
+              value.manifest_referenced_bytes +
+              value.unknown_bytes !==
+              value.allocated_bytes ||
+            value.active_files +
+              value.authoritative_files +
+              value.manifest_referenced_files +
+              value.unknown_files !==
+              value.file_count ||
+            value.active_classes +
+              value.authoritative_classes +
+              value.manifest_referenced_classes +
+              value.unknown_classes !==
+              value.class_count
+          )
+            context.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: 'Codex state aggregates are inconsistent',
+            });
+        }),
+      z.object({
+        source: z.literal('unavailable'),
+        observed_at: z.null(),
+        installed_build: z.null(),
+        scan_duration_ms: z.null(),
+        snapshot_evidence: z.null(),
+        allocated_bytes: z.null(),
+        file_count: z.null(),
+        class_count: z.null(),
+        relevant_process_count: z.null(),
+        active_bytes: z.null(),
+        active_files: z.null(),
+        active_classes: z.null(),
+        authoritative_bytes: z.null(),
+        authoritative_files: z.null(),
+        authoritative_classes: z.null(),
+        manifest_referenced_bytes: z.null(),
+        manifest_referenced_files: z.null(),
+        manifest_referenced_classes: z.null(),
+        unknown_bytes: z.null(),
+        unknown_files: z.null(),
+        unknown_classes: z.null(),
+        reconstructible_bytes: z.null(),
+        reclaimable_bytes: z.null(),
+        retention_authority: z.null(),
+      }),
+    ])
+    .optional(),
   services: z.object({
     failed_system_units: nonnegativeInteger,
     failed_user_units: nonnegativeInteger,
@@ -347,6 +427,7 @@ export type MachineHealthSample = {
   routeTaggedMemoryBytes: number | null;
   routeResidueJobs: number | null;
   routeUnknownCount: number | null;
+  codexStateAllocatedBytes: number | null;
   buildStateGib: number | null;
   buildTargetCount: number | null;
   activeBuildProcesses: number | null;
@@ -714,6 +795,11 @@ export async function readMachineHealth(
           parsedSample.data.route_activity?.source === 'codex-route-leases-v2'
             ? parsedSample.data.route_activity
             : null;
+        const codexState =
+          parsedSample.success &&
+          parsedSample.data.codex_state?.source === 'codex-state-inventory-v1'
+            ? parsedSample.data.codex_state
+            : null;
         return {
           checkedAt: new Date(row.checked_at).toISOString(),
           cpuUsedPercent: toNumber(row.cpu_used_percent),
@@ -769,6 +855,7 @@ export async function readMachineHealth(
             ? (routeActivity.unknown_routes ?? 0) +
               (routeActivity.unknown_jobs ?? 0)
             : null,
+          codexStateAllocatedBytes: codexState?.allocated_bytes ?? null,
           buildStateGib: buildState?.total_gib ?? null,
           buildTargetCount: buildState?.target_count ?? null,
           activeBuildProcesses: buildState?.active_build_processes ?? null,

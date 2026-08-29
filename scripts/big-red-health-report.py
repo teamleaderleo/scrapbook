@@ -28,6 +28,8 @@ from typing import Any
 GIB = 1024**3
 MIB = 1024**2
 COMMAND_TIMEOUT_SECONDS = 4
+CODEX_STATE_TIMEOUT_SECONDS = 12
+CODEX_STATE_OUTPUT_BYTES = 64 * 1024
 ACTIVITY_SAMPLE_SECONDS = 0.25
 SYSSTAT_WINDOW_RECORDS = 6
 SYSSTAT_MAX_AGE_MINUTES = 90
@@ -53,6 +55,9 @@ CODEX_PROCESS_COVERAGE_HELPER = (
     / "leo-workspace"
     / "tools"
     / "codex_process_coverage.py"
+)
+CODEX_STATE_INVENTORY_HELPER = (
+    Path.home() / "Projects" / "leo-workspace" / "tools" / "codex_state_inventory.py"
 )
 RELIABILITY_WINDOW_HOURS = 24
 RELIABILITY_EVENT_LIMIT = 4_096
@@ -86,6 +91,23 @@ def run(*command: str) -> tuple[int, str]:
         return result.returncode, result.stdout.strip()
     except (FileNotFoundError, subprocess.TimeoutExpired):
         return 127, ""
+
+
+def run_codex_state(helper: Path) -> tuple[int, str]:
+    try:
+        result = subprocess.run(
+            (sys.executable, str(helper), "--format", "aggregate-json"),
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=CODEX_STATE_TIMEOUT_SECONDS,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return 127, ""
+    output = result.stdout.strip()
+    if len(output.encode("utf-8")) > CODEX_STATE_OUTPUT_BYTES:
+        return 127, ""
+    return result.returncode, output
 
 
 def service_state(name: str, *, user: bool = False) -> str:
@@ -789,6 +811,179 @@ def process_coverage(
     }
 
 
+def codex_state(
+    helper: Path = CODEX_STATE_INVENTORY_HELPER,
+) -> dict[str, Any]:
+    numeric_fields = (
+        "scan_duration_ms",
+        "allocated_bytes",
+        "file_count",
+        "class_count",
+        "relevant_process_count",
+        "active_bytes",
+        "active_files",
+        "active_classes",
+        "authoritative_bytes",
+        "authoritative_files",
+        "authoritative_classes",
+        "manifest_referenced_bytes",
+        "manifest_referenced_files",
+        "manifest_referenced_classes",
+        "unknown_bytes",
+        "unknown_files",
+        "unknown_classes",
+        "reconstructible_bytes",
+        "reclaimable_bytes",
+    )
+    unavailable = {
+        "source": "unavailable",
+        "observed_at": None,
+        "installed_build": None,
+        "snapshot_evidence": None,
+        **dict.fromkeys(numeric_fields),
+        "retention_authority": None,
+    }
+    code, output = run_codex_state(helper)
+    if code != 0 or not output:
+        return unavailable
+    try:
+        status = json.loads(output)
+    except (json.JSONDecodeError, TypeError):
+        return unavailable
+    if (
+        not isinstance(status, dict)
+        or status.get("schema_version") != 1
+        or isinstance(status.get("schema_version"), bool)
+        or status.get("document_type")
+        != "big-red-codex-state-aggregate-report"
+    ):
+        return unavailable
+
+    observed_at = status.get("observed_at")
+    if not isinstance(observed_at, str):
+        return unavailable
+    try:
+        parsed_observed_at = dt.datetime.fromisoformat(
+            observed_at.replace("Z", "+00:00")
+        )
+    except ValueError:
+        return unavailable
+    if parsed_observed_at.tzinfo is None:
+        return unavailable
+
+    build = status.get("installed_build")
+    if (
+        not isinstance(build, dict)
+        or build.get("package") != "chatgpt"
+        or not isinstance(build.get("version"), str)
+        or not re.fullmatch(r"[0-9A-Za-z.+:~_-]{1,64}", build["version"])
+    ):
+        return unavailable
+
+    boolean_fields = (
+        "snapshot_stable",
+        "manifest_scan_complete",
+        "process_scan_complete",
+        "privileged_process_observation",
+        "network_used",
+        "mutation_performed",
+        "retention_authority",
+    )
+    if any(not isinstance(status.get(field), bool) for field in boolean_fields):
+        return unavailable
+    source_integer_fields = (
+        "scan_duration_ms",
+        "allocated_bytes",
+        "file_count",
+        "class_count",
+        "relevant_process_count",
+        "content_files_opened",
+        "privileged_link_reads",
+        "privileged_fd_table_reads",
+        "reconstructible_bytes",
+        "reclaimable_bytes",
+    )
+    if any(
+        isinstance(status.get(field), bool)
+        or not isinstance(status.get(field), int)
+        or status[field] < 0
+        for field in source_integer_fields
+    ):
+        return unavailable
+
+    class_keys = ("active", "authoritative", "manifest-referenced", "unknown")
+    aggregate_names = (
+        ("classifications", "class_count"),
+        ("allocated_bytes_by_classification", "allocated_bytes"),
+        ("files_by_classification", "file_count"),
+    )
+    aggregates: dict[str, dict[str, int]] = {}
+    for aggregate_name, total_name in aggregate_names:
+        aggregate = status.get(aggregate_name)
+        if not isinstance(aggregate, dict) or set(aggregate) != set(class_keys):
+            return unavailable
+        if any(
+            isinstance(aggregate.get(key), bool)
+            or not isinstance(aggregate.get(key), int)
+            or aggregate[key] < 0
+            for key in class_keys
+        ):
+            return unavailable
+        if sum(aggregate.values()) != status[total_name]:
+            return unavailable
+        aggregates[aggregate_name] = aggregate
+
+    if (
+        status["content_files_opened"] != 0
+        or status["privileged_process_observation"]
+        or status["privileged_link_reads"] != 0
+        or status["privileged_fd_table_reads"] != 0
+        or status["network_used"]
+        or status["mutation_performed"]
+        or status["retention_authority"]
+        or status["reconstructible_bytes"] != 0
+        or status["reclaimable_bytes"] != 0
+    ):
+        return unavailable
+
+    classes = aggregates["classifications"]
+    allocated = aggregates["allocated_bytes_by_classification"]
+    files = aggregates["files_by_classification"]
+    snapshot_evidence = (
+        "complete"
+        if status["snapshot_stable"]
+        and status["manifest_scan_complete"]
+        and status["process_scan_complete"]
+        else "partial"
+    )
+    return {
+        "source": "codex-state-inventory-v1",
+        "observed_at": observed_at,
+        "installed_build": build["version"],
+        "scan_duration_ms": status["scan_duration_ms"],
+        "snapshot_evidence": snapshot_evidence,
+        "allocated_bytes": status["allocated_bytes"],
+        "file_count": status["file_count"],
+        "class_count": status["class_count"],
+        "relevant_process_count": status["relevant_process_count"],
+        "active_bytes": allocated["active"],
+        "active_files": files["active"],
+        "active_classes": classes["active"],
+        "authoritative_bytes": allocated["authoritative"],
+        "authoritative_files": files["authoritative"],
+        "authoritative_classes": classes["authoritative"],
+        "manifest_referenced_bytes": allocated["manifest-referenced"],
+        "manifest_referenced_files": files["manifest-referenced"],
+        "manifest_referenced_classes": classes["manifest-referenced"],
+        "unknown_bytes": allocated["unknown"],
+        "unknown_files": files["unknown"],
+        "unknown_classes": classes["unknown"],
+        "reconstructible_bytes": 0,
+        "reclaimable_bytes": 0,
+        "retention_authority": False,
+    }
+
+
 def read_number(path: Path) -> float | None:
     try:
         return float(path.read_text(encoding="utf-8").strip())
@@ -1363,6 +1558,7 @@ def build_report() -> dict[str, Any]:
     routes = route_activity()
     tags = process_tags()
     coverage = process_coverage()
+    state_inventory = codex_state()
     _, total_gib = memory()
     disk = shutil.disk_usage("/")
     graphics_clock_mhz, graphics_max_clock_mhz = graphics_clock()
@@ -1427,6 +1623,7 @@ def build_report() -> dict[str, Any]:
         "route_activity": routes,
         "process_tags": tags,
         "process_coverage": coverage,
+        "codex_state": state_inventory,
         "services": {
             "failed_system_units": failed_unit_count(),
             "failed_user_units": failed_unit_count(user=True),
