@@ -161,6 +161,61 @@ export const machineHealthPayloadSchema = z.object({
       }),
     ])
     .optional(),
+  process_tags: z
+    .discriminatedUnion('source', [
+      z.object({
+        source: z.literal('codex-route-hook-v1'),
+        active_routes: nonnegativeInteger,
+        active_main_roots: nonnegativeInteger,
+        active_subagents: nonnegativeInteger,
+        active_jobs: nonnegativeInteger,
+        main_root_jobs: nonnegativeInteger,
+        subagent_jobs: nonnegativeInteger,
+        tagged_processes: nonnegativeInteger,
+        main_root_processes: nonnegativeInteger,
+        subagent_processes: nonnegativeInteger,
+        tagged_memory_current_bytes: nonnegativeInteger,
+        main_root_memory_current_bytes: nonnegativeInteger,
+        subagent_memory_current_bytes: nonnegativeInteger,
+        unknown_jobs: nonnegativeInteger,
+      }),
+      z.object({
+        source: z.literal('unavailable'),
+        active_routes: z.null(),
+        active_main_roots: z.null(),
+        active_subagents: z.null(),
+        active_jobs: z.null(),
+        main_root_jobs: z.null(),
+        subagent_jobs: z.null(),
+        tagged_processes: z.null(),
+        main_root_processes: z.null(),
+        subagent_processes: z.null(),
+        tagged_memory_current_bytes: z.null(),
+        main_root_memory_current_bytes: z.null(),
+        subagent_memory_current_bytes: z.null(),
+        unknown_jobs: z.null(),
+      }),
+    ])
+    .superRefine((value, context) => {
+      if (value.source !== 'codex-route-hook-v1') return;
+      if (
+        value.active_routes > value.active_jobs ||
+        value.active_main_roots > value.active_routes ||
+        value.active_main_roots > value.main_root_jobs ||
+        value.active_subagents > value.subagent_jobs ||
+        value.main_root_jobs + value.subagent_jobs !== value.active_jobs ||
+        value.main_root_processes + value.subagent_processes !==
+          value.tagged_processes ||
+        value.main_root_memory_current_bytes +
+          value.subagent_memory_current_bytes !==
+          value.tagged_memory_current_bytes
+      )
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Codex process tag aggregates are inconsistent',
+        });
+    })
+    .optional(),
   process_coverage: z
     .union([
       z
@@ -391,6 +446,13 @@ export function evaluateMachineHealth(payload: MachineHealthPayload) {
         `${unknownRouteItems} agent route item${unknownRouteItems === 1 ? ' needs' : 's need'} ownership inspection.`
       );
   }
+  if (
+    payload.process_tags?.source === 'codex-route-hook-v1' &&
+    payload.process_tags.unknown_jobs > 0
+  )
+    reasons.push(
+      `${payload.process_tags.unknown_jobs} Codex tag${payload.process_tags.unknown_jobs === 1 ? ' needs' : 's need'} inspection.`
+    );
   if (
     payload.reliability?.source === 'journal-24h' &&
     payload.reliability.crash_exits > 0

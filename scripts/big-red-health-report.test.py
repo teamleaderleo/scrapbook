@@ -260,6 +260,78 @@ class RouteActivityTest(unittest.TestCase):
         self.assertIsNone(activity["tagged_memory_current_bytes"])
 
 
+class ProcessTagsTest(unittest.TestCase):
+    def test_accepts_only_consistent_content_blind_aggregates(self) -> None:
+        status = {
+            "source": "codex-route-hook-v1",
+            "active_routes": 2,
+            "active_main_roots": 1,
+            "active_subagents": 3,
+            "active_agents": 4,
+            "active_jobs": 5,
+            "main_root_jobs": 2,
+            "subagent_jobs": 3,
+            "tagged_processes": 17,
+            "main_root_processes": 7,
+            "subagent_processes": 10,
+            "tagged_memory_current_bytes": 512 * REPORT.MIB,
+            "tagged_rss_bytes": 512 * REPORT.MIB,
+            "main_root_memory_current_bytes": 192 * REPORT.MIB,
+            "subagent_memory_current_bytes": 320 * REPORT.MIB,
+            "unknown_jobs": 0,
+            "route_id": "must-not-escape",
+        }
+        with patch.object(REPORT, "run", return_value=(0, json.dumps(status))):
+            tags = REPORT.process_tags(Path("/private/helper"))
+
+        self.assertEqual(tags["source"], "codex-route-hook-v1")
+        self.assertEqual(tags["active_routes"], 2)
+        self.assertEqual(tags["active_main_roots"], 1)
+        self.assertEqual(tags["active_subagents"], 3)
+        self.assertEqual(tags["tagged_processes"], 17)
+        self.assertEqual(tags["tagged_memory_current_bytes"], 512 * REPORT.MIB)
+        self.assertNotIn("active_agents", tags)
+        self.assertNotIn("tagged_rss_bytes", tags)
+        self.assertNotIn("route_id", tags)
+        self.assertNotIn("must-not-escape", json.dumps(tags))
+
+    def test_marks_missing_malformed_or_inconsistent_status_unavailable(self) -> None:
+        valid = {
+            "source": "codex-route-hook-v1",
+            "active_routes": 1,
+            "active_main_roots": 1,
+            "active_subagents": 0,
+            "active_jobs": 1,
+            "main_root_jobs": 1,
+            "subagent_jobs": 0,
+            "tagged_processes": 1,
+            "main_root_processes": 1,
+            "subagent_processes": 0,
+            "tagged_memory_current_bytes": 1,
+            "main_root_memory_current_bytes": 1,
+            "subagent_memory_current_bytes": 0,
+            "unknown_jobs": 0,
+        }
+        responses = (
+            (127, ""),
+            (0, "not json"),
+            (0, json.dumps({**valid, "source": "wrong"})),
+            (0, json.dumps({**valid, "active_routes": True})),
+            (0, json.dumps({**valid, "active_jobs": 2})),
+            (0, json.dumps({**valid, "tagged_processes": 2})),
+            (
+                0,
+                json.dumps({**valid, "tagged_memory_current_bytes": 2}),
+            ),
+        )
+        for response in responses:
+            with self.subTest(response=response):
+                with patch.object(REPORT, "run", return_value=response):
+                    tags = REPORT.process_tags(Path("/private/helper"))
+                self.assertEqual(tags["source"], "unavailable")
+                self.assertIsNone(tags["active_routes"])
+
+
 class ProcessCoverageTest(unittest.TestCase):
     def test_accepts_only_consistent_aggregate_coverage(self) -> None:
         status = {

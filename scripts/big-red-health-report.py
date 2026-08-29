@@ -43,6 +43,9 @@ GLAEDA_CACHE = Path.home() / ".cache" / "glaeda"
 CODEX_ROUTE_STATUS_HELPER = (
     Path.home() / "Projects" / "leo-workspace" / "tools" / "codex_route_job.py"
 )
+CODEX_PROCESS_TAGS_HELPER = (
+    Path.home() / "Projects" / "leo-workspace" / "tools" / "codex_route_hook.py"
+)
 CODEX_PROCESS_COVERAGE_HELPER = (
     Path.home()
     / "Projects"
@@ -571,6 +574,62 @@ def route_activity(
             elif any(values[field] is None for field in metric_fields):
                 values[observed_field] = None
     return {"source": "codex-route-leases-v2", **values}
+
+
+def process_tags(
+    helper: Path = CODEX_PROCESS_TAGS_HELPER,
+) -> dict[str, Any]:
+    fields = (
+        "active_routes",
+        "active_main_roots",
+        "active_subagents",
+        "active_jobs",
+        "main_root_jobs",
+        "subagent_jobs",
+        "tagged_processes",
+        "main_root_processes",
+        "subagent_processes",
+        "tagged_memory_current_bytes",
+        "main_root_memory_current_bytes",
+        "subagent_memory_current_bytes",
+        "unknown_jobs",
+    )
+    unavailable = {
+        "source": "unavailable",
+        **dict.fromkeys(fields),
+    }
+    code, output = run(sys.executable, str(helper), "status")
+    if code != 0 or not output:
+        return unavailable
+    try:
+        status = json.loads(output)
+    except (json.JSONDecodeError, TypeError):
+        return unavailable
+    if not isinstance(status, dict) or status.get("source") != "codex-route-hook-v1":
+        return unavailable
+
+    values: dict[str, int] = {}
+    for field in fields:
+        value = status.get(field)
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            return unavailable
+        values[field] = value
+
+    if (
+        values["active_routes"] > values["active_jobs"]
+        or values["active_main_roots"] > values["active_routes"]
+        or values["active_main_roots"] > values["main_root_jobs"]
+        or values["active_subagents"] > values["subagent_jobs"]
+        or values["main_root_jobs"] + values["subagent_jobs"]
+        != values["active_jobs"]
+        or values["main_root_processes"] + values["subagent_processes"]
+        != values["tagged_processes"]
+        or values["main_root_memory_current_bytes"]
+        + values["subagent_memory_current_bytes"]
+        != values["tagged_memory_current_bytes"]
+    ):
+        return unavailable
+    return {"source": "codex-route-hook-v1", **values}
 
 
 def process_coverage(
@@ -1288,6 +1347,7 @@ def build_report() -> dict[str, Any]:
     activity = activity_window(now)
     codex_usage = codex_usage_window(now)
     routes = route_activity()
+    tags = process_tags()
     coverage = process_coverage()
     _, total_gib = memory()
     disk = shutil.disk_usage("/")
@@ -1351,6 +1411,7 @@ def build_report() -> dict[str, Any]:
         },
         "codex_usage": codex_usage,
         "route_activity": routes,
+        "process_tags": tags,
         "process_coverage": coverage,
         "services": {
             "failed_system_units": failed_unit_count(),

@@ -17,7 +17,7 @@ The page starts with the questions that matter when Leo is away from the machine
 - Did the current GNOME Remote Desktop process initialize its Vulkan/VA-API path, fall back to software, or not yet receive an RDP session?
 - How many agent routes, jobs, and descendant processes are explicitly owned, how much RSS do they account for, and did any ownership record become unknown or leave residue?
 
-The dashboard defaults to 24 hourly bins and offers 7- and 30-day daily rollups. Its time control starts in the browser's own time zone and can switch to UTC. Browser/Codex counts, tagged route/process counts, aggregate RSS, and the active RDP connection count stay coarse. They support cleanup and remote-session awareness without turning the dashboard into process surveillance.
+The dashboard defaults to 24 hourly bins and offers 7- and 30-day daily rollups. Its time control starts in the browser's own time zone and can switch to UTC. Browser/Codex counts, tagged route/process counts, aggregate memory, and the active RDP connection count stay coarse. The current workspace view also splits hook-owned execution into chat roots, main-root jobs, subagent jobs, processes, and memory. It keeps opaque route and agent IDs out of the snapshot.
 
 Each stored row also carries its accounting source, interval count, window length, and uptime. The activity footer therefore distinguishes full sysstat windows, partial coverage, point-sample fallbacks, and reboot discontinuities instead of drawing equally authoritative bars from unlike data.
 
@@ -33,7 +33,7 @@ The ingestion schema is an allowlist and strips unknown keys at every object lev
 - browser URLs, titles, history, cookies, profiles, tab contents, or per-process memory;
 - usernames, home-directory paths, serial numbers, or raw command output.
 
-The collector parses local command output and emits only enum values, booleans, percentages, byte totals, and aggregate counts. Its legacy Codex count observes code-mode worker leaves while excluding persistent desktop and remote-control daemons. The route view calls the v2 ownership tool's aggregate `status` contract; Scrapbook does not repeat its cgroup classifier or read route receipts directly. Malformed, missing, or version-mismatched status becomes `unavailable` instead of a guessed zero. Browser RSS sums the browser process trees and is a trend signal rather than unique physical memory because shared pages can appear in more than one process. RDP visibility counts established local connections without emitting the peer or endpoint.
+The collector parses local command output and emits only enum values, booleans, percentages, byte totals, and aggregate counts. Its legacy Codex count observes code-mode worker leaves while excluding persistent desktop and remote-control daemons. The route view calls the v2 ownership tool's aggregate `status` contract; the process-tag view calls the hook adapter's aggregate `status` contract. Scrapbook does not repeat either cgroup classifier or read route receipts directly. It checks the root/job/process/memory sums before accepting a tag snapshot. Malformed, missing, inconsistent, or version-mismatched status becomes `unavailable` instead of a guessed zero. Browser RSS sums the browser process trees and is a trend signal rather than unique physical memory because shared pages can appear in more than one process. RDP visibility counts established local connections without emitting the peer or endpoint.
 
 Remote-client state is derived from the same local `tailscale status --json` read used for Big Red's own state. Exactly one macOS peer is required; zero or multiple candidates become unavailable. The report emits only `offline`, `online-idle`, `direct`, `relay`, or `unknown`, plus a last-seen age. Direct requires an active peer with a current endpoint; relay requires an active peer with relay evidence. Host names, node keys, addresses, tailnet IPs, relay regions, traffic totals, and timestamps never enter the report. The public repository contains the contract and collector code, but no machine snapshot or credential.
 
@@ -53,9 +53,20 @@ Big Red already runs Ubuntu's `sysstat` accounting every 10 minutes. The collect
 
 The reuse path has no new resident process. A five-run same-machine comparison measured 934 ms mean before route status and 945 ms after it, a 10.5 ms difference inside the observed run-to-run spread. The compact payload grew by 181 bytes. Existing local sysstat history occupied 624 KiB after about 15 hours, independent of this dashboard.
 
+The process-tag status read added 348 bytes to the compact live payload and took 26.6 ms median
+across 15 idle reads, with a 25.8–32.4 ms observed range. It adds one bounded local `systemctl` query
+to each hourly report and no sampler or resident process. A physical two-context canary placed one
+main-root scope and one subagent scope under the same opaque chat root. The adapter and collector
+both reported 1 root, 1 main bucket, 1 subagent, 2 jobs, 2 processes, exact matching memory sums and
+zero unknown jobs. Both scopes exited normally and `--collect` left zero matching units.
+
+The accepted fields come from the agent-aware hook contract in leo-workspace PR 78. Until that
+contract reaches canonical `leo-workspace`, the collector returns `unavailable`; it does not infer
+agent ownership from the older aggregate.
+
 The current complete collector, including route/process coverage, remote-client state, and acceleration state, took 1.32–1.44 seconds across five live runs with a 1.44-second median. Remote-client classification reuses the existing Tailscale status document, so it adds no second Tailscale command or network probe. Acceleration classification adds two bounded local reads: the service invocation ID and up to 512 journal records from that invocation. Those two reads took 5.1 ms median and 8.1 ms maximum across 20 live probes.
 
-Route activity is a point observation at report time. The hygiene panel shows exact-scoped versus discoverable Codex processes beside active routes, jobs, tagged descendants, aggregate RSS, residue, and unknown ownership records. Historical bins show the highest tagged process count observed in each hour or day; they do not imply continuous runtime between reports. Token-route activity remains a separate previous-complete-hour measurement because it answers a different question.
+Route activity and process tags are point observations at report time. The hygiene panel shows exact-scoped versus discoverable Codex processes beside active routes, jobs, tagged descendants, aggregate memory, residue, and unknown ownership records. Hook tags add main-root and subagent rollups without exposing their identities. Historical bins show the highest lease-tagged process count observed in each hour or day; they do not imply continuous runtime between reports. Token-route activity remains a separate previous-complete-hour measurement because it answers a different question.
 
 An independent `sar` read of the same six intervals reconciled the collector output after rounding: CPU 7.25%, memory 12.44%, network 0.059/0.045 MiB/s, disk 1.989/11.043 MiB/s, and PSI CPU/memory/I/O 0.193/0.015/0.345%. The Python regression test separately verifies interval weighting, loopback/loop-device exclusion, UTC handling, and the labeled point-sample fallback.
 

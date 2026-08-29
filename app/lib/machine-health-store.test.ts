@@ -19,6 +19,11 @@ describe('machine health contract', () => {
         ...healthyMachineReport.route_activity,
         route_id: 'must-not-survive',
       },
+      process_tags: {
+        ...healthyMachineReport.process_tags,
+        route_id: 'must-not-survive',
+        agent_id: 'must-not-survive',
+      },
       process_coverage: {
         ...healthyMachineReport.process_coverage,
         process_identity: 'must-not-survive',
@@ -164,6 +169,26 @@ describe('machine health contract', () => {
     expect(parsed.process_coverage).toBeUndefined();
   });
 
+  it('accepts a snapshot from before process tags were added', () => {
+    const { process_tags: _processTags, ...olderReport } = healthyMachineReport;
+    const parsed = machineHealthPayloadSchema.parse(olderReport);
+
+    expect(parsed.process_tags).toBeUndefined();
+  });
+
+  it('rejects inconsistent process tag aggregates', () => {
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        process_tags: {
+          ...healthyMachineReport.process_tags,
+          tagged_processes:
+            (healthyMachineReport.process_tags?.tagged_processes ?? 0) + 1,
+        },
+      }).success
+    ).toBe(false);
+  });
+
   it('does not accept numeric route counts from an unavailable source', () => {
     const unavailableWithCounts: unknown = {
       ...healthyMachineReport,
@@ -218,6 +243,10 @@ describe('machine health contract', () => {
   });
 
   it('classifies operator thresholds without treating ordinary load as an incident', () => {
+    const processTags = healthyMachineReport.process_tags;
+    if (processTags?.source !== 'codex-route-hook-v1')
+      throw new Error('Expected the process-tag fixture');
+
     expect(evaluateMachineHealth(healthyMachineReport)).toEqual({
       state: 'healthy',
       reasons: [],
@@ -276,6 +305,18 @@ describe('machine health contract', () => {
         '1 agent job left process residue.',
         '1 agent route item needs ownership inspection.',
       ],
+    });
+    expect(
+      evaluateMachineHealth({
+        ...healthyMachineReport,
+        process_tags: {
+          ...processTags,
+          unknown_jobs: 2,
+        },
+      })
+    ).toEqual({
+      state: 'watch',
+      reasons: ['2 Codex tags need inspection.'],
     });
     expect(
       evaluateMachineHealth({

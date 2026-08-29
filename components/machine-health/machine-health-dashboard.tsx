@@ -139,6 +139,10 @@ export function MachineHealthDashboard({
     payload.route_activity?.source === 'codex-route-leases-v2'
       ? payload.route_activity
       : null;
+  const processTags =
+    payload.process_tags?.source === 'codex-route-hook-v1'
+      ? payload.process_tags
+      : null;
   const remoteClient = payload.network.remote_client;
   const remoteServer = payload.services.gnome_remote_desktop;
   const remoteAcceleration = payload.services.gnome_remote_desktop_acceleration;
@@ -209,6 +213,24 @@ export function MachineHealthDashboard({
         .filter(Boolean)
         .join(' · ')
     : 'unavailable';
+  const processTagsNote = processTags
+    ? [
+        `${processTags.active_main_roots} main`,
+        `${processTags.active_subagents} agent${processTags.active_subagents === 1 ? '' : 's'}`,
+        `${processTags.active_jobs} jobs`,
+      ].join(' · ')
+    : 'unavailable';
+  const processTagsResourceNote = processTags
+    ? [
+        `${processTags.tagged_processes} proc`,
+        `${formatMemory(processTags.tagged_memory_current_bytes)} memory`,
+        processTags.unknown_jobs > 0
+          ? `${processTags.unknown_jobs} unknown`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : null;
   const routeUnknown = routeActivity
     ? (routeActivity.unknown_routes ?? 0) + (routeActivity.unknown_jobs ?? 0)
     : null;
@@ -485,10 +507,18 @@ export function MachineHealthDashboard({
               )}
             </div>
             <div>
-              <dt className="opacity-55 text-xs">Codex workers</dt>
+              <dt className="opacity-55 text-xs">Codex tags</dt>
               <dd className="mt-1 text-xl font-black tabular-nums">
-                {payload.hygiene.codex_workers}
+                {processTags?.active_routes ?? '—'}
               </dd>
+              <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
+                {processTagsNote}
+              </dd>
+              {processTagsResourceNote ? (
+                <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
+                  {processTagsResourceNote}
+                </dd>
+              ) : null}
             </div>
             <div>
               <dt className="opacity-55 text-xs">Process scopes</dt>

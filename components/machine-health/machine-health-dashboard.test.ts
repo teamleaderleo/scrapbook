@@ -205,6 +205,22 @@ describe('machine health dashboard', () => {
     expect(html).not.toContain('route_id');
   });
 
+  it('shows chat-root and subagent process tags without identifiers', () => {
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report,
+        samples,
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('Codex tags');
+    expect(html).toContain('1 main · 3 agents · 5 jobs');
+    expect(html).toContain('17 proc · 512 MiB memory');
+    expect(html).not.toContain('agent_id');
+    expect(html).not.toContain('route_id');
+  });
+
   it('surfaces recovered crashes even when failed units returned to zero', () => {
     const html = renderToStaticMarkup(
       createElement(MachineHealthDashboard, {
