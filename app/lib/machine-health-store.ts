@@ -45,6 +45,18 @@ export const machineHealthPayloadSchema = z.object({
     clock_mhz: nullableNonnegative,
     max_clock_mhz: nullableNonnegative,
   }),
+  activity: z.object({
+    source: z.enum(['sysstat-10m', 'point']),
+    window_minutes: z.number().int().min(0).max(180),
+    sample_count: z.number().int().min(1).max(18),
+    cpu_peak_percent: percent,
+    memory_peak_percent: percent,
+    cpu_pressure_some_percent: percent.nullable(),
+    memory_pressure_full_percent: percent.nullable(),
+    io_pressure_full_percent: percent.nullable(),
+    disk_read_mib_s: nullableNonnegative,
+    disk_write_mib_s: nullableNonnegative,
+  }),
   services: z.object({
     failed_system_units: nonnegativeInteger,
     failed_user_units: nonnegativeInteger,
@@ -94,6 +106,9 @@ export type MachineHealthSample = {
   graphicsClockMhz: number | null;
   networkRxMibS: number;
   networkTxMibS: number;
+  diskReadMibS: number | null;
+  diskWriteMibS: number | null;
+  pressurePercent: number | null;
   browserRoots: number;
   codexWorkers: number;
   failedUnits: number;
@@ -186,6 +201,13 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
     payload.services.failed_system_units + payload.services.failed_user_units;
   const loadPerCpu = payload.load.one / payload.load.logical_cpus;
   const state = evaluateMachineHealth(payload).state;
+  const pressureValues = [
+    payload.activity.cpu_pressure_some_percent,
+    payload.activity.memory_pressure_full_percent,
+    payload.activity.io_pressure_full_percent,
+  ].filter((value): value is number => value !== null);
+  const pressurePercent =
+    pressureValues.length === 0 ? null : Math.max(...pressureValues);
 
   await client.begin(async sql => {
     await sql`
@@ -212,6 +234,9 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         graphics_clock_mhz,
         network_rx_mib_s,
         network_tx_mib_s,
+        disk_read_mib_s,
+        disk_write_mib_s,
+        pressure_percent,
         browser_roots,
         codex_workers,
         failed_units,
@@ -230,6 +255,9 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         ${payload.graphics.clock_mhz},
         ${payload.network.rx_mib_s},
         ${payload.network.tx_mib_s},
+        ${payload.activity.disk_read_mib_s},
+        ${payload.activity.disk_write_mib_s},
+        ${pressurePercent},
         ${payload.hygiene.browser_roots},
         ${payload.hygiene.codex_workers},
         ${failedUnits},
@@ -247,6 +275,9 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         graphics_clock_mhz = EXCLUDED.graphics_clock_mhz,
         network_rx_mib_s = EXCLUDED.network_rx_mib_s,
         network_tx_mib_s = EXCLUDED.network_tx_mib_s,
+        disk_read_mib_s = EXCLUDED.disk_read_mib_s,
+        disk_write_mib_s = EXCLUDED.disk_write_mib_s,
+        pressure_percent = EXCLUDED.pressure_percent,
         browser_roots = EXCLUDED.browser_roots,
         codex_workers = EXCLUDED.codex_workers,
         failed_units = EXCLUDED.failed_units,
@@ -303,6 +334,9 @@ export async function readMachineHealth(
           graphics_clock_mhz: number | string | null;
           network_rx_mib_s: number | string;
           network_tx_mib_s: number | string;
+          disk_read_mib_s: number | string | null;
+          disk_write_mib_s: number | string | null;
+          pressure_percent: number | string | null;
           browser_roots: number | string;
           codex_workers: number | string;
           failed_units: number | string;
@@ -319,6 +353,9 @@ export async function readMachineHealth(
           graphics_clock_mhz,
           network_rx_mib_s,
           network_tx_mib_s,
+          disk_read_mib_s,
+          disk_write_mib_s,
+          pressure_percent,
           browser_roots,
           codex_workers,
           failed_units,
@@ -361,6 +398,12 @@ export async function readMachineHealth(
             : toNumber(row.graphics_clock_mhz),
         networkRxMibS: toNumber(row.network_rx_mib_s),
         networkTxMibS: toNumber(row.network_tx_mib_s),
+        diskReadMibS:
+          row.disk_read_mib_s === null ? null : toNumber(row.disk_read_mib_s),
+        diskWriteMibS:
+          row.disk_write_mib_s === null ? null : toNumber(row.disk_write_mib_s),
+        pressurePercent:
+          row.pressure_percent === null ? null : toNumber(row.pressure_percent),
         browserRoots: toNumber(row.browser_roots),
         codexWorkers: toNumber(row.codex_workers),
         failedUnits: toNumber(row.failed_units),

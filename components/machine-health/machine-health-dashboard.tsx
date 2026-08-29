@@ -149,14 +149,22 @@ export function MachineHealthDashboard({
         aria-label="Current resource use"
       >
         <Metric
-          label="CPU"
+          label={
+            payload.activity.source === 'sysstat-10m'
+              ? 'CPU · hourly avg'
+              : 'CPU · point'
+          }
           value={formatPercent(payload.cpu.used_percent)}
-          note={`${(payload.load.one / payload.load.logical_cpus).toFixed(2)} load / CPU`}
+          note={`${formatPercent(payload.activity.cpu_peak_percent)} peak · ${payload.activity.sample_count} sample${payload.activity.sample_count === 1 ? '' : 's'}`}
         />
         <Metric
-          label="Memory"
+          label={
+            payload.activity.source === 'sysstat-10m'
+              ? 'Memory · hourly avg'
+              : 'Memory · point'
+          }
           value={formatPercent(payload.memory.used_percent)}
-          note={`${payload.memory.total_gib.toFixed(0)} GiB installed`}
+          note={`${formatPercent(payload.activity.memory_peak_percent)} peak · ${payload.memory.total_gib.toFixed(0)} GiB`}
         />
         <Metric
           label="Root disk"
@@ -188,6 +196,7 @@ export function MachineHealthDashboard({
         samples={samples}
         now={now}
         graphicsMaxClockMhz={payload.graphics.max_clock_mhz}
+        latestActivity={payload.activity}
       />
 
       <section className="grid gap-3 lg:grid-cols-[1.25fr_1fr]">

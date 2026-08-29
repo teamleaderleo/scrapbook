@@ -1,6 +1,9 @@
 'use client';
 
-import type { MachineHealthSample } from '@/app/lib/machine-health-store';
+import type {
+  MachineHealthPayload,
+  MachineHealthSample,
+} from '@/app/lib/machine-health-store';
 import { useMemo, useState } from 'react';
 
 export type ActivityRange = '24h' | '7d' | '30d';
@@ -13,6 +16,8 @@ type ActivityBin = {
   memoryUsedPercent: number | null;
   graphicsClockMhz: number | null;
   networkMibS: number | null;
+  diskMibS: number | null;
+  pressurePercent: number | null;
   browserRoots: number | null;
   codexWorkers: number | null;
 };
@@ -51,6 +56,14 @@ export function buildActivityBins(
     const graphicsClocks = included
       .map(sample => sample.graphicsClockMhz)
       .filter((value): value is number => value !== null);
+    const diskThroughput = included
+      .filter(
+        sample => sample.diskReadMibS !== null || sample.diskWriteMibS !== null
+      )
+      .map(sample => (sample.diskReadMibS ?? 0) + (sample.diskWriteMibS ?? 0));
+    const pressure = included
+      .map(sample => sample.pressurePercent)
+      .filter((value): value is number => value !== null);
 
     return {
       start: binStart,
@@ -64,6 +77,8 @@ export function buildActivityBins(
       networkMibS: average(
         included.map(sample => sample.networkRxMibS + sample.networkTxMibS)
       ),
+      diskMibS: average(diskThroughput),
+      pressurePercent: pressure.length === 0 ? null : Math.max(...pressure),
       browserRoots:
         included.length === 0
           ? null
@@ -139,10 +154,12 @@ export function MachineHealthActivity({
   samples,
   now,
   graphicsMaxClockMhz,
+  latestActivity,
 }: {
   samples: MachineHealthSample[];
   now: number;
   graphicsMaxClockMhz: number | null;
+  latestActivity: MachineHealthPayload['activity'];
 }) {
   const [range, setRange] = useState<ActivityRange>('24h');
   const bins = useMemo(
@@ -152,6 +169,13 @@ export function MachineHealthActivity({
   const observedBins = bins.filter(bin => bin.sampleCount > 0).length;
   const browserHigh = Math.max(0, ...bins.map(bin => bin.browserRoots ?? 0));
   const workerHigh = Math.max(0, ...bins.map(bin => bin.codexWorkers ?? 0));
+  const pressureSummary = [
+    latestActivity.cpu_pressure_some_percent,
+    latestActivity.memory_pressure_full_percent,
+    latestActivity.io_pressure_full_percent,
+  ]
+    .map(value => (value === null ? '—' : `${value.toFixed(2)}%`))
+    .join(' / ');
 
   return (
     <section className="rounded-2xl border border-black/10 bg-[#e4ded2]/75 p-4 dark:border-white/10 dark:bg-[#17191f]/80 sm:p-5">
@@ -162,8 +186,9 @@ export function MachineHealthActivity({
           </p>
           <h2 className="mt-1 text-lg font-black">Observed, not surveilled</h2>
           <p className="mt-1 max-w-2xl text-xs leading-5 opacity-60">
-            Short point samples show workstation shape without recording apps,
-            tabs, commands, or literal screen time.
+            Hourly summaries reuse six system-accounting intervals when
+            available, without recording apps, tabs, commands, or literal screen
+            time.
           </p>
         </div>
         <div
@@ -188,26 +213,39 @@ export function MachineHealthActivity({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <ObservationChart
-          label="CPU"
+          label="CPU average"
           bins={bins}
           value={bin => bin.cpuUsedPercent}
           ceiling={100}
           unit="%"
         />
         <ObservationChart
-          label="Memory"
+          label="Memory average"
           bins={bins}
           value={bin => bin.memoryUsedPercent}
           ceiling={100}
           unit="%"
         />
         <ObservationChart
-          label="Network"
+          label="Network average"
           bins={bins}
           value={bin => bin.networkMibS}
           unit="MiB/s"
+        />
+        <ObservationChart
+          label="Disk I/O average"
+          bins={bins}
+          value={bin => bin.diskMibS}
+          unit="MiB/s"
+        />
+        <ObservationChart
+          label="Contention high"
+          bins={bins}
+          value={bin => bin.pressurePercent}
+          ceiling={100}
+          unit="%"
         />
         <ObservationChart
           label="iGPU clock"
@@ -219,6 +257,13 @@ export function MachineHealthActivity({
       </div>
 
       <div className="opacity-55 mt-4 flex flex-wrap gap-x-5 gap-y-1 border-t border-black/10 pt-3 text-xs dark:border-white/10">
+        <span>
+          Latest:{' '}
+          {latestActivity.source === 'sysstat-10m'
+            ? `${latestActivity.sample_count}×10m · ${latestActivity.window_minutes}m window`
+            : 'point-sample fallback'}
+        </span>
+        <span>PSI CPU / memory / I/O: {pressureSummary}</span>
         <span>
           {observedBins}/{bins.length} {RANGE_CONFIG[range].description} bins
           observed

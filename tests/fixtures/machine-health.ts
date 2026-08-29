@@ -11,6 +11,18 @@ export const healthyMachineReport: MachineHealthPayload = {
   disk: { root_used_percent: 12, root_free_gib: 800 },
   temperature: { peak_sensor_c: 58 },
   graphics: { clock_mhz: 450, max_clock_mhz: 2_250 },
+  activity: {
+    source: 'sysstat-10m',
+    window_minutes: 60,
+    sample_count: 6,
+    cpu_peak_percent: 38,
+    memory_peak_percent: 27,
+    cpu_pressure_some_percent: 0.4,
+    memory_pressure_full_percent: 0,
+    io_pressure_full_percent: 0.1,
+    disk_read_mib_s: 1.25,
+    disk_write_mib_s: 2.5,
+  },
   services: {
     failed_system_units: 0,
     failed_user_units: 0,

@@ -19,6 +19,9 @@ function sample(
     graphicsClockMhz: 400,
     networkRxMibS: 0.5,
     networkTxMibS: 0.25,
+    diskReadMibS: 1,
+    diskWriteMibS: 2,
+    pressurePercent: 0.5,
     browserRoots: 1,
     codexWorkers: 2,
     failedUnits: 0,
@@ -43,6 +46,8 @@ describe('machine health activity bins', () => {
       sampleCount: 2,
       cpuUsedPercent: 20,
       networkMibS: 0.75,
+      diskMibS: 3,
+      pressurePercent: 0.5,
     });
   });
 

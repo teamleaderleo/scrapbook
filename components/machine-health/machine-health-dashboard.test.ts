@@ -24,6 +24,9 @@ const samples = Array.from({ length: 4 }, (_, index) => ({
   graphicsClockMhz: 300 + index * 50,
   networkRxMibS: 0.4 + index / 10,
   networkTxMibS: 0.1 + index / 20,
+  diskReadMibS: 1 + index / 10,
+  diskWriteMibS: 2 + index / 10,
+  pressurePercent: 0.2 + index / 10,
   browserRoots: 1,
   codexWorkers: 2,
   failedUnits: 0,
@@ -45,6 +48,7 @@ describe('machine health dashboard', () => {
     expect(html).toContain('4 observations · 30d loaded');
     expect(html).toContain('Observed, not surveilled');
     expect(html).toContain('CPU');
+    expect(html).toContain('Contention high');
     expect(html).toContain('iGPU clock');
     expect(html).toContain(
       'No IP addresses, URLs, tab titles, command lines, ports'
