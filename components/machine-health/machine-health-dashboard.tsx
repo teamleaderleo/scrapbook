@@ -131,6 +131,22 @@ export function MachineHealthDashboard({
     payload.route_activity?.source === 'codex-route-leases-v2'
       ? payload.route_activity
       : null;
+  const processCoverage =
+    payload.process_coverage?.source === 'codex-process-coverage-v1'
+      ? payload.process_coverage
+      : null;
+  const processCoverageNote = processCoverage
+    ? [
+        `${processCoverage.scoped_processes}/${processCoverage.discoverable_processes} scoped`,
+        `${processCoverage.discoverable_roots} roots`,
+        processCoverage.discoverable_rss_bytes === null
+          ? null
+          : formatMemory(processCoverage.discoverable_rss_bytes),
+        processCoverage.scope_evidence === 'partial' ? 'partial' : null,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : 'scope unavailable';
   const routeUnknown = routeActivity
     ? (routeActivity.unknown_routes ?? 0) + (routeActivity.unknown_jobs ?? 0)
     : null;
@@ -349,6 +365,9 @@ export function MachineHealthDashboard({
               <dt className="opacity-55 text-xs">Codex workers</dt>
               <dd className="mt-1 text-xl font-black tabular-nums">
                 {payload.hygiene.codex_workers}
+              </dd>
+              <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
+                {processCoverageNote}
               </dd>
             </div>
             <div>

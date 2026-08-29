@@ -96,6 +96,37 @@ export const machineHealthPayloadSchema = z.object({
       }),
     ])
     .optional(),
+  process_coverage: z
+    .union([
+      z
+        .object({
+          source: z.literal('codex-process-coverage-v1'),
+          observed_at: z.string().datetime({ offset: true }),
+          scope_evidence: z.enum(['complete', 'partial']),
+          discoverable_roots: nonnegativeInteger,
+          discoverable_processes: nonnegativeInteger,
+          scoped_processes: nonnegativeInteger,
+          discoverable_rss_bytes: nonnegativeInteger.nullable(),
+          evidence_errors: nonnegativeInteger,
+        })
+        .refine(
+          value =>
+            value.discoverable_roots <= value.discoverable_processes &&
+            value.scoped_processes <= value.discoverable_processes,
+          { message: 'process coverage counts are inconsistent' }
+        ),
+      z.object({
+        source: z.literal('unavailable'),
+        observed_at: z.null(),
+        scope_evidence: z.null(),
+        discoverable_roots: z.null(),
+        discoverable_processes: z.null(),
+        scoped_processes: z.null(),
+        discoverable_rss_bytes: z.null(),
+        evidence_errors: z.null(),
+      }),
+    ])
+    .optional(),
   services: z.object({
     failed_system_units: nonnegativeInteger,
     failed_user_units: nonnegativeInteger,

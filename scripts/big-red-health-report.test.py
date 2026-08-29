@@ -220,6 +220,86 @@ class RouteActivityTest(unittest.TestCase):
                 self.assertIsNone(activity["active_routes"])
 
 
+class ProcessCoverageTest(unittest.TestCase):
+    def test_accepts_only_consistent_aggregate_coverage(self) -> None:
+        status = {
+            "schema_version": 1,
+            "source": "codex-process-coverage-v1",
+            "observed_at": "2026-08-29T06:00:00.000Z",
+            "process_visibility": "partial",
+            "discoverable_roots": 3,
+            "discoverable_processes": 18,
+            "session_identity_processes": 18,
+            "thread_fallback_processes": 0,
+            "scoped_processes": 0,
+            "hook_scope_processes": 0,
+            "lease_scope_processes": 0,
+            "generic_scope_processes": 18,
+            "unknown_scope_processes": 0,
+            "observed_scope_coverage_percent": 0.0,
+            "scope_coverage_percent": None,
+            "discoverable_rss_bytes": 134_975_488,
+            "environ_errors": 3,
+            "identity_errors": 0,
+            "cgroup_errors": 0,
+            "rss_errors": 0,
+            "process_races": 0,
+            "private_identity": "must-not-escape",
+        }
+        with patch.object(REPORT, "run", return_value=(0, json.dumps(status))):
+            coverage = REPORT.process_coverage(Path("/private/helper"))
+
+        self.assertEqual(coverage["source"], "codex-process-coverage-v1")
+        self.assertEqual(coverage["scope_evidence"], "partial")
+        self.assertEqual(coverage["discoverable_roots"], 3)
+        self.assertEqual(coverage["discoverable_processes"], 18)
+        self.assertEqual(coverage["scoped_processes"], 0)
+        self.assertEqual(coverage["evidence_errors"], 3)
+        self.assertNotIn("private_identity", coverage)
+        self.assertNotIn("must-not-escape", json.dumps(coverage))
+
+    def test_rejects_inconsistent_or_malformed_coverage(self) -> None:
+        invalid = (
+            (127, ""),
+            (0, "not json"),
+            (0, json.dumps({"source": "wrong"})),
+            (
+                0,
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "source": "codex-process-coverage-v1",
+                        "observed_at": "2026-08-29T06:00:00.000Z",
+                        "process_visibility": "complete",
+                        "discoverable_roots": 2,
+                        "discoverable_processes": 1,
+                        "session_identity_processes": 1,
+                        "thread_fallback_processes": 0,
+                        "scoped_processes": 0,
+                        "hook_scope_processes": 0,
+                        "lease_scope_processes": 0,
+                        "generic_scope_processes": 1,
+                        "unknown_scope_processes": 0,
+                        "observed_scope_coverage_percent": 0.0,
+                        "scope_coverage_percent": 0.0,
+                        "discoverable_rss_bytes": 1,
+                        "environ_errors": 0,
+                        "identity_errors": 0,
+                        "cgroup_errors": 0,
+                        "rss_errors": 0,
+                        "process_races": 0,
+                    }
+                ),
+            ),
+        )
+        for response in invalid:
+            with self.subTest(response=response):
+                with patch.object(REPORT, "run", return_value=response):
+                    coverage = REPORT.process_coverage(Path("/private/helper"))
+                self.assertEqual(coverage["source"], "unavailable")
+                self.assertIsNone(coverage["discoverable_processes"])
+
+
 class HygieneTest(unittest.TestCase):
     def test_aggregates_browser_descendant_rss_without_process_detail(self) -> None:
         rows = {

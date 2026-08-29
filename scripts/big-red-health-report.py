@@ -42,6 +42,13 @@ GLAEDA_CACHE = Path.home() / ".cache" / "glaeda"
 CODEX_ROUTE_STATUS_HELPER = (
     Path.home() / "Projects" / "leo-workspace" / "tools" / "codex_route_job.py"
 )
+CODEX_PROCESS_COVERAGE_HELPER = (
+    Path.home()
+    / "Projects"
+    / "leo-workspace"
+    / "tools"
+    / "codex_process_coverage.py"
+)
 RELIABILITY_WINDOW_HOURS = 24
 RELIABILITY_EVENT_LIMIT = 4_096
 SYSTEMD_PROCESS_EXIT_MESSAGE_ID = "98e322203f7a4ed290d09fe03c09fe15"
@@ -489,6 +496,149 @@ def route_activity(
     return {"source": "codex-route-leases-v2", **values}
 
 
+def process_coverage(
+    helper: Path = CODEX_PROCESS_COVERAGE_HELPER,
+) -> dict[str, Any]:
+    unavailable = {
+        "source": "unavailable",
+        "observed_at": None,
+        "scope_evidence": None,
+        "discoverable_roots": None,
+        "discoverable_processes": None,
+        "scoped_processes": None,
+        "discoverable_rss_bytes": None,
+        "evidence_errors": None,
+    }
+    code, output = run(sys.executable, str(helper))
+    if code != 0 or not output:
+        return unavailable
+    try:
+        status = json.loads(output)
+    except (json.JSONDecodeError, TypeError):
+        return unavailable
+    if (
+        not isinstance(status, dict)
+        or status.get("schema_version") != 1
+        or isinstance(status.get("schema_version"), bool)
+        or status.get("source") != "codex-process-coverage-v1"
+    ):
+        return unavailable
+
+    count_fields = (
+        "discoverable_roots",
+        "discoverable_processes",
+        "session_identity_processes",
+        "thread_fallback_processes",
+        "scoped_processes",
+        "hook_scope_processes",
+        "lease_scope_processes",
+        "generic_scope_processes",
+        "unknown_scope_processes",
+        "environ_errors",
+        "identity_errors",
+        "cgroup_errors",
+        "rss_errors",
+        "process_races",
+    )
+    counts: dict[str, int] = {}
+    for field in count_fields:
+        value = status.get(field)
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            return unavailable
+        counts[field] = value
+
+    observed_at = status.get("observed_at")
+    if not isinstance(observed_at, str):
+        return unavailable
+    try:
+        parsed_observed_at = dt.datetime.fromisoformat(
+            str(observed_at).replace("Z", "+00:00")
+        )
+    except ValueError:
+        return unavailable
+    if parsed_observed_at.tzinfo is None:
+        return unavailable
+
+    visibility = status.get("process_visibility")
+    if visibility not in {"complete", "partial"}:
+        return unavailable
+    expected_visibility = (
+        "complete"
+        if counts["environ_errors"] == 0
+        and counts["identity_errors"] == 0
+        and counts["process_races"] == 0
+        else "partial"
+    )
+    if visibility != expected_visibility:
+        return unavailable
+    process_count = counts["discoverable_processes"]
+    scoped_count = counts["scoped_processes"]
+    if not (
+        counts["discoverable_roots"] <= process_count
+        and counts["session_identity_processes"]
+        + counts["thread_fallback_processes"]
+        == process_count
+        and scoped_count
+        + counts["generic_scope_processes"]
+        + counts["unknown_scope_processes"]
+        == process_count
+        and counts["hook_scope_processes"]
+        + counts["lease_scope_processes"]
+        == scoped_count
+        and counts["cgroup_errors"] == counts["unknown_scope_processes"]
+    ):
+        return unavailable
+
+    expected_observed_coverage = (
+        round(scoped_count / process_count * 100, 1) if process_count else None
+    )
+    if status.get("observed_scope_coverage_percent") != (
+        expected_observed_coverage
+    ):
+        return unavailable
+    scope_evidence = (
+        "complete"
+        if visibility == "complete" and counts["cgroup_errors"] == 0
+        else "partial"
+    )
+    expected_coverage = (
+        expected_observed_coverage if scope_evidence == "complete" else None
+    )
+    if status.get("scope_coverage_percent") != expected_coverage:
+        return unavailable
+
+    rss_bytes = status.get("discoverable_rss_bytes")
+    if rss_bytes is not None and (
+        isinstance(rss_bytes, bool)
+        or not isinstance(rss_bytes, int)
+        or rss_bytes < 0
+    ):
+        return unavailable
+    if (counts["rss_errors"] == 0) != (rss_bytes is not None):
+        return unavailable
+
+    evidence_errors = sum(
+        counts[field]
+        for field in (
+            "environ_errors",
+            "identity_errors",
+            "cgroup_errors",
+            "rss_errors",
+            "process_races",
+        )
+    )
+    return {
+        "source": "codex-process-coverage-v1",
+        "observed_at": observed_at,
+        "scope_evidence": scope_evidence,
+        "discoverable_roots": counts["discoverable_roots"],
+        "discoverable_processes": process_count,
+        "scoped_processes": scoped_count,
+        "discoverable_rss_bytes": rss_bytes,
+        "evidence_errors": evidence_errors,
+    }
+
+
 def read_number(path: Path) -> float | None:
     try:
         return float(path.read_text(encoding="utf-8").strip())
@@ -921,6 +1071,7 @@ def build_report() -> dict[str, Any]:
     activity = activity_window(now)
     codex_usage = codex_usage_window(now)
     routes = route_activity()
+    coverage = process_coverage()
     _, total_gib = memory()
     disk = shutil.disk_usage("/")
     graphics_clock_mhz, graphics_max_clock_mhz = graphics_clock()
@@ -983,6 +1134,7 @@ def build_report() -> dict[str, Any]:
         },
         "codex_usage": codex_usage,
         "route_activity": routes,
+        "process_coverage": coverage,
         "services": {
             "failed_system_units": failed_unit_count(),
             "failed_user_units": failed_unit_count(user=True),

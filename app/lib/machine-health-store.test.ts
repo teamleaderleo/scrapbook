@@ -19,6 +19,10 @@ describe('machine health contract', () => {
         ...healthyMachineReport.route_activity,
         route_id: 'must-not-survive',
       },
+      process_coverage: {
+        ...healthyMachineReport.process_coverage,
+        process_identity: 'must-not-survive',
+      },
     });
 
     expect(parsed).toEqual(healthyMachineReport);
@@ -54,6 +58,14 @@ describe('machine health contract', () => {
     expect(parsed.route_activity).toBeUndefined();
   });
 
+  it('accepts a snapshot from before process coverage was added', () => {
+    const { process_coverage: _ProcessCoverage, ...olderReport } =
+      healthyMachineReport;
+    const parsed = machineHealthPayloadSchema.parse(olderReport);
+
+    expect(parsed.process_coverage).toBeUndefined();
+  });
+
   it('does not accept numeric route counts from an unavailable source', () => {
     const unavailableWithCounts: unknown = {
       ...healthyMachineReport,
@@ -64,6 +76,31 @@ describe('machine health contract', () => {
     };
     expect(
       machineHealthPayloadSchema.safeParse(unavailableWithCounts).success
+    ).toBe(false);
+  });
+
+  it('does not accept process counts from an unavailable coverage source', () => {
+    const unavailableWithCounts: unknown = {
+      ...healthyMachineReport,
+      process_coverage: {
+        ...healthyMachineReport.process_coverage,
+        source: 'unavailable',
+      },
+    };
+    expect(
+      machineHealthPayloadSchema.safeParse(unavailableWithCounts).success
+    ).toBe(false);
+  });
+
+  it('rejects inconsistent process coverage counts', () => {
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        process_coverage: {
+          ...healthyMachineReport.process_coverage,
+          scoped_processes: 19,
+        },
+      }).success
     ).toBe(false);
   });
 

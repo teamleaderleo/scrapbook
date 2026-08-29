@@ -46,6 +46,16 @@ export const healthyMachineReport: MachineHealthPayload = {
     unknown_routes: 0,
     unknown_jobs: 0,
   },
+  process_coverage: {
+    source: 'codex-process-coverage-v1',
+    observed_at: '2026-08-29T06:00:00.000Z',
+    scope_evidence: 'partial',
+    discoverable_roots: 3,
+    discoverable_processes: 18,
+    scoped_processes: 0,
+    discoverable_rss_bytes: 134_975_488,
+    evidence_errors: 3,
+  },
   services: {
     failed_system_units: 0,
     failed_user_units: 0,
