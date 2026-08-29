@@ -59,6 +59,9 @@ CODEX_PROCESS_COVERAGE_HELPER = (
 CODEX_STATE_INVENTORY_HELPER = (
     Path.home() / "Projects" / "leo-workspace" / "tools" / "codex_state_inventory.py"
 )
+GNOME_POLISH_HELPER = (
+    Path.home() / "Projects" / "leo-workspace" / "tools" / "gnome_polish_variants.py"
+)
 RELIABILITY_WINDOW_HOURS = 24
 RELIABILITY_EVENT_LIMIT = 4_096
 GRD_ACCELERATION_EVENT_LIMIT = 512
@@ -666,6 +669,89 @@ def process_tags(
     ):
         return unavailable
     return {"source": "codex-route-hook-v1", **values}
+
+
+def desktop_state(helper: Path = GNOME_POLISH_HELPER) -> dict[str, Any]:
+    fields = (
+        "gnome_shell",
+        "pixel_width",
+        "pixel_height",
+        "refresh_hz",
+        "logical_scale",
+        "screen_shield_active",
+        "animations_enabled",
+        "screen_share_mode",
+    )
+    unavailable = {"source": "unavailable", **dict.fromkeys(fields)}
+    code, output = run(
+        sys.executable,
+        str(helper),
+        "snapshot",
+        "--variant",
+        "baseline",
+    )
+    if code != 0 or not output:
+        return unavailable
+    try:
+        status = json.loads(output)
+    except (json.JSONDecodeError, TypeError):
+        return unavailable
+    if (
+        not isinstance(status, dict)
+        or status.get("source") != "gnome-polish-live-v2"
+        or status.get("schema_version") != 2
+        or status.get("variant") != "baseline"
+    ):
+        return unavailable
+
+    display = status.get("display")
+    settings = status.get("settings")
+    if not isinstance(display, dict) or not isinstance(settings, dict):
+        return unavailable
+    mode = display.get("mode")
+    mode_match = (
+        re.fullmatch(r"([0-9]{3,5})x([0-9]{3,5})", mode)
+        if isinstance(mode, str)
+        else None
+    )
+    refresh_hz = finite_number(display.get("refresh_hz"))
+    logical_scale = finite_number(display.get("logical_scale"))
+    screen_shield_active = display.get("screen_shield_active")
+    animations_enabled = settings.get(
+        "org.gnome.desktop.interface/enable-animations"
+    )
+    screen_share_mode = settings.get(
+        "org.gnome.desktop.remote-desktop.rdp/screen-share-mode"
+    )
+    gnome_shell = status.get("gnome_shell")
+    if (
+        mode_match is None
+        or not isinstance(gnome_shell, str)
+        or re.fullmatch(r"[0-9]+(?:\.[0-9]+){1,3}", gnome_shell) is None
+        or refresh_hz is None
+        or not 1 <= refresh_hz <= 1_000
+        or logical_scale is None
+        or not 0.5 <= logical_scale <= 4
+        or not isinstance(screen_shield_active, bool)
+        or not isinstance(animations_enabled, bool)
+        or screen_share_mode not in {"mirror-primary", "extend"}
+    ):
+        return unavailable
+    pixel_width = int(mode_match.group(1))
+    pixel_height = int(mode_match.group(2))
+    if not 320 <= pixel_width <= 16_384 or not 240 <= pixel_height <= 16_384:
+        return unavailable
+    return {
+        "source": "gnome-polish-live-v2",
+        "gnome_shell": gnome_shell,
+        "pixel_width": pixel_width,
+        "pixel_height": pixel_height,
+        "refresh_hz": refresh_hz,
+        "logical_scale": logical_scale,
+        "screen_shield_active": screen_shield_active,
+        "animations_enabled": animations_enabled,
+        "screen_share_mode": screen_share_mode,
+    }
 
 
 def process_coverage(
@@ -1559,6 +1645,7 @@ def build_report() -> dict[str, Any]:
     tags = process_tags()
     coverage = process_coverage()
     state_inventory = codex_state()
+    desktop = desktop_state()
     _, total_gib = memory()
     disk = shutil.disk_usage("/")
     graphics_clock_mhz, graphics_max_clock_mhz = graphics_clock()
@@ -1624,6 +1711,7 @@ def build_report() -> dict[str, Any]:
         "process_tags": tags,
         "process_coverage": coverage,
         "codex_state": state_inventory,
+        "desktop": desktop,
         "services": {
             "failed_system_units": failed_unit_count(),
             "failed_user_units": failed_unit_count(user=True),

@@ -695,6 +695,94 @@ class RemoteAccelerationTest(unittest.TestCase):
                 )
 
 
+class DesktopStateTest(unittest.TestCase):
+    @staticmethod
+    def snapshot() -> dict[str, object]:
+        return {
+            "source": "gnome-polish-live-v2",
+            "schema_version": 2,
+            "variant": "baseline",
+            "gnome_shell": "50.1",
+            "display": {
+                "mode": "3072x1920",
+                "refresh_hz": 165.0,
+                "logical_scale": 1.5,
+                "screen_shield_active": True,
+                "private_connector": "must-not-survive",
+            },
+            "settings": {
+                "org.gnome.desktop.interface/enable-animations": True,
+                "org.gnome.desktop.remote-desktop.rdp/screen-share-mode": (
+                    "mirror-primary"
+                ),
+                "org.gnome.desktop.background/picture-uri": "must-not-survive",
+            },
+            "candidate_assets": ["must-not-survive"],
+        }
+
+    def test_allows_only_current_desktop_dimensions_and_modes(self) -> None:
+        with patch.object(
+            REPORT,
+            "run",
+            return_value=(0, json.dumps(self.snapshot())),
+        ) as run:
+            desktop = REPORT.desktop_state(Path("/private/helper"))
+
+        self.assertEqual(
+            desktop,
+            {
+                "source": "gnome-polish-live-v2",
+                "gnome_shell": "50.1",
+                "pixel_width": 3072,
+                "pixel_height": 1920,
+                "refresh_hz": 165.0,
+                "logical_scale": 1.5,
+                "screen_shield_active": True,
+                "animations_enabled": True,
+                "screen_share_mode": "mirror-primary",
+            },
+        )
+        self.assertNotIn("private", json.dumps(desktop))
+        self.assertEqual(
+            run.call_args.args,
+            (
+                REPORT.sys.executable,
+                "/private/helper",
+                "snapshot",
+                "--variant",
+                "baseline",
+            ),
+        )
+
+    def test_malformed_or_drifted_desktop_receipt_is_unavailable(self) -> None:
+        cases = (None, {**self.snapshot(), "schema_version": 3})
+        for value in cases:
+            with self.subTest(value=value):
+                output = "not-json" if value is None else json.dumps(value)
+                with patch.object(REPORT, "run", return_value=(0, output)):
+                    desktop = REPORT.desktop_state()
+                self.assertEqual(desktop["source"], "unavailable")
+                self.assertTrue(
+                    all(
+                        item is None
+                        for key, item in desktop.items()
+                        if key != "source"
+                    )
+                )
+
+        invalid_mode = self.snapshot()
+        invalid_mode["settings"] = {
+            **invalid_mode["settings"],
+            "org.gnome.desktop.remote-desktop.rdp/screen-share-mode": "private",
+        }
+        with patch.object(
+            REPORT,
+            "run",
+            return_value=(0, json.dumps(invalid_mode)),
+        ):
+            self.assertEqual(REPORT.desktop_state()["source"], "unavailable")
+
+
 class HygieneTest(unittest.TestCase):
     def test_aggregates_browser_descendant_rss_without_process_detail(self) -> None:
         rows = {

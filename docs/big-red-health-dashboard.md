@@ -15,6 +15,8 @@ The page starts with the questions that matter when Leo is away from the machine
 - Is the machine on AC, what is the aggregate battery state, and are there failed systemd units, unexpected development listeners, excess browser memory, or active RDP connections?
 - Is the unique macOS remote client offline, online but idle, direct, relayed, or unknown?
 - Did the current GNOME Remote Desktop process initialize its Vulkan/VA-API path, fall back to software, or not yet receive an RDP session?
+- What desktop state is active now: GNOME version, pixel mode, refresh, scale, screen-shield state,
+  animation state, and configured mirror/extend mode?
 - How many agent routes, jobs, and descendant processes are explicitly owned, how much RSS do they account for, and did any ownership record become unknown or leave residue?
 - How much local Codex state is allocated, how much is active or unknown, did the scan finish cleanly, and how did the total change over seven days?
 
@@ -35,6 +37,14 @@ The ingestion schema is an allowlist and strips unknown keys at every object lev
 - usernames, home-directory paths, serial numbers, or raw command output.
 
 The collector parses local command output and emits only enum values, booleans, percentages, byte totals, and aggregate counts. Its legacy Codex count observes code-mode worker leaves while excluding persistent desktop and remote-control daemons. The route view calls the v2 ownership tool's aggregate `status` contract; the process-tag view calls the hook adapter's aggregate `status` contract. Scrapbook does not repeat either cgroup classifier or read route receipts directly. It checks the root/job/process/memory sums before accepting a tag snapshot. Malformed, missing, inconsistent, or version-mismatched status becomes `unavailable` instead of a guessed zero. Browser RSS sums the browser process trees and is a trend signal rather than unique physical memory because shared pages can appear in more than one process. RDP visibility counts established local connections without emitting the peer or endpoint.
+
+The desktop readout calls the repository-owned GNOME polish snapshot and keeps only version, pixel
+dimensions, refresh, logical scale, screen-shield state, animation state, and mirror/extend mode.
+Wallpaper names, URIs, settings outside that allowlist, desktop-entry identities, asset hashes, and
+raw command output are dropped. It is a current readout, not another history chart or alert.
+A direct live GNOME receipt took 0.28 seconds and 32,680 KiB peak RSS. The complete collector took
+11.40 seconds and 53,428 KiB peak RSS in the final print-only check; its compact payload was 5,319
+bytes. The existing Codex-state scan still dominates the hourly run.
 
 The Codex-state view calls `leo-workspace/tools/codex_state_inventory.py` in aggregate mode. The accepted contract opens no content files, uses no network or privileged process reads, mutates nothing, and has no retention authority. Scrapbook reconciles class, file, and allocated-byte totals before accepting active, authoritative, manifest-referenced, and unknown buckets. Any nonzero reclaimable or reconstructible total is rejected because the current inventory contract has not earned cleanup authority. Paths, file names, manifests, process identities, and content never enter the report.
 

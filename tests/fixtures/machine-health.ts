@@ -113,6 +113,17 @@ export const healthyMachineReport: MachineHealthPayload = {
     reclaimable_bytes: 0,
     retention_authority: false,
   },
+  desktop: {
+    source: 'gnome-polish-live-v2',
+    gnome_shell: '50.1',
+    pixel_width: 3072,
+    pixel_height: 1920,
+    refresh_hz: 165,
+    logical_scale: 1.5,
+    screen_shield_active: true,
+    animations_enabled: true,
+    screen_share_mode: 'mirror-primary',
+  },
   services: {
     failed_system_units: 0,
     failed_user_units: 0,

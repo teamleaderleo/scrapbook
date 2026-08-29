@@ -44,6 +44,10 @@ function formatCpuTime(microseconds: number) {
   return `${minutes.toFixed(minutes < 10 ? 1 : 0)} min`;
 }
 
+function formatRefresh(value: number) {
+  return `${Number.isInteger(value) ? value.toFixed(0) : value.toFixed(1)} Hz`;
+}
+
 function Metric({
   label,
   value,
@@ -147,6 +151,22 @@ export function MachineHealthDashboard({
     payload.process_tags?.source === 'codex-route-hook-v1'
       ? payload.process_tags
       : null;
+  const desktop =
+    payload.desktop?.source === 'gnome-polish-live-v2' ? payload.desktop : null;
+  const desktopNote = desktop
+    ? [
+        formatRefresh(desktop.refresh_hz),
+        `${Math.round(desktop.logical_scale * 100)}%`,
+        desktop.screen_shield_active ? 'screen blanked' : 'screen on',
+      ].join(' · ')
+    : 'unavailable';
+  const desktopModeNote = desktop
+    ? [
+        `GNOME ${desktop.gnome_shell}`,
+        desktop.screen_share_mode === 'mirror-primary' ? 'mirror' : 'extend',
+        desktop.animations_enabled ? 'motion on' : 'motion off',
+      ].join(' · ')
+    : null;
   const remoteClient = payload.network.remote_client;
   const remoteServer = payload.services.gnome_remote_desktop;
   const remoteAcceleration = payload.services.gnome_remote_desktop_acceleration;
@@ -599,6 +619,22 @@ export function MachineHealthDashboard({
               <dd className="mt-1 text-xl font-black tabular-nums">
                 {payload.hygiene.unexpected_dev_listeners}
               </dd>
+            </div>
+            <div>
+              <dt className="opacity-55 text-xs">Desktop</dt>
+              <dd className="mt-1 text-xl font-black tabular-nums">
+                {desktop
+                  ? `${desktop.pixel_width}×${desktop.pixel_height}`
+                  : '—'}
+              </dd>
+              <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
+                {desktopNote}
+              </dd>
+              {desktopModeNote ? (
+                <dd className="opacity-55 mt-1 text-[0.68rem]">
+                  {desktopModeNote}
+                </dd>
+              ) : null}
             </div>
           </dl>
           <p className="opacity-55 mt-4 text-xs leading-5">

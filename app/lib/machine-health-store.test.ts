@@ -32,6 +32,11 @@ describe('machine health contract', () => {
         ...healthyMachineReport.codex_state,
         cache_path: 'must-not-survive',
       },
+      desktop: {
+        ...healthyMachineReport.desktop,
+        connector: 'must-not-survive',
+        wallpaper_uri: 'must-not-survive',
+      },
     });
 
     expect(parsed).toEqual(healthyMachineReport);
@@ -185,6 +190,41 @@ describe('machine health contract', () => {
     const parsed = machineHealthPayloadSchema.parse(olderReport);
 
     expect(parsed.codex_state).toBeUndefined();
+  });
+
+  it('accepts a snapshot from before desktop state was added', () => {
+    const { desktop: _desktop, ...olderReport } = healthyMachineReport;
+    const parsed = machineHealthPayloadSchema.parse(olderReport);
+
+    expect(parsed.desktop).toBeUndefined();
+  });
+
+  it('rejects malformed or inconsistent desktop state', () => {
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        desktop: {
+          ...healthyMachineReport.desktop,
+          logical_scale: 10,
+        },
+      }).success
+    ).toBe(false);
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        desktop: {
+          source: 'unavailable',
+          gnome_shell: '50.1',
+          pixel_width: null,
+          pixel_height: null,
+          refresh_hz: null,
+          logical_scale: null,
+          screen_shield_active: null,
+          animations_enabled: null,
+          screen_share_mode: null,
+        },
+      }).success
+    ).toBe(false);
   });
 
   it('rejects inconsistent or authoritative Codex state aggregates', () => {

@@ -93,6 +93,10 @@ describe('machine health dashboard', () => {
     expect(html).toContain('GRD active · VA-API ready');
     expect(html).toContain('Remote desktop: active');
     expect(html).toContain('RDP graphics: VA-API ready');
+    expect(html).toContain('Desktop');
+    expect(html).toContain('3072×1920');
+    expect(html).toContain('165 Hz · 150% · screen blanked');
+    expect(html).toContain('GNOME 50.1 · mirror · motion on');
     expect(html).toContain('Agent routes');
     expect(html).toContain('Process scopes');
     expect(html).toContain('0 / 18');

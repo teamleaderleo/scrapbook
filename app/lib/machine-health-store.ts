@@ -78,6 +78,30 @@ const remoteAcceleration = z.discriminatedUnion('source', [
     state: z.literal('unavailable'),
   }),
 ]);
+const desktopState = z.discriminatedUnion('source', [
+  z.object({
+    source: z.literal('gnome-polish-live-v2'),
+    gnome_shell: z.string().regex(/^[0-9]+(?:\.[0-9]+){1,3}$/),
+    pixel_width: z.number().int().min(320).max(16_384),
+    pixel_height: z.number().int().min(240).max(16_384),
+    refresh_hz: z.number().finite().min(1).max(1_000),
+    logical_scale: z.number().finite().min(0.5).max(4),
+    screen_shield_active: z.boolean(),
+    animations_enabled: z.boolean(),
+    screen_share_mode: z.enum(['mirror-primary', 'extend']),
+  }),
+  z.object({
+    source: z.literal('unavailable'),
+    gnome_shell: z.null(),
+    pixel_width: z.null(),
+    pixel_height: z.null(),
+    refresh_hz: z.null(),
+    logical_scale: z.null(),
+    screen_shield_active: z.null(),
+    animations_enabled: z.null(),
+    screen_share_mode: z.null(),
+  }),
+]);
 
 export const machineHealthPayloadSchema = z.object({
   schema_version: z.literal(1),
@@ -327,6 +351,7 @@ export const machineHealthPayloadSchema = z.object({
       }),
     ])
     .optional(),
+  desktop: desktopState.optional(),
   services: z.object({
     failed_system_units: nonnegativeInteger,
     failed_user_units: nonnegativeInteger,
