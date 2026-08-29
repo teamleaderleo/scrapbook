@@ -20,6 +20,21 @@ describe('machine health contract', () => {
     expect(parsed).toEqual(healthyMachineReport);
   });
 
+  it('defaults new hygiene counters when reading a pre-extension snapshot', () => {
+    const {
+      browser_rss_bytes: _browserRssBytes,
+      rdp_connections: _rdpConnections,
+      ...olderHygiene
+    } = healthyMachineReport.hygiene;
+    const parsed = machineHealthPayloadSchema.parse({
+      ...healthyMachineReport,
+      hygiene: olderHygiene,
+    });
+
+    expect(parsed.hygiene.browser_rss_bytes).toBe(0);
+    expect(parsed.hygiene.rdp_connections).toBe(0);
+  });
+
   it('rejects a host name or payload shape outside the single-machine contract', () => {
     expect(
       machineHealthPayloadSchema.safeParse({

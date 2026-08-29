@@ -167,6 +167,52 @@ class CodexUsageTest(unittest.TestCase):
         self.assertEqual(usage["model_calls"], 0)
 
 
+class HygieneTest(unittest.TestCase):
+    def test_aggregates_browser_descendant_rss_without_process_detail(self) -> None:
+        rows = {
+            100: (1, "chrome", "/usr/bin/google-chrome", 100 * REPORT.MIB),
+            101: (
+                100,
+                "chrome",
+                "/usr/bin/google-chrome --type=renderer",
+                200 * REPORT.MIB,
+            ),
+            102: (101, "chrome", "chrome child", 50 * REPORT.MIB),
+            200: (1, "node_repl", "node_repl", 10 * REPORT.MIB),
+            300: (1, "electron", "unrelated app", 500 * REPORT.MIB),
+        }
+        with (
+            patch.object(REPORT, "process_table", return_value=rows),
+            patch.object(REPORT, "run", return_value=(0, "")),
+            patch.object(REPORT, "established_tcp_connections", return_value=1),
+        ):
+            counts = REPORT.hygiene_counts()
+
+        self.assertEqual(counts, (1, 350 * REPORT.MIB, 1, 0, 1))
+
+    def test_counts_only_established_connections_on_the_local_rdp_port(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            table = Path(temporary_directory) / "tcp"
+            table.write_text(
+                "  sl  local_address rem_address   st\n"
+                "   0: 00000000:0D3D 00000000:0000 0A\n"
+                "   1: 0100007F:0D3D 0200007F:C001 01\n"
+                "   2: 0100007F:0D3D 0200007F:C002 06\n"
+                "   3: 0100007F:1F90 0200007F:C003 01\n",
+                encoding="utf-8",
+            )
+
+            count = REPORT.established_tcp_connections(3389, (table,))
+
+        self.assertEqual(count, 1)
+
+    def test_reads_the_configured_rdp_port_without_emitting_it(self) -> None:
+        with patch.object(REPORT, "run", return_value=(0, "uint16 3391")):
+            port = REPORT.configured_rdp_port()
+
+        self.assertEqual(port, 3391)
+
+
 class BuildStateTest(unittest.TestCase):
     def test_measures_glaeda_targets_and_cache_without_exposing_paths(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

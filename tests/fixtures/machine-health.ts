@@ -62,8 +62,10 @@ export const healthyMachineReport: MachineHealthPayload = {
   },
   hygiene: {
     browser_roots: 1,
+    browser_rss_bytes: 2_684_354_560,
     codex_workers: 2,
     unexpected_dev_listeners: 0,
+    rdp_connections: 0,
   },
   build_state: {
     source: 'filesystem',

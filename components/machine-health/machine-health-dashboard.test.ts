@@ -32,9 +32,11 @@ const samples = Array.from({ length: 4 }, (_, index) => ({
   activityWindowMinutes: 60,
   uptimeSeconds: 86_400 + index * 86_400,
   browserRoots: 1,
+  browserRssBytes: 2_147_483_648,
   codexWorkers: 2,
   failedUnits: 0,
   unexpectedDevListeners: 0,
+  rdpConnections: 0,
   codexUsageWindowStartedAt: null,
   codexInputTokens: null,
   codexCachedInputTokens: null,
@@ -58,7 +60,7 @@ describe('machine health dashboard', () => {
     );
 
     expect(html).toContain('Looks good');
-    expect(html).toContain('No configured guardrail is currently tripped.');
+    expect(html).not.toContain('No configured guardrail');
     expect(html).toContain('4 stored observations');
     expect(html).toContain('Activity');
     expect(html).toContain('Codex');
@@ -68,6 +70,10 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Build state');
     expect(html).toContain('51.6 GiB');
     expect(html).toContain('11 targets · 1.2 GiB cache · 3 building');
+    expect(html).toContain('Browser RSS');
+    expect(html).toContain('2.5 GiB');
+    expect(html).toContain('RDP');
+    expect(html).toContain('Idle');
     expect(html).not.toContain('private_ip');
     expect(html).not.toContain('process_arguments');
   });
@@ -104,5 +110,26 @@ describe('machine health dashboard', () => {
     );
 
     expect(html).toContain('+2.5 GiB / 7d');
+  });
+
+  it('shows the seven-day browser-memory delta when history is available', () => {
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report,
+        samples: [
+          {
+            ...samples[0],
+            checkedAt: new Date(
+              Date.parse(checkedAt) - 8 * 86_400_000
+            ).toISOString(),
+            browserRssBytes: 2_147_483_648,
+          },
+          ...samples,
+        ],
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('+512 MiB / 7d');
   });
 });

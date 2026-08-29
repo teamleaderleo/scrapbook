@@ -578,8 +578,9 @@ def idle_suspend_action(power_source: str) -> str:
     )
 
 
-def process_table() -> dict[int, tuple[int, str, str]]:
-    rows: dict[int, tuple[int, str, str]] = {}
+def process_table() -> dict[int, tuple[int, str, str, int]]:
+    rows: dict[int, tuple[int, str, str, int]] = {}
+    page_size = os.sysconf("SC_PAGE_SIZE")
     for entry in Path("/proc").iterdir():
         if not entry.name.isdigit():
             continue
@@ -596,24 +597,92 @@ def process_table() -> dict[int, tuple[int, str, str]]:
                 .decode("utf-8", "replace")
                 .lower()
             )
-            rows[int(entry.name)] = (parent, comm, cmdline)
-        except (FileNotFoundError, PermissionError, ProcessLookupError, ValueError):
+            resident_pages = int((entry / "statm").read_text().split()[1])
+            rows[int(entry.name)] = (
+                parent,
+                comm,
+                cmdline,
+                resident_pages * page_size,
+            )
+        except (
+            FileNotFoundError,
+            IndexError,
+            OSError,
+            PermissionError,
+            ProcessLookupError,
+            ValueError,
+        ):
             continue
     return rows
 
 
-def hygiene_counts() -> tuple[int, int, int]:
+def established_tcp_connections(
+    local_port: int,
+    tables: tuple[Path, ...] = (Path("/proc/net/tcp"), Path("/proc/net/tcp6")),
+) -> int:
+    port_hex = f"{local_port:04X}"
+    connections = 0
+    for table in tables:
+        try:
+            lines = table.read_text(encoding="utf-8").splitlines()[1:]
+        except (FileNotFoundError, OSError, PermissionError):
+            continue
+        for line in lines:
+            fields = line.split()
+            if len(fields) < 4:
+                continue
+            local_address = fields[1]
+            state = fields[3]
+            if (
+                state == "01"
+                and local_address.rpartition(":")[2].upper() == port_hex
+            ):
+                connections += 1
+    return connections
+
+
+def configured_rdp_port() -> int:
+    _, output = run(
+        "gsettings", "get", "org.gnome.desktop.remote-desktop.rdp", "port"
+    )
+    match = re.search(r"(\d+)\s*$", output)
+    if match:
+        port = int(match.group(1))
+        if 1 <= port <= 65_535:
+            return port
+    return 3389
+
+
+def hygiene_counts() -> tuple[int, int, int, int, int]:
     rows = process_table()
     browser_names = {"firefox", "chrome", "chromium", "msedge", "brave"}
-    browser_roots = sum(
-        1
-        for _, (_, comm, cmdline) in rows.items()
-        if comm in browser_names and "--type=" not in cmdline
-    )
+    browser_named_pids = {
+        pid for pid, (_, comm, _, _) in rows.items() if comm in browser_names
+    }
+    browser_root_pids = {
+        pid
+        for pid, (parent, comm, cmdline, _) in rows.items()
+        if comm in browser_names
+        and "--type=" not in cmdline
+        and parent not in browser_named_pids
+    }
+    browser_pids = set(browser_root_pids)
+    while True:
+        descendants = {
+            pid
+            for pid, (parent, _, _, _) in rows.items()
+            if parent in browser_pids
+        }
+        expanded = browser_pids | descendants
+        if expanded == browser_pids:
+            break
+        browser_pids = expanded
+    browser_rss_bytes = sum(rows[pid][3] for pid in browser_pids)
+
     # Each active Codex route owns one code-mode REPL. Count only that leaf
     # process so the persistent desktop and remote-control daemons are excluded.
     codex_workers = sum(
-        1 for _, (_, comm, _) in rows.items() if comm == "node_repl"
+        1 for _, (_, comm, _, _) in rows.items() if comm == "node_repl"
     )
 
     _, listeners = run("ss", "-H", "-ltnp")
@@ -632,7 +701,13 @@ def hygiene_counts() -> tuple[int, int, int]:
         row = rows.get(pid)
         if row and any(pattern in row[2] for pattern in patterns):
             dev_pids.add(pid)
-    return browser_roots, codex_workers, len(dev_pids)
+    return (
+        len(browser_root_pids),
+        browser_rss_bytes,
+        codex_workers,
+        len(dev_pids),
+        established_tcp_connections(configured_rdp_port()),
+    )
 
 
 def glaeda_worktrees(repository: Path = GLAEDA_REPOSITORY) -> list[Path] | None:
@@ -748,7 +823,13 @@ def build_report() -> dict[str, Any]:
     graphics_clock_mhz, graphics_max_clock_mhz = graphics_clock()
     on_ac, battery_percent, power_state = battery_state()
     tailscale_backend, tailscale_online = tailscale_state()
-    browser_roots, codex_workers, dev_listeners = hygiene_counts()
+    (
+        browser_roots,
+        browser_rss_bytes,
+        codex_workers,
+        dev_listeners,
+        rdp_connections,
+    ) = hygiene_counts()
     time_sync_states = (
         service_state("chrony.service"),
         service_state("systemd-timesyncd.service"),
@@ -832,8 +913,10 @@ def build_report() -> dict[str, Any]:
         },
         "hygiene": {
             "browser_roots": browser_roots,
+            "browser_rss_bytes": browser_rss_bytes,
             "codex_workers": codex_workers,
             "unexpected_dev_listeners": dev_listeners,
+            "rdp_connections": rdp_connections,
         },
         "build_state": build_state(),
     }

@@ -8,6 +8,8 @@ import { MachineHealthActivity } from './machine-health-activity';
 import { MachineHealthTimestamp } from './machine-health-timestamp';
 
 const HOUR_MS = 60 * 60 * 1_000;
+const MIB = 1_024 ** 2;
+const GIB = 1_024 ** 3;
 
 function formatPercent(value: number) {
   return `${Math.round(value)}%`;
@@ -21,6 +23,17 @@ function formatDuration(seconds: number) {
 
 function formatGib(value: number) {
   return `${value.toFixed(1)} GiB`;
+}
+
+function formatMemory(bytes: number) {
+  return bytes < GIB
+    ? `${Math.round(bytes / MIB)} MiB`
+    : `${(bytes / GIB).toFixed(1)} GiB`;
+}
+
+function formatMemoryDelta(bytes: number) {
+  const sign = bytes >= 0 ? '+' : '−';
+  return `${sign}${formatMemory(Math.abs(bytes))} / 7d`;
 }
 
 function Metric({
@@ -141,6 +154,12 @@ export function MachineHealthDashboard({
         .filter(Boolean)
         .join(' · ')
     : 'awaiting snapshot';
+  const browserRssBaseline = [...samples]
+    .reverse()
+    .find(sample => Date.parse(sample.checkedAt) <= now - 7 * 24 * HOUR_MS);
+  const browserRssDelta = browserRssBaseline
+    ? payload.hygiene.browser_rss_bytes - browserRssBaseline.browserRssBytes
+    : null;
 
   return (
     <div className="grid gap-3">
@@ -167,11 +186,7 @@ export function MachineHealthDashboard({
               <li key={reason}>• {reason}</li>
             ))}
           </ul>
-        ) : (
-          <p className="border-current/10 mt-5 border-t pt-4 text-sm">
-            No configured guardrail is currently tripped.
-          </p>
-        )}
+        ) : null}
       </section>
 
       <section
@@ -278,12 +293,23 @@ export function MachineHealthDashboard({
           }}
         >
           <h2 className="text-lg font-black">Workspace hygiene</h2>
-          <dl className="mt-4 grid grid-cols-3 gap-3 text-center">
+          <dl className="mt-4 grid grid-cols-2 gap-3 text-center sm:grid-cols-5">
             <div>
-              <dt className="opacity-55 text-xs">Browsers</dt>
+              <dt className="opacity-55 text-xs">Browser apps</dt>
               <dd className="mt-1 text-xl font-black tabular-nums">
                 {payload.hygiene.browser_roots}
               </dd>
+            </div>
+            <div>
+              <dt className="opacity-55 text-xs">Browser RSS</dt>
+              <dd className="mt-1 text-xl font-black tabular-nums">
+                {formatMemory(payload.hygiene.browser_rss_bytes)}
+              </dd>
+              {browserRssDelta === null ? null : (
+                <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
+                  {formatMemoryDelta(browserRssDelta)}
+                </dd>
+              )}
             </div>
             <div>
               <dt className="opacity-55 text-xs">Codex workers</dt>
@@ -295,6 +321,14 @@ export function MachineHealthDashboard({
               <dt className="opacity-55 text-xs">Dev listeners</dt>
               <dd className="mt-1 text-xl font-black tabular-nums">
                 {payload.hygiene.unexpected_dev_listeners}
+              </dd>
+            </div>
+            <div>
+              <dt className="opacity-55 text-xs">RDP</dt>
+              <dd className="mt-1 text-xl font-black tabular-nums">
+                {payload.hygiene.rdp_connections > 0
+                  ? `${payload.hygiene.rdp_connections} active`
+                  : 'Idle'}
               </dd>
             </div>
           </dl>

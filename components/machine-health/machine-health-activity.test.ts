@@ -27,9 +27,11 @@ function sample(
     activityWindowMinutes: 60,
     uptimeSeconds: 86_400,
     browserRoots: 1,
+    browserRssBytes: 1_073_741_824,
     codexWorkers: 2,
     failedUnits: 0,
     unexpectedDevListeners: 0,
+    rdpConnections: 0,
     codexUsageWindowStartedAt: null,
     codexInputTokens: null,
     codexCachedInputTokens: null,
@@ -62,6 +64,7 @@ describe('machine health activity bins', () => {
       networkMibS: 0.75,
       diskMibS: 3,
       pressurePercent: 0.5,
+      browserRssMib: 1024,
     });
   });
 

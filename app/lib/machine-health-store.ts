@@ -104,8 +104,10 @@ export const machineHealthPayloadSchema = z.object({
   }),
   hygiene: z.object({
     browser_roots: nonnegativeInteger,
+    browser_rss_bytes: nonnegativeInteger.default(0),
     codex_workers: nonnegativeInteger,
     unexpected_dev_listeners: nonnegativeInteger,
+    rdp_connections: nonnegativeInteger.default(0),
   }),
   build_state: z
     .object({
@@ -139,9 +141,11 @@ export type MachineHealthSample = {
   activityWindowMinutes: number;
   uptimeSeconds: number;
   browserRoots: number;
+  browserRssBytes: number;
   codexWorkers: number;
   failedUnits: number;
   unexpectedDevListeners: number;
+  rdpConnections: number;
   codexUsageWindowStartedAt: string | null;
   codexInputTokens: number | null;
   codexCachedInputTokens: number | null;
@@ -281,9 +285,11 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         activity_window_minutes,
         uptime_seconds,
         browser_roots,
+        browser_rss_bytes,
         codex_workers,
         failed_units,
         unexpected_dev_listeners,
+        rdp_connections,
         payload
       )
       VALUES (
@@ -306,9 +312,11 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         ${payload.activity.window_minutes},
         ${payload.uptime_seconds},
         ${payload.hygiene.browser_roots},
+        ${payload.hygiene.browser_rss_bytes},
         ${payload.hygiene.codex_workers},
         ${failedUnits},
         ${payload.hygiene.unexpected_dev_listeners},
+        ${payload.hygiene.rdp_connections},
         ${serializedPayload}::text::jsonb
       )
       ON CONFLICT (host, checked_at)
@@ -330,9 +338,11 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         activity_window_minutes = EXCLUDED.activity_window_minutes,
         uptime_seconds = EXCLUDED.uptime_seconds,
         browser_roots = EXCLUDED.browser_roots,
+        browser_rss_bytes = EXCLUDED.browser_rss_bytes,
         codex_workers = EXCLUDED.codex_workers,
         failed_units = EXCLUDED.failed_units,
         unexpected_dev_listeners = EXCLUDED.unexpected_dev_listeners,
+        rdp_connections = EXCLUDED.rdp_connections,
         payload = EXCLUDED.payload,
         created_at = now()
     `;
@@ -393,9 +403,11 @@ export async function readMachineHealth(
           activity_window_minutes: number | string;
           uptime_seconds: number | string | bigint;
           browser_roots: number | string;
+          browser_rss_bytes: number | string | bigint;
           codex_workers: number | string;
           failed_units: number | string;
           unexpected_dev_listeners: number | string;
+          rdp_connections: number | string;
           payload: unknown;
         }[]
       >`
@@ -417,9 +429,11 @@ export async function readMachineHealth(
           activity_window_minutes,
           uptime_seconds,
           browser_roots,
+          browser_rss_bytes,
           codex_workers,
           failed_units,
           unexpected_dev_listeners,
+          rdp_connections,
           payload
         FROM machine_health_samples
         WHERE host = 'big-red'
@@ -486,9 +500,11 @@ export async function readMachineHealth(
           activityWindowMinutes: toNumber(row.activity_window_minutes),
           uptimeSeconds: toNumber(row.uptime_seconds),
           browserRoots: toNumber(row.browser_roots),
+          browserRssBytes: toNumber(row.browser_rss_bytes),
           codexWorkers: toNumber(row.codex_workers),
           failedUnits: toNumber(row.failed_units),
           unexpectedDevListeners: toNumber(row.unexpected_dev_listeners),
+          rdpConnections: toNumber(row.rdp_connections),
           codexUsageWindowStartedAt: codexUsage?.window_started_at ?? null,
           codexInputTokens: codexUsage?.input_tokens ?? null,
           codexCachedInputTokens: codexUsage?.cached_input_tokens ?? null,

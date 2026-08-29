@@ -12,9 +12,9 @@ The page starts with the questions that matter when Leo is away from the machine
 - Are hourly CPU/memory/network/disk activity, Linux resource pressure, root capacity, peak sensor temperature, and the readable iGPU activity clock moving in a bad direction?
 - Are SSH, Tailscale, NetworkManager, and time sync active?
 - Is automatic idle suspend still disabled while deliberate lid-close suspend remains available, and are hibernate targets still masked?
-- Is the machine on AC, what is the aggregate battery state, and are there failed systemd units, unexpected development listeners, or an implausible number of browser/Codex roots?
+- Is the machine on AC, what is the aggregate battery state, and are there failed systemd units, unexpected development listeners, excess browser memory, or active RDP connections?
 
-The dashboard defaults to 24 hourly bins and offers 7- and 30-day daily rollups. Its time control starts in the browser's own time zone and can switch to UTC. Browser/Codex counts are intentionally coarse. They support cleanup without turning the dashboard into process surveillance.
+The dashboard defaults to 24 hourly bins and offers 7- and 30-day daily rollups. Its time control starts in the browser's own time zone and can switch to UTC. Browser/Codex counts, aggregate browser RSS, and the active RDP connection count stay coarse. They support cleanup and remote-session awareness without turning the dashboard into process surveillance.
 
 Each stored row also carries its accounting source, interval count, window length, and uptime. The activity footer therefore distinguishes full sysstat windows, partial coverage, point-sample fallbacks, and reboot discontinuities instead of drawing equally authoritative bars from unlike data.
 
@@ -27,10 +27,10 @@ The ingestion schema is an allowlist and strips unknown keys at every object lev
 - IP addresses, interface names, SSIDs, routes, or open port numbers (network throughput is summed across non-loopback interfaces);
 - Tailscale peer names, identities, or tailnet addresses;
 - process IDs, executable paths, command arguments, environment variables, or package lists;
-- browser URLs, titles, history, cookies, profiles, or tab contents;
+- browser URLs, titles, history, cookies, profiles, tab contents, or per-process memory;
 - usernames, home-directory paths, serial numbers, or raw command output.
 
-The collector parses local command output and emits only enum values, booleans, percentages, and aggregate counts. Its Codex count observes code-mode worker leaves while excluding persistent desktop and remote-control daemons. The public repository contains the contract and collector code, but no machine snapshot or credential.
+The collector parses local command output and emits only enum values, booleans, percentages, byte totals, and aggregate counts. Its Codex count observes code-mode worker leaves while excluding persistent desktop and remote-control daemons. Browser RSS sums the browser process trees and is a trend signal rather than unique physical memory because shared pages can appear in more than one process. RDP visibility counts established local connections without emitting the peer or endpoint. The public repository contains the contract and collector code, but no machine snapshot or credential.
 
 ## Frequency, history, and cost
 
@@ -39,12 +39,12 @@ The default proposal is one report per hour, with manual runs whenever a change 
 - The dashboard reads the latest 30 days and offers 24-hour, 7-day, and 30-day views.
 - Every successful ingest deletes samples older than 90 days, so retention needs no second scheduled job.
 - Retry posts with the same host and timestamp update one sample instead of duplicating it, and an older delayed report cannot replace the latest status row.
-- A measured expanded report is 1,205 bytes as compact JSON and 1,557 bytes pretty-printed. Ninety days at hourly frequency is 2,160 rows and roughly 2.5 MiB of raw compact payload; a conservative database budget remains under 12 MiB after allowing for JSONB, scalar columns, row overhead, and the index.
+- A measured expanded report is 1,730 bytes as compact JSON and 2,210 bytes pretty-printed. Ninety days at hourly frequency is 2,160 rows and roughly 3.6 MiB of raw compact payload; a conservative database budget remains under 12 MiB after allowing for JSONB, scalar columns, row overhead, and the index.
 - There is no daemon, polling loop, Prometheus, Grafana, log drain, or client-side refresh.
 
 Big Red already runs Ubuntu's `sysstat` accounting every 10 minutes. The collector reuses the six newest records to produce time-weighted 60-minute averages for CPU, memory, aggregate non-loopback network throughput, and non-loop disk I/O, plus CPU/memory/I/O [Pressure Stall Information](https://docs.kernel.org/accounting/psi.html). It emits only the aggregate result; host names, device names, and interface names parsed from `sadf` never enter the report. If readable accounting data is unavailable, the collector fails soft to the original 250 ms `/proc` point sample and labels the source accordingly.
 
-The reuse path has no new resident process. In a five-run live comparison, the original collector took 0.50–0.56 seconds; the optimized collector had a 0.36-second median with no mandatory sleep. The underlying `sadf` extraction itself completed in under 0.01 seconds. Existing local sysstat history occupied 624 KiB after about 15 hours, independent of this dashboard.
+The reuse path has no new resident process. With browser RSS, RDP visibility, Codex usage, and eleven live Glaeda worktrees included, five current collector runs took 0.74–1.01 seconds with a 0.78-second median and at most 45,184 KiB RSS. The underlying `sadf` extraction itself completed in under 0.01 seconds. Existing local sysstat history occupied 624 KiB after about 15 hours, independent of this dashboard.
 
 An independent `sar` read of the same six intervals reconciled the collector output after rounding: CPU 7.25%, memory 12.44%, network 0.059/0.045 MiB/s, disk 1.989/11.043 MiB/s, and PSI CPU/memory/I/O 0.193/0.015/0.345%. The Python regression test separately verifies interval weighting, loopback/loop-device exclusion, UTC handling, and the labeled point-sample fallback.
 

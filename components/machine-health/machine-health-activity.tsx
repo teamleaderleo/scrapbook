@@ -28,8 +28,11 @@ type ActivityBin = {
   undercoveredCount: number;
   rebootCount: number;
   browserRoots: number | null;
+  browserRssMib: number | null;
   codexWorkers: number | null;
 };
+
+const MIB = 1_024 ** 2;
 
 const RANGE_CONFIG: Record<
   ActivityRange,
@@ -146,6 +149,10 @@ export function buildActivityBins(
         included.length === 0
           ? null
           : Math.max(...included.map(sample => sample.browserRoots)),
+      browserRssMib:
+        included.length === 0
+          ? null
+          : Math.max(...included.map(sample => sample.browserRssBytes / MIB)),
       codexWorkers:
         included.length === 0
           ? null
@@ -361,7 +368,7 @@ export function MachineHealthActivity({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <ObservationChart
           label="CPU average"
           bins={bins}
@@ -407,6 +414,14 @@ export function MachineHealthActivity({
           value={bin => bin.graphicsClockMhz}
           ceiling={graphicsMaxClockMhz ?? undefined}
           unit="MHz"
+        />
+        <ObservationChart
+          label="Browser RSS high"
+          bins={bins}
+          previousBins={previousBins}
+          value={bin => bin.browserRssMib}
+          unit="MiB"
+          summary="maximum"
         />
       </div>
 
