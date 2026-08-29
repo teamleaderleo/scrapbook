@@ -10,7 +10,7 @@ import { notFound } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'Big Red health · Leo',
-  description: 'Private, low-frequency workstation health snapshots.',
+  description: 'Private, lightweight hourly workstation health observations.',
   robots: { index: false, follow: false },
 };
 

@@ -16,10 +16,16 @@ const samples = Array.from({ length: 4 }, (_, index) => ({
   checkedAt: new Date(
     Date.parse(checkedAt) - (3 - index) * 86_400_000
   ).toISOString(),
+  cpuUsedPercent: 12 + index,
   rootUsedPercent: 11 + index,
   memoryUsedPercent: 20 + index,
   loadPerCpu: 0.08 + index / 100,
   peakSensorTemperatureC: 50 + index,
+  graphicsClockMhz: 300 + index * 50,
+  networkRxMibS: 0.4 + index / 10,
+  networkTxMibS: 0.1 + index / 20,
+  browserRoots: 1,
+  codexWorkers: 2,
   failedUnits: 0,
   unexpectedDevListeners: 0,
 }));
@@ -36,7 +42,10 @@ describe('machine health dashboard', () => {
 
     expect(html).toContain('Looks good');
     expect(html).toContain('No configured guardrail is currently tripped.');
-    expect(html).toContain('4 snapshots · 30d view');
+    expect(html).toContain('4 observations · 30d loaded');
+    expect(html).toContain('Observed, not surveilled');
+    expect(html).toContain('CPU');
+    expect(html).toContain('iGPU clock');
     expect(html).toContain(
       'No IP addresses, URLs, tab titles, command lines, ports'
     );
@@ -49,11 +58,11 @@ describe('machine health dashboard', () => {
       createElement(MachineHealthDashboard, {
         report,
         samples,
-        now: Date.parse(checkedAt) + 40 * 60 * 60_000,
+        now: Date.parse(checkedAt) + 4 * 60 * 60_000,
       })
     );
 
     expect(html).toContain('Worth a look');
-    expect(html).toContain('Snapshot is 40 hours old.');
+    expect(html).toContain('Snapshot is 4 hours old.');
   });
 });

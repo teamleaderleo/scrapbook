@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 const percent = z.number().finite().min(0).max(100);
 const nonnegative = z.number().finite().min(0);
+const nullableNonnegative = nonnegative.nullable();
 const nonnegativeInteger = z.number().int().min(0);
 const serviceState = z.enum(['active', 'inactive', 'missing', 'unknown']);
 const idleSleepAction = z.enum([
@@ -26,6 +27,9 @@ export const machineHealthPayloadSchema = z.object({
     fifteen: nonnegative,
     logical_cpus: z.number().int().min(1).max(1_024),
   }),
+  cpu: z.object({
+    used_percent: percent,
+  }),
   memory: z.object({
     used_percent: percent,
     total_gib: nonnegative,
@@ -36,6 +40,10 @@ export const machineHealthPayloadSchema = z.object({
   }),
   temperature: z.object({
     peak_sensor_c: z.number().finite().min(-20).max(150).nullable(),
+  }),
+  graphics: z.object({
+    clock_mhz: nullableNonnegative,
+    max_clock_mhz: nullableNonnegative,
   }),
   services: z.object({
     failed_system_units: nonnegativeInteger,
@@ -49,12 +57,23 @@ export const machineHealthPayloadSchema = z.object({
     connectivity: z.enum(['full', 'limited', 'portal', 'none', 'unknown']),
     tailscale_backend: z.enum(['running', 'needs-login', 'stopped', 'unknown']),
     tailscale_self_online: z.boolean().nullable(),
+    rx_mib_s: nonnegative,
+    tx_mib_s: nonnegative,
   }),
   power: z.object({
     profile: z.enum(['performance', 'balanced', 'power-saver', 'unknown']),
     idle_suspend_ac: idleSleepAction,
     idle_suspend_battery: idleSleepAction,
     hibernate_targets_masked: z.boolean(),
+    on_ac: z.boolean().nullable(),
+    battery_percent: percent.nullable(),
+    battery_state: z.enum([
+      'full',
+      'charging',
+      'discharging',
+      'not-charging',
+      'unknown',
+    ]),
   }),
   hygiene: z.object({
     browser_roots: nonnegativeInteger,
@@ -67,10 +86,16 @@ export type MachineHealthPayload = z.infer<typeof machineHealthPayloadSchema>;
 
 export type MachineHealthSample = {
   checkedAt: string;
+  cpuUsedPercent: number;
   rootUsedPercent: number;
   memoryUsedPercent: number;
   loadPerCpu: number;
   peakSensorTemperatureC: number | null;
+  graphicsClockMhz: number | null;
+  networkRxMibS: number;
+  networkTxMibS: number;
+  browserRoots: number;
+  codexWorkers: number;
   failedUnits: number;
   unexpectedDevListeners: number;
 };
@@ -181,8 +206,14 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         state,
         root_used_percent,
         memory_used_percent,
+        cpu_used_percent,
         load_per_cpu,
         peak_sensor_temperature_c,
+        graphics_clock_mhz,
+        network_rx_mib_s,
+        network_tx_mib_s,
+        browser_roots,
+        codex_workers,
         failed_units,
         unexpected_dev_listeners,
         payload
@@ -193,8 +224,14 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         ${state},
         ${payload.disk.root_used_percent},
         ${payload.memory.used_percent},
+        ${payload.cpu.used_percent},
         ${loadPerCpu},
         ${payload.temperature.peak_sensor_c},
+        ${payload.graphics.clock_mhz},
+        ${payload.network.rx_mib_s},
+        ${payload.network.tx_mib_s},
+        ${payload.hygiene.browser_roots},
+        ${payload.hygiene.codex_workers},
         ${failedUnits},
         ${payload.hygiene.unexpected_dev_listeners},
         ${serializedPayload}::text::jsonb
@@ -204,8 +241,14 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         state = EXCLUDED.state,
         root_used_percent = EXCLUDED.root_used_percent,
         memory_used_percent = EXCLUDED.memory_used_percent,
+        cpu_used_percent = EXCLUDED.cpu_used_percent,
         load_per_cpu = EXCLUDED.load_per_cpu,
         peak_sensor_temperature_c = EXCLUDED.peak_sensor_temperature_c,
+        graphics_clock_mhz = EXCLUDED.graphics_clock_mhz,
+        network_rx_mib_s = EXCLUDED.network_rx_mib_s,
+        network_tx_mib_s = EXCLUDED.network_tx_mib_s,
+        browser_roots = EXCLUDED.browser_roots,
+        codex_workers = EXCLUDED.codex_workers,
         failed_units = EXCLUDED.failed_units,
         unexpected_dev_listeners = EXCLUDED.unexpected_dev_listeners,
         payload = EXCLUDED.payload,
@@ -252,20 +295,32 @@ export async function readMachineHealth(
       client<
         {
           checked_at: Date | string;
+          cpu_used_percent: number | string;
           root_used_percent: number | string;
           memory_used_percent: number | string;
           load_per_cpu: number | string;
           peak_sensor_temperature_c: number | string | null;
+          graphics_clock_mhz: number | string | null;
+          network_rx_mib_s: number | string;
+          network_tx_mib_s: number | string;
+          browser_roots: number | string;
+          codex_workers: number | string;
           failed_units: number | string;
           unexpected_dev_listeners: number | string;
         }[]
       >`
         SELECT
           checked_at,
+          cpu_used_percent,
           root_used_percent,
           memory_used_percent,
           load_per_cpu,
           peak_sensor_temperature_c,
+          graphics_clock_mhz,
+          network_rx_mib_s,
+          network_tx_mib_s,
+          browser_roots,
+          codex_workers,
           failed_units,
           unexpected_dev_listeners
         FROM machine_health_samples
@@ -292,6 +347,7 @@ export async function readMachineHealth(
       observedAt: new Date().toISOString(),
       samples: sampleRows.map(row => ({
         checkedAt: new Date(row.checked_at).toISOString(),
+        cpuUsedPercent: toNumber(row.cpu_used_percent),
         rootUsedPercent: toNumber(row.root_used_percent),
         memoryUsedPercent: toNumber(row.memory_used_percent),
         loadPerCpu: toNumber(row.load_per_cpu),
@@ -299,6 +355,14 @@ export async function readMachineHealth(
           row.peak_sensor_temperature_c === null
             ? null
             : toNumber(row.peak_sensor_temperature_c),
+        graphicsClockMhz:
+          row.graphics_clock_mhz === null
+            ? null
+            : toNumber(row.graphics_clock_mhz),
+        networkRxMibS: toNumber(row.network_rx_mib_s),
+        networkTxMibS: toNumber(row.network_tx_mib_s),
+        browserRoots: toNumber(row.browser_roots),
+        codexWorkers: toNumber(row.codex_workers),
         failedUnits: toNumber(row.failed_units),
         unexpectedDevListeners: toNumber(row.unexpected_dev_listeners),
       })),

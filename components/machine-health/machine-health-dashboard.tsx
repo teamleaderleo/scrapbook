@@ -4,6 +4,8 @@ import {
   type StoredMachineHealth,
 } from '@/app/lib/machine-health-store';
 import type { ReactNode } from 'react';
+import { MachineHealthActivity } from './machine-health-activity';
+import { MachineHealthTimestamp } from './machine-health-timestamp';
 
 const HOUR_MS = 60 * 60 * 1_000;
 
@@ -15,17 +17,6 @@ function formatDuration(seconds: number) {
   const days = Math.floor(seconds / 86_400);
   const hours = Math.floor((seconds % 86_400) / 3_600);
   return days > 0 ? `${days}d ${hours}h` : `${hours}h`;
-}
-
-function formatTimestamp(value: string, timeZone: string) {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZone,
-    timeZoneName: 'short',
-  }).format(new Date(value));
 }
 
 function Metric({
@@ -66,68 +57,6 @@ function Pill({
   );
 }
 
-function Sparkline({ values, label }: { values: number[]; label: string }) {
-  if (values.length < 2)
-    return (
-      <div className="grid h-16 place-items-center text-xs opacity-50">
-        More snapshots needed
-      </div>
-    );
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const spread = Math.max(max - min, 1);
-  const points = values
-    .map(
-      (value, index) =>
-        `${(index / (values.length - 1)) * 100},${40 - ((value - min) / spread) * 34}`
-    )
-    .join(' ');
-  return (
-    <svg
-      className="h-16 w-full overflow-visible"
-      viewBox="0 0 100 44"
-      role="img"
-      aria-label={label}
-      preserveAspectRatio="none"
-    >
-      <polyline
-        points={points}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
-  );
-}
-
-function Trend({
-  title,
-  value,
-  values,
-}: {
-  title: string;
-  value: string;
-  values: number[];
-}) {
-  return (
-    <div className="bg-white/48 dark:bg-black/12 rounded-xl border border-black/10 p-4 dark:border-white/10">
-      <div className="flex items-baseline justify-between gap-3">
-        <h3 className="text-sm font-bold">{title}</h3>
-        <span className="font-mono text-sm tabular-nums opacity-70">
-          {value}
-        </span>
-      </div>
-      <div className="mt-3 text-[#a8342e] dark:text-[#ef8f87]">
-        <Sparkline
-          values={values}
-          label={`${title} over the available 30-day history`}
-        />
-      </div>
-    </div>
-  );
-}
-
 export function MachineHealthDashboard({
   report,
   samples,
@@ -140,7 +69,7 @@ export function MachineHealthDashboard({
   const payload = report.payload;
   const assessment = evaluateMachineHealth(payload);
   const ageHours = Math.max(0, (now - Date.parse(report.checkedAt)) / HOUR_MS);
-  const stale = ageHours > 36;
+  const stale = ageHours > 3;
   const state =
     stale && assessment.state === 'healthy' ? 'watch' : assessment.state;
   const reasons = stale
@@ -163,6 +92,20 @@ export function MachineHealthDashboard({
     ['NetworkManager', payload.services.network_manager],
     ['Time sync', payload.services.time_sync],
   ] as const;
+  const battery =
+    payload.power.battery_percent === null
+      ? '—'
+      : `${Math.round(payload.power.battery_percent)}%`;
+  const powerNote =
+    payload.power.on_ac === null
+      ? payload.power.battery_state
+      : payload.power.on_ac
+        ? `AC · ${payload.power.battery_state}`
+        : payload.power.battery_state;
+  const graphicsClock =
+    payload.graphics.clock_mhz === null
+      ? '—'
+      : `${Math.round(payload.graphics.clock_mhz)} MHz`;
 
   return (
     <div className="grid gap-3">
@@ -183,13 +126,10 @@ export function MachineHealthDashboard({
               collected.
             </p>
           </div>
-          <div className="opacity-65 shrink-0 text-left text-xs leading-5 sm:text-right">
-            <p>{formatTimestamp(report.checkedAt, 'Asia/Shanghai')}</p>
-            <p>{formatTimestamp(report.checkedAt, 'America/Vancouver')}</p>
-            <p className="mt-1 font-mono">
-              {samples.length} snapshots · 30d view
-            </p>
-          </div>
+          <MachineHealthTimestamp
+            checkedAt={report.checkedAt}
+            sampleCount={samples.length}
+          />
         </div>
         {reasons.length > 0 ? (
           <ul className="border-current/10 mt-5 grid gap-2 border-t pt-4 text-sm">
@@ -205,13 +145,13 @@ export function MachineHealthDashboard({
       </section>
 
       <section
-        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
         aria-label="Current resource use"
       >
         <Metric
-          label="Root disk"
-          value={formatPercent(payload.disk.root_used_percent)}
-          note={`${payload.disk.root_free_gib.toFixed(0)} GiB free`}
+          label="CPU"
+          value={formatPercent(payload.cpu.used_percent)}
+          note={`${(payload.load.one / payload.load.logical_cpus).toFixed(2)} load / CPU`}
         />
         <Metric
           label="Memory"
@@ -219,41 +159,36 @@ export function MachineHealthDashboard({
           note={`${payload.memory.total_gib.toFixed(0)} GiB installed`}
         />
         <Metric
-          label="Load / CPU"
-          value={(payload.load.one / payload.load.logical_cpus).toFixed(2)}
-          note={`${payload.load.logical_cpus} logical CPUs`}
+          label="Root disk"
+          value={formatPercent(payload.disk.root_used_percent)}
+          note={`${payload.disk.root_free_gib.toFixed(0)} GiB free`}
         />
         <Metric
-          label="Uptime"
-          value={formatDuration(payload.uptime_seconds)}
-          note={
+          label="Temperature"
+          value={
             payload.temperature.peak_sensor_c === null
-              ? 'Temperature unavailable'
-              : `${Math.round(payload.temperature.peak_sensor_c)} °C peak sensor`
+              ? '—'
+              : `${Math.round(payload.temperature.peak_sensor_c)} °C`
+          }
+          note="peak readable sensor"
+        />
+        <Metric
+          label="iGPU clock"
+          value={graphicsClock}
+          note={
+            payload.graphics.max_clock_mhz === null
+              ? 'busy % unavailable'
+              : `${Math.round(payload.graphics.max_clock_mhz)} MHz ceiling`
           }
         />
+        <Metric label="Battery" value={battery} note={powerNote} />
       </section>
 
-      <section
-        className="grid gap-3 lg:grid-cols-3"
-        aria-label="Thirty-day trends"
-      >
-        <Trend
-          title="Root disk"
-          value={formatPercent(payload.disk.root_used_percent)}
-          values={samples.map(sample => sample.rootUsedPercent)}
-        />
-        <Trend
-          title="Memory"
-          value={formatPercent(payload.memory.used_percent)}
-          values={samples.map(sample => sample.memoryUsedPercent)}
-        />
-        <Trend
-          title="Load per CPU"
-          value={(payload.load.one / payload.load.logical_cpus).toFixed(2)}
-          values={samples.map(sample => sample.loadPerCpu)}
-        />
-      </section>
+      <MachineHealthActivity
+        samples={samples}
+        now={now}
+        graphicsMaxClockMhz={payload.graphics.max_clock_mhz}
+      />
 
       <section className="grid gap-3 lg:grid-cols-[1.25fr_1fr]">
         <div className="dark:bg-black/12 rounded-2xl border border-black/10 bg-white/50 p-5 dark:border-white/10">
@@ -304,14 +239,15 @@ export function MachineHealthDashboard({
           </dl>
           <p className="opacity-55 mt-4 text-xs leading-5">
             Counts are aggregate and intentionally omit names, arguments, ports,
-            and ownership details.
+            and ownership details. Uptime is{' '}
+            {formatDuration(payload.uptime_seconds)}.
           </p>
         </div>
       </section>
 
       <footer className="px-2 py-1 text-xs opacity-50">
-        Daily is enough. The page shows 30 days; ingestion deletes samples older
-        than 90 days.
+        Hourly snapshots, 90-day retention, no client polling. Empty history
+        bins remain visible instead of implying continuous coverage.
       </footer>
     </div>
   );
