@@ -42,6 +42,9 @@ const samples = Array.from({ length: 4 }, (_, index) => ({
   codexReasoningOutputTokens: null,
   codexModelCalls: null,
   codexActiveRoutes: null,
+  buildStateGib: index === 0 ? 49.2 : 51.65,
+  buildTargetCount: 11,
+  activeBuildProcesses: 3,
 }));
 
 describe('machine health dashboard', () => {
@@ -62,6 +65,9 @@ describe('machine health dashboard', () => {
     expect(html).toContain('CPU');
     expect(html).toContain('Contention high');
     expect(html).toContain('iGPU clock');
+    expect(html).toContain('Build state');
+    expect(html).toContain('51.6 GiB');
+    expect(html).toContain('11 targets · 1.2 GiB cache · 3 building');
     expect(html).not.toContain('private_ip');
     expect(html).not.toContain('process_arguments');
   });
@@ -77,5 +83,26 @@ describe('machine health dashboard', () => {
 
     expect(html).toContain('Worth a look');
     expect(html).toContain('Snapshot is 4 hours old.');
+  });
+
+  it('shows the seven-day build-state delta when history is available', () => {
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report,
+        samples: [
+          {
+            ...samples[0],
+            checkedAt: new Date(
+              Date.parse(checkedAt) - 8 * 86_400_000
+            ).toISOString(),
+            buildStateGib: 49.15,
+          },
+          ...samples,
+        ],
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('+2.5 GiB / 7d');
   });
 });

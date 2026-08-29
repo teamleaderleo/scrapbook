@@ -65,4 +65,12 @@ export const healthyMachineReport: MachineHealthPayload = {
     codex_workers: 2,
     unexpected_dev_listeners: 0,
   },
+  build_state: {
+    source: 'filesystem',
+    total_gib: 51.65,
+    target_gib: 50.45,
+    glaeda_cache_gib: 1.2,
+    target_count: 11,
+    active_build_processes: 3,
+  },
 };

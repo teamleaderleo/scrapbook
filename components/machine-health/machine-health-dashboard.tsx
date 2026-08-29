@@ -19,6 +19,10 @@ function formatDuration(seconds: number) {
   return days > 0 ? `${days}d ${hours}h` : `${hours}h`;
 }
 
+function formatGib(value: number) {
+  return `${value.toFixed(1)} GiB`;
+}
+
 function Metric({
   label,
   value,
@@ -106,6 +110,37 @@ export function MachineHealthDashboard({
     payload.graphics.clock_mhz === null
       ? '—'
       : `${Math.round(payload.graphics.clock_mhz)} MHz`;
+  const buildState =
+    payload.build_state?.source === 'filesystem' ? payload.build_state : null;
+  const buildStateBaseline = [...samples]
+    .reverse()
+    .find(
+      sample =>
+        Date.parse(sample.checkedAt) <= now - 7 * 24 * HOUR_MS &&
+        sample.buildStateGib !== null
+    );
+  const buildStateDelta =
+    buildState?.total_gib != null && buildStateBaseline?.buildStateGib != null
+      ? buildState.total_gib - buildStateBaseline.buildStateGib
+      : null;
+  const buildStateNote = buildState
+    ? [
+        buildState.target_count === null
+          ? null
+          : `${buildState.target_count} targets`,
+        buildState.glaeda_cache_gib === null
+          ? null
+          : `${buildState.glaeda_cache_gib.toFixed(1)} GiB cache`,
+        buildState.active_build_processes === null
+          ? null
+          : `${buildState.active_build_processes} building`,
+        buildStateDelta === null
+          ? null
+          : `${buildStateDelta >= 0 ? '+' : ''}${buildStateDelta.toFixed(1)} GiB / 7d`,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : 'awaiting snapshot';
 
   return (
     <div className="grid gap-3">
@@ -140,7 +175,7 @@ export function MachineHealthDashboard({
       </section>
 
       <section
-        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7"
         aria-label="Current resource use"
       >
         <Metric
@@ -165,6 +200,15 @@ export function MachineHealthDashboard({
           label="Root disk"
           value={formatPercent(payload.disk.root_used_percent)}
           note={`${payload.disk.root_free_gib.toFixed(0)} GiB free`}
+        />
+        <Metric
+          label="Build state"
+          value={
+            buildState?.total_gib == null
+              ? '—'
+              : formatGib(buildState.total_gib)
+          }
+          note={buildStateNote}
         />
         <Metric
           label="Temperature"

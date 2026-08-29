@@ -167,5 +167,38 @@ class CodexUsageTest(unittest.TestCase):
         self.assertEqual(usage["model_calls"], 0)
 
 
+class BuildStateTest(unittest.TestCase):
+    def test_measures_glaeda_targets_and_cache_without_exposing_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            worktrees = [root / "glaeda", root / "worktree"]
+            for index, worktree in enumerate(worktrees, start=1):
+                target = worktree / "target"
+                target.mkdir(parents=True)
+                (target / "artifact").write_bytes(b"x" * index * 2 * REPORT.MIB)
+            cache = root / "cache"
+            cache.mkdir()
+            (cache / "state").write_bytes(b"x" * 8 * REPORT.MIB)
+
+            with patch.object(
+                REPORT, "active_glaeda_build_processes", return_value=2
+            ):
+                state = REPORT.build_state(worktrees, cache)
+
+        self.assertEqual(state["source"], "filesystem")
+        self.assertEqual(state["target_count"], 2)
+        self.assertEqual(state["active_build_processes"], 2)
+        self.assertGreater(state["target_gib"], 0)
+        self.assertGreater(state["glaeda_cache_gib"], 0)
+        self.assertNotIn(str(root), json.dumps(state))
+
+    def test_marks_missing_worktree_inventory_unavailable(self) -> None:
+        with patch.object(REPORT, "glaeda_worktrees", return_value=None):
+            state = REPORT.build_state()
+
+        self.assertEqual(state["source"], "unavailable")
+        self.assertIsNone(state["total_gib"])
+
+
 if __name__ == "__main__":
     unittest.main()

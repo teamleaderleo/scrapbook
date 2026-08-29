@@ -37,6 +37,9 @@ function sample(
     codexReasoningOutputTokens: null,
     codexModelCalls: null,
     codexActiveRoutes: null,
+    buildStateGib: null,
+    buildTargetCount: null,
+    activeBuildProcesses: null,
     ...overrides,
   };
 }

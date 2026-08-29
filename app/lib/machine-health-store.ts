@@ -107,6 +107,16 @@ export const machineHealthPayloadSchema = z.object({
     codex_workers: nonnegativeInteger,
     unexpected_dev_listeners: nonnegativeInteger,
   }),
+  build_state: z
+    .object({
+      source: z.enum(['filesystem', 'unavailable']),
+      total_gib: nullableNonnegative,
+      target_gib: nullableNonnegative,
+      glaeda_cache_gib: nullableNonnegative,
+      target_count: nonnegativeInteger.nullable(),
+      active_build_processes: nonnegativeInteger.nullable(),
+    })
+    .optional(),
 });
 
 export type MachineHealthPayload = z.infer<typeof machineHealthPayloadSchema>;
@@ -139,6 +149,9 @@ export type MachineHealthSample = {
   codexReasoningOutputTokens: number | null;
   codexModelCalls: number | null;
   codexActiveRoutes: number | null;
+  buildStateGib: number | null;
+  buildTargetCount: number | null;
+  activeBuildProcesses: number | null;
 };
 
 export type StoredMachineHealth = {
@@ -437,6 +450,11 @@ export async function readMachineHealth(
           parsedSample.data.codex_usage?.source === 'session-jsonl'
             ? parsedSample.data.codex_usage
             : null;
+        const buildState =
+          parsedSample.success &&
+          parsedSample.data.build_state?.source === 'filesystem'
+            ? parsedSample.data.build_state
+            : null;
         return {
           checkedAt: new Date(row.checked_at).toISOString(),
           cpuUsedPercent: toNumber(row.cpu_used_percent),
@@ -479,6 +497,9 @@ export async function readMachineHealth(
             codexUsage?.reasoning_output_tokens ?? null,
           codexModelCalls: codexUsage?.model_calls ?? null,
           codexActiveRoutes: codexUsage?.active_routes ?? null,
+          buildStateGib: buildState?.total_gib ?? null,
+          buildTargetCount: buildState?.target_count ?? null,
+          activeBuildProcesses: buildState?.active_build_processes ?? null,
         };
       }),
     };

@@ -36,6 +36,8 @@ CODEX_TOKEN_FIELDS = (
     "reasoning_output_tokens",
     "total_tokens",
 )
+GLAEDA_REPOSITORY = Path.home() / "Projects" / "glaeda"
+GLAEDA_CACHE = Path.home() / ".cache" / "glaeda"
 
 
 def run(*command: str) -> tuple[int, str]:
@@ -633,6 +635,108 @@ def hygiene_counts() -> tuple[int, int, int]:
     return browser_roots, codex_workers, len(dev_pids)
 
 
+def glaeda_worktrees(repository: Path = GLAEDA_REPOSITORY) -> list[Path] | None:
+    code, output = run(
+        "git", "-C", str(repository), "worktree", "list", "--porcelain"
+    )
+    if code != 0:
+        return None
+    worktrees = []
+    for line in output.splitlines():
+        if line.startswith("worktree "):
+            worktrees.append(Path(line.removeprefix("worktree ")))
+    return worktrees
+
+
+def apparent_directory_sizes(
+    paths: list[Path], *, exclude: str | None = None
+) -> dict[Path, int] | None:
+    existing = [path for path in paths if path.is_dir()]
+    if not existing:
+        return {}
+    command = ["du", "-sb"]
+    if exclude is not None:
+        command.append(f"--exclude={exclude}")
+    command.extend(["--", *(str(path) for path in existing)])
+    code, output = run(*command)
+    if code != 0:
+        return None
+
+    sizes: dict[Path, int] = {}
+    for line in output.splitlines():
+        size_text, separator, path_text = line.partition("\t")
+        if not separator:
+            return None
+        try:
+            sizes[Path(path_text)] = int(size_text)
+        except ValueError:
+            return None
+    return sizes if len(sizes) == len(existing) else None
+
+
+def active_glaeda_build_processes(worktrees: list[Path]) -> int:
+    roots = [path.absolute() for path in worktrees]
+    active = 0
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            comm = (entry / "comm").read_text(encoding="utf-8").strip().lower()
+            if comm not in {"cargo", "rustc"} and not comm.startswith("glaeda-"):
+                continue
+            cwd = (entry / "cwd").resolve(strict=True)
+        except (FileNotFoundError, PermissionError, ProcessLookupError, OSError):
+            continue
+        if any(cwd == root or root in cwd.parents for root in roots):
+            active += 1
+    return active
+
+
+def build_state(
+    worktrees: list[Path] | None = None,
+    cache: Path = GLAEDA_CACHE,
+) -> dict[str, Any]:
+    observed_worktrees = worktrees if worktrees is not None else glaeda_worktrees()
+    if observed_worktrees is None:
+        return {
+            "source": "unavailable",
+            "total_gib": None,
+            "target_gib": None,
+            "glaeda_cache_gib": None,
+            "target_count": None,
+            "active_build_processes": None,
+        }
+
+    targets = [worktree / "target" for worktree in observed_worktrees]
+    existing_targets = [target for target in targets if target.is_dir()]
+    target_sizes = apparent_directory_sizes(existing_targets)
+    cache_sizes = apparent_directory_sizes(
+        [cache] if cache.is_dir() else [], exclude="work-*"
+    )
+    if target_sizes is None or cache_sizes is None:
+        return {
+            "source": "unavailable",
+            "total_gib": None,
+            "target_gib": None,
+            "glaeda_cache_gib": None,
+            "target_count": len(existing_targets),
+            "active_build_processes": active_glaeda_build_processes(
+                observed_worktrees
+            ),
+        }
+
+    target_bytes = sum(target_sizes.get(target, 0) for target in existing_targets)
+    cache_bytes = cache_sizes.get(cache, 0)
+    return {
+        "source": "filesystem",
+        "total_gib": round((target_bytes + cache_bytes) / GIB, 2),
+        "target_gib": round(target_bytes / GIB, 2),
+        "glaeda_cache_gib": round(cache_bytes / GIB, 2),
+        "target_count": len(existing_targets),
+        "active_build_processes": active_glaeda_build_processes(observed_worktrees),
+    }
+
+
 def build_report() -> dict[str, Any]:
     now = dt.datetime.now(dt.timezone.utc)
     load_one, load_five, load_fifteen = os.getloadavg()
@@ -731,6 +835,7 @@ def build_report() -> dict[str, Any]:
             "codex_workers": codex_workers,
             "unexpected_dev_listeners": dev_listeners,
         },
+        "build_state": build_state(),
     }
 
 
