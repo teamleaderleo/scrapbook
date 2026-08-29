@@ -435,6 +435,96 @@ class RemoteClientTest(unittest.TestCase):
         self.assertIsNone(remote["last_seen_seconds_ago"])
 
 
+class RemoteAccelerationTest(unittest.TestCase):
+    INVOCATION_ID = "a" * 32
+
+    @staticmethod
+    def journal(*messages: str) -> str:
+        return "\n".join(json.dumps({"MESSAGE": message}) for message in messages)
+
+    def test_classifies_current_hardware_fallback_and_waiting_paths(self) -> None:
+        cases = (
+            (
+                [
+                    "[HWAccel.Vulkan] Initialization of Vulkan was successful",
+                    "[HWAccel.VAAPI] Successfully initialized VAAPI private detail",
+                ],
+                "hardware-ready",
+            ),
+            (
+                [
+                    "[HWAccel.Vulkan] Initialization of Vulkan was successful",
+                    "[RDP] Did not initialize VAAPI: private failure detail",
+                ],
+                "software-fallback",
+            ),
+            (
+                ["[HWAccel.Vulkan] Initialization of Vulkan was successful"],
+                "awaiting-session",
+            ),
+            ([], "unknown"),
+        )
+        for messages, expected in cases:
+            with self.subTest(expected=expected):
+                self.assertEqual(REPORT.grd_acceleration_state(messages), expected)
+
+    def test_uses_only_the_current_service_invocation_and_emits_no_log_detail(
+        self,
+    ) -> None:
+        output = self.journal(
+            "[HWAccel.Vulkan] Initialization of Vulkan was successful",
+            "[HWAccel.VAAPI] Successfully initialized VAAPI must-not-escape",
+        )
+        with patch.object(
+            REPORT,
+            "run",
+            side_effect=((0, self.INVOCATION_ID), (0, output)),
+        ) as run:
+            acceleration = REPORT.gnome_remote_desktop_acceleration()
+
+        self.assertEqual(
+            acceleration,
+            {
+                "source": "grd-current-invocation",
+                "state": "hardware-ready",
+            },
+        )
+        self.assertNotIn("must-not-escape", json.dumps(acceleration))
+        self.assertIn(
+            f"_SYSTEMD_INVOCATION_ID={self.INVOCATION_ID}", run.call_args_list[1].args
+        )
+
+    def test_latest_vaapi_result_wins_within_one_invocation(self) -> None:
+        output = self.journal(
+            "[HWAccel.Vulkan] Initialization of Vulkan was successful",
+            "[RDP] Did not initialize VAAPI: first attempt",
+            "[HWAccel.VAAPI] Successfully initialized VAAPI later attempt",
+        )
+        with patch.object(
+            REPORT,
+            "run",
+            side_effect=((0, self.INVOCATION_ID), (0, output)),
+        ):
+            acceleration = REPORT.gnome_remote_desktop_acceleration()
+
+        self.assertEqual(acceleration["state"], "hardware-ready")
+
+    def test_invalid_invocation_or_journal_fails_closed(self) -> None:
+        cases = (
+            ((0, "private-invalid-id"),),
+            ((0, self.INVOCATION_ID), (127, "")),
+            ((0, self.INVOCATION_ID), (0, "not-json")),
+        )
+        for responses in cases:
+            with self.subTest(responses=responses):
+                with patch.object(REPORT, "run", side_effect=responses):
+                    acceleration = REPORT.gnome_remote_desktop_acceleration()
+                self.assertEqual(
+                    acceleration,
+                    {"source": "unavailable", "state": "unavailable"},
+                )
+
+
 class HygieneTest(unittest.TestCase):
     def test_aggregates_browser_descendant_rss_without_process_detail(self) -> None:
         rows = {

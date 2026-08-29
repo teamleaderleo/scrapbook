@@ -63,6 +63,21 @@ const remoteClient = z.discriminatedUnion('source', [
     last_seen_seconds_ago: z.null(),
   }),
 ]);
+const remoteAcceleration = z.discriminatedUnion('source', [
+  z.object({
+    source: z.literal('grd-current-invocation'),
+    state: z.enum([
+      'hardware-ready',
+      'software-fallback',
+      'awaiting-session',
+      'unknown',
+    ]),
+  }),
+  z.object({
+    source: z.literal('unavailable'),
+    state: z.literal('unavailable'),
+  }),
+]);
 
 export const machineHealthPayloadSchema = z.object({
   schema_version: z.literal(1),
@@ -185,6 +200,7 @@ export const machineHealthPayloadSchema = z.object({
     network_manager: serviceState,
     time_sync: serviceState,
     gnome_remote_desktop: serviceState.optional(),
+    gnome_remote_desktop_acceleration: remoteAcceleration.optional(),
   }),
   network: z.object({
     connectivity: z.enum(['full', 'limited', 'portal', 'none', 'unknown']),
@@ -337,6 +353,13 @@ export function evaluateMachineHealth(payload: MachineHealthPayload) {
     payload.services.gnome_remote_desktop !== 'active'
   )
     reasons.push('GNOME Remote Desktop is not active.');
+  if (
+    payload.services.gnome_remote_desktop_acceleration?.source ===
+      'grd-current-invocation' &&
+    payload.services.gnome_remote_desktop_acceleration.state ===
+      'software-fallback'
+  )
+    reasons.push('GNOME Remote Desktop fell back from GPU acceleration.');
   if (
     payload.power.idle_suspend_ac !== 'nothing' ||
     payload.power.idle_suspend_battery !== 'nothing'

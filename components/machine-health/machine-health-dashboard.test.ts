@@ -83,8 +83,9 @@ describe('machine health dashboard', () => {
     expect(html).toContain('2.5 GiB');
     expect(html).toContain('Remote');
     expect(html).toContain('Direct');
-    expect(html).toContain('GRD active');
+    expect(html).toContain('GRD active · VA-API ready');
     expect(html).toContain('Remote desktop: active');
+    expect(html).toContain('RDP graphics: VA-API ready');
     expect(html).toContain('Agent routes');
     expect(html).toContain('Process scopes');
     expect(html).toContain('0 / 18');
@@ -125,8 +126,37 @@ describe('machine health dashboard', () => {
     );
 
     expect(html).toContain('Mac offline');
-    expect(html).toContain('Seen 6h ago · GRD active');
+    expect(html).toContain('Seen 6h ago · GRD active · VA-API ready');
     expect(html).toContain('Looks good');
+  });
+
+  it('surfaces a current software-encode fallback', () => {
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report: {
+          ...report,
+          payload: {
+            ...report.payload,
+            services: {
+              ...report.payload.services,
+              gnome_remote_desktop_acceleration: {
+                source: 'grd-current-invocation',
+                state: 'software-fallback',
+              },
+            },
+          },
+        },
+        samples,
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('GRD active · Software encode');
+    expect(html).toContain('RDP graphics: Software encode');
+    expect(html).toContain('Worth a look');
+    expect(html).toContain(
+      'GNOME Remote Desktop fell back from GPU acceleration.'
+    );
   });
 
   it('surfaces route residue and unknown ownership without exposing IDs', () => {

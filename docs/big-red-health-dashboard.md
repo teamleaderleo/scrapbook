@@ -14,6 +14,7 @@ The page starts with the questions that matter when Leo is away from the machine
 - Is automatic idle suspend still disabled while deliberate lid-close suspend remains available, and are hibernate targets still masked?
 - Is the machine on AC, what is the aggregate battery state, and are there failed systemd units, unexpected development listeners, excess browser memory, or active RDP connections?
 - Is the unique macOS remote client offline, online but idle, direct, relayed, or unknown?
+- Did the current GNOME Remote Desktop process initialize its Vulkan/VA-API path, fall back to software, or not yet receive an RDP session?
 - How many agent routes, jobs, and descendant processes are explicitly owned, how much RSS do they account for, and did any ownership record become unknown or leave residue?
 
 The dashboard defaults to 24 hourly bins and offers 7- and 30-day daily rollups. Its time control starts in the browser's own time zone and can switch to UTC. Browser/Codex counts, tagged route/process counts, aggregate RSS, and the active RDP connection count stay coarse. They support cleanup and remote-session awareness without turning the dashboard into process surveillance.
@@ -36,6 +37,8 @@ The collector parses local command output and emits only enum values, booleans, 
 
 Remote-client state is derived from the same local `tailscale status --json` read used for Big Red's own state. Exactly one macOS peer is required; zero or multiple candidates become unavailable. The report emits only `offline`, `online-idle`, `direct`, `relay`, or `unknown`, plus a last-seen age. Direct requires an active peer with a current endpoint; relay requires an active peer with relay evidence. Host names, node keys, addresses, tailnet IPs, relay regions, traffic totals, and timestamps never enter the report. The public repository contains the contract and collector code, but no machine snapshot or credential.
 
+RDP acceleration state is bound to the current `gnome-remote-desktop.service` invocation. The collector reads at most 512 journal records for that invocation and emits one enum: `hardware-ready` after both Vulkan and VA-API initialize, `software-fallback` after the latest relevant failure, `awaiting-session` when Vulkan is ready but no VA-API session attempt exists, or `unknown`. A new daemon invocation cannot inherit an old failure. Invocation IDs, journal messages, driver strings, client capabilities, endpoints, and timestamps never enter the report. `hardware-ready` proves initialization, not rendered frame rate, codec selection, or end-to-end latency.
+
 ## Frequency, history, and cost
 
 The default proposal is one report per hour, with manual runs whenever a change needs a before/after check.
@@ -43,14 +46,14 @@ The default proposal is one report per hour, with manual runs whenever a change 
 - The dashboard reads the latest 30 days and offers 24-hour, 7-day, and 30-day views.
 - Every successful ingest deletes samples older than 90 days, so retention needs no second scheduled job.
 - Retry posts with the same host and timestamp update one sample instead of duplicating it, and an older delayed report cannot replace the latest status row.
-- The current live report measured 2,860–2,861 bytes as compact JSON and 3,618–3,619 bytes pretty-printed across five runs. Ninety days at hourly frequency is 2,160 rows and roughly 5.9 MiB of raw compact payload; a conservative database budget remains under 16 MiB after allowing for JSONB, scalar columns, row overhead, and the index.
+- The current exact-head live report measured 2,961 bytes as compact JSON and 3,747–3,748 bytes pretty-printed. Ninety days at hourly frequency is 2,160 rows and roughly 6.1 MiB of raw compact payload; a conservative database budget remains under 16 MiB after allowing for JSONB, scalar columns, row overhead, and the index.
 - The page has a manual refresh control and refreshes its server data once per hour while the tab is visible. Returning to a tab refreshes it only when the last page refresh is at least an hour old.
 
 Big Red already runs Ubuntu's `sysstat` accounting every 10 minutes. The collector reuses the six newest records to produce time-weighted 60-minute averages for CPU, memory, aggregate non-loopback network throughput, and non-loop disk I/O, plus CPU/memory/I/O [Pressure Stall Information](https://docs.kernel.org/accounting/psi.html). It emits only the aggregate result; host names, device names, and interface names parsed from `sadf` never enter the report. If readable accounting data is unavailable, the collector fails soft to the original 250 ms `/proc` point sample and labels the source accordingly.
 
 The reuse path has no new resident process. A five-run same-machine comparison measured 934 ms mean before route status and 945 ms after it, a 10.5 ms difference inside the observed run-to-run spread. The compact payload grew by 181 bytes. Existing local sysstat history occupied 624 KiB after about 15 hours, independent of this dashboard.
 
-The current complete collector, including route/process coverage and remote-client state, took 1.40–1.53 seconds across five live runs. Remote-client classification reuses the existing Tailscale status document, so it adds no second Tailscale command or network probe.
+The current complete collector, including route/process coverage, remote-client state, and acceleration state, took 1.32–1.44 seconds across five live runs with a 1.44-second median. Remote-client classification reuses the existing Tailscale status document, so it adds no second Tailscale command or network probe. Acceleration classification adds two bounded local reads: the service invocation ID and up to 512 journal records from that invocation. Those two reads took 5.1 ms median and 8.1 ms maximum across 20 live probes.
 
 Route activity is a point observation at report time. The hygiene panel shows exact-scoped versus discoverable Codex processes beside active routes, jobs, tagged descendants, aggregate RSS, residue, and unknown ownership records. Historical bins show the highest tagged process count observed in each hour or day; they do not imply continuous runtime between reports. Token-route activity remains a separate previous-complete-hour measurement because it answers a different question.
 
@@ -65,6 +68,7 @@ These are operator thresholds rather than hardware safety limits:
 - any failed system or user unit: attention;
 - anything other than full NetworkManager connectivity or running Tailscale: watch;
 - GNOME Remote Desktop present but not active: watch;
+- current GNOME Remote Desktop invocation reports software fallback: watch;
 - automatic idle suspend no longer disabled on AC or battery: watch;
 - hibernate or hybrid-sleep no longer masked: watch;
 - any detected development listener: watch;

@@ -79,6 +79,10 @@ export const healthyMachineReport: MachineHealthPayload = {
     network_manager: 'active',
     time_sync: 'active',
     gnome_remote_desktop: 'active',
+    gnome_remote_desktop_acceleration: {
+      source: 'grd-current-invocation',
+      state: 'hardware-ready',
+    },
   },
   network: {
     connectivity: 'full',

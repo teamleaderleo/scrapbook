@@ -52,6 +52,7 @@ CODEX_PROCESS_COVERAGE_HELPER = (
 )
 RELIABILITY_WINDOW_HOURS = 24
 RELIABILITY_EVENT_LIMIT = 4_096
+GRD_ACCELERATION_EVENT_LIMIT = 512
 SYSTEMD_PROCESS_EXIT_MESSAGE_ID = "98e322203f7a4ed290d09fe03c09fe15"
 SYSTEMD_RESTART_MESSAGE_ID = "5eb03494b6584870a536b337290809b3"
 
@@ -893,6 +894,72 @@ def tailscale_state(
     )
 
 
+def grd_acceleration_state(messages: list[str]) -> str:
+    vulkan_state = "unknown"
+    vaapi_state = "not-attempted"
+    for message in messages:
+        lowered = message.lower()
+        if "[hwaccel.vulkan]" in lowered:
+            if "successful" in lowered:
+                vulkan_state = "ready"
+            elif "fail" in lowered or "error" in lowered:
+                vulkan_state = "failed"
+        if "successfully initialized vaapi" in lowered:
+            vaapi_state = "ready"
+        elif "did not initialize vaapi" in lowered:
+            vaapi_state = "failed"
+
+    if vulkan_state == "failed" or vaapi_state == "failed":
+        return "software-fallback"
+    if vulkan_state == "ready" and vaapi_state == "ready":
+        return "hardware-ready"
+    if vulkan_state == "ready" and vaapi_state == "not-attempted":
+        return "awaiting-session"
+    return "unknown"
+
+
+def gnome_remote_desktop_acceleration() -> dict[str, str]:
+    code, invocation_id = run(
+        "systemctl",
+        "--user",
+        "show",
+        "gnome-remote-desktop.service",
+        "--property=InvocationID",
+        "--value",
+    )
+    if code != 0 or re.fullmatch(r"[0-9a-f]{32}", invocation_id) is None:
+        return {"source": "unavailable", "state": "unavailable"}
+
+    code, output = run(
+        "journalctl",
+        "--user",
+        "--quiet",
+        "--no-pager",
+        "--output=json",
+        "--output-fields=MESSAGE",
+        "--lines",
+        str(GRD_ACCELERATION_EVENT_LIMIT),
+        f"_SYSTEMD_INVOCATION_ID={invocation_id}",
+    )
+    if code != 0:
+        return {"source": "unavailable", "state": "unavailable"}
+
+    messages: list[str] = []
+    try:
+        for line in output.splitlines():
+            record = json.loads(line)
+            message = record.get("MESSAGE") if isinstance(record, dict) else None
+            if isinstance(message, str):
+                messages.append(message)
+    except (json.JSONDecodeError, TypeError):
+        return {"source": "unavailable", "state": "unavailable"}
+
+    return {
+        "source": "grd-current-invocation",
+        "state": grd_acceleration_state(messages),
+    }
+
+
 def connectivity() -> str:
     _, output = run("nmcli", "-t", "-f", "CONNECTIVITY", "general")
     value = output.lower()
@@ -1302,6 +1369,9 @@ def build_report() -> dict[str, Any]:
             ),
             "gnome_remote_desktop": service_state(
                 "gnome-remote-desktop.service", user=True
+            ),
+            "gnome_remote_desktop_acceleration": (
+                gnome_remote_desktop_acceleration()
             ),
         },
         "network": {

@@ -141,6 +141,17 @@ export function MachineHealthDashboard({
       : null;
   const remoteClient = payload.network.remote_client;
   const remoteServer = payload.services.gnome_remote_desktop;
+  const remoteAcceleration = payload.services.gnome_remote_desktop_acceleration;
+  const remoteAccelerationLabel =
+    remoteAcceleration?.source === 'grd-current-invocation'
+      ? remoteAcceleration.state === 'hardware-ready'
+        ? 'VA-API ready'
+        : remoteAcceleration.state === 'software-fallback'
+          ? 'Software encode'
+          : remoteAcceleration.state === 'awaiting-session'
+            ? 'VA-API pending'
+            : 'Graphics unknown'
+      : null;
   const remoteState = remoteClient?.state ?? 'unavailable';
   const remoteValue =
     payload.hygiene.rdp_connections > 0
@@ -171,6 +182,7 @@ export function MachineHealthDashboard({
       ? `Seen ${formatDuration(remoteClient.last_seen_seconds_ago)} ago`
       : remotePath,
     remoteServer ? `GRD ${remoteServer}` : null,
+    remoteAccelerationLabel,
     payload.hygiene.rdp_connections > 0
       ? `${payload.hygiene.rdp_connections} RDP`
       : null,
@@ -411,6 +423,17 @@ export function MachineHealthDashboard({
             {remoteServer ? (
               <Pill good={remoteServer === 'active'}>
                 Remote desktop: {remoteServer}
+              </Pill>
+            ) : null}
+            {remoteAcceleration ? (
+              <Pill
+                good={
+                  remoteAcceleration.source === 'grd-current-invocation' &&
+                  remoteAcceleration.state !== 'software-fallback' &&
+                  remoteAcceleration.state !== 'unknown'
+                }
+              >
+                RDP graphics: {remoteAccelerationLabel ?? 'unavailable'}
               </Pill>
             ) : null}
             <Pill good={idleSuspendDisabled}>

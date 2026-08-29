@@ -53,8 +53,11 @@ describe('machine health contract', () => {
   it('accepts a snapshot from before remote client state was added', () => {
     const { remote_client: _remoteClient, ...olderNetwork } =
       healthyMachineReport.network;
-    const { gnome_remote_desktop: _remoteDesktop, ...olderServices } =
-      healthyMachineReport.services;
+    const {
+      gnome_remote_desktop: _remoteDesktop,
+      gnome_remote_desktop_acceleration: _remoteAcceleration,
+      ...olderServices
+    } = healthyMachineReport.services;
     const parsed = machineHealthPayloadSchema.parse({
       ...healthyMachineReport,
       network: olderNetwork,
@@ -63,6 +66,7 @@ describe('machine health contract', () => {
 
     expect(parsed.network.remote_client).toBeUndefined();
     expect(parsed.services.gnome_remote_desktop).toBeUndefined();
+    expect(parsed.services.gnome_remote_desktop_acceleration).toBeUndefined();
   });
 
   it('rejects peer detail and inconsistent unavailable remote state', () => {
@@ -90,6 +94,36 @@ describe('machine health contract', () => {
             source: 'unavailable',
             state: 'offline',
             last_seen_seconds_ago: 1,
+          },
+        },
+      }).success
+    ).toBe(false);
+  });
+
+  it('strips journal detail and rejects inconsistent acceleration state', () => {
+    const parsed = machineHealthPayloadSchema.parse({
+      ...healthyMachineReport,
+      services: {
+        ...healthyMachineReport.services,
+        gnome_remote_desktop_acceleration: {
+          source: 'grd-current-invocation',
+          state: 'hardware-ready',
+          journal_message: 'must-not-survive',
+          invocation_id: 'must-not-survive',
+        },
+      },
+    });
+    expect(parsed.services.gnome_remote_desktop_acceleration).toEqual(
+      healthyMachineReport.services.gnome_remote_desktop_acceleration
+    );
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        services: {
+          ...healthyMachineReport.services,
+          gnome_remote_desktop_acceleration: {
+            source: 'unavailable',
+            state: 'hardware-ready',
           },
         },
       }).success
@@ -242,6 +276,21 @@ describe('machine health contract', () => {
         '1 agent job left process residue.',
         '1 agent route item needs ownership inspection.',
       ],
+    });
+    expect(
+      evaluateMachineHealth({
+        ...healthyMachineReport,
+        services: {
+          ...healthyMachineReport.services,
+          gnome_remote_desktop_acceleration: {
+            source: 'grd-current-invocation',
+            state: 'software-fallback',
+          },
+        },
+      })
+    ).toEqual({
+      state: 'watch',
+      reasons: ['GNOME Remote Desktop fell back from GPU acceleration.'],
     });
   });
 });
