@@ -70,6 +70,8 @@ describe('machine health dashboard', () => {
     expect(html).toContain('4 stored observations');
     expect(html).toContain('Activity');
     expect(html).toContain('Codex');
+    expect(html).toContain('Cache reads');
+    expect(html).toContain('Cache writes');
     expect(html).toContain('CPU');
     expect(html).toContain('Contention high');
     expect(html).toContain('iGPU clock');

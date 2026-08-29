@@ -510,16 +510,21 @@ function CodexActivity({
         <p className="text-[0.68rem] opacity-50">Previous complete UTC hour</p>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4">
+      <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-5">
         <CodexMetric
           label="Input"
           value={formatValue(usage.input_tokens, 'tokens')}
           note="cached portion included"
         />
         <CodexMetric
-          label="Cached input"
+          label="Cache reads"
           value={cacheShare === null ? '—' : `${cacheShare.toFixed(1)}%`}
           note={`${formatValue(usage.cached_input_tokens, 'tokens')} of input`}
+        />
+        <CodexMetric
+          label="Cache writes"
+          value={formatValue(usage.cache_write_input_tokens, 'tokens')}
+          note="input tokens"
         />
         <CodexMetric
           label="Output"
