@@ -64,6 +64,11 @@ describe('machine health ingestion', () => {
           network: {
             ...healthyMachineReport.network,
             peer_names: ['discard-me'],
+            remote_client: {
+              ...healthyMachineReport.network.remote_client,
+              peer_name: 'discard-me',
+              address: 'discard-me',
+            },
           },
         })
       )

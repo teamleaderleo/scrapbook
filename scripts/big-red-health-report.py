@@ -2,7 +2,8 @@
 """Emit or post a privacy-bounded Big Red health snapshot.
 
 The JSON contract deliberately contains no command output, process arguments,
-ports, addresses, interface names, SSIDs, Tailscale peers, or browser metadata.
+ports, addresses, interface names, SSIDs, Tailscale peer identifiers, or
+browser metadata.
 """
 
 from __future__ import annotations
@@ -800,22 +801,96 @@ def peak_sensor_temperature() -> float | None:
     return round(max(values), 1) if values else None
 
 
-def tailscale_state() -> tuple[str, bool | None]:
+def remote_client_state(
+    status: dict[str, Any], now: dt.datetime
+) -> dict[str, str | int | None]:
+    peers = status.get("Peer")
+    if not isinstance(peers, dict):
+        return {
+            "source": "unavailable",
+            "state": "unavailable",
+            "last_seen_seconds_ago": None,
+        }
+    macos_peers = [
+        peer
+        for peer in peers.values()
+        if isinstance(peer, dict)
+        and str(peer.get("OS", "")).lower() in {"macos", "darwin"}
+    ]
+    if len(macos_peers) != 1:
+        return {
+            "source": "unavailable",
+            "state": "unavailable",
+            "last_seen_seconds_ago": None,
+        }
+
+    peer = macos_peers[0]
+    online = peer.get("Online")
+    active = peer.get("Active")
+    if not isinstance(online, bool) or not isinstance(active, bool):
+        return {
+            "source": "unavailable",
+            "state": "unavailable",
+            "last_seen_seconds_ago": None,
+        }
+
+    last_seen_age: int | None = None
+    last_seen = peer.get("LastSeen")
+    if isinstance(last_seen, str):
+        try:
+            observed = dt.datetime.fromisoformat(last_seen.replace("Z", "+00:00"))
+            last_seen_age = max(
+                0,
+                int((now.astimezone(dt.timezone.utc) - observed).total_seconds()),
+            )
+        except (TypeError, ValueError):
+            pass
+
+    if not online:
+        state = "offline"
+    elif not active:
+        state = "online-idle"
+    elif isinstance(peer.get("CurAddr"), str) and peer["CurAddr"].strip():
+        state = "direct"
+    elif any(
+        isinstance(peer.get(key), str) and peer[key].strip()
+        for key in ("PeerRelay", "Relay")
+    ):
+        state = "relay"
+    else:
+        state = "unknown"
+    return {
+        "source": "tailscale-status",
+        "state": state,
+        "last_seen_seconds_ago": last_seen_age,
+    }
+
+
+def tailscale_state(
+    now: dt.datetime,
+) -> tuple[str, bool | None, dict[str, str | int | None]]:
     code, output = run("tailscale", "status", "--json")
     if code != 0 or not output:
-        return "unknown", None
+        return "unknown", None, remote_client_state({}, now)
     try:
         status = json.loads(output)
     except json.JSONDecodeError:
-        return "unknown", None
+        return "unknown", None, remote_client_state({}, now)
+    if not isinstance(status, dict):
+        return "unknown", None, remote_client_state({}, now)
     backend = str(status.get("BackendState", "")).lower()
     mapped = {
         "running": "running",
         "needslogin": "needs-login",
         "stopped": "stopped",
     }.get(backend, "unknown")
-    online = status.get("Self", {}).get("Online")
-    return mapped, online if isinstance(online, bool) else None
+    self_state = status.get("Self")
+    online = self_state.get("Online") if isinstance(self_state, dict) else None
+    return (
+        mapped,
+        online if isinstance(online, bool) else None,
+        remote_client_state(status, now),
+    )
 
 
 def connectivity() -> str:
@@ -1151,7 +1226,7 @@ def build_report() -> dict[str, Any]:
     disk = shutil.disk_usage("/")
     graphics_clock_mhz, graphics_max_clock_mhz = graphics_clock()
     on_ac, battery_percent, power_state = battery_state()
-    tailscale_backend, tailscale_online = tailscale_state()
+    tailscale_backend, tailscale_online, remote_client = tailscale_state(now)
     (
         browser_roots,
         browser_rss_bytes,
@@ -1225,11 +1300,15 @@ def build_report() -> dict[str, Any]:
                     else "inactive"
                 )
             ),
+            "gnome_remote_desktop": service_state(
+                "gnome-remote-desktop.service", user=True
+            ),
         },
         "network": {
             "connectivity": connectivity(),
             "tailscale_backend": tailscale_backend,
             "tailscale_self_online": tailscale_online,
+            "remote_client": remote_client,
             "rx_mib_s": activity["network_rx_mib_s"],
             "tx_mib_s": activity["network_tx_mib_s"],
         },

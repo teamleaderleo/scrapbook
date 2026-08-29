@@ -139,6 +139,44 @@ export function MachineHealthDashboard({
     payload.route_activity?.source === 'codex-route-leases-v2'
       ? payload.route_activity
       : null;
+  const remoteClient = payload.network.remote_client;
+  const remoteServer = payload.services.gnome_remote_desktop;
+  const remoteState = remoteClient?.state ?? 'unavailable';
+  const remoteValue =
+    payload.hygiene.rdp_connections > 0
+      ? 'Connected'
+      : remoteState === 'offline'
+        ? 'Mac offline'
+        : remoteState === 'online-idle'
+          ? 'Mac online'
+          : remoteState === 'direct'
+            ? 'Direct'
+            : remoteState === 'relay'
+              ? 'Relayed'
+              : '—';
+  const remotePath =
+    remoteState === 'online-idle'
+      ? 'Path idle'
+      : remoteState === 'direct'
+        ? 'Direct'
+        : remoteState === 'relay'
+          ? 'Relayed'
+          : remoteState === 'unknown'
+            ? 'Path unknown'
+            : null;
+  const remoteNote = [
+    remoteState === 'offline' &&
+    remoteClient?.last_seen_seconds_ago !== null &&
+    remoteClient?.last_seen_seconds_ago !== undefined
+      ? `Seen ${formatDuration(remoteClient.last_seen_seconds_ago)} ago`
+      : remotePath,
+    remoteServer ? `GRD ${remoteServer}` : null,
+    payload.hygiene.rdp_connections > 0
+      ? `${payload.hygiene.rdp_connections} RDP`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
   const processCoverage =
     payload.process_coverage?.source === 'codex-process-coverage-v1'
       ? payload.process_coverage
@@ -284,7 +322,7 @@ export function MachineHealthDashboard({
       </section>
 
       <section
-        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7"
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8"
         aria-label="Current resource use"
       >
         <Metric
@@ -338,6 +376,7 @@ export function MachineHealthDashboard({
           }
         />
         <Metric label="Battery" value={battery} note={powerNote} />
+        <Metric label="Remote" value={remoteValue} note={remoteNote} />
       </section>
 
       <MachineHealthActivity
@@ -369,6 +408,11 @@ export function MachineHealthDashboard({
             <Pill good={payload.network.tailscale_backend === 'running'}>
               Tailnet: {payload.network.tailscale_backend}
             </Pill>
+            {remoteServer ? (
+              <Pill good={remoteServer === 'active'}>
+                Remote desktop: {remoteServer}
+              </Pill>
+            ) : null}
             <Pill good={idleSuspendDisabled}>
               Idle suspend: {idleSuspendDisabled ? 'off' : 'changed'}
             </Pill>
@@ -455,14 +499,6 @@ export function MachineHealthDashboard({
               <dt className="opacity-55 text-xs">Dev listeners</dt>
               <dd className="mt-1 text-xl font-black tabular-nums">
                 {payload.hygiene.unexpected_dev_listeners}
-              </dd>
-            </div>
-            <div>
-              <dt className="opacity-55 text-xs">RDP</dt>
-              <dd className="mt-1 text-xl font-black tabular-nums">
-                {payload.hygiene.rdp_connections > 0
-                  ? `${payload.hygiene.rdp_connections} active`
-                  : 'Idle'}
               </dd>
             </div>
           </dl>

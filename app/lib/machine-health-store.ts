@@ -51,6 +51,18 @@ const idleSleepAction = z.enum([
   'shutdown',
   'unknown',
 ]);
+const remoteClient = z.discriminatedUnion('source', [
+  z.object({
+    source: z.literal('tailscale-status'),
+    state: z.enum(['offline', 'online-idle', 'direct', 'relay', 'unknown']),
+    last_seen_seconds_ago: nonnegativeInteger.nullable(),
+  }),
+  z.object({
+    source: z.literal('unavailable'),
+    state: z.literal('unavailable'),
+    last_seen_seconds_ago: z.null(),
+  }),
+]);
 
 export const machineHealthPayloadSchema = z.object({
   schema_version: z.literal(1),
@@ -172,11 +184,13 @@ export const machineHealthPayloadSchema = z.object({
     tailscale: serviceState,
     network_manager: serviceState,
     time_sync: serviceState,
+    gnome_remote_desktop: serviceState.optional(),
   }),
   network: z.object({
     connectivity: z.enum(['full', 'limited', 'portal', 'none', 'unknown']),
     tailscale_backend: z.enum(['running', 'needs-login', 'stopped', 'unknown']),
     tailscale_self_online: z.boolean().nullable(),
+    remote_client: remoteClient.optional(),
     rx_mib_s: nonnegative,
     tx_mib_s: nonnegative,
   }),
@@ -318,6 +332,11 @@ export function evaluateMachineHealth(payload: MachineHealthPayload) {
     );
   if (payload.network.tailscale_backend !== 'running')
     reasons.push('Tailscale is not in the running state.');
+  if (
+    payload.services.gnome_remote_desktop !== undefined &&
+    payload.services.gnome_remote_desktop !== 'active'
+  )
+    reasons.push('GNOME Remote Desktop is not active.');
   if (
     payload.power.idle_suspend_ac !== 'nothing' ||
     payload.power.idle_suspend_battery !== 'nothing'

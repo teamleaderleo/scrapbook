@@ -50,6 +50,52 @@ describe('machine health contract', () => {
     expect(parsed.reliability).toBeUndefined();
   });
 
+  it('accepts a snapshot from before remote client state was added', () => {
+    const { remote_client: _remoteClient, ...olderNetwork } =
+      healthyMachineReport.network;
+    const { gnome_remote_desktop: _remoteDesktop, ...olderServices } =
+      healthyMachineReport.services;
+    const parsed = machineHealthPayloadSchema.parse({
+      ...healthyMachineReport,
+      network: olderNetwork,
+      services: olderServices,
+    });
+
+    expect(parsed.network.remote_client).toBeUndefined();
+    expect(parsed.services.gnome_remote_desktop).toBeUndefined();
+  });
+
+  it('rejects peer detail and inconsistent unavailable remote state', () => {
+    const parsed = machineHealthPayloadSchema.parse({
+      ...healthyMachineReport,
+      network: {
+        ...healthyMachineReport.network,
+        remote_client: {
+          ...healthyMachineReport.network.remote_client,
+          peer_name: 'must-not-survive',
+          address: 'must-not-survive',
+          relay_region: 'must-not-survive',
+        },
+      },
+    });
+    expect(parsed.network.remote_client).toEqual(
+      healthyMachineReport.network.remote_client
+    );
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        network: {
+          ...healthyMachineReport.network,
+          remote_client: {
+            source: 'unavailable',
+            state: 'offline',
+            last_seen_seconds_ago: 1,
+          },
+        },
+      }).success
+    ).toBe(false);
+  });
+
   it('accepts a snapshot from before route ownership was added', () => {
     const { route_activity: _routeActivity, ...olderReport } =
       healthyMachineReport;

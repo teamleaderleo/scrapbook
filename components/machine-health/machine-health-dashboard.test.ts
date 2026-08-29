@@ -81,8 +81,10 @@ describe('machine health dashboard', () => {
     expect(html).toContain('11 targets · 1.2 GiB cache · 3 building');
     expect(html).toContain('Browser RSS');
     expect(html).toContain('2.5 GiB');
-    expect(html).toContain('RDP');
-    expect(html).toContain('Idle');
+    expect(html).toContain('Remote');
+    expect(html).toContain('Direct');
+    expect(html).toContain('GRD active');
+    expect(html).toContain('Remote desktop: active');
     expect(html).toContain('Agent routes');
     expect(html).toContain('Process scopes');
     expect(html).toContain('0 / 18');
@@ -98,6 +100,33 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Auto restarts · 24h: 0');
     expect(html).not.toContain('private_ip');
     expect(html).not.toContain('process_arguments');
+  });
+
+  it('shows an offline Mac without turning expected absence into a fault', () => {
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report: {
+          ...report,
+          payload: {
+            ...report.payload,
+            network: {
+              ...report.payload.network,
+              remote_client: {
+                source: 'tailscale-status',
+                state: 'offline',
+                last_seen_seconds_ago: 6 * 3_600,
+              },
+            },
+          },
+        },
+        samples,
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('Mac offline');
+    expect(html).toContain('Seen 6h ago · GRD active');
+    expect(html).toContain('Looks good');
   });
 
   it('surfaces route residue and unknown ownership without exposing IDs', () => {

@@ -340,6 +340,101 @@ class ProcessCoverageTest(unittest.TestCase):
                 self.assertIsNone(coverage["discoverable_processes"])
 
 
+class RemoteClientTest(unittest.TestCase):
+    NOW = dt.datetime(2026, 8, 29, 18, 0, tzinfo=dt.timezone.utc)
+
+    @staticmethod
+    def status(**peer_overrides: object) -> dict[str, object]:
+        peer: dict[str, object] = {
+            "OS": "macOS",
+            "Online": True,
+            "Active": False,
+            "CurAddr": "",
+            "Relay": "private-region",
+            "LastSeen": "2026-08-29T17:59:00Z",
+            "HostName": "must-not-escape",
+            "PublicKey": "must-not-escape",
+        }
+        peer.update(peer_overrides)
+        return {
+            "BackendState": "Running",
+            "Self": {"Online": True},
+            "Peer": {"private-peer-key": peer},
+        }
+
+    def test_classifies_offline_idle_direct_and_relay_without_peer_detail(self) -> None:
+        cases = (
+            ({"Online": False}, "offline"),
+            ({}, "online-idle"),
+            ({"Active": True, "CurAddr": "private-endpoint"}, "direct"),
+            ({"Active": True, "CurAddr": ""}, "relay"),
+        )
+        for overrides, expected in cases:
+            with self.subTest(expected=expected):
+                result = REPORT.remote_client_state(
+                    self.status(**overrides), self.NOW
+                )
+                self.assertEqual(result["source"], "tailscale-status")
+                self.assertEqual(result["state"], expected)
+                encoded = json.dumps(result)
+                self.assertNotIn("must-not-escape", encoded)
+                self.assertNotIn("private-region", encoded)
+                self.assertNotIn("private-endpoint", encoded)
+                self.assertNotIn("private-peer-key", encoded)
+
+        offline = REPORT.remote_client_state(
+            self.status(Online=False, LastSeen="2026-08-29T12:00:00Z"),
+            self.NOW,
+        )
+        self.assertEqual(offline["last_seen_seconds_ago"], 6 * 3_600)
+
+    def test_fails_closed_on_missing_or_ambiguous_macos_peer(self) -> None:
+        statuses = (
+            {},
+            {"Peer": {}},
+            {
+                "Peer": {
+                    "one": self.status()["Peer"]["private-peer-key"],
+                    "two": self.status()["Peer"]["private-peer-key"],
+                }
+            },
+        )
+        for status in statuses:
+            with self.subTest(status=status):
+                result = REPORT.remote_client_state(status, self.NOW)
+                self.assertEqual(
+                    result,
+                    {
+                        "source": "unavailable",
+                        "state": "unavailable",
+                        "last_seen_seconds_ago": None,
+                    },
+                )
+
+    def test_reads_one_tailscale_document_for_host_and_remote_state(self) -> None:
+        with patch.object(
+            REPORT,
+            "run",
+            return_value=(0, json.dumps(self.status(Online=False))),
+        ):
+            backend, online, remote = REPORT.tailscale_state(self.NOW)
+
+        self.assertEqual(backend, "running")
+        self.assertTrue(online)
+        self.assertEqual(remote["state"], "offline")
+
+    def test_malformed_self_and_time_evidence_fail_soft(self) -> None:
+        status = self.status(LastSeen="not-a-time")
+        status["Self"] = "not-an-object"
+        with patch.object(REPORT, "run", return_value=(0, json.dumps(status))):
+            backend, online, remote = REPORT.tailscale_state(self.NOW)
+
+        self.assertEqual(backend, "running")
+        self.assertIsNone(online)
+        self.assertEqual(remote["state"], "online-idle")
+        self.assertIsNone(remote["last_seen_seconds_ago"])
+
+
 class HygieneTest(unittest.TestCase):
     def test_aggregates_browser_descendant_rss_without_process_detail(self) -> None:
         rows = {
