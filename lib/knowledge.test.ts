@@ -16,15 +16,26 @@ describe('knowledge forest', () => {
 
   it('rewrites relative Markdown links without damaging external or local anchors', () => {
     expect(
-      resolveKnowledgeLink('distributed-systems/idempotency.md', '../storage/transactions.md')
+      resolveKnowledgeLink(
+        'distributed-systems/idempotency.md',
+        '../storage/transactions.md'
+      )
     ).toBe('/knowledge/storage/transactions');
     expect(
-      resolveKnowledgeLink('distributed-systems/idempotency.md', 'README.md#start')
+      resolveKnowledgeLink(
+        'distributed-systems/idempotency.md',
+        'README.md#start'
+      )
     ).toBe('/knowledge/distributed-systems#start');
     expect(
-      resolveKnowledgeLink('distributed-systems/idempotency.md', 'https://example.com/x.md')
+      resolveKnowledgeLink(
+        'distributed-systems/idempotency.md',
+        'https://example.com/x.md'
+      )
     ).toBe('https://example.com/x.md');
-    expect(resolveKnowledgeLink('storage/mvcc.md', '#invariant')).toBe('#invariant');
+    expect(resolveKnowledgeLink('storage/mvcc.md', '#invariant')).toBe(
+      '#invariant'
+    );
 
     expect(
       rewriteKnowledgeLinks(
@@ -47,7 +58,14 @@ describe('knowledge forest', () => {
     );
     expect(index.concepts.map(entry => entry.slug)).not.toContain('HANDOFF');
     expect(index.concepts.map(entry => entry.slug)).not.toContain('LEARNING');
-    expect(index.logs[0]?.date).toBe('2026-08-25');
+    const logDates = index.logs.flatMap(entry =>
+      entry.date === undefined ? [] : [entry.date]
+    );
+    expect(logDates).toHaveLength(index.logs.length);
+    expect(logDates).toContain('2026-08-25');
+    expect(logDates).toEqual(
+      [...logDates].sort((left, right) => right.localeCompare(left))
+    );
   });
 
   it('renders a concept and a trunk from the same repository-backed reader', async () => {
@@ -69,6 +87,8 @@ describe('knowledge forest', () => {
     expect(handoff.title).toBe('Current handoff');
     expect(handoff.updated).toBe('2026-08-25');
     expect(handoff.html).toContain('/knowledge/computation/cancellation');
-    expect(handoff.html).toContain('/knowledge/distributed-systems/idempotency');
+    expect(handoff.html).toContain(
+      '/knowledge/distributed-systems/idempotency'
+    );
   });
 });
