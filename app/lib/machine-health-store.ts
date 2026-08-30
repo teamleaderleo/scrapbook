@@ -568,6 +568,8 @@ export type MachineHealthSample = {
   failedUnits: number;
   unexpectedDevListeners: number;
   rdpConnections: number;
+  remoteTransportPath: 'direct' | 'relay' | 'peer-relay' | null;
+  remoteRttMs: number | null;
   codexUsageWindowStartedAt: string | null;
   codexInputTokens: number | null;
   codexCachedInputTokens: number | null;
@@ -1260,6 +1262,12 @@ export async function readMachineHealth(
           parsedSample.data.codex_state?.source === 'codex-state-inventory-v1'
             ? parsedSample.data.codex_state
             : null;
+        const remoteTransport =
+          parsedSample.success &&
+          parsedSample.data.network.remote_client?.source ===
+            'tailscale-status'
+            ? (parsedSample.data.network.remote_client.transport_probe ?? null)
+            : null;
         return {
           checkedAt: new Date(row.checked_at).toISOString(),
           cpuUsedPercent: toNumber(row.cpu_used_percent),
@@ -1296,6 +1304,8 @@ export async function readMachineHealth(
           failedUnits: toNumber(row.failed_units),
           unexpectedDevListeners: toNumber(row.unexpected_dev_listeners),
           rdpConnections: toNumber(row.rdp_connections),
+          remoteTransportPath: remoteTransport?.path ?? null,
+          remoteRttMs: remoteTransport?.rtt_ms ?? null,
           codexUsageWindowStartedAt: codexUsage?.window_started_at ?? null,
           codexInputTokens: codexUsage?.input_tokens ?? null,
           codexCachedInputTokens: codexUsage?.cached_input_tokens ?? null,

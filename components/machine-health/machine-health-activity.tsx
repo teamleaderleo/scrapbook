@@ -42,6 +42,11 @@ type ActivityBin = {
   codexWorkers: number | null;
   routeTaggedProcesses: number | null;
   routeTaggedMemoryMib: number | null;
+  remoteRttMs: number | null;
+  remoteProbeCount: number;
+  remoteDirectProbes: number;
+  remoteRelayProbes: number;
+  remotePeerRelayProbes: number;
 };
 
 const MIB = 1_024 ** 2;
@@ -125,6 +130,12 @@ export function buildActivityBins(
         .map(sample => sample[key])
         .filter((value): value is number => typeof value === 'number');
     const activeRoutes = codexValues('codexActiveRoutes');
+    const remoteProbes = included.flatMap(sample =>
+      sample.remoteRttMs === null || sample.remoteTransportPath === null
+        ? []
+        : [{ rttMs: sample.remoteRttMs, path: sample.remoteTransportPath }]
+    );
+    const remoteRttValues = remoteProbes.map(probe => probe.rttMs);
 
     return {
       start: binStart,
@@ -215,6 +226,16 @@ export function buildActivityBins(
                 )
               )
             : null,
+      remoteRttMs: average(remoteRttValues),
+      remoteProbeCount: remoteRttValues.length,
+      remoteDirectProbes: remoteProbes.filter(
+        probe => probe.path === 'direct'
+      ).length,
+      remoteRelayProbes: remoteProbes.filter(probe => probe.path === 'relay')
+        .length,
+      remotePeerRelayProbes: remoteProbes.filter(
+        probe => probe.path === 'peer-relay'
+      ).length,
     };
   });
 }
@@ -444,6 +465,130 @@ function ObservationChart({
   );
 }
 
+function weightedRemoteRtt(bins: ActivityBin[]) {
+  const probes = bins.reduce(
+    (total, bin) => total + bin.remoteProbeCount,
+    0
+  );
+  if (probes === 0) return null;
+  return (
+    bins.reduce(
+      (total, bin) =>
+        total + (bin.remoteRttMs ?? 0) * bin.remoteProbeCount,
+      0
+    ) / probes
+  );
+}
+
+function remotePathText(bin: ActivityBin) {
+  return [
+    bin.remoteDirectProbes > 0
+      ? `${bin.remoteDirectProbes} direct`
+      : null,
+    bin.remoteRelayProbes > 0 ? `${bin.remoteRelayProbes} relay` : null,
+    bin.remotePeerRelayProbes > 0
+      ? `${bin.remotePeerRelayProbes} peer-relay`
+      : null,
+  ]
+    .filter((value): value is string => value !== null)
+    .join(', ');
+}
+
+function RemoteTransportChart({
+  bins,
+  previousBins,
+}: {
+  bins: ActivityBin[];
+  previousBins: ActivityBin[];
+}) {
+  const values = bins.map(bin => bin.remoteRttMs);
+  const present = values.filter((value): value is number => value !== null);
+  const max = Math.max(...present, 1);
+  const probeCount = bins.reduce(
+    (total, bin) => total + bin.remoteProbeCount,
+    0
+  );
+  const directCount = bins.reduce(
+    (total, bin) => total + bin.remoteDirectProbes,
+    0
+  );
+  const relayCount = bins.reduce(
+    (total, bin) => total + bin.remoteRelayProbes,
+    0
+  );
+  const peerRelayCount = bins.reduce(
+    (total, bin) => total + bin.remotePeerRelayProbes,
+    0
+  );
+  const currentAverage = weightedRemoteRtt(bins);
+  const previousAverage = weightedRemoteRtt(previousBins);
+
+  return (
+    <article className="bg-white/55 dark:bg-black/15 rounded-xl border border-black/10 p-4 dark:border-white/10">
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-sm font-black">Mac transport RTT</h3>
+        <div className="text-right">
+          <p className="font-mono text-xs tabular-nums opacity-70">
+            {formatValue(currentAverage, 'ms')}
+          </p>
+          <p className="opacity-45 mt-0.5 text-[0.62rem] tabular-nums">
+            {formatDelta(currentAverage, previousAverage, 'ms')}
+          </p>
+        </div>
+      </div>
+      <div
+        className="mt-4 flex h-20 items-end gap-px"
+        role="img"
+        aria-label={`Mac transport RTT across ${bins.length} observation bins; ${probeCount} probes`}
+      >
+        {values.map((value, index) => {
+          const bin = bins[index];
+          const pathText = remotePathText(bin);
+          const path =
+            bin.remotePeerRelayProbes > 0
+              ? 'peer-relay'
+              : bin.remoteRelayProbes > 0
+                ? 'relay'
+                : bin.remoteDirectProbes > 0
+                  ? 'direct'
+                  : null;
+          return (
+            <span
+              key={bin.start}
+              className="relative flex h-full min-w-0 flex-1 items-end"
+              data-remote-path={path ?? undefined}
+              title={`${new Date(bin.start).toISOString()}: ${value === null ? 'No transport probe' : formatValue(value, 'ms')}${pathText ? ` · ${pathText}` : ''}`}
+            >
+              <span
+                aria-hidden="true"
+                className={`w-full rounded-t-[2px] ${
+                  value === null
+                    ? 'h-px bg-black/10 dark:bg-white/10'
+                    : path === 'peer-relay'
+                      ? 'bg-[#725796] dark:bg-[#bda1df]'
+                      : path === 'relay'
+                        ? 'bg-amber-600 dark:bg-amber-300'
+                        : 'bg-[#376d73] dark:bg-[#6fb3b5]'
+                }`}
+                style={
+                  value === null
+                    ? undefined
+                    : { height: `${Math.max(4, (value / max) * 100)}%` }
+                }
+              />
+            </span>
+          );
+        })}
+      </div>
+      <div className="opacity-45 mt-1 flex justify-between text-[0.58rem] tabular-nums">
+        <span>{directCount} direct</span>
+        <span>{relayCount} relay</span>
+        <span>{peerRelayCount} peer</span>
+      </div>
+    </article>
+  );
+}
+
 function CodexMetric({
   label,
   value,
@@ -629,6 +774,7 @@ export function MachineHealthActivity({
           unit="MiB"
           summary="maximum"
         />
+        <RemoteTransportChart bins={bins} previousBins={previousBins} />
       </div>
 
       <div

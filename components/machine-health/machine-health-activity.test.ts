@@ -41,6 +41,8 @@ function sample(
     failedUnits: 0,
     unexpectedDevListeners: 0,
     rdpConnections: 0,
+    remoteTransportPath: null,
+    remoteRttMs: null,
     codexUsageWindowStartedAt: null,
     codexInputTokens: null,
     codexCachedInputTokens: null,
@@ -213,6 +215,36 @@ describe('machine health activity bins', () => {
     expect(bins.at(-1)?.sampleCount).toBe(1);
   });
 
+  it('averages only observed Mac probes and preserves path counts', () => {
+    const bins = buildActivityBins(
+      [
+        sample('2026-08-29T06:05:00.000Z', {
+          remoteTransportPath: 'direct',
+          remoteRttMs: 220,
+        }),
+        sample('2026-08-29T06:25:00.000Z', {
+          remoteTransportPath: 'relay',
+          remoteRttMs: 260,
+        }),
+        sample('2026-08-29T06:45:00.000Z'),
+      ],
+      '24h',
+      now
+    );
+
+    expect(bins.at(-1)).toMatchObject({
+      remoteRttMs: 240,
+      remoteProbeCount: 2,
+      remoteDirectProbes: 1,
+      remoteRelayProbes: 1,
+      remotePeerRelayProbes: 0,
+    });
+    expect(bins.at(-2)).toMatchObject({
+      remoteRttMs: null,
+      remoteProbeCount: 0,
+    });
+  });
+
   it('marks fallback, partial coverage, and uptime discontinuities', () => {
     const bins = buildActivityBins(
       [
@@ -277,6 +309,46 @@ describe('machine health activity bins', () => {
     expect(html).toContain('data-activity-reboot="true"');
     expect(html).toContain('1 fallback, 1 reboot');
     expect(html).toContain('1 partial');
+  });
+
+  it('renders path-aware Mac RTT without filling missing probe bins', () => {
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthActivity, {
+        samples: [
+          sample('2026-08-29T05:05:00.000Z', {
+            remoteTransportPath: 'direct',
+            remoteRttMs: 220,
+          }),
+          sample('2026-08-29T06:05:00.000Z', {
+            remoteTransportPath: 'peer-relay',
+            remoteRttMs: 260,
+          }),
+        ],
+        codexSamples: [],
+        now,
+        graphicsMaxClockMhz: 2_200,
+        latestActivity: {
+          source: 'sysstat-10m',
+          window_minutes: 60,
+          sample_count: 6,
+          cpu_peak_percent: 20,
+          memory_peak_percent: 30,
+          cpu_pressure_some_percent: 0.1,
+          memory_pressure_full_percent: 0,
+          io_pressure_full_percent: 0,
+          disk_read_mib_s: 1,
+          disk_write_mib_s: 2,
+        },
+      })
+    );
+
+    expect(html).toContain('Mac transport RTT');
+    expect(html).toContain('aria-label="Mac transport RTT across 10 observation bins; 2 probes"');
+    expect(html).toContain('data-remote-path="direct"');
+    expect(html).toContain('data-remote-path="peer-relay"');
+    expect(html).toContain('1 direct');
+    expect(html).toContain('1 peer');
+    expect(html).toContain('No transport probe');
   });
 
   it('places Codex counters in their fixed usage hour and deduplicates retries', () => {

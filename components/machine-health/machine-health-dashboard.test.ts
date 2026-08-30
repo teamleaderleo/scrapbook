@@ -37,6 +37,8 @@ const samples = Array.from({ length: 4 }, (_, index) => ({
   failedUnits: 0,
   unexpectedDevListeners: 0,
   rdpConnections: 0,
+  remoteTransportPath: index === 3 ? ('direct' as const) : null,
+  remoteRttMs: index === 3 ? 221 : null,
   codexUsageWindowStartedAt: index === 3 ? '2026-08-29T05:00:00.000Z' : null,
   codexInputTokens: index === 3 ? 12_500_000 : null,
   codexCachedInputTokens: index === 3 ? 11_875_000 : null,
@@ -118,6 +120,7 @@ describe('machine health dashboard', () => {
     expect(html).toContain('CPU');
     expect(html).toContain('Contention high');
     expect(html).toContain('iGPU clock');
+    expect(html).toContain('Mac transport RTT');
     expect(html).toContain('Build state');
     expect(html).toContain('51.6 GiB');
     expect(html).toContain(
