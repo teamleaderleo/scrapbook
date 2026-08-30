@@ -7,7 +7,12 @@ describe('robots', () => {
       rules: {
         userAgent: '*',
         allow: '/',
-        disallow: ['/proxy-dashboard', '/proxy-dashboard/'],
+        disallow: [
+          '/proxy-dashboard',
+          '/proxy-dashboard/',
+          '/machine-health',
+          '/machine-health/',
+        ],
       },
       sitemap: 'https://teamleaderleo.com/sitemap.xml',
     });
