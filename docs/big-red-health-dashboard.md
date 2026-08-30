@@ -17,6 +17,8 @@ The page starts with the questions that matter when Leo is away from the machine
   one-shot path RTT did Big Red observe while that peer was active?
 - Is GNOME's idle screen shield blocking new desktop-sharing sessions, and how many source-matched
   admission blocks occurred in the last 24 hours?
+- Is Beryl reachable, are Tailscale/OpenClash running with Netify inactive, what do its
+  thermal and memory receipts show, and what does Big Red's bounded local Wi-Fi/gateway sample show?
 - Did the current GNOME Remote Desktop process initialize its Vulkan/VA-API path, fall back to software, or not yet receive an RDP session?
 - What desktop state is active now: GNOME version, pixel mode, refresh, scale, screen-shield and
   physical-backlight state, saved animation preference, and configured mirror/extend mode?
@@ -239,9 +241,27 @@ These are operator thresholds rather than hardware safety limits:
 - any detected development listener: watch;
 - any structured core-dump exit in the last 24 hours: watch, split between desktop search and other services when the current collector supplied the breakdown;
 - unavailable route ownership status, any residue job, or any unknown route/job record: watch;
+- unavailable Beryl diagnostics or SSH, unexpected Tailscale/OpenClash/Netify process shape, an
+  inactive fan policy, active CPU thermal cooling, a Beryl OOM in the last 24 hours, or any loss in
+  the five-packet gateway point sample: watch;
 - report older than 3 hours: watch.
 
 CPU/memory peaks, disk/network throughput, PSI, load, and the iGPU clock are displayed but do not yet alert. Pressure is a better contention signal than utilization alone, but thresholds should be based on an observed Big Red baseline instead of imported folklore.
+
+Beryl data is parsed only from the allowlisted `Beryl local health` and `Beryl local link` sections
+of the canonical `/usr/local/bin/big-red-connectivity-check`. The collector runs that diagnostic
+once per report. Missing, duplicate, malformed, inconsistent, oversized, or timed-out output fails
+closed to unavailable. The link receipt keeps only signal, frequency, channel width, negotiated RX/TX
+rates, and aggregates from exactly five gateway pings. It never stores the interface, SSID, BSSID,
+gateway address, route, or packet-level output. Negotiated rates describe the current radio link, not
+measured internet throughput; RTT is a local gateway point sample, and ping mdev is labeled variation
+rather than network jitter. Signal, rate, and latency are display-only until Big Red has its own
+baseline. Any observed packet loss is a watch reason, explicitly scoped to the five-packet sample.
+The PWM value is a requested cooling-device state, not measured fan RPM; the dashboard compares it
+with its reported maximum and does not turn a single temperature sample into a generic hardware
+alarm. OOM count is scoped to OpenWrt's currently retained log window, not the whole boot; an
+unchanged count cannot prove that no new event arrived. Only the newest retained event's monotonic
+age under 24 hours raises a watch reason.
 
 ## Website configuration
 
@@ -296,6 +316,10 @@ This performs read-only local checks, prints the exact sanitized payload, and ne
 neither reporting environment variable set, the default invocation also prints locally and sends
 nothing. A configured successful send is quiet, so the hourly service does not copy every snapshot
 into the user journal.
+
+The optional Beryl section requires the canonical connectivity diagnostic to be installed and its
+non-interactive `beryl7` SSH probe to work. The collector runs that diagnostic once with a 10-second
+timeout and a 32 KiB output ceiling. It neither changes router settings nor retries service actions.
 
 The route section expects the authoritative helper at `~/Projects/leo-workspace/tools/codex_route_job.py`. If it is absent, fails, or changes its aggregate contract, the report marks route activity unavailable. Restoring that exact helper restores the section; no dashboard-side ownership fallback exists.
 

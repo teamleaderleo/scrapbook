@@ -488,6 +488,43 @@ export function MachineHealthDashboard({
   const browserRssDelta = browserRssBaseline
     ? payload.hygiene.browser_rss_bytes - browserRssBaseline.browserRssBytes
     : null;
+  const beryl =
+    payload.beryl?.source === 'big-red-connectivity-check-v1' &&
+    payload.beryl.ssh === 'available'
+      ? payload.beryl
+      : null;
+  const berylFan = beryl?.fan ?? null;
+  const berylOomNote = beryl
+    ? beryl.oom_kills_observed_log === 0
+      ? '0 retained-log OOM events'
+      : beryl.latest_oom_age_seconds_observed_log === null
+        ? `${beryl.oom_kills_observed_log} retained-log events · latest age unknown`
+        : `${beryl.oom_kills_observed_log} retained-log events · latest ${formatDuration(beryl.latest_oom_age_seconds_observed_log)} ago`
+    : null;
+  const berylLink =
+    payload.beryl_link?.source === 'big-red-connectivity-check-v1'
+      ? payload.beryl_link
+      : null;
+  const berylWifi = berylLink?.wifi ?? null;
+  const berylGateway = berylLink?.gateway ?? null;
+  const wifiLinkNote = berylWifi
+    ? [
+        berylWifi.rx_bitrate_mbps === null
+          ? null
+          : `${Math.round(berylWifi.rx_bitrate_mbps)} ↓`,
+        berylWifi.tx_bitrate_mbps === null
+          ? null
+          : `${Math.round(berylWifi.tx_bitrate_mbps)} ↑ Mbit/s`,
+        berylWifi.frequency_mhz === null
+          ? null
+          : `${berylWifi.frequency_mhz} MHz`,
+        berylWifi.channel_width_mhz === null
+          ? null
+          : `${berylWifi.channel_width_mhz} MHz wide`,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : 'link evidence unavailable';
 
   return (
     <div className="grid gap-3">
@@ -581,6 +618,130 @@ export function MachineHealthDashboard({
         <Metric label="Battery" value={battery} note={powerNote} />
         <Metric label="Remote" value={remoteValue} note={remoteNote} />
       </section>
+
+      {payload.beryl || payload.beryl_link ? (
+        <section
+          className="rounded-2xl border border-black/10 p-5 dark:border-white/10"
+          style={{
+            backgroundColor:
+              'light-dark(rgba(255,255,255,0.5), rgba(0,0,0,0.15))',
+          }}
+          aria-label="Beryl router"
+        >
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+            <div>
+              <p className="opacity-55 text-[0.68rem] font-black uppercase tracking-[0.2em]">
+                Beryl router
+              </p>
+              <h2 className="mt-1 text-lg font-black">Local network edge</h2>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Pill good={beryl?.tailscale_service === 'running'}>
+                Tailscale: {beryl?.tailscale_service ?? 'unavailable'}
+              </Pill>
+              <Pill good={beryl?.openclash_service === 'running'}>
+                OpenClash: {beryl?.openclash_service ?? 'unavailable'}
+              </Pill>
+              <Pill
+                good={
+                  beryl !== null &&
+                  beryl.netifyd_service === 'inactive' &&
+                  beryl.netifyd_processes === 0
+                }
+              >
+                Netify: {beryl?.netifyd_service ?? 'unavailable'}
+              </Pill>
+              {berylFan ? (
+                <Pill
+                  good={
+                    berylFan.service === 'running' && berylFan.policy_enabled
+                  }
+                >
+                  Fan policy:{' '}
+                  {berylFan.service === 'running' && berylFan.policy_enabled
+                    ? 'active'
+                    : 'changed'}
+                </Pill>
+              ) : null}
+            </div>
+          </div>
+          {beryl || berylLink ? (
+            <div
+              className={`mt-4 grid gap-3 sm:grid-cols-2 ${berylLink ? 'lg:grid-cols-3 xl:grid-cols-6' : 'lg:grid-cols-4'}`}
+            >
+              {beryl ? (
+                <>
+                  <Metric
+                    label="SoC temperature"
+                    value={`${Math.round(beryl.soc_temp_millic / 1_000)} °C`}
+                    note={
+                      berylFan
+                        ? `${berylFan.policy_temperature_c} °C fan policy · ${berylFan.policy_warning_c} °C warning`
+                        : 'fan evidence unavailable'
+                    }
+                  />
+                  <Metric
+                    label="Available memory"
+                    value={formatMemory(beryl.mem_available_kib * 1_024)}
+                    note={`${formatMemory(beryl.tailscaled_rss_kib * 1_024)} Tailscale · ${formatMemory(beryl.clash_rss_kib * 1_024)} Clash`}
+                  />
+                  <Metric
+                    label="Router uptime"
+                    value={formatDuration(beryl.uptime_seconds)}
+                    note={berylOomNote ?? undefined}
+                  />
+                  <Metric
+                    label="Cooling state"
+                    value={
+                      berylFan
+                        ? `${berylFan.cpu_cooling_current_state} / ${berylFan.cpu_cooling_max_state}`
+                        : '—'
+                    }
+                    note={
+                      berylFan
+                        ? `PWM request ${berylFan.pwm_current_state} / ${berylFan.pwm_max_state}`
+                        : 'cooling evidence unavailable'
+                    }
+                  />
+                </>
+              ) : null}
+              {berylLink ? (
+                <>
+                  <Metric
+                    label="Wi-Fi link"
+                    value={
+                      berylWifi?.signal_dbm === null || !berylWifi
+                        ? '—'
+                        : `${String(berylWifi.signal_dbm).replace('-', '−')} dBm`
+                    }
+                    note={wifiLinkNote}
+                  />
+                  <Metric
+                    label="Gateway RTT"
+                    value={
+                      berylGateway?.rtt_avg_ms === null || !berylGateway
+                        ? '—'
+                        : `${berylGateway.rtt_avg_ms.toFixed(1)} ms`
+                    }
+                    note={
+                      berylGateway
+                        ? `${berylGateway.packet_loss_percent}% loss · ${berylGateway.rtt_mdev_ms?.toFixed(2) ?? '—'} ms variation · ${berylGateway.samples_received}/${berylGateway.samples_sent} replies`
+                        : 'five-packet point sample unavailable'
+                    }
+                  />
+                </>
+              ) : null}
+            </div>
+          ) : (
+            <p className="opacity-65 mt-4 text-sm">
+              {payload.beryl?.source === 'big-red-connectivity-check-v1' &&
+              payload.beryl.ssh === 'unavailable'
+                ? 'Beryl did not answer the bounded SSH health probe.'
+                : 'The local diagnostic did not return a bounded Beryl snapshot.'}
+            </p>
+          )}
+        </section>
+      ) : null}
 
       <MachineHealthActivity
         samples={samples}

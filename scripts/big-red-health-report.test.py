@@ -715,6 +715,196 @@ class CodexStateTest(unittest.TestCase):
                 self.assertIsNone(state["allocated_bytes"])
 
 
+class BerylHealthTest(unittest.TestCase):
+    @staticmethod
+    def diagnostic(**overrides: str) -> str:
+        values = {
+            "router_ssh": "available",
+            "router_tailscale_service": "running",
+            "router_openclash_service": "running",
+            "router_netifyd_service": "inactive",
+            "router_fan_service": "running",
+            "router_tailscaled_processes": "1",
+            "router_clash_processes": "1",
+            "router_netifyd_processes": "0",
+            "router_tailscaled_rss_kib": "31540",
+            "router_clash_rss_kib": "51020",
+            "router_mem_available_kib": "89116",
+            "router_uptime_seconds": "449097",
+            "router_oom_kills_observed_log": "15",
+            "router_latest_oom_age_seconds_observed_log": "102224",
+            "router_soc_temp_millic": "78664",
+            "router_fan_policy_enabled": "1",
+            "router_fan_policy_temperature_celsius": "75",
+            "router_fan_policy_warning_celsius": "75",
+            "router_pwm_fan_current_state": "14",
+            "router_pwm_fan_max_state": "255",
+            "router_cpu_thermal_current_state": "0",
+            "router_cpu_thermal_max_state": "3",
+        }
+        values.update(overrides)
+        section = "\n".join(f"{key}={value}" for key, value in values.items())
+        return f"timestamp=private\n\nBeryl local health:\n{section}\n\nDNS:\n"
+
+    def test_parses_only_the_allowlisted_router_section(self) -> None:
+        output = self.diagnostic().replace(
+            "\n\nDNS:\n", "\nrouter_address=private\n\nDNS:\n"
+        )
+        with patch.object(
+            REPORT,
+            "run_connectivity_diagnostic",
+            return_value=(0, output),
+        ):
+            health = REPORT.beryl_health()
+
+        self.assertEqual(health["source"], "big-red-connectivity-check-v1")
+        self.assertEqual(health["ssh"], "available")
+        self.assertEqual(health["soc_temp_millic"], 78_664)
+        self.assertEqual(
+            health["latest_oom_age_seconds_observed_log"], 102_224
+        )
+        self.assertEqual(
+            health["fan"],
+            {
+                "service": "running",
+                "policy_enabled": True,
+                "policy_temperature_c": 75,
+                "policy_warning_c": 75,
+                "pwm_current_state": 14,
+                "pwm_max_state": 255,
+                "cpu_cooling_current_state": 0,
+                "cpu_cooling_max_state": 3,
+            },
+        )
+        self.assertNotIn("timestamp", health)
+
+    def test_fails_closed_on_duplicate_or_inconsistent_fields(self) -> None:
+        duplicate = self.diagnostic().replace(
+            "\n\nDNS:\n", "\nrouter_soc_temp_millic=1\n\nDNS:\n"
+        )
+        duplicate_section = (
+            self.diagnostic()
+            + "\nBeryl local health:\nrouter_ssh=unavailable\n"
+        )
+        inconsistent = self.diagnostic(router_pwm_fan_current_state="256")
+        for output in (duplicate, duplicate_section, inconsistent):
+            with (
+                self.subTest(output=output[-40:]),
+                patch.object(
+                    REPORT,
+                    "run_connectivity_diagnostic",
+                    return_value=(0, output),
+                ),
+            ):
+                self.assertEqual(REPORT.beryl_health(), {"source": "unavailable"})
+
+    def test_preserves_bounded_ssh_unavailability(self) -> None:
+        output = "Beryl local health:\nrouter_ssh=unavailable\n"
+        with patch.object(
+            REPORT, "run_connectivity_diagnostic", return_value=(0, output)
+        ):
+            self.assertEqual(
+                REPORT.beryl_health(),
+                {
+                    "source": "big-red-connectivity-check-v1",
+                    "ssh": "unavailable",
+                },
+            )
+
+
+class BerylLinkHealthTest(unittest.TestCase):
+    @staticmethod
+    def diagnostic(**overrides: str) -> str:
+        values = {
+            "wifi_signal_dbm": "-44",
+            "wifi_frequency_mhz": "5220",
+            "wifi_channel_width_mhz": "80",
+            "wifi_rx_bitrate_mbps": "432.3",
+            "wifi_tx_bitrate_mbps": "600.4",
+            "gateway_ping_samples_sent": "5",
+            "gateway_ping_samples_received": "5",
+            "gateway_packet_loss_percent": "0",
+            "gateway_rtt_avg_ms": "1.227",
+            "gateway_rtt_mdev_ms": "0.097",
+        }
+        values.update(overrides)
+        section = "\n".join(f"{key}={value}" for key, value in values.items())
+        return (
+            "timestamp=private\n\n"
+            f"Beryl local link:\n{section}\n"
+            "wifi_interface=private\n"
+            "wifi_ssid=private\n"
+            "gateway_address=private\n\nDNS:\n"
+        )
+
+    def test_parses_only_allowlisted_link_aggregates(self) -> None:
+        with patch.object(
+            REPORT, "run_connectivity_diagnostic"
+        ) as diagnostic_runner:
+            link = REPORT.beryl_link_health((0, self.diagnostic()))
+
+        diagnostic_runner.assert_not_called()
+        self.assertEqual(
+            link,
+            {
+                "source": "big-red-connectivity-check-v1",
+                "wifi": {
+                    "signal_dbm": -44,
+                    "frequency_mhz": 5_220,
+                    "channel_width_mhz": 80,
+                    "rx_bitrate_mbps": 432.3,
+                    "tx_bitrate_mbps": 600.4,
+                },
+                "gateway": {
+                    "samples_sent": 5,
+                    "samples_received": 5,
+                    "packet_loss_percent": 0.0,
+                    "rtt_avg_ms": 1.227,
+                    "rtt_mdev_ms": 0.097,
+                },
+            },
+        )
+        self.assertNotIn("wifi_interface", json.dumps(link))
+        self.assertNotIn("wifi_ssid", json.dumps(link))
+        self.assertNotIn("gateway_address", json.dumps(link))
+
+    def test_accepts_explicitly_unavailable_link_sources(self) -> None:
+        unavailable = {
+            key: "unavailable"
+            for key in REPORT.BERYL_LINK_FIELDS
+        }
+        link = REPORT.beryl_link_health((0, self.diagnostic(**unavailable)))
+
+        self.assertEqual(
+            link,
+            {
+                "source": "big-red-connectivity-check-v1",
+                "wifi": None,
+                "gateway": None,
+            },
+        )
+
+    def test_fails_closed_on_malformed_or_inconsistent_samples(self) -> None:
+        duplicate = self.diagnostic().replace(
+            "\n\nDNS:\n", "\nwifi_signal_dbm=-55\n\nDNS:\n"
+        )
+        duplicate_section = (
+            self.diagnostic()
+            + "\nBeryl local link:\nwifi_signal_dbm=unavailable\n"
+        )
+        inconsistent = self.diagnostic(
+            gateway_ping_samples_received="4",
+            gateway_packet_loss_percent="0",
+        )
+        missing_rtt = self.diagnostic(gateway_rtt_avg_ms="unavailable")
+        for output in (duplicate, duplicate_section, inconsistent, missing_rtt):
+            with self.subTest(output=output[-80:]):
+                self.assertEqual(
+                    REPORT.beryl_link_health((0, output)),
+                    {"source": "unavailable"},
+                )
+
+
 class RemoteClientTest(unittest.TestCase):
     NOW = dt.datetime(2026, 8, 29, 18, 0, tzinfo=dt.timezone.utc)
 

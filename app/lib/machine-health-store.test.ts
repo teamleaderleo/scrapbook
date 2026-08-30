@@ -118,6 +118,16 @@ describe('machine health contract', () => {
         connector: 'must-not-survive',
         wallpaper_uri: 'must-not-survive',
       },
+      beryl: {
+        ...healthyMachineReport.beryl,
+        router_address: 'must-not-survive',
+      },
+      beryl_link: {
+        ...healthyMachineReport.beryl_link,
+        interface_name: 'must-not-survive',
+        ssid: 'must-not-survive',
+        gateway_address: 'must-not-survive',
+      },
     });
 
     expect(parsed).toEqual(healthyMachineReport);
@@ -211,6 +221,83 @@ describe('machine health contract', () => {
     const parsed = machineHealthPayloadSchema.parse(olderReport);
 
     expect(parsed.reliability).toBeUndefined();
+  });
+
+  it('accepts a snapshot from before Beryl health was added', () => {
+    const {
+      beryl: _beryl,
+      beryl_link: _berylLink,
+      ...olderReport
+    } = healthyMachineReport;
+    const parsed = machineHealthPayloadSchema.parse(olderReport);
+
+    expect(parsed.beryl).toBeUndefined();
+    expect(parsed.beryl_link).toBeUndefined();
+  });
+
+  it('rejects inconsistent Beryl gateway samples', () => {
+    const berylLink = healthyMachineReport.beryl_link;
+    if (
+      berylLink?.source !== 'big-red-connectivity-check-v1' ||
+      !berylLink.gateway
+    )
+      throw new Error('Expected the Beryl link fixture');
+
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        beryl_link: {
+          ...berylLink,
+          gateway: {
+            ...berylLink.gateway,
+            samples_received: 4,
+            packet_loss_percent: 0,
+          },
+        },
+      }).success
+    ).toBe(false);
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        beryl_link: {
+          ...berylLink,
+          gateway: {
+            ...berylLink.gateway,
+            samples_received: 0,
+          },
+        },
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects inconsistent Beryl cooling and OOM evidence', () => {
+    const beryl = healthyMachineReport.beryl;
+    if (
+      beryl?.source !== 'big-red-connectivity-check-v1' ||
+      beryl.ssh !== 'available' ||
+      !beryl.fan
+    )
+      throw new Error('Expected the Beryl fixture');
+
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        beryl: {
+          ...beryl,
+          fan: { ...beryl.fan, pwm_current_state: 256, pwm_max_state: 255 },
+        },
+      }).success
+    ).toBe(false);
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        beryl: {
+          ...beryl,
+          oom_kills_observed_log: 0,
+          latest_oom_age_seconds_observed_log: 1,
+        },
+      }).success
+    ).toBe(false);
   });
 
   it('accepts old reliability totals and rejects a mismatched breakdown', () => {
