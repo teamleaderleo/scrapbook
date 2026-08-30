@@ -8,7 +8,7 @@ You make a fake computer inside your computer. Great. Maybe you want to run Ubun
 
 Okay. Cool. Virtual machine.
 
-Then this month I ended up contributing to [Cloud Hypervisor](https://www.cloudhypervisor.org/) because we were looking for good open-source work and there were bugs that looked tractable enough to attack. The initial logic was almost embarrassingly practical: meaningful repository, useful fixes, places where a new contributor could get purchase. Low-hanging fruit, except line count is a terrible way to measure the shot. A dunk, a layup and a contested jumper can all put two points on the board.
+Then this month I ended up contributing to [Cloud Hypervisor](https://www.cloudhypervisor.org/) because we were looking for good open-source work and there were bugs that looked tractable enough to attack. The initial logic was embarrassingly practical: meaningful repository, useful fixes, places where a new contributor could get purchase. Low-hanging fruit, except line count is a terrible way to measure the shot. A dunk, a layup and a contested jumper can all put two points on the board.
 
 A few merged fixes later I had the much more important reaction:
 
@@ -82,9 +82,9 @@ A VMM lives much closer to where those promises get manufactured.
 
 The operating system expects a machine. You present one.
 
-The physical details can vary wildly. The guest does not need a miniature physical disk spinning somewhere inside the host. It needs block semantics. It does not need a tiny DIMM corresponding to every region of guest RAM. It needs an addressable memory world with the behavior its software expects. A virtual CPU can ride hardware virtualization while the VMM and kernel cooperate around the edges.
+The physical details can vary wildly. The guest sees a disk because the layer preserves block semantics. Guest RAM becomes an addressable memory world assembled from host resources. A virtual CPU can ride hardware virtualization while the VMM and kernel cooperate around the edges.
 
-This asks a question I find almost philosophically irresistible:
+And then you hit the question I find philosophically irresistible:
 
 **Which observable truths make a machine a machine?**
 
@@ -98,7 +98,7 @@ It's an executable ontology of a computer.
 
 ## Everything touches everything because everything has to work
 
-Virtualization gets cross-cutting almost by definition.
+Virtualization gets cross-cutting by definition.
 
 Boot a guest and suddenly CPU privilege, memory translation and interrupt delivery are your concern. Give it a disk and storage semantics arrive. Give it networking and packets arrive. Pass through a physical device and DMA plus IOMMU reasoning walk in. Snapshot or migrate the thing and every piece of live state asks whether it can be captured consistently. Run hostile tenants and every boundary starts carrying a security consequence. Optimize startup and now the exact amount of machine you need to construct becomes an economics problem.
 
@@ -130,9 +130,7 @@ The machine is physical underneath; the work is still something you can read, in
 
 ## Chronic overthinking finally gets a finite target
 
-There is another reason this domain feels suspiciously compatible with my brain.
-
-A lot of virtualization work rewards the question after the obvious question.
+Another reason this domain feels suspiciously compatible with my brain: virtualization rewards the question after the obvious question.
 
 Did shutdown happen?
 
