@@ -334,6 +334,12 @@ export function MachineHealthDashboard({
         buildState.target_count === null
           ? null
           : `${buildState.target_count} targets`,
+        buildState.largest_target_gib == null
+          ? null
+          : `${buildState.largest_target_gib.toFixed(1)} GiB max`,
+        buildState.median_target_gib == null
+          ? null
+          : `${buildState.median_target_gib.toFixed(1)} GiB median`,
         buildState.glaeda_cache_gib === null
           ? null
           : `${buildState.glaeda_cache_gib.toFixed(1)} GiB cache`,

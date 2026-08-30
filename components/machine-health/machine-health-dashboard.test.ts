@@ -120,7 +120,9 @@ describe('machine health dashboard', () => {
     expect(html).toContain('iGPU clock');
     expect(html).toContain('Build state');
     expect(html).toContain('51.6 GiB');
-    expect(html).toContain('11 targets · 1.2 GiB cache · 3 building');
+    expect(html).toContain(
+      '11 targets · 9.6 GiB max · 4.3 GiB median · 1.2 GiB cache · 3 building'
+    );
     expect(html).toContain('Browser RSS');
     expect(html).toContain('2.5 GiB');
     expect(html).toContain('Codex state');

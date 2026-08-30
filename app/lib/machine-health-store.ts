@@ -487,6 +487,8 @@ export const machineHealthPayloadSchema = z.object({
       source: z.enum(['filesystem', 'unavailable']),
       total_gib: nullableNonnegative,
       target_gib: nullableNonnegative,
+      largest_target_gib: nullableNonnegative.optional(),
+      median_target_gib: nullableNonnegative.optional(),
       glaeda_cache_gib: nullableNonnegative,
       target_count: nonnegativeInteger.nullable(),
       active_build_processes: nonnegativeInteger.nullable(),

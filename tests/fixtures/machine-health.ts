@@ -176,6 +176,8 @@ export const healthyMachineReport: MachineHealthPayload = {
     source: 'filesystem',
     total_gib: 51.65,
     target_gib: 50.45,
+    largest_target_gib: 9.55,
+    median_target_gib: 4.31,
     glaeda_cache_gib: 1.2,
     target_count: 11,
     active_build_processes: 3,

@@ -17,6 +17,7 @@ import math
 import os
 import re
 import shutil
+import statistics
 import subprocess
 import sys
 import time
@@ -1648,6 +1649,8 @@ def build_state(
             "source": "unavailable",
             "total_gib": None,
             "target_gib": None,
+            "largest_target_gib": None,
+            "median_target_gib": None,
             "glaeda_cache_gib": None,
             "target_count": None,
             "active_build_processes": None,
@@ -1664,6 +1667,8 @@ def build_state(
             "source": "unavailable",
             "total_gib": None,
             "target_gib": None,
+            "largest_target_gib": None,
+            "median_target_gib": None,
             "glaeda_cache_gib": None,
             "target_count": len(existing_targets),
             "active_build_processes": active_glaeda_build_processes(
@@ -1672,11 +1677,24 @@ def build_state(
         }
 
     target_bytes = sum(target_sizes.get(target, 0) for target in existing_targets)
+    target_size_values = [
+        target_sizes.get(target, 0) for target in existing_targets
+    ]
     cache_bytes = cache_sizes.get(cache, 0)
     return {
         "source": "filesystem",
         "total_gib": round((target_bytes + cache_bytes) / GIB, 2),
         "target_gib": round(target_bytes / GIB, 2),
+        "largest_target_gib": (
+            round(max(target_size_values) / GIB, 2)
+            if target_size_values
+            else 0.0
+        ),
+        "median_target_gib": (
+            round(statistics.median(target_size_values) / GIB, 2)
+            if target_size_values
+            else 0.0
+        ),
         "glaeda_cache_gib": round(cache_bytes / GIB, 2),
         "target_count": len(existing_targets),
         "active_build_processes": active_glaeda_build_processes(observed_worktrees),

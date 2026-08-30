@@ -1061,6 +1061,39 @@ class BuildStateTest(unittest.TestCase):
         self.assertGreater(state["glaeda_cache_gib"], 0)
         self.assertNotIn(str(root), json.dumps(state))
 
+    def test_summarizes_target_skew_without_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            worktrees = [root / "glaeda", root / "worktree"]
+            targets = [worktree / "target" for worktree in worktrees]
+            for target in targets:
+                target.mkdir(parents=True)
+            cache = root / "cache"
+            cache.mkdir()
+            sizes = {
+                targets[0]: 2 * REPORT.GIB,
+                targets[1]: 4 * REPORT.GIB,
+                cache: REPORT.GIB,
+            }
+
+            with (
+                patch.object(
+                    REPORT,
+                    "apparent_directory_sizes",
+                    side_effect=lambda paths, **_kwargs: {
+                        path: sizes[path] for path in paths
+                    },
+                ),
+                patch.object(
+                    REPORT, "active_glaeda_build_processes", return_value=0
+                ),
+            ):
+                state = REPORT.build_state(worktrees, cache)
+
+        self.assertEqual(state["largest_target_gib"], 4.0)
+        self.assertEqual(state["median_target_gib"], 3.0)
+        self.assertNotIn(str(root), json.dumps(state))
+
     def test_marks_missing_worktree_inventory_unavailable(self) -> None:
         with patch.object(REPORT, "glaeda_worktrees", return_value=None):
             state = REPORT.build_state()
