@@ -99,8 +99,8 @@ BERYL_HEALTH_FIELDS = {
     "router_clash_rss_kib",
     "router_mem_available_kib",
     "router_uptime_seconds",
-    "router_oom_kills_current_boot",
-    "router_latest_oom_age_seconds",
+    "router_oom_kills_observed_log",
+    "router_latest_oom_age_seconds_observed_log",
     "router_soc_temp_millic",
     "router_fan_policy_enabled",
     "router_fan_policy_temperature_celsius",
@@ -268,8 +268,8 @@ def beryl_health(
         "clash_rss_kib": ("router_clash_rss_kib", 0, 2**31),
         "mem_available_kib": ("router_mem_available_kib", 0, 2**31),
         "uptime_seconds": ("router_uptime_seconds", 0, 2**53 - 1),
-        "oom_kills_current_boot": (
-            "router_oom_kills_current_boot",
+        "oom_kills_observed_log": (
+            "router_oom_kills_observed_log",
             0,
             1_000_000,
         ),
@@ -282,20 +282,25 @@ def beryl_health(
             return unavailable
         integers[output_key] = parsed
 
-    latest_oom_age = values.get("router_latest_oom_age_seconds")
+    latest_oom_age = values.get(
+        "router_latest_oom_age_seconds_observed_log"
+    )
     if latest_oom_age == "not_observed":
-        if integers["oom_kills_current_boot"] != 0:
+        if integers["oom_kills_observed_log"] != 0:
             return unavailable
-        latest_oom_age_seconds = None
+        latest_oom_age_seconds_observed_log = None
     elif latest_oom_age == "unknown":
-        latest_oom_age_seconds = None
+        latest_oom_age_seconds_observed_log = None
     else:
-        latest_oom_age_seconds = bounded_integer(
+        latest_oom_age_seconds_observed_log = bounded_integer(
             latest_oom_age, 0, integers["uptime_seconds"]
         )
-        if latest_oom_age_seconds is None:
+        if latest_oom_age_seconds_observed_log is None:
             return unavailable
-    if integers["oom_kills_current_boot"] == 0 and latest_oom_age_seconds is not None:
+    if (
+        integers["oom_kills_observed_log"] == 0
+        and latest_oom_age_seconds_observed_log is not None
+    ):
         return unavailable
 
     fan_source_keys = (
@@ -365,7 +370,9 @@ def beryl_health(
         "ssh": "available",
         **services,
         **integers,
-        "latest_oom_age_seconds": latest_oom_age_seconds,
+        "latest_oom_age_seconds_observed_log": (
+            latest_oom_age_seconds_observed_log
+        ),
         "fan": fan,
     }
 

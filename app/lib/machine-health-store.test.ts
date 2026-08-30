@@ -293,8 +293,8 @@ describe('machine health contract', () => {
         ...healthyMachineReport,
         beryl: {
           ...beryl,
-          oom_kills_current_boot: 0,
-          latest_oom_age_seconds: 1,
+          oom_kills_observed_log: 0,
+          latest_oom_age_seconds_observed_log: 1,
         },
       }).success
     ).toBe(false);

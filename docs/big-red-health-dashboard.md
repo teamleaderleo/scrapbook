@@ -259,8 +259,9 @@ rather than network jitter. Signal, rate, and latency are display-only until Big
 baseline. Any observed packet loss is a watch reason, explicitly scoped to the five-packet sample.
 The PWM value is a requested cooling-device state, not measured fan RPM; the dashboard compares it
 with its reported maximum and does not turn a single temperature sample into a generic hardware
-alarm. OOM count is cumulative for the current router boot, so only a reported latest-event age under
-24 hours raises a watch reason.
+alarm. OOM count is scoped to OpenWrt's currently retained log window, not the whole boot; an
+unchanged count cannot prove that no new event arrived. Only the newest retained event's monotonic
+age under 24 hours raises a watch reason.
 
 ## Website configuration
 

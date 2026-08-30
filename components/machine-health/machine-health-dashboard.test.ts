@@ -156,7 +156,7 @@ describe('machine health dashboard', () => {
     expect(html).toContain('75 °C fan policy · 75 °C warning');
     expect(html).toContain('87 MiB');
     expect(html).toContain('5d 4h');
-    expect(html).toContain('15 boot total · latest 1d 4h ago');
+    expect(html).toContain('15 retained-log events · latest 1d 4h ago');
     expect(html).toContain('No CPU throttle');
     expect(html).toContain('PWM request 14 / 255 · not fan RPM');
     expect(html).toContain('Wi-Fi link');
@@ -207,7 +207,10 @@ describe('machine health dashboard', () => {
           ...report,
           payload: {
             ...report.payload,
-            beryl: { ...beryl, latest_oom_age_seconds: 3_600 },
+            beryl: {
+              ...beryl,
+              latest_oom_age_seconds_observed_log: 3_600,
+            },
           },
         },
         samples,

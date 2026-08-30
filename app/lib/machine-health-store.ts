@@ -302,17 +302,17 @@ const berylState = z.union([
       clash_rss_kib: nonnegativeInteger.max(2 ** 31),
       mem_available_kib: nonnegativeInteger.max(2 ** 31),
       uptime_seconds: codexCounter,
-      oom_kills_current_boot: nonnegativeInteger.max(1_000_000),
-      latest_oom_age_seconds: nonnegativeInteger.nullable(),
+      oom_kills_observed_log: nonnegativeInteger.max(1_000_000),
+      latest_oom_age_seconds_observed_log: nonnegativeInteger.nullable(),
       soc_temp_millic: z.number().int().min(0).max(150_000),
       fan: berylFanState.nullable(),
     })
     .refine(
       value =>
-        value.latest_oom_age_seconds === null ||
-        (value.oom_kills_current_boot > 0 &&
-          value.latest_oom_age_seconds <= value.uptime_seconds),
-      { message: 'Beryl OOM age is inconsistent with this boot' }
+        value.latest_oom_age_seconds_observed_log === null ||
+        (value.oom_kills_observed_log > 0 &&
+          value.latest_oom_age_seconds_observed_log <= value.uptime_seconds),
+      { message: 'Beryl retained-log OOM evidence is inconsistent' }
     ),
 ]);
 const berylLinkState = z.union([
@@ -975,9 +975,9 @@ export function evaluateMachineHealth(payload: MachineHealthPayload) {
         reasons.push('Beryl is applying CPU thermal cooling.');
     }
     if (
-      payload.beryl.oom_kills_current_boot > 0 &&
-      payload.beryl.latest_oom_age_seconds !== null &&
-      payload.beryl.latest_oom_age_seconds < 24 * 60 * 60
+      payload.beryl.oom_kills_observed_log > 0 &&
+      payload.beryl.latest_oom_age_seconds_observed_log !== null &&
+      payload.beryl.latest_oom_age_seconds_observed_log < 24 * 60 * 60
     )
       reasons.push(
         'Beryl recorded an out-of-memory kill in the last 24 hours.'

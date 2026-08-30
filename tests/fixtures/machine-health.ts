@@ -189,8 +189,8 @@ export const healthyMachineReport: MachineHealthPayload = {
     clash_rss_kib: 51_020,
     mem_available_kib: 89_116,
     uptime_seconds: 449_097,
-    oom_kills_current_boot: 15,
-    latest_oom_age_seconds: 102_224,
+    oom_kills_observed_log: 15,
+    latest_oom_age_seconds_observed_log: 102_224,
     soc_temp_millic: 78_664,
     fan: {
       service: 'running',

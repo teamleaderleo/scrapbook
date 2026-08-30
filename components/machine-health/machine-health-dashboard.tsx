@@ -495,11 +495,11 @@ export function MachineHealthDashboard({
       : null;
   const berylFan = beryl?.fan ?? null;
   const berylOomNote = beryl
-    ? beryl.oom_kills_current_boot === 0
-      ? 'no OOM this boot'
-      : beryl.latest_oom_age_seconds === null
-        ? `${beryl.oom_kills_current_boot} boot total · latest age unknown`
-        : `${beryl.oom_kills_current_boot} boot total · latest ${formatDuration(beryl.latest_oom_age_seconds)} ago`
+    ? beryl.oom_kills_observed_log === 0
+      ? 'no OOM retained in log'
+      : beryl.latest_oom_age_seconds_observed_log === null
+        ? `${beryl.oom_kills_observed_log} retained-log events · latest age unknown`
+        : `${beryl.oom_kills_observed_log} retained-log events · latest ${formatDuration(beryl.latest_oom_age_seconds_observed_log)} ago`
     : null;
   const berylLink =
     payload.beryl_link?.source === 'big-red-connectivity-check-v1'

@@ -731,8 +731,8 @@ class BerylHealthTest(unittest.TestCase):
             "router_clash_rss_kib": "51020",
             "router_mem_available_kib": "89116",
             "router_uptime_seconds": "449097",
-            "router_oom_kills_current_boot": "15",
-            "router_latest_oom_age_seconds": "102224",
+            "router_oom_kills_observed_log": "15",
+            "router_latest_oom_age_seconds_observed_log": "102224",
             "router_soc_temp_millic": "78664",
             "router_fan_policy_enabled": "1",
             "router_fan_policy_temperature_celsius": "75",
@@ -760,7 +760,9 @@ class BerylHealthTest(unittest.TestCase):
         self.assertEqual(health["source"], "big-red-connectivity-check-v1")
         self.assertEqual(health["ssh"], "available")
         self.assertEqual(health["soc_temp_millic"], 78_664)
-        self.assertEqual(health["latest_oom_age_seconds"], 102_224)
+        self.assertEqual(
+            health["latest_oom_age_seconds_observed_log"], 102_224
+        )
         self.assertEqual(
             health["fan"],
             {
