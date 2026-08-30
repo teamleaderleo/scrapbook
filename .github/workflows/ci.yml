@@ -45,6 +45,7 @@ jobs:
         run: |
           python3 scripts/big-red-health-report.test.py
           python3 scripts/codex-token-report.test.py
+          python3 scripts/codex-token-launchd.test.py
       - name: Unit tests
         run: pnpm test
 

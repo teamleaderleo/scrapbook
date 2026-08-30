@@ -10,6 +10,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 SCRIPT = Path(__file__).with_name("codex-token-report.py")
@@ -132,6 +133,62 @@ class CodexTokenReportTest(unittest.TestCase):
             REPORT.validate_ingest_url("http://127.0.0.1:3000/ingest"),
             "http://127.0.0.1:3000/ingest",
         )
+
+    def test_loads_a_private_owned_credential_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "credentials.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "ingest_url": "https://example.com/ingest",
+                        "ingest_secret": "secret-value",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            path.chmod(0o600)
+            with mock.patch.dict(os.environ, {}, clear=True):
+                credentials = REPORT.load_credentials(path)
+
+        self.assertEqual(credentials, ("https://example.com/ingest", "secret-value"))
+
+    def test_rejects_ambiguous_or_exposed_credentials(self) -> None:
+        with mock.patch.dict(
+            os.environ,
+            {"CODEX_TOKEN_INGEST_URL": "https://example.com/ingest"},
+            clear=True,
+        ):
+            with self.assertRaises(ValueError):
+                REPORT.load_credentials(None)
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "credentials.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "ingest_url": "https://example.com/ingest",
+                        "ingest_secret": "secret-value",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            path.chmod(0o644)
+            with mock.patch.dict(os.environ, {}, clear=True):
+                with self.assertRaises(ValueError):
+                    REPORT.load_credentials(path)
+
+            path.chmod(0o600)
+            link = Path(temporary_directory) / "credentials-link.json"
+            link.symlink_to(path)
+            with mock.patch.dict(os.environ, {}, clear=True):
+                with self.assertRaises(ValueError):
+                    REPORT.load_credentials(link)
+
+            hard_link = Path(temporary_directory) / "credentials-hard-link.json"
+            os.link(path, hard_link)
+            with mock.patch.dict(os.environ, {}, clear=True):
+                with self.assertRaises(ValueError):
+                    REPORT.load_credentials(path)
 
     def test_resumes_from_the_last_successful_complete_hour(self) -> None:
         now = dt.datetime(2026, 8, 29, 7, 23, tzinfo=dt.timezone.utc)

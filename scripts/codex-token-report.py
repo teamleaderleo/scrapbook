@@ -13,6 +13,7 @@ import hashlib
 import hmac
 import json
 import os
+import stat
 import sys
 import urllib.error
 import urllib.parse
@@ -31,6 +32,8 @@ TOKEN_FIELDS = (
 )
 FORK_REPLAY_SECONDS = 2
 MAX_HOURS = 720
+MAX_CONFIG_BYTES = 16_384
+CONFIG_KEYS = frozenset({"ingest_url", "ingest_secret"})
 
 
 class RejectRedirects(urllib.request.HTTPRedirectHandler):
@@ -255,6 +258,55 @@ def validate_ingest_url(value: str) -> str:
     raise ValueError("The ingest URL must use HTTPS, except for loopback testing")
 
 
+def load_credentials(config_file: Path | None) -> tuple[str, str]:
+    environment_url = os.environ.get("CODEX_TOKEN_INGEST_URL", "").strip()
+    environment_secret = os.environ.get("MACHINE_HEALTH_INGEST_SECRET", "").strip()
+    if config_file is None:
+        if bool(environment_url) != bool(environment_secret):
+            raise ValueError("Both token ingest environment variables are required")
+        if environment_url:
+            environment_url = validate_ingest_url(environment_url)
+        return environment_url, environment_secret
+    if environment_url or environment_secret:
+        raise ValueError("Do not combine a credential file with ingest environment variables")
+
+    try:
+        descriptor = os.open(
+            config_file,
+            os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK,
+        )
+        with os.fdopen(descriptor, "rb") as credential_stream:
+            metadata = os.fstat(credential_stream.fileno())
+            if not stat.S_ISREG(metadata.st_mode):
+                raise ValueError("The credential file must be a regular file")
+            if metadata.st_uid != os.getuid():
+                raise ValueError("The credential file must be owned by the current user")
+            if metadata.st_nlink != 1:
+                raise ValueError("The credential file must have one link")
+            if stat.S_IMODE(metadata.st_mode) & 0o077:
+                raise ValueError(
+                    "The credential file must not be accessible by group or other"
+                )
+            encoded_document = credential_stream.read(MAX_CONFIG_BYTES + 1)
+    except OSError as error:
+        raise ValueError("The credential file is unavailable") from error
+    if len(encoded_document) > MAX_CONFIG_BYTES:
+        raise ValueError("The credential file is too large")
+    try:
+        document = json.loads(encoded_document.decode("utf-8"))
+    except (UnicodeError, json.JSONDecodeError) as error:
+        raise ValueError("The credential file is invalid") from error
+    if not isinstance(document, dict) or set(document) != CONFIG_KEYS:
+        raise ValueError("The credential file fields are invalid")
+    url = document.get("ingest_url")
+    secret = document.get("ingest_secret")
+    if not isinstance(url, str) or not url.strip():
+        raise ValueError("The credential file ingest URL is invalid")
+    if not isinstance(secret, str) or not secret.strip():
+        raise ValueError("The credential file ingest secret is invalid")
+    return validate_ingest_url(url.strip()), secret.strip()
+
+
 def send(payload: dict[str, Any], url: str, secret: str) -> None:
     body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
     request = urllib.request.Request(
@@ -287,6 +339,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--hours", type=int)
     parser.add_argument("--session-directory", type=Path)
+    parser.add_argument("--config-file", type=Path)
     parser.add_argument(
         "--state-file",
         type=Path,
@@ -308,9 +361,8 @@ def main() -> int:
         if args.hours is not None
         else hours_since_success(now, args.state_file)
     )
-    url = os.environ.get("CODEX_TOKEN_INGEST_URL", "").strip()
-    secret = os.environ.get("MACHINE_HEALTH_INGEST_SECRET", "").strip()
     try:
+        url, secret = load_credentials(args.config_file)
         payload = report(
             args.source,
             now,

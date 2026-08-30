@@ -230,8 +230,64 @@ MACHINE_HEALTH_INGEST_SECRET='<ingest secret>' \
 python3 scripts/codex-token-report.py --source macbook-air
 ```
 
-No Mac LaunchAgent is installed by this change. An approved rollout can schedule that command hourly
-and at login; sleep or offline gaps are recovered from the success cursor.
+For launchd, keep those two values in one current-user-owned mode-`0600` JSON file instead of
+putting the bearer secret in a plist:
+
+```json
+{
+  "ingest_url": "https://teamleaderleo.com/api/machine-health/codex-usage/ingest",
+  "ingest_secret": "<ingest secret>"
+}
+```
+
+Pass it with `--config-file`. The reporter rejects symlinks, non-regular files, another owner's
+file, group/other permissions, files above 16 KiB, unknown or missing fields, an unsafe URL, and any
+mixture of the file with ingest environment variables. Supplying only one environment variable is
+also an error instead of a local-print fallback.
+
+## Proposed Mac LaunchAgent — not installed
+
+`scripts/codex-token-launchd.py` renders the plist to standard output. It contains paths and fixed
+arguments, never the ingest secret. The generated agent runs once at login and at minute 17 of each
+hour as a background, low-I/O process. Missed sleep/offline hours come from the success cursor on
+the next run.
+
+An approved installation can use stable copies under Application Support:
+
+```bash
+support="$HOME/Library/Application Support/Scrapbook"
+agent="$HOME/Library/LaunchAgents/com.teamleaderleo.scrapbook-codex-token.plist"
+install -d -m 700 "$support"
+mkdir -p "$HOME/Library/LaunchAgents"
+install -m 600 scripts/codex-token-report.py "$support/codex-token-report.py"
+python3 scripts/codex-token-launchd.py \
+  --python "$(command -v python3)" \
+  --reporter "$support/codex-token-report.py" \
+  --config "$support/codex-token.json" \
+  --state "$support/codex-token-state.json" > "$agent"
+plutil -lint "$agent"
+```
+
+Create `codex-token.json` separately with mode `0600`, then run one explicit backfill before loading
+the validated plist:
+
+```bash
+python3 "$support/codex-token-report.py" \
+  --source macbook-air \
+  --config-file "$support/codex-token.json" \
+  --state-file "$support/codex-token-state.json" \
+  --hours 720
+launchctl bootstrap "gui/$(id -u)" "$agent"
+launchctl kickstart "gui/$(id -u)/com.teamleaderleo.scrapbook-codex-token"
+```
+
+A successful scheduled run writes no stdout or stderr; dashboard source-hour coverage and the
+local success cursor expose freshness without an ever-growing log file. Run the reporter manually
+to diagnose a failed post. Rollback begins with
+`launchctl bootout "gui/$(id -u)" "$agent"`, then removes the plist, stable script copy, credential
+file and success cursor.
+
+No Mac file or LaunchAgent is installed by this change.
 
 The Codex-state section expects `~/Projects/leo-workspace/tools/codex_state_inventory.py`. Missing, slow, malformed, privileged, mutating, or cleanup-authoritative output becomes unavailable. The collector allows 12 seconds for this read and rejects output above 64 KiB.
 
