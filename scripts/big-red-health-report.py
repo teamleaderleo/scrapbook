@@ -705,25 +705,32 @@ def process_tags(
         "subagent_memory_current_bytes",
         "unknown_jobs",
     )
-    unavailable = {
-        "source": "unavailable",
-        **dict.fromkeys(fields),
-    }
+    def unavailable(reason: str) -> dict[str, Any]:
+        return {
+            "source": "unavailable",
+            "availability_reason": reason,
+            **dict.fromkeys(fields),
+        }
+
+    if not helper.is_file():
+        return unavailable("helper-missing")
     code, output = run(sys.executable, str(helper), "status")
     if code != 0 or not output:
-        return unavailable
+        return unavailable("helper-failed")
     try:
         status = json.loads(output)
     except (json.JSONDecodeError, TypeError):
-        return unavailable
+        return unavailable("invalid-receipt")
     if not isinstance(status, dict) or status.get("source") != "codex-route-hook-v1":
-        return unavailable
+        return unavailable("schema-mismatch")
+    if any(field not in status for field in fields):
+        return unavailable("schema-mismatch")
 
     values: dict[str, int] = {}
     for field in fields:
         value = status.get(field)
         if isinstance(value, bool) or not isinstance(value, int) or value < 0:
-            return unavailable
+            return unavailable("invalid-receipt")
         values[field] = value
 
     if (
@@ -739,7 +746,7 @@ def process_tags(
         + values["subagent_memory_current_bytes"]
         != values["tagged_memory_current_bytes"]
     ):
-        return unavailable
+        return unavailable("invalid-receipt")
     return {"source": "codex-route-hook-v1", **values}
 
 
@@ -1699,6 +1706,25 @@ def is_codex_control_process(row: tuple[int, str, str, int]) -> bool:
     return desktop_root or app_server
 
 
+def codex_runtime_class(
+    row: tuple[int, str, str, int],
+) -> str:
+    if is_codex_control_process(row):
+        return "control"
+    _, comm, cmdline, _ = row
+    if comm in {"node_repl", "codex-code-mode"}:
+        return "code_mode"
+    tokens = cmdline.split()
+    if comm in {"node", "mainthread"} and any(
+        token in {"./server.mjs", "./mcp/server.mjs", "./mcp/server.cjs"}
+        or token.endswith("/mcp/server.mjs")
+        or token.endswith("/mcp/server.cjs")
+        for token in tokens
+    ):
+        return "mcp"
+    return "other"
+
+
 def process_pss_swap(
     pid: int,
     proc_root: Path = Path("/proc"),
@@ -1755,20 +1781,17 @@ def codex_runtime(
         runtime_pids = expanded
     runtime_pids.discard(os.getpid() if own_pid is None else own_pid)
 
-    code_mode_hosts = 0
-    mcp_servers = 0
+    class_names = ("control", "code_mode", "mcp", "other")
+    class_counts = {name: 0 for name in class_names}
+    class_rss_bytes = {name: 0 for name in class_names}
+    class_pss_bytes = {name: 0 for name in class_names}
+    class_swap_bytes = {name: 0 for name in class_names}
+    process_classes: dict[int, str] = {}
     for pid in runtime_pids:
-        _, comm, cmdline, _ = rows[pid]
-        if comm in {"node_repl", "codex-code-mode"}:
-            code_mode_hosts += 1
-        tokens = cmdline.split()
-        if comm in {"node", "mainthread"} and any(
-            token in {"./server.mjs", "./mcp/server.mjs", "./mcp/server.cjs"}
-            or token.endswith("/mcp/server.mjs")
-            or token.endswith("/mcp/server.cjs")
-            for token in tokens
-        ):
-            mcp_servers += 1
+        process_class = codex_runtime_class(rows[pid])
+        process_classes[pid] = process_class
+        class_counts[process_class] += 1
+        class_rss_bytes[process_class] += rows[pid][3]
 
     pss_bytes = 0
     swap_bytes = 0
@@ -1779,19 +1802,34 @@ def codex_runtime(
         except (FileNotFoundError, OSError, UnicodeError, ValueError):
             memory_errors += 1
             continue
+        process_class = process_classes[pid]
         pss_bytes += pss
         swap_bytes += swap
+        class_pss_bytes[process_class] += pss
+        class_swap_bytes[process_class] += swap
+
+    memory_complete = memory_errors == 0
+    class_receipt = {
+        name: {
+            "processes": class_counts[name],
+            "rss_bytes": class_rss_bytes[name],
+            "pss_bytes": class_pss_bytes[name] if memory_complete else None,
+            "swap_bytes": class_swap_bytes[name] if memory_complete else None,
+        }
+        for name in class_names
+    }
 
     return {
         "source": "codex-runtime-tree-v1",
         "control_roots": len(roots),
         "processes": len(runtime_pids),
-        "code_mode_hosts": code_mode_hosts,
-        "mcp_servers": mcp_servers,
+        "code_mode_hosts": class_counts["code_mode"],
+        "mcp_servers": class_counts["mcp"],
         "rss_bytes": sum(rows[pid][3] for pid in runtime_pids),
-        "pss_bytes": pss_bytes if memory_errors == 0 else None,
-        "swap_bytes": swap_bytes if memory_errors == 0 else None,
+        "pss_bytes": pss_bytes if memory_complete else None,
+        "swap_bytes": swap_bytes if memory_complete else None,
         "memory_errors": memory_errors,
+        "process_classes": class_receipt,
     }
 
 

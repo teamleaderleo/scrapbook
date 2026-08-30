@@ -8,6 +8,12 @@ const nonnegative = z.number().finite().min(0);
 const nullableNonnegative = nonnegative.nullable();
 const nonnegativeInteger = z.number().int().min(0);
 const codexCounter = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
+const codexRuntimeClassSchema = z.object({
+  processes: nonnegativeInteger,
+  rss_bytes: nonnegativeInteger,
+  pss_bytes: nonnegativeInteger.nullable(),
+  swap_bytes: nonnegativeInteger.nullable(),
+});
 export const codexTokenSourceSchema = z.enum(['big-red', 'macbook-air']);
 export const codexUsageWindowSchema = z
   .object({
@@ -388,6 +394,14 @@ export const machineHealthPayloadSchema = z.object({
       }),
       z.object({
         source: z.literal('unavailable'),
+        availability_reason: z
+          .enum([
+            'helper-missing',
+            'helper-failed',
+            'schema-mismatch',
+            'invalid-receipt',
+          ])
+          .optional(),
         active_routes: z.null(),
         active_main_roots: z.null(),
         active_subagents: z.null(),
@@ -584,6 +598,62 @@ export const machineHealthPayloadSchema = z.object({
         pss_bytes: nonnegativeInteger.nullable(),
         swap_bytes: nonnegativeInteger.nullable(),
         memory_errors: nonnegativeInteger,
+        process_classes: z
+          .object({
+            control: codexRuntimeClassSchema,
+            code_mode: codexRuntimeClassSchema,
+            mcp: codexRuntimeClassSchema,
+            other: codexRuntimeClassSchema,
+          })
+          .optional(),
+      })
+      .superRefine((runtime, context) => {
+        if (
+          (runtime.memory_errors === 0) !== (runtime.pss_bytes !== null) ||
+          (runtime.memory_errors === 0) !== (runtime.swap_bytes !== null)
+        )
+          context.addIssue({
+            code: 'custom',
+            message: 'Codex runtime memory completeness is inconsistent',
+          });
+        if (!runtime.process_classes) return;
+        const classes = Object.values(runtime.process_classes);
+        if (
+          classes.reduce((total, value) => total + value.processes, 0) !==
+            runtime.processes ||
+          classes.reduce((total, value) => total + value.rss_bytes, 0) !==
+            runtime.rss_bytes ||
+          runtime.process_classes.control.processes < runtime.control_roots ||
+          runtime.process_classes.code_mode.processes !==
+            runtime.code_mode_hosts ||
+          runtime.process_classes.mcp.processes !== runtime.mcp_servers
+        )
+          context.addIssue({
+            code: 'custom',
+            message: 'Codex runtime process-class totals are inconsistent',
+          });
+
+        for (const field of ['pss_bytes', 'swap_bytes'] as const) {
+          const total = runtime[field];
+          const values = classes.map(value => value[field]);
+          if (total === null) {
+            if (values.some(value => value !== null))
+              context.addIssue({
+                code: 'custom',
+                message: `Codex runtime ${field} classes must fail closed`,
+              });
+          } else if (
+            values.some(value => value === null) ||
+            values.reduce<number>(
+              (sum, value) => sum + (value === null ? 0 : value),
+              0
+            ) !== total
+          )
+            context.addIssue({
+              code: 'custom',
+              message: `Codex runtime ${field} class totals are inconsistent`,
+            });
+        }
       })
       .optional(),
     unexpected_dev_listeners: nonnegativeInteger,
@@ -666,6 +736,8 @@ export type MachineHealthSample = {
   browserRoots: number;
   browserRssBytes: number;
   codexWorkers: number;
+  codexRuntimeProcesses: number | null;
+  codexRuntimePssBytes: number | null;
   failedUnits: number;
   unexpectedDevListeners: number;
   rdpConnections: number;
@@ -1383,6 +1455,12 @@ export async function readMachineHealth(
           parsedSample.data.codex_state?.source === 'codex-state-inventory-v1'
             ? parsedSample.data.codex_state
             : null;
+        const codexRuntime =
+          parsedSample.success &&
+          parsedSample.data.hygiene.codex_runtime?.source ===
+            'codex-runtime-tree-v1'
+            ? parsedSample.data.hygiene.codex_runtime
+            : null;
         const remoteTransport =
           parsedSample.success &&
           parsedSample.data.network.remote_client?.source === 'tailscale-status'
@@ -1424,6 +1502,8 @@ export async function readMachineHealth(
           browserRoots: toNumber(row.browser_roots),
           browserRssBytes: toNumber(row.browser_rss_bytes),
           codexWorkers: toNumber(row.codex_workers),
+          codexRuntimeProcesses: codexRuntime?.processes ?? null,
+          codexRuntimePssBytes: codexRuntime?.pss_bytes ?? null,
           failedUnits: toNumber(row.failed_units),
           unexpectedDevListeners: toNumber(row.unexpected_dev_listeners),
           rdpConnections: toNumber(row.rdp_connections),

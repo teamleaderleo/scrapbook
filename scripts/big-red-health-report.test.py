@@ -459,7 +459,10 @@ class ProcessTagsTest(unittest.TestCase):
             "unknown_jobs": 0,
             "route_id": "must-not-escape",
         }
-        with patch.object(REPORT, "run", return_value=(0, json.dumps(status))):
+        with (
+            patch.object(Path, "is_file", return_value=True),
+            patch.object(REPORT, "run", return_value=(0, json.dumps(status))),
+        ):
             tags = REPORT.process_tags(Path("/private/helper"))
 
         self.assertEqual(tags["source"], "codex-route-hook-v1")
@@ -491,23 +494,51 @@ class ProcessTagsTest(unittest.TestCase):
             "unknown_jobs": 0,
         }
         responses = (
-            (127, ""),
-            (0, "not json"),
-            (0, json.dumps({**valid, "source": "wrong"})),
-            (0, json.dumps({**valid, "active_routes": True})),
-            (0, json.dumps({**valid, "active_jobs": 2})),
-            (0, json.dumps({**valid, "tagged_processes": 2})),
+            ((127, ""), "helper-failed"),
+            ((0, "not json"), "invalid-receipt"),
+            ((0, json.dumps({**valid, "source": "wrong"})), "schema-mismatch"),
             (
-                0,
-                json.dumps({**valid, "tagged_memory_current_bytes": 2}),
+                (
+                    0,
+                    json.dumps(
+                        {
+                            key: value
+                            for key, value in valid.items()
+                            if key != "main_root_jobs"
+                        }
+                    ),
+                ),
+                "schema-mismatch",
+            ),
+            ((0, json.dumps({**valid, "active_routes": True})), "invalid-receipt"),
+            ((0, json.dumps({**valid, "active_jobs": 2})), "invalid-receipt"),
+            ((0, json.dumps({**valid, "tagged_processes": 2})), "invalid-receipt"),
+            (
+                (0, json.dumps({**valid, "tagged_memory_current_bytes": 2})),
+                "invalid-receipt",
             ),
         )
-        for response in responses:
+        for response, reason in responses:
             with self.subTest(response=response):
-                with patch.object(REPORT, "run", return_value=response):
+                with (
+                    patch.object(Path, "is_file", return_value=True),
+                    patch.object(REPORT, "run", return_value=response),
+                ):
                     tags = REPORT.process_tags(Path("/private/helper"))
                 self.assertEqual(tags["source"], "unavailable")
+                self.assertEqual(tags["availability_reason"], reason)
                 self.assertIsNone(tags["active_routes"])
+
+    def test_marks_an_absent_process_tag_helper_without_running_it(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            helper = Path(temporary) / "missing.py"
+            with patch.object(REPORT, "run") as runner:
+                tags = REPORT.process_tags(helper)
+
+        self.assertEqual(tags["source"], "unavailable")
+        self.assertEqual(tags["availability_reason"], "helper-missing")
+        self.assertIsNone(tags["active_routes"])
+        runner.assert_not_called()
 
 
 class ProcessCoverageTest(unittest.TestCase):
@@ -1253,6 +1284,32 @@ class CodexRuntimeTest(unittest.TestCase):
                 "pss_bytes": 87 * mib,
                 "swap_bytes": 174 * mib,
                 "memory_errors": 0,
+                "process_classes": {
+                    "control": {
+                        "processes": 3,
+                        "rss_bytes": 3 * mib,
+                        "pss_bytes": 41 * mib,
+                        "swap_bytes": 82 * mib,
+                    },
+                    "code_mode": {
+                        "processes": 1,
+                        "rss_bytes": mib,
+                        "pss_bytes": 12 * mib,
+                        "swap_bytes": 24 * mib,
+                    },
+                    "mcp": {
+                        "processes": 2,
+                        "rss_bytes": 2 * mib,
+                        "pss_bytes": 34 * mib,
+                        "swap_bytes": 68 * mib,
+                    },
+                    "other": {
+                        "processes": 0,
+                        "rss_bytes": 0,
+                        "pss_bytes": 0,
+                        "swap_bytes": 0,
+                    },
+                },
             },
         )
         serialized = json.dumps(runtime)
@@ -1277,6 +1334,9 @@ class CodexRuntimeTest(unittest.TestCase):
         self.assertEqual(runtime["memory_errors"], 1)
         self.assertIsNone(runtime["pss_bytes"])
         self.assertIsNone(runtime["swap_bytes"])
+        for process_class in runtime["process_classes"].values():
+            self.assertIsNone(process_class["pss_bytes"])
+            self.assertIsNone(process_class["swap_bytes"])
 
     def test_reads_only_bounded_pss_and_swap_totals(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -1327,6 +1387,15 @@ class HygieneTest(unittest.TestCase):
                 "pss_bytes": 0,
                 "swap_bytes": 0,
                 "memory_errors": 0,
+                "process_classes": {
+                    name: {
+                        "processes": 0,
+                        "rss_bytes": 0,
+                        "pss_bytes": 0,
+                        "swap_bytes": 0,
+                    }
+                    for name in ("control", "code_mode", "mcp", "other")
+                },
             },
         )
 

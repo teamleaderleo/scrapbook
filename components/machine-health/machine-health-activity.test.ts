@@ -39,6 +39,8 @@ function sample(
     browserRoots: 1,
     browserRssBytes: 1_073_741_824,
     codexWorkers: 2,
+    codexRuntimeProcesses: null,
+    codexRuntimePssBytes: null,
     failedUnits: 0,
     unexpectedDevListeners: 0,
     rdpConnections: 0,
@@ -512,6 +514,32 @@ describe('machine health activity bins', () => {
     expect(bins.at(-2)).toMatchObject({
       buildStateGib: null,
       codexStateMib: null,
+    });
+  });
+
+  it('keeps Codex runtime PSS and process highs without mixing RSS fallback', () => {
+    const bins = buildActivityBins(
+      [
+        sample('2026-08-29T06:05:00.000Z', {
+          codexRuntimeProcesses: 70,
+          codexRuntimePssBytes: 1_024 ** 3,
+        }),
+        sample('2026-08-29T06:25:00.000Z', {
+          codexRuntimeProcesses: 83,
+          codexRuntimePssBytes: 2 * 1_024 ** 3,
+        }),
+      ],
+      '24h',
+      now
+    );
+
+    expect(bins.at(-1)).toMatchObject({
+      codexRuntimeProcesses: 83,
+      codexRuntimePssMib: 2048,
+    });
+    expect(bins.at(-2)).toMatchObject({
+      codexRuntimeProcesses: null,
+      codexRuntimePssMib: null,
     });
   });
 });

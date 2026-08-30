@@ -35,6 +35,11 @@ aggregate memory, and the active RDP connection count stay coarse. The current w
 splits hook-owned execution into chat roots, main-root jobs, subagent jobs, processes, and memory. It
 keeps opaque route and agent IDs out of the snapshot.
 
+Codex runtime PSS is also a historical gauge. Each hour or day keeps the highest complete
+proportional-memory receipt and runtime process count observed in that bin, then compares the range
+high with the same-length prior range. A failed proportional-memory read stays empty rather than
+mixing RSS into the PSS series. The current card can still fall back to RSS and labels that fallback.
+
 Each stored row also carries its accounting source, interval count, window length, and uptime. The
 activity charts mark the exact bins containing partial coverage, point-sample fallbacks and reboot
 discontinuities with distinct line/shape cues that do not rely on color. The footer keeps the range
@@ -55,6 +60,12 @@ The ingestion schema is an allowlist and strips unknown keys at every object lev
 The collector parses local command output and emits only enum values, booleans, percentages, byte totals, and aggregate counts. Its legacy Codex count observes code-mode worker leaves while excluding persistent desktop and remote-control daemons. The route view calls the v2 ownership tool's aggregate `status` contract; the process-tag view calls the hook adapter's aggregate `status` contract. Scrapbook does not repeat either cgroup classifier or read route receipts directly. It checks the root/job/process/memory sums before accepting a tag snapshot. Malformed, missing, inconsistent, or version-mismatched status becomes `unavailable` instead of a guessed zero. Browser RSS sums the browser process trees and is a trend signal rather than unique physical memory because shared pages can appear in more than one process. RDP visibility counts established local connections without emitting the peer or endpoint.
 
 Whole-machine swap occupancy comes from `SwapTotal` and `SwapFree` in `/proc/meminfo` and is a point-in-time capacity gauge. The Memory card keeps it beside RAM use and PSI rather than treating occupied swap as active contention. Older stored snapshots show the swap value as unavailable.
+
+An unavailable process-tag receipt carries one bounded local diagnosis: `helper-missing`,
+`helper-failed`, `schema-mismatch`, or `invalid-receipt`. The card renders that reason instead of
+treating absent or old helper output as zero tagged work. Older stored reports without a reason
+remain valid. The report never emits the helper path, stderr, command, unit name, route identity,
+process identity, or raw receipt.
 
 Token reports never send session IDs. Each reporter HMACs the local session ID with the shared
 ingest secret and sends a truncated 128-bit fingerprint used only for collision detection. A retry
@@ -113,6 +124,19 @@ The first live receipt found two control roots, 69 processes, 13 code hosts and 
 2,318,140,416 proportional bytes, 3,706,445,824 RSS bytes and 1,533,861,888 swapped bytes with zero
 memory-read errors while whole-machine memory use was 10.92%. That supports visibility, not cleanup;
 the route registry simultaneously reported zero owned residue.
+
+An additive class receipt splits the already-admitted runtime tree into control processes,
+code-mode hosts, MCP servers and other descendants. It emits only process, RSS, PSS and swap totals
+for those four fixed buckets. Counts and RSS always reconcile to the runtime total. One failed
+`smaps_rollup` read withholds every class PSS and swap value; the consumer rejects partial or
+inconsistent sums. Historical reports without the optional class object remain valid.
+
+A bounded live verification made the distinction useful. With the route-owned Next development
+server and browser verifier open, the tree held 94 processes and 3,142,606,848 PSS bytes; the
+`other` bucket alone held 1,636,202,496 bytes. Closing both reduced the next complete receipt to 83
+processes and 2,025,950,208 PSS bytes, with `other` at 506,767,360 bytes. The 11-process /
+1,116,656,640-byte drop is evidence that the fixed class catches temporary route tooling. It does
+not identify a chat, declare the remaining processes idle, or authorize signaling them.
 
 The 24-hour reliability readout counts structured systemd core-dump exits and automatic restart
 events. It partitions both totals into the GNOME desktop-search indexer and all other services,

@@ -123,6 +123,41 @@ describe('machine health contract', () => {
     expect(parsed).toEqual(healthyMachineReport);
   });
 
+  it('rejects inconsistent or partially disclosed runtime class memory', () => {
+    const runtime = healthyMachineReport.hygiene.codex_runtime!;
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        hygiene: {
+          ...healthyMachineReport.hygiene,
+          codex_runtime: {
+            ...runtime,
+            process_classes: {
+              ...runtime.process_classes!,
+              control: {
+                ...runtime.process_classes!.control,
+                processes: runtime.process_classes!.control.processes + 1,
+              },
+            },
+          },
+        },
+      }).success
+    ).toBe(false);
+
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        hygiene: {
+          ...healthyMachineReport.hygiene,
+          codex_runtime: {
+            ...runtime,
+            pss_bytes: null,
+          },
+        },
+      }).success
+    ).toBe(false);
+  });
+
   it('defaults new hygiene counters when reading a pre-extension snapshot', () => {
     const {
       browser_rss_bytes: _browserRssBytes,
@@ -348,6 +383,42 @@ describe('machine health contract', () => {
     const parsed = machineHealthPayloadSchema.parse(olderReport);
 
     expect(parsed.process_tags).toBeUndefined();
+  });
+
+  it('bounds process-tag unavailability without breaking older snapshots', () => {
+    const nullFields = Object.fromEntries(
+      Object.keys(healthyMachineReport.process_tags ?? {}).map(key => [
+        key,
+        null,
+      ])
+    );
+    const unavailable = {
+      ...nullFields,
+      source: 'unavailable',
+      availability_reason: 'helper-missing',
+    };
+
+    expect(
+      machineHealthPayloadSchema.parse({
+        ...healthyMachineReport,
+        process_tags: unavailable,
+      }).process_tags
+    ).toMatchObject({
+      source: 'unavailable',
+      availability_reason: 'helper-missing',
+    });
+    expect(
+      machineHealthPayloadSchema.parse({
+        ...healthyMachineReport,
+        process_tags: { ...unavailable, availability_reason: undefined },
+      }).process_tags
+    ).toMatchObject({ source: 'unavailable' });
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        process_tags: { ...unavailable, availability_reason: 'private-path' },
+      }).success
+    ).toBe(false);
   });
 
   it('accepts a snapshot from before Codex state inventory was added', () => {

@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { createElement } from 'react';
 import { describe, expect, it } from 'vitest';
 
+import { machineHealthPayloadSchema } from '@/app/lib/machine-health-store';
 import { healthyMachineReport } from '@/tests/fixtures/machine-health';
 import { MachineHealthDashboard } from './machine-health-dashboard';
 
@@ -35,6 +36,8 @@ const samples = Array.from({ length: 4 }, (_, index) => ({
   browserRoots: 1,
   browserRssBytes: 2_147_483_648,
   codexWorkers: 2,
+  codexRuntimeProcesses: 83,
+  codexRuntimePssBytes: 2_025_950_208,
   failedUnits: 0,
   unexpectedDevListeners: 0,
   rdpConnections: 0,
@@ -109,6 +112,7 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Activity');
     expect(html).toContain('Build state high');
     expect(html).toContain('Codex state high');
+    expect(html).toContain('Codex runtime PSS high');
     expect(html).toContain('Codex');
     expect(html).toContain(
       '10 complete hours · 1h recorded · Big Red 1h · MacBook Air 1h'
@@ -155,12 +159,14 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Codex runtime');
     expect(html).toContain('2.2 GiB');
     expect(html).toContain('69 proc · 13 code · 36 MCP · 1.4 GiB swap');
+    expect(html).toContain('app 936 MiB · code 500 MiB · MCP 800 MiB · PSS');
     expect(html).toContain('3 jobs · 17 proc · 512 MiB');
     expect(html).toContain(
       '384 MiB memory · 192 MiB job peak · 2.5 s CPU · I/O —'
     );
     expect(html).toContain('I/O 0/3');
     expect(html).toContain('Agent memory high');
+    expect(html).toContain('Runtime-process high 83');
     expect(html).toContain('Tagged-process high');
     expect(html).toContain('Search indexer · 24h:');
     expect(html).toContain('Other services · 24h:');
@@ -242,6 +248,40 @@ describe('machine health dashboard', () => {
         )
       );
     }
+  });
+
+  it('falls back to runtime-class RSS when a PSS read is incomplete', () => {
+    const runtime = report.payload.hygiene.codex_runtime!;
+    const processClasses = runtime.process_classes!;
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report: {
+          ...report,
+          payload: {
+            ...report.payload,
+            hygiene: {
+              ...report.payload.hygiene,
+              codex_runtime: {
+                ...runtime,
+                pss_bytes: null,
+                swap_bytes: null,
+                memory_errors: 1,
+                process_classes: Object.fromEntries(
+                  Object.entries(processClasses).map(([name, value]) => [
+                    name,
+                    { ...value, pss_bytes: null, swap_bytes: null },
+                  ])
+                ) as typeof processClasses,
+              },
+            },
+          },
+        },
+        samples,
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('app 1.6 GiB · code 700 MiB · MCP 1.2 GiB · RSS');
   });
 
   it('keeps hot-run completeness visible when build-size inventory is unavailable', () => {
@@ -410,6 +450,34 @@ describe('machine health dashboard', () => {
     expect(html).toContain('17 proc · 512 MiB memory');
     expect(html).not.toContain('agent_id');
     expect(html).not.toContain('route_id');
+  });
+
+  it('shows why Codex process tags are unavailable', () => {
+    const unavailable = Object.fromEntries(
+      Object.keys(report.payload.process_tags ?? {}).map(key => [key, null])
+    );
+    const payload = machineHealthPayloadSchema.parse({
+      ...report.payload,
+      process_tags: {
+        ...unavailable,
+        source: 'unavailable',
+        availability_reason: 'schema-mismatch',
+      },
+    });
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report: {
+          ...report,
+          payload,
+        },
+        samples,
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('Codex tags');
+    expect(html).toContain('schema mismatch');
+    expect(html).not.toContain('codex_route_hook.py');
   });
 
   it('surfaces recovered crashes even when failed units returned to zero', () => {

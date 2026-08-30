@@ -156,6 +156,18 @@ export function MachineHealthDashboard({
     payload.process_tags?.source === 'codex-route-hook-v1'
       ? payload.process_tags
       : null;
+  const processTagsUnavailableNote =
+    payload.process_tags?.source === 'unavailable'
+      ? payload.process_tags.availability_reason === 'helper-missing'
+        ? 'helper missing'
+        : payload.process_tags.availability_reason === 'helper-failed'
+          ? 'helper failed'
+          : payload.process_tags.availability_reason === 'schema-mismatch'
+            ? 'schema mismatch'
+            : payload.process_tags.availability_reason === 'invalid-receipt'
+              ? 'receipt invalid'
+              : 'unavailable'
+      : 'unavailable';
   const desktop =
     payload.desktop?.source === 'gnome-polish-live-v2' ? payload.desktop : null;
   const panel =
@@ -294,6 +306,24 @@ export function MachineHealthDashboard({
         .filter(Boolean)
         .join(' · ')
     : 'unavailable';
+  const runtimeClasses = codexRuntime?.process_classes ?? null;
+  const runtimeClassNote = runtimeClasses
+    ? (() => {
+        const values = Object.values(runtimeClasses);
+        const memoryField = values.every(value => value.pss_bytes !== null)
+          ? ('pss_bytes' as const)
+          : ('rss_bytes' as const);
+        const appBytes =
+          runtimeClasses.control[memoryField]! +
+          runtimeClasses.other[memoryField]!;
+        return [
+          `app ${formatMemory(appBytes)}`,
+          `code ${formatMemory(runtimeClasses.code_mode[memoryField]!)}`,
+          `MCP ${formatMemory(runtimeClasses.mcp[memoryField]!)}`,
+          memoryField === 'pss_bytes' ? 'PSS' : 'RSS',
+        ].join(' · ');
+      })()
+    : null;
   const processCoverageValue = processCoverage
     ? `${processCoverage.scoped_processes} / ${processCoverage.discoverable_processes}`
     : '—';
@@ -316,7 +346,7 @@ export function MachineHealthDashboard({
         `${processTags.active_subagents} agent${processTags.active_subagents === 1 ? '' : 's'}`,
         `${processTags.active_jobs} jobs`,
       ].join(' · ')
-    : 'unavailable';
+    : processTagsUnavailableNote;
   const processTagsResourceNote = processTags
     ? [
         `${processTags.tagged_processes} proc`,
@@ -738,6 +768,11 @@ export function MachineHealthDashboard({
               <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
                 {codexRuntimeNote}
               </dd>
+              {runtimeClassNote ? (
+                <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
+                  {runtimeClassNote}
+                </dd>
+              ) : null}
             </div>
             <div>
               <dt className="opacity-55 text-xs">Agent routes</dt>
