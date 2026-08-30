@@ -35,6 +35,11 @@ aggregate memory, and the active RDP connection count stay coarse. The current w
 splits hook-owned execution into chat roots, main-root jobs, subagent jobs, processes, and memory. It
 keeps opaque route and agent IDs out of the snapshot.
 
+Codex runtime PSS is also a historical gauge. Each hour or day keeps the highest complete
+proportional-memory receipt and runtime process count observed in that bin, then compares the range
+high with the same-length prior range. A failed proportional-memory read stays empty rather than
+mixing RSS into the PSS series. The current card can still fall back to RSS and labels that fallback.
+
 Each stored row also carries its accounting source, interval count, window length, and uptime. The
 activity charts mark the exact bins containing partial coverage, point-sample fallbacks and reboot
 discontinuities with distinct line/shape cues that do not rely on color. The footer keeps the range

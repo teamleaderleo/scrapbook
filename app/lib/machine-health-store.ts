@@ -728,6 +728,8 @@ export type MachineHealthSample = {
   browserRoots: number;
   browserRssBytes: number;
   codexWorkers: number;
+  codexRuntimeProcesses: number | null;
+  codexRuntimePssBytes: number | null;
   failedUnits: number;
   unexpectedDevListeners: number;
   rdpConnections: number;
@@ -1445,6 +1447,12 @@ export async function readMachineHealth(
           parsedSample.data.codex_state?.source === 'codex-state-inventory-v1'
             ? parsedSample.data.codex_state
             : null;
+        const codexRuntime =
+          parsedSample.success &&
+          parsedSample.data.hygiene.codex_runtime?.source ===
+            'codex-runtime-tree-v1'
+            ? parsedSample.data.hygiene.codex_runtime
+            : null;
         const remoteTransport =
           parsedSample.success &&
           parsedSample.data.network.remote_client?.source === 'tailscale-status'
@@ -1486,6 +1494,8 @@ export async function readMachineHealth(
           browserRoots: toNumber(row.browser_roots),
           browserRssBytes: toNumber(row.browser_rss_bytes),
           codexWorkers: toNumber(row.codex_workers),
+          codexRuntimeProcesses: codexRuntime?.processes ?? null,
+          codexRuntimePssBytes: codexRuntime?.pss_bytes ?? null,
           failedUnits: toNumber(row.failed_units),
           unexpectedDevListeners: toNumber(row.unexpected_dev_listeners),
           rdpConnections: toNumber(row.rdp_connections),

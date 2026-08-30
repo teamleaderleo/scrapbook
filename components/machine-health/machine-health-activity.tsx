@@ -43,6 +43,8 @@ type ActivityBin = {
   buildStateGib: number | null;
   codexStateMib: number | null;
   codexWorkers: number | null;
+  codexRuntimeProcesses: number | null;
+  codexRuntimePssMib: number | null;
   routeTaggedProcesses: number | null;
   routeTaggedMemoryMib: number | null;
   remoteRttMs: number | null;
@@ -221,6 +223,22 @@ export function buildActivityBins(
         included.length === 0
           ? null
           : Math.max(...included.map(sample => sample.codexWorkers)),
+      codexRuntimeProcesses:
+        included.length === 0 ||
+        !included.some(sample => sample.codexRuntimeProcesses !== null)
+          ? null
+          : Math.max(
+              ...included.map(sample => sample.codexRuntimeProcesses ?? 0)
+            ),
+      codexRuntimePssMib:
+        included.length === 0 ||
+        !included.some(sample => sample.codexRuntimePssBytes !== null)
+          ? null
+          : Math.max(
+              ...included.map(
+                sample => (sample.codexRuntimePssBytes ?? 0) / MIB
+              )
+            ),
       routeTaggedProcesses:
         included.length === 0
           ? null
@@ -746,6 +764,10 @@ export function MachineHealthActivity({
   const observedBins = bins.filter(bin => bin.sampleCount > 0).length;
   const browserHigh = Math.max(0, ...bins.map(bin => bin.browserRoots ?? 0));
   const workerHigh = Math.max(0, ...bins.map(bin => bin.codexWorkers ?? 0));
+  const runtimeProcessHigh = Math.max(
+    0,
+    ...bins.map(bin => bin.codexRuntimeProcesses ?? 0)
+  );
   const taggedProcessHigh = Math.max(
     0,
     ...bins.map(bin => bin.routeTaggedProcesses ?? 0)
@@ -866,6 +888,14 @@ export function MachineHealthActivity({
           summary="maximum"
         />
         <ObservationChart
+          label="Codex runtime PSS high"
+          bins={bins}
+          previousBins={previousBins}
+          value={bin => bin.codexRuntimePssMib}
+          unit="MiB"
+          summary="maximum"
+        />
+        <ObservationChart
           label="Agent memory high"
           bins={bins}
           previousBins={previousBins}
@@ -927,6 +957,7 @@ export function MachineHealthActivity({
         </span>
         <span>Browser-root high {browserHigh}</span>
         <span>Codex-worker high {workerHigh}</span>
+        <span>Runtime-process high {runtimeProcessHigh}</span>
         <span>Tagged-process high {taggedProcessHigh}</span>
         <span>Empty bins stay visible</span>
       </div>

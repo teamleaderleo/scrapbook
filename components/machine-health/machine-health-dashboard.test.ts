@@ -35,6 +35,8 @@ const samples = Array.from({ length: 4 }, (_, index) => ({
   browserRoots: 1,
   browserRssBytes: 2_147_483_648,
   codexWorkers: 2,
+  codexRuntimeProcesses: 83,
+  codexRuntimePssBytes: 2_025_950_208,
   failedUnits: 0,
   unexpectedDevListeners: 0,
   rdpConnections: 0,
@@ -109,6 +111,7 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Activity');
     expect(html).toContain('Build state high');
     expect(html).toContain('Codex state high');
+    expect(html).toContain('Codex runtime PSS high');
     expect(html).toContain('Codex');
     expect(html).toContain(
       '10 complete hours · 1h recorded · Big Red 1h · MacBook Air 1h'
@@ -162,6 +165,7 @@ describe('machine health dashboard', () => {
     );
     expect(html).toContain('I/O 0/3');
     expect(html).toContain('Agent memory high');
+    expect(html).toContain('Runtime-process high 83');
     expect(html).toContain('Tagged-process high');
     expect(html).toContain('Search indexer · 24h:');
     expect(html).toContain('Other services · 24h:');
