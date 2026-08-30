@@ -421,7 +421,7 @@ function formatDelta(
   previous: number | null,
   unit: string
 ) {
-  if (current === null || previous === null) return 'no prior comparison';
+  if (current === null || previous === null) return null;
   const delta = current - previous;
   const threshold = unit === 'tokens' ? 1 : 0.005;
   if (Math.abs(delta) < threshold) return 'flat vs prior';
@@ -476,6 +476,32 @@ function formatAxisTime(bin: ActivityBin) {
   }).format(bin.start);
 }
 
+function ChartReadout({
+  value,
+  note,
+  selected,
+}: {
+  value: string;
+  note: string | null;
+  selected: boolean;
+}) {
+  return (
+    <div
+      className="min-h-9 text-right"
+      aria-live="polite"
+      data-chart-readout={selected ? 'selected' : 'summary'}
+    >
+      <p className="font-mono text-xs tabular-nums opacity-70">{value}</p>
+      <p
+        className={`mt-0.5 text-[0.62rem] tabular-nums ${note ? 'opacity-45' : 'opacity-0'}`}
+        aria-hidden={note ? undefined : true}
+      >
+        {note ?? '\u00a0'}
+      </p>
+    </div>
+  );
+}
+
 function ObservationChart({
   label,
   bins,
@@ -484,7 +510,6 @@ function ObservationChart({
   ceiling,
   unit,
   summary = 'average',
-  binDetail,
   segments,
 }: {
   label: string;
@@ -494,7 +519,6 @@ function ObservationChart({
   ceiling?: number;
   unit: string;
   summary?: 'average' | 'maximum' | 'sum';
-  binDetail?: (bin: ActivityBin) => string;
   segments?: {
     label: string;
     className: string;
@@ -514,41 +538,22 @@ function ObservationChart({
   const selectedBin = selectedIndex === null ? null : bins[selectedIndex];
   const selectedValue = selectedIndex === null ? null : values[selectedIndex];
   const selectedMarker = selectedBin ? activityMarkerText(selectedBin) : '';
+  const selected = selectedBin !== null && selectedValue !== null;
+  const displayValue = selected ? selectedValue : currentSummary;
+  const displayNote = selected
+    ? [formatBinTime(selectedBin), selectedMarker].filter(Boolean).join(' · ')
+    : formatDelta(currentSummary, previousSummary, unit);
 
   return (
     <article className="bg-white/55 dark:bg-black/15 rounded-xl border border-black/10 p-4 dark:border-white/10">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-sm font-black">{label}</h3>
-        <div className="text-right">
-          <p className="font-mono text-xs tabular-nums opacity-70">
-            {formatValue(currentSummary, unit)}
-          </p>
-          <p className="opacity-45 mt-0.5 text-[0.62rem] tabular-nums">
-            {formatDelta(currentSummary, previousSummary, unit)}
-          </p>
-        </div>
+        <ChartReadout
+          value={formatValue(displayValue, unit)}
+          note={displayNote}
+          selected={selected}
+        />
       </div>
-      {selectedBin ? (
-        <div
-          className="mt-3 border-y border-black/10 py-2 text-xs dark:border-white/10"
-          role="status"
-          aria-live="polite"
-        >
-          <p className="font-semibold tabular-nums">
-            {formatBinTime(selectedBin)}
-          </p>
-          <p className="mt-0.5 opacity-60">
-            {selectedValue === null
-              ? 'No observation'
-              : formatValue(selectedValue, unit)}
-            {' · '}
-            {binDetail
-              ? binDetail(selectedBin)
-              : `${selectedBin.sampleCount} health snapshot${selectedBin.sampleCount === 1 ? '' : 's'}`}
-            {selectedMarker ? ` · ${selectedMarker}` : ''}
-          </p>
-        </div>
-      ) : null}
       <div
         className="mt-4 flex h-24 items-end gap-px"
         role="group"
@@ -557,18 +562,18 @@ function ObservationChart({
         {values.map((item, index) => {
           const bin = bins[index];
           const markerText = activityMarkerText(bin);
-          const valueText =
-            item === null ? 'No observation' : formatValue(item, unit);
+          const valueText = item === null ? '' : formatValue(item, unit);
           return (
             <button
               key={bin.start}
               type="button"
-              aria-label={`${formatBinTime(bin)}: ${valueText}${markerText ? `; ${markerText}` : ''}`}
+              aria-label={`${formatBinTime(bin)}: ${item === null ? 'empty' : valueText}${markerText ? `; ${markerText}` : ''}`}
               aria-pressed={selectedIndex === index}
+              disabled={item === null}
               onClick={() =>
                 setSelectedIndex(current => (current === index ? null : index))
               }
-              className="group relative flex h-full min-w-0 flex-1 items-end rounded-sm px-px outline-none transition-colors hover:bg-[#a53b34]/10 focus-visible:ring-2 focus-visible:ring-[#a53b34] focus-visible:ring-offset-1 dark:hover:bg-[#e27c72]/10"
+              className="group relative flex h-full min-w-0 flex-1 touch-manipulation items-end rounded-sm px-px outline-none transition-colors [-webkit-tap-highlight-color:transparent] enabled:focus-visible:ring-2 enabled:focus-visible:ring-[#a53b34] enabled:focus-visible:ring-offset-1"
               data-activity-fallback={
                 bin.fallbackCount > 0 ? 'true' : undefined
               }
@@ -576,7 +581,11 @@ function ObservationChart({
                 bin.undercoveredCount > 0 ? 'true' : undefined
               }
               data-activity-reboot={bin.rebootCount > 0 ? 'true' : undefined}
-              title={`${new Date(bin.start).toISOString()}: ${valueText}${markerText ? ` · ${markerText}` : ''}`}
+              title={
+                item === null
+                  ? undefined
+                  : `${new Date(bin.start).toISOString()}: ${valueText}${markerText ? ` · ${markerText}` : ''}`
+              }
             >
               <span
                 aria-hidden="true"
@@ -647,6 +656,9 @@ function ObservationChart({
                 className={`size-2 ${segment.className}`}
               />
               {segment.label}
+              {selected && selectedBin
+                ? ` ${formatValue(segment.value(selectedBin), unit)}`
+                : ''}
             </span>
           ))}
         </div>
@@ -699,36 +711,22 @@ function PanelObservationChart({
   const healthSamples = bins.reduce((total, bin) => total + bin.sampleCount, 0);
   const unknown = healthSamples - observed;
   const selectedBin = selectedIndex === null ? null : bins[selectedIndex];
+  const selected = selectedBin !== null && selectedBin.panelOnPercent !== null;
+  const displayValue = selected ? selectedBin.panelOnPercent : currentShare;
+  const displayNote = selected
+    ? `${formatBinTime(selectedBin)} · ${selectedBin.panelOnCount}/${selectedBin.panelObservedCount} on`
+    : formatDelta(currentShare, previousShare, '%');
 
   return (
     <article className="bg-white/55 dark:bg-black/15 rounded-xl border border-black/10 p-4 dark:border-white/10">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-sm font-black">Panel on samples</h3>
-        <div className="text-right">
-          <p className="font-mono text-xs tabular-nums opacity-70">
-            {formatPanelShare(currentShare)}
-          </p>
-          <p className="opacity-45 mt-0.5 text-[0.62rem] tabular-nums">
-            {formatDelta(currentShare, previousShare, '%')}
-          </p>
-        </div>
+        <ChartReadout
+          value={formatPanelShare(displayValue)}
+          note={displayNote}
+          selected={selected}
+        />
       </div>
-      {selectedBin ? (
-        <div
-          className="mt-3 border-y border-black/10 py-2 text-xs dark:border-white/10"
-          role="status"
-          aria-live="polite"
-        >
-          <p className="font-semibold tabular-nums">
-            {formatBinTime(selectedBin)}
-          </p>
-          <p className="mt-0.5 opacity-60">
-            {selectedBin.panelOnPercent === null
-              ? 'No panel observation'
-              : `${formatPanelShare(selectedBin.panelOnPercent)} · ${selectedBin.panelOnCount}/${selectedBin.panelObservedCount} on`}
-          </p>
-        </div>
-      ) : null}
       <div
         className="mt-4 flex h-24 items-end gap-px"
         role="group"
@@ -739,22 +737,27 @@ function PanelObservationChart({
           const missing = bin.sampleCount - bin.panelObservedCount;
           const detail =
             value === null
-              ? 'No panel observation'
+              ? ''
               : `${formatPanelShare(value)} · ${bin.panelOnCount}/${bin.panelObservedCount} on`;
           return (
             <button
               key={bin.start}
               type="button"
-              aria-label={`${formatBinTime(bin)}: ${detail}${missing > 0 ? `; ${missing} unknown` : ''}`}
+              aria-label={`${formatBinTime(bin)}: ${value === null ? 'empty' : detail}${missing > 0 ? `; ${missing} unknown` : ''}`}
               aria-pressed={selectedIndex === index}
+              disabled={value === null}
               onClick={() =>
                 setSelectedIndex(current => (current === index ? null : index))
               }
-              className="group relative flex h-full min-w-0 flex-1 items-end rounded-sm px-px outline-none transition-colors hover:bg-[#376d73]/10 focus-visible:ring-2 focus-visible:ring-[#376d73] focus-visible:ring-offset-1"
+              className="group relative flex h-full min-w-0 flex-1 touch-manipulation items-end rounded-sm px-px outline-none transition-colors [-webkit-tap-highlight-color:transparent] enabled:focus-visible:ring-2 enabled:focus-visible:ring-[#376d73] enabled:focus-visible:ring-offset-1"
               data-panel-observed={
                 bin.panelObservedCount > 0 ? 'true' : undefined
               }
-              title={`${new Date(bin.start).toISOString()}: ${detail}${missing > 0 ? ` · ${missing} unknown` : ''}`}
+              title={
+                value === null
+                  ? undefined
+                  : `${new Date(bin.start).toISOString()}: ${detail}${missing > 0 ? ` · ${missing} unknown` : ''}`
+              }
             >
               <span
                 aria-hidden="true"
@@ -826,39 +829,23 @@ function RemoteTransportChart({
   const currentAverage = weightedRemoteRtt(bins);
   const previousAverage = weightedRemoteRtt(previousBins);
   const selectedBin = selectedIndex === null ? null : bins[selectedIndex];
+  const selected = selectedBin !== null && selectedBin.remoteRttMs !== null;
+  const selectedPath = selected ? remotePathText(selectedBin) : '';
+  const displayValue = selected ? selectedBin.remoteRttMs : currentAverage;
+  const displayNote = selected
+    ? [formatBinTime(selectedBin), selectedPath].filter(Boolean).join(' · ')
+    : formatDelta(currentAverage, previousAverage, 'ms');
 
   return (
     <article className="bg-white/55 dark:bg-black/15 rounded-xl border border-black/10 p-4 dark:border-white/10">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-sm font-black">Mac transport RTT</h3>
-        <div className="text-right">
-          <p className="font-mono text-xs tabular-nums opacity-70">
-            {formatValue(currentAverage, 'ms')}
-          </p>
-          <p className="opacity-45 mt-0.5 text-[0.62rem] tabular-nums">
-            {formatDelta(currentAverage, previousAverage, 'ms')}
-          </p>
-        </div>
+        <ChartReadout
+          value={formatValue(displayValue, 'ms')}
+          note={displayNote}
+          selected={selected}
+        />
       </div>
-      {selectedBin ? (
-        <div
-          className="mt-3 border-y border-black/10 py-2 text-xs dark:border-white/10"
-          role="status"
-          aria-live="polite"
-        >
-          <p className="font-semibold tabular-nums">
-            {formatBinTime(selectedBin)}
-          </p>
-          <p className="mt-0.5 opacity-60">
-            {selectedBin.remoteRttMs === null
-              ? 'No transport probe'
-              : formatValue(selectedBin.remoteRttMs, 'ms')}
-            {remotePathText(selectedBin)
-              ? ` · ${remotePathText(selectedBin)}`
-              : ''}
-          </p>
-        </div>
-      ) : null}
       <div
         className="mt-4 flex h-24 items-end gap-px"
         role="group"
@@ -879,14 +866,19 @@ function RemoteTransportChart({
             <button
               key={bin.start}
               type="button"
-              aria-label={`${formatBinTime(bin)}: ${value === null ? 'No transport probe' : formatValue(value, 'ms')}${pathText ? `; ${pathText}` : ''}`}
+              aria-label={`${formatBinTime(bin)}: ${value === null ? 'empty' : formatValue(value, 'ms')}${pathText ? `; ${pathText}` : ''}`}
               aria-pressed={selectedIndex === index}
+              disabled={value === null}
               onClick={() =>
                 setSelectedIndex(current => (current === index ? null : index))
               }
-              className="group relative flex h-full min-w-0 flex-1 items-end rounded-sm px-px outline-none transition-colors hover:bg-[#376d73]/10 focus-visible:ring-2 focus-visible:ring-[#376d73] focus-visible:ring-offset-1"
+              className="group relative flex h-full min-w-0 flex-1 touch-manipulation items-end rounded-sm px-px outline-none transition-colors [-webkit-tap-highlight-color:transparent] enabled:focus-visible:ring-2 enabled:focus-visible:ring-[#376d73] enabled:focus-visible:ring-offset-1"
               data-remote-path={path ?? undefined}
-              title={`${new Date(bin.start).toISOString()}: ${value === null ? 'No transport probe' : formatValue(value, 'ms')}${pathText ? ` · ${pathText}` : ''}`}
+              title={
+                value === null
+                  ? undefined
+                  : `${new Date(bin.start).toISOString()}: ${formatValue(value, 'ms')}${pathText ? ` · ${pathText}` : ''}`
+              }
             >
               <span
                 aria-hidden="true"
@@ -1003,12 +995,7 @@ export function MachineHealthActivity({
   return (
     <section className="rounded-2xl border border-black/10 bg-[#e4ded2]/75 p-4 dark:border-white/10 dark:bg-[#17191f]/80 sm:p-5">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-        <div>
-          <h2 className="text-lg font-black">Activity</h2>
-          <p className="opacity-55 mt-1 text-xs">
-            Tap or focus a bar to inspect that interval. Chart times use UTC.
-          </p>
-        </div>
+        <h2 className="text-lg font-black">Activity</h2>
         <div
           className="border-black/15 dark:border-white/15 grid w-full grid-cols-4 border-b sm:w-auto"
           role="group"
@@ -1041,6 +1028,7 @@ export function MachineHealthActivity({
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <ObservationChart
+          key={`cpu-${range}`}
           label="CPU average"
           bins={bins}
           previousBins={previousBins}
@@ -1049,6 +1037,7 @@ export function MachineHealthActivity({
           unit="%"
         />
         <ObservationChart
+          key={`memory-${range}`}
           label="Memory average"
           bins={bins}
           previousBins={previousBins}
@@ -1057,6 +1046,7 @@ export function MachineHealthActivity({
           unit="%"
         />
         <ObservationChart
+          key={`network-${range}`}
           label="Network average"
           bins={bins}
           previousBins={previousBins}
@@ -1064,6 +1054,7 @@ export function MachineHealthActivity({
           unit="MiB/s"
         />
         <ObservationChart
+          key={`disk-${range}`}
           label="Disk I/O average"
           bins={bins}
           previousBins={previousBins}
@@ -1071,6 +1062,7 @@ export function MachineHealthActivity({
           unit="MiB/s"
         />
         <ObservationChart
+          key={`pressure-${range}`}
           label="Contention high"
           bins={bins}
           previousBins={previousBins}
@@ -1085,8 +1077,13 @@ export function MachineHealthActivity({
           More diagnostics
         </summary>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <PanelObservationChart bins={bins} previousBins={previousBins} />
+          <PanelObservationChart
+            key={`panel-${range}`}
+            bins={bins}
+            previousBins={previousBins}
+          />
           <ObservationChart
+            key={`browser-${range}`}
             label="Browser RSS high"
             bins={bins}
             previousBins={previousBins}
@@ -1095,6 +1092,7 @@ export function MachineHealthActivity({
             summary="maximum"
           />
           <ObservationChart
+            key={`build-${range}`}
             label="Build state high"
             bins={bins}
             previousBins={previousBins}
@@ -1103,6 +1101,7 @@ export function MachineHealthActivity({
             summary="maximum"
           />
           <ObservationChart
+            key={`state-${range}`}
             label="Codex state high"
             bins={bins}
             previousBins={previousBins}
@@ -1111,6 +1110,7 @@ export function MachineHealthActivity({
             summary="maximum"
           />
           <ObservationChart
+            key={`runtime-memory-${range}`}
             label="Codex runtime PSS high"
             bins={bins}
             previousBins={previousBins}
@@ -1119,6 +1119,7 @@ export function MachineHealthActivity({
             summary="maximum"
           />
           <ObservationChart
+            key={`agent-memory-${range}`}
             label="Agent memory high"
             bins={bins}
             previousBins={previousBins}
@@ -1126,7 +1127,11 @@ export function MachineHealthActivity({
             unit="MiB"
             summary="maximum"
           />
-          <RemoteTransportChart bins={bins} previousBins={previousBins} />
+          <RemoteTransportChart
+            key={`remote-${range}`}
+            bins={bins}
+            previousBins={previousBins}
+          />
         </div>
       </details>
 
@@ -1184,7 +1189,6 @@ export function MachineHealthActivity({
         <span>Codex-worker high {workerHigh}</span>
         <span>Runtime-process high {runtimeProcessHigh}</span>
         <span>Tagged-process high {taggedProcessHigh}</span>
-        <span>Empty bins stay visible</span>
       </div>
     </section>
   );
@@ -1339,6 +1343,7 @@ function CodexActivity({
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <ObservationChart
+          key={`codex-input-${range}`}
           label="Input tokens"
           bins={bins}
           previousBins={previousBins}
@@ -1346,11 +1351,9 @@ function CodexActivity({
           unit="tokens"
           summary="sum"
           segments={CODEX_INPUT_SEGMENTS}
-          binDetail={bin =>
-            `Big Red ${formatValue(bin.codexSourceInputTokens['big-red'], 'tokens')} · MacBook Air ${formatValue(bin.codexSourceInputTokens['macbook-air'], 'tokens')} · ${bin.codexWindowCount} source-hour record${bin.codexWindowCount === 1 ? '' : 's'}${bin.codexSkippedCount > 0 ? ` · ${bin.codexSkippedCount} skipped` : ''}`
-          }
         />
         <ObservationChart
+          key={`codex-output-${range}`}
           label="Output tokens"
           bins={bins}
           previousBins={previousBins}
@@ -1358,9 +1361,6 @@ function CodexActivity({
           unit="tokens"
           summary="sum"
           segments={CODEX_OUTPUT_SEGMENTS}
-          binDetail={bin =>
-            `Big Red ${formatValue(bin.codexSourceOutputTokens['big-red'], 'tokens')} · MacBook Air ${formatValue(bin.codexSourceOutputTokens['macbook-air'], 'tokens')} · ${bin.codexWindowCount} source-hour record${bin.codexWindowCount === 1 ? '' : 's'}${bin.codexSkippedCount > 0 ? ` · ${bin.codexSkippedCount} skipped` : ''}`
-          }
         />
       </div>
     </div>

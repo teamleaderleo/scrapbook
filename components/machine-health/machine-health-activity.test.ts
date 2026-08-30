@@ -220,6 +220,62 @@ describe('machine health activity bins', () => {
     expect(bins.at(-1)?.sampleCount).toBe(1);
   });
 
+  it('keeps empty history quiet and inert instead of inventing detail', () => {
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthActivity, {
+        samples: [sample('2026-08-29T05:05:00.000Z')],
+        codexSamples: [],
+        now,
+        latestActivity: {
+          source: 'sysstat-10m',
+          window_minutes: 60,
+          sample_count: 6,
+          cpu_peak_percent: 20,
+          memory_peak_percent: 30,
+          cpu_pressure_some_percent: 0.1,
+          memory_pressure_full_percent: 0,
+          io_pressure_full_percent: 0,
+          disk_read_mib_s: 1,
+          disk_write_mib_s: 2,
+        },
+      })
+    );
+
+    expect(html).not.toContain('no prior comparison');
+    expect(html).not.toContain('health snapshot');
+    expect(html).not.toContain('No observation');
+    expect(html).toContain('data-chart-readout="summary"');
+    expect(html).toMatch(/<button[^>]*disabled=""/);
+  });
+
+  it('keeps a real prior-window comparison when the data exists', () => {
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthActivity, {
+        samples: [
+          sample('2026-08-28T18:05:00.000Z', { cpuUsedPercent: 10 }),
+          sample('2026-08-29T05:05:00.000Z', { cpuUsedPercent: 20 }),
+        ],
+        codexSamples: [],
+        now,
+        latestActivity: {
+          source: 'sysstat-10m',
+          window_minutes: 60,
+          sample_count: 6,
+          cpu_peak_percent: 20,
+          memory_peak_percent: 30,
+          cpu_pressure_some_percent: 0.1,
+          memory_pressure_full_percent: 0,
+          io_pressure_full_percent: 0,
+          disk_read_mib_s: 1,
+          disk_write_mib_s: 2,
+        },
+      })
+    );
+
+    expect(html).toContain('+10.0 pp vs prior');
+    expect(html).not.toContain('no prior comparison');
+  });
+
   it('weights panel-on share by observed snapshots and keeps unknown coverage', () => {
     const bins = buildActivityBins(
       [
@@ -377,7 +433,7 @@ describe('machine health activity bins', () => {
     expect(html).toContain('data-remote-path="peer-relay"');
     expect(html).toContain('1 direct');
     expect(html).toContain('1 peer');
-    expect(html).toContain('No transport probe');
+    expect(html).not.toContain('No transport probe');
   });
 
   it('renders sampled panel history without treating missing state as off', () => {
@@ -416,7 +472,7 @@ describe('machine health activity bins', () => {
     expect(html).toContain('1 on');
     expect(html).toContain('3 off');
     expect(html).toContain('1 unknown');
-    expect(html).toContain('No panel observation');
+    expect(html).not.toContain('No panel observation');
   });
 
   it('places Codex counters in their fixed usage hour and deduplicates retries', () => {
