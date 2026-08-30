@@ -160,6 +160,15 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
         group: 'tools',
         surface: 'operational',
       },
+      {
+        id: 'machine-health',
+        href: '/machine-health',
+        label: 'Big Red',
+        description: 'Private workstation health and Codex usage.',
+        group: 'tools',
+        surface: 'private',
+        badge: 'Private',
+      },
     ],
   },
   {
