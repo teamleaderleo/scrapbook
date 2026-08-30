@@ -206,6 +206,8 @@ def diagnostic_section(
     output: str, heading: str, allowlist: set[str]
 ) -> dict[str, str] | None:
     lines = output.splitlines()
+    if lines.count(heading) != 1:
+        return None
     try:
         start = lines.index(heading) + 1
     except ValueError:

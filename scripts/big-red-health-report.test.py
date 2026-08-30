@@ -782,8 +782,12 @@ class BerylHealthTest(unittest.TestCase):
         duplicate = self.diagnostic().replace(
             "\n\nDNS:\n", "\nrouter_soc_temp_millic=1\n\nDNS:\n"
         )
+        duplicate_section = (
+            self.diagnostic()
+            + "\nBeryl local health:\nrouter_ssh=unavailable\n"
+        )
         inconsistent = self.diagnostic(router_pwm_fan_current_state="256")
-        for output in (duplicate, inconsistent):
+        for output in (duplicate, duplicate_section, inconsistent):
             with (
                 self.subTest(output=output[-40:]),
                 patch.object(
@@ -884,12 +888,16 @@ class BerylLinkHealthTest(unittest.TestCase):
         duplicate = self.diagnostic().replace(
             "\n\nDNS:\n", "\nwifi_signal_dbm=-55\n\nDNS:\n"
         )
+        duplicate_section = (
+            self.diagnostic()
+            + "\nBeryl local link:\nwifi_signal_dbm=unavailable\n"
+        )
         inconsistent = self.diagnostic(
             gateway_ping_samples_received="4",
             gateway_packet_loss_percent="0",
         )
         missing_rtt = self.diagnostic(gateway_rtt_avg_ms="unavailable")
-        for output in (duplicate, inconsistent, missing_rtt):
+        for output in (duplicate, duplicate_section, inconsistent, missing_rtt):
             with self.subTest(output=output[-80:]):
                 self.assertEqual(
                     REPORT.beryl_link_health((0, output)),
