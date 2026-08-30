@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from 'react';
 
 const subscribeToTimeZone = () => () => undefined;
 const getServerTimeZone = () => 'UTC';
@@ -37,8 +37,8 @@ export function MachineHealthTimestamp({
   now,
 }: {
   checkedAt: string;
-  firstCheckedAt: string;
-  sampleCount: number;
+  firstCheckedAt?: string;
+  sampleCount?: number;
   now: number;
 }) {
   const browserTimeZone = useSyncExternalStore(
@@ -46,44 +46,21 @@ export function MachineHealthTimestamp({
     getBrowserTimeZone,
     getServerTimeZone
   );
-  const [mode, setMode] = useState<'local' | 'utc'>('local');
-
-  const timeZone = mode === 'utc' ? 'UTC' : browserTimeZone;
-  const zoneLabel = mode === 'utc' ? 'UTC' : browserTimeZone;
-
   return (
-    <div className="shrink-0 text-left text-xs sm:text-right">
-      <p className="font-semibold tabular-nums">
-        Updated {formatRelativeAge(checkedAt, now)}
-      </p>
-      <p className="mt-1 tabular-nums opacity-60">
-        {formatTimestamp(checkedAt, timeZone)} · {zoneLabel}
-      </p>
-      <div
-        className="mt-2 flex items-center gap-2 sm:justify-end"
-        role="group"
-        aria-label="Snapshot time zone"
+    <>
+      <span
+        className="opacity-45 tabular-nums"
+        title={`${formatTimestamp(checkedAt, browserTimeZone)} · ${browserTimeZone}`}
+        suppressHydrationWarning
       >
-        {(['local', 'utc'] as const).map(option => (
-          <button
-            key={option}
-            type="button"
-            aria-pressed={mode === option}
-            onClick={() => setMode(option)}
-            className={`border-b px-0.5 py-1 font-bold uppercase tracking-[0.12em] transition-colors ${
-              mode === option
-                ? 'border-current opacity-90'
-                : 'border-transparent opacity-40 hover:opacity-75'
-            }`}
-          >
-            {option}
-          </button>
-        ))}
-      </div>
-      <p className="opacity-55 mt-3 font-mono text-[0.68rem]">
-        {sampleCount} Big Red snapshot{sampleCount === 1 ? '' : 's'} · history
-        began {formatTimestamp(firstCheckedAt, timeZone)}
-      </p>
-    </div>
+        Updated {formatRelativeAge(checkedAt, now)}
+      </span>
+      {sampleCount !== undefined && firstCheckedAt ? (
+        <span className="sr-only">
+          {sampleCount} Big Red snapshots · history began{' '}
+          {formatTimestamp(firstCheckedAt, browserTimeZone)}
+        </span>
+      ) : null}
+    </>
   );
 }

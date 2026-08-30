@@ -38,7 +38,7 @@ export async function GET(request: Request) {
 
   const errorPath =
     next === '/machine-health'
-      ? '/machine-health/access?error=callback'
+      ? '/machine-health?auth=callback'
       : '/space?error=auth';
   const response = NextResponse.redirect(new URL(errorPath, returnOrigin));
   response.cookies.delete(MACHINE_DASHBOARD_OAUTH_RETURN_COOKIE);

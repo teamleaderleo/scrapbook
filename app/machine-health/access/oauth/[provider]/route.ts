@@ -14,8 +14,8 @@ function isOAuthProvider(value: string): value is OAuthProvider {
 }
 
 function accessError(request: NextRequest, reason: string) {
-  const url = new URL('/machine-health/access', request.url);
-  url.searchParams.set('error', reason);
+  const url = new URL('/machine-health', request.url);
+  url.searchParams.set('auth', reason);
   return NextResponse.redirect(url, 303);
 }
 
@@ -46,7 +46,7 @@ export async function GET(
     const supabase = await createClient();
     const result = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${returnOrigin}/` },
+      options: { redirectTo: `${returnOrigin}/auth/callback` },
     });
     data = result.data;
     error = result.error;

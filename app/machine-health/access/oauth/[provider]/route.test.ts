@@ -46,7 +46,7 @@ describe('machine dashboard OAuth start', () => {
     );
     expect(signInWithOAuth).toHaveBeenCalledWith({
       provider: 'google',
-      options: { redirectTo: 'https://teamleaderleo.com/' },
+      options: { redirectTo: 'https://teamleaderleo.com/auth/callback' },
     });
     expect(setCookie).toHaveBeenCalledWith(
       'machine_health_oauth_return',
@@ -70,7 +70,7 @@ describe('machine dashboard OAuth start', () => {
 
     expect(response.status).toBe(303);
     expect(response.headers.get('location')).toBe(
-      'https://teamleaderleo.com/machine-health/access?error=provider'
+      'https://teamleaderleo.com/machine-health?auth=provider'
     );
     expect(signInWithOAuth).not.toHaveBeenCalled();
   });
@@ -90,7 +90,7 @@ describe('machine dashboard OAuth start', () => {
     );
 
     expect(response.headers.get('location')).toBe(
-      'https://teamleaderleo.com/machine-health/access?error=start'
+      'https://teamleaderleo.com/machine-health?auth=start'
     );
     expect(setCookie).not.toHaveBeenCalled();
   });
