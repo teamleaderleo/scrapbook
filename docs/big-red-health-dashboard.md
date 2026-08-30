@@ -22,11 +22,12 @@ The page starts with the questions that matter when Leo is away from the machine
 - How many Codex tokens came from Big Red and the MacBook Air, and what share of input was served from cache?
 
 The dashboard defaults to the last 10 complete hourly bins and also offers 24-hour, 7-day, and
-30-day views. One hour always remains one normalized hour; UTC fixes the storage boundary, while the
-browser's time zone changes only the labels. Token cards sum the selected device-hour records, and
-the 10-hour view excludes the current partial hour. Cached input percent is
-`cached_input_tokens / input_tokens`; the card shows both counts with the percentage. The source
-line shows how many bins each device supplied. Browser/Codex counts, tagged route/process counts,
+30-day views. Every token range ends at the last complete UTC hour; the long views group the same
+hours into rolling 24-hour bars instead of replacing them with partial calendar days. UTC fixes the
+storage boundary, while the browser's time zone changes only the labels. Token cards sum the
+selected device-hour records. Cached input percent is `cached_input_tokens / input_tokens`; the
+card shows the exact counts with the percentage. The source line shows how many complete
+source-hours each device supplied. Browser/Codex counts, tagged route/process counts,
 aggregate memory, and the active RDP connection count stay coarse. The current workspace view also
 splits hook-owned execution into chat roots, main-root jobs, subagent jobs, processes, and memory. It
 keeps opaque route and agent IDs out of the snapshot.

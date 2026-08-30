@@ -28,9 +28,10 @@ type ActivityBin = {
   codexTotalTokens: number | null;
   codexModelCalls: number | null;
   codexActiveRoutes: number | null;
+  codexHourCount: number;
+  codexSourceHours: Record<CodexTokenSource, number>;
   codexWindowCount: number;
   codexSkippedCount: number;
-  codexSources: CodexTokenSource[];
   fallbackCount: number;
   undercoveredCount: number;
   rebootCount: number;
@@ -71,10 +72,11 @@ function sum(values: number[]) {
 export function buildActivityBins(
   samples: MachineHealthSample[],
   range: ActivityRange,
-  now: number
+  now: number,
+  alignedEndOverride?: number
 ): ActivityBin[] {
   const { bins, binMs } = RANGE_CONFIG[range];
-  const alignedEnd = Math.ceil(now / binMs) * binMs;
+  const alignedEnd = alignedEndOverride ?? Math.ceil(now / binMs) * binMs;
   const start = alignedEnd - bins * binMs;
   const ordered = [...samples].sort(
     (left, right) => Date.parse(left.checkedAt) - Date.parse(right.checkedAt)
@@ -151,9 +153,13 @@ export function buildActivityBins(
       codexModelCalls: sum(codexValues('codexModelCalls')),
       codexActiveRoutes:
         activeRoutes.length === 0 ? null : Math.max(...activeRoutes),
+      codexHourCount: includedCodex.length,
+      codexSourceHours: {
+        'big-red': includedCodex.length,
+        'macbook-air': 0,
+      },
       codexWindowCount: includedCodex.length,
       codexSkippedCount: 0,
-      codexSources: includedCodex.length === 0 ? [] : ['big-red'],
       fallbackCount: included.filter(
         sample => sample.activitySource === 'point'
       ).length,
@@ -219,7 +225,12 @@ export function buildCodexActivityBins(
   now: number
 ) {
   const completeHourEnd = Math.floor(now / HOUR_MS) * HOUR_MS;
-  const emptyBins = buildActivityBins([], range, completeHourEnd);
+  const emptyBins = buildActivityBins(
+    [],
+    range,
+    completeHourEnd,
+    completeHourEnd
+  );
   return emptyBins.map(bin => {
     const included = samples.filter(sample => {
       const windowStartedAt = Date.parse(sample.windowStartedAt);
@@ -236,6 +247,18 @@ export function buildCodexActivityBins(
           sample.activeRoutes
       );
     const activeRoutes = [...activeRoutesByHour.values()];
+    const sourceHours: Record<CodexTokenSource, number> = {
+      'big-red': new Set(
+        counted
+          .filter(sample => sample.source === 'big-red')
+          .map(sample => sample.windowStartedAt)
+      ).size,
+      'macbook-air': new Set(
+        counted
+          .filter(sample => sample.source === 'macbook-air')
+          .map(sample => sample.windowStartedAt)
+      ).size,
+    };
     return {
       ...bin,
       codexInputTokens: sum(counted.map(sample => sample.inputTokens)),
@@ -253,9 +276,11 @@ export function buildCodexActivityBins(
       codexModelCalls: sum(counted.map(sample => sample.modelCalls)),
       codexActiveRoutes:
         activeRoutes.length === 0 ? null : Math.max(...activeRoutes),
+      codexHourCount: new Set(counted.map(sample => sample.windowStartedAt))
+        .size,
+      codexSourceHours: sourceHours,
       codexWindowCount: counted.length,
       codexSkippedCount: included.length - counted.length,
-      codexSources: [...new Set(counted.map(sample => sample.source))],
     };
   });
 }
@@ -602,12 +627,15 @@ function CodexActivity({
   previousBins: ActivityBin[];
   range: ActivityRange;
 }) {
-  const observedBins = bins.filter(bin => bin.codexWindowCount > 0).length;
+  const observedHours = bins.reduce(
+    (total, bin) => total + bin.codexHourCount,
+    0
+  );
   const skippedWindows = bins.reduce(
     (total, bin) => total + bin.codexSkippedCount,
     0
   );
-  if (observedBins === 0 && skippedWindows === 0)
+  if (observedHours === 0 && skippedWindows === 0)
     return (
       <div className="mt-4 border-t border-black/10 pt-4 dark:border-white/10">
         <p className="text-sm font-black">Codex</p>
@@ -659,8 +687,9 @@ function CodexActivity({
     totalInput === null || totalInput === 0 || totalCachedInput === null
       ? null
       : (totalCachedInput / totalInput) * 100;
-  const rangeLabel =
-    range === '10h' ? '10 complete hours' : `${range} selected`;
+  const rangeHours =
+    (RANGE_CONFIG[range].bins * RANGE_CONFIG[range].binMs) / HOUR_MS;
+  const rangeLabel = `${rangeHours} complete hours`;
   const sourceLabels: Record<CodexTokenSource, string> = {
     'big-red': 'Big Red',
     'macbook-air': 'MacBook Air',
@@ -668,13 +697,13 @@ function CodexActivity({
   const sourceCoverage = (['big-red', 'macbook-air'] as const)
     .map(source => ({
       source,
-      bins: bins.filter(bin => bin.codexSources.includes(source)).length,
+      hours: bins.reduce(
+        (total, bin) => total + bin.codexSourceHours[source],
+        0
+      ),
     }))
-    .filter(item => item.bins > 0)
-    .map(
-      item =>
-        `${sourceLabels[item.source]} ${item.bins}${range === '10h' || range === '24h' ? 'h' : 'd'}`
-    )
+    .filter(item => item.hours > 0)
+    .map(item => `${sourceLabels[item.source]} ${item.hours}h`)
     .join(' · ');
 
   return (
@@ -682,7 +711,7 @@ function CodexActivity({
       <div className="flex flex-col justify-between gap-1 sm:flex-row sm:items-end">
         <h3 className="text-base font-black">Codex</h3>
         <p className="text-[0.68rem] opacity-50">
-          {rangeLabel} · {observedBins} recorded
+          {rangeLabel} · {observedHours}h recorded
           {sourceCoverage ? ` · ${sourceCoverage}` : ''}
           {skippedWindows > 0 ? ` · ${skippedWindows} source-hour skipped` : ''}
         </p>
@@ -701,17 +730,25 @@ function CodexActivity({
         <CodexMetric
           label="Input"
           value={formatValue(totalInput, 'tokens')}
-          note="cached portion included"
+          note={
+            totalInput === null
+              ? '—'
+              : `${totalInput.toLocaleString('en-US')} tokens`
+          }
         />
         <CodexMetric
           label="Cached input"
           value={cacheShare === null ? '—' : `${cacheShare.toFixed(1)}%`}
-          note={`${formatValue(totalCachedInput, 'tokens')} / ${formatValue(totalInput, 'tokens')}`}
+          note={`${totalCachedInput?.toLocaleString('en-US') ?? '—'} / ${totalInput?.toLocaleString('en-US') ?? '—'}`}
         />
         <CodexMetric
           label="Cache writes"
           value={formatValue(totalCacheWriteInput, 'tokens')}
-          note="input tokens"
+          note={
+            totalCacheWriteInput === null
+              ? '—'
+              : `${totalCacheWriteInput.toLocaleString('en-US')} tokens`
+          }
         />
         <CodexMetric
           label="Output"

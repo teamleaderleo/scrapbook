@@ -111,9 +111,10 @@ describe('machine health activity bins', () => {
       codexCacheWriteInputTokens: 100,
       codexTotalTokens: 1_575,
       codexActiveRoutes: 3,
+      codexHourCount: 1,
+      codexSourceHours: { 'big-red': 1, 'macbook-air': 1 },
       codexWindowCount: 2,
       codexSkippedCount: 0,
-      codexSources: ['big-red', 'macbook-air'],
     });
     expect(
       bins.some(bin => bin.start === Date.parse('2026-08-29T06:00:00.000Z'))
@@ -166,9 +167,34 @@ describe('machine health activity bins', () => {
       codexInputTokens: 1_000,
       codexCachedInputTokens: 800,
       codexTotalTokens: 1_050,
+      codexHourCount: 1,
+      codexSourceHours: { 'big-red': 1, 'macbook-air': 0 },
       codexWindowCount: 1,
       codexSkippedCount: 1,
-      codexSources: ['big-red'],
+    });
+  });
+
+  it('keeps long ranges as rolling complete hours and counts source-hours', () => {
+    const bins = buildCodexActivityBins(
+      [
+        tokenSample('big-red', {
+          windowStartedAt: '2026-08-28T06:00:00.000Z',
+          windowEndedAt: '2026-08-28T07:00:00.000Z',
+        }),
+        tokenSample('big-red'),
+        tokenSample('macbook-air'),
+      ],
+      '7d',
+      now
+    );
+
+    expect(bins).toHaveLength(7);
+    expect(bins.at(-1)).toMatchObject({
+      start: Date.parse('2026-08-28T06:00:00.000Z'),
+      end: Date.parse('2026-08-29T06:00:00.000Z'),
+      codexHourCount: 2,
+      codexSourceHours: { 'big-red': 2, 'macbook-air': 1 },
+      codexWindowCount: 3,
     });
   });
 

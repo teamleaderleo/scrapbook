@@ -108,11 +108,12 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Codex state high');
     expect(html).toContain('Codex');
     expect(html).toContain(
-      '10 complete hours · 1 recorded · Big Red 1h · MacBook Air 1h'
+      '10 complete hours · 1h recorded · Big Red 1h · MacBook Air 1h'
     );
     expect(html).toContain('15,050,000 tokens');
     expect(html).toContain('Cached input');
     expect(html).toContain('92.5%');
+    expect(html).toContain('13,875,000 / 15,000,000');
     expect(html).toContain('Cache writes');
     expect(html).toContain('CPU');
     expect(html).toContain('Contention high');
