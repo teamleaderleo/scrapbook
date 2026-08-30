@@ -208,6 +208,40 @@ const desktopState = z.discriminatedUnion('source', [
     wallpaper_references_complete: z.null().optional(),
   }),
 ]);
+const reliabilityCounts = z.object({
+  crash_exits: nonnegativeInteger,
+  automatic_restarts: nonnegativeInteger,
+});
+const reliabilityState = z
+  .object({
+    source: z.enum(['journal-24h', 'unavailable']),
+    window_hours: z.literal(24),
+    crash_exits: nonnegativeInteger,
+    automatic_restarts: nonnegativeInteger,
+    breakdown: z
+      .object({
+        desktop_search: reliabilityCounts,
+        other: reliabilityCounts,
+      })
+      .optional(),
+    truncated: z.boolean(),
+  })
+  .superRefine((value, context) => {
+    if (!value.breakdown) return;
+    if (
+      value.breakdown.desktop_search.crash_exits +
+        value.breakdown.other.crash_exits !==
+        value.crash_exits ||
+      value.breakdown.desktop_search.automatic_restarts +
+        value.breakdown.other.automatic_restarts !==
+        value.automatic_restarts
+    )
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['breakdown'],
+        message: 'Reliability breakdown does not reconcile with totals',
+      });
+  });
 
 export const machineHealthPayloadSchema = z.object({
   schema_version: z.literal(1),
@@ -517,15 +551,7 @@ export const machineHealthPayloadSchema = z.object({
     unexpected_dev_listeners: nonnegativeInteger,
     rdp_connections: nonnegativeInteger.default(0),
   }),
-  reliability: z
-    .object({
-      source: z.enum(['journal-24h', 'unavailable']),
-      window_hours: z.literal(24),
-      crash_exits: nonnegativeInteger,
-      automatic_restarts: nonnegativeInteger,
-      truncated: z.boolean(),
-    })
-    .optional(),
+  reliability: reliabilityState.optional(),
   build_state: z
     .object({
       source: z.enum(['filesystem', 'unavailable']),
@@ -714,13 +740,25 @@ export function evaluateMachineHealth(payload: MachineHealthPayload) {
     reasons.push(
       `${payload.process_tags.unknown_jobs} Codex tag${payload.process_tags.unknown_jobs === 1 ? ' needs' : 's need'} inspection.`
     );
-  if (
-    payload.reliability?.source === 'journal-24h' &&
-    payload.reliability.crash_exits > 0
-  )
-    reasons.push(
-      `${payload.reliability.crash_exits} service crash${payload.reliability.crash_exits === 1 ? '' : 'es'} recorded in the last 24 hours.`
-    );
+  if (payload.reliability?.source === 'journal-24h') {
+    const breakdown = payload.reliability.breakdown;
+    if (breakdown) {
+      const searchCrashes = breakdown.desktop_search.crash_exits;
+      const searchRestarts = breakdown.desktop_search.automatic_restarts;
+      if (searchCrashes > 0)
+        reasons.push(
+          `Desktop search: ${searchCrashes} crash${searchCrashes === 1 ? '' : 'es'}${searchRestarts > 0 ? ` and ${searchRestarts} automatic restart${searchRestarts === 1 ? '' : 's'}` : ''} in the last 24 hours.`
+        );
+      const otherCrashes = breakdown.other.crash_exits;
+      if (otherCrashes > 0)
+        reasons.push(
+          `${otherCrashes} other service crash${otherCrashes === 1 ? '' : 'es'} recorded in the last 24 hours.`
+        );
+    } else if (payload.reliability.crash_exits > 0)
+      reasons.push(
+        `${payload.reliability.crash_exits} service crash${payload.reliability.crash_exits === 1 ? '' : 'es'} recorded in the last 24 hours.`
+      );
+  }
   if (payload.reliability?.truncated)
     reasons.push('Reliability event count exceeded the collector limit.');
 

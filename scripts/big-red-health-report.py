@@ -75,6 +75,7 @@ GRD_ACCELERATION_EVENT_LIMIT = 512
 GRD_SESSION_EVENT_LIMIT = 512
 SYSTEMD_PROCESS_EXIT_MESSAGE_ID = "98e322203f7a4ed290d09fe03c09fe15"
 SYSTEMD_RESTART_MESSAGE_ID = "5eb03494b6584870a536b337290809b3"
+DESKTOP_SEARCH_UNIT = "localsearch-3.service"
 
 
 class RejectRedirects(urllib.request.HTTPRedirectHandler):
@@ -1767,6 +1768,10 @@ def reliability_window(now: dt.datetime | None = None) -> dict[str, Any]:
             "window_hours": RELIABILITY_WINDOW_HOURS,
             "crash_exits": 0,
             "automatic_restarts": 0,
+            "breakdown": {
+                "desktop_search": {"crash_exits": 0, "automatic_restarts": 0},
+                "other": {"crash_exits": 0, "automatic_restarts": 0},
+            },
             "truncated": False,
         }
 
@@ -1778,23 +1783,54 @@ def reliability_window(now: dt.datetime | None = None) -> dict[str, Any]:
             "window_hours": RELIABILITY_WINDOW_HOURS,
             "crash_exits": 0,
             "automatic_restarts": 0,
+            "breakdown": {
+                "desktop_search": {"crash_exits": 0, "automatic_restarts": 0},
+                "other": {"crash_exits": 0, "automatic_restarts": 0},
+            },
             "truncated": False,
         }
 
     truncated = len(records) > RELIABILITY_EVENT_LIMIT
     records = records[-RELIABILITY_EVENT_LIMIT:]
+    crash_records = [
+        record
+        for record in records
+        if record.get("MESSAGE_ID") == SYSTEMD_PROCESS_EXIT_MESSAGE_ID
+        and record.get("EXIT_CODE") == "dumped"
+    ]
+    restart_records = [
+        record
+        for record in records
+        if record.get("MESSAGE_ID") == SYSTEMD_RESTART_MESSAGE_ID
+    ]
+
+    def belongs_to_desktop_search(record: dict[str, Any]) -> bool:
+        return any(
+            record.get(field) == DESKTOP_SEARCH_UNIT for field in ("USER_UNIT", "UNIT")
+        )
+
+    desktop_search_crashes = sum(
+        belongs_to_desktop_search(record) for record in crash_records
+    )
+    desktop_search_restarts = sum(
+        belongs_to_desktop_search(record) for record in restart_records
+    )
     return {
         "source": "journal-24h",
         "window_hours": RELIABILITY_WINDOW_HOURS,
-        "crash_exits": sum(
-            record.get("MESSAGE_ID") == SYSTEMD_PROCESS_EXIT_MESSAGE_ID
-            and record.get("EXIT_CODE") == "dumped"
-            for record in records
-        ),
-        "automatic_restarts": sum(
-            record.get("MESSAGE_ID") == SYSTEMD_RESTART_MESSAGE_ID
-            for record in records
-        ),
+        "crash_exits": len(crash_records),
+        "automatic_restarts": len(restart_records),
+        "breakdown": {
+            "desktop_search": {
+                "crash_exits": desktop_search_crashes,
+                "automatic_restarts": desktop_search_restarts,
+            },
+            "other": {
+                "crash_exits": len(crash_records) - desktop_search_crashes,
+                "automatic_restarts": len(restart_records)
+                - desktop_search_restarts,
+            },
+        },
         "truncated": truncated,
     }
 

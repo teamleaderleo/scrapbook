@@ -146,6 +146,30 @@ describe('machine health contract', () => {
     expect(parsed.reliability).toBeUndefined();
   });
 
+  it('accepts old reliability totals and rejects a mismatched breakdown', () => {
+    const { breakdown: _breakdown, ...olderReliability } =
+      healthyMachineReport.reliability!;
+    const parsed = machineHealthPayloadSchema.parse({
+      ...healthyMachineReport,
+      reliability: olderReliability,
+    });
+
+    expect(parsed.reliability?.breakdown).toBeUndefined();
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        reliability: {
+          ...healthyMachineReport.reliability!,
+          crash_exits: 2,
+          breakdown: {
+            desktop_search: { crash_exits: 1, automatic_restarts: 0 },
+            other: { crash_exits: 0, automatic_restarts: 0 },
+          },
+        },
+      }).success
+    ).toBe(false);
+  });
+
   it('accepts a snapshot from before remote client state was added', () => {
     const { remote_client: _remoteClient, ...olderNetwork } =
       healthyMachineReport.network;
@@ -464,11 +488,17 @@ describe('machine health contract', () => {
           ...healthyMachineReport.reliability!,
           crash_exits: 2,
           automatic_restarts: 3,
+          breakdown: {
+            desktop_search: { crash_exits: 2, automatic_restarts: 3 },
+            other: { crash_exits: 0, automatic_restarts: 0 },
+          },
         },
       })
     ).toEqual({
       state: 'watch',
-      reasons: ['2 service crashes recorded in the last 24 hours.'],
+      reasons: [
+        'Desktop search: 2 crashes and 3 automatic restarts in the last 24 hours.',
+      ],
     });
     expect(
       evaluateMachineHealth({

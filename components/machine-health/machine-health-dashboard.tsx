@@ -573,14 +573,47 @@ export function MachineHealthDashboard({
             </Pill>
             <Pill good={failedUnits === 0}>Failed units: {failedUnits}</Pill>
             {reliability ? (
-              <>
-                <Pill good={reliability.crash_exits === 0}>
-                  Crashes · 24h: {reliability.crash_exits}
-                </Pill>
-                <Pill good={reliability.automatic_restarts === 0}>
-                  Auto restarts · 24h: {reliability.automatic_restarts}
-                </Pill>
-              </>
+              reliability.breakdown ? (
+                <>
+                  <Pill
+                    good={
+                      reliability.breakdown.desktop_search.crash_exits === 0
+                    }
+                  >
+                    Search indexer · 24h:{' '}
+                    {reliability.breakdown.desktop_search.crash_exits} crash
+                    {reliability.breakdown.desktop_search.crash_exits === 1
+                      ? ''
+                      : 'es'}{' '}
+                    · {reliability.breakdown.desktop_search.automatic_restarts}{' '}
+                    restart
+                    {reliability.breakdown.desktop_search.automatic_restarts ===
+                    1
+                      ? ''
+                      : 's'}
+                  </Pill>
+                  <Pill good={reliability.breakdown.other.crash_exits === 0}>
+                    Other services · 24h:{' '}
+                    {reliability.breakdown.other.crash_exits} crash
+                    {reliability.breakdown.other.crash_exits === 1
+                      ? ''
+                      : 'es'}{' '}
+                    · {reliability.breakdown.other.automatic_restarts} restart
+                    {reliability.breakdown.other.automatic_restarts === 1
+                      ? ''
+                      : 's'}
+                  </Pill>
+                </>
+              ) : (
+                <>
+                  <Pill good={reliability.crash_exits === 0}>
+                    Crashes · 24h: {reliability.crash_exits}
+                  </Pill>
+                  <Pill good={reliability.automatic_restarts === 0}>
+                    Auto restarts · 24h: {reliability.automatic_restarts}
+                  </Pill>
+                </>
+              )
             ) : (
               <Pill good={false}>Crash history: unavailable</Pill>
             )}

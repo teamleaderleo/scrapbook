@@ -97,6 +97,13 @@ The first live receipt found two control roots, 69 processes, 13 code hosts and 
 memory-read errors while whole-machine memory use was 10.92%. That supports visibility, not cleanup;
 the route registry simultaneously reported zero owned residue.
 
+The 24-hour reliability readout counts structured systemd core-dump exits and automatic restart
+events. It partitions both totals into the GNOME desktop-search indexer and all other services,
+then discards unit names, messages, exit statuses, timestamps, and invocation identifiers. A
+nonzero ordinary exit is not a crash: the live route-lease matrix includes deliberate status-7
+failure arms, and those remain outside this metric. Older stored snapshots retain their aggregate
+crash and restart totals without a retroactive classification.
+
 Remote-client state is derived from the same local `tailscale status --json` read used for Big Red's own state. Exactly one macOS peer is required; zero or multiple candidates become unavailable. The report emits only `offline`, `online-idle`, `direct`, `relay`, or `unknown`, plus a last-seen age when Tailscale supplies a nonzero timestamp. Direct requires an active peer with a current endpoint; relay requires an active peer with relay evidence. When that peer is already active, the collector adds one bounded Tailscale disco ping and keeps only its coarse path class and RTT. It skips the probe for offline and idle peers, so the observer does not manufacture an active path or keep a sleeping Mac busy. The RTT is Big Red-to-Mac transport evidence, not Windows App, decoder, display, or input-to-paint latency. Host names, node keys, addresses, tailnet IPs, endpoints, relay regions, traffic totals, and timestamps never enter the report. The public repository contains the contract and collector code, but no machine snapshot or credential.
 
 The Remote card also summarizes the last 24 hours of GNOME Remote Desktop session endings. It keeps
@@ -179,6 +186,7 @@ These are operator thresholds rather than hardware safety limits:
 - automatic idle suspend no longer disabled on AC or battery: watch;
 - hibernate or hybrid-sleep no longer masked: watch;
 - any detected development listener: watch;
+- any structured core-dump exit in the last 24 hours: watch, split between desktop search and other services when the current collector supplied the breakdown;
 - unavailable route ownership status, any residue job, or any unknown route/job record: watch;
 - report older than 3 hours: watch.
 

@@ -157,8 +157,10 @@ describe('machine health dashboard', () => {
     expect(html).toContain('I/O 0/3');
     expect(html).toContain('Agent memory high');
     expect(html).toContain('Tagged-process high');
-    expect(html).toContain('Crashes · 24h: 0');
-    expect(html).toContain('Auto restarts · 24h: 0');
+    expect(html).toContain('Search indexer · 24h:');
+    expect(html).toContain('Other services · 24h:');
+    expect(html).toContain('0 crashes ·');
+    expect(html).toContain('0 restarts');
     expect(html).not.toContain('private_ip');
     expect(html).not.toContain('process_arguments');
   });
@@ -339,6 +341,10 @@ describe('machine health dashboard', () => {
               window_hours: 24,
               crash_exits: 2,
               automatic_restarts: 3,
+              breakdown: {
+                desktop_search: { crash_exits: 2, automatic_restarts: 3 },
+                other: { crash_exits: 0, automatic_restarts: 0 },
+              },
               truncated: false,
             },
           },
@@ -349,9 +355,13 @@ describe('machine health dashboard', () => {
     );
 
     expect(html).toContain('Worth a look');
-    expect(html).toContain('2 service crashes recorded in the last 24 hours.');
-    expect(html).toContain('Crashes · 24h: 2');
-    expect(html).toContain('Auto restarts · 24h: 3');
+    expect(html).toContain(
+      'Desktop search: 2 crashes and 3 automatic restarts in the last 24 hours.'
+    );
+    expect(html).toContain('Search indexer · 24h:');
+    expect(html).toContain('2 crashes ·');
+    expect(html).toContain('3 restarts');
+    expect(html).toContain('Other services · 24h:');
   });
 
   it('turns an otherwise healthy but stale report into a visible watch state', () => {

@@ -197,6 +197,10 @@ export const healthyMachineReport: MachineHealthPayload = {
     window_hours: 24,
     crash_exits: 0,
     automatic_restarts: 0,
+    breakdown: {
+      desktop_search: { crash_exits: 0, automatic_restarts: 0 },
+      other: { crash_exits: 0, automatic_restarts: 0 },
+    },
     truncated: false,
   },
   build_state: {

@@ -1258,7 +1258,21 @@ class ReliabilityTest(unittest.TestCase):
             {
                 "MESSAGE_ID": REPORT.SYSTEMD_PROCESS_EXIT_MESSAGE_ID,
                 "EXIT_CODE": "dumped",
+                "USER_UNIT": REPORT.DESKTOP_SEARCH_UNIT,
+                "MESSAGE": "desktop search crashed",
+            },
+            {
+                "MESSAGE_ID": REPORT.SYSTEMD_PROCESS_EXIT_MESSAGE_ID,
+                "EXIT_CODE": "dumped",
+                "UNIT": "private.service",
                 "MESSAGE": "private.service crashed",
+            },
+            {
+                "MESSAGE_ID": REPORT.SYSTEMD_PROCESS_EXIT_MESSAGE_ID,
+                "EXIT_CODE": "exited",
+                "EXIT_STATUS": "7",
+                "USER_UNIT": "expected-failure-canary.service",
+                "MESSAGE": "expected failure arm exited",
             },
             {
                 "MESSAGE_ID": REPORT.SYSTEMD_PROCESS_EXIT_MESSAGE_ID,
@@ -1267,6 +1281,12 @@ class ReliabilityTest(unittest.TestCase):
             },
             {
                 "MESSAGE_ID": REPORT.SYSTEMD_RESTART_MESSAGE_ID,
+                "USER_UNIT": REPORT.DESKTOP_SEARCH_UNIT,
+                "MESSAGE": "desktop search restarted",
+            },
+            {
+                "MESSAGE_ID": REPORT.SYSTEMD_RESTART_MESSAGE_ID,
+                "UNIT": "private.service",
                 "MESSAGE": "private.service restarted",
             },
         ]
@@ -1281,10 +1301,18 @@ class ReliabilityTest(unittest.TestCase):
 
         self.assertEqual(reliability["source"], "journal-24h")
         self.assertEqual(reliability["window_hours"], 24)
-        self.assertEqual(reliability["crash_exits"], 1)
-        self.assertEqual(reliability["automatic_restarts"], 1)
+        self.assertEqual(reliability["crash_exits"], 2)
+        self.assertEqual(reliability["automatic_restarts"], 2)
+        self.assertEqual(
+            reliability["breakdown"],
+            {
+                "desktop_search": {"crash_exits": 1, "automatic_restarts": 1},
+                "other": {"crash_exits": 1, "automatic_restarts": 1},
+            },
+        )
         self.assertFalse(reliability["truncated"])
         self.assertNotIn("private.service", json.dumps(reliability))
+        self.assertNotIn(REPORT.DESKTOP_SEARCH_UNIT, json.dumps(reliability))
 
     def test_marks_missing_or_malformed_journal_data_unavailable(self) -> None:
         for response in ((127, ""), (0, "not json")):
@@ -1294,6 +1322,16 @@ class ReliabilityTest(unittest.TestCase):
                 self.assertEqual(reliability["source"], "unavailable")
                 self.assertEqual(reliability["crash_exits"], 0)
                 self.assertEqual(reliability["automatic_restarts"], 0)
+                self.assertEqual(
+                    reliability["breakdown"],
+                    {
+                        "desktop_search": {
+                            "crash_exits": 0,
+                            "automatic_restarts": 0,
+                        },
+                        "other": {"crash_exits": 0, "automatic_restarts": 0},
+                    },
+                )
 
     def test_caps_pathological_event_volume(self) -> None:
         record = json.dumps({"MESSAGE_ID": REPORT.SYSTEMD_RESTART_MESSAGE_ID})
@@ -1304,6 +1342,9 @@ class ReliabilityTest(unittest.TestCase):
             reliability = REPORT.reliability_window()
 
         self.assertEqual(reliability["automatic_restarts"], 2)
+        self.assertEqual(
+            reliability["breakdown"]["other"]["automatic_restarts"], 2
+        )
         self.assertTrue(reliability["truncated"])
 
 
