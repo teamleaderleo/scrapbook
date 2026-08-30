@@ -6,6 +6,11 @@ import {
 } from '@/app/lib/machine-health-store';
 import { GitHubIcon } from '@/components/icons/github-icon';
 import { GoogleIcon } from '@/components/icons/google-icon';
+import { PressedSprig } from '@/components/cozy-flourishes';
+import {
+  PaperCreature,
+  type PaperCreaturePose,
+} from '@/components/paper-creature';
 import { MemoryStick, Thermometer, Timer } from 'lucide-react';
 import Link from 'next/link';
 import { MachineHealthOverview } from './machine-health-overview';
@@ -15,6 +20,36 @@ import { MachineHealthTimestamp } from './machine-health-timestamp';
 const HOUR_MS = 60 * 60_000;
 const GIB = 1_024 ** 3;
 const MIB = 1_024 ** 2;
+
+const COMPANION_POSES: { pose: PaperCreaturePose; label: string }[] = [
+  { pose: 'idle', label: 'keeping watch' },
+  { pose: 'reading', label: 'reading the gauges' },
+  { pose: 'napping', label: 'napping beside the dashboard' },
+  { pose: 'archivist', label: 'filing today’s notes' },
+  { pose: 'carrying', label: 'bringing a fresh pencil' },
+];
+
+function DailyCompanion({ now }: { now: number }) {
+  const companion =
+    COMPANION_POSES[
+      Math.floor(now / (24 * HOUR_MS)) % COMPANION_POSES.length
+    ];
+  return (
+    <div
+      className="relative h-12 w-[4.75rem]"
+      title={`Scraplet is ${companion.label}`}
+    >
+      <PressedSprig className="absolute -right-1 -top-4 h-14 w-10 rotate-6 opacity-35" />
+      <PaperCreature
+        pose={companion.pose}
+        size="md"
+        label={`Scraplet is ${companion.label}`}
+        animateKey={companion.pose}
+        className="absolute bottom-0 left-0"
+      />
+    </div>
+  );
+}
 
 function formatDuration(seconds: number) {
   const days = Math.floor(seconds / 86_400);
@@ -283,6 +318,10 @@ export function MachineHealthDashboard({
     diskReadMibS: sample.diskReadMibS,
     diskWriteMibS: sample.diskWriteMibS,
     pressurePercent: sample.pressurePercent,
+    coreAveragePercent: sample.coreAveragePercent ?? null,
+    corePeakPercent: sample.corePeakPercent ?? null,
+    networkPeakMibS: sample.networkPeakMibS ?? null,
+    diskPeakMibS: sample.diskPeakMibS ?? null,
   }));
 
   return (
@@ -307,7 +346,10 @@ export function MachineHealthDashboard({
             <MachineHealthTimestamp checkedAt={report.checkedAt} now={now} />
           </div>
         </div>
-        <MachineHealthRefresh />
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <MachineHealthRefresh />
+          <DailyCompanion now={now} />
+        </div>
       </header>
 
       {activeReasons.length > 0 ? (

@@ -5,10 +5,14 @@ import type {
   CodexTokenSource,
 } from '@/app/lib/machine-health-store';
 import {
+  ArrowDownRight,
+  ArrowUpRight,
   Cpu,
+  Gauge,
   HardDrive,
   Laptop,
   MemoryStick,
+  Network,
   Server,
   SquareTerminal,
   type LucideIcon,
@@ -60,18 +64,25 @@ export type PublicMachineHealthSample = {
   diskReadMibS: number | null;
   diskWriteMibS: number | null;
   pressurePercent: number | null;
+  coreAveragePercent: number[] | null;
+  corePeakPercent: number[] | null;
+  networkPeakMibS: number | null;
+  diskPeakMibS: number | null;
 };
 
 type PublicActivityBin = {
   start: number;
   end: number;
-  sampleCount: number;
   cpuUsedPercent: number | null;
   memoryUsedPercent: number | null;
   rootUsedPercent: number | null;
   networkMibS: number | null;
   diskMibS: number | null;
   pressurePercent: number | null;
+  coreAveragePercent: number[] | null;
+  corePeakPercent: number[] | null;
+  networkPeakMibS: number | null;
+  diskPeakMibS: number | null;
 };
 
 type CodexActivityBin = {
@@ -159,6 +170,26 @@ function nullableSum(values: number[]) {
   return values.length === 0 ? null : sum(values);
 }
 
+function averageCoreArrays(values: (number[] | null)[]) {
+  const available = values.filter((value): value is number[] => value !== null);
+  if (available.length === 0) return null;
+  const coreCount = available[0].length;
+  const compatible = available.filter(value => value.length === coreCount);
+  return Array.from({ length: coreCount }, (_, index) =>
+    average(compatible.map(value => value[index]))
+  ).filter((value): value is number => value !== null);
+}
+
+function peakCoreArrays(values: (number[] | null)[]) {
+  const available = values.filter((value): value is number[] => value !== null);
+  if (available.length === 0) return null;
+  const coreCount = available[0].length;
+  const compatible = available.filter(value => value.length === coreCount);
+  return Array.from({ length: coreCount }, (_, index) =>
+    Math.max(...compatible.map(value => value[index]))
+  );
+}
+
 function buildPublicActivityBins(
   samples: PublicMachineHealthSample[],
   range: ActivityRange,
@@ -182,10 +213,15 @@ function buildPublicActivityBins(
     const pressureValues = included
       .map(sample => sample.pressurePercent)
       .filter((value): value is number => value !== null);
+    const networkPeaks = included
+      .map(sample => sample.networkPeakMibS)
+      .filter((value): value is number => value !== null);
+    const diskPeaks = included
+      .map(sample => sample.diskPeakMibS)
+      .filter((value): value is number => value !== null);
     return {
       start: binStart,
       end: binEnd,
-      sampleCount: included.length,
       cpuUsedPercent: average(included.map(sample => sample.cpuUsedPercent)),
       memoryUsedPercent: average(
         included.map(sample => sample.memoryUsedPercent)
@@ -197,6 +233,15 @@ function buildPublicActivityBins(
       diskMibS: average(diskValues),
       pressurePercent:
         pressureValues.length === 0 ? null : Math.max(...pressureValues),
+      coreAveragePercent: averageCoreArrays(
+        included.map(sample => sample.coreAveragePercent)
+      ),
+      corePeakPercent: peakCoreArrays(
+        included.map(sample => sample.corePeakPercent)
+      ),
+      networkPeakMibS:
+        networkPeaks.length === 0 ? null : Math.max(...networkPeaks),
+      diskPeakMibS: diskPeaks.length === 0 ? null : Math.max(...diskPeaks),
     };
   });
 }
@@ -265,6 +310,24 @@ function percent(value: number | null) {
 function formatThroughput(value: number | null) {
   if (value === null) return '—';
   return `${value.toFixed(value < 10 ? 1 : 0)} MiB/s`;
+}
+
+function DeltaValue({
+  value,
+  suffix,
+}: {
+  value: number;
+  suffix: string;
+}) {
+  const RisingIcon = value >= 0 ? ArrowUpRight : ArrowDownRight;
+  return (
+    <span className="inline-flex items-center justify-end gap-1">
+      <RisingIcon aria-hidden="true" className="size-3.5 stroke-[1.8]" />
+      <span>
+        {compactNumber(Math.abs(value))} {suffix}
+      </span>
+    </span>
+  );
 }
 
 function formatBin(bin: { start: number; end: number }, timeZone: string) {
@@ -476,7 +539,7 @@ function ResourceHistory({
             />
             {delta !== null && Math.abs(delta) >= 0.5 ? (
               <p className="opacity-45 mt-1 tabular-nums">
-                {delta > 0 ? '↑' : '↓'} {Math.abs(delta).toFixed(0)} points
+                <DeltaValue value={delta} suffix="points" />
               </p>
             ) : null}
           </div>
@@ -613,8 +676,10 @@ function CodexHistory({
             />
             {selectedIndex === null && previousInput > 0 ? (
               <p className="opacity-45 mt-1 tabular-nums">
-                {totalInput >= previousInput ? '↑' : '↓'}{' '}
-                {compactNumber(Math.abs(totalInput - previousInput))} vs prior
+                <DeltaValue
+                  value={totalInput - previousInput}
+                  suffix="vs prior"
+                />
               </p>
             ) : null}
           </div>
@@ -768,13 +833,111 @@ function CodexHistory({
   );
 }
 
-function PerformanceDetails({
-  bins,
-  range,
-}: {
-  bins: PublicActivityBin[];
-  range: ActivityRange;
-}) {
+function CoreActivity({ bins }: { bins: PublicActivityBin[] }) {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const timeZone = useSyncExternalStore(
+    subscribeToTimeZone,
+    getBrowserTimeZone,
+    getServerTimeZone
+  );
+  const availableIndexes = bins.flatMap((bin, index) =>
+    bin.coreAveragePercent ? [index] : []
+  );
+  if (availableIndexes.length === 0) return null;
+
+  const activeIndex =
+    selectedIndex !== null && bins[selectedIndex]?.coreAveragePercent
+      ? selectedIndex
+      : availableIndexes.at(-1)!;
+  const activeBin = bins[activeIndex];
+  const activeAverages = activeBin.coreAveragePercent!;
+  const activePeaks = activeBin.corePeakPercent;
+  const busiestCore = activeAverages.reduce(
+    (best, value, index) => (value > activeAverages[best] ? index : best),
+    0
+  );
+
+  return (
+    <section className="border-black/7 dark:border-white/8 border-t py-3">
+      <div className="mb-3 flex items-start justify-between gap-4">
+        <div className="flex items-start gap-2.5">
+          <Cpu
+            aria-hidden="true"
+            className="mt-0.5 size-4 shrink-0 stroke-[1.8] text-[#9b3b35] dark:text-[#ef8b83]"
+          />
+          <div>
+            <h4 className="text-sm font-medium">Core activity</h4>
+            <p className="opacity-45 mt-0.5 text-xs">
+              {formatBin(activeBin, timeZone)}
+            </p>
+          </div>
+        </div>
+        <p className="text-right text-xs tabular-nums">
+          <span className="block font-medium">Core {busiestCore}</span>
+          <span className="opacity-45 mt-0.5 block">
+            {percent(activeAverages[busiestCore])} avg
+            {activePeaks
+              ? ` · ${percent(activePeaks[busiestCore])} high`
+              : ''}
+          </span>
+        </p>
+      </div>
+
+      <div
+        className="flex h-28 items-stretch gap-px"
+        role="group"
+        aria-label="Per-core CPU history"
+      >
+        {bins.map((bin, index) => {
+          const averages = bin.coreAveragePercent;
+          if (!averages)
+            return (
+              <span
+                key={bin.start}
+                aria-hidden="true"
+                className="min-w-0 flex-1 rounded-[2px] bg-black/[0.025] dark:bg-white/[0.025]"
+              />
+            );
+          const selected = index === activeIndex;
+          const busiest = averages.reduce(
+            (best, value, core) => (value > averages[best] ? core : best),
+            0
+          );
+          return (
+            <button
+              key={bin.start}
+              type="button"
+              aria-pressed={selected}
+              aria-label={`${formatBin(bin, timeZone)}: core ${busiest} busiest at ${percent(averages[busiest])}`}
+              onClick={() => setSelectedIndex(index)}
+              className={`flex min-w-0 flex-1 flex-col gap-px rounded-[2px] p-px outline-none [-webkit-tap-highlight-color:transparent] enabled:hover:bg-black/[0.045] enabled:focus-visible:ring-2 enabled:focus-visible:ring-[#a53b34] dark:enabled:hover:bg-white/[0.055] ${
+                selected
+                  ? 'bg-black/[0.07] ring-1 ring-black/15 dark:bg-white/[0.09] dark:ring-white/20'
+                  : ''
+              }`}
+            >
+              {averages.map((value, core) => (
+                <span
+                  key={core}
+                  aria-hidden="true"
+                  className="min-h-px flex-1 w-full rounded-[1px] bg-[#b74a42] dark:bg-[#e77970]"
+                  style={{ opacity: Math.max(0.12, value / 100) }}
+                />
+              ))}
+            </button>
+          );
+        })}
+      </div>
+      <div className="opacity-35 mt-1 flex justify-between font-mono text-[0.58rem] tabular-nums">
+        <span>{axisLabel(bins[0], timeZone)}</span>
+        <span>Cores 0–{activeAverages.length - 1}</span>
+        <span>{axisLabel(bins.at(-1)!, timeZone)}</span>
+      </div>
+    </section>
+  );
+}
+
+function PerformanceDetails({ bins }: { bins: PublicActivityBin[] }) {
   const network = average(
     bins
       .map(bin => bin.networkMibS)
@@ -789,7 +952,16 @@ function PerformanceDetails({
     .map(bin => bin.pressurePercent)
     .filter((value): value is number => value !== null);
   const pressure = pressureValues.length ? Math.max(...pressureValues) : null;
-  const observed = bins.filter(bin => bin.sampleCount > 0).length;
+  const networkPeakValues = bins
+    .map(bin => bin.networkPeakMibS)
+    .filter((value): value is number => value !== null);
+  const diskPeakValues = bins
+    .map(bin => bin.diskPeakMibS)
+    .filter((value): value is number => value !== null);
+  const networkPeak = networkPeakValues.length
+    ? Math.max(...networkPeakValues)
+    : null;
+  const diskPeak = diskPeakValues.length ? Math.max(...diskPeakValues) : null;
 
   return (
     <details className="border-t border-black/10 py-1 dark:border-white/10">
@@ -797,29 +969,43 @@ function PerformanceDetails({
         Performance details
       </summary>
       <dl className="pb-2 text-sm">
-        <div className="border-black/7 dark:border-white/8 flex justify-between gap-4 border-t py-3">
-          <dt className="opacity-60">Network average</dt>
-          <dd className="font-medium tabular-nums">
-            {formatThroughput(network)}
+        <div className="border-black/7 dark:border-white/8 flex items-center justify-between gap-4 border-t py-3">
+          <dt className="opacity-60 flex items-center gap-2">
+            <Network aria-hidden="true" className="size-4 stroke-[1.7]" />
+            Network
+          </dt>
+          <dd className="text-right tabular-nums">
+            <span className="block font-medium">{formatThroughput(network)}</span>
+            {networkPeak !== null ? (
+              <span className="opacity-45 mt-0.5 block text-xs">
+                {formatThroughput(networkPeak)} high
+              </span>
+            ) : null}
           </dd>
         </div>
-        <div className="border-black/7 dark:border-white/8 flex justify-between gap-4 border-t py-3">
-          <dt className="opacity-60">Disk I/O average</dt>
-          <dd className="font-medium tabular-nums">{formatThroughput(disk)}</dd>
+        <div className="border-black/7 dark:border-white/8 flex items-center justify-between gap-4 border-t py-3">
+          <dt className="opacity-60 flex items-center gap-2">
+            <HardDrive aria-hidden="true" className="size-4 stroke-[1.7]" />
+            Disk I/O
+          </dt>
+          <dd className="text-right tabular-nums">
+            <span className="block font-medium">{formatThroughput(disk)}</span>
+            {diskPeak !== null ? (
+              <span className="opacity-45 mt-0.5 block text-xs">
+                {formatThroughput(diskPeak)} high
+              </span>
+            ) : null}
+          </dd>
         </div>
-        <div className="border-black/7 dark:border-white/8 flex justify-between gap-4 border-t py-3">
-          <dt className="opacity-60">Peak contention</dt>
+        <div className="border-black/7 dark:border-white/8 flex items-center justify-between gap-4 border-t py-3">
+          <dt className="opacity-60 flex items-center gap-2">
+            <Gauge aria-hidden="true" className="size-4 stroke-[1.7]" />
+            Peak contention
+          </dt>
           <dd className="font-medium tabular-nums">{percent(pressure)}</dd>
         </div>
-        {observed < bins.length ? (
-          <div className="border-black/7 dark:border-white/8 flex justify-between gap-4 border-t py-3">
-            <dt className="opacity-60">Observed</dt>
-            <dd className="font-medium tabular-nums">
-              {observed} of {RANGE_CONFIG[range].bins} buckets
-            </dd>
-          </div>
-        ) : null}
       </dl>
+      <CoreActivity bins={bins} />
     </details>
   );
 }
@@ -906,7 +1092,7 @@ export function MachineHealthOverview({
         </div>
       </div>
 
-      <PerformanceDetails bins={resourceBins} range={resourceRange} />
+      <PerformanceDetails bins={resourceBins} />
     </section>
   );
 }

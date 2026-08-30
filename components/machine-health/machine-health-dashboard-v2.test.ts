@@ -35,6 +35,10 @@ const sample: MachineHealthSample = {
   diskReadMibS: 1.25,
   diskWriteMibS: 2.5,
   pressurePercent: 0.4,
+  coreAveragePercent: [12, 18, 9, 24, 11, 15, 8, 20],
+  corePeakPercent: [31, 42, 22, 51, 28, 36, 19, 47],
+  networkPeakMibS: 8.5,
+  diskPeakMibS: 12.25,
   activitySource: 'sysstat-10m',
   activitySampleCount: 6,
   activityWindowMinutes: 60,
@@ -116,6 +120,9 @@ describe('machine health dashboard v2', () => {
     expect(html).toContain('Codex');
     expect(html).toContain('Total tokens');
     expect(html).toContain('12,542,000');
+    expect(html).toContain('Core activity');
+    expect(html).toContain('aria-label="Per-core CPU history"');
+    expect(html).toContain('Scraplet is');
     expect(html).toContain('aria-label="Resource history range"');
     expect(html).toContain('aria-label="Codex history range"');
     expect(html).toContain(

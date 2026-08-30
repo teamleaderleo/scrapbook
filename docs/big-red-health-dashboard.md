@@ -191,14 +191,16 @@ The default proposal is one report per hour, with manual runs whenever a change 
   12-hour, day, week, and month views.
 - Every successful ingest deletes samples older than 365 days, so live retention needs no second scheduled job.
 - Retry posts with the same host and timestamp update one sample instead of duplicating it, and an older delayed report cannot replace the latest status row.
-- The current exact-head live report measured 3,987 bytes as compact JSON and 5,015 bytes pretty-printed. One year at hourly frequency is 8,760 rows and roughly 33.3 MiB of raw compact payload per machine; a conservative database budget remains under 80 MiB per machine after allowing for JSONB, scalar columns, row overhead, and the index.
+- The current exact-head live report measured about 6.8 KiB as compact JSON. One year at hourly frequency is 8,760 rows and roughly 57 MiB of raw compact payload per machine; a conservative database budget remains under 140 MiB per machine after allowing for JSONB, scalar columns, row overhead, and the index.
 - The page has a manual refresh control and refreshes its server data once per hour while the tab is visible. Returning to a tab refreshes it only when the last page refresh is at least an hour old.
 
 A live 30-day Big Red token backfill scanned 720 complete hours in a few seconds and remained below
 the 512 KiB ingest limit. The production backfill was persisted on Aug. 31, 2026; routine health
 reports continue to store the latest complete Big Red hour without a resident process.
 
-Big Red already runs Ubuntu's `sysstat` accounting every 10 minutes. The collector reuses the six newest records to produce time-weighted 60-minute averages for CPU, memory, aggregate non-loopback network throughput, and non-loop disk I/O, plus CPU/memory/I/O [Pressure Stall Information](https://docs.kernel.org/accounting/psi.html). It emits only the aggregate result; host names, device names, and interface names parsed from `sadf` never enter the report. If readable accounting data is unavailable, the collector fails soft to the original 250 ms `/proc` point sample and labels the source accordingly.
+Big Red already runs Ubuntu's `sysstat` accounting every 10 minutes. The collector reuses the six newest records to produce time-weighted 60-minute averages for CPU, memory, aggregate non-loopback network throughput, and non-loop disk I/O, plus CPU/memory/I/O [Pressure Stall Information](https://docs.kernel.org/accounting/psi.html). It also retains one bounded average and high-water percentage for each numeric logical-core slot, and aggregate network/disk high-water rates, so the dashboard can show a time-by-core heatmap and useful rate context. It emits only those aggregates; host names, CPU model/topology, process attribution, device names, and interface names parsed from `sadf` never enter the report. If readable accounting data is unavailable, the collector fails soft to the original 250 ms `/proc` point sample and labels the source accordingly.
+
+Per-core history does not add another poller. `sadf -P ALL` returns rows from the same six existing records during the same hourly one-shot run; the schema accepts at most 256 percentages and requires paired, equal-length average/high arrays with every high at least its average. A live 16-core run added 32 percentages and kept the complete compact report below 7 KiB.
 
 The reuse path has no new resident process. A five-run same-machine comparison measured 934 ms mean before route status and 945 ms after it, a 10.5 ms difference inside the observed run-to-run spread. The compact payload grew by 181 bytes. Existing local sysstat history occupied 624 KiB after about 15 hours, independent of this dashboard.
 
@@ -295,9 +297,11 @@ MACHINE_HEALTH_INGEST_SECRET=<long random ingest-only secret>
 MACHINE_HEALTH_DASHBOARD_TOKEN=<optional recovery token>
 ```
 
-The dashboard uses the existing Supabase Google/GitHub session and the same explicit administrator
-allowlist as Space. An already signed-in administrator opens the dashboard directly. The dashboard
-token remains an optional recovery path and may be omitted if the existing
+The public route shows only sanitized machine-resource and Codex aggregates. The existing Supabase
+Google/GitHub session and the same explicit administrator allowlist as Space reveal the inline
+operational details. A signed-in administrator sees those details directly; everyone else sees two
+low-key provider icons at the bottom of the public summary instead of an authentication wall. The
+dashboard token remains an optional recovery path and may be omitted if the existing
 `PROXY_DASHBOARD_TOKEN` should provide recovery access to both private operations pages. Recovery
 cookies remain different and path-scoped. The ingest credential has no fallback to the proxy
 credential.
@@ -312,10 +316,10 @@ POST /api/machine-health/ingest
 POST /api/machine-health/codex-usage/ingest
 ```
 
-Production `/machine-health` verifies the current Supabase user against the administrator allowlist
-before reading the database. The signed, seven-day HttpOnly recovery cookie remains accepted. A
-visitor without either form of access is sent to Google/GitHub sign-in; the optional recovery form
-sends its token in a POST body rather than a query string.
+Production `/machine-health` always reads the sanitized public projection. It separately verifies
+the current Supabase user against the administrator allowlist before rendering operational
+diagnostics. The signed, seven-day HttpOnly recovery cookie remains accepted. The optional recovery
+form sends its token in a POST body rather than a query string.
 
 Ingestion accepts reports no more than 48 hours old and no more than 10 minutes in the future. The collector refuses to send its credential over plain HTTP except to loopback during local testing.
 It refuses every redirect, so a response cannot forward the ingest bearer token to another origin
