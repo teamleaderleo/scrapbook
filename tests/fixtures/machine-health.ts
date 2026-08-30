@@ -7,7 +7,12 @@ export const healthyMachineReport: MachineHealthPayload = {
   uptime_seconds: 86_400,
   load: { one: 1.6, five: 1.4, fifteen: 1.2, logical_cpus: 16 },
   cpu: { used_percent: 12 },
-  memory: { used_percent: 24, total_gib: 32 },
+  memory: {
+    used_percent: 24,
+    total_gib: 32,
+    swap_used_gib: 7.24,
+    swap_total_gib: 8,
+  },
   disk: { root_used_percent: 12, root_free_gib: 800 },
   temperature: { peak_sensor_c: 58 },
   graphics: { clock_mhz: 450, max_clock_mhz: 2_250 },

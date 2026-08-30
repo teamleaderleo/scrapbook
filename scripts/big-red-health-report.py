@@ -163,16 +163,28 @@ def failed_unit_count(*, user: bool = False) -> int:
     return sum(1 for line in output.splitlines() if line.strip())
 
 
-def memory() -> tuple[float, float]:
+def memory(
+    meminfo: Path = Path("/proc/meminfo"),
+) -> tuple[float, float, float, float]:
     values: dict[str, int] = {}
-    for line in Path("/proc/meminfo").read_text(encoding="utf-8").splitlines():
-        match = re.match(r"^(MemTotal|MemAvailable):\s+(\d+)\s+kB$", line)
+    for line in meminfo.read_text(encoding="utf-8").splitlines():
+        match = re.match(
+            r"^(MemTotal|MemAvailable|SwapTotal|SwapFree):\s+(\d+)\s+kB$",
+            line,
+        )
         if match:
             values[match.group(1)] = int(match.group(2)) * 1024
     total = values.get("MemTotal", 0)
     available = values.get("MemAvailable", 0)
+    swap_total = values.get("SwapTotal", 0)
+    swap_free = min(values.get("SwapFree", 0), swap_total)
     used_percent = 0.0 if total <= 0 else (total - available) / total * 100
-    return round(used_percent, 2), round(total / GIB, 2)
+    return (
+        round(used_percent, 2),
+        round(total / GIB, 2),
+        round((swap_total - swap_free) / GIB, 2),
+        round(swap_total / GIB, 2),
+    )
 
 
 def cpu_counters() -> tuple[int, int]:
@@ -420,7 +432,7 @@ def activity_window(now: dt.datetime) -> dict[str, Any]:
         return historical
 
     cpu_used, network_rx_mib_s, network_tx_mib_s = activity_sample()
-    memory_used, _ = memory()
+    memory_used, _, _, _ = memory()
     return {
         "source": "point",
         "window_minutes": 0,
@@ -2250,7 +2262,7 @@ def build_report() -> dict[str, Any]:
     coverage = process_coverage()
     state_inventory = codex_state()
     desktop = desktop_state()
-    _, total_gib = memory()
+    _, total_gib, swap_used_gib, swap_total_gib = memory()
     disk = shutil.disk_usage("/")
     graphics_clock_mhz, graphics_max_clock_mhz = graphics_clock()
     on_ac, battery_percent, power_state = battery_state()
@@ -2285,6 +2297,8 @@ def build_report() -> dict[str, Any]:
         "memory": {
             "used_percent": activity["memory_used_percent"],
             "total_gib": total_gib,
+            "swap_used_gib": swap_used_gib,
+            "swap_total_gib": swap_total_gib,
         },
         "disk": {
             "root_used_percent": round(disk.used / disk.total * 100, 2),

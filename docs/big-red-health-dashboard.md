@@ -9,7 +9,7 @@ This change only provides the code and operating plan. It does **not** apply the
 The page starts with the questions that matter when Leo is away from the machine:
 
 - Is the snapshot fresh, and did a configured guardrail trip?
-- Are hourly CPU/memory/network/disk activity, Linux resource pressure, root capacity, peak sensor temperature, the readable iGPU activity clock, and sampled physical-panel state moving in a bad direction?
+- Are hourly CPU/memory/network/disk activity, current whole-machine swap occupancy, Linux resource pressure, root capacity, peak sensor temperature, the readable iGPU activity clock, and sampled physical-panel state moving in a bad direction?
 - Are SSH, Tailscale, NetworkManager, GNOME Remote Desktop, and time sync active?
 - Is automatic idle suspend still disabled while deliberate lid-close suspend remains available, and are hibernate targets still masked?
 - Is the machine on AC, what is the aggregate battery state, and are there failed systemd units, unexpected development listeners, excess browser memory, or active RDP connections?
@@ -51,6 +51,8 @@ The ingestion schema is an allowlist and strips unknown keys at every object lev
 - usernames, home-directory paths, serial numbers, or raw command output.
 
 The collector parses local command output and emits only enum values, booleans, percentages, byte totals, and aggregate counts. Its legacy Codex count observes code-mode worker leaves while excluding persistent desktop and remote-control daemons. The route view calls the v2 ownership tool's aggregate `status` contract; the process-tag view calls the hook adapter's aggregate `status` contract. Scrapbook does not repeat either cgroup classifier or read route receipts directly. It checks the root/job/process/memory sums before accepting a tag snapshot. Malformed, missing, inconsistent, or version-mismatched status becomes `unavailable` instead of a guessed zero. Browser RSS sums the browser process trees and is a trend signal rather than unique physical memory because shared pages can appear in more than one process. RDP visibility counts established local connections without emitting the peer or endpoint.
+
+Whole-machine swap occupancy comes from `SwapTotal` and `SwapFree` in `/proc/meminfo` and is a point-in-time capacity gauge. The Memory card keeps it beside RAM use and PSI rather than treating occupied swap as active contention. Older stored snapshots show the swap value as unavailable.
 
 Token reports never send session IDs. Each reporter HMACs the local session ID with the shared
 ingest secret and sends a truncated 128-bit fingerprint used only for collision detection. A retry

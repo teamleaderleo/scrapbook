@@ -140,6 +140,37 @@ describe('machine health contract', () => {
     expect(parsed.hygiene.codex_runtime).toBeUndefined();
   });
 
+  it('accepts older memory snapshots and rejects inconsistent swap gauges', () => {
+    const {
+      swap_used_gib: _swapUsed,
+      swap_total_gib: _swapTotal,
+      ...olderMemory
+    } = healthyMachineReport.memory;
+    const parsed = machineHealthPayloadSchema.parse({
+      ...healthyMachineReport,
+      memory: olderMemory,
+    });
+
+    expect(parsed.memory.swap_used_gib).toBeUndefined();
+    expect(parsed.memory.swap_total_gib).toBeUndefined();
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        memory: { ...healthyMachineReport.memory, swap_used_gib: 9 },
+      }).success
+    ).toBe(false);
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        memory: {
+          used_percent: 24,
+          total_gib: 32,
+          swap_used_gib: 7.24,
+        },
+      }).success
+    ).toBe(false);
+  });
+
   it('accepts a snapshot from before reliability history was added', () => {
     const { reliability: _reliability, ...olderReport } = healthyMachineReport;
     const parsed = machineHealthPayloadSchema.parse(olderReport);

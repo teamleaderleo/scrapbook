@@ -150,7 +150,7 @@ class SysstatParsingTest(unittest.TestCase):
         with (
             patch.object(REPORT, "sysstat_activity", return_value=None),
             patch.object(REPORT, "activity_sample", return_value=(12.5, 0.25, 0.5)),
-            patch.object(REPORT, "memory", return_value=(30.0, 32.0)),
+            patch.object(REPORT, "memory", return_value=(30.0, 32.0, 7.0, 8.0)),
         ):
             activity = REPORT.activity_window(now)
 
@@ -158,6 +158,28 @@ class SysstatParsingTest(unittest.TestCase):
         self.assertEqual(activity["sample_count"], 1)
         self.assertEqual(activity["cpu_used_percent"], 12.5)
         self.assertIsNone(activity["cpu_pressure_some_percent"])
+
+
+class MemoryTest(unittest.TestCase):
+    def test_reports_ram_and_whole_machine_swap_without_raw_meminfo(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            meminfo = Path(temporary_directory) / "meminfo"
+            meminfo.write_text(
+                "\n".join(
+                    [
+                        "MemTotal:       33554432 kB",
+                        "MemAvailable:   25165824 kB",
+                        "SwapTotal:       8388608 kB",
+                        "SwapFree:         786432 kB",
+                        "PrivateField:          1 kB",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            observed = REPORT.memory(meminfo)
+
+        self.assertEqual(observed, (25.0, 32.0, 7.25, 8.0))
 
 
 class CodexUsageTest(unittest.TestCase):

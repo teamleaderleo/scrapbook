@@ -271,10 +271,32 @@ export const machineHealthPayloadSchema = z.object({
   cpu: z.object({
     used_percent: percent,
   }),
-  memory: z.object({
-    used_percent: percent,
-    total_gib: nonnegative,
-  }),
+  memory: z
+    .object({
+      used_percent: percent,
+      total_gib: nonnegative,
+      swap_used_gib: nonnegative.optional(),
+      swap_total_gib: nonnegative.optional(),
+    })
+    .superRefine((value, context) => {
+      const hasUsed = value.swap_used_gib !== undefined;
+      const hasTotal = value.swap_total_gib !== undefined;
+      if (hasUsed !== hasTotal) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'swap usage and capacity must be reported together',
+        });
+      } else if (
+        value.swap_used_gib !== undefined &&
+        value.swap_total_gib !== undefined &&
+        value.swap_used_gib > value.swap_total_gib
+      ) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'swap usage cannot exceed capacity',
+        });
+      }
+    }),
   disk: z.object({
     root_used_percent: percent,
     root_free_gib: nonnegative,

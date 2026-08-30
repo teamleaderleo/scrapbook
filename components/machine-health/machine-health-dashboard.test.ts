@@ -119,6 +119,7 @@ describe('machine health dashboard', () => {
     expect(html).toContain('13,875,000 / 15,000,000');
     expect(html).toContain('Cache writes');
     expect(html).toContain('CPU');
+    expect(html).toContain('32 GiB RAM · 7.2 / 8.0 GiB swap');
     expect(html).toContain('Contention high');
     expect(html).toContain('iGPU clock');
     expect(html).toContain('Mac transport RTT');

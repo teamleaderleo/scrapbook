@@ -501,7 +501,14 @@ export function MachineHealthDashboard({
               : 'Memory · point'
           }
           value={formatPercent(payload.memory.used_percent)}
-          note={`${formatPercent(payload.activity.memory_peak_percent)} peak · ${payload.memory.total_gib.toFixed(0)} GiB`}
+          note={`${formatPercent(payload.activity.memory_peak_percent)} peak · ${payload.memory.total_gib.toFixed(0)} GiB RAM · ${
+            payload.memory.swap_total_gib === undefined ||
+            payload.memory.swap_used_gib === undefined
+              ? 'swap —'
+              : payload.memory.swap_total_gib === 0
+                ? 'swap off'
+                : `${payload.memory.swap_used_gib.toFixed(1)} / ${payload.memory.swap_total_gib.toFixed(1)} GiB swap`
+          }`}
         />
         <Metric
           label="Root disk"
