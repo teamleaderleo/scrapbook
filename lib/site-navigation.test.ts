@@ -20,6 +20,7 @@ describe('site navigation registry', () => {
         '/knowledge',
         '/work',
         '/time',
+        '/machine-health',
         '/gallery',
         '/desk',
         '/atelier',
@@ -57,6 +58,7 @@ describe('site navigation registry', () => {
     expect(primaryIds).not.toContain('knowledge');
     expect(primaryIds).not.toContain('journal');
     expect(primaryIds).not.toContain('proxy');
+    expect(primaryIds).not.toContain('machine-health');
     expect(primaryIds).not.toContain('snow-globe');
     expect(primaryIds).not.toContain('activity-lab');
     expect(primaryIds).not.toContain('sigil-lab');
@@ -88,6 +90,9 @@ describe('site navigation registry', () => {
       'operational'
     );
     expect(
+      siteNavigationItems.find(item => item.id === 'machine-health')?.surface
+    ).toBe('private');
+    expect(
       siteNavigationItems.find(item => item.id === 'github')?.surface
     ).toBe('external');
 
@@ -102,7 +107,10 @@ describe('site navigation registry', () => {
       'journal',
       'time',
     ]);
-    expect(nonPublicNavigationItems.map(item => item.id)).toEqual(['proxy']);
+    expect(nonPublicNavigationItems.map(item => item.id)).toEqual([
+      'proxy',
+      'machine-health',
+    ]);
     expect(homeRoomNavigationItems.map(item => item.id)).toEqual([
       'space',
       'knowledge',
@@ -119,10 +127,14 @@ describe('site navigation registry', () => {
     const space = siteNavigationItems.find(item => item.id === 'space');
     const knowledge = siteNavigationItems.find(item => item.id === 'knowledge');
     const desk = siteNavigationItems.find(item => item.id === 'desk');
+    const machineHealth = siteNavigationItems.find(
+      item => item.id === 'machine-health'
+    );
     expect(operator).toBeDefined();
     expect(space).toBeDefined();
     expect(knowledge).toBeDefined();
     expect(desk).toBeDefined();
+    expect(machineHealth).toBeDefined();
     expect(isNavigationItemActive('/operator/', operator!)).toBe(true);
     expect(isNavigationItemActive('/space/review', space!)).toBe(true);
     expect(isNavigationItemActive('/space/edit/example/', space!)).toBe(true);
@@ -130,6 +142,9 @@ describe('site navigation registry', () => {
       isNavigationItemActive('/knowledge/storage/mvcc/', knowledge!)
     ).toBe(true);
     expect(isNavigationItemActive('/desk/example/', desk!)).toBe(true);
+    expect(
+      isNavigationItemActive('/machine-health/access', machineHealth!)
+    ).toBe(true);
   });
 
   it('keeps home exact and external links inactive', () => {
@@ -154,6 +169,12 @@ describe('site navigation registry', () => {
     expect(getActiveNavigationItem('/desk')?.id).toBe('desk');
     expect(getActiveNavigationItem('/desk/example')?.id).toBe('desk');
     expect(getActiveNavigationItem('/journal')?.id).toBe('journal');
+    expect(getActiveNavigationItem('/machine-health')?.id).toBe(
+      'machine-health'
+    );
+    expect(getActiveNavigationItem('/machine-health/access')?.id).toBe(
+      'machine-health'
+    );
     expect(getActiveNavigationItem('/snow-globe')?.id).toBe('snow-globe');
     expect(getActiveNavigationItem('/resume')).toBeUndefined();
     expect(getActiveNavigationItem('/blog/about')).toBeUndefined();

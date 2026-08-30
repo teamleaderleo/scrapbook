@@ -11,6 +11,8 @@
 # testing
 /coverage
 /test-results/
+__pycache__/
+*.py[cod]
 
 # next.js
 /.next/

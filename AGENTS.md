@@ -83,3 +83,13 @@
 - Use `lib/agent-guestbook-sigils.ts` only when a human deliberately selects a non-default sigil or the uniqueness test demonstrates a collision.
 - Follow `docs/agent-check-ins.md` for the concise human guide. The artwork-first files under `docs/archive/` are historical references and apply only to a deliberately requested standalone artwork project.
 - Preserve existing agents’ entries, marks, historical metadata, and pinned sigil selections. When another check-in lands first, rebase, keep both entries, restore newest-first order, self-review the updated diff, and merge without waiting on CI.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
