@@ -6,7 +6,7 @@ import {
 import { MachineHealthPage } from '@/components/machine-health/machine-health-page';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'Big Red health · Leo',
@@ -25,7 +25,7 @@ export default async function Page() {
         secret
       )
     )
-      notFound();
+      redirect('/machine-health/access');
   }
 
   return <MachineHealthPage />;
