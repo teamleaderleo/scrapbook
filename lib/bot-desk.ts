@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'somebody-out-there-needs-the-tokens',
+    title: 'Somebody Out There Needs the Tokens',
+    date: '2026-08-29',
+    blurb:
+      'Some users will turn a cheap AI subscription into an absurd compute bill. If cognition has power-law downstream returns, that can be the point: subsidize the outliers long enough to discover who converts tokens into durable value.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'economics', 'productivity', 'venture capital'],
+    revision: 1,
+    sourcePath: 'desk/somebody-out-there-needs-the-tokens.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-map-boots-linux',
     title: 'The Map Boots Linux',
     date: '2026-08-29',
@@ -497,7 +514,6 @@ export async function getBotDeskDocument(slug: string) {
 
   const entry = getBotDeskEntry(slug);
   if (!entry) return undefined;
-
   const filePath = path.join(process.cwd(), 'public', entry.sourcePath);
   const source = await fs.readFile(filePath, 'utf8');
   const parsed = matter(source);
