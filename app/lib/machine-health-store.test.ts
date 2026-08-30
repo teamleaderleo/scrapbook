@@ -4,6 +4,7 @@ import {
   codexTokenReportSchema,
   evaluateMachineHealth,
   machineHealthPayloadSchema,
+  panelOnSample,
 } from './machine-health-store';
 import { healthyMachineReport } from '@/tests/fixtures/machine-health';
 
@@ -330,6 +331,31 @@ describe('machine health contract', () => {
     const parsed = machineHealthPayloadSchema.parse(olderReport);
 
     expect(parsed.desktop).toBeUndefined();
+  });
+
+  it('derives only authoritative panel on/off samples', () => {
+    expect(panelOnSample(healthyMachineReport)).toBe(false);
+    expect(
+      panelOnSample({
+        ...healthyMachineReport,
+        desktop: {
+          ...healthyMachineReport.desktop!,
+          panel: {
+            source: 'sysfs-backlight',
+            state: 'unknown',
+            actual_brightness_percent: 0,
+          },
+        },
+      })
+    ).toBeNull();
+    const { panel: _panel, ...desktopWithoutPanel } =
+      healthyMachineReport.desktop!;
+    expect(
+      panelOnSample({
+        ...healthyMachineReport,
+        desktop: desktopWithoutPanel,
+      })
+    ).toBeNull();
   });
 
   it('rejects malformed or inconsistent desktop state', () => {

@@ -16,6 +16,7 @@ const samples = Array.from({ length: 4 }, (_, index) => ({
   checkedAt: new Date(
     Date.parse(checkedAt) - (3 - index) * 86_400_000
   ).toISOString(),
+  panelOn: null,
   cpuUsedPercent: 12 + index,
   rootUsedPercent: 11 + index,
   memoryUsedPercent: 20 + index,

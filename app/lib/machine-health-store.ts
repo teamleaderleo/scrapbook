@@ -587,6 +587,7 @@ export type CodexTokenReport = z.infer<typeof codexTokenReportSchema>;
 
 export type MachineHealthSample = {
   checkedAt: string;
+  panelOn: boolean | null;
   cpuUsedPercent: number;
   rootUsedPercent: number;
   memoryUsedPercent: number;
@@ -676,6 +677,14 @@ function toNumber(value: unknown, fallback = 0) {
   )
     return Number(value);
   return fallback;
+}
+
+export function panelOnSample(payload: MachineHealthPayload) {
+  const panel = payload.desktop?.panel;
+  if (panel?.source !== 'sysfs-backlight') return null;
+  if (panel.state === 'on') return true;
+  if (panel.state === 'off') return false;
+  return null;
 }
 
 export function evaluateMachineHealth(payload: MachineHealthPayload) {
@@ -1321,6 +1330,9 @@ export async function readMachineHealth(
             : null;
         return {
           checkedAt: new Date(row.checked_at).toISOString(),
+          panelOn: parsedSample.success
+            ? panelOnSample(parsedSample.data)
+            : null,
           cpuUsedPercent: toNumber(row.cpu_used_percent),
           rootUsedPercent: toNumber(row.root_used_percent),
           memoryUsedPercent: toNumber(row.memory_used_percent),

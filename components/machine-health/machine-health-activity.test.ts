@@ -20,6 +20,7 @@ function sample(
 ): MachineHealthSample {
   return {
     checkedAt,
+    panelOn: null,
     cpuUsedPercent: 20,
     rootUsedPercent: 10,
     memoryUsedPercent: 30,
@@ -215,6 +216,30 @@ describe('machine health activity bins', () => {
     expect(bins.at(-1)?.sampleCount).toBe(1);
   });
 
+  it('weights panel-on share by observed snapshots and keeps unknown coverage', () => {
+    const bins = buildActivityBins(
+      [
+        sample('2026-08-29T06:05:00.000Z', { panelOn: true }),
+        sample('2026-08-29T06:25:00.000Z', { panelOn: false }),
+        sample('2026-08-29T06:45:00.000Z'),
+      ],
+      '24h',
+      now
+    );
+
+    expect(bins.at(-1)).toMatchObject({
+      sampleCount: 3,
+      panelOnPercent: 50,
+      panelOnCount: 1,
+      panelObservedCount: 2,
+    });
+    expect(bins.at(-2)).toMatchObject({
+      panelOnPercent: null,
+      panelOnCount: 0,
+      panelObservedCount: 0,
+    });
+  });
+
   it('averages only observed Mac probes and preserves path counts', () => {
     const bins = buildActivityBins(
       [
@@ -343,12 +368,54 @@ describe('machine health activity bins', () => {
     );
 
     expect(html).toContain('Mac transport RTT');
-    expect(html).toContain('aria-label="Mac transport RTT across 10 observation bins; 2 probes"');
+    expect(html).toContain(
+      'aria-label="Mac transport RTT across 10 observation bins; 2 probes"'
+    );
     expect(html).toContain('data-remote-path="direct"');
     expect(html).toContain('data-remote-path="peer-relay"');
     expect(html).toContain('1 direct');
     expect(html).toContain('1 peer');
     expect(html).toContain('No transport probe');
+  });
+
+  it('renders sampled panel history without treating missing state as off', () => {
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthActivity, {
+        samples: [
+          sample('2026-08-29T05:05:00.000Z', { panelOn: true }),
+          sample('2026-08-29T06:05:00.000Z', { panelOn: false }),
+          sample('2026-08-29T06:15:00.000Z', { panelOn: false }),
+          sample('2026-08-29T06:25:00.000Z', { panelOn: false }),
+          sample('2026-08-29T06:35:00.000Z'),
+        ],
+        codexSamples: [],
+        now,
+        graphicsMaxClockMhz: 2_200,
+        latestActivity: {
+          source: 'sysstat-10m',
+          window_minutes: 60,
+          sample_count: 6,
+          cpu_peak_percent: 20,
+          memory_peak_percent: 30,
+          cpu_pressure_some_percent: 0.1,
+          memory_pressure_full_percent: 0,
+          io_pressure_full_percent: 0,
+          disk_read_mib_s: 1,
+          disk_write_mib_s: 2,
+        },
+      })
+    );
+
+    expect(html).toContain('Panel on samples');
+    expect(html).toContain(
+      'aria-label="Panel on share across 10 observation bins; 4 panel samples"'
+    );
+    expect(html).toContain('data-panel-observed="true"');
+    expect(html).toContain('>25%<');
+    expect(html).toContain('1 on');
+    expect(html).toContain('3 off');
+    expect(html).toContain('1 unknown');
+    expect(html).toContain('No panel observation');
   });
 
   it('places Codex counters in their fixed usage hour and deduplicates retries', () => {

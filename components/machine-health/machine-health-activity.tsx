@@ -14,6 +14,9 @@ type ActivityBin = {
   start: number;
   end: number;
   sampleCount: number;
+  panelOnPercent: number | null;
+  panelOnCount: number;
+  panelObservedCount: number;
   cpuUsedPercent: number | null;
   memoryUsedPercent: number | null;
   graphicsClockMhz: number | null;
@@ -136,11 +139,21 @@ export function buildActivityBins(
         : [{ rttMs: sample.remoteRttMs, path: sample.remoteTransportPath }]
     );
     const remoteRttValues = remoteProbes.map(probe => probe.rttMs);
+    const panelObservations = included
+      .map(sample => sample.panelOn)
+      .filter((value): value is boolean => value !== null);
+    const panelOnCount = panelObservations.filter(Boolean).length;
 
     return {
       start: binStart,
       end: binEnd,
       sampleCount: included.length,
+      panelOnPercent:
+        panelObservations.length === 0
+          ? null
+          : (panelOnCount / panelObservations.length) * 100,
+      panelOnCount,
+      panelObservedCount: panelObservations.length,
       cpuUsedPercent: average(included.map(sample => sample.cpuUsedPercent)),
       memoryUsedPercent: average(
         included.map(sample => sample.memoryUsedPercent)
@@ -228,9 +241,8 @@ export function buildActivityBins(
             : null,
       remoteRttMs: average(remoteRttValues),
       remoteProbeCount: remoteRttValues.length,
-      remoteDirectProbes: remoteProbes.filter(
-        probe => probe.path === 'direct'
-      ).length,
+      remoteDirectProbes: remoteProbes.filter(probe => probe.path === 'direct')
+        .length,
       remoteRelayProbes: remoteProbes.filter(probe => probe.path === 'relay')
         .length,
       remotePeerRelayProbes: remoteProbes.filter(
@@ -466,25 +478,111 @@ function ObservationChart({
 }
 
 function weightedRemoteRtt(bins: ActivityBin[]) {
-  const probes = bins.reduce(
-    (total, bin) => total + bin.remoteProbeCount,
-    0
-  );
+  const probes = bins.reduce((total, bin) => total + bin.remoteProbeCount, 0);
   if (probes === 0) return null;
   return (
     bins.reduce(
-      (total, bin) =>
-        total + (bin.remoteRttMs ?? 0) * bin.remoteProbeCount,
+      (total, bin) => total + (bin.remoteRttMs ?? 0) * bin.remoteProbeCount,
       0
     ) / probes
   );
 }
 
+function weightedPanelShare(bins: ActivityBin[]) {
+  const observed = bins.reduce(
+    (total, bin) => total + bin.panelObservedCount,
+    0
+  );
+  if (observed === 0) return null;
+  const on = bins.reduce((total, bin) => total + bin.panelOnCount, 0);
+  return (on / observed) * 100;
+}
+
+function formatPanelShare(value: number | null) {
+  if (value === null) return '—';
+  return `${Number.isInteger(value) ? value.toFixed(0) : value.toFixed(1)}%`;
+}
+
+function PanelObservationChart({
+  bins,
+  previousBins,
+}: {
+  bins: ActivityBin[];
+  previousBins: ActivityBin[];
+}) {
+  const currentShare = weightedPanelShare(bins);
+  const previousShare = weightedPanelShare(previousBins);
+  const observed = bins.reduce(
+    (total, bin) => total + bin.panelObservedCount,
+    0
+  );
+  const on = bins.reduce((total, bin) => total + bin.panelOnCount, 0);
+  const healthSamples = bins.reduce((total, bin) => total + bin.sampleCount, 0);
+  const unknown = healthSamples - observed;
+
+  return (
+    <article className="bg-white/55 dark:bg-black/15 rounded-xl border border-black/10 p-4 dark:border-white/10">
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-sm font-black">Panel on samples</h3>
+        <div className="text-right">
+          <p className="font-mono text-xs tabular-nums opacity-70">
+            {formatPanelShare(currentShare)}
+          </p>
+          <p className="opacity-45 mt-0.5 text-[0.62rem] tabular-nums">
+            {formatDelta(currentShare, previousShare, '%')}
+          </p>
+        </div>
+      </div>
+      <div
+        className="mt-4 flex h-20 items-end gap-px"
+        role="img"
+        aria-label={`Panel on share across ${bins.length} observation bins; ${observed} panel samples`}
+      >
+        {bins.map(bin => {
+          const value = bin.panelOnPercent;
+          const missing = bin.sampleCount - bin.panelObservedCount;
+          const detail =
+            value === null
+              ? 'No panel observation'
+              : `${formatPanelShare(value)} · ${bin.panelOnCount}/${bin.panelObservedCount} on`;
+          return (
+            <span
+              key={bin.start}
+              className="relative flex h-full min-w-0 flex-1 items-end"
+              data-panel-observed={
+                bin.panelObservedCount > 0 ? 'true' : undefined
+              }
+              title={`${new Date(bin.start).toISOString()}: ${detail}${missing > 0 ? ` · ${missing} unknown` : ''}`}
+            >
+              <span
+                aria-hidden="true"
+                className={`w-full rounded-t-[2px] ${
+                  value === null
+                    ? 'h-px bg-black/10 dark:bg-white/10'
+                    : 'bg-[#376d73] dark:bg-[#6fb3b5]'
+                }`}
+                style={
+                  value === null
+                    ? undefined
+                    : { height: `${Math.max(4, value)}%` }
+                }
+              />
+            </span>
+          );
+        })}
+      </div>
+      <div className="opacity-45 mt-1 flex justify-between text-[0.58rem] tabular-nums">
+        <span>{on} on</span>
+        <span>{observed - on} off</span>
+        <span>{unknown} unknown</span>
+      </div>
+    </article>
+  );
+}
+
 function remotePathText(bin: ActivityBin) {
   return [
-    bin.remoteDirectProbes > 0
-      ? `${bin.remoteDirectProbes} direct`
-      : null,
+    bin.remoteDirectProbes > 0 ? `${bin.remoteDirectProbes} direct` : null,
     bin.remoteRelayProbes > 0 ? `${bin.remoteRelayProbes} relay` : null,
     bin.remotePeerRelayProbes > 0
       ? `${bin.remotePeerRelayProbes} peer-relay`
@@ -742,6 +840,7 @@ export function MachineHealthActivity({
           ceiling={graphicsMaxClockMhz ?? undefined}
           unit="MHz"
         />
+        <PanelObservationChart bins={bins} previousBins={previousBins} />
         <ObservationChart
           label="Browser RSS high"
           bins={bins}

@@ -9,7 +9,7 @@ This change only provides the code and operating plan. It does **not** apply the
 The page starts with the questions that matter when Leo is away from the machine:
 
 - Is the snapshot fresh, and did a configured guardrail trip?
-- Are hourly CPU/memory/network/disk activity, Linux resource pressure, root capacity, peak sensor temperature, and the readable iGPU activity clock moving in a bad direction?
+- Are hourly CPU/memory/network/disk activity, Linux resource pressure, root capacity, peak sensor temperature, the readable iGPU activity clock, and sampled physical-panel state moving in a bad direction?
 - Are SSH, Tailscale, NetworkManager, GNOME Remote Desktop, and time sync active?
 - Is automatic idle suspend still disabled while deliberate lid-close suspend remains available, and are hibernate targets still masked?
 - Is the machine on AC, what is the aggregate battery state, and are there failed systemd units, unexpected development listeners, excess browser memory, or active RDP connections?
@@ -38,7 +38,7 @@ activity charts mark the exact bins containing partial coverage, point-sample fa
 discontinuities with distinct line/shape cues that do not rely on color. The footer keeps the range
 totals. This avoids drawing equally authoritative bars from unlike data.
 
-This is not literal Screen Time. Each row combines an hourly aggregate with a few current point observations, so the UI leaves empty bins visible and never implies that a process ran continuously between reports.
+This is not literal Screen Time. Each row combines an hourly aggregate with a few current point observations, so the UI leaves empty bins visible and never implies that a process ran continuously between reports. The panel chart reports the share of authoritative physical-backlight snapshots observed on. It weights the range by snapshots, shows on/off/unknown counts, and never converts missing states into off time.
 
 ## Privacy boundary
 
@@ -79,8 +79,8 @@ one boolean stating whether both configured wallpaper files are readable. A sepa
 receipt reduces one to sixteen backlights to `on`, `off`, or `unknown` plus their maximum actual
 brightness percentage. Any missing, malformed, out-of-range, or partially unreadable device makes
 that receipt unavailable. No device or connector name survives. Older stored reports omit the
-backlight and wallpaper fields instead of being relabeled. It is a current readout, not another
-history chart.
+backlight and wallpaper fields instead of being relabeled. The current card shows the latest
+receipt; the activity chart derives nullable on/off samples from the same stored payloads.
 A direct live GNOME receipt took 0.28 seconds and 32,680 KiB peak RSS. A current print-only
 collector observation with the backlight receipt took 3.94 seconds and 64,384 KiB peak RSS; its
 compact payload was 6,494 bytes. The existing Codex-state scan still dominates the hourly run.
