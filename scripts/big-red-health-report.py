@@ -324,8 +324,10 @@ def weighted_average(records: list[dict[str, float]], key: str) -> float:
     return sum(record[key] * record["interval"] for record in records) / weight
 
 
-def sysstat_activity(now: dt.datetime) -> dict[str, Any] | None:
-    directory = Path("/var/log/sysstat")
+def sysstat_activity(
+    now: dt.datetime, directory: Path | None = None
+) -> dict[str, Any] | None:
+    directory = directory or Path("/var/log/sysstat")
     try:
         files = sorted(
             directory.glob("sa[0-9][0-9]"),

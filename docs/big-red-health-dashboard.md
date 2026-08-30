@@ -32,7 +32,10 @@ aggregate memory, and the active RDP connection count stay coarse. The current w
 splits hook-owned execution into chat roots, main-root jobs, subagent jobs, processes, and memory. It
 keeps opaque route and agent IDs out of the snapshot.
 
-Each stored row also carries its accounting source, interval count, window length, and uptime. The activity footer therefore distinguishes full sysstat windows, partial coverage, point-sample fallbacks, and reboot discontinuities instead of drawing equally authoritative bars from unlike data.
+Each stored row also carries its accounting source, interval count, window length, and uptime. The
+activity charts mark the exact bins containing partial coverage, point-sample fallbacks and reboot
+discontinuities with distinct line/shape cues that do not rely on color. The footer keeps the range
+totals. This avoids drawing equally authoritative bars from unlike data.
 
 This is not literal Screen Time. Each row combines an hourly aggregate with a few current point observations, so the UI leaves empty bins visible and never implies that a process ran continuously between reports.
 
@@ -131,7 +134,11 @@ prior range. Missing source data stays empty instead of becoming zero. The exist
 and seven-day point delta remain in Workspace hygiene; the charts show when growth or cleanup was
 observed.
 
-An independent `sar` read of the same six intervals reconciled the collector output after rounding: CPU 7.25%, memory 12.44%, network 0.059/0.045 MiB/s, disk 1.989/11.043 MiB/s, and PSI CPU/memory/I/O 0.193/0.015/0.345%. The Python regression test separately verifies interval weighting, loopback/loop-device exclusion, UTC handling, and the labeled point-sample fallback.
+An independent `sar` read of the same six intervals reconciled the collector output after rounding:
+CPU 7.25%, memory 12.44%, network 0.059/0.045 MiB/s, disk 1.989/11.043 MiB/s, and PSI
+CPU/memory/I/O 0.193/0.015/0.345%. Python regression tests separately verify interval weighting,
+loopback/loop-device exclusion, explicit UTC, one six-record window spanning two daily archives at
+midnight, and the labeled point-sample fallback.
 
 The collector also reads battery/AC state and the Intel iGPU's current/max activity clocks from sysfs when those files are available. Big Red does not currently expose a user-readable GPU busy percentage, so the dashboard labels the clock honestly and does not invent utilization or install another package.
 

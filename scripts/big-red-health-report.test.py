@@ -85,6 +85,66 @@ class SysstatParsingTest(unittest.TestCase):
             )
         )
 
+    def test_collects_one_window_across_utc_midnight(self) -> None:
+        def statistic(date: str, time: str, cpu: float) -> dict[str, object]:
+            return {
+                "timestamp": {
+                    "date": date,
+                    "time": time,
+                    "tz": "UTC",
+                    "interval": 600,
+                },
+                "cpu-load": [{"cpu": "all", "idle": 100 - cpu}],
+                "memory": {"memused-percent": 30},
+            }
+
+        documents = {
+            "sa29": {
+                "sysstat": {
+                    "hosts": [
+                        {
+                            "statistics": [
+                                statistic("2026-08-29", "23:40:00", 10),
+                                statistic("2026-08-29", "23:50:00", 20),
+                            ]
+                        }
+                    ]
+                }
+            },
+            "sa30": {
+                "sysstat": {
+                    "hosts": [
+                        {
+                            "statistics": [
+                                statistic("2026-08-30", "00:00:00", 30),
+                                statistic("2026-08-30", "00:10:00", 40),
+                                statistic("2026-08-30", "00:20:00", 50),
+                                statistic("2026-08-30", "00:30:00", 60),
+                            ]
+                        }
+                    ]
+                }
+            },
+        }
+
+        def fake_run(*arguments: str) -> tuple[int, str]:
+            return 0, json.dumps(documents[Path(arguments[2]).name])
+
+        now = dt.datetime(2026, 8, 30, 0, 35, tzinfo=dt.timezone.utc)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            directory = Path(temporary_directory)
+            (directory / "sa29").touch()
+            (directory / "sa30").touch()
+            with patch.object(REPORT, "run", side_effect=fake_run):
+                activity = REPORT.sysstat_activity(now, directory)
+
+        self.assertIsNotNone(activity)
+        assert activity is not None
+        self.assertEqual(activity["sample_count"], 6)
+        self.assertEqual(activity["window_minutes"], 60)
+        self.assertEqual(activity["cpu_used_percent"], 35)
+        self.assertEqual(activity["cpu_peak_percent"], 60)
+
     def test_falls_back_to_a_labeled_point_sample(self) -> None:
         now = dt.datetime(2026, 8, 29, tzinfo=dt.timezone.utc)
         with (

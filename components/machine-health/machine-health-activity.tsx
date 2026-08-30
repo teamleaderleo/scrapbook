@@ -327,6 +327,17 @@ function formatDelta(
   return `${sign}${formatValue(magnitude, unit)} vs prior`;
 }
 
+function activityMarkerText(bin: ActivityBin) {
+  const markers = [
+    bin.fallbackCount > 0 ? `${bin.fallbackCount} fallback` : null,
+    bin.undercoveredCount > 0 ? `${bin.undercoveredCount} partial` : null,
+    bin.rebootCount > 0
+      ? `${bin.rebootCount} reboot${bin.rebootCount === 1 ? '' : 's'}`
+      : null,
+  ].filter((value): value is string => value !== null);
+  return markers.join(', ');
+}
+
 function ObservationChart({
   label,
   bins,
@@ -352,6 +363,7 @@ function ObservationChart({
   const max = Math.max(ceiling ?? 0, ...present, 1);
   const currentSummary = aggregateValues(present, summary);
   const previousSummary = aggregateValues(previousPresent, summary);
+  const markedBins = bins.filter(bin => activityMarkerText(bin)).length;
 
   return (
     <article className="bg-white/55 dark:bg-black/15 rounded-xl border border-black/10 p-4 dark:border-white/10">
@@ -369,28 +381,60 @@ function ObservationChart({
       <div
         className="mt-4 flex h-20 items-end gap-px"
         role="img"
-        aria-label={`${label} across ${bins.length} observation bins`}
+        aria-label={`${label} across ${bins.length} observation bins${markedBins > 0 ? `; ${markedBins} source or reboot bins marked` : ''}`}
       >
-        {values.map((item, index) => (
-          <span
-            key={bins[index].start}
-            className={`min-w-0 flex-1 rounded-t-[2px] ${
-              item === null
-                ? 'h-px bg-black/10 dark:bg-white/10'
-                : 'bg-[#a53b34] dark:bg-[#e27c72]'
-            }`}
-            style={
-              item === null
-                ? undefined
-                : { height: `${Math.max(4, (item / max) * 100)}%` }
-            }
-            title={
-              item === null
-                ? 'No observation'
-                : `${new Date(bins[index].start).toISOString()}: ${formatValue(item, unit)}`
-            }
-          />
-        ))}
+        {values.map((item, index) => {
+          const bin = bins[index];
+          const markerText = activityMarkerText(bin);
+          const valueText =
+            item === null ? 'No observation' : formatValue(item, unit);
+          return (
+            <span
+              key={bin.start}
+              className="relative flex h-full min-w-0 flex-1 items-end"
+              data-activity-fallback={
+                bin.fallbackCount > 0 ? 'true' : undefined
+              }
+              data-activity-partial={
+                bin.undercoveredCount > 0 ? 'true' : undefined
+              }
+              data-activity-reboot={bin.rebootCount > 0 ? 'true' : undefined}
+              title={`${new Date(bin.start).toISOString()}: ${valueText}${markerText ? ` · ${markerText}` : ''}`}
+            >
+              <span
+                aria-hidden="true"
+                className={`w-full rounded-t-[2px] ${
+                  item === null
+                    ? 'h-px bg-black/10 dark:bg-white/10'
+                    : 'bg-[#a53b34] dark:bg-[#e27c72]'
+                }`}
+                style={
+                  item === null
+                    ? undefined
+                    : { height: `${Math.max(4, (item / max) * 100)}%` }
+                }
+              />
+              {bin.fallbackCount > 0 ? (
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-x-0 bottom-0 h-1 bg-amber-600 dark:bg-amber-300"
+                />
+              ) : null}
+              {bin.undercoveredCount > 0 ? (
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-x-0 top-0 border-t border-dashed border-amber-800 dark:border-amber-200"
+                />
+              ) : null}
+              {bin.rebootCount > 0 ? (
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 absolute left-1/2 top-1 -translate-x-1/2 rotate-45 bg-black dark:bg-white"
+                />
+              ) : null}
+            </span>
+          );
+        })}
       </div>
       <div className="opacity-35 mt-1 flex justify-between text-[0.58rem] uppercase tracking-[0.12em]">
         <span>older</span>
@@ -585,6 +629,33 @@ export function MachineHealthActivity({
           unit="MiB"
           summary="maximum"
         />
+      </div>
+
+      <div
+        className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[0.68rem] opacity-60"
+        aria-label="Activity chart markers"
+      >
+        <span className="inline-flex items-center gap-1.5">
+          <span
+            aria-hidden="true"
+            className="h-1 w-4 bg-amber-600 dark:bg-amber-300"
+          />
+          Fallback
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span
+            aria-hidden="true"
+            className="w-4 border-t border-dashed border-amber-800 dark:border-amber-200"
+          />
+          Partial
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span
+            aria-hidden="true"
+            className="size-1.5 rotate-45 bg-black dark:bg-white"
+          />
+          Reboot
+        </span>
       </div>
 
       <CodexActivity

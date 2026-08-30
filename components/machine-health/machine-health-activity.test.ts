@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 import type {
   CodexTokenSample,
@@ -7,6 +9,7 @@ import type {
 import {
   buildActivityBins,
   buildCodexActivityBins,
+  MachineHealthActivity,
 } from './machine-health-activity';
 
 const now = Date.parse('2026-08-29T06:30:00.000Z');
@@ -231,6 +234,49 @@ describe('machine health activity bins', () => {
 
     expect(bins.at(-2)).toMatchObject({ undercoveredCount: 1 });
     expect(bins.at(-1)).toMatchObject({ fallbackCount: 1, rebootCount: 1 });
+  });
+
+  it('renders source and reboot marks on their exact chart bins', () => {
+    const markedSamples = [
+      sample('2026-08-29T05:05:00.000Z', {
+        activitySampleCount: 4,
+        activityWindowMinutes: 40,
+        uptimeSeconds: 10_000,
+      }),
+      sample('2026-08-29T06:05:00.000Z', {
+        activitySource: 'point',
+        activitySampleCount: 1,
+        activityWindowMinutes: 0,
+        uptimeSeconds: 100,
+      }),
+    ];
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthActivity, {
+        samples: markedSamples,
+        codexSamples: [],
+        now,
+        graphicsMaxClockMhz: 2_200,
+        latestActivity: {
+          source: 'point',
+          window_minutes: 0,
+          sample_count: 1,
+          cpu_peak_percent: 20,
+          memory_peak_percent: 30,
+          cpu_pressure_some_percent: null,
+          memory_pressure_full_percent: null,
+          io_pressure_full_percent: null,
+          disk_read_mib_s: null,
+          disk_write_mib_s: null,
+        },
+      })
+    );
+
+    expect(html).toContain('aria-label="Activity chart markers"');
+    expect(html).toContain('data-activity-fallback="true"');
+    expect(html).toContain('data-activity-partial="true"');
+    expect(html).toContain('data-activity-reboot="true"');
+    expect(html).toContain('1 fallback, 1 reboot');
+    expect(html).toContain('1 partial');
   });
 
   it('places Codex counters in their fixed usage hour and deduplicates retries', () => {
