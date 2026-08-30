@@ -2,14 +2,14 @@
 
 `/machine-health` is a private, lightweight health check for the Big Red Ubuntu workstation. One short-lived collector sends a compact hourly health report. Codex token accounting uses one row per device and complete UTC hour so Big Red and the MacBook Air can share the same view.
 
-This change only provides the code and operating plan. It does **not** apply the database migration, set credentials, install a user service or timer, or deploy Scrapbook.
+The production database, ingestion credentials, hourly Big Red timer, and private dashboard are live. The MacBook Air token reporter is a separate hourly source; both devices retain only aggregate complete-hour accounting.
 
 ## What it answers
 
 The page starts with the questions that matter when Leo is away from the machine:
 
 - Is the snapshot fresh, and did a configured guardrail trip?
-- Are hourly CPU/memory/network/disk activity, current whole-machine swap occupancy, Linux resource pressure, root capacity, peak sensor temperature, the readable iGPU activity clock, and sampled physical-panel state moving in a bad direction?
+- Are hourly CPU/memory/network/disk activity, current whole-machine swap occupancy, Linux resource pressure, root capacity, peak sensor temperature, and sampled physical-panel state moving in a bad direction?
 - Are SSH, Tailscale, NetworkManager, GNOME Remote Desktop, and time sync active?
 - Is automatic idle suspend still disabled while deliberate lid-close suspend remains available, and are hibernate targets still masked?
 - Is the machine on AC, what is the aggregate battery state, and are there failed systemd units, unexpected development listeners, excess browser memory, or active RDP connections?
@@ -26,13 +26,15 @@ The page starts with the questions that matter when Leo is away from the machine
 - How much local Codex state is allocated, how much is active or unknown, did the scan finish cleanly, and how did the total change over seven days?
 - How many Codex tokens came from Big Red and the MacBook Air, and what share of input was served from cache?
 
-The dashboard defaults to the last 10 complete hourly bins and also offers 24-hour, 7-day, and
-30-day views. Every token range ends at the last complete UTC hour; the long views group the same
+The dashboard defaults to the last 12 complete hourly bins and also offers day, week, and month
+views. Every token range ends at the last complete UTC hour; the long views group the same
 hours into rolling 24-hour bars instead of replacing them with partial calendar days. UTC fixes the
 storage boundary, while the browser's time zone changes only the labels. Token cards sum the
 selected device-hour records. Cached input percent is `cached_input_tokens / input_tokens`; the
 card shows the exact counts with the percentage. The source line shows how many complete
-source-hours each device supplied. Browser/Codex counts, tagged route/process counts,
+source-hours each device supplied. Every bar is a focusable control; tap, click, or keyboard focus pins
+the exact interval and its coverage. Codex input and output bars stack Big Red and MacBook Air so the
+device contribution remains visible without exposing session identity. Browser/Codex counts, tagged route/process counts,
 aggregate memory, and the active RDP connection count stay coarse. The current workspace view also
 splits hook-owned execution into chat roots, main-root jobs, subagent jobs, processes, and memory. It
 keeps opaque route and agent IDs out of the snapshot.
@@ -171,15 +173,15 @@ RDP acceleration state is bound to the current `gnome-remote-desktop.service` in
 The default proposal is one report per hour, with manual runs whenever a change needs a before/after check.
 
 - The server reads 60 days so equal-window comparisons have a prior period; the dashboard shows
-  24-hour, 7-day, and 30-day views.
+  12-hour, day, week, and month views.
 - Every successful ingest deletes samples older than 90 days, so retention needs no second scheduled job.
 - Retry posts with the same host and timestamp update one sample instead of duplicating it, and an older delayed report cannot replace the latest status row.
 - The current exact-head live report measured 3,987 bytes as compact JSON and 5,015 bytes pretty-printed. Ninety days at hourly frequency is 2,160 rows and roughly 8.2 MiB of raw compact payload; a conservative database budget remains under 20 MiB after allowing for JSONB, scalar columns, row overhead, and the index.
 - The page has a manual refresh control and refreshes its server data once per hour while the tab is visible. Returning to a tab refreshes it only when the last page refresh is at least an hour old.
 
-A live 30-day Big Red token backfill scanned 720 complete hours in 2.24 seconds at 50,704 KiB peak
-RSS. Its compact report was 244,226 bytes, below the 512 KiB ingest limit; only 24 hours contained
-model calls. Routine runs scan from the last successful hour and exit after posting.
+A live 30-day Big Red token backfill scanned 720 complete hours in a few seconds and remained below
+the 512 KiB ingest limit. The production backfill was persisted on Aug. 31, 2026; routine health
+reports continue to store the latest complete Big Red hour without a resident process.
 
 Big Red already runs Ubuntu's `sysstat` accounting every 10 minutes. The collector reuses the six newest records to produce time-weighted 60-minute averages for CPU, memory, aggregate non-loopback network throughput, and non-loop disk I/O, plus CPU/memory/I/O [Pressure Stall Information](https://docs.kernel.org/accounting/psi.html). It emits only the aggregate result; host names, device names, and interface names parsed from `sadf` never enter the report. If readable accounting data is unavailable, the collector fails soft to the original 250 ms `/proc` point sample and labels the source accordingly.
 
@@ -225,7 +227,7 @@ CPU/memory/I/O 0.193/0.015/0.345%. Python regression tests separately verify int
 loopback/loop-device exclusion, explicit UTC, one six-record window spanning two daily archives at
 midnight, and the labeled point-sample fallback.
 
-The collector also reads battery/AC state and the Intel iGPU's current/max activity clocks from sysfs when those files are available. Big Red does not currently expose a user-readable GPU busy percentage, so the dashboard labels the clock honestly and does not invent utilization or install another package.
+The collector also reads battery/AC state and the Intel iGPU's current/max activity clocks from sysfs when those files are available. Big Red does not currently expose a user-readable GPU busy percentage, so the dashboard does not promote an idle clock reading as useful utilization or install another package merely to fill the space.
 
 These are operator thresholds rather than hardware safety limits:
 
@@ -246,7 +248,7 @@ These are operator thresholds rather than hardware safety limits:
   the five-packet gateway point sample: watch;
 - report older than 3 hours: watch.
 
-CPU/memory peaks, disk/network throughput, PSI, load, and the iGPU clock are displayed but do not yet alert. Pressure is a better contention signal than utilization alone, but thresholds should be based on an observed Big Red baseline instead of imported folklore.
+CPU/memory peaks, disk/network throughput, PSI, and load are displayed but do not yet alert. Pressure is a better contention signal than utilization alone, but thresholds should be based on an observed Big Red baseline instead of imported folklore.
 
 Beryl data is parsed only from the allowlisted `Beryl local health` and `Beryl local link` sections
 of the canonical `/usr/local/bin/big-red-connectivity-check`. The collector runs that diagnostic

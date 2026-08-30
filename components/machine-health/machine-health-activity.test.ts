@@ -92,7 +92,7 @@ function tokenSample(
 }
 
 describe('machine health activity bins', () => {
-  it('builds 10 complete hourly bins without the current partial hour', () => {
+  it('builds 12 complete hourly bins without the current partial hour', () => {
     const bins = buildCodexActivityBins(
       [
         tokenSample('big-red'),
@@ -107,11 +107,11 @@ describe('machine health activity bins', () => {
           activeRoutes: 1,
         }),
       ],
-      '10h',
+      '12h',
       now
     );
 
-    expect(bins).toHaveLength(10);
+    expect(bins).toHaveLength(12);
     expect(bins.at(-1)).toMatchObject({
       start: Date.parse('2026-08-29T05:00:00.000Z'),
       codexInputTokens: 1_500,
@@ -121,6 +121,8 @@ describe('machine health activity bins', () => {
       codexActiveRoutes: 3,
       codexHourCount: 1,
       codexSourceHours: { 'big-red': 1, 'macbook-air': 1 },
+      codexSourceInputTokens: { 'big-red': 1_000, 'macbook-air': 500 },
+      codexSourceOutputTokens: { 'big-red': 50, 'macbook-air': 25 },
       codexWindowCount: 2,
       codexSkippedCount: 0,
     });
@@ -167,7 +169,7 @@ describe('machine health activity bins', () => {
           totalTokens: 10_000,
         }),
       ],
-      '10h',
+      '12h',
       now
     );
 
@@ -314,7 +316,6 @@ describe('machine health activity bins', () => {
         samples: markedSamples,
         codexSamples: [],
         now,
-        graphicsMaxClockMhz: 2_200,
         latestActivity: {
           source: 'point',
           window_minutes: 0,
@@ -353,7 +354,6 @@ describe('machine health activity bins', () => {
         ],
         codexSamples: [],
         now,
-        graphicsMaxClockMhz: 2_200,
         latestActivity: {
           source: 'sysstat-10m',
           window_minutes: 60,
@@ -371,7 +371,7 @@ describe('machine health activity bins', () => {
 
     expect(html).toContain('Mac transport RTT');
     expect(html).toContain(
-      'aria-label="Mac transport RTT across 10 observation bins; 2 probes"'
+      'aria-label="Mac transport RTT across 12 observation bins; 2 probes"'
     );
     expect(html).toContain('data-remote-path="direct"');
     expect(html).toContain('data-remote-path="peer-relay"');
@@ -392,7 +392,6 @@ describe('machine health activity bins', () => {
         ],
         codexSamples: [],
         now,
-        graphicsMaxClockMhz: 2_200,
         latestActivity: {
           source: 'sysstat-10m',
           window_minutes: 60,
@@ -410,7 +409,7 @@ describe('machine health activity bins', () => {
 
     expect(html).toContain('Panel on samples');
     expect(html).toContain(
-      'aria-label="Panel on share across 10 observation bins; 4 panel samples"'
+      'aria-label="Panel on share across 12 observation bins; 4 panel samples"'
     );
     expect(html).toContain('data-panel-observed="true"');
     expect(html).toContain('>25%<');
