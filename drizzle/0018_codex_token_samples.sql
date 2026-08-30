@@ -26,7 +26,10 @@ CREATE TABLE IF NOT EXISTS "codex_token_samples" (
       )
     ),
   CONSTRAINT "codex_token_samples_hour_check"
-    CHECK ("window_ended_at" = "window_started_at" + interval '1 hour'),
+    CHECK (
+      mod(extract(epoch FROM "window_started_at"), 3600) = 0 AND
+      "window_ended_at" = "window_started_at" + interval '1 hour'
+    ),
   CONSTRAINT "codex_token_samples_cached_check"
     CHECK ("cached_input_tokens" <= "input_tokens"),
   CONSTRAINT "codex_token_samples_reasoning_check"

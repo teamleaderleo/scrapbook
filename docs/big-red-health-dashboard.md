@@ -173,6 +173,10 @@ Apply `drizzle/0016_machine_health.sql`, `drizzle/0017_machine_health_hygiene.sq
 `drizzle/0018_codex_token_samples.sql` in order
 through the normal Scrapbook migration process, then set:
 
+The token migration also enforces exact UTC-hour boundaries in Postgres. The ingest schema checks
+the same rule before opening a transaction, so a half-hour or other shifted window is rejected at
+both boundaries.
+
 ```text
 MACHINE_HEALTH_INGEST_SECRET=<long random ingest-only secret>
 MACHINE_HEALTH_DASHBOARD_TOKEN=<private read token>
