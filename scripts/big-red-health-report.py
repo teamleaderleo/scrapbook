@@ -50,6 +50,11 @@ CODEX_TOKEN_FIELDS = (
 CODEX_FORK_REPLAY_SECONDS = 2
 GLAEDA_REPOSITORY = Path.home() / "Projects" / "glaeda"
 GLAEDA_CACHE = Path.home() / ".cache" / "glaeda"
+GLAEDA_HOT_RUN = GLAEDA_CACHE / "hot-run"
+GLAEDA_OBSERVATION_OUTPUT_BYTES = 64 * 1024
+GLAEDA_OBSERVATION_MAX_STATES = 1_024
+GLAEDA_OBSERVATION_MAX_BYTES = 2**53 - 1
+GLAEDA_OBSERVATION_PROBLEMS = {"permission_denied", "unsupported_node"}
 CODEX_ROUTE_STATUS_HELPER = (
     Path.home() / "Projects" / "leo-workspace" / "tools" / "codex_route_job.py"
 )
@@ -2012,10 +2017,161 @@ def active_glaeda_build_processes(worktrees: list[Path]) -> int:
     return active
 
 
+def nonnegative_integer(value: Any, maximum: int) -> int | None:
+    if isinstance(value, bool) or not isinstance(value, int):
+        return None
+    return value if 0 <= value <= maximum else None
+
+
+def glaeda_observer_executable(repository: Path = GLAEDA_REPOSITORY) -> Path | None:
+    for candidate in (
+        repository / "target" / "release" / "glaeda",
+        repository / "target" / "debug" / "glaeda",
+    ):
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return candidate
+    return None
+
+
+def glaeda_hot_run_observation(
+    executable: Path | None = None,
+    root: Path = GLAEDA_HOT_RUN,
+) -> dict[str, Any] | None:
+    observer = executable or glaeda_observer_executable()
+    if observer is None:
+        return None
+    code, output = run(
+        str(observer),
+        "--output",
+        "json",
+        "cache",
+        "observe-hot-run",
+        "--root",
+        str(root),
+    )
+    if (
+        code != 0
+        or not output
+        or len(output.encode("utf-8")) > GLAEDA_OBSERVATION_OUTPUT_BYTES
+    ):
+        return None
+    try:
+        report = json.loads(output)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(report, dict) or set(report) != {
+        "schema_version",
+        "authority",
+        "operation",
+        "mutation_performed",
+        "completeness",
+        "summary",
+        "states",
+        "problems",
+    }:
+        return None
+    if (
+        report.get("schema_version") != 2
+        or report.get("authority") != "local_hot_run_filesystem_observation"
+        or report.get("operation") != "status"
+        or report.get("mutation_performed") is not False
+        or report.get("completeness") not in {"complete", "partial"}
+    ):
+        return None
+
+    summary = report.get("summary")
+    states = report.get("states")
+    problems = report.get("problems")
+    summary_keys = {
+        "state_count",
+        "in_use_count",
+        "warm_count",
+        "reclaimable_count",
+        "quarantined_count",
+        "unknown_count",
+        "logical_bytes",
+        "allocated_bytes",
+        "reclaimable_allocated_bytes",
+    }
+    if (
+        not isinstance(summary, dict)
+        or set(summary) != summary_keys
+        or not isinstance(states, list)
+        or not isinstance(problems, list)
+    ):
+        return None
+    state_count = nonnegative_integer(
+        summary.get("state_count"), GLAEDA_OBSERVATION_MAX_STATES
+    )
+    if state_count is None:
+        return None
+    if not all(isinstance(problem, str) for problem in problems):
+        return None
+    if (
+        (not problems and report["completeness"] == "partial")
+        or len(problems) > len(GLAEDA_OBSERVATION_PROBLEMS)
+        or len(set(problems)) != len(problems)
+        or any(problem not in GLAEDA_OBSERVATION_PROBLEMS for problem in problems)
+    ):
+        return None
+
+    count_fields = (
+        "in_use_count",
+        "warm_count",
+        "reclaimable_count",
+        "quarantined_count",
+        "unknown_count",
+    )
+    byte_fields = (
+        "logical_bytes",
+        "allocated_bytes",
+        "reclaimable_allocated_bytes",
+    )
+    if report["completeness"] == "partial":
+        if states or any(
+            summary.get(field) is not None for field in (*count_fields, *byte_fields)
+        ):
+            return None
+    else:
+        counts = {
+            field: nonnegative_integer(summary.get(field), state_count)
+            for field in count_fields
+        }
+        byte_values = {
+            field: nonnegative_integer(
+                summary.get(field), GLAEDA_OBSERVATION_MAX_BYTES
+            )
+            for field in byte_fields
+        }
+        if (
+            problems
+            or len(states) != state_count
+            or any(value is None for value in counts.values())
+            or any(value is None for value in byte_values.values())
+            or sum(value for value in counts.values() if value is not None)
+            != state_count
+            or byte_values["reclaimable_allocated_bytes"]
+            > byte_values["allocated_bytes"]
+        ):
+            return None
+
+    return {
+        "source": "glaeda-hot-run-observation-v2",
+        "completeness": report["completeness"],
+        "state_count": state_count,
+        "logical_bytes": summary["logical_bytes"],
+        "allocated_bytes": summary["allocated_bytes"],
+        "reclaimable_count": summary["reclaimable_count"],
+        "reclaimable_allocated_bytes": summary["reclaimable_allocated_bytes"],
+        "problems": problems,
+    }
+
+
 def build_state(
     worktrees: list[Path] | None = None,
     cache: Path = GLAEDA_CACHE,
 ) -> dict[str, Any]:
+    hot_run = glaeda_hot_run_observation()
     observed_worktrees = worktrees if worktrees is not None else glaeda_worktrees()
     if observed_worktrees is None:
         return {
@@ -2027,6 +2183,7 @@ def build_state(
             "glaeda_cache_gib": None,
             "target_count": None,
             "active_build_processes": None,
+            "hot_run": hot_run,
         }
 
     targets = [worktree / "target" for worktree in observed_worktrees]
@@ -2047,6 +2204,7 @@ def build_state(
             "active_build_processes": active_glaeda_build_processes(
                 observed_worktrees
             ),
+            "hot_run": hot_run,
         }
 
     target_bytes = sum(target_sizes.get(target, 0) for target in existing_targets)
@@ -2071,6 +2229,7 @@ def build_state(
         "glaeda_cache_gib": round(cache_bytes / GIB, 2),
         "target_count": len(existing_targets),
         "active_build_processes": active_glaeda_build_processes(observed_worktrees),
+        "hot_run": hot_run,
     }
 
 

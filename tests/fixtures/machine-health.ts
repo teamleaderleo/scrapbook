@@ -217,5 +217,15 @@ export const healthyMachineReport: MachineHealthPayload = {
     glaeda_cache_gib: 1.2,
     target_count: 11,
     active_build_processes: 3,
+    hot_run: {
+      source: 'glaeda-hot-run-observation-v2',
+      completeness: 'partial',
+      state_count: 4,
+      logical_bytes: null,
+      allocated_bytes: null,
+      reclaimable_count: null,
+      reclaimable_allocated_bytes: null,
+      problems: ['permission_denied'],
+    },
   },
 };

@@ -140,8 +140,10 @@ export function MachineHealthDashboard({
     payload.graphics.clock_mhz === null
       ? '—'
       : `${Math.round(payload.graphics.clock_mhz)} MHz`;
+  const buildStateRecord = payload.build_state ?? null;
   const buildState =
-    payload.build_state?.source === 'filesystem' ? payload.build_state : null;
+    buildStateRecord?.source === 'filesystem' ? buildStateRecord : null;
+  const hotRun = buildStateRecord?.hot_run ?? null;
   const codexState =
     payload.codex_state?.source === 'codex-state-inventory-v1'
       ? payload.codex_state
@@ -384,30 +386,36 @@ export function MachineHealthDashboard({
     buildState?.total_gib != null && buildStateBaseline?.buildStateGib != null
       ? buildState.total_gib - buildStateBaseline.buildStateGib
       : null;
-  const buildStateNote = buildState
-    ? [
-        buildState.target_count === null
-          ? null
-          : `${buildState.target_count} targets`,
-        buildState.largest_target_gib == null
-          ? null
-          : `${buildState.largest_target_gib.toFixed(1)} GiB max`,
-        buildState.median_target_gib == null
-          ? null
-          : `${buildState.median_target_gib.toFixed(1)} GiB median`,
-        buildState.glaeda_cache_gib === null
-          ? null
-          : `${buildState.glaeda_cache_gib.toFixed(1)} GiB cache`,
-        buildState.active_build_processes === null
-          ? null
-          : `${buildState.active_build_processes} building`,
-        buildStateDelta === null
-          ? null
-          : `${buildStateDelta >= 0 ? '+' : ''}${buildStateDelta.toFixed(1)} GiB / 7d`,
-      ]
-        .filter(Boolean)
-        .join(' · ')
-    : 'awaiting snapshot';
+  const buildStateNote =
+    buildState || hotRun
+      ? [
+          buildState?.target_count == null
+            ? null
+            : `${buildState.target_count} targets`,
+          buildState?.largest_target_gib == null
+            ? null
+            : `${buildState.largest_target_gib.toFixed(1)} GiB max`,
+          buildState?.median_target_gib == null
+            ? null
+            : `${buildState.median_target_gib.toFixed(1)} GiB median`,
+          buildState?.glaeda_cache_gib == null
+            ? null
+            : `${buildState.glaeda_cache_gib.toFixed(1)} GiB cache`,
+          buildState?.active_build_processes == null
+            ? null
+            : `${buildState.active_build_processes} building`,
+          buildStateDelta === null
+            ? null
+            : `${buildStateDelta >= 0 ? '+' : ''}${buildStateDelta.toFixed(1)} GiB / 7d`,
+          hotRun === null
+            ? null
+            : hotRun.completeness === 'partial'
+              ? `${hotRun.state_count} hot states, bytes unknown`
+              : `${hotRun.state_count} hot states, ${formatMemory(hotRun.allocated_bytes)} allocated`,
+        ]
+          .filter(Boolean)
+          .join(' · ')
+      : 'awaiting snapshot';
   const codexStateBaseline = [...samples]
     .reverse()
     .find(

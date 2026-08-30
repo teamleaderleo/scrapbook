@@ -326,6 +326,29 @@ describe('machine health contract', () => {
     expect(parsed.codex_state).toBeUndefined();
   });
 
+  it('accepts older build state and rejects invented partial hot-run bytes', () => {
+    const { hot_run: _hotRun, ...olderBuildState } =
+      healthyMachineReport.build_state!;
+    const parsed = machineHealthPayloadSchema.parse({
+      ...healthyMachineReport,
+      build_state: olderBuildState,
+    });
+
+    expect(parsed.build_state?.hot_run).toBeUndefined();
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        build_state: {
+          ...healthyMachineReport.build_state,
+          hot_run: {
+            ...healthyMachineReport.build_state?.hot_run,
+            logical_bytes: 1,
+          },
+        },
+      }).success
+    ).toBe(false);
+  });
+
   it('accepts a snapshot from before desktop state was added', () => {
     const { desktop: _desktop, ...olderReport } = healthyMachineReport;
     const parsed = machineHealthPayloadSchema.parse(olderReport);

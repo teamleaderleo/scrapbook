@@ -1411,6 +1411,110 @@ class ReliabilityTest(unittest.TestCase):
 
 
 class BuildStateTest(unittest.TestCase):
+    def test_accepts_only_path_free_partial_hot_run_aggregates(self) -> None:
+        report = {
+            "schema_version": 2,
+            "authority": "local_hot_run_filesystem_observation",
+            "operation": "status",
+            "mutation_performed": False,
+            "completeness": "partial",
+            "summary": {
+                "state_count": 4,
+                "in_use_count": None,
+                "warm_count": None,
+                "reclaimable_count": None,
+                "quarantined_count": None,
+                "unknown_count": None,
+                "logical_bytes": None,
+                "allocated_bytes": None,
+                "reclaimable_allocated_bytes": None,
+            },
+            "states": [],
+            "problems": ["permission_denied"],
+        }
+        with patch.object(REPORT, "run", return_value=(0, json.dumps(report))):
+            observation = REPORT.glaeda_hot_run_observation(
+                Path("/private/glaeda"), Path("/private/hot-run")
+            )
+
+        self.assertEqual(
+            observation,
+            {
+                "source": "glaeda-hot-run-observation-v2",
+                "completeness": "partial",
+                "state_count": 4,
+                "logical_bytes": None,
+                "allocated_bytes": None,
+                "reclaimable_count": None,
+                "reclaimable_allocated_bytes": None,
+                "problems": ["permission_denied"],
+            },
+        )
+        self.assertNotIn("private", json.dumps(observation))
+
+    def test_rejects_partial_hot_run_bytes_and_stale_schema(self) -> None:
+        report = {
+            "schema_version": 2,
+            "authority": "local_hot_run_filesystem_observation",
+            "operation": "status",
+            "mutation_performed": False,
+            "completeness": "partial",
+            "summary": {
+                "state_count": 1,
+                "in_use_count": None,
+                "warm_count": None,
+                "reclaimable_count": None,
+                "quarantined_count": None,
+                "unknown_count": None,
+                "logical_bytes": 1,
+                "allocated_bytes": None,
+                "reclaimable_allocated_bytes": None,
+            },
+            "states": [],
+            "problems": ["permission_denied"],
+        }
+        with patch.object(REPORT, "run", return_value=(0, json.dumps(report))):
+            self.assertIsNone(
+                REPORT.glaeda_hot_run_observation(Path("/observer"), Path("/root"))
+            )
+        report["schema_version"] = 1
+        report["summary"]["logical_bytes"] = None
+        with patch.object(REPORT, "run", return_value=(0, json.dumps(report))):
+            self.assertIsNone(
+                REPORT.glaeda_hot_run_observation(Path("/observer"), Path("/root"))
+            )
+
+    def test_accepts_complete_hot_run_without_retaining_state_records(self) -> None:
+        report = {
+            "schema_version": 2,
+            "authority": "local_hot_run_filesystem_observation",
+            "operation": "status",
+            "mutation_performed": False,
+            "completeness": "complete",
+            "summary": {
+                "state_count": 1,
+                "in_use_count": 0,
+                "warm_count": 0,
+                "reclaimable_count": 0,
+                "quarantined_count": 0,
+                "unknown_count": 1,
+                "logical_bytes": 3,
+                "allocated_bytes": 4_096,
+                "reclaimable_allocated_bytes": 0,
+            },
+            "states": [{"state_id": "private-state-id"}],
+            "problems": [],
+        }
+        with patch.object(REPORT, "run", return_value=(0, json.dumps(report))):
+            observation = REPORT.glaeda_hot_run_observation(
+                Path("/observer"), Path("/root")
+            )
+
+        self.assertIsNotNone(observation)
+        self.assertNotIn("private-state-id", json.dumps(observation))
+        assert observation is not None
+        self.assertEqual(observation["allocated_bytes"], 4_096)
+
     def test_measures_glaeda_targets_and_cache_without_exposing_paths(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             root = Path(temporary_directory)
@@ -1423,8 +1527,15 @@ class BuildStateTest(unittest.TestCase):
             cache.mkdir()
             (cache / "state").write_bytes(b"x" * 8 * REPORT.MIB)
 
-            with patch.object(
-                REPORT, "active_glaeda_build_processes", return_value=2
+            with (
+                patch.object(
+                    REPORT, "active_glaeda_build_processes", return_value=2
+                ),
+                patch.object(
+                    REPORT,
+                    "glaeda_hot_run_observation",
+                    return_value={"state_count": 4},
+                ),
             ):
                 state = REPORT.build_state(worktrees, cache)
 
@@ -1433,6 +1544,7 @@ class BuildStateTest(unittest.TestCase):
         self.assertEqual(state["active_build_processes"], 2)
         self.assertGreater(state["target_gib"], 0)
         self.assertGreater(state["glaeda_cache_gib"], 0)
+        self.assertEqual(state["hot_run"], {"state_count": 4})
         self.assertNotIn(str(root), json.dumps(state))
 
     def test_summarizes_target_skew_without_paths(self) -> None:
@@ -1461,6 +1573,7 @@ class BuildStateTest(unittest.TestCase):
                 patch.object(
                     REPORT, "active_glaeda_build_processes", return_value=0
                 ),
+                patch.object(REPORT, "glaeda_hot_run_observation", return_value=None),
             ):
                 state = REPORT.build_state(worktrees, cache)
 
@@ -1469,11 +1582,19 @@ class BuildStateTest(unittest.TestCase):
         self.assertNotIn(str(root), json.dumps(state))
 
     def test_marks_missing_worktree_inventory_unavailable(self) -> None:
-        with patch.object(REPORT, "glaeda_worktrees", return_value=None):
+        with (
+            patch.object(REPORT, "glaeda_worktrees", return_value=None),
+            patch.object(
+                REPORT,
+                "glaeda_hot_run_observation",
+                return_value={"state_count": 4},
+            ),
+        ):
             state = REPORT.build_state()
 
         self.assertEqual(state["source"], "unavailable")
         self.assertIsNone(state["total_gib"])
+        self.assertEqual(state["hot_run"], {"state_count": 4})
 
 
 class ReportDeliveryTest(unittest.TestCase):

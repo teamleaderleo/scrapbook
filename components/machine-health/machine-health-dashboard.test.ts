@@ -125,7 +125,7 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Build state');
     expect(html).toContain('51.6 GiB');
     expect(html).toContain(
-      '11 targets · 9.6 GiB max · 4.3 GiB median · 1.2 GiB cache · 3 building'
+      '11 targets · 9.6 GiB max · 4.3 GiB median · 1.2 GiB cache · 3 building · 4 hot states, bytes unknown'
     );
     expect(html).toContain('Browser RSS');
     expect(html).toContain('2.5 GiB');
@@ -191,6 +191,37 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Mac offline');
     expect(html).toContain('Seen 6h ago · GRD active · VA-API ready');
     expect(html).toContain('Looks good');
+  });
+
+  it('keeps hot-run completeness visible when build-size inventory is unavailable', () => {
+    const hotRun = report.payload.build_state?.hot_run;
+    if (!hotRun) throw new Error('Expected the hot-run fixture');
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report: {
+          ...report,
+          payload: {
+            ...report.payload,
+            build_state: {
+              source: 'unavailable',
+              total_gib: null,
+              target_gib: null,
+              largest_target_gib: null,
+              median_target_gib: null,
+              glaeda_cache_gib: null,
+              target_count: null,
+              active_build_processes: null,
+              hot_run: hotRun,
+            },
+          },
+        },
+        samples,
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('4 hot states, bytes unknown');
+    expect(html).not.toContain('awaiting snapshot');
   });
 
   it('shows a skipped cross-device overlap without adding it to totals', () => {

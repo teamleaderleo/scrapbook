@@ -576,6 +576,42 @@ export const machineHealthPayloadSchema = z.object({
       glaeda_cache_gib: nullableNonnegative,
       target_count: nonnegativeInteger.nullable(),
       active_build_processes: nonnegativeInteger.nullable(),
+      hot_run: z
+        .union([
+          z
+            .object({
+              source: z.literal('glaeda-hot-run-observation-v2'),
+              completeness: z.literal('complete'),
+              state_count: nonnegativeInteger.max(1_024),
+              logical_bytes: codexCounter,
+              allocated_bytes: codexCounter,
+              reclaimable_count: nonnegativeInteger,
+              reclaimable_allocated_bytes: codexCounter,
+              problems: z.array(z.never()).length(0),
+            })
+            .refine(
+              value =>
+                value.reclaimable_count <= value.state_count &&
+                value.reclaimable_allocated_bytes <= value.allocated_bytes,
+              { message: 'Glaeda hot-run aggregates are inconsistent' }
+            ),
+          z.object({
+            source: z.literal('glaeda-hot-run-observation-v2'),
+            completeness: z.literal('partial'),
+            state_count: nonnegativeInteger.max(1_024),
+            logical_bytes: z.null(),
+            allocated_bytes: z.null(),
+            reclaimable_count: z.null(),
+            reclaimable_allocated_bytes: z.null(),
+            problems: z
+              .array(z.enum(['permission_denied', 'unsupported_node']))
+              .min(1)
+              .max(2)
+              .refine(values => new Set(values).size === values.length),
+          }),
+        ])
+        .nullable()
+        .optional(),
     })
     .optional(),
 });
