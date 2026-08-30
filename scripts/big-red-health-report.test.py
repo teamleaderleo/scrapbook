@@ -1030,12 +1030,20 @@ class DesktopStateTest(unittest.TestCase):
         }
 
     def test_allows_only_current_desktop_dimensions_and_modes(self) -> None:
-        with patch.object(
-            REPORT,
-            "run",
-            return_value=(0, json.dumps(self.snapshot())),
-        ) as run:
-            desktop = REPORT.desktop_state(Path("/private/helper"))
+        with tempfile.TemporaryDirectory() as temporary:
+            backlight = Path(temporary) / "panel"
+            backlight.mkdir()
+            (backlight / "actual_brightness").write_text("0\n", encoding="utf-8")
+            (backlight / "max_brightness").write_text("500\n", encoding="utf-8")
+            (backlight / "bl_power").write_text("4\n", encoding="utf-8")
+            with patch.object(
+                REPORT,
+                "run",
+                return_value=(0, json.dumps(self.snapshot())),
+            ) as run:
+                desktop = REPORT.desktop_state(
+                    Path("/private/helper"), Path(temporary)
+                )
 
         self.assertEqual(
             desktop,
@@ -1050,6 +1058,11 @@ class DesktopStateTest(unittest.TestCase):
                 "animations_enabled": True,
                 "screen_share_mode": "mirror-primary",
                 "wallpaper_references_complete": False,
+                "panel": {
+                    "source": "sysfs-backlight",
+                    "state": "off",
+                    "actual_brightness_percent": 0.0,
+                },
             },
         )
         self.assertNotIn("private", json.dumps(desktop))
@@ -1066,19 +1079,23 @@ class DesktopStateTest(unittest.TestCase):
 
     def test_malformed_or_drifted_desktop_receipt_is_unavailable(self) -> None:
         cases = (None, {**self.snapshot(), "schema_version": 3})
-        for value in cases:
-            with self.subTest(value=value):
-                output = "not-json" if value is None else json.dumps(value)
-                with patch.object(REPORT, "run", return_value=(0, output)):
-                    desktop = REPORT.desktop_state()
-                self.assertEqual(desktop["source"], "unavailable")
-                self.assertTrue(
-                    all(
-                        item is None
-                        for key, item in desktop.items()
-                        if key != "source"
+        with tempfile.TemporaryDirectory() as temporary:
+            for value in cases:
+                with self.subTest(value=value):
+                    output = "not-json" if value is None else json.dumps(value)
+                    with patch.object(REPORT, "run", return_value=(0, output)):
+                        desktop = REPORT.desktop_state(
+                            backlight_root=Path(temporary)
+                        )
+                    self.assertEqual(desktop["source"], "unavailable")
+                    self.assertEqual(desktop["panel"]["source"], "unavailable")
+                    self.assertTrue(
+                        all(
+                            item is None
+                            for key, item in desktop.items()
+                            if key not in {"source", "panel"}
+                        )
                     )
-                )
 
         invalid_mode = self.snapshot()
         invalid_mode["settings"] = {
@@ -1090,7 +1107,11 @@ class DesktopStateTest(unittest.TestCase):
             "run",
             return_value=(0, json.dumps(invalid_mode)),
         ):
-            self.assertEqual(REPORT.desktop_state()["source"], "unavailable")
+            with tempfile.TemporaryDirectory() as temporary:
+                self.assertEqual(
+                    REPORT.desktop_state(backlight_root=Path(temporary))["source"],
+                    "unavailable",
+                )
 
         missing_wallpaper_state = self.snapshot()
         missing_wallpaper_state.pop("configured_wallpapers")
@@ -1099,7 +1120,48 @@ class DesktopStateTest(unittest.TestCase):
             "run",
             return_value=(0, json.dumps(missing_wallpaper_state)),
         ):
-            self.assertEqual(REPORT.desktop_state()["source"], "unavailable")
+            with tempfile.TemporaryDirectory() as temporary:
+                self.assertEqual(
+                    REPORT.desktop_state(backlight_root=Path(temporary))["source"],
+                    "unavailable",
+                )
+
+    def test_backlight_receipt_is_bounded_and_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            first = root / "first-private-name"
+            first.mkdir()
+            (first / "actual_brightness").write_text("151\n", encoding="utf-8")
+            (first / "max_brightness").write_text("496\n", encoding="utf-8")
+            (first / "bl_power").write_text("0\n", encoding="utf-8")
+
+            receipt = REPORT.panel_backlight_state(root)
+            self.assertEqual(
+                receipt,
+                {
+                    "source": "sysfs-backlight",
+                    "state": "on",
+                    "actual_brightness_percent": 30.4,
+                },
+            )
+            self.assertNotIn("private", json.dumps(receipt))
+
+            second = root / "second-private-name"
+            second.mkdir()
+            (second / "actual_brightness").write_text("0\n", encoding="utf-8")
+            (second / "max_brightness").write_text("100\n", encoding="utf-8")
+            (second / "bl_power").write_text("4\n", encoding="utf-8")
+            self.assertEqual(REPORT.panel_backlight_state(root)["state"], "on")
+
+            (first / "actual_brightness").write_text("invalid\n", encoding="utf-8")
+            self.assertEqual(
+                REPORT.panel_backlight_state(root),
+                {
+                    "source": "unavailable",
+                    "state": "unavailable",
+                    "actual_brightness_percent": None,
+                },
+            )
 
 
 class CodexRuntimeTest(unittest.TestCase):

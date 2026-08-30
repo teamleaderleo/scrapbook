@@ -358,6 +358,19 @@ describe('machine health contract', () => {
         },
       }).success
     ).toBe(false);
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        desktop: {
+          ...healthyMachineReport.desktop,
+          panel: {
+            source: 'sysfs-backlight',
+            state: 'on',
+            actual_brightness_percent: 101,
+          },
+        },
+      }).success
+    ).toBe(false);
   });
 
   it('rejects inconsistent or authoritative Codex state aggregates', () => {

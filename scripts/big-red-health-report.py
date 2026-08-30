@@ -69,6 +69,7 @@ CODEX_STATE_INVENTORY_HELPER = (
 GNOME_POLISH_HELPER = (
     Path.home() / "Projects" / "leo-workspace" / "tools" / "gnome_polish_variants.py"
 )
+SYSFS_BACKLIGHT = Path("/sys/class/backlight")
 RELIABILITY_WINDOW_HOURS = 24
 RELIABILITY_EVENT_LIMIT = 4_096
 GRD_ACCELERATION_EVENT_LIMIT = 512
@@ -725,7 +726,62 @@ def process_tags(
     return {"source": "codex-route-hook-v1", **values}
 
 
-def desktop_state(helper: Path = GNOME_POLISH_HELPER) -> dict[str, Any]:
+def panel_backlight_state(root: Path = SYSFS_BACKLIGHT) -> dict[str, Any]:
+    unavailable = {
+        "source": "unavailable",
+        "state": "unavailable",
+        "actual_brightness_percent": None,
+    }
+    try:
+        devices = sorted(path for path in root.iterdir() if path.is_dir())
+    except (FileNotFoundError, PermissionError, OSError):
+        return unavailable
+    if not devices or len(devices) > 16:
+        return unavailable
+
+    states: list[str] = []
+    percentages: list[float] = []
+    for device in devices:
+        actual = read_number(device / "actual_brightness")
+        maximum = read_number(device / "max_brightness")
+        power = read_number(device / "bl_power")
+        if (
+            actual is None
+            or maximum is None
+            or power is None
+            or not actual.is_integer()
+            or not maximum.is_integer()
+            or not power.is_integer()
+            or not 0 <= actual <= maximum
+            or maximum <= 0
+            or not 0 <= power <= 4
+        ):
+            return unavailable
+        percentages.append(actual / maximum * 100)
+        if actual == 0 or power == 4:
+            states.append("off")
+        elif actual > 0 and power == 0:
+            states.append("on")
+        else:
+            states.append("unknown")
+
+    if "on" in states:
+        state = "on"
+    elif all(item == "off" for item in states):
+        state = "off"
+    else:
+        state = "unknown"
+    return {
+        "source": "sysfs-backlight",
+        "state": state,
+        "actual_brightness_percent": round(max(percentages), 1),
+    }
+
+
+def desktop_state(
+    helper: Path = GNOME_POLISH_HELPER,
+    backlight_root: Path = SYSFS_BACKLIGHT,
+) -> dict[str, Any]:
     fields = (
         "gnome_shell",
         "pixel_width",
@@ -737,7 +793,12 @@ def desktop_state(helper: Path = GNOME_POLISH_HELPER) -> dict[str, Any]:
         "screen_share_mode",
         "wallpaper_references_complete",
     )
-    unavailable = {"source": "unavailable", **dict.fromkeys(fields)}
+    panel = panel_backlight_state(backlight_root)
+    unavailable = {
+        "source": "unavailable",
+        **dict.fromkeys(fields),
+        "panel": panel,
+    }
     code, output = run(
         sys.executable,
         str(helper),
@@ -814,6 +875,7 @@ def desktop_state(helper: Path = GNOME_POLISH_HELPER) -> dict[str, Any]:
         "animations_enabled": animations_enabled,
         "screen_share_mode": screen_share_mode,
         "wallpaper_references_complete": wallpaper_references_complete,
+        "panel": panel,
     }
 
 
@@ -1136,7 +1198,7 @@ def codex_state(
 def read_number(path: Path) -> float | None:
     try:
         return float(path.read_text(encoding="utf-8").strip())
-    except (FileNotFoundError, PermissionError, ValueError):
+    except (OSError, ValueError):
         return None
 
 

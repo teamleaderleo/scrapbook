@@ -124,6 +124,11 @@ export const healthyMachineReport: MachineHealthPayload = {
     animations_enabled: true,
     screen_share_mode: 'mirror-primary',
     wallpaper_references_complete: true,
+    panel: {
+      source: 'sysfs-backlight',
+      state: 'off',
+      actual_brightness_percent: 0,
+    },
   },
   services: {
     failed_system_units: 0,

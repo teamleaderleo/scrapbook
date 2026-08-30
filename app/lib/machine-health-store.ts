@@ -182,6 +182,18 @@ const remoteSessions = z.discriminatedUnion('source', [
     truncated: z.boolean(),
   }),
 ]);
+const panelState = z.discriminatedUnion('source', [
+  z.object({
+    source: z.literal('sysfs-backlight'),
+    state: z.enum(['on', 'off', 'unknown']),
+    actual_brightness_percent: z.number().finite().min(0).max(100),
+  }),
+  z.object({
+    source: z.literal('unavailable'),
+    state: z.literal('unavailable'),
+    actual_brightness_percent: z.null(),
+  }),
+]);
 const desktopState = z.discriminatedUnion('source', [
   z.object({
     source: z.literal('gnome-polish-live-v2'),
@@ -194,6 +206,7 @@ const desktopState = z.discriminatedUnion('source', [
     animations_enabled: z.boolean(),
     screen_share_mode: z.enum(['mirror-primary', 'extend']),
     wallpaper_references_complete: z.boolean().optional(),
+    panel: panelState.optional(),
   }),
   z.object({
     source: z.literal('unavailable'),
@@ -206,6 +219,7 @@ const desktopState = z.discriminatedUnion('source', [
     animations_enabled: z.null(),
     screen_share_mode: z.null(),
     wallpaper_references_complete: z.null().optional(),
+    panel: panelState.optional(),
   }),
 ]);
 const reliabilityCounts = z.object({
@@ -1302,8 +1316,7 @@ export async function readMachineHealth(
             : null;
         const remoteTransport =
           parsedSample.success &&
-          parsedSample.data.network.remote_client?.source ===
-            'tailscale-status'
+          parsedSample.data.network.remote_client?.source === 'tailscale-status'
             ? (parsedSample.data.network.remote_client.transport_probe ?? null)
             : null;
         return {

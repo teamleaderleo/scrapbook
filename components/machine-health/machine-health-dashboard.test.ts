@@ -141,7 +141,7 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Wallpaper refs: ready');
     expect(html).toContain('Desktop');
     expect(html).toContain('3072×1920');
-    expect(html).toContain('165 Hz · 150% · screen blanked');
+    expect(html).toContain('165 Hz · 150% · panel off');
     expect(html).toContain('GNOME 50.1 · mirror · motion on');
     expect(html).toContain('Agent routes');
     expect(html).toContain('Process scopes');

@@ -156,11 +156,22 @@ export function MachineHealthDashboard({
       : null;
   const desktop =
     payload.desktop?.source === 'gnome-polish-live-v2' ? payload.desktop : null;
+  const panel =
+    desktop?.panel?.source === 'sysfs-backlight' ? desktop.panel : null;
+  const panelNote = panel
+    ? panel.state === 'off'
+      ? 'panel off'
+      : panel.state === 'on'
+        ? `panel ${Math.round(panel.actual_brightness_percent)}%`
+        : 'panel unknown'
+    : desktop?.screen_shield_active
+      ? 'screen blanked'
+      : 'screen on';
   const desktopNote = desktop
     ? [
         formatRefresh(desktop.refresh_hz),
         `${Math.round(desktop.logical_scale * 100)}%`,
-        desktop.screen_shield_active ? 'screen blanked' : 'screen on',
+        panelNote,
       ].join(' · ')
     : 'unavailable';
   const desktopModeNote = desktop
