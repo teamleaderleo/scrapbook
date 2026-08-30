@@ -19,7 +19,7 @@ The page starts with the questions that matter when Leo is away from the machine
   admission blocks occurred in the last 24 hours?
 - Did the current GNOME Remote Desktop process initialize its Vulkan/VA-API path, fall back to software, or not yet receive an RDP session?
 - What desktop state is active now: GNOME version, pixel mode, refresh, scale, screen-shield and
-  physical-backlight state, animation state, and configured mirror/extend mode?
+  physical-backlight state, saved animation preference, and configured mirror/extend mode?
 - How many agent routes, jobs, and descendant processes are explicitly owned, how much RSS do they account for, and did any ownership record become unknown or leave residue?
 - How much local Codex state is allocated, how much is active or unknown, did the scan finish cleanly, and how did the total change over seven days?
 - How many Codex tokens came from Big Red and the MacBook Air, and what share of input was served from cache?
@@ -78,13 +78,24 @@ the weighted `sum(cached_input_tokens) / sum(input_tokens)`. It does not reconst
 the component counters.
 
 The desktop readout calls the repository-owned GNOME polish snapshot and keeps only version, pixel
-dimensions, refresh, logical scale, screen-shield state, animation state, mirror/extend mode, and
-one boolean stating whether both configured wallpaper files are readable. A separate bounded sysfs
+dimensions, refresh, logical scale, screen-shield state, saved animation preference, mirror/extend
+mode, and one boolean stating whether both configured wallpaper files are readable. GNOME Remote
+Desktop 50.2 separately asks Mutter to disable animations on its remote-access handle, and GNOME
+Shell 50.1 inhibits Shell/St animations until that handle stops. The dashboard therefore labels
+the saved value `motion pref`; it does not misreport the temporary effective remote-session state
+or imply that every application and web page follows the compositor inhibition. A separate bounded sysfs
 receipt reduces one to sixteen backlights to `on`, `off`, or `unknown` plus their maximum actual
 brightness percentage. Any missing, malformed, out-of-range, or partially unreadable device makes
 that receipt unavailable. No device or connector name survives. Older stored reports omit the
 backlight and wallpaper fields instead of being relabeled. The current card shows the latest
 receipt; the activity chart derives nullable on/off samples from the same stored payloads.
+
+Animation sources: GNOME Remote Desktop
+[`grd-session.c`](https://gitlab.gnome.org/GNOME/gnome-remote-desktop/-/blob/60423c896a54e3eacb65bd93167e91c1ce5e648c/src/grd-session.c),
+Mutter
+[`meta-screen-cast-session.c`](https://gitlab.gnome.org/GNOME/mutter/-/blob/8e9bb806da4a6a4fc87aa4a481b228dba6735cbd/src/backends/meta-screen-cast-session.c),
+and GNOME Shell
+[`main.js`](https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/e0fdc4c13250e9a9b8ea9594c83925274f4a5dca/js/ui/main.js).
 A direct live GNOME receipt took 0.28 seconds and 32,680 KiB peak RSS. A current print-only
 collector observation with the backlight receipt took 3.94 seconds and 64,384 KiB peak RSS; its
 compact payload was 6,494 bytes. The existing Codex-state scan still dominates the hourly run.

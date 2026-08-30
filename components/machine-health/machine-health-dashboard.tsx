@@ -180,7 +180,7 @@ export function MachineHealthDashboard({
     ? [
         `GNOME ${desktop.gnome_shell}`,
         desktop.screen_share_mode === 'mirror-primary' ? 'mirror' : 'extend',
-        desktop.animations_enabled ? 'motion on' : 'motion off',
+        desktop.animations_enabled ? 'motion pref on' : 'motion pref off',
       ].join(' · ')
     : null;
   const remoteClient = payload.network.remote_client;
