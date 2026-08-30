@@ -7,6 +7,7 @@ import { MachineHealthPage } from '@/components/machine-health/machine-health-pa
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
+import { connection } from 'next/server';
 
 export const metadata: Metadata = {
   title: 'Big Red health · Leo',
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
 export const instant = false;
 
 export default async function Page() {
+  await connection();
   const secret = machineDashboardSecret();
   if (process.env.NODE_ENV === 'production') {
     if (!secret) notFound();
