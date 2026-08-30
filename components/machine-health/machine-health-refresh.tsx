@@ -37,17 +37,18 @@ export function MachineHealthRefresh() {
   }, [refresh]);
 
   return (
-    <div className="flex items-center justify-end gap-2 px-1 pb-2 text-xs">
-      <span className="opacity-50">Hourly while open</span>
+    <div className="flex items-center justify-end gap-3 px-1 pb-2 text-xs">
+      <span className="opacity-50">Auto-refresh hourly</span>
       <button
         type="button"
         onClick={refresh}
         disabled={isPending}
-        className="min-h-8 border-black/15 bg-white/55 disabled:opacity-55 dark:border-white/15 dark:hover:bg-black/35 inline-flex items-center gap-1.5 rounded-full border px-3 font-bold transition-colors hover:bg-white/80 disabled:cursor-wait dark:bg-black/20"
+        className="min-h-8 border-current/25 disabled:opacity-55 inline-flex items-center gap-1.5 border-b px-0.5 font-bold transition-colors hover:border-current disabled:cursor-wait"
       >
         <RefreshCw
           aria-hidden="true"
-          className={`size-3.5 ${isPending ? 'animate-spin' : ''}`}
+          strokeWidth={1.8}
+          className={`size-3.5 shrink-0 ${isPending ? 'animate-spin' : ''}`}
         />
         {isPending ? 'Refreshing' : 'Refresh'}
       </button>

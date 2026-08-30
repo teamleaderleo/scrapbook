@@ -108,14 +108,14 @@ describe('machine health dashboard', () => {
 
     expect(html).toContain('Looks good');
     expect(html).not.toContain('No configured guardrail');
-    expect(html).toContain('4 stored observations');
+    expect(html).toContain('4 Big Red snapshots');
     expect(html).toContain('Activity');
     expect(html).toContain('Build state high');
     expect(html).toContain('Codex state high');
     expect(html).toContain('Codex runtime PSS high');
     expect(html).toContain('Codex');
     expect(html).toContain(
-      '10 complete hours · 1h recorded · Big Red 1h · MacBook Air 1h'
+      '12-hour window · 1/12 hours recorded · Big Red 1h · MacBook Air 1h'
     );
     expect(html).toContain('15,050,000 tokens');
     expect(html).toContain('Cached input');
@@ -125,7 +125,7 @@ describe('machine health dashboard', () => {
     expect(html).toContain('CPU');
     expect(html).toContain('32 GiB RAM · 7.2 / 8.0 GiB swap');
     expect(html).toContain('Contention high');
-    expect(html).toContain('iGPU clock');
+    expect(html).not.toContain('iGPU clock');
     expect(html).toContain('Mac transport RTT');
     expect(html).toContain('Build state');
     expect(html).toContain('51.6 GiB');

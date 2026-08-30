@@ -136,10 +136,6 @@ export function MachineHealthDashboard({
       : payload.power.on_ac
         ? `AC · ${payload.power.battery_state}`
         : payload.power.battery_state;
-  const graphicsClock =
-    payload.graphics.clock_mhz === null
-      ? '—'
-      : `${Math.round(payload.graphics.clock_mhz)} MHz`;
   const buildStateRecord = payload.build_state ?? null;
   const buildState =
     buildStateRecord?.source === 'filesystem' ? buildStateRecord : null;
@@ -525,6 +521,77 @@ export function MachineHealthDashboard({
         .filter(Boolean)
         .join(' · ')
     : 'link evidence unavailable';
+  const guardrailChecks = [
+    ...serviceRows.map(([name, value]) => ({
+      label: `${name}: ${value}`,
+      good: value === 'active',
+    })),
+    {
+      label: `Network: ${payload.network.connectivity}`,
+      good: payload.network.connectivity === 'full',
+    },
+    {
+      label: `Tailnet: ${payload.network.tailscale_backend}`,
+      good: payload.network.tailscale_backend === 'running',
+    },
+    ...(remoteServer
+      ? [
+          {
+            label: `Remote desktop: ${remoteServer}`,
+            good: remoteServer === 'active',
+          },
+        ]
+      : []),
+    ...(remoteAcceleration
+      ? [
+          {
+            label: `RDP graphics: ${remoteAccelerationLabel ?? 'unavailable'}`,
+            good:
+              remoteAcceleration.source === 'grd-current-invocation' &&
+              remoteAcceleration.state !== 'software-fallback' &&
+              remoteAcceleration.state !== 'unknown',
+          },
+        ]
+      : []),
+    ...(desktop?.wallpaper_references_complete === undefined
+      ? []
+      : [
+          {
+            label: `Wallpaper refs: ${desktop.wallpaper_references_complete ? 'ready' : 'missing'}`,
+            good: desktop.wallpaper_references_complete,
+          },
+        ]),
+    {
+      label: `Idle suspend: ${idleSuspendDisabled ? 'off' : 'changed'}`,
+      good: idleSuspendDisabled,
+    },
+    {
+      label: `Hibernate: ${payload.power.hibernate_targets_masked ? 'masked' : 'changed'}`,
+      good: payload.power.hibernate_targets_masked,
+    },
+    { label: `Failed units: ${failedUnits}`, good: failedUnits === 0 },
+    ...(reliability?.breakdown
+      ? [
+          {
+            label: `Search indexer · 24h: ${reliability.breakdown.desktop_search.crash_exits} crash${reliability.breakdown.desktop_search.crash_exits === 1 ? '' : 'es'} · ${reliability.breakdown.desktop_search.automatic_restarts} restart${reliability.breakdown.desktop_search.automatic_restarts === 1 ? '' : 's'}`,
+            good: reliability.breakdown.desktop_search.crash_exits === 0,
+          },
+          {
+            label: `Other services · 24h: ${reliability.breakdown.other.crash_exits} crash${reliability.breakdown.other.crash_exits === 1 ? '' : 'es'}`,
+            good: reliability.breakdown.other.crash_exits === 0,
+          },
+        ]
+      : reliability
+        ? [
+            {
+              label: `Crashes · 24h: ${reliability.crash_exits}`,
+              good: reliability.crash_exits === 0,
+            },
+          ]
+        : [{ label: 'Crash history: unavailable', good: false }]),
+  ];
+  const guardrailIssues = guardrailChecks.filter(check => !check.good);
+  const normalGuardrails = guardrailChecks.filter(check => check.good);
 
   return (
     <div className="grid gap-3">
@@ -542,7 +609,9 @@ export function MachineHealthDashboard({
           </div>
           <MachineHealthTimestamp
             checkedAt={report.checkedAt}
+            firstCheckedAt={samples.at(0)?.checkedAt ?? report.checkedAt}
             sampleCount={samples.length}
+            now={now}
           />
         </div>
         {reasons.length > 0 ? (
@@ -605,15 +674,6 @@ export function MachineHealthDashboard({
               : `${Math.round(payload.temperature.peak_sensor_c)} °C`
           }
           note="peak readable sensor"
-        />
-        <Metric
-          label="iGPU clock"
-          value={graphicsClock}
-          note={
-            payload.graphics.max_clock_mhz === null
-              ? 'busy % unavailable'
-              : `${Math.round(payload.graphics.max_clock_mhz)} MHz ceiling`
-          }
         />
         <Metric label="Battery" value={battery} note={powerNote} />
         <Metric label="Remote" value={remoteValue} note={remoteNote} />
@@ -747,7 +807,6 @@ export function MachineHealthDashboard({
         samples={samples}
         codexSamples={codexSamples}
         now={now}
-        graphicsMaxClockMhz={payload.graphics.max_clock_mhz}
         latestActivity={payload.activity}
       />
 
@@ -760,94 +819,30 @@ export function MachineHealthDashboard({
           }}
         >
           <h2 className="text-lg font-black">Guardrails</h2>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {serviceRows.map(([name, value]) => (
-              <Pill key={name} good={value === 'active'}>
-                {name}: {value}
-              </Pill>
-            ))}
-            <Pill good={payload.network.connectivity === 'full'}>
-              Network: {payload.network.connectivity}
-            </Pill>
-            <Pill good={payload.network.tailscale_backend === 'running'}>
-              Tailnet: {payload.network.tailscale_backend}
-            </Pill>
-            {remoteServer ? (
-              <Pill good={remoteServer === 'active'}>
-                Remote desktop: {remoteServer}
-              </Pill>
-            ) : null}
-            {remoteAcceleration ? (
-              <Pill
-                good={
-                  remoteAcceleration.source === 'grd-current-invocation' &&
-                  remoteAcceleration.state !== 'software-fallback' &&
-                  remoteAcceleration.state !== 'unknown'
-                }
-              >
-                RDP graphics: {remoteAccelerationLabel ?? 'unavailable'}
-              </Pill>
-            ) : null}
-            {desktop?.wallpaper_references_complete === undefined ? null : (
-              <Pill good={desktop.wallpaper_references_complete}>
-                Wallpaper refs:{' '}
-                {desktop.wallpaper_references_complete ? 'ready' : 'missing'}
-              </Pill>
-            )}
-            <Pill good={idleSuspendDisabled}>
-              Idle suspend: {idleSuspendDisabled ? 'off' : 'changed'}
-            </Pill>
-            <Pill good={payload.power.hibernate_targets_masked}>
-              Hibernate:{' '}
-              {payload.power.hibernate_targets_masked ? 'masked' : 'changed'}
-            </Pill>
-            <Pill good={failedUnits === 0}>Failed units: {failedUnits}</Pill>
-            {reliability ? (
-              reliability.breakdown ? (
-                <>
-                  <Pill
-                    good={
-                      reliability.breakdown.desktop_search.crash_exits === 0
-                    }
-                  >
-                    Search indexer · 24h:{' '}
-                    {reliability.breakdown.desktop_search.crash_exits} crash
-                    {reliability.breakdown.desktop_search.crash_exits === 1
-                      ? ''
-                      : 'es'}{' '}
-                    · {reliability.breakdown.desktop_search.automatic_restarts}{' '}
-                    restart
-                    {reliability.breakdown.desktop_search.automatic_restarts ===
-                    1
-                      ? ''
-                      : 's'}
-                  </Pill>
-                  <Pill good={reliability.breakdown.other.crash_exits === 0}>
-                    Other services · 24h:{' '}
-                    {reliability.breakdown.other.crash_exits} crash
-                    {reliability.breakdown.other.crash_exits === 1
-                      ? ''
-                      : 'es'}{' '}
-                    · {reliability.breakdown.other.automatic_restarts} restart
-                    {reliability.breakdown.other.automatic_restarts === 1
-                      ? ''
-                      : 's'}
-                  </Pill>
-                </>
-              ) : (
-                <>
-                  <Pill good={reliability.crash_exits === 0}>
-                    Crashes · 24h: {reliability.crash_exits}
-                  </Pill>
-                  <Pill good={reliability.automatic_restarts === 0}>
-                    Auto restarts · 24h: {reliability.automatic_restarts}
-                  </Pill>
-                </>
-              )
-            ) : (
-              <Pill good={false}>Crash history: unavailable</Pill>
-            )}
-          </div>
+          {guardrailIssues.length > 0 ? (
+            <ul className="mt-4 grid gap-2 text-sm">
+              {guardrailIssues.map(check => (
+                <li
+                  key={check.label}
+                  className="border-l-2 border-amber-600 py-1 pl-3 dark:border-amber-300"
+                >
+                  {check.label}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="opacity-65 mt-3 text-sm">No guardrail exceptions.</p>
+          )}
+          <details className="mt-4 border-t border-black/10 pt-3 text-sm dark:border-white/10">
+            <summary className="cursor-pointer font-semibold opacity-60 hover:opacity-100">
+              {normalGuardrails.length} checks normal
+            </summary>
+            <ul className="opacity-65 mt-3 grid gap-x-5 gap-y-2 text-xs sm:grid-cols-2">
+              {normalGuardrails.map(check => (
+                <li key={check.label}>✓ {check.label}</li>
+              ))}
+            </ul>
+          </details>
         </div>
         <div
           className="rounded-2xl border border-black/10 p-5 dark:border-white/10"

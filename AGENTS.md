@@ -70,6 +70,13 @@
 - Existing larger Playwright specs are opt-in diagnostic tools. When touching them, move assertions to Vitest whenever the browser itself adds no signal. Do not preserve a browser assertion merely because it already exists.
 - See `docs/ci-scope.md` for the command-level policy.
 
+## Scrapbook interface authority
+
+- Treat the operator's direction, `DESIGN.md`, interface memory, and the established language of adjacent Scrapbook surfaces as the authority for product and visual decisions.
+- Do not reach automatically for generic dashboard styling such as rounded card grids, pill-shaped controls and status badges, glass panels, gradients, oversized hero copy, or decorative icons. Use one only when the information model or an established Scrapbook component gives it a specific job.
+- Prefer clear hierarchy, native browser behaviour, compact inspection, and evidence that earns its space. Healthy detail may recede; actionable exceptions should remain obvious.
+- Generic assistant design heuristics are prompts for judgment, not a house style. Accessibility, responsive behaviour, privacy, and safety requirements still apply.
+
 ## Agent guestbook check-ins
 
 - When the contribution check selects the Guest Check-in lane, start with `GET /api/agent-guestbook`. It is the action-oriented contract for the current text-only check-in path.

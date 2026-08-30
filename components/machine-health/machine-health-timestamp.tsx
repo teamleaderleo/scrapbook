@@ -17,12 +17,29 @@ function formatTimestamp(value: string, timeZone: string) {
   }).format(new Date(value));
 }
 
+function formatRelativeAge(checkedAt: string, now: number) {
+  const minutes = Math.max(
+    0,
+    Math.floor((now - Date.parse(checkedAt)) / 60_000)
+  );
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days === 1 ? '' : 's'} ago`;
+}
+
 export function MachineHealthTimestamp({
   checkedAt,
+  firstCheckedAt,
   sampleCount,
+  now,
 }: {
   checkedAt: string;
+  firstCheckedAt: string;
   sampleCount: number;
+  now: number;
 }) {
   const browserTimeZone = useSyncExternalStore(
     subscribeToTimeZone,
@@ -36,8 +53,15 @@ export function MachineHealthTimestamp({
 
   return (
     <div className="shrink-0 text-left text-xs sm:text-right">
+      <p className="font-semibold tabular-nums">
+        Updated {formatRelativeAge(checkedAt, now)}
+      </p>
+      <p className="mt-1 tabular-nums opacity-60">
+        {formatTimestamp(checkedAt, timeZone)} · {zoneLabel}
+      </p>
       <div
-        className="border-current/15 inline-flex rounded-full border bg-black/5 p-0.5 dark:bg-white/5"
+        className="mt-2 flex items-center gap-2 sm:justify-end"
+        role="group"
         aria-label="Snapshot time zone"
       >
         {(['local', 'utc'] as const).map(option => (
@@ -46,22 +70,19 @@ export function MachineHealthTimestamp({
             type="button"
             aria-pressed={mode === option}
             onClick={() => setMode(option)}
-            className={`rounded-full px-2.5 py-1 font-bold uppercase tracking-[0.12em] transition-colors ${
+            className={`border-b px-0.5 py-1 font-bold uppercase tracking-[0.12em] transition-colors ${
               mode === option
-                ? 'bg-[#a53b34] text-white shadow-sm'
-                : 'opacity-55 hover:opacity-90'
+                ? 'border-current opacity-90'
+                : 'border-transparent opacity-40 hover:opacity-75'
             }`}
           >
             {option}
           </button>
         ))}
       </div>
-      <p className="mt-2 font-semibold tabular-nums">
-        {formatTimestamp(checkedAt, timeZone)}
-      </p>
-      <p className="opacity-55 mt-0.5">{zoneLabel}</p>
-      <p className="opacity-55 mt-2 font-mono">
-        {sampleCount} stored observations
+      <p className="opacity-55 mt-3 font-mono text-[0.68rem]">
+        {sampleCount} Big Red snapshot{sampleCount === 1 ? '' : 's'} · history
+        began {formatTimestamp(firstCheckedAt, timeZone)}
       </p>
     </div>
   );

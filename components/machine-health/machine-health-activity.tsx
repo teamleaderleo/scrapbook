@@ -8,7 +8,7 @@ import type {
 } from '@/app/lib/machine-health-store';
 import { useMemo, useState } from 'react';
 
-export type ActivityRange = '10h' | '24h' | '7d' | '30d';
+export type ActivityRange = '12h' | '24h' | '7d' | '30d';
 
 type ActivityBin = {
   start: number;
@@ -33,6 +33,8 @@ type ActivityBin = {
   codexActiveRoutes: number | null;
   codexHourCount: number;
   codexSourceHours: Record<CodexTokenSource, number>;
+  codexSourceInputTokens: Record<CodexTokenSource, number>;
+  codexSourceOutputTokens: Record<CodexTokenSource, number>;
   codexWindowCount: number;
   codexSkippedCount: number;
   fallbackCount: number;
@@ -61,11 +63,37 @@ const RANGE_CONFIG: Record<
   ActivityRange,
   { bins: number; binMs: number; description: string }
 > = {
-  '10h': { bins: 10, binMs: HOUR_MS, description: 'hourly' },
+  '12h': { bins: 12, binMs: HOUR_MS, description: 'hourly' },
   '24h': { bins: 24, binMs: HOUR_MS, description: 'hourly' },
   '7d': { bins: 7, binMs: 24 * 60 * 60_000, description: 'daily' },
   '30d': { bins: 30, binMs: 24 * 60 * 60_000, description: 'daily' },
 };
+
+const CODEX_INPUT_SEGMENTS = [
+  {
+    label: 'Big Red',
+    className: 'bg-[#a53b34] dark:bg-[#e27c72]',
+    value: (bin: ActivityBin) => bin.codexSourceInputTokens['big-red'],
+  },
+  {
+    label: 'MacBook Air',
+    className: 'bg-[#2d7f88] dark:bg-[#68c4cb]',
+    value: (bin: ActivityBin) => bin.codexSourceInputTokens['macbook-air'],
+  },
+];
+
+const CODEX_OUTPUT_SEGMENTS = [
+  {
+    label: 'Big Red',
+    className: 'bg-[#a53b34] dark:bg-[#e27c72]',
+    value: (bin: ActivityBin) => bin.codexSourceOutputTokens['big-red'],
+  },
+  {
+    label: 'MacBook Air',
+    className: 'bg-[#2d7f88] dark:bg-[#68c4cb]',
+    value: (bin: ActivityBin) => bin.codexSourceOutputTokens['macbook-air'],
+  },
+];
 
 function average(values: number[]) {
   return values.length === 0
@@ -135,6 +163,8 @@ export function buildActivityBins(
         .map(sample => sample[key])
         .filter((value): value is number => typeof value === 'number');
     const activeRoutes = codexValues('codexActiveRoutes');
+    const embeddedInputTokens = sum(codexValues('codexInputTokens')) ?? 0;
+    const embeddedOutputTokens = sum(codexValues('codexOutputTokens')) ?? 0;
     const remoteProbes = included.flatMap(sample =>
       sample.remoteRttMs === null || sample.remoteTransportPath === null
         ? []
@@ -182,6 +212,14 @@ export function buildActivityBins(
       codexHourCount: includedCodex.length,
       codexSourceHours: {
         'big-red': includedCodex.length,
+        'macbook-air': 0,
+      },
+      codexSourceInputTokens: {
+        'big-red': embeddedInputTokens,
+        'macbook-air': 0,
+      },
+      codexSourceOutputTokens: {
+        'big-red': embeddedOutputTokens,
         'macbook-air': 0,
       },
       codexWindowCount: includedCodex.length,
@@ -310,6 +348,15 @@ export function buildCodexActivityBins(
           .map(sample => sample.windowStartedAt)
       ).size,
     };
+    const sourceTokenValues = (
+      source: CodexTokenSource,
+      field: 'inputTokens' | 'outputTokens'
+    ) =>
+      sum(
+        counted
+          .filter(sample => sample.source === source)
+          .map(sample => sample[field])
+      ) ?? 0;
     return {
       ...bin,
       codexInputTokens: sum(counted.map(sample => sample.inputTokens)),
@@ -330,6 +377,14 @@ export function buildCodexActivityBins(
       codexHourCount: new Set(counted.map(sample => sample.windowStartedAt))
         .size,
       codexSourceHours: sourceHours,
+      codexSourceInputTokens: {
+        'big-red': sourceTokenValues('big-red', 'inputTokens'),
+        'macbook-air': sourceTokenValues('macbook-air', 'inputTokens'),
+      },
+      codexSourceOutputTokens: {
+        'big-red': sourceTokenValues('big-red', 'outputTokens'),
+        'macbook-air': sourceTokenValues('macbook-air', 'outputTokens'),
+      },
       codexWindowCount: counted.length,
       codexSkippedCount: included.length - counted.length,
     };
@@ -389,6 +444,38 @@ function activityMarkerText(bin: ActivityBin) {
   return markers.join(', ');
 }
 
+function formatBinTime(bin: ActivityBin) {
+  const duration = bin.end - bin.start;
+  const options: Intl.DateTimeFormatOptions =
+    duration >= 24 * HOUR_MS
+      ? { month: 'short', day: 'numeric', timeZone: 'UTC' }
+      : {
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          hour12: false,
+          timeZone: 'UTC',
+        };
+  const start = new Intl.DateTimeFormat('en-US', options).format(bin.start);
+  if (duration >= 24 * HOUR_MS) return `${start} UTC`;
+  const end = new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    hour12: false,
+    timeZone: 'UTC',
+  }).format(bin.end);
+  return `${start}–${end} UTC`;
+}
+
+function formatAxisTime(bin: ActivityBin) {
+  const duration = bin.end - bin.start;
+  return new Intl.DateTimeFormat('en-US', {
+    ...(duration >= 24 * HOUR_MS
+      ? { month: 'numeric', day: 'numeric' }
+      : { hour: 'numeric', hour12: false }),
+    timeZone: 'UTC',
+  }).format(bin.start);
+}
+
 function ObservationChart({
   label,
   bins,
@@ -397,6 +484,8 @@ function ObservationChart({
   ceiling,
   unit,
   summary = 'average',
+  binDetail,
+  segments,
 }: {
   label: string;
   bins: ActivityBin[];
@@ -405,7 +494,14 @@ function ObservationChart({
   ceiling?: number;
   unit: string;
   summary?: 'average' | 'maximum' | 'sum';
+  binDetail?: (bin: ActivityBin) => string;
+  segments?: {
+    label: string;
+    className: string;
+    value: (bin: ActivityBin) => number;
+  }[];
 }) {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const values = bins.map(value);
   const present = values.filter((item): item is number => item !== null);
   const previousPresent = previousBins
@@ -415,6 +511,9 @@ function ObservationChart({
   const currentSummary = aggregateValues(present, summary);
   const previousSummary = aggregateValues(previousPresent, summary);
   const markedBins = bins.filter(bin => activityMarkerText(bin)).length;
+  const selectedBin = selectedIndex === null ? null : bins[selectedIndex];
+  const selectedValue = selectedIndex === null ? null : values[selectedIndex];
+  const selectedMarker = selectedBin ? activityMarkerText(selectedBin) : '';
 
   return (
     <article className="bg-white/55 dark:bg-black/15 rounded-xl border border-black/10 p-4 dark:border-white/10">
@@ -429,9 +528,30 @@ function ObservationChart({
           </p>
         </div>
       </div>
+      {selectedBin ? (
+        <div
+          className="mt-3 border-y border-black/10 py-2 text-xs dark:border-white/10"
+          role="status"
+          aria-live="polite"
+        >
+          <p className="font-semibold tabular-nums">
+            {formatBinTime(selectedBin)}
+          </p>
+          <p className="mt-0.5 opacity-60">
+            {selectedValue === null
+              ? 'No observation'
+              : formatValue(selectedValue, unit)}
+            {' · '}
+            {binDetail
+              ? binDetail(selectedBin)
+              : `${selectedBin.sampleCount} health snapshot${selectedBin.sampleCount === 1 ? '' : 's'}`}
+            {selectedMarker ? ` · ${selectedMarker}` : ''}
+          </p>
+        </div>
+      ) : null}
       <div
-        className="mt-4 flex h-20 items-end gap-px"
-        role="img"
+        className="mt-4 flex h-24 items-end gap-px"
+        role="group"
         aria-label={`${label} across ${bins.length} observation bins${markedBins > 0 ? `; ${markedBins} source or reboot bins marked` : ''}`}
       >
         {values.map((item, index) => {
@@ -440,9 +560,15 @@ function ObservationChart({
           const valueText =
             item === null ? 'No observation' : formatValue(item, unit);
           return (
-            <span
+            <button
               key={bin.start}
-              className="relative flex h-full min-w-0 flex-1 items-end"
+              type="button"
+              aria-label={`${formatBinTime(bin)}: ${valueText}${markerText ? `; ${markerText}` : ''}`}
+              aria-pressed={selectedIndex === index}
+              onClick={() =>
+                setSelectedIndex(current => (current === index ? null : index))
+              }
+              className="group relative flex h-full min-w-0 flex-1 items-end rounded-sm px-px outline-none transition-colors hover:bg-[#a53b34]/10 focus-visible:ring-2 focus-visible:ring-[#a53b34] focus-visible:ring-offset-1 dark:hover:bg-[#e27c72]/10"
               data-activity-fallback={
                 bin.fallbackCount > 0 ? 'true' : undefined
               }
@@ -454,17 +580,34 @@ function ObservationChart({
             >
               <span
                 aria-hidden="true"
-                className={`w-full rounded-t-[2px] ${
+                className={`w-full overflow-hidden rounded-t-[2px] ${
                   item === null
                     ? 'h-px bg-black/10 dark:bg-white/10'
-                    : 'bg-[#a53b34] dark:bg-[#e27c72]'
+                    : segments
+                      ? 'flex flex-col-reverse'
+                      : selectedIndex === index
+                        ? 'bg-[#762720] dark:bg-[#ff9a90]'
+                        : 'bg-[#a53b34] group-hover:bg-[#8c302a] dark:bg-[#e27c72] dark:group-hover:bg-[#f18b81]'
                 }`}
                 style={
                   item === null
                     ? undefined
                     : { height: `${Math.max(4, (item / max) * 100)}%` }
                 }
-              />
+              >
+                {item !== null && item > 0 && segments
+                  ? segments.map(segment => {
+                      const segmentValue = segment.value(bin);
+                      return segmentValue > 0 ? (
+                        <span
+                          key={segment.label}
+                          className={segment.className}
+                          style={{ height: `${(segmentValue / item) * 100}%` }}
+                        />
+                      ) : null;
+                    })
+                  : null}
+              </span>
               {bin.fallbackCount > 0 ? (
                 <span
                   aria-hidden="true"
@@ -483,14 +626,31 @@ function ObservationChart({
                   className="size-1.5 absolute left-1/2 top-1 -translate-x-1/2 rotate-45 bg-black dark:bg-white"
                 />
               ) : null}
-            </span>
+            </button>
           );
         })}
       </div>
-      <div className="opacity-35 mt-1 flex justify-between text-[0.58rem] uppercase tracking-[0.12em]">
-        <span>older</span>
-        <span>newer</span>
+      <div className="mt-1 flex justify-between font-mono text-[0.58rem] tabular-nums opacity-40">
+        <span>{formatAxisTime(bins[0])}</span>
+        <span>{formatAxisTime(bins[Math.floor(bins.length / 2)])}</span>
+        <span>{formatAxisTime(bins.at(-1)!)}</span>
       </div>
+      {segments ? (
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[0.62rem] opacity-60">
+          {segments.map(segment => (
+            <span
+              key={segment.label}
+              className="inline-flex items-center gap-1.5"
+            >
+              <span
+                aria-hidden="true"
+                className={`size-2 ${segment.className}`}
+              />
+              {segment.label}
+            </span>
+          ))}
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -528,6 +688,7 @@ function PanelObservationChart({
   bins: ActivityBin[];
   previousBins: ActivityBin[];
 }) {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const currentShare = weightedPanelShare(bins);
   const previousShare = weightedPanelShare(previousBins);
   const observed = bins.reduce(
@@ -537,6 +698,7 @@ function PanelObservationChart({
   const on = bins.reduce((total, bin) => total + bin.panelOnCount, 0);
   const healthSamples = bins.reduce((total, bin) => total + bin.sampleCount, 0);
   const unknown = healthSamples - observed;
+  const selectedBin = selectedIndex === null ? null : bins[selectedIndex];
 
   return (
     <article className="bg-white/55 dark:bg-black/15 rounded-xl border border-black/10 p-4 dark:border-white/10">
@@ -551,12 +713,28 @@ function PanelObservationChart({
           </p>
         </div>
       </div>
+      {selectedBin ? (
+        <div
+          className="mt-3 border-y border-black/10 py-2 text-xs dark:border-white/10"
+          role="status"
+          aria-live="polite"
+        >
+          <p className="font-semibold tabular-nums">
+            {formatBinTime(selectedBin)}
+          </p>
+          <p className="mt-0.5 opacity-60">
+            {selectedBin.panelOnPercent === null
+              ? 'No panel observation'
+              : `${formatPanelShare(selectedBin.panelOnPercent)} · ${selectedBin.panelOnCount}/${selectedBin.panelObservedCount} on`}
+          </p>
+        </div>
+      ) : null}
       <div
-        className="mt-4 flex h-20 items-end gap-px"
-        role="img"
+        className="mt-4 flex h-24 items-end gap-px"
+        role="group"
         aria-label={`Panel on share across ${bins.length} observation bins; ${observed} panel samples`}
       >
-        {bins.map(bin => {
+        {bins.map((bin, index) => {
           const value = bin.panelOnPercent;
           const missing = bin.sampleCount - bin.panelObservedCount;
           const detail =
@@ -564,9 +742,15 @@ function PanelObservationChart({
               ? 'No panel observation'
               : `${formatPanelShare(value)} · ${bin.panelOnCount}/${bin.panelObservedCount} on`;
           return (
-            <span
+            <button
               key={bin.start}
-              className="relative flex h-full min-w-0 flex-1 items-end"
+              type="button"
+              aria-label={`${formatBinTime(bin)}: ${detail}${missing > 0 ? `; ${missing} unknown` : ''}`}
+              aria-pressed={selectedIndex === index}
+              onClick={() =>
+                setSelectedIndex(current => (current === index ? null : index))
+              }
+              className="group relative flex h-full min-w-0 flex-1 items-end rounded-sm px-px outline-none transition-colors hover:bg-[#376d73]/10 focus-visible:ring-2 focus-visible:ring-[#376d73] focus-visible:ring-offset-1"
               data-panel-observed={
                 bin.panelObservedCount > 0 ? 'true' : undefined
               }
@@ -577,7 +761,9 @@ function PanelObservationChart({
                 className={`w-full rounded-t-[2px] ${
                   value === null
                     ? 'h-px bg-black/10 dark:bg-white/10'
-                    : 'bg-[#376d73] dark:bg-[#6fb3b5]'
+                    : selectedIndex === index
+                      ? 'bg-[#214f54] dark:bg-[#91d3d5]'
+                      : 'bg-[#376d73] group-hover:bg-[#2b5d62] dark:bg-[#6fb3b5]'
                 }`}
                 style={
                   value === null
@@ -585,7 +771,7 @@ function PanelObservationChart({
                     : { height: `${Math.max(4, value)}%` }
                 }
               />
-            </span>
+            </button>
           );
         })}
       </div>
@@ -617,6 +803,7 @@ function RemoteTransportChart({
   bins: ActivityBin[];
   previousBins: ActivityBin[];
 }) {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const values = bins.map(bin => bin.remoteRttMs);
   const present = values.filter((value): value is number => value !== null);
   const max = Math.max(...present, 1);
@@ -638,6 +825,7 @@ function RemoteTransportChart({
   );
   const currentAverage = weightedRemoteRtt(bins);
   const previousAverage = weightedRemoteRtt(previousBins);
+  const selectedBin = selectedIndex === null ? null : bins[selectedIndex];
 
   return (
     <article className="bg-white/55 dark:bg-black/15 rounded-xl border border-black/10 p-4 dark:border-white/10">
@@ -652,9 +840,28 @@ function RemoteTransportChart({
           </p>
         </div>
       </div>
+      {selectedBin ? (
+        <div
+          className="mt-3 border-y border-black/10 py-2 text-xs dark:border-white/10"
+          role="status"
+          aria-live="polite"
+        >
+          <p className="font-semibold tabular-nums">
+            {formatBinTime(selectedBin)}
+          </p>
+          <p className="mt-0.5 opacity-60">
+            {selectedBin.remoteRttMs === null
+              ? 'No transport probe'
+              : formatValue(selectedBin.remoteRttMs, 'ms')}
+            {remotePathText(selectedBin)
+              ? ` · ${remotePathText(selectedBin)}`
+              : ''}
+          </p>
+        </div>
+      ) : null}
       <div
-        className="mt-4 flex h-20 items-end gap-px"
-        role="img"
+        className="mt-4 flex h-24 items-end gap-px"
+        role="group"
         aria-label={`Mac transport RTT across ${bins.length} observation bins; ${probeCount} probes`}
       >
         {values.map((value, index) => {
@@ -669,9 +876,15 @@ function RemoteTransportChart({
                   ? 'direct'
                   : null;
           return (
-            <span
+            <button
               key={bin.start}
-              className="relative flex h-full min-w-0 flex-1 items-end"
+              type="button"
+              aria-label={`${formatBinTime(bin)}: ${value === null ? 'No transport probe' : formatValue(value, 'ms')}${pathText ? `; ${pathText}` : ''}`}
+              aria-pressed={selectedIndex === index}
+              onClick={() =>
+                setSelectedIndex(current => (current === index ? null : index))
+              }
+              className="group relative flex h-full min-w-0 flex-1 items-end rounded-sm px-px outline-none transition-colors hover:bg-[#376d73]/10 focus-visible:ring-2 focus-visible:ring-[#376d73] focus-visible:ring-offset-1"
               data-remote-path={path ?? undefined}
               title={`${new Date(bin.start).toISOString()}: ${value === null ? 'No transport probe' : formatValue(value, 'ms')}${pathText ? ` · ${pathText}` : ''}`}
             >
@@ -692,7 +905,7 @@ function RemoteTransportChart({
                     : { height: `${Math.max(4, (value / max) * 100)}%` }
                 }
               />
-            </span>
+            </button>
           );
         })}
       </div>
@@ -734,16 +947,14 @@ export function MachineHealthActivity({
   samples,
   codexSamples,
   now,
-  graphicsMaxClockMhz,
   latestActivity,
 }: {
   samples: MachineHealthSample[];
   codexSamples: CodexTokenSample[];
   now: number;
-  graphicsMaxClockMhz: number | null;
   latestActivity: MachineHealthPayload['activity'];
 }) {
-  const [range, setRange] = useState<ActivityRange>('10h');
+  const [range, setRange] = useState<ActivityRange>('12h');
   const bins = useMemo(
     () => buildActivityBins(samples, range, now),
     [samples, range, now]
@@ -791,31 +1002,44 @@ export function MachineHealthActivity({
 
   return (
     <section className="rounded-2xl border border-black/10 bg-[#e4ded2]/75 p-4 dark:border-white/10 dark:bg-[#17191f]/80 sm:p-5">
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
-        <h2 className="text-lg font-black">Activity</h2>
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+        <div>
+          <h2 className="text-lg font-black">Activity</h2>
+          <p className="opacity-55 mt-1 text-xs">
+            Tap or focus a bar to inspect that interval. Chart times use UTC.
+          </p>
+        </div>
         <div
-          className="bg-white/45 grid w-full grid-cols-4 rounded-full border border-black/10 p-0.5 dark:border-white/10 dark:bg-black/20 sm:inline-flex sm:w-auto sm:self-start"
+          className="border-black/15 dark:border-white/15 grid w-full grid-cols-4 border-b sm:w-auto"
+          role="group"
           aria-label="Activity history range"
         >
-          {(['10h', '24h', '7d', '30d'] as const).map(option => (
+          {(
+            [
+              ['12h', '12h'],
+              ['24h', 'Day'],
+              ['7d', 'Week'],
+              ['30d', 'Month'],
+            ] as const
+          ).map(([option, label]) => (
             <button
               key={option}
               type="button"
               aria-pressed={range === option}
               onClick={() => setRange(option)}
-              className={`min-h-[44px] rounded-full px-3 py-2 text-xs font-black transition-colors sm:min-h-0 sm:py-1.5 ${
+              className={`min-h-[44px] border-b-2 px-3 py-2 text-xs font-black transition-colors sm:min-h-0 sm:py-2 ${
                 range === option
-                  ? 'bg-[#a53b34] text-white shadow-sm'
-                  : 'opacity-55 hover:opacity-90'
+                  ? 'border-[#a53b34] text-[#762720] dark:border-[#e27c72] dark:text-[#ffaaa2]'
+                  : 'hover:opacity-85 -mb-px border-transparent opacity-50'
               }`}
             >
-              {option}
+              {label}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <ObservationChart
           label="CPU average"
           bins={bins}
@@ -854,60 +1078,61 @@ export function MachineHealthActivity({
           unit="%"
           summary="maximum"
         />
-        <ObservationChart
-          label="iGPU clock"
-          bins={bins}
-          previousBins={previousBins}
-          value={bin => bin.graphicsClockMhz}
-          ceiling={graphicsMaxClockMhz ?? undefined}
-          unit="MHz"
-        />
-        <PanelObservationChart bins={bins} previousBins={previousBins} />
-        <ObservationChart
-          label="Browser RSS high"
-          bins={bins}
-          previousBins={previousBins}
-          value={bin => bin.browserRssMib}
-          unit="MiB"
-          summary="maximum"
-        />
-        <ObservationChart
-          label="Build state high"
-          bins={bins}
-          previousBins={previousBins}
-          value={bin => bin.buildStateGib}
-          unit="GiB"
-          summary="maximum"
-        />
-        <ObservationChart
-          label="Codex state high"
-          bins={bins}
-          previousBins={previousBins}
-          value={bin => bin.codexStateMib}
-          unit="MiB"
-          summary="maximum"
-        />
-        <ObservationChart
-          label="Codex runtime PSS high"
-          bins={bins}
-          previousBins={previousBins}
-          value={bin => bin.codexRuntimePssMib}
-          unit="MiB"
-          summary="maximum"
-        />
-        <ObservationChart
-          label="Agent memory high"
-          bins={bins}
-          previousBins={previousBins}
-          value={bin => bin.routeTaggedMemoryMib}
-          unit="MiB"
-          summary="maximum"
-        />
-        <RemoteTransportChart bins={bins} previousBins={previousBins} />
       </div>
+
+      <details className="mt-4 border-t border-black/10 pt-3 dark:border-white/10">
+        <summary className="opacity-65 cursor-pointer text-sm font-bold hover:opacity-100">
+          More diagnostics
+        </summary>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <PanelObservationChart bins={bins} previousBins={previousBins} />
+          <ObservationChart
+            label="Browser RSS high"
+            bins={bins}
+            previousBins={previousBins}
+            value={bin => bin.browserRssMib}
+            unit="MiB"
+            summary="maximum"
+          />
+          <ObservationChart
+            label="Build state high"
+            bins={bins}
+            previousBins={previousBins}
+            value={bin => bin.buildStateGib}
+            unit="GiB"
+            summary="maximum"
+          />
+          <ObservationChart
+            label="Codex state high"
+            bins={bins}
+            previousBins={previousBins}
+            value={bin => bin.codexStateMib}
+            unit="MiB"
+            summary="maximum"
+          />
+          <ObservationChart
+            label="Codex runtime PSS high"
+            bins={bins}
+            previousBins={previousBins}
+            value={bin => bin.codexRuntimePssMib}
+            unit="MiB"
+            summary="maximum"
+          />
+          <ObservationChart
+            label="Agent memory high"
+            bins={bins}
+            previousBins={previousBins}
+            value={bin => bin.routeTaggedMemoryMib}
+            unit="MiB"
+            summary="maximum"
+          />
+          <RemoteTransportChart bins={bins} previousBins={previousBins} />
+        </div>
+      </details>
 
       <div
         className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[0.68rem] opacity-60"
+        role="group"
         aria-label="Activity chart markers"
       >
         <span className="inline-flex items-center gap-1.5">
@@ -1036,7 +1261,10 @@ function CodexActivity({
       : (totalCachedInput / totalInput) * 100;
   const rangeHours =
     (RANGE_CONFIG[range].bins * RANGE_CONFIG[range].binMs) / HOUR_MS;
-  const rangeLabel = `${rangeHours} complete hours`;
+  const rangeLabel =
+    rangeHours < 48
+      ? `${rangeHours}-hour window`
+      : `${Math.round(rangeHours / 24)}-day window`;
   const sourceLabels: Record<CodexTokenSource, string> = {
     'big-red': 'Big Red',
     'macbook-air': 'MacBook Air',
@@ -1058,7 +1286,7 @@ function CodexActivity({
       <div className="flex flex-col justify-between gap-1 sm:flex-row sm:items-end">
         <h3 className="text-base font-black">Codex</h3>
         <p className="text-[0.68rem] opacity-50">
-          {rangeLabel} · {observedHours}h recorded
+          {rangeLabel} · {observedHours}/{rangeHours} hours recorded
           {sourceCoverage ? ` · ${sourceCoverage}` : ''}
           {skippedWindows > 0 ? ` · ${skippedWindows} source-hour skipped` : ''}
         </p>
@@ -1117,6 +1345,10 @@ function CodexActivity({
           value={bin => bin.codexInputTokens}
           unit="tokens"
           summary="sum"
+          segments={CODEX_INPUT_SEGMENTS}
+          binDetail={bin =>
+            `Big Red ${formatValue(bin.codexSourceInputTokens['big-red'], 'tokens')} · MacBook Air ${formatValue(bin.codexSourceInputTokens['macbook-air'], 'tokens')} · ${bin.codexWindowCount} source-hour record${bin.codexWindowCount === 1 ? '' : 's'}${bin.codexSkippedCount > 0 ? ` · ${bin.codexSkippedCount} skipped` : ''}`
+          }
         />
         <ObservationChart
           label="Output tokens"
@@ -1125,6 +1357,10 @@ function CodexActivity({
           value={bin => bin.codexOutputTokens}
           unit="tokens"
           summary="sum"
+          segments={CODEX_OUTPUT_SEGMENTS}
+          binDetail={bin =>
+            `Big Red ${formatValue(bin.codexSourceOutputTokens['big-red'], 'tokens')} · MacBook Air ${formatValue(bin.codexSourceOutputTokens['macbook-air'], 'tokens')} · ${bin.codexWindowCount} source-hour record${bin.codexWindowCount === 1 ? '' : 's'}${bin.codexSkippedCount > 0 ? ` · ${bin.codexSkippedCount} skipped` : ''}`
+          }
         />
       </div>
     </div>
