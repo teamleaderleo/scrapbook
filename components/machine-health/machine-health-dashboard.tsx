@@ -294,6 +294,24 @@ export function MachineHealthDashboard({
         .filter(Boolean)
         .join(' · ')
     : 'unavailable';
+  const runtimeClasses = codexRuntime?.process_classes ?? null;
+  const runtimeClassNote = runtimeClasses
+    ? (() => {
+        const values = Object.values(runtimeClasses);
+        const memoryField = values.every(value => value.pss_bytes !== null)
+          ? ('pss_bytes' as const)
+          : ('rss_bytes' as const);
+        const appBytes =
+          runtimeClasses.control[memoryField]! +
+          runtimeClasses.other[memoryField]!;
+        return [
+          `app ${formatMemory(appBytes)}`,
+          `code ${formatMemory(runtimeClasses.code_mode[memoryField]!)}`,
+          `MCP ${formatMemory(runtimeClasses.mcp[memoryField]!)}`,
+          memoryField === 'pss_bytes' ? 'PSS' : 'RSS',
+        ].join(' · ');
+      })()
+    : null;
   const processCoverageValue = processCoverage
     ? `${processCoverage.scoped_processes} / ${processCoverage.discoverable_processes}`
     : '—';
@@ -738,6 +756,11 @@ export function MachineHealthDashboard({
               <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
                 {codexRuntimeNote}
               </dd>
+              {runtimeClassNote ? (
+                <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
+                  {runtimeClassNote}
+                </dd>
+              ) : null}
             </div>
             <div>
               <dt className="opacity-55 text-xs">Agent routes</dt>

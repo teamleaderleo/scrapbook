@@ -1253,6 +1253,32 @@ class CodexRuntimeTest(unittest.TestCase):
                 "pss_bytes": 87 * mib,
                 "swap_bytes": 174 * mib,
                 "memory_errors": 0,
+                "process_classes": {
+                    "control": {
+                        "processes": 3,
+                        "rss_bytes": 3 * mib,
+                        "pss_bytes": 41 * mib,
+                        "swap_bytes": 82 * mib,
+                    },
+                    "code_mode": {
+                        "processes": 1,
+                        "rss_bytes": mib,
+                        "pss_bytes": 12 * mib,
+                        "swap_bytes": 24 * mib,
+                    },
+                    "mcp": {
+                        "processes": 2,
+                        "rss_bytes": 2 * mib,
+                        "pss_bytes": 34 * mib,
+                        "swap_bytes": 68 * mib,
+                    },
+                    "other": {
+                        "processes": 0,
+                        "rss_bytes": 0,
+                        "pss_bytes": 0,
+                        "swap_bytes": 0,
+                    },
+                },
             },
         )
         serialized = json.dumps(runtime)
@@ -1277,6 +1303,9 @@ class CodexRuntimeTest(unittest.TestCase):
         self.assertEqual(runtime["memory_errors"], 1)
         self.assertIsNone(runtime["pss_bytes"])
         self.assertIsNone(runtime["swap_bytes"])
+        for process_class in runtime["process_classes"].values():
+            self.assertIsNone(process_class["pss_bytes"])
+            self.assertIsNone(process_class["swap_bytes"])
 
     def test_reads_only_bounded_pss_and_swap_totals(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -1327,6 +1356,15 @@ class HygieneTest(unittest.TestCase):
                 "pss_bytes": 0,
                 "swap_bytes": 0,
                 "memory_errors": 0,
+                "process_classes": {
+                    name: {
+                        "processes": 0,
+                        "rss_bytes": 0,
+                        "pss_bytes": 0,
+                        "swap_bytes": 0,
+                    }
+                    for name in ("control", "code_mode", "mcp", "other")
+                },
             },
         )
 

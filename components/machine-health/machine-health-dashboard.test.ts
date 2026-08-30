@@ -155,6 +155,7 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Codex runtime');
     expect(html).toContain('2.2 GiB');
     expect(html).toContain('69 proc · 13 code · 36 MCP · 1.4 GiB swap');
+    expect(html).toContain('app 936 MiB · code 500 MiB · MCP 800 MiB · PSS');
     expect(html).toContain('3 jobs · 17 proc · 512 MiB');
     expect(html).toContain(
       '384 MiB memory · 192 MiB job peak · 2.5 s CPU · I/O —'
@@ -242,6 +243,40 @@ describe('machine health dashboard', () => {
         )
       );
     }
+  });
+
+  it('falls back to runtime-class RSS when a PSS read is incomplete', () => {
+    const runtime = report.payload.hygiene.codex_runtime!;
+    const processClasses = runtime.process_classes!;
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report: {
+          ...report,
+          payload: {
+            ...report.payload,
+            hygiene: {
+              ...report.payload.hygiene,
+              codex_runtime: {
+                ...runtime,
+                pss_bytes: null,
+                swap_bytes: null,
+                memory_errors: 1,
+                process_classes: Object.fromEntries(
+                  Object.entries(processClasses).map(([name, value]) => [
+                    name,
+                    { ...value, pss_bytes: null, swap_bytes: null },
+                  ])
+                ) as typeof processClasses,
+              },
+            },
+          },
+        },
+        samples,
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('app 1.6 GiB · code 700 MiB · MCP 1.2 GiB · RSS');
   });
 
   it('keeps hot-run completeness visible when build-size inventory is unavailable', () => {

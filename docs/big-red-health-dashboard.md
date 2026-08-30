@@ -114,6 +114,19 @@ The first live receipt found two control roots, 69 processes, 13 code hosts and 
 memory-read errors while whole-machine memory use was 10.92%. That supports visibility, not cleanup;
 the route registry simultaneously reported zero owned residue.
 
+An additive class receipt splits the already-admitted runtime tree into control processes,
+code-mode hosts, MCP servers and other descendants. It emits only process, RSS, PSS and swap totals
+for those four fixed buckets. Counts and RSS always reconcile to the runtime total. One failed
+`smaps_rollup` read withholds every class PSS and swap value; the consumer rejects partial or
+inconsistent sums. Historical reports without the optional class object remain valid.
+
+A bounded live verification made the distinction useful. With the route-owned Next development
+server and browser verifier open, the tree held 94 processes and 3,142,606,848 PSS bytes; the
+`other` bucket alone held 1,636,202,496 bytes. Closing both reduced the next complete receipt to 83
+processes and 2,025,950,208 PSS bytes, with `other` at 506,767,360 bytes. The 11-process /
+1,116,656,640-byte drop is evidence that the fixed class catches temporary route tooling. It does
+not identify a chat, declare the remaining processes idle, or authorize signaling them.
+
 The 24-hour reliability readout counts structured systemd core-dump exits and automatic restart
 events. It partitions both totals into the GNOME desktop-search indexer and all other services,
 then discards unit names, messages, exit statuses, timestamps, and invocation identifiers. A

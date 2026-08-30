@@ -123,6 +123,41 @@ describe('machine health contract', () => {
     expect(parsed).toEqual(healthyMachineReport);
   });
 
+  it('rejects inconsistent or partially disclosed runtime class memory', () => {
+    const runtime = healthyMachineReport.hygiene.codex_runtime!;
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        hygiene: {
+          ...healthyMachineReport.hygiene,
+          codex_runtime: {
+            ...runtime,
+            process_classes: {
+              ...runtime.process_classes!,
+              control: {
+                ...runtime.process_classes!.control,
+                processes: runtime.process_classes!.control.processes + 1,
+              },
+            },
+          },
+        },
+      }).success
+    ).toBe(false);
+
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        hygiene: {
+          ...healthyMachineReport.hygiene,
+          codex_runtime: {
+            ...runtime,
+            pss_bytes: null,
+          },
+        },
+      }).success
+    ).toBe(false);
+  });
+
   it('defaults new hygiene counters when reading a pre-extension snapshot', () => {
     const {
       browser_rss_bytes: _browserRssBytes,

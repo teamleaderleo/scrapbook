@@ -199,6 +199,32 @@ export const healthyMachineReport: MachineHealthPayload = {
       pss_bytes: 2_344_271_872,
       swap_bytes: 1_533_607_936,
       memory_errors: 0,
+      process_classes: {
+        control: {
+          processes: 4,
+          rss_bytes: 629_145_600,
+          pss_bytes: 419_430_400,
+          swap_bytes: 209_715_200,
+        },
+        code_mode: {
+          processes: 13,
+          rss_bytes: 734_003_200,
+          pss_bytes: 524_288_000,
+          swap_bytes: 419_430_400,
+        },
+        mcp: {
+          processes: 36,
+          rss_bytes: 1_258_291_200,
+          pss_bytes: 838_860_800,
+          swap_bytes: 629_145_600,
+        },
+        other: {
+          processes: 16,
+          rss_bytes: 1_108_377_600,
+          pss_bytes: 561_692_672,
+          swap_bytes: 275_316_736,
+        },
+      },
     },
     unexpected_dev_listeners: 0,
     rdp_connections: 0,
