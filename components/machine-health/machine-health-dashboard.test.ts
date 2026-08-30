@@ -131,7 +131,7 @@ describe('machine health dashboard', () => {
     expect(html).toContain('partial · 0 MiB reclaimable · 7.4 s');
     expect(html).toContain('Remote');
     expect(html).toContain('Direct');
-    expect(html).toContain('GRD active · VA-API ready');
+    expect(html).toContain('221 ms · GRD active · VA-API ready');
     expect(html).toContain('Remote desktop: active');
     expect(html).toContain('RDP graphics: VA-API ready');
     expect(html).toContain('Desktop');

@@ -184,6 +184,10 @@ export function MachineHealthDashboard({
             : 'Graphics unknown'
       : null;
   const remoteState = remoteClient?.state ?? 'unavailable';
+  const remoteProbe =
+    remoteClient?.source === 'tailscale-status'
+      ? remoteClient.transport_probe
+      : undefined;
   const remoteValue =
     payload.hygiene.rdp_connections > 0
       ? 'Connected'
@@ -211,7 +215,9 @@ export function MachineHealthDashboard({
     remoteClient?.last_seen_seconds_ago !== null &&
     remoteClient?.last_seen_seconds_ago !== undefined
       ? `Seen ${formatDuration(remoteClient.last_seen_seconds_ago)} ago`
-      : remotePath,
+      : remoteProbe
+        ? `${Math.round(remoteProbe.rtt_ms)} ms`
+        : remotePath,
     remoteServer ? `GRD ${remoteServer}` : null,
     remoteAccelerationLabel,
     payload.hygiene.rdp_connections > 0

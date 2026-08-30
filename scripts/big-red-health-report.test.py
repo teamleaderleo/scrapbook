@@ -676,6 +676,7 @@ class RemoteClientTest(unittest.TestCase):
             "LastSeen": "2026-08-29T17:59:00Z",
             "HostName": "must-not-escape",
             "PublicKey": "must-not-escape",
+            "TailscaleIPs": ["100.64.0.1"],
         }
         peer.update(peer_overrides)
         return {
@@ -709,6 +710,11 @@ class RemoteClientTest(unittest.TestCase):
             self.NOW,
         )
         self.assertEqual(offline["last_seen_seconds_ago"], 6 * 3_600)
+
+        active_zero_time = REPORT.remote_client_state(
+            self.status(LastSeen="0001-01-01T00:00:00Z"), self.NOW
+        )
+        self.assertIsNone(active_zero_time["last_seen_seconds_ago"])
 
     def test_fails_closed_on_missing_or_ambiguous_macos_peer(self) -> None:
         statuses = (
@@ -744,6 +750,87 @@ class RemoteClientTest(unittest.TestCase):
         self.assertEqual(backend, "running")
         self.assertTrue(online)
         self.assertEqual(remote["state"], "offline")
+
+    def test_parses_one_path_probe_without_peer_detail(self) -> None:
+        cases = (
+            ("via 192.0.2.1:41641", "direct"),
+            ("via [2001:db8::1]:41641", "direct"),
+            ("via DERP(private-region)", "relay"),
+            ("via peer-relay(private-peer)", "peer-relay"),
+        )
+        for route, expected in cases:
+            with self.subTest(expected=expected):
+                probe = REPORT.parse_tailscale_ping(
+                    f"pong from must-not-escape (100.64.0.1) {route} in 221ms"
+                )
+                self.assertEqual(
+                    probe,
+                    {
+                        "source": "tailscale-ping",
+                        "path": expected,
+                        "rtt_ms": 221.0,
+                        "samples": 1,
+                    },
+                )
+                self.assertNotIn("must-not-escape", json.dumps(probe))
+                self.assertNotIn("private", json.dumps(probe))
+
+        self.assertIsNone(
+            REPORT.parse_tailscale_ping(
+                "pong from must-not-escape (100.64.0.1) "
+                "via future-route(private) in 221ms"
+            )
+        )
+
+    def test_adds_one_probe_only_for_an_active_remote_path(self) -> None:
+        responses = (
+            (0, json.dumps(self.status(Active=True, CurAddr="private-endpoint"))),
+            (
+                0,
+                "pong from must-not-escape (100.64.0.1) "
+                "via 192.0.2.1:41641 in 221ms",
+            ),
+        )
+        with patch.object(REPORT, "run", side_effect=responses) as run:
+            backend, online, remote = REPORT.tailscale_state(self.NOW)
+
+        self.assertEqual(backend, "running")
+        self.assertTrue(online)
+        self.assertEqual(remote["state"], "direct")
+        self.assertEqual(
+            remote["transport_probe"],
+            {
+                "source": "tailscale-ping",
+                "path": "direct",
+                "rtt_ms": 221.0,
+                "samples": 1,
+            },
+        )
+        self.assertEqual(run.call_count, 2)
+        encoded = json.dumps(remote)
+        self.assertNotIn("must-not-escape", encoded)
+        self.assertNotIn("private-endpoint", encoded)
+        self.assertNotIn("100.64.0.1", encoded)
+
+    def test_skips_probe_for_inactive_or_unknown_remote_paths(self) -> None:
+        cases = (
+            {"Online": False},
+            {"Active": False},
+            {"Active": True, "CurAddr": "", "Relay": ""},
+        )
+        for overrides in cases:
+            with self.subTest(overrides=overrides):
+                with patch.object(
+                    REPORT,
+                    "run",
+                    return_value=(0, json.dumps(self.status(**overrides))),
+                ) as run:
+                    _backend, _online, remote = REPORT.tailscale_state(
+                        self.NOW
+                    )
+
+                self.assertNotIn("transport_probe", remote)
+                run.assert_called_once_with("tailscale", "status", "--json")
 
     def test_malformed_self_and_time_evidence_fail_soft(self) -> None:
         status = self.status(LastSeen="not-a-time")

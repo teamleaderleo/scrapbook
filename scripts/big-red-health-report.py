@@ -12,6 +12,7 @@ import argparse
 import datetime as dt
 import hashlib
 import hmac
+import ipaddress
 import json
 import math
 import os
@@ -1207,7 +1208,7 @@ def peak_sensor_temperature() -> float | None:
 
 def remote_client_state(
     status: dict[str, Any], now: dt.datetime
-) -> dict[str, str | int | None]:
+) -> dict[str, Any]:
     peers = status.get("Peer")
     if not isinstance(peers, dict):
         return {
@@ -1243,10 +1244,15 @@ def remote_client_state(
     if isinstance(last_seen, str):
         try:
             observed = dt.datetime.fromisoformat(last_seen.replace("Z", "+00:00"))
-            last_seen_age = max(
-                0,
-                int((now.astimezone(dt.timezone.utc) - observed).total_seconds()),
-            )
+            if observed.year > 1:
+                last_seen_age = max(
+                    0,
+                    int(
+                        (
+                            now.astimezone(dt.timezone.utc) - observed
+                        ).total_seconds()
+                    ),
+                )
         except (TypeError, ValueError):
             pass
 
@@ -1270,9 +1276,71 @@ def remote_client_state(
     }
 
 
+def parse_tailscale_ping(output: str) -> dict[str, Any] | None:
+    pattern = re.compile(
+        r"^pong from .+ via (?P<route>.+) in "
+        r"(?P<rtt>[0-9]+(?:\.[0-9]+)?)ms$"
+    )
+    for line in reversed(output.splitlines()):
+        match = pattern.fullmatch(line.strip())
+        if match is None:
+            continue
+        route = match.group("route")
+        if route.startswith("DERP(") and route.endswith(")"):
+            path = "relay"
+        elif route.startswith("peer-relay(") and route.endswith(")"):
+            path = "peer-relay"
+        else:
+            host, separator, port = route.rpartition(":")
+            if separator != ":" or not port.isdigit():
+                continue
+            if host.startswith("[") and host.endswith("]"):
+                host = host[1:-1]
+            try:
+                ipaddress.ip_address(host)
+            except ValueError:
+                continue
+            if not 0 < int(port) <= 65_535:
+                continue
+            path = "direct"
+        return {
+            "source": "tailscale-ping",
+            "path": path,
+            "rtt_ms": round(float(match.group("rtt")), 1),
+            "samples": 1,
+        }
+    return None
+
+
+def remote_transport_probe(
+    peer: dict[str, Any], state: str
+) -> dict[str, Any] | None:
+    if state not in {"direct", "relay"}:
+        return None
+    addresses = peer.get("TailscaleIPs")
+    if not isinstance(addresses, list):
+        return None
+    target = next(
+        (address for address in addresses if isinstance(address, str) and address),
+        None,
+    )
+    if target is None:
+        return None
+    code, output = run(
+        "tailscale",
+        "ping",
+        "--c",
+        "1",
+        "--timeout",
+        "2s",
+        target,
+    )
+    return parse_tailscale_ping(output) if code == 0 else None
+
+
 def tailscale_state(
     now: dt.datetime,
-) -> tuple[str, bool | None, dict[str, str | int | None]]:
+) -> tuple[str, bool | None, dict[str, Any]]:
     code, output = run("tailscale", "status", "--json")
     if code != 0 or not output:
         return "unknown", None, remote_client_state({}, now)
@@ -1290,10 +1358,25 @@ def tailscale_state(
     }.get(backend, "unknown")
     self_state = status.get("Self")
     online = self_state.get("Online") if isinstance(self_state, dict) else None
+    remote = remote_client_state(status, now)
+    peers = status.get("Peer")
+    if remote.get("source") == "tailscale-status" and isinstance(peers, dict):
+        macos_peers = [
+            peer
+            for peer in peers.values()
+            if isinstance(peer, dict)
+            and str(peer.get("OS", "")).lower() in {"macos", "darwin"}
+        ]
+        if len(macos_peers) == 1:
+            transport_probe = remote_transport_probe(
+                macos_peers[0], str(remote.get("state", "unknown"))
+            )
+            if transport_probe is not None:
+                remote["transport_probe"] = transport_probe
     return (
         mapped,
         online if isinstance(online, bool) else None,
-        remote_client_state(status, now),
+        remote,
     )
 
 

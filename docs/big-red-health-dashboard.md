@@ -13,7 +13,8 @@ The page starts with the questions that matter when Leo is away from the machine
 - Are SSH, Tailscale, NetworkManager, GNOME Remote Desktop, and time sync active?
 - Is automatic idle suspend still disabled while deliberate lid-close suspend remains available, and are hibernate targets still masked?
 - Is the machine on AC, what is the aggregate battery state, and are there failed systemd units, unexpected development listeners, excess browser memory, or active RDP connections?
-- Is the unique macOS remote client offline, online but idle, direct, relayed, or unknown?
+- Is the unique macOS remote client offline, online but idle, direct, relayed, or unknown, and what
+  one-shot path RTT did Big Red observe while that peer was active?
 - Did the current GNOME Remote Desktop process initialize its Vulkan/VA-API path, fall back to software, or not yet receive an RDP session?
 - What desktop state is active now: GNOME version, pixel mode, refresh, scale, screen-shield state,
   animation state, and configured mirror/extend mode?
@@ -82,7 +83,7 @@ bytes. The existing Codex-state scan still dominates the hourly run.
 
 The Codex-state view calls `leo-workspace/tools/codex_state_inventory.py` in aggregate mode. The accepted contract opens no content files, uses no network or privileged process reads, mutates nothing, and has no retention authority. Scrapbook reconciles class, file, and allocated-byte totals before accepting active, authoritative, manifest-referenced, and unknown buckets. Any nonzero reclaimable or reconstructible total is rejected because the current inventory contract has not earned cleanup authority. Paths, file names, manifests, process identities, and content never enter the report.
 
-Remote-client state is derived from the same local `tailscale status --json` read used for Big Red's own state. Exactly one macOS peer is required; zero or multiple candidates become unavailable. The report emits only `offline`, `online-idle`, `direct`, `relay`, or `unknown`, plus a last-seen age. Direct requires an active peer with a current endpoint; relay requires an active peer with relay evidence. Host names, node keys, addresses, tailnet IPs, relay regions, traffic totals, and timestamps never enter the report. The public repository contains the contract and collector code, but no machine snapshot or credential.
+Remote-client state is derived from the same local `tailscale status --json` read used for Big Red's own state. Exactly one macOS peer is required; zero or multiple candidates become unavailable. The report emits only `offline`, `online-idle`, `direct`, `relay`, or `unknown`, plus a last-seen age when Tailscale supplies a nonzero timestamp. Direct requires an active peer with a current endpoint; relay requires an active peer with relay evidence. When that peer is already active, the collector adds one bounded Tailscale disco ping and keeps only its coarse path class and RTT. It skips the probe for offline and idle peers, so the observer does not manufacture an active path or keep a sleeping Mac busy. The RTT is Big Red-to-Mac transport evidence, not Windows App, decoder, display, or input-to-paint latency. Host names, node keys, addresses, tailnet IPs, endpoints, relay regions, traffic totals, and timestamps never enter the report. The public repository contains the contract and collector code, but no machine snapshot or credential.
 
 RDP acceleration state is bound to the current `gnome-remote-desktop.service` invocation. The collector reads at most 512 journal records for that invocation and emits one enum: `hardware-ready` after both Vulkan and VA-API initialize, `software-fallback` after the latest relevant failure, `awaiting-session` when Vulkan is ready but no VA-API session attempt exists, or `unknown`. A new daemon invocation cannot inherit an old failure. Invocation IDs, journal messages, driver strings, client capabilities, endpoints, and timestamps never enter the report. `hardware-ready` proves initialization, not rendered frame rate, codec selection, or end-to-end latency.
 
@@ -118,7 +119,12 @@ agent ownership from the older aggregate.
 
 The exact-head collector took 10.43 seconds and 54,208 KiB peak RSS in a live print-only run. The Codex-state scan accounted for 8.70 seconds and returned 1.73 GiB across 9,792 files and 48 classes. One hourly run is about 0.3% duty cycle, with no resident process between reports. The source marked process evidence partial, split the bytes between active and unknown, and reported zero reclaimable bytes with retention authority false. The dashboard displays those facts and the seven-day total-size delta without treating growth as an alert.
 
-Remote-client classification reuses the existing Tailscale status document, so it adds no second Tailscale command or network probe. Acceleration classification adds two bounded local reads: the service invocation ID and up to 512 journal records from that invocation. Those two reads took 5.1 ms median and 8.1 ms maximum across 20 live probes.
+Remote-client classification reuses the existing Tailscale status document. An already-active unique
+Mac peer receives one optional Tailscale disco ping with a two-second per-probe timeout inside the
+collector's four-second command cap; offline, idle, ambiguous, failed, and malformed cases expose no
+RTT. Acceleration classification adds two bounded local reads: the service invocation ID and up to
+512 journal records from that invocation. Those two reads took 5.1 ms median and 8.1 ms maximum
+across 20 live probes.
 
 Route activity, process tags, and Codex state are point observations at report time. The hygiene panel shows exact-scoped versus discoverable Codex processes beside active routes, jobs, tagged descendants, aggregate memory, residue, unknown ownership records, and local state growth. Hook tags add main-root and subagent rollups without exposing their identities. Historical bins show the highest lease-tagged process count observed in each hour or day; they do not imply continuous runtime between reports. Token usage is stored by source and complete hour, summed across Big Red and the MacBook Air, and deduplicated on source plus hour. Full-history subagent forks replay old session events at creation; both collectors drop that startup replay before accounting so a fork cannot manufacture a token spike.
 

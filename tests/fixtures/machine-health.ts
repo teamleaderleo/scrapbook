@@ -145,6 +145,12 @@ export const healthyMachineReport: MachineHealthPayload = {
       source: 'tailscale-status',
       state: 'direct',
       last_seen_seconds_ago: 60,
+      transport_probe: {
+        source: 'tailscale-ping',
+        path: 'direct',
+        rtt_ms: 221,
+        samples: 1,
+      },
     },
     rx_mib_s: 0.8,
     tx_mib_s: 0.2,

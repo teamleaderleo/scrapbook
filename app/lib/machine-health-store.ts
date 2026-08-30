@@ -132,6 +132,14 @@ const remoteClient = z.discriminatedUnion('source', [
     source: z.literal('tailscale-status'),
     state: z.enum(['offline', 'online-idle', 'direct', 'relay', 'unknown']),
     last_seen_seconds_ago: nonnegativeInteger.nullable(),
+    transport_probe: z
+      .object({
+        source: z.literal('tailscale-ping'),
+        path: z.enum(['direct', 'relay', 'peer-relay']),
+        rtt_ms: z.number().finite().nonnegative().max(60_000),
+        samples: z.literal(1),
+      })
+      .optional(),
   }),
   z.object({
     source: z.literal('unavailable'),
