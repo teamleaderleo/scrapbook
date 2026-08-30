@@ -3,6 +3,10 @@ import {
   hasMachineDashboardAccess,
   machineDashboardSecret,
 } from '@/app/lib/server/machine-dashboard-access';
+import {
+  hasMachineDashboardOwnerSession,
+  machineDashboardOwnerAuthConfigured,
+} from '@/app/lib/server/machine-dashboard-owner';
 import { MachineHealthPage } from '@/components/machine-health/machine-health-page';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
@@ -21,15 +25,19 @@ export default async function Page() {
   await connection();
   const secret = machineDashboardSecret();
   if (process.env.NODE_ENV === 'production') {
-    if (!secret) notFound();
     const cookieStore = await cookies();
-    if (
-      !hasMachineDashboardAccess(
-        cookieStore.get(MACHINE_DASHBOARD_COOKIE)?.value,
-        secret
-      )
-    )
-      redirect('/machine-health/access');
+    const hasRecoveryAccess = Boolean(
+      secret &&
+        hasMachineDashboardAccess(
+          cookieStore.get(MACHINE_DASHBOARD_COOKIE)?.value,
+          secret
+        )
+    );
+    const hasOwnerAccess =
+      hasRecoveryAccess || (await hasMachineDashboardOwnerSession());
+
+    if (!secret && !machineDashboardOwnerAuthConfigured()) notFound();
+    if (!hasOwnerAccess) redirect('/machine-health/access');
   }
 
   return <MachineHealthPage />;

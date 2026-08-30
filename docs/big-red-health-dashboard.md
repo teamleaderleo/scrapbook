@@ -231,21 +231,30 @@ both boundaries.
 
 ```text
 MACHINE_HEALTH_INGEST_SECRET=<long random ingest-only secret>
-MACHINE_HEALTH_DASHBOARD_TOKEN=<private read token>
+MACHINE_HEALTH_DASHBOARD_TOKEN=<optional recovery token>
 ```
 
-The dashboard token may be omitted if the existing `PROXY_DASHBOARD_TOKEN` should unlock both private operations pages. The signed cookies remain different and path-scoped. The ingest credential has no fallback to the proxy credential.
+The dashboard uses the existing Supabase Google/GitHub session and the same explicit administrator
+allowlist as Space. An already signed-in administrator opens the dashboard directly. The dashboard
+token remains an optional recovery path and may be omitted if the existing
+`PROXY_DASHBOARD_TOKEN` should provide recovery access to both private operations pages. Recovery
+cookies remain different and path-scoped. The ingest credential has no fallback to the proxy
+credential.
 
 Paths:
 
 ```text
 GET  /machine-health/access
 GET  /machine-health
+POST /machine-health/access/token
 POST /api/machine-health/ingest
 POST /api/machine-health/codex-usage/ingest
 ```
 
-Production `/machine-health` verifies its signed, seven-day HttpOnly cookie before reading the database. Invalid or unconfigured access returns the ordinary not-found page. The access form sends the token in a POST body rather than a query string.
+Production `/machine-health` verifies the current Supabase user against the administrator allowlist
+before reading the database. The signed, seven-day HttpOnly recovery cookie remains accepted. A
+visitor without either form of access is sent to Google/GitHub sign-in; the optional recovery form
+sends its token in a POST body rather than a query string.
 
 Ingestion accepts reports no more than 48 hours old and no more than 10 minutes in the future. The collector refuses to send its credential over plain HTTP except to loopback during local testing.
 It refuses every redirect, so a response cannot forward the ingest bearer token to another origin
