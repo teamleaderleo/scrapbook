@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "node scripts/prepare-next-build.mjs",
     "ci:local": "node scripts/local-ci.mjs",
     "dev": "next dev --turbopack",
     "prettier": "prettier --write --ignore-unknown .",
