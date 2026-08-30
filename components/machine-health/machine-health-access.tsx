@@ -1,43 +1,20 @@
-'use client';
-
 import { GitHubIcon } from '@/components/icons/github-icon';
 import { GoogleIcon } from '@/components/icons/google-icon';
 import { Button } from '@/components/ui/button';
-import { createClient } from '@/utils/supabase/client';
-import { Loader2 } from 'lucide-react';
-import { useState } from 'react';
-
-type OAuthProvider = 'google' | 'github';
 
 export function MachineHealthAccess({
   hasOwnerSignIn,
   hasRecoveryToken,
+  oauthStartBaseUrl = '',
+  oauthError = false,
 }: {
   hasOwnerSignIn: boolean;
   hasRecoveryToken: boolean;
+  oauthStartBaseUrl?: string;
+  oauthError?: boolean;
 }) {
-  const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(
-    null
-  );
-  const [error, setError] = useState<string | null>(null);
-
-  const signIn = async (provider: OAuthProvider) => {
-    setLoadingProvider(provider);
-    setError(null);
-    const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent('/machine-health')}`,
-      },
-    });
-
-    if (signInError) {
-      console.error('Big Red OAuth error:', signInError);
-      setError('Sign-in could not start. Try again in a moment.');
-      setLoadingProvider(null);
-    }
-  };
+  const oauthPath = (provider: 'google' | 'github') =>
+    `${oauthStartBaseUrl}/machine-health/access/oauth/${provider}`;
 
   return (
     <main className="grid min-h-[100dvh] place-items-center bg-[#e9e4da] px-4 py-12 text-[#2d2a26] dark:bg-[#17191d] dark:text-[#f2eee6]">
@@ -58,43 +35,35 @@ export function MachineHealthAccess({
         {hasOwnerSignIn ? (
           <div className="mt-6 grid gap-3">
             <Button
-              type="button"
+              asChild
               size="lg"
-              onClick={() => signIn('google')}
-              disabled={loadingProvider !== null}
               className="w-full rounded-xl bg-[#a8342e] text-white hover:bg-[#8f2c27]"
             >
-              {loadingProvider === 'google' ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              ) : (
+              <a href={oauthPath('google')}>
                 <GoogleIcon className="h-4 w-4" aria-hidden="true" />
-              )}
-              Continue with Google
+                Continue with Google
+              </a>
             </Button>
             <Button
-              type="button"
+              asChild
               variant="outline"
               size="lg"
-              onClick={() => signIn('github')}
-              disabled={loadingProvider !== null}
               className="w-full rounded-xl border-[#9f9485] bg-transparent dark:border-[#6a6d73]"
             >
-              {loadingProvider === 'github' ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              ) : (
+              <a href={oauthPath('github')}>
                 <GitHubIcon className="h-4 w-4" aria-hidden="true" />
-              )}
-              Continue with GitHub
+                Continue with GitHub
+              </a>
             </Button>
           </div>
         ) : null}
 
-        {error ? (
+        {oauthError ? (
           <p
             className="mt-4 text-sm text-[#a8342e] dark:text-[#ef8c83]"
             role="alert"
           >
-            {error}
+            Sign-in returned without a valid session. Please try again.
           </p>
         ) : null}
 

@@ -3,6 +3,7 @@ import {
   machineDashboardOwner,
   machineDashboardOwnerAuthConfigured,
 } from '@/app/lib/server/machine-dashboard-owner';
+import { machineDashboardOAuthStartBaseUrl } from '@/app/lib/machine-dashboard-oauth';
 import { MachineHealthAccess } from '@/components/machine-health/machine-health-access';
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
@@ -16,8 +17,13 @@ export const metadata: Metadata = {
 
 export const instant = false;
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string | string[] }>;
+}) {
   await connection();
+  const error = (await searchParams).error;
   const owner = await machineDashboardOwner();
   if (owner) redirect('/machine-health');
 
@@ -29,6 +35,8 @@ export default async function Page() {
     <MachineHealthAccess
       hasOwnerSignIn={hasOwnerSignIn}
       hasRecoveryToken={Boolean(recoveryToken)}
+      oauthStartBaseUrl={machineDashboardOAuthStartBaseUrl()}
+      oauthError={typeof error === 'string'}
     />
   );
 }
