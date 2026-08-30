@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { createElement } from 'react';
 import { describe, expect, it } from 'vitest';
 
+import { machineHealthPayloadSchema } from '@/app/lib/machine-health-store';
 import { healthyMachineReport } from '@/tests/fixtures/machine-health';
 import { MachineHealthDashboard } from './machine-health-dashboard';
 
@@ -449,6 +450,34 @@ describe('machine health dashboard', () => {
     expect(html).toContain('17 proc · 512 MiB memory');
     expect(html).not.toContain('agent_id');
     expect(html).not.toContain('route_id');
+  });
+
+  it('shows why Codex process tags are unavailable', () => {
+    const unavailable = Object.fromEntries(
+      Object.keys(report.payload.process_tags ?? {}).map(key => [key, null])
+    );
+    const payload = machineHealthPayloadSchema.parse({
+      ...report.payload,
+      process_tags: {
+        ...unavailable,
+        source: 'unavailable',
+        availability_reason: 'schema-mismatch',
+      },
+    });
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report: {
+          ...report,
+          payload,
+        },
+        samples,
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('Codex tags');
+    expect(html).toContain('schema mismatch');
+    expect(html).not.toContain('codex_route_hook.py');
   });
 
   it('surfaces recovered crashes even when failed units returned to zero', () => {

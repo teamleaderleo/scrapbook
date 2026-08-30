@@ -705,25 +705,32 @@ def process_tags(
         "subagent_memory_current_bytes",
         "unknown_jobs",
     )
-    unavailable = {
-        "source": "unavailable",
-        **dict.fromkeys(fields),
-    }
+    def unavailable(reason: str) -> dict[str, Any]:
+        return {
+            "source": "unavailable",
+            "availability_reason": reason,
+            **dict.fromkeys(fields),
+        }
+
+    if not helper.is_file():
+        return unavailable("helper-missing")
     code, output = run(sys.executable, str(helper), "status")
     if code != 0 or not output:
-        return unavailable
+        return unavailable("helper-failed")
     try:
         status = json.loads(output)
     except (json.JSONDecodeError, TypeError):
-        return unavailable
+        return unavailable("invalid-receipt")
     if not isinstance(status, dict) or status.get("source") != "codex-route-hook-v1":
-        return unavailable
+        return unavailable("schema-mismatch")
+    if any(field not in status for field in fields):
+        return unavailable("schema-mismatch")
 
     values: dict[str, int] = {}
     for field in fields:
         value = status.get(field)
         if isinstance(value, bool) or not isinstance(value, int) or value < 0:
-            return unavailable
+            return unavailable("invalid-receipt")
         values[field] = value
 
     if (
@@ -739,7 +746,7 @@ def process_tags(
         + values["subagent_memory_current_bytes"]
         != values["tagged_memory_current_bytes"]
     ):
-        return unavailable
+        return unavailable("invalid-receipt")
     return {"source": "codex-route-hook-v1", **values}
 
 

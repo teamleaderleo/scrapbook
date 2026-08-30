@@ -61,6 +61,12 @@ The collector parses local command output and emits only enum values, booleans, 
 
 Whole-machine swap occupancy comes from `SwapTotal` and `SwapFree` in `/proc/meminfo` and is a point-in-time capacity gauge. The Memory card keeps it beside RAM use and PSI rather than treating occupied swap as active contention. Older stored snapshots show the swap value as unavailable.
 
+An unavailable process-tag receipt carries one bounded local diagnosis: `helper-missing`,
+`helper-failed`, `schema-mismatch`, or `invalid-receipt`. The card renders that reason instead of
+treating absent or old helper output as zero tagged work. Older stored reports without a reason
+remain valid. The report never emits the helper path, stderr, command, unit name, route identity,
+process identity, or raw receipt.
+
 Token reports never send session IDs. Each reporter HMACs the local session ID with the shared
 ingest secret and sends a truncated 128-bit fingerprint used only for collision detection. A retry
 with the same or a newer collection timestamp replaces the same source-hour row; a delayed older

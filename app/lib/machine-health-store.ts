@@ -394,6 +394,14 @@ export const machineHealthPayloadSchema = z.object({
       }),
       z.object({
         source: z.literal('unavailable'),
+        availability_reason: z
+          .enum([
+            'helper-missing',
+            'helper-failed',
+            'schema-mismatch',
+            'invalid-receipt',
+          ])
+          .optional(),
         active_routes: z.null(),
         active_main_roots: z.null(),
         active_subagents: z.null(),

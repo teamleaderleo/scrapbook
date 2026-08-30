@@ -156,6 +156,18 @@ export function MachineHealthDashboard({
     payload.process_tags?.source === 'codex-route-hook-v1'
       ? payload.process_tags
       : null;
+  const processTagsUnavailableNote =
+    payload.process_tags?.source === 'unavailable'
+      ? payload.process_tags.availability_reason === 'helper-missing'
+        ? 'helper missing'
+        : payload.process_tags.availability_reason === 'helper-failed'
+          ? 'helper failed'
+          : payload.process_tags.availability_reason === 'schema-mismatch'
+            ? 'schema mismatch'
+            : payload.process_tags.availability_reason === 'invalid-receipt'
+              ? 'receipt invalid'
+              : 'unavailable'
+      : 'unavailable';
   const desktop =
     payload.desktop?.source === 'gnome-polish-live-v2' ? payload.desktop : null;
   const panel =
@@ -334,7 +346,7 @@ export function MachineHealthDashboard({
         `${processTags.active_subagents} agent${processTags.active_subagents === 1 ? '' : 's'}`,
         `${processTags.active_jobs} jobs`,
       ].join(' · ')
-    : 'unavailable';
+    : processTagsUnavailableNote;
   const processTagsResourceNote = processTags
     ? [
         `${processTags.tagged_processes} proc`,

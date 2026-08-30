@@ -385,6 +385,42 @@ describe('machine health contract', () => {
     expect(parsed.process_tags).toBeUndefined();
   });
 
+  it('bounds process-tag unavailability without breaking older snapshots', () => {
+    const nullFields = Object.fromEntries(
+      Object.keys(healthyMachineReport.process_tags ?? {}).map(key => [
+        key,
+        null,
+      ])
+    );
+    const unavailable = {
+      ...nullFields,
+      source: 'unavailable',
+      availability_reason: 'helper-missing',
+    };
+
+    expect(
+      machineHealthPayloadSchema.parse({
+        ...healthyMachineReport,
+        process_tags: unavailable,
+      }).process_tags
+    ).toMatchObject({
+      source: 'unavailable',
+      availability_reason: 'helper-missing',
+    });
+    expect(
+      machineHealthPayloadSchema.parse({
+        ...healthyMachineReport,
+        process_tags: { ...unavailable, availability_reason: undefined },
+      }).process_tags
+    ).toMatchObject({ source: 'unavailable' });
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        process_tags: { ...unavailable, availability_reason: 'private-path' },
+      }).success
+    ).toBe(false);
+  });
+
   it('accepts a snapshot from before Codex state inventory was added', () => {
     const { codex_state: _codexState, ...olderReport } = healthyMachineReport;
     const parsed = machineHealthPayloadSchema.parse(olderReport);
