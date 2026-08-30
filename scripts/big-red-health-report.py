@@ -25,6 +25,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -34,6 +35,7 @@ MIB = 1024**2
 COMMAND_TIMEOUT_SECONDS = 4
 CODEX_STATE_TIMEOUT_SECONDS = 12
 CODEX_STATE_OUTPUT_BYTES = 64 * 1024
+SMAPS_ROLLUP_OUTPUT_BYTES = 256 * 1024
 ACTIVITY_SAMPLE_SECONDS = 0.25
 SYSSTAT_WINDOW_RECORDS = 6
 SYSSTAT_MAX_AGE_MINUTES = 90
@@ -1594,6 +1596,119 @@ def process_table() -> dict[int, tuple[int, str, str, int]]:
     return rows
 
 
+def is_codex_control_process(row: tuple[int, str, str, int]) -> bool:
+    _, comm, cmdline, _ = row
+    desktop_root = (
+        comm == "chatgpt"
+        and cmdline.startswith("/usr/lib/chatgpt/chatgpt")
+        and " --type=" not in cmdline
+    )
+    app_server = comm == "codex" and " app-server" in cmdline and (
+        cmdline.startswith("/usr/lib/chatgpt/resources/codex ")
+        or (
+            "/.codex/packages/standalone/releases/" in cmdline
+            and "/bin/codex app-server" in cmdline
+        )
+    )
+    return desktop_root or app_server
+
+
+def process_pss_swap(
+    pid: int,
+    proc_root: Path = Path("/proc"),
+) -> tuple[int, int]:
+    path = proc_root / str(pid) / "smaps_rollup"
+    with path.open("r", encoding="utf-8") as handle:
+        content = handle.read(SMAPS_ROLLUP_OUTPUT_BYTES + 1)
+    if len(content.encode("utf-8")) > SMAPS_ROLLUP_OUTPUT_BYTES:
+        raise ValueError("smaps rollup exceeds the observation limit")
+    values: dict[str, int] = {}
+    for line in content.splitlines():
+        key, separator, tail = line.partition(":")
+        fields = tail.split()
+        if (
+            separator
+            and key in {"Pss", "Swap"}
+            and len(fields) == 2
+            and fields[1] == "kB"
+        ):
+            values[key] = int(fields[0]) * 1024
+    if set(values) != {"Pss", "Swap"} or any(value < 0 for value in values.values()):
+        raise ValueError("smaps rollup is incomplete")
+    return values["Pss"], values["Swap"]
+
+
+def codex_runtime(
+    rows: dict[int, tuple[int, str, str, int]],
+    *,
+    memory_reader: Callable[[int], tuple[int, int]] = process_pss_swap,
+    own_pid: int | None = None,
+) -> dict[str, Any]:
+    candidates = {
+        pid for pid, row in rows.items() if is_codex_control_process(row)
+    }
+    roots = set(candidates)
+    for pid in candidates:
+        parent = rows[pid][0]
+        seen: set[int] = set()
+        while parent in rows and parent not in seen:
+            if parent in candidates:
+                roots.discard(pid)
+                break
+            seen.add(parent)
+            parent = rows[parent][0]
+
+    runtime_pids = set(roots)
+    while True:
+        descendants = {
+            pid for pid, (parent, _, _, _) in rows.items() if parent in runtime_pids
+        }
+        expanded = runtime_pids | descendants
+        if expanded == runtime_pids:
+            break
+        runtime_pids = expanded
+    runtime_pids.discard(os.getpid() if own_pid is None else own_pid)
+
+    code_mode_hosts = 0
+    mcp_servers = 0
+    for pid in runtime_pids:
+        _, comm, cmdline, _ = rows[pid]
+        if comm in {"node_repl", "codex-code-mode"}:
+            code_mode_hosts += 1
+        tokens = cmdline.split()
+        if comm in {"node", "mainthread"} and any(
+            token in {"./server.mjs", "./mcp/server.mjs", "./mcp/server.cjs"}
+            or token.endswith("/mcp/server.mjs")
+            or token.endswith("/mcp/server.cjs")
+            for token in tokens
+        ):
+            mcp_servers += 1
+
+    pss_bytes = 0
+    swap_bytes = 0
+    memory_errors = 0
+    for pid in runtime_pids:
+        try:
+            pss, swap = memory_reader(pid)
+        except (FileNotFoundError, OSError, UnicodeError, ValueError):
+            memory_errors += 1
+            continue
+        pss_bytes += pss
+        swap_bytes += swap
+
+    return {
+        "source": "codex-runtime-tree-v1",
+        "control_roots": len(roots),
+        "processes": len(runtime_pids),
+        "code_mode_hosts": code_mode_hosts,
+        "mcp_servers": mcp_servers,
+        "rss_bytes": sum(rows[pid][3] for pid in runtime_pids),
+        "pss_bytes": pss_bytes if memory_errors == 0 else None,
+        "swap_bytes": swap_bytes if memory_errors == 0 else None,
+        "memory_errors": memory_errors,
+    }
+
+
 def established_tcp_connections(
     local_port: int,
     tables: tuple[Path, ...] = (Path("/proc/net/tcp"), Path("/proc/net/tcp6")),
@@ -1684,7 +1799,7 @@ def reliability_window(now: dt.datetime | None = None) -> dict[str, Any]:
     }
 
 
-def hygiene_counts() -> tuple[int, int, int, int, int]:
+def hygiene_counts() -> tuple[int, int, int, int, int, dict[str, Any]]:
     rows = process_table()
     browser_names = {"firefox", "chrome", "chromium", "msedge", "brave"}
     browser_named_pids = {
@@ -1738,6 +1853,7 @@ def hygiene_counts() -> tuple[int, int, int, int, int]:
         codex_workers,
         len(dev_pids),
         established_tcp_connections(configured_rdp_port()),
+        codex_runtime(rows),
     )
 
 
@@ -1888,6 +2004,7 @@ def build_report() -> dict[str, Any]:
         codex_workers,
         dev_listeners,
         rdp_connections,
+        codex_runtime_state,
     ) = hygiene_counts()
     time_sync_states = (
         service_state("chrony.service"),
@@ -1987,6 +2104,7 @@ def build_report() -> dict[str, Any]:
             "browser_roots": browser_roots,
             "browser_rss_bytes": browser_rss_bytes,
             "codex_workers": codex_workers,
+            "codex_runtime": codex_runtime_state,
             "unexpected_dev_listeners": dev_listeners,
             "rdp_connections": rdp_connections,
         },

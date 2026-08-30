@@ -144,6 +144,9 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Process scopes');
     expect(html).toContain('0 / 18');
     expect(html).toContain('3 roots · 129 MiB · partial visibility');
+    expect(html).toContain('Codex runtime');
+    expect(html).toContain('2.2 GiB');
+    expect(html).toContain('69 proc · 13 code · 36 MCP · 1.4 GiB swap');
     expect(html).toContain('3 jobs · 17 proc · 512 MiB');
     expect(html).toContain(
       '384 MiB memory · 192 MiB job peak · 2.5 s CPU · I/O —'

@@ -501,6 +501,19 @@ export const machineHealthPayloadSchema = z.object({
     browser_roots: nonnegativeInteger,
     browser_rss_bytes: nonnegativeInteger.default(0),
     codex_workers: nonnegativeInteger,
+    codex_runtime: z
+      .object({
+        source: z.literal('codex-runtime-tree-v1'),
+        control_roots: nonnegativeInteger,
+        processes: nonnegativeInteger,
+        code_mode_hosts: nonnegativeInteger,
+        mcp_servers: nonnegativeInteger,
+        rss_bytes: nonnegativeInteger,
+        pss_bytes: nonnegativeInteger.nullable(),
+        swap_bytes: nonnegativeInteger.nullable(),
+        memory_errors: nonnegativeInteger,
+      })
+      .optional(),
     unexpected_dev_listeners: nonnegativeInteger,
     rdp_connections: nonnegativeInteger.default(0),
   }),

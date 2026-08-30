@@ -85,6 +85,18 @@ print-only collector observation took 3.75 seconds and 67,836 KiB peak RSS; its 
 
 The Codex-state view calls `leo-workspace/tools/codex_state_inventory.py` in aggregate mode. The accepted contract opens no content files, uses no network or privileged process reads, mutates nothing, and has no retention authority. Scrapbook reconciles class, file, and allocated-byte totals before accepting active, authoritative, manifest-referenced, and unknown buckets. Any nonzero reclaimable or reconstructible total is rejected because the current inventory contract has not earned cleanup authority. Paths, file names, manifests, process identities, and content never enter the report.
 
+The Codex runtime readout follows descendants of two closed control-root shapes: the packaged
+ChatGPT desktop root and Codex app servers from the packaged or standalone release paths. Nested
+control roots are collapsed before aggregation. It reports only root, process, code-host and MCP
+counts plus aggregate RSS, proportional set size, swap and memory-read errors. Proportional memory
+is preferred on the card because RSS double-counts shared Node and Chromium pages. The tree is a
+resource budget, not route ownership or cleanup authority; active tools and shared infrastructure
+remain in the same total. PIDs, paths, arguments, thread IDs and per-process values are discarded.
+The first live receipt found two control roots, 69 processes, 13 code hosts and 36 MCP servers:
+2,318,140,416 proportional bytes, 3,706,445,824 RSS bytes and 1,533,861,888 swapped bytes with zero
+memory-read errors while whole-machine memory use was 10.92%. That supports visibility, not cleanup;
+the route registry simultaneously reported zero owned residue.
+
 Remote-client state is derived from the same local `tailscale status --json` read used for Big Red's own state. Exactly one macOS peer is required; zero or multiple candidates become unavailable. The report emits only `offline`, `online-idle`, `direct`, `relay`, or `unknown`, plus a last-seen age when Tailscale supplies a nonzero timestamp. Direct requires an active peer with a current endpoint; relay requires an active peer with relay evidence. When that peer is already active, the collector adds one bounded Tailscale disco ping and keeps only its coarse path class and RTT. It skips the probe for offline and idle peers, so the observer does not manufacture an active path or keep a sleeping Mac busy. The RTT is Big Red-to-Mac transport evidence, not Windows App, decoder, display, or input-to-paint latency. Host names, node keys, addresses, tailnet IPs, endpoints, relay regions, traffic totals, and timestamps never enter the report. The public repository contains the contract and collector code, but no machine snapshot or credential.
 
 The Remote card also summarizes the last 24 hours of GNOME Remote Desktop session endings. It keeps

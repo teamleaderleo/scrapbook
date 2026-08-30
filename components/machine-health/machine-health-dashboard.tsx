@@ -250,6 +250,24 @@ export function MachineHealthDashboard({
     payload.process_coverage?.source === 'codex-process-coverage-v1'
       ? payload.process_coverage
       : null;
+  const codexRuntime =
+    payload.hygiene.codex_runtime?.source === 'codex-runtime-tree-v1'
+      ? payload.hygiene.codex_runtime
+      : null;
+  const codexRuntimeNote = codexRuntime
+    ? [
+        `${codexRuntime.processes} proc`,
+        `${codexRuntime.code_mode_hosts} code`,
+        `${codexRuntime.mcp_servers} MCP`,
+        codexRuntime.swap_bytes === null
+          ? codexRuntime.memory_errors > 0
+            ? 'memory partial'
+            : null
+          : `${formatMemory(codexRuntime.swap_bytes)} swap`,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : 'unavailable';
   const processCoverageValue = processCoverage
     ? `${processCoverage.scoped_processes} / ${processCoverage.discoverable_processes}`
     : '—';
@@ -634,6 +652,19 @@ export function MachineHealthDashboard({
               </dd>
               <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
                 {processCoverageNote}
+              </dd>
+            </div>
+            <div>
+              <dt className="opacity-55 text-xs">Codex runtime</dt>
+              <dd className="mt-1 text-xl font-black tabular-nums">
+                {codexRuntime
+                  ? formatMemory(
+                      codexRuntime.pss_bytes ?? codexRuntime.rss_bytes
+                    )
+                  : '—'}
+              </dd>
+              <dd className="opacity-55 mt-1 text-[0.68rem] tabular-nums">
+                {codexRuntimeNote}
               </dd>
             </div>
             <div>

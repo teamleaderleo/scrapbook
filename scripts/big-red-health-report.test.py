@@ -1102,6 +1102,96 @@ class DesktopStateTest(unittest.TestCase):
             self.assertEqual(REPORT.desktop_state()["source"], "unavailable")
 
 
+class CodexRuntimeTest(unittest.TestCase):
+    def test_aggregates_minimal_control_trees_without_process_detail(self) -> None:
+        mib = REPORT.MIB
+        rows = {
+            10: (1, "chatgpt", "/usr/lib/chatgpt/chatgpt", mib),
+            11: (
+                10,
+                "codex",
+                "/usr/lib/chatgpt/resources/codex app-server",
+                mib,
+            ),
+            12: (11, "node_repl", "/runtime/node_repl", mib),
+            13: (
+                11,
+                "mainthread",
+                "/runtime/node /plugin/mcp/server.mjs --stdio",
+                mib,
+            ),
+            14: (11, "python3", "collector must-not-survive", mib),
+            20: (
+                1,
+                "codex",
+                (
+                    "/home/private/.codex/packages/standalone/releases/v/bin/"
+                    "codex app-server --remote-control"
+                ),
+                mib,
+            ),
+            21: (20, "node", "node ./mcp/server.cjs --stdio", mib),
+            30: (1, "node", "node ./mcp/server.cjs --stdio unrelated", mib),
+        }
+
+        runtime = REPORT.codex_runtime(
+            rows,
+            memory_reader=lambda pid: (pid * mib, pid * 2 * mib),
+            own_pid=14,
+        )
+
+        self.assertEqual(
+            runtime,
+            {
+                "source": "codex-runtime-tree-v1",
+                "control_roots": 2,
+                "processes": 6,
+                "code_mode_hosts": 1,
+                "mcp_servers": 2,
+                "rss_bytes": 6 * mib,
+                "pss_bytes": 87 * mib,
+                "swap_bytes": 174 * mib,
+                "memory_errors": 0,
+            },
+        )
+        serialized = json.dumps(runtime)
+        self.assertNotIn("private", serialized)
+        self.assertNotIn("server.cjs", serialized)
+        self.assertNotIn("collector", serialized)
+
+    def test_memory_error_withholds_pss_and_swap_without_losing_counts(self) -> None:
+        rows = {
+            10: (1, "chatgpt", "/usr/lib/chatgpt/chatgpt", REPORT.MIB),
+            11: (10, "node_repl", "node_repl", REPORT.MIB),
+        }
+
+        def memory(pid: int) -> tuple[int, int]:
+            if pid == 11:
+                raise FileNotFoundError
+            return REPORT.MIB, 0
+
+        runtime = REPORT.codex_runtime(rows, memory_reader=memory, own_pid=999)
+
+        self.assertEqual(runtime["processes"], 2)
+        self.assertEqual(runtime["memory_errors"], 1)
+        self.assertIsNone(runtime["pss_bytes"])
+        self.assertIsNone(runtime["swap_bytes"])
+
+    def test_reads_only_bounded_pss_and_swap_totals(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            process = root / "42"
+            process.mkdir()
+            (process / "smaps_rollup").write_text(
+                "Rss: 100 kB\nPss: 75 kB\nSwap: 25 kB\n",
+                encoding="utf-8",
+            )
+
+            values = REPORT.process_pss_swap(42, root)
+
+        self.assertEqual(values, (75 * 1024, 25 * 1024))
+
+
 class HygieneTest(unittest.TestCase):
     def test_aggregates_browser_descendant_rss_without_process_detail(self) -> None:
         rows = {
@@ -1123,7 +1213,21 @@ class HygieneTest(unittest.TestCase):
         ):
             counts = REPORT.hygiene_counts()
 
-        self.assertEqual(counts, (1, 350 * REPORT.MIB, 1, 0, 1))
+        self.assertEqual(counts[:5], (1, 350 * REPORT.MIB, 1, 0, 1))
+        self.assertEqual(
+            counts[5],
+            {
+                "source": "codex-runtime-tree-v1",
+                "control_roots": 0,
+                "processes": 0,
+                "code_mode_hosts": 0,
+                "mcp_servers": 0,
+                "rss_bytes": 0,
+                "pss_bytes": 0,
+                "swap_bytes": 0,
+                "memory_errors": 0,
+            },
+        )
 
     def test_counts_only_established_connections_on_the_local_rdp_port(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

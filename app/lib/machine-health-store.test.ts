@@ -89,6 +89,11 @@ describe('machine health contract', () => {
       hygiene: {
         ...healthyMachineReport.hygiene,
         process_arguments: ['must-not-survive'],
+        codex_runtime: {
+          ...healthyMachineReport.hygiene.codex_runtime,
+          process_ids: ['must-not-survive'],
+          command_lines: ['must-not-survive'],
+        },
       },
       route_activity: {
         ...healthyMachineReport.route_activity,
@@ -121,6 +126,7 @@ describe('machine health contract', () => {
     const {
       browser_rss_bytes: _browserRssBytes,
       rdp_connections: _rdpConnections,
+      codex_runtime: _codexRuntime,
       ...olderHygiene
     } = healthyMachineReport.hygiene;
     const parsed = machineHealthPayloadSchema.parse({
@@ -130,6 +136,7 @@ describe('machine health contract', () => {
 
     expect(parsed.hygiene.browser_rss_bytes).toBe(0);
     expect(parsed.hygiene.rdp_connections).toBe(0);
+    expect(parsed.hygiene.codex_runtime).toBeUndefined();
   });
 
   it('accepts a snapshot from before reliability history was added', () => {
