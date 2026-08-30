@@ -4,8 +4,6 @@
     "build": "node scripts/prepare-next-build.mjs",
     "ci:local": "node scripts/local-ci.mjs",
     "dev": "next dev --turbopack",
-    "prettier": "prettier --write --ignore-unknown .",
-    "prettier:check": "prettier --check --ignore-unknown .",
     "start": "next start",
     "lint": "eslint . --cache --cache-strategy content --cache-location .eslintcache",
     "typecheck": "next typegen && tsc --noEmit -p tsconfig.verify.json",
@@ -72,8 +70,6 @@
     "eslint": "^9.39.4",
     "eslint-config-next": "16.3.2",
     "playwright": "^1.56.1",
-    "prettier": "^3.6.2",
-    "prettier-plugin-tailwindcss": "0.5.4",
     "vitest": "^3.2.4"
   },
   "engines": {

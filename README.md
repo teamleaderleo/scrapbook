@@ -80,7 +80,7 @@ Their history remains available through Git and [`docs/deprecation-ledger.md`](d
 - Supabase/Postgres with checked-in SQL migrations;
 - React Three Fiber and Three.js;
 - Monaco, Shiki, and Markdown tooling;
-- Vitest, Playwright, ESLint, and Prettier.
+- Vitest, Playwright, and ESLint.
 
 ## Local development
 
@@ -102,7 +102,6 @@ Useful checks:
 pnpm lint
 pnpm typecheck
 pnpm test
-pnpm prettier:check
 pnpm build
 pnpm test:e2e
 pnpm test:e2e:full
