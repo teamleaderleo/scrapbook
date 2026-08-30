@@ -496,7 +496,7 @@ export function MachineHealthDashboard({
   const berylFan = beryl?.fan ?? null;
   const berylOomNote = beryl
     ? beryl.oom_kills_observed_log === 0
-      ? 'no OOM retained in log'
+      ? '0 retained-log OOM events'
       : beryl.latest_oom_age_seconds_observed_log === null
         ? `${beryl.oom_kills_observed_log} retained-log events · latest age unknown`
         : `${beryl.oom_kills_observed_log} retained-log events · latest ${formatDuration(beryl.latest_oom_age_seconds_observed_log)} ago`
@@ -691,17 +691,15 @@ export function MachineHealthDashboard({
                     note={berylOomNote ?? undefined}
                   />
                   <Metric
-                    label="Thermal cooling"
+                    label="Cooling state"
                     value={
                       berylFan
-                        ? berylFan.cpu_cooling_current_state === 0
-                          ? 'No CPU throttle'
-                          : `${berylFan.cpu_cooling_current_state} / ${berylFan.cpu_cooling_max_state}`
+                        ? `${berylFan.cpu_cooling_current_state} / ${berylFan.cpu_cooling_max_state}`
                         : '—'
                     }
                     note={
                       berylFan
-                        ? `PWM request ${berylFan.pwm_current_state} / ${berylFan.pwm_max_state} · not fan RPM`
+                        ? `PWM request ${berylFan.pwm_current_state} / ${berylFan.pwm_max_state}`
                         : 'cooling evidence unavailable'
                     }
                   />

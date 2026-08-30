@@ -17,7 +17,7 @@ The page starts with the questions that matter when Leo is away from the machine
   one-shot path RTT did Big Red observe while that peer was active?
 - Is GNOME's idle screen shield blocking new desktop-sharing sessions, and how many source-matched
   admission blocks occurred in the last 24 hours?
-- Is the Beryl reachable, are Tailscale/OpenClash running with Netify inactive, what do its
+- Is Beryl reachable, are Tailscale/OpenClash running with Netify inactive, what do its
   thermal and memory receipts show, and what does Big Red's bounded local Wi-Fi/gateway sample show?
 - Did the current GNOME Remote Desktop process initialize its Vulkan/VA-API path, fall back to software, or not yet receive an RDP session?
 - What desktop state is active now: GNOME version, pixel mode, refresh, scale, screen-shield and

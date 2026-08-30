@@ -157,8 +157,8 @@ describe('machine health dashboard', () => {
     expect(html).toContain('87 MiB');
     expect(html).toContain('5d 4h');
     expect(html).toContain('15 retained-log events · latest 1d 4h ago');
-    expect(html).toContain('No CPU throttle');
-    expect(html).toContain('PWM request 14 / 255 · not fan RPM');
+    expect(html).toContain('Cooling state');
+    expect(html).toContain('PWM request 14 / 255');
     expect(html).toContain('Wi-Fi link');
     expect(html).toContain('−44 dBm');
     expect(html).toContain('432 ↓ · 600 ↑ Mbit/s · 5220 MHz · 80 MHz wide');
