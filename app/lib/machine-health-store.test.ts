@@ -118,6 +118,10 @@ describe('machine health contract', () => {
         connector: 'must-not-survive',
         wallpaper_uri: 'must-not-survive',
       },
+      beryl: {
+        ...healthyMachineReport.beryl,
+        router_address: 'must-not-survive',
+      },
     });
 
     expect(parsed).toEqual(healthyMachineReport);
@@ -211,6 +215,43 @@ describe('machine health contract', () => {
     const parsed = machineHealthPayloadSchema.parse(olderReport);
 
     expect(parsed.reliability).toBeUndefined();
+  });
+
+  it('accepts a snapshot from before Beryl health was added', () => {
+    const { beryl: _beryl, ...olderReport } = healthyMachineReport;
+    const parsed = machineHealthPayloadSchema.parse(olderReport);
+
+    expect(parsed.beryl).toBeUndefined();
+  });
+
+  it('rejects inconsistent Beryl cooling and OOM evidence', () => {
+    const beryl = healthyMachineReport.beryl;
+    if (
+      beryl?.source !== 'big-red-connectivity-check-v1' ||
+      beryl.ssh !== 'available' ||
+      !beryl.fan
+    )
+      throw new Error('Expected the Beryl fixture');
+
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        beryl: {
+          ...beryl,
+          fan: { ...beryl.fan, pwm_current_state: 256, pwm_max_state: 255 },
+        },
+      }).success
+    ).toBe(false);
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        beryl: {
+          ...beryl,
+          oom_kills_current_boot: 0,
+          latest_oom_age_seconds: 1,
+        },
+      }).success
+    ).toBe(false);
   });
 
   it('accepts old reliability totals and rejects a mismatched breakdown', () => {

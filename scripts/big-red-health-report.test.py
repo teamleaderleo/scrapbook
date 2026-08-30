@@ -715,6 +715,97 @@ class CodexStateTest(unittest.TestCase):
                 self.assertIsNone(state["allocated_bytes"])
 
 
+class BerylHealthTest(unittest.TestCase):
+    @staticmethod
+    def diagnostic(**overrides: str) -> str:
+        values = {
+            "router_ssh": "available",
+            "router_tailscale_service": "running",
+            "router_openclash_service": "running",
+            "router_netifyd_service": "inactive",
+            "router_fan_service": "running",
+            "router_tailscaled_processes": "1",
+            "router_clash_processes": "1",
+            "router_netifyd_processes": "0",
+            "router_tailscaled_rss_kib": "31540",
+            "router_clash_rss_kib": "51020",
+            "router_mem_available_kib": "89116",
+            "router_uptime_seconds": "449097",
+            "router_oom_kills_current_boot": "15",
+            "router_latest_oom_age_seconds": "102224",
+            "router_soc_temp_millic": "78664",
+            "router_fan_policy_enabled": "1",
+            "router_fan_policy_temperature_celsius": "75",
+            "router_fan_policy_warning_celsius": "75",
+            "router_pwm_fan_current_state": "14",
+            "router_pwm_fan_max_state": "255",
+            "router_cpu_thermal_current_state": "0",
+            "router_cpu_thermal_max_state": "3",
+        }
+        values.update(overrides)
+        section = "\n".join(f"{key}={value}" for key, value in values.items())
+        return f"timestamp=private\n\nBeryl local health:\n{section}\n\nDNS:\n"
+
+    def test_parses_only_the_allowlisted_router_section(self) -> None:
+        output = self.diagnostic().replace(
+            "\n\nDNS:\n", "\nrouter_address=private\n\nDNS:\n"
+        )
+        with patch.object(
+            REPORT,
+            "run_connectivity_diagnostic",
+            return_value=(0, output),
+        ):
+            health = REPORT.beryl_health()
+
+        self.assertEqual(health["source"], "big-red-connectivity-check-v1")
+        self.assertEqual(health["ssh"], "available")
+        self.assertEqual(health["soc_temp_millic"], 78_664)
+        self.assertEqual(health["latest_oom_age_seconds"], 102_224)
+        self.assertEqual(
+            health["fan"],
+            {
+                "service": "running",
+                "policy_enabled": True,
+                "policy_temperature_c": 75,
+                "policy_warning_c": 75,
+                "pwm_current_state": 14,
+                "pwm_max_state": 255,
+                "cpu_cooling_current_state": 0,
+                "cpu_cooling_max_state": 3,
+            },
+        )
+        self.assertNotIn("timestamp", health)
+
+    def test_fails_closed_on_duplicate_or_inconsistent_fields(self) -> None:
+        duplicate = self.diagnostic().replace(
+            "\n\nDNS:\n", "\nrouter_soc_temp_millic=1\n\nDNS:\n"
+        )
+        inconsistent = self.diagnostic(router_pwm_fan_current_state="256")
+        for output in (duplicate, inconsistent):
+            with (
+                self.subTest(output=output[-40:]),
+                patch.object(
+                    REPORT,
+                    "run_connectivity_diagnostic",
+                    return_value=(0, output),
+                ),
+            ):
+                self.assertEqual(REPORT.beryl_health(), {"source": "unavailable"})
+
+    def test_preserves_bounded_ssh_unavailability(self) -> None:
+        output = "Beryl local health:\nrouter_ssh=unavailable\n"
+        with patch.object(
+            REPORT, "run_connectivity_diagnostic", return_value=(0, output)
+        ):
+            self.assertEqual(
+                REPORT.beryl_health(),
+                {
+                    "source": "big-red-connectivity-check-v1",
+                    "ssh": "unavailable",
+                },
+            )
+
+
 class RemoteClientTest(unittest.TestCase):
     NOW = dt.datetime(2026, 8, 29, 18, 0, tzinfo=dt.timezone.utc)
 

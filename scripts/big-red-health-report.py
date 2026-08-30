@@ -33,6 +33,8 @@ from typing import Any
 GIB = 1024**3
 MIB = 1024**2
 COMMAND_TIMEOUT_SECONDS = 4
+CONNECTIVITY_DIAGNOSTIC_TIMEOUT_SECONDS = 10
+CONNECTIVITY_DIAGNOSTIC_OUTPUT_BYTES = 32 * 1024
 CODEX_STATE_TIMEOUT_SECONDS = 12
 CODEX_STATE_OUTPUT_BYTES = 64 * 1024
 SMAPS_ROLLUP_OUTPUT_BYTES = 256 * 1024
@@ -82,6 +84,32 @@ GRD_SESSION_EVENT_LIMIT = 512
 SYSTEMD_PROCESS_EXIT_MESSAGE_ID = "98e322203f7a4ed290d09fe03c09fe15"
 SYSTEMD_RESTART_MESSAGE_ID = "5eb03494b6584870a536b337290809b3"
 DESKTOP_SEARCH_UNIT = "localsearch-3.service"
+CONNECTIVITY_DIAGNOSTIC = Path("/usr/local/bin/big-red-connectivity-check")
+
+BERYL_HEALTH_FIELDS = {
+    "router_ssh",
+    "router_tailscale_service",
+    "router_openclash_service",
+    "router_netifyd_service",
+    "router_fan_service",
+    "router_tailscaled_processes",
+    "router_clash_processes",
+    "router_netifyd_processes",
+    "router_tailscaled_rss_kib",
+    "router_clash_rss_kib",
+    "router_mem_available_kib",
+    "router_uptime_seconds",
+    "router_oom_kills_current_boot",
+    "router_latest_oom_age_seconds",
+    "router_soc_temp_millic",
+    "router_fan_policy_enabled",
+    "router_fan_policy_temperature_celsius",
+    "router_fan_policy_warning_celsius",
+    "router_pwm_fan_current_state",
+    "router_pwm_fan_max_state",
+    "router_cpu_thermal_current_state",
+    "router_cpu_thermal_max_state",
+}
 
 
 class RejectRedirects(urllib.request.HTTPRedirectHandler):
@@ -109,6 +137,187 @@ def run(*command: str) -> tuple[int, str]:
         return result.returncode, result.stdout.strip()
     except (FileNotFoundError, subprocess.TimeoutExpired):
         return 127, ""
+
+
+def run_connectivity_diagnostic() -> tuple[int, str]:
+    try:
+        result = subprocess.run(
+            (str(CONNECTIVITY_DIAGNOSTIC),),
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=CONNECTIVITY_DIAGNOSTIC_TIMEOUT_SECONDS,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return 127, ""
+    output = result.stdout.strip()
+    if len(output.encode("utf-8")) > CONNECTIVITY_DIAGNOSTIC_OUTPUT_BYTES:
+        return 127, ""
+    return result.returncode, output
+
+
+def bounded_integer(
+    value: str | None, minimum: int, maximum: int
+) -> int | None:
+    if value is None or re.fullmatch(r"[0-9]+", value) is None:
+        return None
+    parsed = int(value)
+    return parsed if minimum <= parsed <= maximum else None
+
+
+def beryl_health() -> dict[str, Any]:
+    code, output = run_connectivity_diagnostic()
+    unavailable = {"source": "unavailable"}
+    if code != 0:
+        return unavailable
+
+    lines = output.splitlines()
+    try:
+        start = lines.index("Beryl local health:") + 1
+    except ValueError:
+        return unavailable
+
+    values: dict[str, str] = {}
+    for line in lines[start:]:
+        if not line:
+            break
+        if "=" not in line:
+            return unavailable
+        key, value = line.split("=", 1)
+        if key not in BERYL_HEALTH_FIELDS:
+            continue
+        if key in values:
+            return unavailable
+        values[key] = value
+
+    if values.get("router_ssh") == "unavailable":
+        return {
+            "source": "big-red-connectivity-check-v1",
+            "ssh": "unavailable",
+        }
+    if values.get("router_ssh") != "available":
+        return unavailable
+
+    service_keys = {
+        "tailscale_service": "router_tailscale_service",
+        "openclash_service": "router_openclash_service",
+        "netifyd_service": "router_netifyd_service",
+    }
+    services: dict[str, str] = {}
+    for output_key, source_key in service_keys.items():
+        state = values.get(source_key)
+        if state not in {"running", "inactive", "unknown"}:
+            return unavailable
+        services[output_key] = state
+
+    integer_specs = {
+        "tailscaled_processes": ("router_tailscaled_processes", 0, 1_024),
+        "clash_processes": ("router_clash_processes", 0, 1_024),
+        "netifyd_processes": ("router_netifyd_processes", 0, 1_024),
+        "tailscaled_rss_kib": ("router_tailscaled_rss_kib", 0, 2**31),
+        "clash_rss_kib": ("router_clash_rss_kib", 0, 2**31),
+        "mem_available_kib": ("router_mem_available_kib", 0, 2**31),
+        "uptime_seconds": ("router_uptime_seconds", 0, 2**53 - 1),
+        "oom_kills_current_boot": (
+            "router_oom_kills_current_boot",
+            0,
+            1_000_000,
+        ),
+        "soc_temp_millic": ("router_soc_temp_millic", 0, 150_000),
+    }
+    integers: dict[str, int] = {}
+    for output_key, (source_key, minimum, maximum) in integer_specs.items():
+        parsed = bounded_integer(values.get(source_key), minimum, maximum)
+        if parsed is None:
+            return unavailable
+        integers[output_key] = parsed
+
+    latest_oom_age = values.get("router_latest_oom_age_seconds")
+    if latest_oom_age == "not_observed":
+        if integers["oom_kills_current_boot"] != 0:
+            return unavailable
+        latest_oom_age_seconds = None
+    elif latest_oom_age == "unknown":
+        latest_oom_age_seconds = None
+    else:
+        latest_oom_age_seconds = bounded_integer(
+            latest_oom_age, 0, integers["uptime_seconds"]
+        )
+        if latest_oom_age_seconds is None:
+            return unavailable
+    if integers["oom_kills_current_boot"] == 0 and latest_oom_age_seconds is not None:
+        return unavailable
+
+    fan_source_keys = (
+        "router_fan_service",
+        "router_fan_policy_enabled",
+        "router_fan_policy_temperature_celsius",
+        "router_fan_policy_warning_celsius",
+        "router_pwm_fan_current_state",
+        "router_pwm_fan_max_state",
+        "router_cpu_thermal_current_state",
+        "router_cpu_thermal_max_state",
+    )
+    fan_fields_present = [key in values for key in fan_source_keys]
+    fan: dict[str, Any] | None = None
+    if any(fan_fields_present):
+        if not all(fan_fields_present):
+            return unavailable
+        fan_service = values["router_fan_service"]
+        if fan_service not in {"running", "inactive", "unknown"}:
+            return unavailable
+        fan_policy_enabled = bounded_integer(
+            values["router_fan_policy_enabled"], 0, 1
+        )
+        fan_policy_temperature = bounded_integer(
+            values["router_fan_policy_temperature_celsius"], 0, 150
+        )
+        fan_policy_warning = bounded_integer(
+            values["router_fan_policy_warning_celsius"], 0, 150
+        )
+        pwm_current = bounded_integer(
+            values["router_pwm_fan_current_state"], 0, 1_000_000
+        )
+        pwm_max = bounded_integer(
+            values["router_pwm_fan_max_state"], 1, 1_000_000
+        )
+        cpu_current = bounded_integer(
+            values["router_cpu_thermal_current_state"], 0, 1_000_000
+        )
+        cpu_max = bounded_integer(
+            values["router_cpu_thermal_max_state"], 1, 1_000_000
+        )
+        if (
+            fan_policy_enabled is None
+            or fan_policy_temperature is None
+            or fan_policy_warning is None
+            or pwm_current is None
+            or pwm_max is None
+            or cpu_current is None
+            or cpu_max is None
+            or pwm_current > pwm_max
+            or cpu_current > cpu_max
+        ):
+            return unavailable
+        fan = {
+            "service": fan_service,
+            "policy_enabled": fan_policy_enabled == 1,
+            "policy_temperature_c": fan_policy_temperature,
+            "policy_warning_c": fan_policy_warning,
+            "pwm_current_state": pwm_current,
+            "pwm_max_state": pwm_max,
+            "cpu_cooling_current_state": cpu_current,
+            "cpu_cooling_max_state": cpu_max,
+        }
+
+    return {
+        "source": "big-red-connectivity-check-v1",
+        "ssh": "available",
+        **services,
+        **integers,
+        "latest_oom_age_seconds": latest_oom_age_seconds,
+        "fan": fan,
+    }
 
 
 def run_codex_state(helper: Path) -> tuple[int, str]:
@@ -2323,6 +2532,7 @@ def build_report() -> dict[str, Any]:
         service_state("chrony.service"),
         service_state("systemd-timesyncd.service"),
     )
+    beryl = beryl_health()
 
     return {
         "schema_version": 1,
@@ -2406,6 +2616,7 @@ def build_report() -> dict[str, Any]:
             "rx_mib_s": activity["network_rx_mib_s"],
             "tx_mib_s": activity["network_tx_mib_s"],
         },
+        "beryl": beryl,
         "power": {
             "profile": power_profile(),
             "idle_suspend_ac": idle_suspend_action("ac"),

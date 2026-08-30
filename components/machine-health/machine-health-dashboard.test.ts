@@ -147,6 +147,18 @@ describe('machine health dashboard', () => {
     );
     expect(html).toContain('Remote desktop: active');
     expect(html).toContain('RDP graphics: VA-API ready');
+    expect(html).toContain('Beryl router');
+    expect(html).toContain('Local network edge');
+    expect(html).toContain('Tailscale: running');
+    expect(html).toContain('OpenClash: running');
+    expect(html).toContain('Netify: inactive');
+    expect(html).toContain('79 °C');
+    expect(html).toContain('75 °C fan policy · 75 °C warning');
+    expect(html).toContain('87 MiB');
+    expect(html).toContain('5d 4h');
+    expect(html).toContain('15 boot total · latest 1d 4h ago');
+    expect(html).toContain('No CPU throttle');
+    expect(html).toContain('PWM request 14 / 255 · not fan RPM');
     expect(html).toContain('Wallpaper refs: ready');
     expect(html).toContain('Desktop');
     expect(html).toContain('3072×1920');
@@ -174,6 +186,33 @@ describe('machine health dashboard', () => {
     expect(html).toContain('0 restarts');
     expect(html).not.toContain('private_ip');
     expect(html).not.toContain('process_arguments');
+  });
+
+  it('surfaces a recent Beryl OOM without treating an old boot count as new', () => {
+    const beryl = report.payload.beryl;
+    if (
+      beryl?.source !== 'big-red-connectivity-check-v1' ||
+      beryl.ssh !== 'available'
+    )
+      throw new Error('Expected the Beryl fixture');
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report: {
+          ...report,
+          payload: {
+            ...report.payload,
+            beryl: { ...beryl, latest_oom_age_seconds: 3_600 },
+          },
+        },
+        samples,
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('Worth a look');
+    expect(html).toContain(
+      'Beryl recorded an out-of-memory kill in the last 24 hours.'
+    );
   });
 
   it('shows an offline Mac without turning expected absence into a fault', () => {
