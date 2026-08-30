@@ -56,6 +56,30 @@ describe('machine health contract', () => {
         ],
       }).success
     ).toBe(false);
+    expect(
+      codexTokenReportSchema.safeParse({
+        ...report,
+        windows: [
+          window,
+          {
+            ...window,
+            window_started_at: '2026-08-29T06:00:00.000+01:00',
+            window_ended_at: '2026-08-29T07:00:00.000+01:00',
+          },
+        ],
+      }).success
+    ).toBe(false);
+    expect(
+      codexTokenReportSchema.safeParse({
+        ...report,
+        windows: [
+          {
+            ...window,
+            input_tokens: Number.MAX_SAFE_INTEGER + 1,
+          },
+        ],
+      }).success
+    ).toBe(false);
   });
 
   it('accepts the bounded report and strips unknown fields at every level', () => {

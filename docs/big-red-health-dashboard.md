@@ -50,10 +50,24 @@ The collector parses local command output and emits only enum values, booleans, 
 
 Token reports never send session IDs. Each reporter HMACs the local session ID with the shared
 ingest secret and sends a truncated 128-bit fingerprint used only for collision detection. A retry
-replaces the same source-hour row. If Big Red and the MacBook Air report the same session in the
-same hour, the later source-hour is marked `overlap-skipped` and omitted from totals instead of being
-counted twice. A report without complete fingerprint evidence is marked `unverified-skipped`. The
-dashboard shows the skipped source-hour count. Fingerprints are not returned by the dashboard query.
+with the same or a newer collection timestamp replaces the same source-hour row; a delayed older
+retry is ignored and reported as such by the ingest response. If Big Red and the MacBook Air report
+the same session in the same hour, the later source-hour is marked `overlap-skipped` and omitted from
+totals instead of being counted twice. A report without complete fingerprint evidence is marked
+`unverified-skipped`. The dashboard shows the skipped source-hour count. Fingerprints are not
+returned by the dashboard query.
+
+The source-hour primary key is device plus absolute UTC start time. Report validation compares
+parsed instants, so two offset spellings of the same hour cannot enter one bulk insert as duplicate
+keys. Every counter must also fit in JavaScript's safe integer range before PostgreSQL receives it;
+this keeps exact token counts from becoming rounded JSON numbers.
+
+A content-blind Aug. 30 arithmetic audit checked 40,975 valid local `last_token_usage` events. Every
+event satisfied cached input ≤ input and reasoning output ≤ output. `total_tokens` equaled input plus
+output for 40,631 events (99.160%); 344 events used a different logged total. The dashboard therefore
+keeps `total_tokens` as the source's authoritative total and calculates cache share separately as
+the weighted `sum(cached_input_tokens) / sum(input_tokens)`. It does not reconstruct total usage from
+the component counters.
 
 The desktop readout calls the repository-owned GNOME polish snapshot and keeps only version, pixel
 dimensions, refresh, logical scale, screen-shield state, animation state, and mirror/extend mode.

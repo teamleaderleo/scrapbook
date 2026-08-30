@@ -57,6 +57,7 @@ describe('Codex token ingestion', () => {
       windows: 1,
       counted: 1,
       skipped: 0,
+      ignored: 0,
       collectedAt: report.collected_at,
     });
   });
@@ -96,6 +97,17 @@ describe('Codex token ingestion', () => {
   it('rejects duplicate, partial, future, or over-age windows', async () => {
     const invalidReports = [
       { ...report, windows: [usage, usage] },
+      {
+        ...report,
+        windows: [
+          usage,
+          {
+            ...usage,
+            window_started_at: '2026-08-29T06:00:00.000+01:00',
+            window_ended_at: '2026-08-29T07:00:00.000+01:00',
+          },
+        ],
+      },
       {
         ...report,
         windows: [
@@ -139,6 +151,7 @@ describe('Codex token ingestion', () => {
       windows: 1,
       counted: 0,
       skipped: 1,
+      ignored: 0,
       collectedAt: report.collected_at,
     });
 
@@ -149,6 +162,7 @@ describe('Codex token ingestion', () => {
       ok: true,
       counted: 0,
       skipped: 1,
+      ignored: 0,
     });
   });
 });

@@ -7,20 +7,21 @@ const percent = z.number().finite().min(0).max(100);
 const nonnegative = z.number().finite().min(0);
 const nullableNonnegative = nonnegative.nullable();
 const nonnegativeInteger = z.number().int().min(0);
+const codexCounter = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 export const codexTokenSourceSchema = z.enum(['big-red', 'macbook-air']);
 export const codexUsageWindowSchema = z
   .object({
     source: z.literal('session-jsonl'),
     window_started_at: z.string().datetime({ offset: true }),
     window_ended_at: z.string().datetime({ offset: true }),
-    input_tokens: nonnegativeInteger,
-    cached_input_tokens: nonnegativeInteger,
-    cache_write_input_tokens: nonnegativeInteger,
-    output_tokens: nonnegativeInteger,
-    reasoning_output_tokens: nonnegativeInteger,
-    total_tokens: nonnegativeInteger,
-    model_calls: nonnegativeInteger,
-    active_routes: nonnegativeInteger,
+    input_tokens: codexCounter,
+    cached_input_tokens: codexCounter,
+    cache_write_input_tokens: codexCounter,
+    output_tokens: codexCounter,
+    reasoning_output_tokens: codexCounter,
+    total_tokens: codexCounter,
+    model_calls: codexCounter,
+    active_routes: codexCounter,
     session_fingerprints: z
       .array(z.string().regex(/^[0-9a-f]{32}$/))
       .max(1_024)
@@ -55,7 +56,9 @@ export const codexTokenReportSchema = z
     windows: z.array(codexUsageWindowSchema).min(1).max(720),
   })
   .superRefine((report, context) => {
-    const starts = report.windows.map(window => window.window_started_at);
+    const starts = report.windows.map(window =>
+      Date.parse(window.window_started_at)
+    );
     if (new Set(starts).size !== starts.length)
       context.addIssue({
         code: 'custom',
@@ -877,6 +880,7 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
               codex_token_samples.collected_at,
               EXCLUDED.collected_at
             )
+          WHERE codex_token_samples.collected_at <= EXCLUDED.collected_at
       `;
     }
 
@@ -914,7 +918,7 @@ export async function saveCodexTokenReport(report: CodexTokenReport) {
     collected_at: collectedAt,
   }));
 
-  const skipped = await client.begin(async sql => {
+  const persistedRows = await client.begin(async sql => {
     const starts = rows.map(row => row.window_started_at);
     await sql`
       SELECT pg_advisory_xact_lock(1129270341)
@@ -961,7 +965,7 @@ export async function saveCodexTokenReport(report: CodexTokenReport) {
         : ('counted' as const),
       session_fingerprints: sql.array(row.session_fingerprints, 25),
     }));
-    await sql`
+    const returnedRows = await sql`
       INSERT INTO codex_token_samples ${sql(
         databaseRows,
         'source',
@@ -998,19 +1002,37 @@ export async function saveCodexTokenReport(report: CodexTokenReport) {
           codex_token_samples.collected_at,
           EXCLUDED.collected_at
         )
+      WHERE codex_token_samples.collected_at <= EXCLUDED.collected_at
+      RETURNING accounting_state
     `;
+    const writtenRows = returnedRows.map(row => {
+      const accountingState = row.accounting_state;
+      if (
+        accountingState !== 'counted' &&
+        accountingState !== 'overlap-skipped' &&
+        accountingState !== 'unverified-skipped'
+      )
+        throw new Error('Stored Codex accounting state is invalid');
+      return { accounting_state: accountingState };
+    });
     await sql`
       DELETE FROM codex_token_samples
       WHERE window_started_at < now() - interval '90 days'
     `;
-    return skippedStarts.size;
+    return writtenRows;
   });
+
+  const counted = persistedRows.filter(
+    row => row.accounting_state === 'counted'
+  ).length;
+  const skipped = persistedRows.length - counted;
 
   return {
     source: report.source,
     windows: rows.length,
-    counted: rows.length - skipped,
+    counted,
     skipped,
+    ignored: rows.length - persistedRows.length,
     collectedAt,
   };
 }

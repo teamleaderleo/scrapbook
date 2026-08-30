@@ -88,6 +88,7 @@ export async function POST(request: NextRequest) {
       windows: result.windows,
       counted: result.counted,
       skipped: result.skipped,
+      ignored: result.ignored,
       collected_at: result.collectedAt,
       request_id: requestId,
     });
