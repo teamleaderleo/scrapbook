@@ -205,6 +205,9 @@ export function MachineHealthDashboard({
     remoteClient?.source === 'tailscale-status'
       ? remoteClient.transport_probe
       : undefined;
+  const observedRemotePath =
+    remoteProbe?.path ??
+    (remoteState === 'direct' || remoteState === 'relay' ? remoteState : null);
   const remoteValue =
     payload.hygiene.rdp_connections > 0
       ? 'Connected'
@@ -212,21 +215,25 @@ export function MachineHealthDashboard({
         ? 'Mac offline'
         : remoteState === 'online-idle'
           ? 'Mac online'
-          : remoteState === 'direct'
+          : observedRemotePath === 'direct'
             ? 'Direct'
-            : remoteState === 'relay'
+            : observedRemotePath === 'relay'
               ? 'Relayed'
-              : '—';
+              : observedRemotePath === 'peer-relay'
+                ? 'Peer relay'
+                : '—';
   const remotePath =
     remoteState === 'online-idle'
       ? 'Path idle'
-      : remoteState === 'direct'
+      : observedRemotePath === 'direct'
         ? 'Direct'
-        : remoteState === 'relay'
+        : observedRemotePath === 'relay'
           ? 'Relayed'
-          : remoteState === 'unknown'
-            ? 'Path unknown'
-            : null;
+          : observedRemotePath === 'peer-relay'
+            ? 'Peer relay'
+            : remoteState === 'unknown'
+              ? 'Path unknown'
+              : null;
   const remoteSessionNote = remoteSessions
     ? [
         remoteSessions.truncated ? '24h partial' : '24h',

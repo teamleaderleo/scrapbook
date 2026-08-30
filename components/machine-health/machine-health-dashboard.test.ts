@@ -193,6 +193,51 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Looks good');
   });
 
+  it('prefers the measured Mac path when status and ping disagree', () => {
+    const cases = [
+      { state: 'direct' as const, path: 'relay' as const, label: 'Relayed' },
+      { state: 'relay' as const, path: 'direct' as const, label: 'Direct' },
+      {
+        state: 'direct' as const,
+        path: 'peer-relay' as const,
+        label: 'Peer relay',
+      },
+    ];
+
+    for (const { state, path, label } of cases) {
+      const html = renderToStaticMarkup(
+        createElement(MachineHealthDashboard, {
+          report: {
+            ...report,
+            payload: {
+              ...report.payload,
+              network: {
+                ...report.payload.network,
+                remote_client: {
+                  source: 'tailscale-status',
+                  state,
+                  last_seen_seconds_ago: 60,
+                  transport_probe: {
+                    source: 'tailscale-ping',
+                    path,
+                    rtt_ms: 221,
+                    samples: 1,
+                  },
+                },
+              },
+            },
+          },
+          samples,
+          now: Date.parse(checkedAt) + 20 * 60_000,
+        })
+      );
+
+      expect(html).toMatch(
+        new RegExp(`>Remote</p><p[^>]*>${label}</p><p[^>]*>221 ms`)
+      );
+    }
+  });
+
   it('keeps hot-run completeness visible when build-size inventory is unavailable', () => {
     const hotRun = report.payload.build_state?.hot_run;
     if (!hotRun) throw new Error('Expected the hot-run fixture');

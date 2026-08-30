@@ -108,6 +108,11 @@ crash and restart totals without a retroactive classification.
 
 Remote-client state is derived from the same local `tailscale status --json` read used for Big Red's own state. Exactly one macOS peer is required; zero or multiple candidates become unavailable. The report emits only `offline`, `online-idle`, `direct`, `relay`, or `unknown`, plus a last-seen age when Tailscale supplies a nonzero timestamp. Direct requires an active peer with a current endpoint; relay requires an active peer with relay evidence. When that peer is already active, the collector adds one bounded Tailscale disco ping and keeps only its coarse path class and RTT. It skips the probe for offline and idle peers, so the observer does not manufacture an active path or keep a sleeping Mac busy. The RTT is Big Red-to-Mac transport evidence, not Windows App, decoder, display, or input-to-paint latency. Host names, node keys, addresses, tailnet IPs, endpoints, relay regions, traffic totals, and timestamps never enter the report. The public repository contains the contract and collector code, but no machine snapshot or credential.
 
+The Remote card prefers that measured ping path when it exists and falls back to the status class
+otherwise. This keeps the current card and history chart consistent during endpoint churn. One ping
+describes the observed path; it does not satisfy the multi-sample direct-path gate used by an RDP
+quality trial.
+
 The Remote card also summarizes the last 24 hours of GNOME Remote Desktop session endings. It keeps
 only bounded counts for total endings, transport endings, user logoffs, and server disconnects.
 GNOME labels the common transport ending as network or intentional, so the count is evidence for a
