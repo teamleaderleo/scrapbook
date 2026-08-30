@@ -731,6 +731,7 @@ def desktop_state(helper: Path = GNOME_POLISH_HELPER) -> dict[str, Any]:
         "screen_shield_active",
         "animations_enabled",
         "screen_share_mode",
+        "wallpaper_references_complete",
     )
     unavailable = {"source": "unavailable", **dict.fromkeys(fields)}
     code, output = run(
@@ -756,7 +757,12 @@ def desktop_state(helper: Path = GNOME_POLISH_HELPER) -> dict[str, Any]:
 
     display = status.get("display")
     settings = status.get("settings")
-    if not isinstance(display, dict) or not isinstance(settings, dict):
+    configured_wallpapers = status.get("configured_wallpapers")
+    if (
+        not isinstance(display, dict)
+        or not isinstance(settings, dict)
+        or not isinstance(configured_wallpapers, dict)
+    ):
         return unavailable
     mode = display.get("mode")
     mode_match = (
@@ -773,6 +779,7 @@ def desktop_state(helper: Path = GNOME_POLISH_HELPER) -> dict[str, Any]:
     screen_share_mode = settings.get(
         "org.gnome.desktop.remote-desktop.rdp/screen-share-mode"
     )
+    wallpaper_references_complete = configured_wallpapers.get("complete")
     gnome_shell = status.get("gnome_shell")
     if (
         mode_match is None
@@ -785,6 +792,7 @@ def desktop_state(helper: Path = GNOME_POLISH_HELPER) -> dict[str, Any]:
         or not isinstance(screen_shield_active, bool)
         or not isinstance(animations_enabled, bool)
         or screen_share_mode not in {"mirror-primary", "extend"}
+        or not isinstance(wallpaper_references_complete, bool)
     ):
         return unavailable
     pixel_width = int(mode_match.group(1))
@@ -801,6 +809,7 @@ def desktop_state(helper: Path = GNOME_POLISH_HELPER) -> dict[str, Any]:
         "screen_shield_active": screen_shield_active,
         "animations_enabled": animations_enabled,
         "screen_share_mode": screen_share_mode,
+        "wallpaper_references_complete": wallpaper_references_complete,
     }
 
 

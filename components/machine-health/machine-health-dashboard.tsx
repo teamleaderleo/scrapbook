@@ -520,6 +520,12 @@ export function MachineHealthDashboard({
                 RDP graphics: {remoteAccelerationLabel ?? 'unavailable'}
               </Pill>
             ) : null}
+            {desktop?.wallpaper_references_complete === undefined ? null : (
+              <Pill good={desktop.wallpaper_references_complete}>
+                Wallpaper refs:{' '}
+                {desktop.wallpaper_references_complete ? 'ready' : 'missing'}
+              </Pill>
+            )}
             <Pill good={idleSuspendDisabled}>
               Idle suspend: {idleSuspendDisabled ? 'off' : 'changed'}
             </Pill>

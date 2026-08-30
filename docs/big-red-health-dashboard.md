@@ -74,12 +74,14 @@ the weighted `sum(cached_input_tokens) / sum(input_tokens)`. It does not reconst
 the component counters.
 
 The desktop readout calls the repository-owned GNOME polish snapshot and keeps only version, pixel
-dimensions, refresh, logical scale, screen-shield state, animation state, and mirror/extend mode.
-Wallpaper names, URIs, settings outside that allowlist, desktop-entry identities, asset hashes, and
-raw command output are dropped. It is a current readout, not another history chart or alert.
-A direct live GNOME receipt took 0.28 seconds and 32,680 KiB peak RSS. The complete collector took
-11.40 seconds and 53,428 KiB peak RSS in the final print-only check; its compact payload was 5,319
-bytes. The existing Codex-state scan still dominates the hourly run.
+dimensions, refresh, logical scale, screen-shield state, animation state, mirror/extend mode, and
+one boolean stating whether both configured wallpaper files are readable. Wallpaper names, URIs,
+settings outside that allowlist, desktop-entry identities, asset hashes, and raw command output are
+dropped. Older stored reports omit the new boolean instead of being relabeled. It is a current
+readout, not another history chart.
+A direct live GNOME receipt took 0.28 seconds and 32,680 KiB peak RSS. A current exact-head
+print-only collector observation took 3.75 seconds and 67,836 KiB peak RSS; its compact payload was
+5,623 bytes. The existing Codex-state scan still dominates the hourly run.
 
 The Codex-state view calls `leo-workspace/tools/codex_state_inventory.py` in aggregate mode. The accepted contract opens no content files, uses no network or privileged process reads, mutates nothing, and has no retention authority. Scrapbook reconciles class, file, and allocated-byte totals before accepting active, authoritative, manifest-referenced, and unknown buckets. Any nonzero reclaimable or reconstructible total is rejected because the current inventory contract has not earned cleanup authority. Paths, file names, manifests, process identities, and content never enter the report.
 
@@ -156,6 +158,7 @@ These are operator thresholds rather than hardware safety limits:
 - anything other than full NetworkManager connectivity or running Tailscale: watch;
 - GNOME Remote Desktop present but not active: watch;
 - current GNOME Remote Desktop invocation reports software fallback: watch;
+- configured GNOME wallpaper references are missing: watch;
 - automatic idle suspend no longer disabled on AC or battery: watch;
 - hibernate or hybrid-sleep no longer masked: watch;
 - any detected development listener: watch;

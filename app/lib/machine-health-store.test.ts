@@ -394,6 +394,9 @@ describe('machine health contract', () => {
     const processTags = healthyMachineReport.process_tags;
     if (processTags?.source !== 'codex-route-hook-v1')
       throw new Error('Expected the process-tag fixture');
+    const desktop = healthyMachineReport.desktop;
+    if (desktop?.source !== 'gnome-polish-live-v2')
+      throw new Error('Expected the GNOME desktop fixture');
 
     expect(evaluateMachineHealth(healthyMachineReport)).toEqual({
       state: 'healthy',
@@ -480,6 +483,18 @@ describe('machine health contract', () => {
     ).toEqual({
       state: 'watch',
       reasons: ['GNOME Remote Desktop fell back from GPU acceleration.'],
+    });
+    expect(
+      evaluateMachineHealth({
+        ...healthyMachineReport,
+        desktop: {
+          ...desktop,
+          wallpaper_references_complete: false,
+        },
+      })
+    ).toEqual({
+      state: 'watch',
+      reasons: ['Configured wallpaper files are missing.'],
     });
   });
 });

@@ -134,6 +134,7 @@ describe('machine health dashboard', () => {
     expect(html).toContain('221 ms · GRD active · VA-API ready');
     expect(html).toContain('Remote desktop: active');
     expect(html).toContain('RDP graphics: VA-API ready');
+    expect(html).toContain('Wallpaper refs: ready');
     expect(html).toContain('Desktop');
     expect(html).toContain('3072×1920');
     expect(html).toContain('165 Hz · 150% · screen blanked');
@@ -227,6 +228,34 @@ describe('machine health dashboard', () => {
     expect(html).toContain(
       'GNOME Remote Desktop fell back from GPU acceleration.'
     );
+  });
+
+  it('surfaces missing configured wallpaper files without exposing their paths', () => {
+    const desktop = report.payload.desktop;
+    if (desktop?.source !== 'gnome-polish-live-v2')
+      throw new Error('Expected the GNOME desktop fixture');
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report: {
+          ...report,
+          payload: {
+            ...report.payload,
+            desktop: {
+              ...desktop,
+              wallpaper_references_complete: false,
+            },
+          },
+        },
+        samples,
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('Wallpaper refs: missing');
+    expect(html).toContain('Worth a look');
+    expect(html).toContain('Configured wallpaper files are missing.');
+    expect(html).not.toContain('adwaita-l.jxl');
+    expect(html).not.toContain('/usr/share/backgrounds');
   });
 
   it('surfaces route residue and unknown ownership without exposing IDs', () => {

@@ -123,6 +123,7 @@ export const healthyMachineReport: MachineHealthPayload = {
     screen_shield_active: true,
     animations_enabled: true,
     screen_share_mode: 'mirror-primary',
+    wallpaper_references_complete: true,
   },
   services: {
     failed_system_units: 0,

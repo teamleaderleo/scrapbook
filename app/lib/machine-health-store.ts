@@ -173,6 +173,7 @@ const desktopState = z.discriminatedUnion('source', [
     screen_shield_active: z.boolean(),
     animations_enabled: z.boolean(),
     screen_share_mode: z.enum(['mirror-primary', 'extend']),
+    wallpaper_references_complete: z.boolean().optional(),
   }),
   z.object({
     source: z.literal('unavailable'),
@@ -184,6 +185,7 @@ const desktopState = z.discriminatedUnion('source', [
     screen_shield_active: z.null(),
     animations_enabled: z.null(),
     screen_share_mode: z.null(),
+    wallpaper_references_complete: z.null().optional(),
   }),
 ]);
 
@@ -633,6 +635,11 @@ export function evaluateMachineHealth(payload: MachineHealthPayload) {
       'software-fallback'
   )
     reasons.push('GNOME Remote Desktop fell back from GPU acceleration.');
+  if (
+    payload.desktop?.source === 'gnome-polish-live-v2' &&
+    payload.desktop.wallpaper_references_complete === false
+  )
+    reasons.push('Configured wallpaper files are missing.');
   if (
     payload.power.idle_suspend_ac !== 'nothing' ||
     payload.power.idle_suspend_battery !== 'nothing'

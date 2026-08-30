@@ -957,6 +957,11 @@ class DesktopStateTest(unittest.TestCase):
                 "org.gnome.desktop.background/picture-uri": "must-not-survive",
             },
             "candidate_assets": ["must-not-survive"],
+            "configured_wallpapers": {
+                "complete": False,
+                "light": {"basename": "must-not-survive"},
+                "dark": {"basename": "must-not-survive"},
+            },
         }
 
     def test_allows_only_current_desktop_dimensions_and_modes(self) -> None:
@@ -979,6 +984,7 @@ class DesktopStateTest(unittest.TestCase):
                 "screen_shield_active": True,
                 "animations_enabled": True,
                 "screen_share_mode": "mirror-primary",
+                "wallpaper_references_complete": False,
             },
         )
         self.assertNotIn("private", json.dumps(desktop))
@@ -1018,6 +1024,15 @@ class DesktopStateTest(unittest.TestCase):
             REPORT,
             "run",
             return_value=(0, json.dumps(invalid_mode)),
+        ):
+            self.assertEqual(REPORT.desktop_state()["source"], "unavailable")
+
+        missing_wallpaper_state = self.snapshot()
+        missing_wallpaper_state.pop("configured_wallpapers")
+        with patch.object(
+            REPORT,
+            "run",
+            return_value=(0, json.dumps(missing_wallpaper_state)),
         ):
             self.assertEqual(REPORT.desktop_state()["source"], "unavailable")
 
