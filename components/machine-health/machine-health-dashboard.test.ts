@@ -159,6 +159,12 @@ describe('machine health dashboard', () => {
     expect(html).toContain('15 boot total · latest 1d 4h ago');
     expect(html).toContain('No CPU throttle');
     expect(html).toContain('PWM request 14 / 255 · not fan RPM');
+    expect(html).toContain('Wi-Fi link');
+    expect(html).toContain('−44 dBm');
+    expect(html).toContain('432 ↓ · 600 ↑ Mbit/s · 5220 MHz · 80 MHz wide');
+    expect(html).toContain('Gateway RTT');
+    expect(html).toContain('1.2 ms');
+    expect(html).toContain('0% loss · 0.10 ms variation · 5/5 replies');
     expect(html).toContain('Wallpaper refs: ready');
     expect(html).toContain('Desktop');
     expect(html).toContain('3072×1920');
@@ -212,6 +218,40 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Worth a look');
     expect(html).toContain(
       'Beryl recorded an out-of-memory kill in the last 24 hours.'
+    );
+  });
+
+  it('treats gateway packet loss as a bounded point-sample warning', () => {
+    const berylLink = report.payload.beryl_link;
+    if (
+      berylLink?.source !== 'big-red-connectivity-check-v1' ||
+      !berylLink.gateway
+    )
+      throw new Error('Expected the Beryl link fixture');
+    const html = renderToStaticMarkup(
+      createElement(MachineHealthDashboard, {
+        report: {
+          ...report,
+          payload: {
+            ...report.payload,
+            beryl_link: {
+              ...berylLink,
+              gateway: {
+                ...berylLink.gateway,
+                samples_received: 4,
+                packet_loss_percent: 20,
+              },
+            },
+          },
+        },
+        samples,
+        now: Date.parse(checkedAt) + 20 * 60_000,
+      })
+    );
+
+    expect(html).toContain('Worth a look');
+    expect(html).toContain(
+      'Beryl gateway point sample lost 20% of its five packets.'
     );
   });
 

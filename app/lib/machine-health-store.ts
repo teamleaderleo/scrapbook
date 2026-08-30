@@ -315,6 +315,52 @@ const berylState = z.union([
       { message: 'Beryl OOM age is inconsistent with this boot' }
     ),
 ]);
+const berylLinkState = z.union([
+  z.object({ source: z.literal('unavailable') }),
+  z
+    .object({
+      source: z.literal('big-red-connectivity-check-v1'),
+      wifi: z
+        .object({
+          signal_dbm: z.number().int().min(-150).max(0).nullable(),
+          frequency_mhz: z.number().int().min(2_000).max(8_000).nullable(),
+          channel_width_mhz: z.number().int().min(1).max(320).nullable(),
+          rx_bitrate_mbps: z.number().finite().min(0).max(100_000).nullable(),
+          tx_bitrate_mbps: z.number().finite().min(0).max(100_000).nullable(),
+        })
+        .nullable(),
+      gateway: z
+        .object({
+          samples_sent: z.literal(5),
+          samples_received: z.number().int().min(0).max(5),
+          packet_loss_percent: percent,
+          rtt_avg_ms: z.number().finite().min(0).max(60_000).nullable(),
+          rtt_mdev_ms: z.number().finite().min(0).max(60_000).nullable(),
+        })
+        .nullable(),
+    })
+    .superRefine((value, context) => {
+      const gateway = value.gateway;
+      if (!gateway) return;
+      const expectedLoss =
+        ((gateway.samples_sent - gateway.samples_received) * 100) /
+        gateway.samples_sent;
+      if (Math.abs(gateway.packet_loss_percent - expectedLoss) > 0.01)
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['gateway', 'packet_loss_percent'],
+          message: 'Beryl gateway packet counts and loss are inconsistent',
+        });
+      const hasRtt =
+        gateway.rtt_avg_ms !== null && gateway.rtt_mdev_ms !== null;
+      if (hasRtt !== gateway.samples_received > 0)
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['gateway', 'rtt_avg_ms'],
+          message: 'Beryl gateway RTT is inconsistent with received replies',
+        });
+    }),
+]);
 
 export const machineHealthPayloadSchema = z.object({
   schema_version: z.literal(1),
@@ -620,6 +666,7 @@ export const machineHealthPayloadSchema = z.object({
     tx_mib_s: nonnegative,
   }),
   beryl: berylState.optional(),
+  beryl_link: berylLinkState.optional(),
   power: z.object({
     profile: z.enum(['performance', 'balanced', 'power-saver', 'unknown']),
     idle_suspend_ac: idleSleepAction,
@@ -936,6 +983,14 @@ export function evaluateMachineHealth(payload: MachineHealthPayload) {
         'Beryl recorded an out-of-memory kill in the last 24 hours.'
       );
   }
+  if (
+    payload.beryl_link?.source === 'big-red-connectivity-check-v1' &&
+    payload.beryl_link.gateway !== null &&
+    payload.beryl_link.gateway.packet_loss_percent > 0
+  )
+    reasons.push(
+      `Beryl gateway point sample lost ${payload.beryl_link.gateway.packet_loss_percent}% of its five packets.`
+    );
   if (
     payload.services.gnome_remote_desktop !== undefined &&
     payload.services.gnome_remote_desktop !== 'active'

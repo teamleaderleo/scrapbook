@@ -110,6 +110,18 @@ BERYL_HEALTH_FIELDS = {
     "router_cpu_thermal_current_state",
     "router_cpu_thermal_max_state",
 }
+BERYL_LINK_FIELDS = {
+    "wifi_signal_dbm",
+    "wifi_frequency_mhz",
+    "wifi_channel_width_mhz",
+    "wifi_rx_bitrate_mbps",
+    "wifi_tx_bitrate_mbps",
+    "gateway_ping_samples_sent",
+    "gateway_ping_samples_received",
+    "gateway_packet_loss_percent",
+    "gateway_rtt_avg_ms",
+    "gateway_rtt_mdev_ms",
+}
 
 
 class RejectRedirects(urllib.request.HTTPRedirectHandler):
@@ -165,30 +177,68 @@ def bounded_integer(
     return parsed if minimum <= parsed <= maximum else None
 
 
-def beryl_health() -> dict[str, Any]:
-    code, output = run_connectivity_diagnostic()
-    unavailable = {"source": "unavailable"}
-    if code != 0:
-        return unavailable
+def bounded_signed_integer(
+    value: str | None, minimum: int, maximum: int
+) -> int | None:
+    if value is None or re.fullmatch(r"-?[0-9]+", value) is None:
+        return None
+    parsed = int(value)
+    return parsed if minimum <= parsed <= maximum else None
 
+
+def bounded_float(
+    value: str | None, minimum: float, maximum: float
+) -> float | None:
+    if value is None:
+        return None
+    try:
+        parsed = float(value)
+    except ValueError:
+        return None
+    return (
+        parsed
+        if math.isfinite(parsed) and minimum <= parsed <= maximum
+        else None
+    )
+
+
+def diagnostic_section(
+    output: str, heading: str, allowlist: set[str]
+) -> dict[str, str] | None:
     lines = output.splitlines()
     try:
-        start = lines.index("Beryl local health:") + 1
+        start = lines.index(heading) + 1
     except ValueError:
-        return unavailable
+        return None
 
     values: dict[str, str] = {}
     for line in lines[start:]:
         if not line:
             break
         if "=" not in line:
-            return unavailable
+            return None
         key, value = line.split("=", 1)
-        if key not in BERYL_HEALTH_FIELDS:
+        if key not in allowlist:
             continue
         if key in values:
-            return unavailable
+            return None
         values[key] = value
+    return values
+
+
+def beryl_health(
+    diagnostic: tuple[int, str] | None = None,
+) -> dict[str, Any]:
+    code, output = diagnostic or run_connectivity_diagnostic()
+    unavailable = {"source": "unavailable"}
+    if code != 0:
+        return unavailable
+
+    values = diagnostic_section(
+        output, "Beryl local health:", BERYL_HEALTH_FIELDS
+    )
+    if values is None:
+        return unavailable
 
     if values.get("router_ssh") == "unavailable":
         return {
@@ -317,6 +367,111 @@ def beryl_health() -> dict[str, Any]:
         **integers,
         "latest_oom_age_seconds": latest_oom_age_seconds,
         "fan": fan,
+    }
+
+
+def beryl_link_health(
+    diagnostic: tuple[int, str] | None = None,
+) -> dict[str, Any]:
+    code, output = diagnostic or run_connectivity_diagnostic()
+    unavailable = {"source": "unavailable"}
+    if code != 0:
+        return unavailable
+
+    values = diagnostic_section(
+        output, "Beryl local link:", BERYL_LINK_FIELDS
+    )
+    if values is None:
+        return unavailable
+
+    def optional_integer(key: str, minimum: int, maximum: int) -> int | None:
+        value = values.get(key)
+        if value == "unavailable":
+            return None
+        return bounded_integer(value, minimum, maximum)
+
+    def optional_float(key: str, minimum: float, maximum: float) -> float | None:
+        value = values.get(key)
+        if value == "unavailable":
+            return None
+        return bounded_float(value, minimum, maximum)
+
+    wifi_values = {
+        "signal_dbm": (
+            None
+            if values.get("wifi_signal_dbm") == "unavailable"
+            else bounded_signed_integer(values.get("wifi_signal_dbm"), -150, 0)
+        ),
+        "frequency_mhz": optional_integer("wifi_frequency_mhz", 2_000, 8_000),
+        "channel_width_mhz": optional_integer(
+            "wifi_channel_width_mhz", 1, 320
+        ),
+        "rx_bitrate_mbps": optional_float(
+            "wifi_rx_bitrate_mbps", 0, 100_000
+        ),
+        "tx_bitrate_mbps": optional_float(
+            "wifi_tx_bitrate_mbps", 0, 100_000
+        ),
+    }
+    wifi_source_keys = (
+        "wifi_signal_dbm",
+        "wifi_frequency_mhz",
+        "wifi_channel_width_mhz",
+        "wifi_rx_bitrate_mbps",
+        "wifi_tx_bitrate_mbps",
+    )
+    if any(
+        values.get(key) not in {None, "unavailable"}
+        and value is None
+        for key, value in zip(wifi_source_keys, wifi_values.values(), strict=True)
+    ):
+        return unavailable
+    wifi = (
+        wifi_values
+        if any(value is not None for value in wifi_values.values())
+        else None
+    )
+
+    gateway_source_keys = (
+        "gateway_ping_samples_sent",
+        "gateway_ping_samples_received",
+        "gateway_packet_loss_percent",
+        "gateway_rtt_avg_ms",
+        "gateway_rtt_mdev_ms",
+    )
+    if all(values.get(key) == "unavailable" for key in gateway_source_keys):
+        gateway = None
+    else:
+        sent = bounded_integer(values.get("gateway_ping_samples_sent"), 5, 5)
+        received = bounded_integer(
+            values.get("gateway_ping_samples_received"), 0, 5
+        )
+        loss = bounded_float(
+            values.get("gateway_packet_loss_percent"), 0, 100
+        )
+        average = optional_float("gateway_rtt_avg_ms", 0, 60_000)
+        variation = optional_float("gateway_rtt_mdev_ms", 0, 60_000)
+        if (
+            sent is None
+            or received is None
+            or received > sent
+            or loss is None
+            or abs(loss - ((sent - received) * 100 / sent)) > 0.01
+            or ((average is None or variation is None) != (received == 0))
+        ):
+            return unavailable
+        gateway = {
+            "samples_sent": sent,
+            "samples_received": received,
+            "packet_loss_percent": loss,
+            "rtt_avg_ms": average,
+            "rtt_mdev_ms": variation,
+        }
+
+    return {
+        "source": "big-red-connectivity-check-v1",
+        "wifi": wifi,
+        "gateway": gateway,
     }
 
 
@@ -2532,7 +2687,9 @@ def build_report() -> dict[str, Any]:
         service_state("chrony.service"),
         service_state("systemd-timesyncd.service"),
     )
-    beryl = beryl_health()
+    connectivity_diagnostic = run_connectivity_diagnostic()
+    beryl = beryl_health(connectivity_diagnostic)
+    beryl_link = beryl_link_health(connectivity_diagnostic)
 
     return {
         "schema_version": 1,
@@ -2617,6 +2774,7 @@ def build_report() -> dict[str, Any]:
             "tx_mib_s": activity["network_tx_mib_s"],
         },
         "beryl": beryl,
+        "beryl_link": beryl_link,
         "power": {
             "profile": power_profile(),
             "idle_suspend_ac": idle_suspend_action("ac"),

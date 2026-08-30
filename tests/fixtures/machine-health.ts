@@ -203,6 +203,23 @@ export const healthyMachineReport: MachineHealthPayload = {
       cpu_cooling_max_state: 3,
     },
   },
+  beryl_link: {
+    source: 'big-red-connectivity-check-v1',
+    wifi: {
+      signal_dbm: -44,
+      frequency_mhz: 5_220,
+      channel_width_mhz: 80,
+      rx_bitrate_mbps: 432.3,
+      tx_bitrate_mbps: 600.4,
+    },
+    gateway: {
+      samples_sent: 5,
+      samples_received: 5,
+      packet_loss_percent: 0,
+      rtt_avg_ms: 1.227,
+      rtt_mdev_ms: 0.097,
+    },
+  },
   power: {
     profile: 'balanced',
     idle_suspend_ac: 'nothing',

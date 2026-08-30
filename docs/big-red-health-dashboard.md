@@ -17,9 +17,8 @@ The page starts with the questions that matter when Leo is away from the machine
   one-shot path RTT did Big Red observe while that peer was active?
 - Is GNOME's idle screen shield blocking new desktop-sharing sessions, and how many source-matched
   admission blocks occurred in the last 24 hours?
-- Is the Beryl reachable, are Tailscale/OpenClash running with Netify inactive, and what do its
-  memory, uptime, boot-scoped OOM, SoC temperature, fan-policy, requested PWM, and CPU-cooling
-  readings show?
+- Is the Beryl reachable, are Tailscale/OpenClash running with Netify inactive, what do its
+  thermal and memory receipts show, and what does Big Red's bounded local Wi-Fi/gateway sample show?
 - Did the current GNOME Remote Desktop process initialize its Vulkan/VA-API path, fall back to software, or not yet receive an RDP session?
 - What desktop state is active now: GNOME version, pixel mode, refresh, scale, screen-shield and
   physical-backlight state, saved animation preference, and configured mirror/extend mode?
@@ -243,17 +242,25 @@ These are operator thresholds rather than hardware safety limits:
 - any structured core-dump exit in the last 24 hours: watch, split between desktop search and other services when the current collector supplied the breakdown;
 - unavailable route ownership status, any residue job, or any unknown route/job record: watch;
 - unavailable Beryl diagnostics or SSH, unexpected Tailscale/OpenClash/Netify process shape, an
-  inactive fan policy, active CPU thermal cooling, or a Beryl OOM in the last 24 hours: watch;
+  inactive fan policy, active CPU thermal cooling, a Beryl OOM in the last 24 hours, or any loss in
+  the five-packet gateway point sample: watch;
 - report older than 3 hours: watch.
 
 CPU/memory peaks, disk/network throughput, PSI, load, and the iGPU clock are displayed but do not yet alert. Pressure is a better contention signal than utilization alone, but thresholds should be based on an observed Big Red baseline instead of imported folklore.
 
-Beryl data is parsed only from the allowlisted `Beryl local health` section of the canonical
-`/usr/local/bin/big-red-connectivity-check`. Missing, duplicate, malformed, oversized, or timed-out
-output fails closed to unavailable. The PWM value is a requested cooling-device state, not measured
-fan RPM; the dashboard compares it with its reported maximum and does not turn a single temperature
-sample into a generic hardware alarm. OOM count is cumulative for the current router boot, so only a
-reported latest-event age under 24 hours raises a watch reason.
+Beryl data is parsed only from the allowlisted `Beryl local health` and `Beryl local link` sections
+of the canonical `/usr/local/bin/big-red-connectivity-check`. The collector runs that diagnostic
+once per report. Missing, duplicate, malformed, inconsistent, oversized, or timed-out output fails
+closed to unavailable. The link receipt keeps only signal, frequency, channel width, negotiated RX/TX
+rates, and aggregates from exactly five gateway pings. It never stores the interface, SSID, BSSID,
+gateway address, route, or packet-level output. Negotiated rates describe the current radio link, not
+measured internet throughput; RTT is a local gateway point sample, and ping mdev is labeled variation
+rather than network jitter. Signal, rate, and latency are display-only until Big Red has its own
+baseline. Any observed packet loss is a watch reason, explicitly scoped to the five-packet sample.
+The PWM value is a requested cooling-device state, not measured fan RPM; the dashboard compares it
+with its reported maximum and does not turn a single temperature sample into a generic hardware
+alarm. OOM count is cumulative for the current router boot, so only a reported latest-event age under
+24 hours raises a watch reason.
 
 ## Website configuration
 
