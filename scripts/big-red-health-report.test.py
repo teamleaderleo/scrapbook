@@ -981,9 +981,10 @@ class RemoteSessionWindowTest(unittest.TestCase):
                 "window_hours": 24,
                 "session_endings": 1,
                 "transport_endings": 1,
-                "user_logoffs": 1,
-                "server_disconnects": 1,
-                "truncated": False,
+            "user_logoffs": 1,
+            "server_disconnects": 1,
+            "admission_blocks": 0,
+            "truncated": False,
             },
         )
         self.assertNotIn("secret", json.dumps(sessions))
@@ -992,6 +993,22 @@ class RemoteSessionWindowTest(unittest.TestCase):
             run.call_args.args,
         )
         self.assertIn("2026-08-29T09:00:00+00:00", run.call_args.args)
+
+    def test_counts_session_creation_inhibition_without_retaining_log_text(
+        self,
+    ) -> None:
+        output = self.journal(
+            "Failed to start remote desktop session: "
+            "GDBus.Error:org.freedesktop.DBus.Error.Failed: "
+            "Session creation inhibited private detail",
+            "[rdp_set_error_info]: ERRINFO_RPC_INITIATED_DISCONNECT",
+        )
+        with patch.object(REPORT, "run", return_value=(0, output)):
+            sessions = REPORT.gnome_remote_desktop_sessions(self.NOW)
+
+        self.assertEqual(sessions["admission_blocks"], 1)
+        self.assertEqual(sessions["server_disconnects"], 1)
+        self.assertNotIn("private detail", json.dumps(sessions))
 
     def test_marks_a_truncated_window_and_counts_only_the_bounded_tail(self) -> None:
         records = [

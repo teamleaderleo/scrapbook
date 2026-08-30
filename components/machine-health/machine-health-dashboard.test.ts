@@ -136,8 +136,11 @@ describe('machine health dashboard', () => {
     expect(html).toContain('partial · 0 MiB reclaimable · 7.4 s');
     expect(html).toContain('Remote');
     expect(html).toContain('Direct');
+    expect(html).toContain('Wake screen · 221 ms');
     expect(html).toContain('221 ms · GRD active · VA-API ready');
-    expect(html).toContain('24h · 7 endings · 6 transport · 1 logoff');
+    expect(html).toContain(
+      '24h · 7 endings · 6 transport · 1 logoff · 4 admission'
+    );
     expect(html).toContain('Remote desktop: active');
     expect(html).toContain('RDP graphics: VA-API ready');
     expect(html).toContain('Wallpaper refs: ready');
@@ -234,7 +237,9 @@ describe('machine health dashboard', () => {
       );
 
       expect(html).toMatch(
-        new RegExp(`>Remote</p><p[^>]*>${label}</p><p[^>]*>221 ms`)
+        new RegExp(
+          `>Remote</p><p[^>]*>${label}</p><p[^>]*>Wake screen · 221 ms`
+        )
       );
     }
   });

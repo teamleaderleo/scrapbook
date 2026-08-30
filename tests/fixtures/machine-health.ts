@@ -154,6 +154,7 @@ export const healthyMachineReport: MachineHealthPayload = {
       transport_endings: 6,
       user_logoffs: 1,
       server_disconnects: 0,
+      admission_blocks: 4,
       truncated: false,
     },
   },

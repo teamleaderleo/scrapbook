@@ -170,6 +170,7 @@ const remoteSessions = z.discriminatedUnion('source', [
     transport_endings: nonnegativeInteger,
     user_logoffs: nonnegativeInteger,
     server_disconnects: nonnegativeInteger,
+    admission_blocks: nonnegativeInteger.optional(),
     truncated: z.boolean(),
   }),
   z.object({
@@ -179,6 +180,7 @@ const remoteSessions = z.discriminatedUnion('source', [
     transport_endings: z.null(),
     user_logoffs: z.null(),
     server_disconnects: z.null(),
+    admission_blocks: z.null().optional(),
     truncated: z.boolean(),
   }),
 ]);

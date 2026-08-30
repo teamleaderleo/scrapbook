@@ -15,6 +15,8 @@ The page starts with the questions that matter when Leo is away from the machine
 - Is the machine on AC, what is the aggregate battery state, and are there failed systemd units, unexpected development listeners, excess browser memory, or active RDP connections?
 - Is the unique macOS remote client offline, online but idle, direct, relayed, or unknown, and what
   one-shot path RTT did Big Red observe while that peer was active?
+- Is GNOME's idle screen shield blocking new desktop-sharing sessions, and how many source-matched
+  admission blocks occurred in the last 24 hours?
 - Did the current GNOME Remote Desktop process initialize its Vulkan/VA-API path, fall back to software, or not yet receive an RDP session?
 - What desktop state is active now: GNOME version, pixel mode, refresh, scale, screen-shield and
   physical-backlight state, animation state, and configured mirror/extend mode?
@@ -107,6 +109,11 @@ then discards unit names, messages, exit statuses, timestamps, and invocation id
 nonzero ordinary exit is not a crash: the live route-lease matrix includes deliberate status-7
 failure arms, and those remain outside this metric. Older stored snapshots retain their aggregate
 crash and restart totals without a retroactive classification.
+
+The Remote card treats an active GNOME screen shield with no current RDP socket as an admission
+action, not a network failure. It shows `Wake screen` beside the independently measured Mac path.
+The 24-hour session summary counts only the exact `Session creation inhibited` GRD error as an
+admission block; older snapshots omit that counter. The dashboard does not clear the shield itself.
 
 Remote-client state is derived from the same local `tailscale status --json` read used for Big Red's own state. Exactly one macOS peer is required; zero or multiple candidates become unavailable. The report emits only `offline`, `online-idle`, `direct`, `relay`, or `unknown`, plus a last-seen age when Tailscale supplies a nonzero timestamp. Direct requires an active peer with a current endpoint; relay requires an active peer with relay evidence. When that peer is already active, the collector adds one bounded Tailscale disco ping and keeps only its coarse path class and RTT. It skips the probe for offline and idle peers, so the observer does not manufacture an active path or keep a sleeping Mac busy. The RTT is Big Red-to-Mac transport evidence, not Windows App, decoder, display, or input-to-paint latency. Host names, node keys, addresses, tailnet IPs, endpoints, relay regions, traffic totals, and timestamps never enter the report. The public repository contains the contract and collector code, but no machine snapshot or credential.
 

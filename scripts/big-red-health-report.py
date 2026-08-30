@@ -1548,6 +1548,7 @@ def gnome_remote_desktop_sessions(
         "transport_endings": None,
         "user_logoffs": None,
         "server_disconnects": None,
+        "admission_blocks": None,
         "truncated": False,
     }
     observed_at = now or dt.datetime.now(dt.timezone.utc)
@@ -1598,6 +1599,11 @@ def gnome_remote_desktop_sessions(
         ),
         "server_disconnects": sum(
             "[rdp_set_error_info]: ERRINFO_RPC_INITIATED_DISCONNECT" in message
+            for message in messages
+        ),
+        "admission_blocks": sum(
+            "Failed to start remote desktop session:" in message
+            and "Session creation inhibited" in message
             for message in messages
         ),
         "truncated": truncated,

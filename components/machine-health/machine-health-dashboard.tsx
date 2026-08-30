@@ -245,11 +245,17 @@ export function MachineHealthDashboard({
         remoteSessions.server_disconnects > 0
           ? `${remoteSessions.server_disconnects} server`
           : null,
+        (remoteSessions.admission_blocks ?? 0) > 0
+          ? `${remoteSessions.admission_blocks} admission`
+          : null,
       ]
         .filter(Boolean)
         .join(' · ')
     : null;
   const remoteNote = [
+    desktop?.screen_shield_active && payload.hygiene.rdp_connections === 0
+      ? 'Wake screen'
+      : null,
     remoteState === 'offline' &&
     remoteClient?.last_seen_seconds_ago !== null &&
     remoteClient?.last_seen_seconds_ago !== undefined
