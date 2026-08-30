@@ -110,4 +110,18 @@ describe('Codex token persistence ordering', () => {
       ignored: 0,
     });
   });
+
+  it('keeps a bounded year of machine and token history', async () => {
+    await saveCodexTokenReport(report());
+    await saveMachineHealth(healthyMachineReport);
+
+    const retentionDeletes = database.queries.filter(query =>
+      query.includes('DELETE FROM')
+    );
+    expect(retentionDeletes).toHaveLength(3);
+    for (const query of retentionDeletes) {
+      expect(query).toContain("interval '365 days'");
+      expect(query).not.toContain("interval '90 days'");
+    }
+  });
 });

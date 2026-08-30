@@ -4,6 +4,15 @@ import type {
   CodexTokenSample,
   CodexTokenSource,
 } from '@/app/lib/machine-health-store';
+import {
+  Cpu,
+  HardDrive,
+  Laptop,
+  MemoryStick,
+  Server,
+  SquareTerminal,
+  type LucideIcon,
+} from 'lucide-react';
 import { useMemo, useState, useSyncExternalStore } from 'react';
 
 type ActivityRange = '12h' | '24h' | '7d' | '30d';
@@ -94,6 +103,8 @@ const RESOURCE_CONFIG: Record<
     selectedColor: string;
     darkColor: string;
     darkSelectedColor: string;
+    icon: LucideIcon;
+    iconColor: string;
     value: (bin: PublicActivityBin) => number | null;
   }
 > = {
@@ -103,6 +114,8 @@ const RESOURCE_CONFIG: Record<
     selectedColor: 'bg-[#7f2d28]',
     darkColor: 'dark:bg-[#e77970]',
     darkSelectedColor: 'dark:bg-[#ffaaa2]',
+    icon: Cpu,
+    iconColor: 'text-[#9b3b35] dark:text-[#ef8b83]',
     value: bin => bin.cpuUsedPercent,
   },
   memory: {
@@ -111,6 +124,8 @@ const RESOURCE_CONFIG: Record<
     selectedColor: 'bg-[#205b63]',
     darkColor: 'dark:bg-[#66c0c8]',
     darkSelectedColor: 'dark:bg-[#99e1e5]',
+    icon: MemoryStick,
+    iconColor: 'text-[#2e747d] dark:text-[#79cad1]',
     value: bin => bin.memoryUsedPercent,
   },
   storage: {
@@ -119,6 +134,8 @@ const RESOURCE_CONFIG: Record<
     selectedColor: 'bg-[#7d581d]',
     darkColor: 'dark:bg-[#e2b660]',
     darkSelectedColor: 'dark:bg-[#ffd58a]',
+    icon: HardDrive,
+    iconColor: 'text-[#926920] dark:text-[#eac270]',
     value: bin => bin.rootUsedPercent,
   },
 };
@@ -413,6 +430,7 @@ function ResourceHistory({
     getServerTimeZone
   );
   const config = RESOURCE_CONFIG[metric];
+  const MetricIcon = config.icon;
   const values = bins.map(config.value);
   const previousValues = previousBins
     .map(config.value)
@@ -452,7 +470,10 @@ function ResourceHistory({
             </p>
           </div>
           <div className="pt-0.5 text-right text-xs">
-            <p className="font-semibold">{config.label}</p>
+            <MetricIcon
+              aria-label={config.label}
+              className={`size-[1.1rem] ml-auto stroke-[1.8] ${config.iconColor}`}
+            />
             {delta !== null && Math.abs(delta) >= 0.5 ? (
               <p className="opacity-45 mt-1 tabular-nums">
                 {delta > 0 ? '↑' : '↓'} {Math.abs(delta).toFixed(0)} points
@@ -482,6 +503,7 @@ function ResourceHistory({
       <div className="border-black/9 border-t dark:border-white/10">
         {(Object.keys(RESOURCE_CONFIG) as ResourceKey[]).map(key => {
           const item = RESOURCE_CONFIG[key];
+          const ItemIcon = item.icon;
           const itemValues = bins
             .map(item.value)
             .filter((value): value is number => value !== null);
@@ -498,9 +520,9 @@ function ResourceHistory({
               className="grid min-h-[3.45rem] w-full grid-cols-[minmax(0,1fr)_5rem] items-center gap-3 border-b border-black/[0.055] px-5 py-2.5 text-left last:border-b-0 hover:bg-black/[0.025] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#a53b34] dark:border-white/[0.065] dark:hover:bg-white/[0.035]"
             >
               <span className="flex min-w-0 items-center gap-2.5">
-                <span
+                <ItemIcon
                   aria-hidden="true"
-                  className={`size-2 shrink-0 rounded-full ${item.color} ${item.darkColor}`}
+                  className={`size-[1.05rem] shrink-0 stroke-[1.8] ${item.iconColor}`}
                 />
                 <span>
                   <span className="block text-[0.95rem] font-medium leading-tight">
@@ -585,7 +607,10 @@ function CodexHistory({
             </p>
           </div>
           <div className="pt-0.5 text-right text-xs">
-            <p className="font-semibold">Codex</p>
+            <SquareTerminal
+              aria-label="Codex"
+              className="size-[1.1rem] opacity-65 ml-auto stroke-[1.8]"
+            />
             {selectedIndex === null && previousInput > 0 ? (
               <p className="opacity-45 mt-1 tabular-nums">
                 {totalInput >= previousInput ? '↑' : '↓'}{' '}
@@ -672,10 +697,17 @@ function CodexHistory({
               className="flex items-center justify-between gap-2"
             >
               <span className="opacity-65 flex items-center gap-2">
-                <span
-                  aria-hidden="true"
-                  className={`size-2 rounded-sm ${source === 'big-red' ? 'bg-[#b74a42] dark:bg-[#e77970]' : 'bg-[#378690] dark:bg-[#66c0c8]'}`}
-                />
+                {source === 'big-red' ? (
+                  <Server
+                    aria-hidden="true"
+                    className="size-3.5 stroke-[1.8] text-[#9b3b35] dark:text-[#ef8b83]"
+                  />
+                ) : (
+                  <Laptop
+                    aria-hidden="true"
+                    className="size-3.5 stroke-[1.8] text-[#2e747d] dark:text-[#79cad1]"
+                  />
+                )}
                 {sourceLabels[source]}
               </span>
               <span className="font-medium tabular-nums">

@@ -1,8 +1,23 @@
 # Big Red health dashboard
 
-`/machine-health` is a private, lightweight health check for the Big Red Ubuntu workstation. One short-lived collector sends a compact hourly health report. Codex token accounting uses one row per device and complete UTC hour so Big Red and the MacBook Air can share the same view.
+`/machine-health` is a lightweight health check for the Big Red Ubuntu workstation. Sanitized resource and Codex aggregates are public; operational diagnostics remain owner-only. One short-lived collector sends a compact hourly health report. Codex token accounting uses one row per device and complete UTC hour so Big Red and the MacBook Air can share the same view.
 
-The production database, ingestion credentials, hourly Big Red timer, and private dashboard are live. The MacBook Air token reporter is a separate hourly source; both devices retain only aggregate complete-hour accounting.
+The production database, ingestion credentials, hourly Big Red timer, public summary, and owner-only diagnostics are live. The MacBook Air token reporter is a separate hourly source; both devices retain only aggregate complete-hour accounting.
+
+## Storage and retention
+
+Live dashboard history is stored in the Scrapbook Supabase Postgres database, not Google Drive.
+`machine_health_status` keeps one replaceable latest snapshot, `machine_health_samples` keeps compact
+hourly machine observations, and `codex_token_samples` keeps one aggregate row per device and
+complete UTC hour. Every successful ingest deletes machine and token rows older than 365 days, so
+the live store stays bounded without a resident cleanup service.
+
+A future MacBook Air resource collector should use the same sanitized hourly shape and one-year
+retention rather than uploading Activity Monitor logs or raw process data. At full coverage that is
+about 8,760 machine rows per device. Google Drive is the intended cold archive beyond that live
+window, but it is not currently part of ingestion or dashboard queries. The retired gallery importer
+credential was read-only; scheduled archive upload requires a separate write-scoped service account
+restricted to one archive folder.
 
 ## What it answers
 
@@ -174,9 +189,9 @@ The default proposal is one report per hour, with manual runs whenever a change 
 
 - The server reads 60 days so equal-window comparisons have a prior period; the dashboard shows
   12-hour, day, week, and month views.
-- Every successful ingest deletes samples older than 90 days, so retention needs no second scheduled job.
+- Every successful ingest deletes samples older than 365 days, so live retention needs no second scheduled job.
 - Retry posts with the same host and timestamp update one sample instead of duplicating it, and an older delayed report cannot replace the latest status row.
-- The current exact-head live report measured 3,987 bytes as compact JSON and 5,015 bytes pretty-printed. Ninety days at hourly frequency is 2,160 rows and roughly 8.2 MiB of raw compact payload; a conservative database budget remains under 20 MiB after allowing for JSONB, scalar columns, row overhead, and the index.
+- The current exact-head live report measured 3,987 bytes as compact JSON and 5,015 bytes pretty-printed. One year at hourly frequency is 8,760 rows and roughly 33.3 MiB of raw compact payload per machine; a conservative database budget remains under 80 MiB per machine after allowing for JSONB, scalar columns, row overhead, and the index.
 - The page has a manual refresh control and refreshes its server data once per hour while the tab is visible. Returning to a tab refreshes it only when the last page refresh is at least an hour old.
 
 A live 30-day Big Red token backfill scanned 720 complete hours in a few seconds and remained below

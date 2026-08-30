@@ -979,7 +979,7 @@ export function MachineHealthDashboard({
       </section>
 
       <footer className="px-2 py-1 text-xs opacity-50">
-        Hourly snapshots · 90-day history
+        Hourly snapshots · one-year history
       </footer>
     </div>
   );

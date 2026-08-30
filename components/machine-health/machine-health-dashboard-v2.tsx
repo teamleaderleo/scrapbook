@@ -6,6 +6,7 @@ import {
 } from '@/app/lib/machine-health-store';
 import { GitHubIcon } from '@/components/icons/github-icon';
 import { GoogleIcon } from '@/components/icons/google-icon';
+import { MemoryStick, Thermometer, Timer } from 'lucide-react';
 import Link from 'next/link';
 import { MachineHealthOverview } from './machine-health-overview';
 import { MachineHealthRefresh } from './machine-health-refresh';
@@ -339,22 +340,34 @@ export function MachineHealthDashboard({
 
       <section aria-label="Additional machine details">
         <div className="grid grid-cols-3 gap-4 border-t border-black/10 py-4 text-center dark:border-white/10">
-          <div>
-            <p className="opacity-45 text-xs">Temperature</p>
+          <div aria-label="Temperature" title="Temperature">
+            <Thermometer
+              aria-hidden="true"
+              className="size-4 mx-auto stroke-[1.7] opacity-40"
+            />
+            <span className="sr-only">Temperature</span>
             <p className="mt-1 text-lg font-semibold tabular-nums">
               {payload.temperature.peak_sensor_c === null
                 ? '—'
                 : `${Math.round(payload.temperature.peak_sensor_c)} °C`}
             </p>
           </div>
-          <div>
-            <p className="opacity-45 text-xs">Memory</p>
+          <div aria-label="Installed memory" title="Installed memory">
+            <MemoryStick
+              aria-hidden="true"
+              className="size-4 mx-auto stroke-[1.7] opacity-40"
+            />
+            <span className="sr-only">Installed memory</span>
             <p className="mt-1 text-lg font-semibold tabular-nums">
               {payload.memory.total_gib.toFixed(0)} GiB
             </p>
           </div>
-          <div>
-            <p className="opacity-45 text-xs">Uptime</p>
+          <div aria-label="Uptime" title="Uptime">
+            <Timer
+              aria-hidden="true"
+              className="size-4 mx-auto stroke-[1.7] opacity-40"
+            />
+            <span className="sr-only">Uptime</span>
             <p className="mt-1 text-lg font-semibold tabular-nums">
               {formatDuration(payload.uptime_seconds)}
             </p>

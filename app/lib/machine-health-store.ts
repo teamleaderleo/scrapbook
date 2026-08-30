@@ -1284,11 +1284,11 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
     await sql`
       DELETE FROM machine_health_samples
       WHERE host = 'big-red'
-        AND checked_at < now() - interval '90 days'
+        AND checked_at < now() - interval '365 days'
     `;
     await sql`
       DELETE FROM codex_token_samples
-      WHERE window_started_at < now() - interval '90 days'
+      WHERE window_started_at < now() - interval '365 days'
     `;
   });
 
@@ -1414,7 +1414,7 @@ export async function saveCodexTokenReport(report: CodexTokenReport) {
     });
     await sql`
       DELETE FROM codex_token_samples
-      WHERE window_started_at < now() - interval '90 days'
+      WHERE window_started_at < now() - interval '365 days'
     `;
     return writtenRows;
   });
@@ -1514,7 +1514,7 @@ export async function readMachineHealth(
           payload
         FROM machine_health_samples
         WHERE host = 'big-red'
-          AND checked_at >= now() - (${Math.max(1, Math.min(90, Math.floor(days)))}::int * interval '1 day')
+          AND checked_at >= now() - (${Math.max(1, Math.min(365, Math.floor(days)))}::int * interval '1 day')
         ORDER BY checked_at ASC
       `,
       client<
@@ -1550,7 +1550,7 @@ export async function readMachineHealth(
           model_calls,
           active_routes
         FROM codex_token_samples
-        WHERE window_started_at >= now() - (${Math.max(1, Math.min(90, Math.floor(days)))}::int * interval '1 day')
+        WHERE window_started_at >= now() - (${Math.max(1, Math.min(365, Math.floor(days)))}::int * interval '1 day')
         ORDER BY window_started_at ASC, source ASC
       `,
     ]);
