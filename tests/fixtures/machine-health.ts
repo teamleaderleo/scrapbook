@@ -137,6 +137,15 @@ export const healthyMachineReport: MachineHealthPayload = {
       source: 'grd-current-invocation',
       state: 'hardware-ready',
     },
+    gnome_remote_desktop_sessions: {
+      source: 'grd-journal-24h',
+      window_hours: 24,
+      session_endings: 7,
+      transport_endings: 6,
+      user_logoffs: 1,
+      server_disconnects: 0,
+      truncated: false,
+    },
   },
   network: {
     connectivity: 'full',

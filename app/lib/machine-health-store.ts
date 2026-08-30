@@ -162,6 +162,26 @@ const remoteAcceleration = z.discriminatedUnion('source', [
     state: z.literal('unavailable'),
   }),
 ]);
+const remoteSessions = z.discriminatedUnion('source', [
+  z.object({
+    source: z.literal('grd-journal-24h'),
+    window_hours: z.literal(24),
+    session_endings: nonnegativeInteger,
+    transport_endings: nonnegativeInteger,
+    user_logoffs: nonnegativeInteger,
+    server_disconnects: nonnegativeInteger,
+    truncated: z.boolean(),
+  }),
+  z.object({
+    source: z.literal('unavailable'),
+    window_hours: z.literal(24),
+    session_endings: z.null(),
+    transport_endings: z.null(),
+    user_logoffs: z.null(),
+    server_disconnects: z.null(),
+    truncated: z.boolean(),
+  }),
+]);
 const desktopState = z.discriminatedUnion('source', [
   z.object({
     source: z.literal('gnome-polish-live-v2'),
@@ -452,6 +472,7 @@ export const machineHealthPayloadSchema = z.object({
     time_sync: serviceState,
     gnome_remote_desktop: serviceState.optional(),
     gnome_remote_desktop_acceleration: remoteAcceleration.optional(),
+    gnome_remote_desktop_sessions: remoteSessions.optional(),
   }),
   network: z.object({
     connectivity: z.enum(['full', 'limited', 'portal', 'none', 'unknown']),

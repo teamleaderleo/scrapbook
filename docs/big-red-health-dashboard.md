@@ -87,6 +87,11 @@ The Codex-state view calls `leo-workspace/tools/codex_state_inventory.py` in agg
 
 Remote-client state is derived from the same local `tailscale status --json` read used for Big Red's own state. Exactly one macOS peer is required; zero or multiple candidates become unavailable. The report emits only `offline`, `online-idle`, `direct`, `relay`, or `unknown`, plus a last-seen age when Tailscale supplies a nonzero timestamp. Direct requires an active peer with a current endpoint; relay requires an active peer with relay evidence. When that peer is already active, the collector adds one bounded Tailscale disco ping and keeps only its coarse path class and RTT. It skips the probe for offline and idle peers, so the observer does not manufacture an active path or keep a sleeping Mac busy. The RTT is Big Red-to-Mac transport evidence, not Windows App, decoder, display, or input-to-paint latency. Host names, node keys, addresses, tailnet IPs, endpoints, relay regions, traffic totals, and timestamps never enter the report. The public repository contains the contract and collector code, but no machine snapshot or credential.
 
+The Remote card also summarizes the last 24 hours of GNOME Remote Desktop session endings. It keeps
+only bounded counts for total endings, transport endings, user logoffs, and server disconnects.
+GNOME labels the common transport ending as network or intentional, so the count is evidence for a
+reconnect investigation rather than a fault verdict. Journal text and event timestamps are discarded.
+
 RDP acceleration state is bound to the current `gnome-remote-desktop.service` invocation. The collector reads at most 512 journal records for that invocation and emits one enum: `hardware-ready` after both Vulkan and VA-API initialize, `software-fallback` after the latest relevant failure, `awaiting-session` when Vulkan is ready but no VA-API session attempt exists, or `unknown`. A new daemon invocation cannot inherit an old failure. Invocation IDs, journal messages, driver strings, client capabilities, endpoints, and timestamps never enter the report. `hardware-ready` proves initialization, not rendered frame rate, codec selection, or end-to-end latency.
 
 ## Frequency, history, and cost

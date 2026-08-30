@@ -934,6 +934,71 @@ class RemoteAccelerationTest(unittest.TestCase):
                 )
 
 
+class RemoteSessionWindowTest(unittest.TestCase):
+    NOW = dt.datetime(2026, 8, 30, 9, 0, tzinfo=dt.timezone.utc)
+
+    @staticmethod
+    def journal(*messages: str) -> str:
+        return "\n".join(json.dumps({"MESSAGE": message}) for message in messages)
+
+    def test_counts_bounded_session_endings_without_log_detail(self) -> None:
+        output = self.journal(
+            "[RDP] Network or intentional disconnect, stopping session",
+            "[transport_read_layer]: ERRCONNECT_CONNECT_TRANSPORT_FAILED secret",
+            "[rdp_set_error_info]: ERRINFO_LOGOFF_BY_USER secret",
+            "[rdp_set_error_info]: ERRINFO_RPC_INITIATED_DISCONNECT secret",
+            "unrelated private journal detail",
+        )
+        with patch.object(REPORT, "run", return_value=(0, output)) as run:
+            sessions = REPORT.gnome_remote_desktop_sessions(self.NOW)
+
+        self.assertEqual(
+            sessions,
+            {
+                "source": "grd-journal-24h",
+                "window_hours": 24,
+                "session_endings": 1,
+                "transport_endings": 1,
+                "user_logoffs": 1,
+                "server_disconnects": 1,
+                "truncated": False,
+            },
+        )
+        self.assertNotIn("secret", json.dumps(sessions))
+        self.assertIn(
+            "--unit=gnome-remote-desktop.service",
+            run.call_args.args,
+        )
+        self.assertIn("2026-08-29T09:00:00+00:00", run.call_args.args)
+
+    def test_marks_a_truncated_window_and_counts_only_the_bounded_tail(self) -> None:
+        records = [
+            json.dumps(
+                {
+                    "MESSAGE": (
+                        "[RDP] Network or intentional disconnect, stopping session"
+                    )
+                }
+            )
+            for _ in range(REPORT.GRD_SESSION_EVENT_LIMIT + 1)
+        ]
+        with patch.object(REPORT, "run", return_value=(0, "\n".join(records))):
+            sessions = REPORT.gnome_remote_desktop_sessions(self.NOW)
+
+        self.assertTrue(sessions["truncated"])
+        self.assertEqual(
+            sessions["session_endings"], REPORT.GRD_SESSION_EVENT_LIMIT
+        )
+
+    def test_unavailable_or_invalid_journal_fails_closed(self) -> None:
+        for response in ((127, ""), (0, "not-json"), (0, '[]')):
+            with self.subTest(response=response):
+                with patch.object(REPORT, "run", return_value=response):
+                    sessions = REPORT.gnome_remote_desktop_sessions(self.NOW)
+                self.assertEqual(sessions["source"], "unavailable")
+                self.assertIsNone(sessions["session_endings"])
+
+
 class DesktopStateTest(unittest.TestCase):
     @staticmethod
     def snapshot() -> dict[str, object]:

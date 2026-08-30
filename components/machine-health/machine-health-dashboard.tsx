@@ -173,6 +173,10 @@ export function MachineHealthDashboard({
   const remoteClient = payload.network.remote_client;
   const remoteServer = payload.services.gnome_remote_desktop;
   const remoteAcceleration = payload.services.gnome_remote_desktop_acceleration;
+  const remoteSessions =
+    payload.services.gnome_remote_desktop_sessions?.source === 'grd-journal-24h'
+      ? payload.services.gnome_remote_desktop_sessions
+      : null;
   const remoteAccelerationLabel =
     remoteAcceleration?.source === 'grd-current-invocation'
       ? remoteAcceleration.state === 'hardware-ready'
@@ -210,6 +214,21 @@ export function MachineHealthDashboard({
           : remoteState === 'unknown'
             ? 'Path unknown'
             : null;
+  const remoteSessionNote = remoteSessions
+    ? [
+        remoteSessions.truncated ? '24h partial' : '24h',
+        `${remoteSessions.session_endings} endings`,
+        `${remoteSessions.transport_endings} transport`,
+        remoteSessions.user_logoffs > 0
+          ? `${remoteSessions.user_logoffs} logoff${remoteSessions.user_logoffs === 1 ? '' : 's'}`
+          : null,
+        remoteSessions.server_disconnects > 0
+          ? `${remoteSessions.server_disconnects} server`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : null;
   const remoteNote = [
     remoteState === 'offline' &&
     remoteClient?.last_seen_seconds_ago !== null &&
@@ -223,6 +242,7 @@ export function MachineHealthDashboard({
     payload.hygiene.rdp_connections > 0
       ? `${payload.hygiene.rdp_connections} RDP`
       : null,
+    remoteSessionNote,
   ]
     .filter(Boolean)
     .join(' · ');

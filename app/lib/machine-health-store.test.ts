@@ -145,6 +145,7 @@ describe('machine health contract', () => {
     const {
       gnome_remote_desktop: _remoteDesktop,
       gnome_remote_desktop_acceleration: _remoteAcceleration,
+      gnome_remote_desktop_sessions: _remoteSessions,
       ...olderServices
     } = healthyMachineReport.services;
     const parsed = machineHealthPayloadSchema.parse({
@@ -156,6 +157,7 @@ describe('machine health contract', () => {
     expect(parsed.network.remote_client).toBeUndefined();
     expect(parsed.services.gnome_remote_desktop).toBeUndefined();
     expect(parsed.services.gnome_remote_desktop_acceleration).toBeUndefined();
+    expect(parsed.services.gnome_remote_desktop_sessions).toBeUndefined();
   });
 
   it('rejects peer detail and inconsistent unavailable remote state', () => {
@@ -189,7 +191,7 @@ describe('machine health contract', () => {
     ).toBe(false);
   });
 
-  it('strips journal detail and rejects inconsistent acceleration state', () => {
+  it('strips RDP journal detail and rejects inconsistent states', () => {
     const parsed = machineHealthPayloadSchema.parse({
       ...healthyMachineReport,
       services: {
@@ -200,10 +202,18 @@ describe('machine health contract', () => {
           journal_message: 'must-not-survive',
           invocation_id: 'must-not-survive',
         },
+        gnome_remote_desktop_sessions: {
+          ...healthyMachineReport.services.gnome_remote_desktop_sessions,
+          journal_message: 'must-not-survive',
+          event_timestamps: ['must-not-survive'],
+        },
       },
     });
     expect(parsed.services.gnome_remote_desktop_acceleration).toEqual(
       healthyMachineReport.services.gnome_remote_desktop_acceleration
+    );
+    expect(parsed.services.gnome_remote_desktop_sessions).toEqual(
+      healthyMachineReport.services.gnome_remote_desktop_sessions
     );
     expect(
       machineHealthPayloadSchema.safeParse({
@@ -213,6 +223,23 @@ describe('machine health contract', () => {
           gnome_remote_desktop_acceleration: {
             source: 'unavailable',
             state: 'hardware-ready',
+          },
+        },
+      }).success
+    ).toBe(false);
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        services: {
+          ...healthyMachineReport.services,
+          gnome_remote_desktop_sessions: {
+            source: 'unavailable',
+            window_hours: 24,
+            session_endings: 1,
+            transport_endings: null,
+            user_logoffs: null,
+            server_disconnects: null,
+            truncated: false,
           },
         },
       }).success

@@ -70,6 +70,7 @@ GNOME_POLISH_HELPER = (
 RELIABILITY_WINDOW_HOURS = 24
 RELIABILITY_EVENT_LIMIT = 4_096
 GRD_ACCELERATION_EVENT_LIMIT = 512
+GRD_SESSION_EVENT_LIMIT = 512
 SYSTEMD_PROCESS_EXIT_MESSAGE_ID = "98e322203f7a4ed290d09fe03c09fe15"
 SYSTEMD_RESTART_MESSAGE_ID = "5eb03494b6584870a536b337290809b3"
 
@@ -1455,6 +1456,72 @@ def gnome_remote_desktop_acceleration() -> dict[str, str]:
     }
 
 
+def gnome_remote_desktop_sessions(
+    now: dt.datetime | None = None,
+) -> dict[str, Any]:
+    unavailable = {
+        "source": "unavailable",
+        "window_hours": RELIABILITY_WINDOW_HOURS,
+        "session_endings": None,
+        "transport_endings": None,
+        "user_logoffs": None,
+        "server_disconnects": None,
+        "truncated": False,
+    }
+    observed_at = now or dt.datetime.now(dt.timezone.utc)
+    since = observed_at - dt.timedelta(hours=RELIABILITY_WINDOW_HOURS)
+    code, output = run(
+        "journalctl",
+        "--user",
+        "--quiet",
+        "--no-pager",
+        "--output=json",
+        "--output-fields=MESSAGE",
+        "--since",
+        since.isoformat(),
+        "--lines",
+        str(GRD_SESSION_EVENT_LIMIT + 1),
+        "--unit=gnome-remote-desktop.service",
+    )
+    if code != 0:
+        return unavailable
+
+    try:
+        records = [json.loads(line) for line in output.splitlines() if line]
+    except (json.JSONDecodeError, TypeError):
+        return unavailable
+    if any(not isinstance(record, dict) for record in records):
+        return unavailable
+
+    truncated = len(records) > GRD_SESSION_EVENT_LIMIT
+    messages = [
+        message
+        for record in records[-GRD_SESSION_EVENT_LIMIT:]
+        if isinstance((message := record.get("MESSAGE")), str)
+    ]
+    return {
+        "source": "grd-journal-24h",
+        "window_hours": RELIABILITY_WINDOW_HOURS,
+        "session_endings": sum(
+            "[RDP] Network or intentional disconnect, stopping session" in message
+            for message in messages
+        ),
+        "transport_endings": sum(
+            "ERRCONNECT_CONNECT_TRANSPORT_FAILED" in message
+            for message in messages
+        ),
+        "user_logoffs": sum(
+            "[rdp_set_error_info]: ERRINFO_LOGOFF_BY_USER" in message
+            for message in messages
+        ),
+        "server_disconnects": sum(
+            "[rdp_set_error_info]: ERRINFO_RPC_INITIATED_DISCONNECT" in message
+            for message in messages
+        ),
+        "truncated": truncated,
+    }
+
+
 def connectivity() -> str:
     _, output = run("nmcli", "-t", "-f", "CONNECTIVITY", "general")
     value = output.lower()
@@ -1897,6 +1964,7 @@ def build_report() -> dict[str, Any]:
             "gnome_remote_desktop_acceleration": (
                 gnome_remote_desktop_acceleration()
             ),
+            "gnome_remote_desktop_sessions": gnome_remote_desktop_sessions(now),
         },
         "network": {
             "connectivity": connectivity(),
