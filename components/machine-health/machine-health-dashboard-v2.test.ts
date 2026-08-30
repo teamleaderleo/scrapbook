@@ -116,6 +116,8 @@ describe('machine health dashboard v2', () => {
     expect(html).toContain('Codex');
     expect(html).toContain('Total tokens');
     expect(html).toContain('12,542,000');
+    expect(html).toContain('aria-label="Resource history range"');
+    expect(html).toContain('aria-label="Codex history range"');
     expect(html).toContain(
       'aria-label="Sign in with Google for private details"'
     );

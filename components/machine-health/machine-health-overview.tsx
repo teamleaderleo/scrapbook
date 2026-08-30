@@ -16,7 +16,7 @@ const RANGE_CONFIG: Record<
   '12h': {
     bins: 12,
     binMs: HOUR_MS,
-    label: '12 Hours',
+    label: '12h',
     averageLabel: '12-hour average',
   },
   '24h': {
@@ -273,15 +273,17 @@ function axisLabel(bin: { start: number; end: number }, timeZone: string) {
 function RangeControl({
   range,
   onChange,
+  label,
 }: {
   range: ActivityRange;
   onChange: (range: ActivityRange) => void;
+  label: string;
 }) {
   return (
     <div
-      className="bg-black/7 grid grid-cols-4 rounded-lg p-0.5 dark:bg-white/10"
+      className="flex items-center gap-0.5"
       role="group"
-      aria-label="History range"
+      aria-label={`${label} history range`}
     >
       {(
         Object.entries(RANGE_CONFIG) as [
@@ -294,10 +296,10 @@ function RangeControl({
           type="button"
           aria-pressed={range === option}
           onClick={() => onChange(option)}
-          className={`min-h-9 rounded-[0.42rem] px-1 text-[0.7rem] font-semibold transition-[background-color,color,box-shadow] sm:px-3 sm:text-xs ${
+          className={`min-h-9 border-b px-2 text-[0.7rem] font-medium tabular-nums transition-[border-color,color,opacity] sm:px-2.5 ${
             range === option
-              ? 'bg-white text-black shadow-sm dark:bg-[#4a4c52] dark:text-white'
-              : 'opacity-55 hover:opacity-85'
+              ? 'border-current opacity-95'
+              : 'opacity-35 border-transparent hover:opacity-75'
           }`}
         >
           {config.label}
@@ -435,7 +437,7 @@ function ResourceHistory({
   return (
     <section
       data-machine-health-resources
-      className="bg-white/58 overflow-hidden rounded-[1.35rem] shadow-[0_1px_0_rgba(0,0,0,0.08)] dark:bg-white/[0.055] dark:shadow-[0_1px_0_rgba(255,255,255,0.1)]"
+      className="bg-white/45 overflow-hidden rounded-2xl border border-black/[0.06] shadow-[0_1px_1px_rgba(0,0,0,0.035)] dark:border-white/[0.07] dark:bg-white/[0.045] dark:shadow-none"
     >
       <div className="px-4 pb-3 pt-4 sm:px-5 sm:pt-5">
         <div className="flex min-h-[4.25rem] items-start justify-between gap-4">
@@ -493,18 +495,18 @@ function ResourceHistory({
                 setMetric(key);
                 setSelectedIndex(null);
               }}
-              className="border-black/7 dark:border-white/8 grid min-h-[3.7rem] w-full grid-cols-[1fr_auto] items-center gap-4 border-b px-4 text-left last:border-b-0 hover:bg-black/[0.025] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#a53b34] dark:hover:bg-white/[0.035] sm:px-5"
+              className="grid min-h-[3.45rem] w-full grid-cols-[minmax(0,1fr)_5rem] items-center gap-3 border-b border-black/[0.055] px-5 py-2.5 text-left last:border-b-0 hover:bg-black/[0.025] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#a53b34] dark:border-white/[0.065] dark:hover:bg-white/[0.035]"
             >
-              <span className="flex min-w-0 items-center gap-3">
+              <span className="flex min-w-0 items-center gap-2.5">
                 <span
                   aria-hidden="true"
-                  className={`size-2.5 shrink-0 rounded-sm ${item.color} ${item.darkColor}`}
+                  className={`size-2 shrink-0 rounded-full ${item.color} ${item.darkColor}`}
                 />
                 <span>
-                  <span className="block text-sm font-medium">
+                  <span className="block text-[0.95rem] font-medium leading-tight">
                     {item.label}
                   </span>
-                  <span className="opacity-45 mt-0.5 block text-xs">
+                  <span className="opacity-45 mt-1 block text-[0.72rem] leading-none">
                     {key === 'storage'
                       ? `${Math.round(current.storageFreeGib)} GiB free`
                       : high === null
@@ -513,7 +515,7 @@ function ResourceHistory({
                   </span>
                 </span>
               </span>
-              <span className="text-lg font-semibold tabular-nums">
+              <span className="text-right text-[1.05rem] font-semibold tabular-nums tracking-[-0.02em]">
                 {percent(currentValues[key])}
               </span>
             </button>
@@ -570,7 +572,7 @@ function CodexHistory({
   return (
     <section
       data-machine-health-codex
-      className="bg-white/58 overflow-hidden rounded-[1.35rem] shadow-[0_1px_0_rgba(0,0,0,0.08)] dark:bg-white/[0.055] dark:shadow-[0_1px_0_rgba(255,255,255,0.1)]"
+      className="bg-white/45 overflow-hidden rounded-2xl border border-black/[0.06] shadow-[0_1px_1px_rgba(0,0,0,0.035)] dark:border-white/[0.07] dark:bg-white/[0.045] dark:shadow-none"
     >
       <div className="px-4 pb-3 pt-4 sm:px-5 sm:pt-5">
         <div className="flex min-h-[4.25rem] items-start justify-between gap-4">
@@ -663,7 +665,7 @@ function CodexHistory({
           <span>{axisLabel(bins.at(-1)!, timeZone)}</span>
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+        <div className="mt-3 grid grid-cols-2 gap-x-5 px-0.5 text-xs">
           {sources.map(({ source, value }) => (
             <div
               key={source}
@@ -684,44 +686,48 @@ function CodexHistory({
         </div>
       </div>
 
-      <dl className="border-black/9 border-t dark:border-white/10">
-        <div className="min-h-12 border-black/7 dark:border-white/8 grid grid-cols-[1fr_auto] items-center gap-4 border-b px-4 sm:px-5">
-          <dt className="text-sm">Cached input</dt>
-          <dd className="font-medium tabular-nums">{cacheShare.toFixed(1)}%</dd>
+      <dl className="border-t border-black/[0.065] dark:border-white/[0.075]">
+        <div className="min-h-11 grid grid-cols-[minmax(0,1fr)_7.5rem] items-center gap-3 border-b border-black/[0.055] px-5 py-2.5 dark:border-white/[0.065]">
+          <dt className="text-[0.95rem] leading-tight">Cached input</dt>
+          <dd className="text-right font-medium tabular-nums leading-none">
+            {cacheShare.toFixed(1)}%
+          </dd>
         </div>
         {cacheWrites > 0 ? (
-          <div className="min-h-12 border-black/7 dark:border-white/8 grid grid-cols-[1fr_auto] items-center gap-4 border-b px-4 sm:px-5">
-            <dt className="text-sm">Cache writes</dt>
-            <dd className="font-medium tabular-nums">
+          <div className="min-h-11 grid grid-cols-[minmax(0,1fr)_7.5rem] items-center gap-3 border-b border-black/[0.055] px-5 py-2.5 dark:border-white/[0.065]">
+            <dt className="text-[0.95rem] leading-tight">Cache writes</dt>
+            <dd className="text-right font-medium tabular-nums leading-none">
               {compactNumber(cacheWrites)}
             </dd>
           </div>
         ) : null}
-        <div className="min-h-12 border-black/7 dark:border-white/8 grid grid-cols-[1fr_auto] items-center gap-4 border-b px-4 sm:px-5">
+        <div className="min-h-11 grid grid-cols-[minmax(0,1fr)_7.5rem] items-center gap-3 border-b border-black/[0.055] px-5 py-2.5 dark:border-white/[0.065]">
           <dt>
-            <span className="block text-sm">Output</span>
-            <span className="opacity-45 block text-xs">
+            <span className="block text-[0.95rem] leading-tight">Output</span>
+            <span className="opacity-45 mt-1 block text-[0.72rem] leading-none">
               {compactNumber(reasoning)} reasoning
             </span>
           </dt>
-          <dd className="font-medium tabular-nums">
+          <dd className="text-right font-medium tabular-nums leading-none">
             {compactNumber(totalOutput)}
           </dd>
         </div>
-        <div className="min-h-12 border-black/7 dark:border-white/8 grid grid-cols-[1fr_auto] items-center gap-4 border-b px-4 sm:px-5">
-          <dt className="text-sm">Model calls</dt>
-          <dd className="font-medium tabular-nums">
+        <div className="min-h-11 grid grid-cols-[minmax(0,1fr)_7.5rem] items-center gap-3 border-b border-black/[0.055] px-5 py-2.5 dark:border-white/[0.065]">
+          <dt className="text-[0.95rem] leading-tight">Model calls</dt>
+          <dd className="text-right font-medium tabular-nums leading-none">
             {modelCalls.toLocaleString('en-US')}
           </dd>
         </div>
-        <div className="grid min-h-[3.7rem] grid-cols-[1fr_auto] items-center gap-4 px-4 sm:px-5">
+        <div className="grid min-h-[3.8rem] grid-cols-[minmax(0,1fr)_minmax(7.5rem,auto)] items-center gap-3 px-5 py-3">
           <dt>
-            <span className="block text-sm font-semibold">Total tokens</span>
-            <span className="opacity-45 block text-xs">
+            <span className="block text-[0.95rem] font-semibold leading-tight">
+              Total tokens
+            </span>
+            <span className="opacity-45 mt-1 block text-[0.72rem] leading-none">
               {observedHours} accounted hour{observedHours === 1 ? '' : 's'}
             </span>
           </dt>
-          <dd className="text-lg font-semibold tabular-nums">
+          <dd className="text-right text-[1.05rem] font-semibold tabular-nums tracking-[-0.02em]">
             {totalTokens.toLocaleString('en-US')}
           </dd>
         </div>
@@ -797,66 +803,78 @@ export function MachineHealthOverview({
   now: number;
   current: MachineResourceSnapshot;
 }) {
-  const [range, setRange] = useState<ActivityRange>('12h');
-  const bins = useMemo(
-    () => buildPublicActivityBins(samples, range, now),
-    [samples, range, now]
+  const [resourceRange, setResourceRange] = useState<ActivityRange>('12h');
+  const [codexRange, setCodexRange] = useState<ActivityRange>('7d');
+  const resourceBins = useMemo(
+    () => buildPublicActivityBins(samples, resourceRange, now),
+    [samples, resourceRange, now]
   );
-  const duration = RANGE_CONFIG[range].bins * RANGE_CONFIG[range].binMs;
-  const previousBins = useMemo(
-    () => buildPublicActivityBins(samples, range, now - duration),
-    [samples, range, now, duration]
+  const resourceDuration =
+    RANGE_CONFIG[resourceRange].bins * RANGE_CONFIG[resourceRange].binMs;
+  const previousResourceBins = useMemo(
+    () =>
+      buildPublicActivityBins(samples, resourceRange, now - resourceDuration),
+    [samples, resourceRange, now, resourceDuration]
   );
   const codexBins = useMemo(
-    () => buildCodexBins(codexSamples, range, now),
-    [codexSamples, range, now]
+    () => buildCodexBins(codexSamples, codexRange, now),
+    [codexSamples, codexRange, now]
   );
+  const codexDuration =
+    RANGE_CONFIG[codexRange].bins * RANGE_CONFIG[codexRange].binMs;
   const previousCodexBins = useMemo(
-    () => buildCodexBins(codexSamples, range, now - duration),
-    [codexSamples, range, now, duration]
+    () => buildCodexBins(codexSamples, codexRange, now - codexDuration),
+    [codexSamples, codexRange, now, codexDuration]
   );
 
   return (
     <section aria-labelledby="activity-heading">
-      <div className="mb-3 flex items-end justify-between gap-4 px-1">
-        <div>
-          <h2
-            id="activity-heading"
-            className="text-xl font-semibold tracking-tight"
-          >
-            Activity
-          </h2>
-          <p className="opacity-45 mt-0.5 text-xs">
-            Big Red and Codex over time
-          </p>
-        </div>
+      <div className="mb-2 px-1">
+        <h2
+          id="activity-heading"
+          className="text-xl font-semibold tracking-tight"
+        >
+          Activity
+        </h2>
+        <p className="opacity-45 mt-0.5 text-xs">Big Red and Codex over time</p>
       </div>
-      <RangeControl range={range} onChange={setRange} />
 
-      <div className="mt-4 grid gap-5 lg:grid-cols-2 lg:items-start">
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         <div>
-          <h3 className="opacity-55 mb-2 px-1 text-sm font-medium">
-            Resources
-          </h3>
+          <div className="min-h-9 mb-2 flex items-end justify-between gap-3 px-1">
+            <h3 className="opacity-55 pb-2 text-sm font-medium">Resources</h3>
+            <RangeControl
+              label="Resource"
+              range={resourceRange}
+              onChange={setResourceRange}
+            />
+          </div>
           <ResourceHistory
-            key={`resources-${range}`}
-            bins={bins}
-            previousBins={previousBins}
-            range={range}
+            key={`resources-${resourceRange}`}
+            bins={resourceBins}
+            previousBins={previousResourceBins}
+            range={resourceRange}
             current={current}
           />
         </div>
         <div>
-          <h3 className="opacity-55 mb-2 px-1 text-sm font-medium">Usage</h3>
+          <div className="min-h-9 mb-2 flex items-end justify-between gap-3 px-1">
+            <h3 className="opacity-55 pb-2 text-sm font-medium">Usage</h3>
+            <RangeControl
+              label="Codex"
+              range={codexRange}
+              onChange={setCodexRange}
+            />
+          </div>
           <CodexHistory
-            key={`codex-${range}`}
+            key={`codex-${codexRange}`}
             bins={codexBins}
             previousBins={previousCodexBins}
           />
         </div>
       </div>
 
-      <PerformanceDetails bins={bins} range={range} />
+      <PerformanceDetails bins={resourceBins} range={resourceRange} />
     </section>
   );
 }
