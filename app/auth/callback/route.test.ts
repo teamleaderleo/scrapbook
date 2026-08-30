@@ -41,7 +41,7 @@ describe('OAuth callback', () => {
     );
   });
 
-  it('returns to access with a visible error when code exchange fails', async () => {
+  it('returns to Big Red with an inline error when code exchange fails', async () => {
     exchangeCodeForSession.mockResolvedValueOnce({
       error: { code: 'bad_code' },
     });
@@ -52,7 +52,7 @@ describe('OAuth callback', () => {
     );
 
     expect(response.headers.get('location')).toBe(
-      'https://teamleaderleo.com/machine-health/access?error=callback'
+      'https://teamleaderleo.com/machine-health?auth=callback'
     );
   });
 });

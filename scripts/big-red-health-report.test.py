@@ -56,6 +56,7 @@ class SysstatParsingTest(unittest.TestCase):
         self.assertIsNotNone(record)
         assert record is not None
         self.assertEqual(record["cpu"], 25)
+        self.assertEqual(record["cores"], [95])
         self.assertEqual(record["memory"], 40)
         self.assertEqual(record["rx"], 3)
         self.assertEqual(record["tx"], 1.5)
@@ -71,6 +72,28 @@ class SysstatParsingTest(unittest.TestCase):
             {"interval": 900.0, "cpu": 30.0},
         ]
         self.assertEqual(REPORT.weighted_average(records, "cpu"), 25)
+
+    def test_reduces_per_core_history_to_hourly_averages_and_peaks(self) -> None:
+        records = [
+            {"interval": 300.0, "cores": [10.0, 50.0]},
+            {"interval": 900.0, "cores": [30.0, 20.0]},
+        ]
+
+        averages, peaks = REPORT.core_activity(records)
+
+        self.assertEqual(averages, [25.0, 27.5])
+        self.assertEqual(peaks, [30.0, 50.0])
+
+    def test_omits_incomplete_per_core_rows(self) -> None:
+        averages, peaks = REPORT.core_activity(
+            [
+                {"interval": 600.0, "cores": [10.0, 20.0]},
+                {"interval": 600.0, "cores": None},
+            ]
+        )
+
+        self.assertIsNone(averages)
+        self.assertIsNone(peaks)
 
     def test_requires_explicit_utc_timestamps(self) -> None:
         self.assertIsNone(
@@ -144,6 +167,7 @@ class SysstatParsingTest(unittest.TestCase):
         self.assertEqual(activity["window_minutes"], 60)
         self.assertEqual(activity["cpu_used_percent"], 35)
         self.assertEqual(activity["cpu_peak_percent"], 60)
+        self.assertIsNone(activity["core_average_percent"])
 
     def test_falls_back_to_a_labeled_point_sample(self) -> None:
         now = dt.datetime(2026, 8, 29, tzinfo=dt.timezone.utc)

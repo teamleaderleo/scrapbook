@@ -133,6 +133,30 @@ describe('machine health contract', () => {
     expect(parsed).toEqual(healthyMachineReport);
   });
 
+  it('accepts bounded per-core summaries and rejects inconsistent arrays', () => {
+    expect(
+      machineHealthPayloadSchema.safeParse(healthyMachineReport).success
+    ).toBe(true);
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        activity: {
+          ...healthyMachineReport.activity,
+          core_peak_percent: [31, 42],
+        },
+      }).success
+    ).toBe(false);
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        activity: {
+          ...healthyMachineReport.activity,
+          core_peak_percent: [11, 42, 22, 51, 28, 36, 19, 47],
+        },
+      }).success
+    ).toBe(false);
+  });
+
   it('rejects inconsistent or partially disclosed runtime class memory', () => {
     const runtime = healthyMachineReport.hygiene.codex_runtime!;
     expect(

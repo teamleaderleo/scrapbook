@@ -37,21 +37,19 @@ export function MachineHealthRefresh() {
   }, [refresh]);
 
   return (
-    <div className="flex items-center justify-end gap-3 px-1 pb-2 text-xs">
-      <span className="opacity-50">Auto-refresh hourly</span>
-      <button
-        type="button"
-        onClick={refresh}
-        disabled={isPending}
-        className="min-h-8 border-current/25 disabled:opacity-55 inline-flex items-center gap-1.5 border-b px-0.5 font-bold transition-colors hover:border-current disabled:cursor-wait"
-      >
-        <RefreshCw
-          aria-hidden="true"
-          strokeWidth={1.8}
-          className={`size-3.5 shrink-0 ${isPending ? 'animate-spin' : ''}`}
-        />
-        {isPending ? 'Refreshing' : 'Refresh'}
-      </button>
-    </div>
+    <button
+      type="button"
+      onClick={refresh}
+      disabled={isPending}
+      aria-label={isPending ? 'Refreshing Big Red' : 'Refresh Big Red'}
+      title="Refresh"
+      className="size-10 opacity-45 grid shrink-0 place-items-center transition-opacity hover:opacity-90 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-[#a53b34] disabled:cursor-wait disabled:opacity-30"
+    >
+      <RefreshCw
+        aria-hidden="true"
+        strokeWidth={1.7}
+        className={`size-[1.1rem] ${isPending ? 'animate-spin' : ''}`}
+      />
+    </button>
   );
 }

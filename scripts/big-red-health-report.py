@@ -626,7 +626,7 @@ def sysstat_timestamp(statistic: dict[str, Any]) -> dt.datetime | None:
         return None
 
 
-def sysstat_record(statistic: dict[str, Any]) -> dict[str, float] | None:
+def sysstat_record(statistic: dict[str, Any]) -> dict[str, Any] | None:
     timestamp = statistic.get("timestamp")
     cpu_rows = statistic.get("cpu-load")
     memory_row = statistic.get("memory")
@@ -646,6 +646,30 @@ def sysstat_record(statistic: dict[str, Any]) -> dict[str, float] | None:
     memory_used = finite_number(memory_row.get("memused-percent"))
     if interval is None or interval <= 0 or idle is None or memory_used is None:
         return None
+
+    core_used_by_index: dict[int, float] = {}
+    for row in cpu_rows:
+        if not isinstance(row, dict):
+            continue
+        core = row.get("cpu")
+        core_idle = finite_number(row.get("idle"))
+        if (
+            not isinstance(core, str)
+            or not core.isdigit()
+            or core_idle is None
+        ):
+            continue
+        core_index = int(core)
+        if core_index > 255:
+            continue
+        core_used_by_index[core_index] = max(
+            0.0, min(100.0, 100.0 - core_idle)
+        )
+    core_used = (
+        [core_used_by_index[index] for index in range(len(core_used_by_index))]
+        if set(core_used_by_index) == set(range(len(core_used_by_index)))
+        else None
+    )
 
     network = statistic.get("network")
     network_rows = network.get("net-dev") if isinstance(network, dict) else None
@@ -679,6 +703,7 @@ def sysstat_record(statistic: dict[str, Any]) -> dict[str, float] | None:
     return {
         "interval": interval,
         "cpu": max(0.0, min(100.0, 100.0 - idle)),
+        "cores": core_used,
         "memory": max(0.0, min(100.0, memory_used)),
         "rx": rx_kib_s / 1024,
         "tx": tx_kib_s / 1024,
@@ -714,11 +739,43 @@ def sysstat_record(statistic: dict[str, Any]) -> dict[str, float] | None:
     }
 
 
-def weighted_average(records: list[dict[str, float]], key: str) -> float:
+def weighted_average(records: list[dict[str, Any]], key: str) -> float:
     weight = sum(record["interval"] for record in records)
     if weight <= 0:
         return 0.0
     return sum(record[key] * record["interval"] for record in records) / weight
+
+
+def core_activity(
+    records: list[dict[str, Any]],
+) -> tuple[list[float] | None, list[float] | None]:
+    core_rows = [record.get("cores") for record in records]
+    if (
+        not core_rows
+        or any(not isinstance(row, list) or not row for row in core_rows)
+        or len({len(row) for row in core_rows}) != 1
+    ):
+        return None, None
+
+    weight = sum(record["interval"] for record in records)
+    if weight <= 0:
+        return None, None
+    average_values = [
+        round(
+            sum(
+                row[index] * record["interval"]
+                for record, row in zip(records, core_rows, strict=True)
+            )
+            / weight,
+            2,
+        )
+        for index in range(len(core_rows[0]))
+    ]
+    peak_values = [
+        round(max(row[index] for row in core_rows), 2)
+        for index in range(len(core_rows[0]))
+    ]
+    return average_values, peak_values
 
 
 def sysstat_activity(
@@ -735,7 +792,7 @@ def sysstat_activity(
         return None
 
     cutoff = now - dt.timedelta(minutes=SYSSTAT_MAX_AGE_MINUTES)
-    records_by_timestamp: dict[dt.datetime, dict[str, float]] = {}
+    records_by_timestamp: dict[dt.datetime, dict[str, Any]] = {}
     for path in files:
         code, output = run(
             "sadf",
@@ -743,6 +800,8 @@ def sysstat_activity(
             str(path),
             "--",
             "-u",
+            "-P",
+            "ALL",
             "-r",
             "-q",
             "PSI",
@@ -779,18 +838,32 @@ def sysstat_activity(
     if not records:
         return None
 
+    core_average_percent, core_peak_percent = core_activity(records)
+
     return {
         "source": "sysstat-10m",
         "window_minutes": round(sum(record["interval"] for record in records) / 60),
         "sample_count": len(records),
         "cpu_used_percent": round(weighted_average(records, "cpu"), 2),
         "cpu_peak_percent": round(max(record["cpu"] for record in records), 2),
+        "core_average_percent": core_average_percent,
+        "core_peak_percent": core_peak_percent,
         "memory_used_percent": round(weighted_average(records, "memory"), 2),
         "memory_peak_percent": round(max(record["memory"] for record in records), 2),
         "network_rx_mib_s": round(weighted_average(records, "rx"), 3),
         "network_tx_mib_s": round(weighted_average(records, "tx"), 3),
+        "network_peak_mib_s": round(
+            max(record["rx"] + record["tx"] for record in records), 3
+        ),
         "disk_read_mib_s": round(weighted_average(records, "disk_read"), 3),
         "disk_write_mib_s": round(weighted_average(records, "disk_write"), 3),
+        "disk_peak_mib_s": round(
+            max(
+                record["disk_read"] + record["disk_write"]
+                for record in records
+            ),
+            3,
+        ),
         "cpu_pressure_some_percent": round(weighted_average(records, "psi_cpu"), 3),
         "memory_pressure_full_percent": round(
             weighted_average(records, "psi_memory"), 3
@@ -812,12 +885,16 @@ def activity_window(now: dt.datetime) -> dict[str, Any]:
         "sample_count": 1,
         "cpu_used_percent": cpu_used,
         "cpu_peak_percent": cpu_used,
+        "core_average_percent": None,
+        "core_peak_percent": None,
         "memory_used_percent": memory_used,
         "memory_peak_percent": memory_used,
         "network_rx_mib_s": network_rx_mib_s,
         "network_tx_mib_s": network_tx_mib_s,
+        "network_peak_mib_s": round(network_rx_mib_s + network_tx_mib_s, 3),
         "disk_read_mib_s": None,
         "disk_write_mib_s": None,
+        "disk_peak_mib_s": None,
         "cpu_pressure_some_percent": None,
         "memory_pressure_full_percent": None,
         "io_pressure_full_percent": None,
@@ -2734,6 +2811,8 @@ def build_report() -> dict[str, Any]:
             "window_minutes": activity["window_minutes"],
             "sample_count": activity["sample_count"],
             "cpu_peak_percent": activity["cpu_peak_percent"],
+            "core_average_percent": activity["core_average_percent"],
+            "core_peak_percent": activity["core_peak_percent"],
             "memory_peak_percent": activity["memory_peak_percent"],
             "cpu_pressure_some_percent": activity[
                 "cpu_pressure_some_percent"
@@ -2744,6 +2823,8 @@ def build_report() -> dict[str, Any]:
             "io_pressure_full_percent": activity["io_pressure_full_percent"],
             "disk_read_mib_s": activity["disk_read_mib_s"],
             "disk_write_mib_s": activity["disk_write_mib_s"],
+            "network_peak_mib_s": activity["network_peak_mib_s"],
+            "disk_peak_mib_s": activity["disk_peak_mib_s"],
         },
         "codex_usage": codex_usage,
         "route_activity": routes,

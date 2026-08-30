@@ -413,18 +413,55 @@ export const machineHealthPayloadSchema = z.object({
     clock_mhz: nullableNonnegative,
     max_clock_mhz: nullableNonnegative,
   }),
-  activity: z.object({
-    source: z.enum(['sysstat-10m', 'point']),
-    window_minutes: z.number().int().min(0).max(180),
-    sample_count: z.number().int().min(1).max(18),
-    cpu_peak_percent: percent,
-    memory_peak_percent: percent,
-    cpu_pressure_some_percent: percent.nullable(),
-    memory_pressure_full_percent: percent.nullable(),
-    io_pressure_full_percent: percent.nullable(),
-    disk_read_mib_s: nullableNonnegative,
-    disk_write_mib_s: nullableNonnegative,
-  }),
+  activity: z
+    .object({
+      source: z.enum(['sysstat-10m', 'point']),
+      window_minutes: z.number().int().min(0).max(180),
+      sample_count: z.number().int().min(1).max(18),
+      cpu_peak_percent: percent,
+      core_average_percent: z
+        .array(percent)
+        .min(1)
+        .max(256)
+        .nullable()
+        .optional(),
+      core_peak_percent: z.array(percent).min(1).max(256).nullable().optional(),
+      memory_peak_percent: percent,
+      cpu_pressure_some_percent: percent.nullable(),
+      memory_pressure_full_percent: percent.nullable(),
+      io_pressure_full_percent: percent.nullable(),
+      disk_read_mib_s: nullableNonnegative,
+      disk_write_mib_s: nullableNonnegative,
+      network_peak_mib_s: nullableNonnegative.optional(),
+      disk_peak_mib_s: nullableNonnegative.optional(),
+    })
+    .superRefine((value, context) => {
+      const averages = value.core_average_percent;
+      const peaks = value.core_peak_percent;
+      if ((averages == null) !== (peaks == null)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'per-core averages and peaks must be reported together',
+        });
+        return;
+      }
+      if (!averages || !peaks) return;
+      if (averages.length !== peaks.length) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'per-core averages and peaks must have the same length',
+        });
+        return;
+      }
+      averages.forEach((average, index) => {
+        if (average > peaks[index])
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['core_peak_percent', index],
+            message: 'per-core peak cannot be below its average',
+          });
+      });
+    }),
   codex_usage: z
     .union([
       codexUsageWindowSchema,
@@ -828,6 +865,10 @@ export type MachineHealthSample = {
   diskReadMibS: number | null;
   diskWriteMibS: number | null;
   pressurePercent: number | null;
+  coreAveragePercent?: number[] | null;
+  corePeakPercent?: number[] | null;
+  networkPeakMibS?: number | null;
+  diskPeakMibS?: number | null;
   activitySource: MachineHealthPayload['activity']['source'];
   activitySampleCount: number;
   activityWindowMinutes: number;
@@ -1284,11 +1325,11 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
     await sql`
       DELETE FROM machine_health_samples
       WHERE host = 'big-red'
-        AND checked_at < now() - interval '90 days'
+        AND checked_at < now() - interval '365 days'
     `;
     await sql`
       DELETE FROM codex_token_samples
-      WHERE window_started_at < now() - interval '90 days'
+      WHERE window_started_at < now() - interval '365 days'
     `;
   });
 
@@ -1414,7 +1455,7 @@ export async function saveCodexTokenReport(report: CodexTokenReport) {
     });
     await sql`
       DELETE FROM codex_token_samples
-      WHERE window_started_at < now() - interval '90 days'
+      WHERE window_started_at < now() - interval '365 days'
     `;
     return writtenRows;
   });
@@ -1514,7 +1555,7 @@ export async function readMachineHealth(
           payload
         FROM machine_health_samples
         WHERE host = 'big-red'
-          AND checked_at >= now() - (${Math.max(1, Math.min(90, Math.floor(days)))}::int * interval '1 day')
+          AND checked_at >= now() - (${Math.max(1, Math.min(365, Math.floor(days)))}::int * interval '1 day')
         ORDER BY checked_at ASC
       `,
       client<
@@ -1550,7 +1591,7 @@ export async function readMachineHealth(
           model_calls,
           active_routes
         FROM codex_token_samples
-        WHERE window_started_at >= now() - (${Math.max(1, Math.min(90, Math.floor(days)))}::int * interval '1 day')
+        WHERE window_started_at >= now() - (${Math.max(1, Math.min(365, Math.floor(days)))}::int * interval '1 day')
         ORDER BY window_started_at ASC, source ASC
       `,
     ]);
@@ -1591,6 +1632,9 @@ export async function readMachineHealth(
           parsedSample.data.codex_usage?.source === 'session-jsonl'
             ? parsedSample.data.codex_usage
             : null;
+        const activity = parsedSample.success
+          ? parsedSample.data.activity
+          : null;
         const buildState =
           parsedSample.success &&
           parsedSample.data.build_state?.source === 'filesystem'
@@ -1646,6 +1690,10 @@ export async function readMachineHealth(
             row.pressure_percent === null
               ? null
               : toNumber(row.pressure_percent),
+          coreAveragePercent: activity?.core_average_percent ?? null,
+          corePeakPercent: activity?.core_peak_percent ?? null,
+          networkPeakMibS: activity?.network_peak_mib_s ?? null,
+          diskPeakMibS: activity?.disk_peak_mib_s ?? null,
           activitySource: row.activity_source,
           activitySampleCount: toNumber(row.activity_sample_count),
           activityWindowMinutes: toNumber(row.activity_window_minutes),

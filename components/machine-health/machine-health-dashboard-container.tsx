@@ -1,6 +1,6 @@
 import { readMachineHealth } from '@/app/lib/machine-health-store';
 import { headers } from 'next/headers';
-import { MachineHealthDashboard } from './machine-health-dashboard';
+import { MachineHealthDashboard } from './machine-health-dashboard-v2';
 
 function StateCard({
   title,
@@ -25,7 +25,15 @@ function StateCard({
   );
 }
 
-export async function MachineHealthDashboardContainer() {
+export async function MachineHealthDashboardContainer({
+  hasPrivateAccess,
+  ownerAuthConfigured,
+  authError = false,
+}: {
+  hasPrivateAccess: boolean;
+  ownerAuthConfigured: boolean;
+  authError?: boolean;
+}) {
   await headers();
   const result = await readMachineHealth(60);
   if (result.status === 'configuration-error')
@@ -57,6 +65,9 @@ export async function MachineHealthDashboardContainer() {
       samples={result.samples}
       codexSamples={result.codexSamples}
       now={Date.parse(result.observedAt)}
+      hasPrivateAccess={hasPrivateAccess}
+      ownerAuthConfigured={ownerAuthConfigured}
+      authError={authError}
     />
   );
 }

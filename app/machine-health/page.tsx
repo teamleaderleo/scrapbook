@@ -10,20 +10,25 @@ import {
 import { MachineHealthPage } from '@/components/machine-health/machine-health-page';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import { notFound, redirect } from 'next/navigation';
 import { connection } from 'next/server';
 
 export const metadata: Metadata = {
   title: 'Big Red health · Leo',
-  description: 'Private, lightweight hourly workstation health observations.',
+  description: 'Big Red resource health and Codex activity over time.',
   robots: { index: false, follow: false },
 };
 
 export const instant = false;
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ auth?: string }>;
+}) {
   await connection();
+  const { auth } = await searchParams;
   const secret = machineDashboardSecret();
+  let hasPrivateAccess = process.env.NODE_ENV !== 'production';
   if (process.env.NODE_ENV === 'production') {
     const cookieStore = await cookies();
     const hasRecoveryAccess = Boolean(
@@ -33,12 +38,15 @@ export default async function Page() {
           secret
         )
     );
-    const hasOwnerAccess =
+    hasPrivateAccess =
       hasRecoveryAccess || (await hasMachineDashboardOwnerSession());
-
-    if (!secret && !machineDashboardOwnerAuthConfigured()) notFound();
-    if (!hasOwnerAccess) redirect('/machine-health/access');
   }
 
-  return <MachineHealthPage />;
+  return (
+    <MachineHealthPage
+      hasPrivateAccess={hasPrivateAccess}
+      ownerAuthConfigured={machineDashboardOwnerAuthConfigured()}
+      authError={Boolean(auth)}
+    />
+  );
 }

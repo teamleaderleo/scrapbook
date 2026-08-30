@@ -224,9 +224,9 @@ The scheduled WebKit compatibility workflow and WebKit Playwright project were a
 
 The temporary `signal-status-once.yml` workflow and its `.smoke/signal-status.json` receipt were deleted after their one historical OIDC inspection completed. The workflow had a hard-coded target SHA and existed only to write that receipt. Git history preserves the diagnostic result without leaving write-enabled one-shot machinery in the active workflow directory.
 
-### Consolidated: formatter configuration
+### Removed: repository-wide Prettier foot-gun
 
-The duplicate `.prettierrc` and `prettier.config.js` files were replaced by one explicit `prettier.config.mjs`. The old JavaScript config depended on `@vercel/style-guide/prettier` without declaring that package directly; the canonical config now contains Scrapbook's local formatting choices and Tailwind plugin directly.
+Prettier, its Tailwind plugin, configuration, and manual scripts were removed after the write script's hard-coded repository root caused a targeted dashboard format to rewrite hundreds of unrelated files. Hosted and local CI never depended on Prettier; ESLint, TypeScript, tests, builds, and `git diff --check` remain the active gates. Local edits should follow the surrounding file rather than initiating an unrelated whole-tree normalization.
 
 ### Removed: dormant learning prototypes
 
