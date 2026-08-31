@@ -1,6 +1,7 @@
 # Freelance Illustrator
 
-**Freelance**  
+**Freelance**
+
 **May 2020 – Feb 2025**
 
 - Worked with clients on freelance digital illustration and character artwork.
