@@ -19,6 +19,15 @@ function tokens(value: number | null) {
   }).format(value);
 }
 
+function dollars(value: number | null) {
+  if (value === null) return 'unknown';
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
 export function AgentEconomicsPanel({
   samples,
 }: {
@@ -49,7 +58,7 @@ export function AgentEconomicsPanel({
               <th scope="col" className="w-24 pb-2 pr-4 font-medium">Tokens/task</th>
               <th scope="col" className="w-28 pb-2 pr-4 font-medium">Tasks/1% 5h</th>
               <th scope="col" className="w-28 pb-2 pr-4 font-medium">Tasks/1% week</th>
-              <th scope="col" className="w-28 pb-2 pr-4 font-medium">Tasks/$</th>
+              <th scope="col" className="w-28 pb-2 pr-4 font-medium">Tasks/plan $</th>
               <th scope="col" className="w-36 pb-2 pr-4 font-medium">Tasks/hour/1%</th>
               <th scope="col" className="w-32 pb-2 font-medium">Operator min/task</th>
             </tr>
@@ -90,6 +99,9 @@ export function AgentEconomicsPanel({
                 </td>
                 <td className="py-2.5 pr-4">
                   {metric(summary.acceptedTasksPerSubscriptionDollar)}
+                  <div className="mt-0.5 text-[11px] text-black/50 dark:text-white/50">
+                    {dollars(summary.subscriptionMonthlyDollars)}/mo
+                  </div>
                 </td>
                 <td className="py-2.5 pr-4">
                   {metric(summary.acceptedTasksPerWallClockHourPerQuotaPercent)}
@@ -105,6 +117,8 @@ export function AgentEconomicsPanel({
       <p className="mt-2 text-[11px] leading-4 text-black/50 dark:text-white/50">
         Unknown means the harness or provider did not expose that dimension. A
         worker result counts only after external acceptance and verification.
+        Plan-dollar yield is withheld unless every grouped attempt reports the
+        same monthly subscription price.
       </p>
     </section>
   );
