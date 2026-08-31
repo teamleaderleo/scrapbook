@@ -1,3 +1,5 @@
+'use client';
+
 import type { CodexQuotaSample } from '@/app/lib/codex-quota-store';
 
 function bucketLabel(minutes: number) {
