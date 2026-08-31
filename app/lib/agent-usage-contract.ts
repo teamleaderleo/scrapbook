@@ -19,15 +19,27 @@ const nullableCounterSchema = z
   .max(Number.MAX_SAFE_INTEGER)
   .nullable();
 
-type SampleIdentity = {
+type UsageSampleIdentity = {
   sample_id: string;
   provider: string;
   harness: string;
 };
 
-function hasDuplicateSampleKeys(samples: ReadonlyArray<SampleIdentity>) {
+type QuotaSampleIdentity = UsageSampleIdentity & {
+  limit_id: string;
+};
+
+function hasDuplicateUsageKeys(samples: ReadonlyArray<UsageSampleIdentity>) {
   const keys = samples.map(
     sample => `${sample.provider}\u0000${sample.harness}\u0000${sample.sample_id}`
+  );
+  return new Set(keys).size !== keys.length;
+}
+
+function hasDuplicateQuotaKeys(samples: ReadonlyArray<QuotaSampleIdentity>) {
+  const keys = samples.map(
+    sample =>
+      `${sample.provider}\u0000${sample.harness}\u0000${sample.sample_id}\u0000${sample.limit_id}`
   );
   return new Set(keys).size !== keys.length;
 }
@@ -109,14 +121,14 @@ export const agentTelemetryEnvelopeSchema = z
   })
   .strict()
   .superRefine((report, context) => {
-    if (hasDuplicateSampleKeys(report.usage_samples)) {
+    if (hasDuplicateUsageKeys(report.usage_samples)) {
       context.addIssue({
         code: 'custom',
         path: ['usage_samples'],
         message: 'Usage sample keys must be unique within a report',
       });
     }
-    if (hasDuplicateSampleKeys(report.quota_samples)) {
+    if (hasDuplicateQuotaKeys(report.quota_samples)) {
       context.addIssue({
         code: 'custom',
         path: ['quota_samples'],

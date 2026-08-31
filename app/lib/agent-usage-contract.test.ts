@@ -12,7 +12,7 @@ function baseReport() {
 }
 
 describe('agentTelemetryEnvelopeSchema', () => {
-  it('accepts current Gemini headless usage and model-scoped quota evidence', () => {
+  it('accepts current Gemini headless usage and a multi-bucket quota snapshot', () => {
     const parsed = agentTelemetryEnvelopeSchema.parse({
       ...baseReport(),
       usage_samples: [
@@ -38,23 +38,8 @@ describe('agentTelemetryEnvelopeSchema', () => {
         },
       ],
       quota_samples: [
-        {
-          schema: 'provider-quota-sample/v1',
-          sample_id: 'agy-task-1-weekly-after',
-          observed_at: '2026-08-31T18:29:30Z',
-          provider: 'google',
-          harness: 'antigravity',
-          model: 'gemini-3.7-flash-high',
-          plan_class: 'google-ai-pro',
-          quota_contract: 'antigravity-statusline-quota/v1',
-          limit_id: 'gemini-weekly',
-          window_minutes: 10_080,
-          percent_orientation: 'remaining',
-          percent_value: 98,
-          resets_at: '2026-09-06T12:00:00Z',
-          balance_unit: null,
-          balance_value: null,
-        },
+        quota('agy-task-1-after', 'gemini-5h', 99, '2026-08-31T23:00:00Z', 300),
+        quota('agy-task-1-after', 'gemini-weekly', 98, '2026-09-06T12:00:00Z', 10_080),
       ],
     });
 
@@ -68,8 +53,10 @@ describe('agentTelemetryEnvelopeSchema', () => {
       total_tokens: 11_072,
       turn_count: 1,
     });
-    expect(parsed.quota_samples[0]).toMatchObject({
+    expect(parsed.quota_samples).toHaveLength(2);
+    expect(parsed.quota_samples[1]).toMatchObject({
       model: 'gemini-3.7-flash-high',
+      limit_id: 'gemini-weekly',
       percent_orientation: 'remaining',
       percent_value: 98,
     });
@@ -129,21 +116,8 @@ describe('agentTelemetryEnvelopeSchema', () => {
       ...baseReport(),
       quota_samples: [
         {
-          schema: 'provider-quota-sample/v1',
-          sample_id: 'bad-percent',
-          observed_at: '2026-08-31T18:29:00Z',
-          provider: 'google',
-          harness: 'antigravity',
-          model: null,
-          plan_class: 'google-ai-pro',
-          quota_contract: 'antigravity-statusline-quota/v1',
-          limit_id: 'gemini-weekly',
-          window_minutes: 10_080,
-          percent_orientation: 'remaining',
+          ...quota('bad-percent', 'gemini-weekly', 98, null, 10_080),
           percent_value: null,
-          resets_at: null,
-          balance_unit: null,
-          balance_value: null,
         },
       ],
     });
@@ -156,31 +130,28 @@ describe('agentTelemetryEnvelopeSchema', () => {
       ...baseReport(),
       quota_samples: [
         {
-          schema: 'provider-quota-sample/v1',
-          sample_id: 'reset-only',
-          observed_at: '2026-08-31T18:29:00Z',
-          provider: 'google',
-          harness: 'antigravity',
-          model: null,
-          plan_class: 'google-ai-pro',
-          quota_contract: 'antigravity-statusline-quota/v1',
-          limit_id: 'gemini-weekly',
-          window_minutes: 10_080,
+          ...quota('reset-only', 'gemini-weekly', 98, '2026-09-06T12:00:00Z', 10_080),
           percent_orientation: null,
           percent_value: null,
-          resets_at: '2026-09-06T12:00:00Z',
-          balance_unit: null,
-          balance_value: null,
         },
       ],
     });
     expect(resetOnly.success).toBe(false);
 
-    const duplicate = agentTelemetryEnvelopeSchema.safeParse({
+    const duplicateUsage = agentTelemetryEnvelopeSchema.safeParse({
       ...baseReport(),
       usage_samples: [usage('same-id'), usage('same-id')],
     });
-    expect(duplicate.success).toBe(false);
+    expect(duplicateUsage.success).toBe(false);
+
+    const duplicateQuota = agentTelemetryEnvelopeSchema.safeParse({
+      ...baseReport(),
+      quota_samples: [
+        quota('same-snapshot', 'gemini-weekly', 98, null, 10_080),
+        quota('same-snapshot', 'gemini-weekly', 97, null, 10_080),
+      ],
+    });
+    expect(duplicateQuota.success).toBe(false);
   });
 
   it('rejects undeclared private-content fields', () => {
@@ -214,5 +185,31 @@ function usage(sampleId: string) {
     request_count: 1,
     turn_count: null,
     agent_step_count: null,
+  };
+}
+
+function quota(
+  sampleId: string,
+  limitId: string,
+  remainingPercent: number,
+  resetsAt: string | null,
+  windowMinutes: number
+) {
+  return {
+    schema: 'provider-quota-sample/v1' as const,
+    sample_id: sampleId,
+    observed_at: '2026-08-31T18:29:30Z',
+    provider: 'google',
+    harness: 'antigravity',
+    model: 'gemini-3.7-flash-high',
+    plan_class: 'google-ai-pro',
+    quota_contract: 'antigravity-statusline-quota/v1',
+    limit_id: limitId,
+    window_minutes: windowMinutes,
+    percent_orientation: 'remaining' as const,
+    percent_value: remainingPercent,
+    resets_at: resetsAt,
+    balance_unit: null,
+    balance_value: null,
   };
 }

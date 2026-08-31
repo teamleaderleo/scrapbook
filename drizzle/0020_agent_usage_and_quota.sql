@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS "provider_quota_samples" (
   "balance_value" double precision,
   "observed_at" timestamp with time zone NOT NULL,
   "collected_at" timestamp with time zone NOT NULL,
-  PRIMARY KEY ("source", "provider", "harness", "sample_id"),
+  PRIMARY KEY ("source", "provider", "harness", "sample_id", "limit_id"),
   CONSTRAINT "provider_quota_samples_identity_check"
     CHECK (
       char_length("source") BETWEEN 1 AND 128 AND
