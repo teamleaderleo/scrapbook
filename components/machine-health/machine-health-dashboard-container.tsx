@@ -1,6 +1,8 @@
+import { readAgentEconomicsSamples } from '@/app/lib/agent-economics-store';
 import { readCodexQuotaSamples } from '@/app/lib/codex-quota-store';
 import { readMachineHealth } from '@/app/lib/machine-health-store';
 import { headers } from 'next/headers';
+import { AgentEconomicsPanel } from './agent-economics-panel';
 import { CodexQuotaPanel } from './codex-quota-panel';
 import { MachineHealthDashboard } from './machine-health-dashboard-v2';
 
@@ -37,11 +39,17 @@ export async function MachineHealthDashboardContainer({
   authError?: boolean;
 }) {
   await headers();
-  const [result, quotaSamples] = await Promise.all([
+  const [result, quotaSamples, agentEconomicsSamples] = await Promise.all([
     readMachineHealth(60),
     hasPrivateAccess
       ? readCodexQuotaSamples(30).catch(error => {
           console.warn('Unable to read private Codex quota history', error);
+          return [];
+        })
+      : Promise.resolve([]),
+    hasPrivateAccess
+      ? readAgentEconomicsSamples(30).catch(error => {
+          console.error('Unable to load agent economics samples', error);
           return [];
         })
       : Promise.resolve([]),
@@ -82,10 +90,13 @@ export async function MachineHealthDashboardContainer({
         authError={authError}
       />
       {hasPrivateAccess ? (
-        <CodexQuotaPanel
-          samples={quotaSamples}
-          tokenSamples={result.codexSamples}
-        />
+        <>
+          <CodexQuotaPanel
+            samples={quotaSamples}
+            tokenSamples={result.codexSamples}
+          />
+          <AgentEconomicsPanel samples={agentEconomicsSamples} />
+        </>
       ) : null}
     </>
   );

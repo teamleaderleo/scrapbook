@@ -41,6 +41,7 @@ The page starts with the questions that matter when Leo is away from the machine
 - How many agent routes, jobs, and descendant processes are explicitly owned, how much RSS do they account for, and did any ownership record become unknown or leave residue?
 - How much local Codex state is allocated, how much is active or unknown, did the scan finish cleanly, and how did the total change over seven days?
 - How many Codex tokens came from Big Red and the MacBook Air, and what share of input was served from cache?
+- How many Sol, Luna, and Gemini worker attempts were externally accepted, and how much measured subscription quota, tokens, wall time, and operator intervention each accepted task consumed?
 
 The dashboard defaults to the last 12 complete hourly bins and also offers day, week, and month
 views. Every token range ends at the last complete UTC hour; the long views group the same
@@ -95,6 +96,14 @@ the same session in the same hour, the later source-hour is marked `overlap-skip
 totals instead of being counted twice. A report without complete fingerprint evidence is marked
 `unverified-skipped`. The dashboard shows the skipped source-hour count. Fingerprints are not
 returned by the dashboard query.
+
+Agent-economics reports are a separate provider-neutral projection of immutable worker receipts and
+external settlement. They contain only a receipt digest, node/provider/model/effort/harness classes,
+nullable token and quota counters, accepted/verification outcomes, aggregate step counts, wall time,
+retry/rework classes, operator minutes, and an optional operator-supplied subscription price. They
+never contain prompts, responses, chain of thought, commands, repository identity or paths,
+conversation/session IDs, environment values, account identity, or raw quota output. A worker cannot
+accept itself: accepted engineering outcomes require a passed external verification result.
 
 The source-hour primary key is device plus absolute UTC start time. Report validation compares
 parsed instants, so two offset spellings of the same hour cannot enter one bulk insert as duplicate
@@ -285,8 +294,8 @@ age under 24 hours raises a watch reason.
 
 ## Website configuration
 
-Apply `drizzle/0016_machine_health.sql`, `drizzle/0017_machine_health_hygiene.sql`, and
-`drizzle/0018_codex_token_samples.sql` in order
+Apply `drizzle/0016_machine_health.sql` through
+`drizzle/0021_agent_task_settlements.sql` in order
 through the normal Scrapbook migration process, then set:
 
 The token migration also enforces exact UTC-hour boundaries in Postgres. The ingest schema checks
@@ -315,7 +324,17 @@ GET  /machine-health
 POST /machine-health/access/token
 POST /api/machine-health/ingest
 POST /api/machine-health/codex-usage/ingest
+POST /api/machine-health/agent-usage/ingest
+POST /api/machine-health/agent-economics/ingest
 ```
+
+The provider-neutral agent-usage endpoint stores only allowlisted token and
+quota evidence. The economics endpoint accepts a small immutable settlement
+that references an existing usage sample; it does not duplicate provider
+usage, prompts, responses, paths, or Stensibly's work ledger. The dashboard
+joins those two private tables to compute accepted-work economics. Missing
+token, quota, price, or operator-time coverage remains unknown for the whole
+comparison group rather than becoming zero or a favorable partial metric.
 
 Production `/machine-health` always reads the sanitized public projection. It separately verifies
 the current Supabase user against the administrator allowlist before rendering operational
