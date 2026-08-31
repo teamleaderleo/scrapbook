@@ -12,7 +12,7 @@ function baseReport() {
 }
 
 describe('agentTelemetryEnvelopeSchema', () => {
-  it('accepts Gemini quota evidence while preserving unknown token counters', () => {
+  it('accepts current Gemini headless usage and model-scoped quota evidence', () => {
     const parsed = agentTelemetryEnvelopeSchema.parse({
       ...baseReport(),
       usage_samples: [
@@ -24,16 +24,16 @@ describe('agentTelemetryEnvelopeSchema', () => {
           harness: 'antigravity',
           model: 'gemini-3.7-flash-high',
           effort: 'high',
-          accounting_contract: 'antigravity-usage/v1',
+          accounting_contract: 'antigravity-headless-usage/v1',
           run_ref: 'stensibly:run_abc123',
-          input_tokens: null,
-          cached_input_tokens: null,
+          input_tokens: 10_415,
+          cached_input_tokens: 8_113,
           cache_write_input_tokens: null,
-          reasoning_tokens: null,
-          output_tokens: null,
-          total_tokens: null,
+          reasoning_tokens: 616,
+          output_tokens: 657,
+          total_tokens: 11_072,
           request_count: null,
-          turn_count: null,
+          turn_count: 1,
           agent_step_count: null,
         },
       ],
@@ -61,7 +61,12 @@ describe('agentTelemetryEnvelopeSchema', () => {
     expect(parsed.usage_samples[0]).toMatchObject({
       provider: 'google',
       harness: 'antigravity',
-      total_tokens: null,
+      input_tokens: 10_415,
+      cached_input_tokens: 8_113,
+      reasoning_tokens: 616,
+      output_tokens: 657,
+      total_tokens: 11_072,
+      turn_count: 1,
     });
     expect(parsed.quota_samples[0]).toMatchObject({
       model: 'gemini-3.7-flash-high',
