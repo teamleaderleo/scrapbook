@@ -42,7 +42,7 @@ const antigravityQuotaEntrySchema = z.object({
 });
 
 const antigravityStatusLineSchema = z.object({
-  product: z.string().max(64).optional(),
+  product: z.literal('antigravity'),
   model: z
     .object({
       id: z.string().trim().min(1).max(128),
@@ -193,9 +193,6 @@ export function projectAntigravityStatusLineQuota(
   context: AntigravityQuotaProjectionContext
 ): ProviderQuotaSample[] {
   const parsed = antigravityStatusLineSchema.parse(value);
-  if (parsed.product !== undefined && parsed.product !== 'antigravity')
-    throw new Error('Status-line payload is not from Antigravity');
-
   const model = context.model ?? parsed.model?.id ?? null;
   const planClass = context.planClass ?? normalizePlanTier(parsed.plan_tier);
   const quotaEntries = Object.entries(parsed.quota ?? {});
