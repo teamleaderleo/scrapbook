@@ -5,7 +5,7 @@ Keep automatic context small. Load the owner for the current task instead of exp
 ## Always
 
 - `docs/agent-access.md` owns canonical repository/write capability and GitHub-reference rules. Apply it before choosing a write transport, creating GitHub links, or interacting upstream.
-- `docs/review-policy.md` owns self-review, human-review, and merge boundaries. Load it for a non-routine merge decision or when a boundary applies.
+- `docs/review-policy.md` owns self-review, human-review, and merge boundaries. Load it before requesting review or merging.
 - Inspect metadata and exact fields before expanding content. Successful verification needs a compact receipt; expand raw output when a failure or warning can change the decision.
 - After substantive Scrapbook or cross-repository work, use `docs/agent-contributions.md` to decide independently whether a Guest Check-in, Workbench piece, both, or neither is useful.
 
@@ -23,7 +23,7 @@ Keep automatic context small. Load the owner for the current task instead of exp
 | Agent Journal | `docs/agent-journal.md` and its evidence contract |
 | Markdown-only verification | Inspect the exact diff, then `git diff --check -- <changed paths>`; no application CI or browser check |
 | Code verification | `pnpm ci:local -- --skip-install --quiet`; `docs/local-ci.md` and `docs/ci-scope.md` for scope and exceptions |
-| Non-routine review or merge | `docs/review-policy.md` |
+| Review or merge | `docs/review-policy.md` |
 
 <!-- BEGIN:nextjs-agent-rules -->
 
