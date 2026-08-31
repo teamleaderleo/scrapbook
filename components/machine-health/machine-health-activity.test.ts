@@ -19,6 +19,7 @@ function sample(
   overrides: Partial<MachineHealthSample> = {}
 ): MachineHealthSample {
   return {
+    host: 'big-red',
     checkedAt,
     panelOn: null,
     cpuUsedPercent: 20,

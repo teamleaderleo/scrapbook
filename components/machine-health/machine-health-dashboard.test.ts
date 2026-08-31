@@ -14,6 +14,7 @@ const report = {
   updatedAt: checkedAt,
 };
 const samples = Array.from({ length: 4 }, (_, index) => ({
+  host: 'big-red' as const,
   checkedAt: new Date(
     Date.parse(checkedAt) - (3 - index) * 86_400_000
   ).toISOString(),

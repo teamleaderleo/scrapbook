@@ -2,7 +2,7 @@
 
 `/machine-health` is a lightweight health check for the Big Red Ubuntu workstation. Sanitized resource and Codex aggregates are public; operational diagnostics remain owner-only. One short-lived collector sends a compact hourly health report. Codex token accounting uses one row per device and complete UTC hour so Big Red and the MacBook Air can share the same view.
 
-The production database, ingestion credentials, hourly Big Red timer, public summary, and owner-only diagnostics are live. The MacBook Air token reporter is a separate hourly source; both devices retain only aggregate complete-hour accounting.
+The production database, ingestion credentials, hourly Big Red timer, public summary, and owner-only diagnostics are live. The MacBook Air runs separate one-shot hourly token and resource reporters. Resource history stays device-specific; Codex accounting combines deduplicated complete-hour rows from both devices.
 
 ## Storage and retention
 
@@ -12,8 +12,9 @@ hourly machine observations, and `codex_token_samples` keeps one aggregate row p
 complete UTC hour. Every successful ingest deletes machine and token rows older than 365 days, so
 the live store stays bounded without a resident cleanup service.
 
-A future MacBook Air resource collector should use the same sanitized hourly shape and one-year
-retention rather than uploading Activity Monitor logs or raw process data. At full coverage that is
+A MacBook Air resource collector uses the same sanitized hourly shape and one-year retention
+rather than uploading Activity Monitor logs or raw process data. It records a one-second aggregate
+sample only while the Mac is awake; sleep and shutdown remain honest gaps. At full coverage that is
 about 8,760 machine rows per device. Google Drive is the intended cold archive beyond that live
 window, but it is not currently part of ingestion or dashboard queries. The retired gallery importer
 credential was read-only; scheduled archive upload requires a separate write-scoped service account
@@ -375,9 +376,9 @@ file, group/other permissions, files above 16 KiB, unknown or missing fields, an
 mixture of the file with ingest environment variables. Supplying only one environment variable is
 also an error instead of a local-print fallback.
 
-## Proposed Mac LaunchAgent — not installed
+## Installed Mac LaunchAgents
 
-`scripts/codex-token-launchd.py` renders the plist to standard output. It contains paths and fixed
+`scripts/codex-token-launchd.py` renders the token plist to standard output. It contains paths and fixed
 arguments, never the ingest secret. The generated agent runs once at login and at minute 17 of each
 hour as a background, low-I/O process. Missed sleep/offline hours come from the success cursor on
 the next run.
@@ -417,7 +418,14 @@ to diagnose a failed post. Rollback begins with
 `launchctl bootout "gui/$(id -u)" "$agent"`, then removes the plist, stable script copy, credential
 file and success cursor.
 
-No Mac file or LaunchAgent is installed by this change.
+The token LaunchAgent is installed and active on the MacBook Air. The resource reporter uses the
+same short-lived pattern through `scripts/mac-health-report.py` and
+`scripts/mac-health-launchd.py`, running at minute 27 of each hour. It samples aggregate per-core
+CPU ticks and whole-machine memory, swap, root-storage, network-throughput, load, uptime, and
+battery counters for one second, posts once, and exits. It does not inspect processes or apps and
+does not use `powermetrics`, Activity Monitor logs, sudo, or a resident daemon. A distinct mode-0600
+credential file points at the machine-health endpoint while reusing the production ingest secret.
+Missed sleeping hours are not synthesized.
 
 The Codex-state section expects `~/Projects/leo-workspace/tools/codex_state_inventory.py`. Missing, slow, malformed, privileged, mutating, or cleanup-authoritative output becomes unavailable. The collector allows 12 seconds for this read and rejects output above 64 KiB.
 
