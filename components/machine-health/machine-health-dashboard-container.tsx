@@ -1,5 +1,7 @@
+import { readCodexQuotaSamples } from '@/app/lib/codex-quota-store';
 import { readMachineHealth } from '@/app/lib/machine-health-store';
 import { headers } from 'next/headers';
+import { CodexQuotaPanel } from './codex-quota-panel';
 import { MachineHealthDashboard } from './machine-health-dashboard-v2';
 
 function StateCard({
@@ -35,7 +37,15 @@ export async function MachineHealthDashboardContainer({
   authError?: boolean;
 }) {
   await headers();
-  const result = await readMachineHealth(60);
+  const [result, quotaSamples] = await Promise.all([
+    readMachineHealth(60),
+    hasPrivateAccess
+      ? readCodexQuotaSamples(30).catch(error => {
+          console.warn('Unable to read private Codex quota history', error);
+          return [];
+        })
+      : Promise.resolve([]),
+  ]);
   if (result.status === 'configuration-error')
     return (
       <StateCard
@@ -60,15 +70,18 @@ export async function MachineHealthDashboardContainer({
       />
     );
   return (
-    <MachineHealthDashboard
-      report={result.report}
-      macReport={result.macReport}
-      samples={result.samples}
-      codexSamples={result.codexSamples}
-      now={Date.parse(result.observedAt)}
-      hasPrivateAccess={hasPrivateAccess}
-      ownerAuthConfigured={ownerAuthConfigured}
-      authError={authError}
-    />
+    <>
+      <MachineHealthDashboard
+        report={result.report}
+        macReport={result.macReport}
+        samples={result.samples}
+        codexSamples={result.codexSamples}
+        now={Date.parse(result.observedAt)}
+        hasPrivateAccess={hasPrivateAccess}
+        ownerAuthConfigured={ownerAuthConfigured}
+        authError={authError}
+      />
+      {hasPrivateAccess ? <CodexQuotaPanel samples={quotaSamples} /> : null}
+    </>
   );
 }

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Collect complete-hour Codex token counters on macOS or Linux.
+"""Collect complete-hour Codex token counters and quota snapshots.
 
-The report contains aggregate counters and the fixed source label only. It does
-not emit session IDs, prompts, responses, paths, account data, or machine names.
+The report contains aggregate counters, quota percentages/reset times, and the
+fixed source label only. It does not emit session IDs, prompts, responses,
+paths, account identities, or machine names.
 """
 
 from __future__ import annotations
@@ -12,7 +13,9 @@ import datetime as dt
 import hashlib
 import hmac
 import json
+import math
 import os
+import re
 import stat
 import sys
 import urllib.error
@@ -33,7 +36,10 @@ TOKEN_FIELDS = (
 FORK_REPLAY_SECONDS = 2
 MAX_HOURS = 720
 MAX_CONFIG_BYTES = 16_384
+MAX_QUOTA_SAMPLES = 4_096
+QUOTA_STATE_VERSION = 1
 CONFIG_KEYS = frozenset({"ingest_url", "ingest_secret"})
+LIMIT_ID_PATTERN = re.compile(r"^[A-Za-z0-9_.:-]{1,64}$")
 
 
 class RejectRedirects(urllib.request.HTTPRedirectHandler):
@@ -65,12 +71,16 @@ def complete_hour(value: dt.datetime) -> dt.datetime:
     )
 
 
+def iso_timestamp(value: dt.datetime) -> str:
+    return value.astimezone(dt.timezone.utc).isoformat().replace("+00:00", "Z")
+
+
 def empty_window(start: dt.datetime) -> dict[str, Any]:
     end = start + dt.timedelta(hours=1)
     return {
         "source": "session-jsonl",
-        "window_started_at": start.isoformat().replace("+00:00", "Z"),
-        "window_ended_at": end.isoformat().replace("+00:00", "Z"),
+        "window_started_at": iso_timestamp(start),
+        "window_ended_at": iso_timestamp(end),
         **dict.fromkeys(TOKEN_FIELDS, 0),
         "model_calls": 0,
         "active_routes": 0,
@@ -79,12 +89,107 @@ def empty_window(start: dt.datetime) -> dict[str, Any]:
     }
 
 
-def collect_windows(
+def quota_samples_from_payload(
+    timestamp: dt.datetime, payload: dict[str, Any]
+) -> list[dict[str, Any]]:
+    rate_limits = payload.get("rate_limits")
+    if not isinstance(rate_limits, dict):
+        return []
+
+    candidate_limit_id = rate_limits.get("limit_id")
+    limit_id = (
+        candidate_limit_id
+        if isinstance(candidate_limit_id, str)
+        and LIMIT_ID_PATTERN.fullmatch(candidate_limit_id)
+        else "codex"
+    )
+    samples: list[dict[str, Any]] = []
+    for name in ("primary", "secondary"):
+        window = rate_limits.get(name)
+        if not isinstance(window, dict):
+            continue
+        used_percent = window.get("used_percent")
+        window_minutes = window.get("window_minutes")
+        if (
+            isinstance(used_percent, bool)
+            or not isinstance(used_percent, (int, float))
+            or not math.isfinite(float(used_percent))
+            or float(used_percent) < 0
+            or float(used_percent) > 100
+            or isinstance(window_minutes, bool)
+            or not isinstance(window_minutes, int)
+            or window_minutes < 1
+            or window_minutes > 525_600
+        ):
+            continue
+
+        resets_at_value = window.get("resets_at")
+        resets_at: str | None = None
+        if resets_at_value is not None:
+            if (
+                isinstance(resets_at_value, bool)
+                or not isinstance(resets_at_value, (int, float))
+                or not math.isfinite(float(resets_at_value))
+            ):
+                continue
+            try:
+                resets_at = iso_timestamp(
+                    dt.datetime.fromtimestamp(
+                        float(resets_at_value), tz=dt.timezone.utc
+                    )
+                )
+            except (OverflowError, OSError, ValueError):
+                continue
+
+        samples.append(
+            {
+                "observed_at": iso_timestamp(timestamp),
+                "limit_id": limit_id,
+                "window_minutes": window_minutes,
+                "used_percent": float(used_percent),
+                "resets_at": resets_at,
+            }
+        )
+    return samples
+
+
+def dedupe_quota_samples(samples: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_observation: dict[tuple[str, str, int], dict[str, Any]] = {}
+    for sample in samples:
+        key = (
+            str(sample["observed_at"]),
+            str(sample["limit_id"]),
+            int(sample["window_minutes"]),
+        )
+        by_observation[key] = sample
+
+    ordered = sorted(
+        by_observation.values(),
+        key=lambda sample: (
+            str(sample["observed_at"]),
+            str(sample["limit_id"]),
+            int(sample["window_minutes"]),
+        ),
+    )
+    latest_state: dict[tuple[str, int], tuple[float, str | None]] = {}
+    transitions: list[dict[str, Any]] = []
+    for sample in ordered:
+        key = (str(sample["limit_id"]), int(sample["window_minutes"]))
+        state = (float(sample["used_percent"]), sample["resets_at"])
+        if latest_state.get(key) == state:
+            continue
+        latest_state[key] = state
+        transitions.append(sample)
+
+    return transitions[-MAX_QUOTA_SAMPLES:]
+
+
+def collect_windows_and_quota(
     now: dt.datetime,
     hours: int,
     session_directory: Path | None = None,
     fingerprint_key: bytes | None = None,
-) -> list[dict[str, Any]]:
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     if hours < 1 or hours > MAX_HOURS:
         raise ValueError(f"hours must be between 1 and {MAX_HOURS}")
     window_end = complete_hour(now)
@@ -97,6 +202,7 @@ def collect_windows(
     windows = {start: empty_window(start) for start in starts}
     fingerprints: dict[dt.datetime, set[str]] = {start: set() for start in starts}
     fingerprints_complete = {start: fingerprint_key is not None for start in starts}
+    quota_observations: list[dict[str, Any]] = []
 
     try:
         paths = list(directory.rglob("*.jsonl"))
@@ -113,6 +219,7 @@ def collect_windows(
             session_id: str | None = None
             forked_session = False
             events: list[tuple[dt.datetime, dict[str, int]]] = []
+            path_quota_observations: list[dict[str, Any]] = []
             with path.open("r", encoding="utf-8") as session:
                 for line in session:
                     try:
@@ -131,15 +238,19 @@ def collect_windows(
                             session_id = candidate
                     if payload.get("forked_from_id"):
                         forked_session = True
-                    if payload.get("type") != "token_count":
+                    if payload.get("type") != "token_count" or not (
+                        window_start <= timestamp < window_end
+                    ):
                         continue
+
+                    path_quota_observations.extend(
+                        quota_samples_from_payload(timestamp, payload)
+                    )
                     try:
                         usage = (payload.get("info") or {}).get("last_token_usage")
                     except AttributeError:
                         continue
-                    if not isinstance(usage, dict) or not (
-                        window_start <= timestamp < window_end
-                    ):
+                    if not isinstance(usage, dict):
                         continue
                     values: dict[str, int] = {}
                     for field in TOKEN_FIELDS:
@@ -162,6 +273,7 @@ def collect_windows(
                 if sum(timestamp < cutoff for timestamp, _ in events) > 1:
                     events = [event for event in events if event[0] >= cutoff]
 
+            quota_observations.extend(path_quota_observations)
             route_hours: set[dt.datetime] = set()
             for timestamp, values in events:
                 start = complete_hour(timestamp)
@@ -192,7 +304,22 @@ def collect_windows(
     for start in starts:
         windows[start]["session_fingerprints"] = sorted(fingerprints[start])
         windows[start]["fingerprints_complete"] = fingerprints_complete[start]
-    return [windows[start] for start in starts]
+    return (
+        [windows[start] for start in starts],
+        dedupe_quota_samples(quota_observations),
+    )
+
+
+def collect_windows(
+    now: dt.datetime,
+    hours: int,
+    session_directory: Path | None = None,
+    fingerprint_key: bytes | None = None,
+) -> list[dict[str, Any]]:
+    windows, _ = collect_windows_and_quota(
+        now, hours, session_directory, fingerprint_key=fingerprint_key
+    )
+    return windows
 
 
 def report(
@@ -204,15 +331,15 @@ def report(
 ) -> dict[str, Any]:
     if source not in {"big-red", "macbook-air"}:
         raise ValueError("source must be big-red or macbook-air")
+    windows, quota_samples = collect_windows_and_quota(
+        now, hours, session_directory, fingerprint_key=fingerprint_key
+    )
     return {
         "schema_version": 1,
         "source": source,
-        "collected_at": now.astimezone(dt.timezone.utc)
-        .isoformat()
-        .replace("+00:00", "Z"),
-        "windows": collect_windows(
-            now, hours, session_directory, fingerprint_key=fingerprint_key
-        ),
+        "collected_at": iso_timestamp(now),
+        "windows": windows,
+        "quota_samples": quota_samples,
     }
 
 
@@ -221,7 +348,9 @@ def hours_since_success(now: dt.datetime, state_file: Path) -> int:
         state = json.loads(state_file.read_text(encoding="utf-8"))
         last_end = utc_timestamp(state.get("last_window_ended_at"))
     except (AttributeError, FileNotFoundError, json.JSONDecodeError, OSError):
-        return 1
+        return MAX_HOURS
+    if state.get("quota_state_version") != QUOTA_STATE_VERSION:
+        return MAX_HOURS
     if last_end is None:
         return 1
     elapsed = int((complete_hour(now) - last_end).total_seconds() // 3_600)
@@ -234,9 +363,8 @@ def save_success_state(now: dt.datetime, state_file: Path) -> None:
     temporary.write_text(
         json.dumps(
             {
-                "last_window_ended_at": complete_hour(now)
-                .isoformat()
-                .replace("+00:00", "Z")
+                "last_window_ended_at": iso_timestamp(complete_hour(now)),
+                "quota_state_version": QUOTA_STATE_VERSION,
             },
             separators=(",", ":"),
         ),
@@ -332,7 +460,7 @@ def send(payload: dict[str, Any], url: str, secret: str) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Collect complete-hour Codex token counters"
+        description="Collect complete-hour Codex token counters and quota snapshots"
     )
     parser.add_argument(
         "--source", choices=("big-red", "macbook-air"), required=True

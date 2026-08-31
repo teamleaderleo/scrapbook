@@ -31,6 +31,22 @@ def usage(input_tokens: int, cached_input_tokens: int) -> dict[str, int]:
     }
 
 
+def rate_limits(short_used: float, weekly_used: float) -> dict[str, object]:
+    return {
+        "limit_id": "codex",
+        "primary": {
+            "used_percent": short_used,
+            "window_minutes": 300,
+            "resets_at": 1_788_200_000,
+        },
+        "secondary": {
+            "used_percent": weekly_used,
+            "window_minutes": 10_080,
+            "resets_at": 1_788_700_000,
+        },
+    }
+
+
 class CodexTokenReportTest(unittest.TestCase):
     def test_groups_complete_hours_and_keeps_zero_activity_coverage(self) -> None:
         now = dt.datetime(2026, 8, 29, 7, 23, tzinfo=dt.timezone.utc)
@@ -75,6 +91,65 @@ class CodexTokenReportTest(unittest.TestCase):
         self.assertTrue(payload["windows"][0]["fingerprints_complete"])
         self.assertEqual(len(payload["windows"][0]["session_fingerprints"]), 1)
         self.assertEqual(payload["windows"][1]["total_tokens"], 0)
+        self.assertEqual(payload["quota_samples"], [])
+
+    def test_collects_only_quota_transitions(self) -> None:
+        now = dt.datetime(2026, 8, 29, 7, 23, tzinfo=dt.timezone.utc)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            directory = Path(temporary_directory)
+            session = directory / "quota.jsonl"
+            records = [
+                {
+                    "timestamp": "2026-08-29T06:00:00Z",
+                    "type": "session_meta",
+                    "payload": {"id": "quota-route"},
+                },
+                {
+                    "timestamp": "2026-08-29T06:10:00Z",
+                    "payload": {
+                        "type": "token_count",
+                        "info": {"last_token_usage": usage(100, 95)},
+                        "rate_limits": rate_limits(25, 50),
+                    },
+                },
+                {
+                    "timestamp": "2026-08-29T06:20:00Z",
+                    "payload": {
+                        "type": "token_count",
+                        "info": {"last_token_usage": usage(100, 95)},
+                        "rate_limits": rate_limits(25, 50),
+                    },
+                },
+                {
+                    "timestamp": "2026-08-29T06:30:00Z",
+                    "payload": {
+                        "type": "token_count",
+                        "info": {"last_token_usage": usage(100, 95)},
+                        "rate_limits": rate_limits(26, 51),
+                    },
+                },
+            ]
+            session.write_text(
+                "\n".join(json.dumps(record) for record in records), encoding="utf-8"
+            )
+            os.utime(session, (now.timestamp(), now.timestamp()))
+
+            payload = REPORT.report(
+                "big-red", now, 1, directory, fingerprint_key=b"test-key"
+            )
+
+        weekly = [
+            sample
+            for sample in payload["quota_samples"]
+            if sample["window_minutes"] == 10_080
+        ]
+        self.assertEqual([sample["used_percent"] for sample in weekly], [50.0, 51.0])
+        self.assertEqual(
+            [sample["observed_at"] for sample in weekly],
+            ["2026-08-29T06:10:00Z", "2026-08-29T06:30:00Z"],
+        )
+        self.assertTrue(all(sample["limit_id"] == "codex" for sample in weekly))
+        self.assertTrue(all(sample["resets_at"] is not None for sample in weekly))
 
     def test_excludes_dense_history_replay_at_fork_start(self) -> None:
         now = dt.datetime(2026, 8, 29, 7, 23, tzinfo=dt.timezone.utc)
@@ -203,6 +278,18 @@ class CodexTokenReportTest(unittest.TestCase):
             state = json.loads(state_file.read_text(encoding="utf-8"))
 
         self.assertEqual(state["last_window_ended_at"], "2026-08-29T04:00:00Z")
+        self.assertEqual(state["quota_state_version"], 1)
+
+    def test_old_state_triggers_one_time_quota_backfill(self) -> None:
+        now = dt.datetime(2026, 8, 29, 7, 23, tzinfo=dt.timezone.utc)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            state_file = Path(temporary_directory) / "state.json"
+            state_file.write_text(
+                json.dumps({"last_window_ended_at": "2026-08-29T06:00:00Z"}),
+                encoding="utf-8",
+            )
+
+            self.assertEqual(REPORT.hours_since_success(now, state_file), 720)
 
 
 if __name__ == "__main__":
