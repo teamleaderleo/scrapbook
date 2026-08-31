@@ -62,6 +62,7 @@ export async function MachineHealthDashboardContainer({
   return (
     <MachineHealthDashboard
       report={result.report}
+      macReport={result.macReport}
       samples={result.samples}
       codexSamples={result.codexSamples}
       now={Date.parse(result.observedAt)}

@@ -257,6 +257,7 @@ function PrivateSignIn({ authError }: { authError: boolean }) {
 
 export function MachineHealthDashboard({
   report,
+  macReport = null,
   samples,
   codexSamples = [],
   now,
@@ -265,6 +266,7 @@ export function MachineHealthDashboard({
   authError = false,
 }: {
   report: StoredMachineHealth;
+  macReport?: StoredMachineHealth | null;
   samples: MachineHealthSample[];
   codexSamples?: CodexTokenSample[];
   now: number;
@@ -309,6 +311,7 @@ export function MachineHealthDashboard({
       ? 'bg-amber-600 dark:bg-amber-300'
       : 'bg-emerald-600 dark:bg-emerald-400';
   const publicSamples = samples.map(sample => ({
+    host: sample.host,
     checkedAt: sample.checkedAt,
     cpuUsedPercent: sample.cpuUsedPercent,
     memoryUsedPercent: sample.memoryUsedPercent,
@@ -372,11 +375,23 @@ export function MachineHealthDashboard({
         samples={publicSamples}
         codexSamples={codexSamples}
         now={now}
-        current={{
-          cpuPercent: payload.cpu.used_percent,
-          memoryPercent: payload.memory.used_percent,
-          storagePercent: payload.disk.root_used_percent,
-          storageFreeGib: payload.disk.root_free_gib,
+        currentByHost={{
+          'big-red': {
+            cpuPercent: payload.cpu.used_percent,
+            memoryPercent: payload.memory.used_percent,
+            storagePercent: payload.disk.root_used_percent,
+            storageFreeGib: payload.disk.root_free_gib,
+          },
+          ...(macReport
+            ? {
+                'macbook-air': {
+                  cpuPercent: macReport.payload.cpu.used_percent,
+                  memoryPercent: macReport.payload.memory.used_percent,
+                  storagePercent: macReport.payload.disk.root_used_percent,
+                  storageFreeGib: macReport.payload.disk.root_free_gib,
+                },
+              }
+            : {}),
         }}
       />
 

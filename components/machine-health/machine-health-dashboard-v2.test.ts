@@ -22,6 +22,7 @@ const report = {
   updatedAt: checkedAt,
 };
 const sample: MachineHealthSample = {
+  host: 'big-red',
   checkedAt,
   panelOn: false,
   cpuUsedPercent: 12,
@@ -92,12 +93,28 @@ const codexSamples: CodexTokenSample[] = [
 ];
 
 function renderDashboard(
-  options: { private?: boolean; reportOverride?: StoredMachineHealth } = {}
+  options: {
+    private?: boolean;
+    reportOverride?: StoredMachineHealth;
+    macReport?: StoredMachineHealth;
+  } = {}
 ) {
   return renderToStaticMarkup(
     createElement(MachineHealthDashboard, {
       report: options.reportOverride ?? report,
-      samples: [sample],
+      macReport: options.macReport,
+      samples: [
+        sample,
+        ...(options.macReport
+          ? [
+              {
+                ...sample,
+                host: 'macbook-air' as const,
+                cpuUsedPercent: 31,
+              },
+            ]
+          : []),
+      ],
       codexSamples,
       now: Date.parse(checkedAt) + 20 * 60_000,
       hasPrivateAccess: options.private ?? false,
@@ -172,5 +189,18 @@ describe('machine health dashboard v2', () => {
     expect(html).toContain('Agent routes');
     expect(html).toContain('Codex runtime');
     expect(html).not.toContain('Sign in with Google for private details');
+  });
+
+  it('offers a resource device switch when Mac history is available', () => {
+    const macReport: StoredMachineHealth = {
+      ...report,
+      host: 'macbook-air',
+      payload: { ...report.payload, host: 'macbook-air' },
+    };
+    const html = renderDashboard({ macReport });
+
+    expect(html).toContain('aria-label="Resource device"');
+    expect(html).toContain('Big Red');
+    expect(html).toContain('MacBook Air');
   });
 });

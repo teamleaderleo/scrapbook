@@ -15,6 +15,7 @@ const codexRuntimeClassSchema = z.object({
   swap_bytes: nonnegativeInteger.nullable(),
 });
 export const codexTokenSourceSchema = z.enum(['big-red', 'macbook-air']);
+export const machineHealthHostSchema = z.enum(['big-red', 'macbook-air']);
 export const codexUsageWindowSchema = z
   .object({
     source: z.literal('session-jsonl'),
@@ -364,7 +365,7 @@ const berylLinkState = z.union([
 
 export const machineHealthPayloadSchema = z.object({
   schema_version: z.literal(1),
-  host: z.literal('big-red'),
+  host: machineHealthHostSchema,
   checked_at: z.string().datetime({ offset: true }),
   uptime_seconds: nonnegativeInteger,
   load: z.object({
@@ -847,11 +848,13 @@ export const machineHealthPayloadSchema = z.object({
 });
 
 export type MachineHealthPayload = z.infer<typeof machineHealthPayloadSchema>;
+export type MachineHealthHost = z.infer<typeof machineHealthHostSchema>;
 export type CodexTokenSource = z.infer<typeof codexTokenSourceSchema>;
 export type CodexUsageWindow = z.infer<typeof codexUsageWindowSchema>;
 export type CodexTokenReport = z.infer<typeof codexTokenReportSchema>;
 
 export type MachineHealthSample = {
+  host: MachineHealthHost;
   checkedAt: string;
   panelOn: boolean | null;
   cpuUsedPercent: number;
@@ -906,7 +909,7 @@ export type MachineHealthSample = {
 };
 
 export type StoredMachineHealth = {
-  host: 'big-red';
+  host: MachineHealthHost;
   payload: MachineHealthPayload;
   checkedAt: string;
   updatedAt: string;
@@ -931,6 +934,7 @@ export type MachineHealthReadResult =
   | {
       status: 'ok';
       report: StoredMachineHealth;
+      macReport: StoredMachineHealth | null;
       samples: MachineHealthSample[];
       codexSamples: CodexTokenSample[];
       observedAt: string;
@@ -1120,6 +1124,17 @@ export function evaluateMachineHealth(payload: MachineHealthPayload) {
   };
 }
 
+function storedState(payload: MachineHealthPayload) {
+  if (payload.host === 'big-red') return evaluateMachineHealth(payload).state;
+  if (payload.disk.root_used_percent >= 90) return 'attention' as const;
+  if (
+    payload.disk.root_used_percent >= 80 ||
+    payload.memory.used_percent >= 90
+  )
+    return 'watch' as const;
+  return 'healthy' as const;
+}
+
 export async function saveMachineHealth(payload: MachineHealthPayload) {
   const checkedAt = new Date(payload.checked_at).toISOString();
   const serializedPayload = JSON.stringify({
@@ -1129,7 +1144,7 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
   const failedUnits =
     payload.services.failed_system_units + payload.services.failed_user_units;
   const loadPerCpu = payload.load.one / payload.load.logical_cpus;
-  const state = evaluateMachineHealth(payload).state;
+  const state = storedState(payload);
   const pressureValues = [
     payload.activity.cpu_pressure_some_percent,
     payload.activity.memory_pressure_full_percent,
@@ -1141,7 +1156,7 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
   await client.begin(async sql => {
     await sql`
       INSERT INTO machine_health_status (host, payload, checked_at, updated_at)
-      VALUES ('big-red', ${serializedPayload}::text::jsonb, ${checkedAt}, now())
+      VALUES (${payload.host}, ${serializedPayload}::text::jsonb, ${checkedAt}, now())
       ON CONFLICT (host)
       DO UPDATE SET
         payload = EXCLUDED.payload,
@@ -1179,7 +1194,7 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         payload
       )
       VALUES (
-        'big-red',
+        ${payload.host},
         ${checkedAt},
         ${state},
         ${payload.disk.root_used_percent},
@@ -1233,7 +1248,10 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
         created_at = now()
     `;
 
-    if (payload.codex_usage?.source === 'session-jsonl') {
+    if (
+      payload.host === 'big-red' &&
+      payload.codex_usage?.source === 'session-jsonl'
+    ) {
       const usage = payload.codex_usage;
       await sql`
         SELECT pg_advisory_xact_lock(1129270341)
@@ -1324,8 +1342,7 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
 
     await sql`
       DELETE FROM machine_health_samples
-      WHERE host = 'big-red'
-        AND checked_at < now() - interval '365 days'
+      WHERE checked_at < now() - interval '365 days'
     `;
     await sql`
       DELETE FROM codex_token_samples
@@ -1333,7 +1350,7 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
     `;
   });
 
-  return { host: 'big-red' as const, checkedAt };
+  return { host: payload.host, checkedAt };
 }
 
 export async function saveCodexTokenReport(report: CodexTokenReport) {
@@ -1491,7 +1508,7 @@ export async function readMachineHealth(
     const [latestRows, sampleRows, codexRows] = await Promise.all([
       client<
         {
-          host: 'big-red';
+          host: MachineHealthHost;
           payload: unknown;
           checked_at: Date | string;
           updated_at: Date | string;
@@ -1499,11 +1516,12 @@ export async function readMachineHealth(
       >`
         SELECT host, payload, checked_at, updated_at
         FROM machine_health_status
-        WHERE host = 'big-red'
-        LIMIT 1
+        WHERE host IN ('big-red', 'macbook-air')
+        ORDER BY host ASC
       `,
       client<
         {
+          host: MachineHealthHost;
           checked_at: Date | string;
           cpu_used_percent: number | string;
           root_used_percent: number | string;
@@ -1530,6 +1548,7 @@ export async function readMachineHealth(
         }[]
       >`
         SELECT
+          host,
           checked_at,
           cpu_used_percent,
           root_used_percent,
@@ -1554,7 +1573,7 @@ export async function readMachineHealth(
           rdp_connections,
           payload
         FROM machine_health_samples
-        WHERE host = 'big-red'
+        WHERE host IN ('big-red', 'macbook-air')
           AND checked_at >= now() - (${Math.max(1, Math.min(365, Math.floor(days)))}::int * interval '1 day')
         ORDER BY checked_at ASC
       `,
@@ -1596,11 +1615,21 @@ export async function readMachineHealth(
       `,
     ]);
 
-    const latest = latestRows[0];
+    const latest = latestRows.find(row => row.host === 'big-red');
     if (!latest) return { status: 'empty' };
     const parsed = machineHealthPayloadSchema.safeParse(latest.payload);
-    if (!parsed.success)
+    if (!parsed.success || parsed.data.host !== latest.host)
       throw new Error('Stored machine health payload is invalid');
+
+    const macLatest = latestRows.find(row => row.host === 'macbook-air');
+    const parsedMac = macLatest
+      ? machineHealthPayloadSchema.safeParse(macLatest.payload)
+      : null;
+    if (
+      macLatest &&
+      (!parsedMac?.success || parsedMac.data.host !== macLatest.host)
+    )
+      throw new Error('Stored Mac machine health payload is invalid');
 
     return {
       status: 'ok',
@@ -1610,6 +1639,15 @@ export async function readMachineHealth(
         checkedAt: new Date(latest.checked_at).toISOString(),
         updatedAt: new Date(latest.updated_at).toISOString(),
       },
+      macReport:
+        macLatest && parsedMac?.success
+          ? {
+              host: macLatest.host,
+              payload: parsedMac.data,
+              checkedAt: new Date(macLatest.checked_at).toISOString(),
+              updatedAt: new Date(macLatest.updated_at).toISOString(),
+            }
+          : null,
       observedAt: new Date().toISOString(),
       codexSamples: codexRows.map(row => ({
         source: row.source,
@@ -1627,6 +1665,8 @@ export async function readMachineHealth(
       })),
       samples: sampleRows.map(row => {
         const parsedSample = machineHealthPayloadSchema.safeParse(row.payload);
+        if (parsedSample.success && parsedSample.data.host !== row.host)
+          throw new Error('Stored machine health sample host is inconsistent');
         const codexUsage =
           parsedSample.success &&
           parsedSample.data.codex_usage?.source === 'session-jsonl'
@@ -1662,6 +1702,7 @@ export async function readMachineHealth(
             ? (parsedSample.data.network.remote_client.transport_probe ?? null)
             : null;
         return {
+          host: row.host,
           checkedAt: new Date(row.checked_at).toISOString(),
           panelOn: parsedSample.success
             ? panelOnSample(parsedSample.data)

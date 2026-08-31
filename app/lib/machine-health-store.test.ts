@@ -9,6 +9,21 @@ import {
 import { healthyMachineReport } from '@/tests/fixtures/machine-health';
 
 describe('machine health contract', () => {
+  it('accepts only the two fixed machine identities', () => {
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        host: 'macbook-air',
+      }).success
+    ).toBe(true);
+    expect(
+      machineHealthPayloadSchema.safeParse({
+        ...healthyMachineReport,
+        host: 'someone-else',
+      }).success
+    ).toBe(false);
+  });
+
   it('requires exact complete-hour token windows and collision fingerprints', () => {
     const window = {
       source: 'session-jsonl',

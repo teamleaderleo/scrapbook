@@ -3,6 +3,7 @@
 import type {
   CodexTokenSample,
   CodexTokenSource,
+  MachineHealthHost,
 } from '@/app/lib/machine-health-store';
 import {
   ArrowDownRight,
@@ -53,8 +54,13 @@ const RANGE_CONFIG: Record<
 };
 
 type ResourceKey = 'cpu' | 'memory' | 'storage';
+const RESOURCE_HOSTS = [
+  ['big-red', 'Big Red', Server],
+  ['macbook-air', 'MacBook Air', Laptop],
+] as const;
 
 export type PublicMachineHealthSample = {
+  host: MachineHealthHost;
   checkedAt: string;
   cpuUsedPercent: number;
   memoryUsedPercent: number;
@@ -1014,25 +1020,38 @@ export function MachineHealthOverview({
   samples,
   codexSamples,
   now,
-  current,
+  currentByHost,
 }: {
   samples: PublicMachineHealthSample[];
   codexSamples: CodexTokenSample[];
   now: number;
-  current: MachineResourceSnapshot;
+  currentByHost: Partial<Record<MachineHealthHost, MachineResourceSnapshot>>;
 }) {
+  const [resourceHost, setResourceHost] =
+    useState<MachineHealthHost>('big-red');
+  const selectedResourceHost = currentByHost[resourceHost]
+    ? resourceHost
+    : 'big-red';
   const [resourceRange, setResourceRange] = useState<ActivityRange>('12h');
   const [codexRange, setCodexRange] = useState<ActivityRange>('7d');
+  const resourceSamples = useMemo(
+    () => samples.filter(sample => sample.host === selectedResourceHost),
+    [samples, selectedResourceHost]
+  );
   const resourceBins = useMemo(
-    () => buildPublicActivityBins(samples, resourceRange, now),
-    [samples, resourceRange, now]
+    () => buildPublicActivityBins(resourceSamples, resourceRange, now),
+    [resourceSamples, resourceRange, now]
   );
   const resourceDuration =
     RANGE_CONFIG[resourceRange].bins * RANGE_CONFIG[resourceRange].binMs;
   const previousResourceBins = useMemo(
     () =>
-      buildPublicActivityBins(samples, resourceRange, now - resourceDuration),
-    [samples, resourceRange, now, resourceDuration]
+      buildPublicActivityBins(
+        resourceSamples,
+        resourceRange,
+        now - resourceDuration
+      ),
+    [resourceSamples, resourceRange, now, resourceDuration]
   );
   const codexBins = useMemo(
     () => buildCodexBins(codexSamples, codexRange, now),
@@ -1059,8 +1078,33 @@ export function MachineHealthOverview({
 
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         <div>
-          <div className="min-h-9 mb-2 flex items-end justify-between gap-3 px-1">
-            <h3 className="opacity-55 pb-2 text-sm font-medium">Resources</h3>
+          <div className="mb-2 flex items-end justify-between gap-3 px-1">
+            <div>
+              <h3 className="opacity-55 pb-2 text-sm font-medium">Resources</h3>
+              {currentByHost['macbook-air'] ? (
+                <div
+                  className="flex gap-4"
+                  aria-label="Resource device"
+                >
+                  {RESOURCE_HOSTS.map(([host, label, Icon]) => (
+                    <button
+                      key={host}
+                      type="button"
+                      aria-pressed={selectedResourceHost === host}
+                      onClick={() => setResourceHost(host)}
+                      className={`flex min-h-8 items-center gap-1.5 border-b pb-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a53b34] ${
+                        selectedResourceHost === host
+                          ? 'border-current font-semibold'
+                          : 'border-transparent opacity-45 hover:opacity-75'
+                      }`}
+                    >
+                      <Icon aria-hidden="true" className="size-3.5 stroke-[1.8]" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
             <RangeControl
               label="Resource"
               range={resourceRange}
@@ -1068,11 +1112,11 @@ export function MachineHealthOverview({
             />
           </div>
           <ResourceHistory
-            key={`resources-${resourceRange}`}
+            key={`resources-${selectedResourceHost}-${resourceRange}`}
             bins={resourceBins}
             previousBins={previousResourceBins}
             range={resourceRange}
-            current={current}
+            current={currentByHost[selectedResourceHost]!}
           />
         </div>
         <div>
