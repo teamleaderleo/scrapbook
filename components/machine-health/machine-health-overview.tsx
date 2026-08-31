@@ -54,6 +54,10 @@ const RANGE_CONFIG: Record<
 };
 
 type ResourceKey = 'cpu' | 'memory' | 'storage';
+const RESOURCE_HOSTS = [
+  ['big-red', 'Big Red', Server],
+  ['macbook-air', 'MacBook Air', Laptop],
+] as const;
 
 export type PublicMachineHealthSample = {
   host: MachineHealthHost;
@@ -1025,11 +1029,14 @@ export function MachineHealthOverview({
 }) {
   const [resourceHost, setResourceHost] =
     useState<MachineHealthHost>('big-red');
+  const selectedResourceHost = currentByHost[resourceHost]
+    ? resourceHost
+    : 'big-red';
   const [resourceRange, setResourceRange] = useState<ActivityRange>('12h');
   const [codexRange, setCodexRange] = useState<ActivityRange>('7d');
   const resourceSamples = useMemo(
-    () => samples.filter(sample => sample.host === resourceHost),
-    [samples, resourceHost]
+    () => samples.filter(sample => sample.host === selectedResourceHost),
+    [samples, selectedResourceHost]
   );
   const resourceBins = useMemo(
     () => buildPublicActivityBins(resourceSamples, resourceRange, now),
@@ -1079,19 +1086,14 @@ export function MachineHealthOverview({
                   className="flex gap-4"
                   aria-label="Resource device"
                 >
-                  {(
-                    [
-                      ['big-red', 'Big Red', Server],
-                      ['macbook-air', 'MacBook Air', Laptop],
-                    ] as const
-                  ).map(([host, label, Icon]) => (
+                  {RESOURCE_HOSTS.map(([host, label, Icon]) => (
                     <button
                       key={host}
                       type="button"
-                      aria-pressed={resourceHost === host}
+                      aria-pressed={selectedResourceHost === host}
                       onClick={() => setResourceHost(host)}
                       className={`flex min-h-8 items-center gap-1.5 border-b pb-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a53b34] ${
-                        resourceHost === host
+                        selectedResourceHost === host
                           ? 'border-current font-semibold'
                           : 'border-transparent opacity-45 hover:opacity-75'
                       }`}
@@ -1110,11 +1112,11 @@ export function MachineHealthOverview({
             />
           </div>
           <ResourceHistory
-            key={`resources-${resourceHost}-${resourceRange}`}
+            key={`resources-${selectedResourceHost}-${resourceRange}`}
             bins={resourceBins}
             previousBins={previousResourceBins}
             range={resourceRange}
-            current={currentByHost[resourceHost]!}
+            current={currentByHost[selectedResourceHost]!}
           />
         </div>
         <div>
