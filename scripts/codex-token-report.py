@@ -37,6 +37,7 @@ FORK_REPLAY_SECONDS = 2
 MAX_HOURS = 720
 MAX_CONFIG_BYTES = 16_384
 MAX_QUOTA_SAMPLES = 4_096
+INGEST_TIMEOUT_SECONDS = 60
 QUOTA_STATE_VERSION = 1
 CONFIG_KEYS = frozenset({"ingest_url", "ingest_secret"})
 LIMIT_ID_PATTERN = re.compile(r"^[A-Za-z0-9_.:-]{1,64}$")
@@ -449,7 +450,7 @@ def send(payload: dict[str, Any], url: str, secret: str) -> None:
     )
     opener = urllib.request.build_opener(RejectRedirects())
     try:
-        with opener.open(request, timeout=15) as response:
+        with opener.open(request, timeout=INGEST_TIMEOUT_SECONDS) as response:
             if response.status < 200 or response.status >= 300:
                 raise RuntimeError(f"ingest returned HTTP {response.status}")
     except urllib.error.HTTPError as error:
