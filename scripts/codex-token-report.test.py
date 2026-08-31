@@ -117,7 +117,14 @@ class CodexTokenReportTest(unittest.TestCase):
                     "payload": {
                         "type": "token_count",
                         "info": {"last_token_usage": usage(100, 95)},
-                        "rate_limits": rate_limits(25, 50),
+                        "rate_limits": {
+                            **rate_limits(25, 50),
+                            "secondary": {
+                                "used_percent": 50,
+                                "window_minutes": 10_080,
+                                "resets_at": 1_788_700_300,
+                            },
+                        },
                     },
                 },
                 {

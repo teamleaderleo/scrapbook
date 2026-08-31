@@ -81,7 +81,12 @@ export async function MachineHealthDashboardContainer({
         ownerAuthConfigured={ownerAuthConfigured}
         authError={authError}
       />
-      {hasPrivateAccess ? <CodexQuotaPanel samples={quotaSamples} /> : null}
+      {hasPrivateAccess ? (
+        <CodexQuotaPanel
+          samples={quotaSamples}
+          tokenSamples={result.codexSamples}
+        />
+      ) : null}
     </>
   );
 }
