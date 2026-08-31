@@ -92,7 +92,7 @@ Working heading:
 
 Canonical opening:
 
-> Reduced startup **101s → 13.69s (86.4% less time, 7.38× speedup)** by reverse-engineering an obfuscated JVM runtime spanning the base game and 83 third-party mods, then moving repeated work out of the launch path with memoization, precomputed artifacts, and runtime bytecode rewrites.
+> Reduced startup **112.17s → 13.69s (87.8% less time, 8.19× speedup)** by reverse-engineering an obfuscated JVM runtime spanning the base game and 83 third-party mods, then moving repeated work out of the launch path with memoization, precomputed artifacts, and runtime bytecode rewrites.
 
 The accumulated run history can describe the surrounding current regime separately. It does not replace the **13.69s** headline measurement.
 
@@ -145,7 +145,7 @@ Other evidence-rich alternates that belong primarily in portfolio/interview mate
 
 Not all of this belongs on the one-page resume.
 
-- startup headline: **101s → 13.69s**, **86.4% less time**, **7.38× speedup**
+- startup headline: **112.17s → 13.69s**, **87.8% less time**, **8.19× speedup**
 - common JSON path: **39,017 calls / 8,378 distinct paths**, with **78.5%** of calls repeating a path already read
 - resource resolution: **1,618,401 filesystem probes** in one launch, **42.6 per JSON call**, with the first-match walk costing **5.25s** and merged resolution another **4.27s**
 - common-loader memo moved one sample launch **84.49s → 73.54s**

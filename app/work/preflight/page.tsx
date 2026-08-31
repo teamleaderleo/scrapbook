@@ -83,7 +83,7 @@ export default function PreflightWorkPage() {
                 Preflight
               </h1>
               <p className="mt-6 max-w-3xl text-lg font-medium leading-8 text-foreground/80 sm:text-xl">
-                Heavily modded Starsector went from roughly 101 seconds at the observed early high to 13.69 seconds. The useful story is how that happened: profile the real system, find repeated work at the boundary that owns it, preserve the original path when the proof stops holding, then measure again.
+                Heavily modded Starsector went from a recent ordinary 112.17-second launch to 13.69 seconds. The useful story is how that happened: profile the real system, find repeated work at the boundary that owns it, preserve the original path when the proof stops holding, then measure again.
               </p>
             </div>
 

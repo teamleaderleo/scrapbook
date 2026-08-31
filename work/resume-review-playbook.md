@@ -17,7 +17,7 @@ Source repositories and retained evidence outrank all career copy when facts cha
 
 ## Preflight measurement rule
 
-The selected career-facing headline is **101s → 13.69s**. Preserve it exactly unless Leo explicitly chooses a new headline.
+The selected career-facing headline is **112.17s → 13.69s**. Preserve it exactly unless Leo explicitly chooses a new headline.
 
 The accumulated current run history may be used to show that the current regime is repeatable, but **do not replace 13.69s with a median or rounded value**. Likewise, do not replace the headline with the historical 89.00s → 15.53s same-session A/B pair.
 
@@ -67,7 +67,7 @@ Review-round observations:
 
 V10 uses seven Preflight bullets:
 
-1. flagship startup/reverse-engineering opening: **101s → 13.69s**
+1. flagship startup/reverse-engineering opening: **112.17s → 13.69s**
 2. shared JSON/CSV read layer and typed-tree representation
 3. texture-cache decision moved ahead of the **~27s** serialized prefetch queue plus **1.22 GiB VRAM** padding removal
 4. campaign mutation-tracked indexes and **117.9M** unchanged recomputations avoided

@@ -69,7 +69,7 @@ Current implementation and retained current evidence lead. Documentation is a pr
 
 When a summary disagrees with source, fix the summary. When a machine-readable claim index lags accepted evidence, bring the index forward. When one changing fact has been copied into five career files, pick one owner and make the others link to it.
 
-The recent Preflight performance cleanup is a good example: the career-facing headline is **~101s → 13.69s**. The broader current run history can describe the surrounding regime and repeatability, but it does not replace that headline. A startup measurement taken under the same clock remains the same kind of observation regardless of which campaign or ad-hoc run produced it. Campaign design, permutation tests, and acceptance flags are useful only when asking a causal comparison question such as whether one intervention changed time.
+The recent Preflight performance cleanup is a good example: the career-facing headline is **112.17s → 13.69s**. The broader current run history can describe the surrounding regime and repeatability, but it does not replace that headline. A startup measurement taken under the same clock remains the same kind of observation regardless of which campaign or ad-hoc run produced it. Campaign design, permutation tests, and acceptance flags are useful only when asking a causal comparison question such as whether one intervention changed time.
 
 ## Writing should preserve the person and the evidence
 

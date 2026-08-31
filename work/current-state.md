@@ -4,13 +4,13 @@ This is the source-first live-status overlay for the work record.
 
 Use current implementation and retained current evidence as the authority for what exists and what has been demonstrated. README files, portfolio prose, issue summaries, and claim indexes are projections of that reality and should be updated when they lag it. For career/editorial context, read `portfolio-inventory.md` after this file.
 
-## Preflight — ~101s → 13.69s development arc; candidate execution
+## Preflight — 112.17s → 13.69s development arc; candidate execution
 
 Repository: https://github.com/teamleaderleo/preflight
 
 State: **source and rendered-UI convergence complete; first-beta candidate execution active**.
 
-The current development headline is **~101 seconds → 13.69 seconds** on the 83-mod M5 MacBook Air development installation: roughly 101 seconds is the retained early observed high end, while 13.69 seconds is the retained current development endpoint from the later G1/deferred-heap-commit condition. That JVM policy became the current macOS Rosetta path. Repeated current runs remain in the same low-14-second regime; they support the headline rather than replacing it.
+The current development headline is **112.17 seconds → 13.69 seconds** on the 83-mod M5 MacBook Air development installation: 112.17 seconds is the retained recent ordinary launch, while 13.69 seconds is the retained accelerated endpoint from the later G1/deferred-heap-commit condition. That JVM policy became the current macOS Rosetta path. Repeated current runs remain in the same low-14-second regime; they support the headline rather than replacing it.
 
 Current source also includes the learned Compact texture path, physical-order-sensitive pack publication, desktop/navigation refinements, dependency/setup checks, manual privacy-bounded support reporting, signed update/package machinery, and release-scoped CI refinements.
 

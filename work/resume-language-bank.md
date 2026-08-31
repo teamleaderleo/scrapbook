@@ -4,7 +4,7 @@ This file keeps strong candidate language and story fragments that may later bec
 
 It is intentionally more generous than `resume-candidates.md`. The ranking file answers what earns scarce space today; this file preserves formulations worth revisiting without forcing them onto the page.
 
-**Authority warning — 2026-08-26:** this is a historical phrase reservoir, not a live status source. Do not treat words such as “current,” merge/review state, benchmark numbers, or project maturity below as authoritative. For the current one-page wording use `resume-current.md`; for ranked candidates use `resume-candidates.md`; for the current Preflight performance headline and moving numbers use `records/preflight-live-performance.md`; use `preflight-resume-evidence-map.md` for provenance and breadcrumbs. Reconcile any fragment here against those owners and the source repository before reuse. The selected Preflight career headline is **101s → 13.69s**. Do not replace 13.69s with a median, same-session A/B result, or packaged-candidate statistic unless Leo explicitly changes the headline. Historical text below that recommends such a substitution is superseded. The old 15.88s formulation and the three-merged-plus-open Cloud Hypervisor wording are also superseded.
+**Authority warning — 2026-08-26:** this is a historical phrase reservoir, not a live status source. Do not treat words such as “current,” merge/review state, benchmark numbers, or project maturity below as authoritative. For the current one-page wording use `resume-current.md`; for ranked candidates use `resume-candidates.md`; for the current Preflight performance headline and moving numbers use `records/preflight-live-performance.md`; use `preflight-resume-evidence-map.md` for provenance and breadcrumbs. Reconcile any fragment here against those owners and the source repository before reuse. The selected Preflight career headline is **112.17s → 13.69s**. Do not replace 13.69s with a median, same-session A/B result, or packaged-candidate statistic unless Leo explicitly changes the headline. Historical text below that recommends such a substitution is superseded. The old 15.88s formulation and the three-merged-plus-open Cloud Hypervisor wording are also superseded.
 
 Primary evidence remains in the originating repositories and the detailed records under `work/records/`.
 
@@ -94,9 +94,9 @@ Preflight should receive the largest owned-work allocation. The strongest story 
 
 Current career formulation:
 
-> Built a Java-agent performance layer for an 80+ mod Starsector installation, reducing startup **101s → 13.69s** while retaining exact compatibility gates and original-runtime fallbacks.
+> Built a Java-agent performance layer for an 80+ mod Starsector installation, reducing startup **112.17s → 13.69s** while retaining exact compatibility gates and original-runtime fallbacks.
 
-The old 89.00s → 15.53s same-session A/B campaign is useful when the question is specifically that before/after comparison. It does not replace or qualify the selected **101s → 13.69s** career headline. Likewise, a packaged release benchmark adds release-package evidence; it does not silently rewrite the development headline.
+The old 89.00s → 15.53s same-session A/B campaign is useful when the question is specifically that before/after comparison. It does not replace or qualify the selected **112.17s → 13.69s** career headline. Likewise, a packaged release benchmark adds release-package evidence; it does not silently rewrite the development headline.
 
 ### Runtime / bytecode compatibility
 
