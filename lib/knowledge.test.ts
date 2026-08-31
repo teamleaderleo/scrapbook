@@ -85,10 +85,10 @@ describe('knowledge forest', () => {
     const handoff = await getKnowledgeHandoff();
 
     expect(handoff.title).toBe('Current handoff');
-    expect(handoff.updated).toBe('2026-08-25');
-    expect(handoff.html).toContain('/knowledge/computation/cancellation');
+    expect(handoff.updated).toBe('2026-08-31');
     expect(handoff.html).toContain(
-      '/knowledge/distributed-systems/idempotency'
+      '/knowledge/computation/virtual-machine-authority'
     );
+    expect(handoff.html).toContain('/knowledge/security/authority');
   });
 });
