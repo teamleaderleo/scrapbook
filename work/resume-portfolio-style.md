@@ -101,7 +101,7 @@ Use numbers when they make the accomplishment easier to understand or harder to 
 
 Strong examples include:
 
-- `101s → 13.69s`
+- `112.17s → 13.69s`
 - `200.77s → 16.21s`
 - `4.76 GB → 1.1 GB`
 - `18.014s → 2.364s`
@@ -112,7 +112,7 @@ Don't add a second measurement merely because it exists. Pair measurements when 
 
 When one sentence carries multiple before/after measurements, keep each pair adjacent. Prefer `200.77s → 16.21s and 4.76 GB → about 1.1 GB` over `200.77s and 4.76 GB to 16.21s and 1.1 GB`. The reader should never have to map the first list onto the second.
 
-For a headline result that genuinely deserves emphasis, repeating the magnitude in two useful forms can help. Preflight's **101s → 13.69s** is also **86.4% less time** and a **7.38× speedup**. Do not apply this decoration mechanically to ordinary numbers.
+For a headline result that genuinely deserves emphasis, repeating the magnitude in two useful forms can help. Preflight's **112.17s → 13.69s** is also **87.8% less time** and an **8.19× speedup**. Do not apply this decoration mechanically to ordinary numbers.
 
 Don't make the reader care about the measurement protocol. Words such as `controlled`, `cohort`, `directional`, `gate`, and similar experiment bookkeeping usually belong in evidence records. On the resume, say `a sample launch`, `a launch`, or just state the result unless the protocol changes what the claim means.
 
@@ -138,7 +138,7 @@ For Preflight, the working heading is:
 
 > **Preflight — Cross-platform performance launcher and mod analysis toolkit** *(public open source, Starsector ecosystem)*
 
-The heading identifies the product and keeps the game as context. The first bullet owns the thesis: reverse-engineering a third-party JVM ecosystem spanning independently maintained code, measuring repeated work at scale, the **101s → 13.69s** result, and the product built from that investigation.
+The heading identifies the product and keeps the game as context. The first bullet owns the thesis: reverse-engineering a third-party JVM ecosystem spanning independently maintained code, measuring repeated work at scale, the **112.17s → 13.69s** result, and the product built from that investigation.
 
 Parentheses are useful for compact context such as public status, platforms, domain, or an open PR. They should not become a second sentence of qualifications.
 

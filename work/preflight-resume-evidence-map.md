@@ -16,11 +16,11 @@ PR descriptions are useful maps, but they are not automatically the latest measu
 
 Umbrella integration: [Preflight PR #322 — Accelerate startup and harden mod-heavy gameplay](https://github.com/teamleaderleo/preflight/pull/322), merged as [`159e8704a048adebf932f3da89e2c7ad521a31ac`](https://github.com/teamleaderleo/preflight/commit/159e8704a048adebf932f3da89e2c7ad521a31ac). This is the broad product/integration checkpoint, not a substitute for the smaller source chain below.
 
-## Startup headline: 101s → 13.69s
+## Startup headline: 112.17s → 13.69s
 
 Career claim:
 
-> Reduced startup **101s → 13.69s (86.4% less time, 7.38× speedup)** ...
+> Reduced startup **112.17s → 13.69s (87.8% less time, 8.19× speedup)** ...
 
 Primary measurement breadcrumbs:
 
@@ -29,7 +29,7 @@ Primary measurement breadcrumbs:
 - [PR #408 — Measure the numbers the beta promises](https://github.com/teamleaderleo/preflight/pull/408) — earlier same-profile campaign and first measured **200.77s** cold preparation; useful chronology, not the current 13.69 endpoint.
 - [PR #322](https://github.com/teamleaderleo/preflight/pull/322) — older integrated 15.88s checkpoint and the broad set of optimizations that became the product.
 
-`records/preflight-live-performance.md` owns the selected **101s → 13.69s** career headline. The older 89.00s → 15.53s same-profile campaign remains useful A/B evidence for the comparison question it was designed to answer; same-profile pairing does not give it editorial priority over the retained development endpoint. Change the career headline only through an explicit new decision, not by preferring one benchmark protocol over another.
+`records/preflight-live-performance.md` owns the selected **112.17s → 13.69s** career headline. The older 89.00s → 15.53s same-profile campaign remains useful A/B evidence for the comparison question it was designed to answer; same-profile pairing does not give it editorial priority over the retained development endpoint. Change the career headline only through an explicit new decision, not by preferring one benchmark protocol over another.
 
 ## JSON/CSV memoization and typed-tree architecture
 
