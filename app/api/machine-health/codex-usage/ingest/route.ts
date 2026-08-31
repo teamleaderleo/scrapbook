@@ -1,6 +1,10 @@
 import { randomUUID } from 'node:crypto';
 
 import {
+  codexQuotaEnvelopeSchema,
+  saveCodexQuotaReport,
+} from '@/app/lib/codex-quota-store';
+import {
   codexTokenReportSchema,
   saveCodexTokenReport,
 } from '@/app/lib/machine-health-store';
@@ -61,6 +65,12 @@ export async function POST(request: NextRequest) {
       { ok: false, error: 'payload does not match the token report schema' },
       { status: 400 }
     );
+  const quotaParsed = codexQuotaEnvelopeSchema.safeParse(value);
+  if (!quotaParsed.success)
+    return NextResponse.json(
+      { ok: false, error: 'payload does not match the quota report schema' },
+      { status: 400 }
+    );
 
   const now = Date.now();
   const collectedAt = Date.parse(parsed.data.collected_at);
@@ -72,6 +82,12 @@ export async function POST(request: NextRequest) {
       const start = Date.parse(window.window_started_at);
       const end = Date.parse(window.window_ended_at);
       return start < now - MAX_HISTORY_AGE_MS || end > completeHourEnd;
+    }) ||
+    (quotaParsed.data.quota_samples ?? []).some(sample => {
+      const observedAt = Date.parse(sample.observed_at);
+      return (
+        observedAt < now - MAX_HISTORY_AGE_MS || observedAt > completeHourEnd
+      );
     });
   if (invalidTime)
     return NextResponse.json(
@@ -82,6 +98,7 @@ export async function POST(request: NextRequest) {
   const requestId = randomUUID();
   try {
     const result = await saveCodexTokenReport(parsed.data);
+    const quotaResult = await saveCodexQuotaReport(quotaParsed.data);
     return NextResponse.json({
       ok: true,
       source: result.source,
@@ -89,6 +106,7 @@ export async function POST(request: NextRequest) {
       counted: result.counted,
       skipped: result.skipped,
       ignored: result.ignored,
+      quota_samples: quotaResult.samples,
       collected_at: result.collectedAt,
       request_id: requestId,
     });
