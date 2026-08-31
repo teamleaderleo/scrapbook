@@ -91,7 +91,7 @@ describe('site navigation registry', () => {
     );
     expect(
       siteNavigationItems.find(item => item.id === 'machine-health')?.surface
-    ).toBe('private');
+    ).toBe('operational');
     expect(
       siteNavigationItems.find(item => item.id === 'github')?.surface
     ).toBe('external');
