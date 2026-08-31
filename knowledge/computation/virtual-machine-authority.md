@@ -65,7 +65,7 @@ game
   -> monitor
 ```
 
-The hypervisor still created the VM, established memory mappings, admitted the PCI device, and coordinates the assignment. Rendering itself can proceed through the native guest driver and the physical GPU.
+The hypervisor created the VM, established memory mappings, admitted the PCI device, and coordinates the assignment. Rendering itself can proceed through the native guest driver and the physical GPU.
 
 CPU and memory have the same mixed character. Guest instructions execute on the physical CPU under hardware virtualization. Guest physical addresses resolve through an additional translation layer into host physical memory. The bytes still live in DRAM; the host controls which DRAM belongs to the guest.
 
@@ -89,7 +89,7 @@ A stale answer can make two layers disagree about who owns the same physical cap
 
 Passthrough removes the VMM from large amounts of routine device traffic. That concentrates correctness in a smaller number of ownership transitions.
 
-A GPU may execute billions of operations without QEMU interpreting them. The dangerous moments become assignment, DMA-map changes, BAR relocation, reset, hotplug, migration, teardown, and reuse.
+A GPU may execute billions of operations while QEMU stays outside those operations. The dangerous moments become assignment, DMA-map changes, BAR relocation, reset, hotplug, migration, teardown, and reuse.
 
 This is visible in current Linux Fieldwork investigations. [Issue 659](https://github.com/teamleaderleo/linux-fieldwork/issues/659) found a VFIO DMA range that fit inside a logical BAR while crossing a hole between actual host mappings. [Issue 675](https://github.com/teamleaderleo/linux-fieldwork/issues/675) records the broader hunting lesson: direct assignment thins the ordinary path and makes device-ownership transitions unusually consequential.
 
@@ -99,11 +99,11 @@ This is the hardware version of a recurring performance move: remove work from t
 
 That connects to [profiling the critical path](../performance/profiling-critical-path.md). Removing a mediation layer can reduce latency and CPU work, while the remaining setup and transition path becomes the place to measure and harden.
 
-The same principle appears in Glaeda: move the request toward already-resident useful state instead of reconstructing or transporting that state for every operation. Device assignment moves the guest toward the physical device.
+Glaeda applies the same instinct by moving requests toward already-resident useful state. Device assignment moves the guest toward the physical device.
 
 ## Connections
 
-[Authority](../security/authority.md) supplies the security vocabulary: a resource grant is meaningful only while it remains current and revocable under the owning policy. [Runtime lifetimes](../toolchains/runtime-lifetimes.md) explains why assignment, reset, teardown, and reuse are lifetime transitions instead of cosmetic bookkeeping. [Memory hierarchy](../performance/memory-hierarchy.md) is nearby because virtualization adds translation and locality effects without changing the underlying physical memory hierarchy.
+[Authority](../security/authority.md) supplies the security vocabulary: a resource grant is meaningful only while it remains current and revocable under the owning policy. [Runtime lifetimes](../toolchains/runtime-lifetimes.md) explains why assignment, reset, teardown, and reuse are concrete lifetime transitions with ownership consequences. [Memory hierarchy](../performance/memory-hierarchy.md) is nearby because virtualization adds translation and locality effects on top of the physical memory hierarchy.
 
 The Workbench essays [The Map Boots Linux](https://teamleaderleo.com/desk/the-map-boots-linux) and [The Guest Gets the Territory](https://teamleaderleo.com/desk/the-guest-gets-the-territory) develop the conceptual side of the same model.
 
