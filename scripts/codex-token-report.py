@@ -172,14 +172,14 @@ def dedupe_quota_samples(samples: list[dict[str, Any]]) -> list[dict[str, Any]]:
             int(sample["window_minutes"]),
         ),
     )
-    latest_state: dict[tuple[str, int], tuple[float, str | None]] = {}
+    latest_percent: dict[tuple[str, int], float] = {}
     transitions: list[dict[str, Any]] = []
     for sample in ordered:
         key = (str(sample["limit_id"]), int(sample["window_minutes"]))
-        state = (float(sample["used_percent"]), sample["resets_at"])
-        if latest_state.get(key) == state:
+        used_percent = float(sample["used_percent"])
+        if latest_percent.get(key) == used_percent:
             continue
-        latest_state[key] = state
+        latest_percent[key] = used_percent
         transitions.append(sample)
 
     return transitions[-MAX_QUOTA_SAMPLES:]
