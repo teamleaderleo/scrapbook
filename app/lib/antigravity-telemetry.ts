@@ -43,11 +43,6 @@ const antigravityQuotaEntrySchema = z.object({
 
 const antigravityStatusLineSchema = z.object({
   product: z.literal('antigravity'),
-  model: z
-    .object({
-      id: z.string().trim().min(1).max(128),
-    })
-    .optional(),
   quota: z.record(antigravityQuotaEntrySchema).optional(),
   plan_tier: z.string().trim().min(1).max(64).optional(),
 });
@@ -74,7 +69,7 @@ export type AntigravityUsageProjectionContext = {
 export type AntigravityQuotaProjectionContext = {
   sampleId: string;
   observedAt: string;
-  model?: string | null;
+  model: string;
   planClass?: string | null;
 };
 
@@ -193,7 +188,6 @@ export function projectAntigravityStatusLineQuota(
   context: AntigravityQuotaProjectionContext
 ): ProviderQuotaSample[] {
   const parsed = antigravityStatusLineSchema.parse(value);
-  const model = context.model ?? parsed.model?.id ?? null;
   const planClass = context.planClass ?? normalizePlanTier(parsed.plan_tier);
   const quotaEntries = Object.entries(parsed.quota ?? {});
   if (quotaEntries.length > 128)
@@ -208,7 +202,7 @@ export function projectAntigravityStatusLineQuota(
         observed_at: context.observedAt,
         provider: 'google',
         harness: 'antigravity',
-        model,
+        model: context.model,
         plan_class: planClass,
         quota_contract: 'antigravity-statusline-quota/v1',
         limit_id: limitId,
