@@ -46,7 +46,7 @@ PCIe
   USB controller B -> Windows
 ```
 
-The Windows side can get stranger still. Use a host-passthrough CPU model so the guest sees the host CPU closely. Give Windows hugepage-backed memory if that helps the workload. Assign an entire GPU rather than a virtual display device. Assign an entire NVMe controller rather than presenting storage through a virtual disk interface. Assign an entire USB controller so the physical ports attached to it belong to Windows.
+The Windows side can get stranger still. Use a host-passthrough CPU model so the guest sees the host CPU closely. Give Windows hugepage-backed memory if that helps the workload. Assign an entire GPU and let the physical display path belong to the guest. Assign an entire NVMe controller and let Windows talk to it through its native storage stack. Assign an entire USB controller so the physical ports attached to it belong to Windows.
 
 The Linux kernel's [VFIO documentation](https://docs.kernel.org/driver-api/vfio.html) describes direct device access as a way for virtual machines to use physical devices with lower latency, higher bandwidth and ordinary bare-metal device drivers. The IOMMU supplies the isolation and DMA translation that makes this kind of assignment possible.
 
@@ -101,7 +101,7 @@ passthrough / assignment
 
 All three can satisfy the operating system.
 
-Linux or Windows does not need a philosophical certificate proving that every component emerged directly from a motherboard trace. It needs coherent consequences.
+Linux and Windows judge the machine through coherent consequences.
 
 Write this register and the promised operation happens.
 
@@ -157,7 +157,7 @@ Device assignment feels like the hardware version of the same instinct.
 
 Move the guest toward the real device until the middle contains only the work that still earns its existence.
 
-For graphics, that may mean the VMM leaves the rendering path entirely. For storage, it may mean giving the guest an NVMe controller instead of translating every block operation through another virtual interface. For USB, it may mean assigning the controller and letting the guest own hotplug directly.
+For graphics, the VMM can leave the rendering path entirely. For storage, a guest-owned NVMe controller gives the native storage stack a direct hardware path. For USB, an assigned controller gives the guest ownership of hotplug itself.
 
 Every removed layer deletes work, latency and state that somebody would otherwise have to maintain.
 
@@ -167,7 +167,7 @@ The thinner the ordinary path becomes, the more concentrated the surviving respo
 
 ## A billion boring operations, one terrifying transition
 
-If Windows owns the GPU, the VMM does not need to interpret every draw call.
+If Windows owns the GPU, every draw call can bypass VMM interpretation.
 
 Wonderful.
 
@@ -188,7 +188,7 @@ Linux Fieldwork has spent a frankly suspicious amount of August walking straight
 
 The VFIO bug behind [linux-fieldwork #659](https://github.com/teamleaderleo/linux-fieldwork/issues/659) is a perfect example. A guest DMA range could fit inside the logical bounds of a VFIO BAR while crossing a hole between the actual host-mapped subregions. The outer story said “inside the device region.” The physical mapping that made the pointer real said “this request spans somewhere you cannot actually reach.”
 
-Other current investigations follow BAR relocation and reuse across the same boundary: stale clones after relocation, partial moves, old mappings becoming reusable while side effects still survive. [Linux Fieldwork #675](https://github.com/teamleaderleo/linux-fieldwork/issues/675) now keeps the broader hunting lesson without pretending all of those bugs have one mechanism.
+Other current investigations follow BAR relocation and reuse across the same boundary: stale clones after relocation, partial moves, old mappings becoming reusable while side effects still survive. [Linux Fieldwork #675](https://github.com/teamleaderleo/linux-fieldwork/issues/675) keeps the broader hunting lesson while preserving the different mechanisms and repairs in the underlying cases.
 
 The VMM can disappear from billions of routine device operations and become absolutely decisive at the instant ownership changes.
 
@@ -218,7 +218,7 @@ A lifecycle that says when the claim begins and ends.
 
 Put those together and an operating system can inhabit the result whether the underlying resources are emulated, paravirtualized, directly assigned or mixed together in one gloriously cursed machine.
 
-That also explains why virtualization bugs feel so existential. A stale BAR, wrong DMA mapping or premature reuse event is not merely an incorrect field in a program. Two layers have begun disagreeing about which world owns a piece of reality.
+That also explains why virtualization bugs feel so existential. A stale BAR, wrong DMA mapping or premature reuse event encodes an ownership split: two layers have begun disagreeing about which world owns a piece of reality.
 
 The machine still looks coherent from one angle while the authority underneath has split.
 
