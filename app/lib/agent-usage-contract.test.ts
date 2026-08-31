@@ -75,6 +75,25 @@ describe('agentTelemetryEnvelopeSchema', () => {
     });
   });
 
+  it('namespaces local sample IDs by provider and harness', () => {
+    const result = agentTelemetryEnvelopeSchema.safeParse({
+      ...baseReport(),
+      usage_samples: [
+        usage('attempt-1'),
+        {
+          ...usage('attempt-1'),
+          provider: 'google',
+          harness: 'antigravity',
+          model: 'gemini-3.7-flash-high',
+          effort: 'high',
+          accounting_contract: 'antigravity-headless-usage/v1',
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   it('does not impose OpenAI token-membership arithmetic on other providers', () => {
     const result = agentTelemetryEnvelopeSchema.safeParse({
       ...baseReport(),
@@ -132,7 +151,7 @@ describe('agentTelemetryEnvelopeSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects reset-only quota noise and duplicate sample identities', () => {
+  it('rejects reset-only quota noise and duplicate sample keys', () => {
     const resetOnly = agentTelemetryEnvelopeSchema.safeParse({
       ...baseReport(),
       quota_samples: [

@@ -19,9 +19,17 @@ const nullableCounterSchema = z
   .max(Number.MAX_SAFE_INTEGER)
   .nullable();
 
-function hasDuplicateSampleIds(samples: ReadonlyArray<{ sample_id: string }>) {
-  const ids = samples.map(sample => sample.sample_id);
-  return new Set(ids).size !== ids.length;
+type SampleIdentity = {
+  sample_id: string;
+  provider: string;
+  harness: string;
+};
+
+function hasDuplicateSampleKeys(samples: ReadonlyArray<SampleIdentity>) {
+  const keys = samples.map(
+    sample => `${sample.provider}\u0000${sample.harness}\u0000${sample.sample_id}`
+  );
+  return new Set(keys).size !== keys.length;
 }
 
 export const agentUsageSampleSchema = z
@@ -101,18 +109,18 @@ export const agentTelemetryEnvelopeSchema = z
   })
   .strict()
   .superRefine((report, context) => {
-    if (hasDuplicateSampleIds(report.usage_samples)) {
+    if (hasDuplicateSampleKeys(report.usage_samples)) {
       context.addIssue({
         code: 'custom',
         path: ['usage_samples'],
-        message: 'Usage sample IDs must be unique within a report',
+        message: 'Usage sample keys must be unique within a report',
       });
     }
-    if (hasDuplicateSampleIds(report.quota_samples)) {
+    if (hasDuplicateSampleKeys(report.quota_samples)) {
       context.addIssue({
         code: 'custom',
         path: ['quota_samples'],
-        message: 'Quota sample IDs must be unique within a report',
+        message: 'Quota sample keys must be unique within a report',
       });
     }
   });
