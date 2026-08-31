@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS "agent_usage_samples" (
   "observed_at" timestamp with time zone NOT NULL,
   "input_tokens" bigint,
   "cached_input_tokens" bigint,
+  "cache_write_input_tokens" bigint,
   "reasoning_tokens" bigint,
   "output_tokens" bigint,
   "total_tokens" bigint,
@@ -33,6 +34,7 @@ CREATE TABLE IF NOT EXISTS "agent_usage_samples" (
     CHECK (
       ("input_tokens" IS NULL OR "input_tokens" >= 0) AND
       ("cached_input_tokens" IS NULL OR "cached_input_tokens" >= 0) AND
+      ("cache_write_input_tokens" IS NULL OR "cache_write_input_tokens" >= 0) AND
       ("reasoning_tokens" IS NULL OR "reasoning_tokens" >= 0) AND
       ("output_tokens" IS NULL OR "output_tokens" >= 0) AND
       ("total_tokens" IS NULL OR "total_tokens" >= 0) AND

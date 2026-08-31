@@ -37,6 +37,7 @@ export const agentUsageSampleSchema = z
     run_ref: boundedReferenceSchema.nullable(),
     input_tokens: nullableCounterSchema,
     cached_input_tokens: nullableCounterSchema,
+    cache_write_input_tokens: nullableCounterSchema,
     reasoning_tokens: nullableCounterSchema,
     output_tokens: nullableCounterSchema,
     total_tokens: nullableCounterSchema,

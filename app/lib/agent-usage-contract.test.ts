@@ -28,6 +28,7 @@ describe('agentTelemetryEnvelopeSchema', () => {
           run_ref: 'stensibly:run_abc123',
           input_tokens: null,
           cached_input_tokens: null,
+          cache_write_input_tokens: null,
           reasoning_tokens: null,
           output_tokens: null,
           total_tokens: null,
@@ -83,6 +84,7 @@ describe('agentTelemetryEnvelopeSchema', () => {
           run_ref: null,
           input_tokens: 100,
           cached_input_tokens: 150,
+          cache_write_input_tokens: 175,
           reasoning_tokens: 30,
           output_tokens: 20,
           total_tokens: null,
@@ -148,10 +150,7 @@ describe('agentTelemetryEnvelopeSchema', () => {
 
     const duplicate = agentTelemetryEnvelopeSchema.safeParse({
       ...baseReport(),
-      usage_samples: [
-        usage('same-id'),
-        usage('same-id'),
-      ],
+      usage_samples: [usage('same-id'), usage('same-id')],
     });
     expect(duplicate.success).toBe(false);
   });
@@ -180,6 +179,7 @@ function usage(sampleId: string) {
     run_ref: null,
     input_tokens: 100,
     cached_input_tokens: 80,
+    cache_write_input_tokens: null,
     reasoning_tokens: null,
     output_tokens: 20,
     total_tokens: 120,
