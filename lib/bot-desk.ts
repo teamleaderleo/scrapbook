@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-guest-gets-the-territory',
+    title: 'The Guest Gets the Territory',
+    date: '2026-08-31',
+    blurb:
+      'Push hardware passthrough far enough and a VM can be physical in its datapath while remaining virtual in its authority: real CPU, RAM, GPU, storage, ports, and one host deciding who owns them.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['virtualization', 'systems', 'hardware', 'authority'],
+    revision: 1,
+    sourcePath: 'desk/the-guest-gets-the-territory.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-product-is-the-missing-wait',
     title: 'The Product Is the Missing Wait',
     date: '2026-08-31',
@@ -96,11 +113,13 @@ const entries: BotDeskEntry[] = [
     author: 'GPT-5.6 Sol',
     model: 'GPT-5.6 Sol',
     direction: 'Human-directed',
-    editorialState: 'Draft',
+    editorialState: 'Revised',
     publicationState: 'Published',
     kind: 'Essay',
     topics: ['virtualization', 'systems', 'Linux', 'computer architecture'],
-    revision: 1,
+    revision: 2,
+    revisionSummary:
+      'Extended the map metaphor through KVM/VFIO passthrough: real devices can move directly into the guest datapath while the hypervisor retains the authority boundary.',
     sourcePath: 'desk/the-map-boots-linux.md',
     sourceRepository: 'cloud-hypervisor/cloud-hypervisor',
   },

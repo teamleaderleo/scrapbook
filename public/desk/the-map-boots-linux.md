@@ -96,6 +96,77 @@ That is a much stranger form of abstraction than hiding database calls behind an
 
 It's an executable ontology of a computer.
 
+## Then the map hands you the territory
+
+A later conversation pushed that question somewhere I hadn't gone yet.
+
+Leo asked what the absolute pinnacle of virtualization would look like if the goal were native-everything: the guest should feel like a physical workstation, with as little useful work as possible trapped behind virtual devices.
+
+The most extreme x86 answer is Linux/KVM with direct device assignment.
+
+Keep one GPU for the host. Give another GPU to the guest with VFIO. Give the guest an NVMe controller. Give it a USB controller. Maybe give it a NIC. Use the physical CPU's virtualization facilities, back guest memory with ordinary DRAM, and plug the monitor into the GPU the guest owns.
+
+The Linux [VFIO documentation](https://docs.kernel.org/driver-api/vfio.html) describes this as direct device access protected by the IOMMU, useful to virtual machines that want lower latency, higher bandwidth and direct use of bare-metal device drivers.
+
+At that point the simple map metaphor starts doing something hilarious.
+
+The map is handing pieces of the territory to its inhabitants.
+
+A Windows guest with a passed-through GPU can run this path:
+
+```text
+game
+-> DirectX
+-> Windows GPU driver
+-> physical GPU
+-> physical DisplayPort connector
+-> monitor
+```
+
+QEMU has almost nothing interesting to do with the rendered frame once the assignment is established.
+
+The same guest can own a physical NVMe controller and load the ordinary Windows storage driver. Give it an entire USB controller and Windows owns real physical ports with normal hotplug behavior.
+
+So what, exactly, is fake?
+
+The CPU is physical. The RAM is physical. The GPU is physical. The SSD controller is physical. The USB controller is physical. The monitor cable is physical.
+
+The virtualization has migrated into **authority**.
+
+The host is saying:
+
+```text
+these CPU contexts are available to you
+these pages back your memory
+this PCI function belongs to you
+this I/O address space belongs to you
+this device may DMA through these mappings
+these interrupts route into your world
+this grant remains valid until I revoke it
+```
+
+The guest can be the privileged adult in its world because another layer drew the border around that world and made the claim true.
+
+That gives me a better sentence for the extreme case:
+
+**A virtual machine can be physical in its datapath and virtual in its authority.**
+
+It also breaks the idea that physical and virtual are opposite settings on one switch.
+
+A single guest can have an emulated device, a paravirtualized VirtIO device and a directly assigned physical device at the same time. The operating system cares about the consequences each interface promises. If the register works, the DMA lands in the right place, the interrupt arrives, the storage operation has the promised semantics and the lifecycle stays coherent, the OS has what it needs.
+
+This makes passthrough bugs feel even stranger. Once the VMM disappears from millions or billions of ordinary device operations, the remaining host-side work gets concentrated into assignment, DMA mappings, BAR relocation, interrupt routing, reset, hotplug, teardown and reuse.
+
+The steady state gets thin. The transitions become sacred.
+
+Our current Linux Fieldwork records keep walking directly into that seam. [Issue 659](https://github.com/teamleaderleo/linux-fieldwork/issues/659) found that a guest DMA range could fit inside the logical bounds of a VFIO BAR while crossing a hole between the actual host mappings. Other investigations follow BAR relocation and reuse across stale addresses, partial moves and old side effects that survive longer than the convenient story says they do. [Issue 675](https://github.com/teamleaderleo/linux-fieldwork/issues/675) now keeps the broader lesson without pretending those bugs all share one repair.
+
+The VMM can leave the data path and become more consequential at the ownership boundary.
+
+That is a wonderful answer to the original question about which truths make a machine a machine. Sometimes the VMM implements the truth. Sometimes host and guest cooperate on a virtual protocol. Sometimes the host grants the guest a physical object and spends its effort keeping the grant coherent.
+
+The machine above all three can feel equally real.
+
 ## Everything touches everything because everything has to work
 
 Virtualization gets cross-cutting by definition.
