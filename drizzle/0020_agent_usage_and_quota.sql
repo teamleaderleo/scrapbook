@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS "provider_quota_samples" (
   "sample_id" text NOT NULL,
   "provider" text NOT NULL,
   "harness" text NOT NULL,
+  "model" text,
   "plan_class" text,
   "quota_contract" text NOT NULL,
   "limit_id" text NOT NULL,
@@ -79,6 +80,7 @@ CREATE TABLE IF NOT EXISTS "provider_quota_samples" (
       char_length("harness") BETWEEN 1 AND 128 AND
       char_length("quota_contract") BETWEEN 1 AND 128 AND
       char_length("limit_id") BETWEEN 1 AND 128 AND
+      ("model" IS NULL OR char_length("model") BETWEEN 1 AND 128) AND
       ("plan_class" IS NULL OR char_length("plan_class") BETWEEN 1 AND 128) AND
       ("balance_unit" IS NULL OR char_length("balance_unit") BETWEEN 1 AND 128)
     ),
@@ -110,7 +112,7 @@ CREATE INDEX IF NOT EXISTS "provider_quota_samples_observed_idx"
 ON "provider_quota_samples" USING btree ("observed_at" DESC NULLS LAST);
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "provider_quota_samples_provider_limit_idx"
-ON "provider_quota_samples" USING btree ("provider", "limit_id", "observed_at" DESC NULLS LAST);
+ON "provider_quota_samples" USING btree ("provider", "model", "limit_id", "observed_at" DESC NULLS LAST);
 --> statement-breakpoint
 ALTER TABLE "provider_quota_samples" ENABLE ROW LEVEL SECURITY;
 --> statement-breakpoint

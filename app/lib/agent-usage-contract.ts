@@ -54,6 +54,7 @@ export const providerQuotaSampleSchema = z
     observed_at: z.string().datetime({ offset: true }),
     provider: compactIdentitySchema,
     harness: compactIdentitySchema,
+    model: compactIdentitySchema.nullable(),
     plan_class: compactIdentitySchema.nullable(),
     quota_contract: compactIdentitySchema,
     limit_id: compactIdentitySchema,
