@@ -27,6 +27,14 @@ Skip the install step when the local dependency graph is already current:
 pnpm ci:local -- --skip-install
 ```
 
+For a compact agent-facing success receipt, add `--quiet`:
+
+```bash
+pnpm ci:local -- --skip-install --quiet
+```
+
+Quiet mode prints one line per completed step and reveals that step's captured log only when it fails.
+
 The command stops at the first broken boundary and prints the duration of every completed step. GitHub Actions remains the clean Linux verification environment; local CI is the quicker equivalent for routine checks.
 
 Before a production build, Scrapbook removes stale generated route declarations from `.next/dev/types`. Next 16.3.2 can otherwise include deleted development routes in its production type check. The build wrapper holds Next's own `.next/dev` advisory lock until the production build exits, so it refuses to run while `next dev` owns that directory and prevents a new dev server from recreating stale declarations mid-build. It leaves the development bundler cache and production build output alone.
