@@ -4,7 +4,7 @@ kind: concept
 trunk: ai-systems
 summary: Recorded token volume splits into fresh prefill, cached context, and generated decode, which drive very different serving and replacement costs.
 created: 2026-08-27
-updated: 2026-08-27
+updated: 2026-08-30
 ---
 # Frontier inference economics
 
@@ -20,6 +20,18 @@ cache-hit input     = T * (1 - o) * c
 If telemetry reports cache-hit tokens as a subset of total input, partition that input once; do not add the cache-hit subset a second time. Generated reasoning tokens, when reported separately, belong on the decode side for capacity and cost modeling.
 
 Fresh input drives prompt prefill. Generated output drives sequential decode. Cache hits reuse previously computed prefix state and can avoid most prompt recomputation, while still consuming cache/state memory, lookup, transfer, and scheduling capacity. Long context also raises the state carried through generation, so a cached 300K-token session and a short session with the same output length can have very different decode costs.
+
+## 2026-08-30 measured workload update
+
+The Big Red/MacBook Codex telemetry now supplies a 30-day measured reference instead of requiring the whole workload to be modeled from a sensitivity band. The month view records about **29.8 billion total tokens**, **29.6 billion input tokens**, **76.4 million output tokens**, **209,049 model calls**, and **97.8% input-cache reuse** across 720 complete UTC hours. That is about **6.95B recorded tokens/week** on the trailing 30-day average, roughly **0.256% generated output**, and about **142.5K recorded tokens/model call**.
+
+The 30-day average dilutes the current operating regime because usage ramped sharply during the latest roughly three weeks. If essentially the whole 29.8B monthly total landed in the latest 21 days, the mathematical upper bound is **9.93B Codex tokens/week**; any activity in the preceding nine days pulls the 21-day Codex average below that bound. ChatGPT/tab activity is outside this Codex collector. The observed all-surface workload is therefore best carried as a separate working floor: **at least ~10B recorded frontier-model tokens/week during the recent regime**, with 10–12B/week retained as the blended planning envelope.
+
+A separate Aug. 29 observation captured **1,436,500,999 tokens across ten complete UTC hours** at about 98% cache reuse. That burst corresponds to roughly 24.1B recorded tokens/week if sustained continuously, so it is useful as a burst reference rather than a weekly baseline.
+
+The measured mix changes the serving interpretation substantially. At 97.8% cache reuse, the displayed 29.6B input tokens imply about **651.2M fresh input tokens/month**, averaging roughly **251 fresh-prefill tok/s** across all hours, while 76.4M output tokens average roughly **29.5 decode tok/s**. At a 10B/week workload with the same measured mix, the corresponding averages are about **363 fresh-prefill tok/s** and **42 decode tok/s**. Extremely favorable prefix reuse means the raw recorded-token counter greatly exceeds the amount of fresh prompt computation and sequential generation.
+
+The collector also records `cache_write_input_tokens`, so future cost updates can replace cache-write assumptions with measured totals. A content-blind Aug. 30 arithmetic audit checked 40,975 valid local `last_token_usage` events: every event satisfied cached input <= input and reasoning output <= output, and 99.160% had `total_tokens = input + output`. The dashboard therefore retains source `total_tokens` as authoritative and calculates cache share independently.
 
 ## 2026-08-27 frontier snapshot
 
@@ -38,7 +50,7 @@ The parameter counts also explain why GLM-5.3-Flash lives in a radically cheaper
 
 ## Blended workload reference
 
-Historical baseline for this note: **10–12 billion recorded frontier-model tokens per week**, kept as one blended workload with no product-surface split recorded. The generated-token fraction is modeled as a sensitivity band of 2–5%; the cache-hit fraction is another sensitivity parameter rather than a claim about measured telemetry.
+The working blended envelope remains **10–12 billion recorded frontier-model tokens per week** across surfaces. The 30-day Codex collector alone averages 6.95B/week, while the recent ~21-day interval is much hotter and has a 9.93B/week mathematical upper bound from the 30-day total. ChatGPT/tab usage remains outside that collector. For historical comparability, the 2–5% generated-token and 95% cache-hit bands below remain as sensitivity cases. They are no longer the best point estimate for the measured Codex mix, which is roughly 0.256% output and 97.8% cache reuse.
 
 A week has 604,800 seconds, so 10–12B recorded tokens correspond to 16,534–19,841 recorded tokens per second when averaged across the full week. That number is accounting volume. At a 2–5% generated share, the sequential decode requirement is far smaller:
 
@@ -54,24 +66,29 @@ At 95% cache reuse on input, fresh prefill averages roughly **785–810 tok/s** 
 | 90% | 1,571–1,620 tok/s | 1,885–1,944 tok/s |
 | 95% | 785–810 tok/s | 942–972 tok/s |
 | 97% | 471–486 tok/s | 565–583 tok/s |
+| 97.8%, measured 0.256% output mix | ~363 tok/s | ~436 tok/s |
 
-This is the main correction to a naive throughput estimate. Treating all 16.5–19.8K recorded tokens per second as autoregressive generation overstates average decode demand by roughly 20–50x under the 2–5% output assumption.
+The measured Codex workload therefore sits well below the old decode sensitivity band while retaining an enormous recorded-token count. Treating all 16.5–19.8K recorded tokens per second as autoregressive generation would overstate the actual measured Codex decode rate by roughly two orders of magnitude.
 
 ### Active-hour concentration
 
 A weekly average hides burstiness. If most work happens inside a consistent daily active window, multiply the 24-hour average by `24 / active_hours` before adding further peak headroom.
 
-| Effective active window | Multiplier | Decode envelope from the blended workload |
+| Effective active window | Multiplier | Decode envelope from the historical 2–5% band |
 | ---: | ---: | ---: |
 | 24 h/day | 1x | 331–992 tok/s |
 | 12 h/day | 2x | 662–1,984 tok/s |
 | 8 h/day | 3x | 992–2,976 tok/s |
 
-Multiple simultaneous agents can push instantaneous load higher again. Long-context cache misses and multimodal/tool bursts mainly pressure prefill, memory, and queueing even when average decode remains modest.
+For the measured 0.256% output mix, a 10B/week workload implies about 42 decode tok/s on a 24/7 average, about 85 tok/s across a 12-hour active window, or about 127 tok/s across an 8-hour active window before burst headroom. Multiple simultaneous agents can push instantaneous load higher again. Long-context cache misses and multimodal/tool bursts mainly pressure prefill, memory, and queueing even when average decode remains modest.
 
 ## API-equivalent replacement cost
 
-The table below uses a 95% cache-hit assumption on input and a 2–5% generated-token band. These are replacement-cost estimates at public token rates, not subscription billing statements.
+Two views are now useful: the original sensitivity envelope and the measured Codex-like mix. These are replacement-cost estimates at public token rates, not subscription billing statements or claims about provider marginal cost.
+
+### Historical sensitivity envelope
+
+The table below retains the original 95% cache-hit assumption on input and 2–5% generated-token band for cross-model comparison.
 
 | Model/API | Fresh input / cache-hit / output per 1M | 10B tokens/week | 12B tokens/week | Annual envelope |
 | --- | ---: | ---: | ---: | ---: |
@@ -82,9 +99,22 @@ The table below uses a 95% cache-hit assumption on input and a 2–5% generated-
 
 GLM's cache-hit figure above is derived from Artificial Analysis's listed $0.15/M input price and 83% cache discount as of this snapshot. Kimi's official K3 API reports more than 90% cache hits on coding workloads, which makes a high-cache sensitivity case worth modeling; a different workload can land elsewhere.
 
-OpenAI currently applies a long-context multiplier to GPT-5.6 requests above 272K input tokens: 2x input, 2x cached input, and 1.5x output for the full request. If every modeled Sol request landed in that tier, the same 95%-cache envelope would rise to **$17.4K–$26.0K/week at 10B** and **$20.8K–$31.2K/week at 12B**, or roughly **$0.90M–$1.62M/year**. A real workload should be costed request by request according to how much volume actually crosses that threshold.
+### Measured Codex-like Sol mix
 
-The gap between subscription spend and these numbers is a product-economics result. Included usage, quota policy, promotions, resets, and retail API rates belong to different accounting systems. API-equivalent spend is useful here as replacement cost, not as an estimate of a provider's marginal compute cost.
+Using roughly **0.256% output** and **97.8% cached input**, the same 10–12B/week recorded volume costs much less than the historical sensitivity envelope because almost all recorded input is cache hits and generated output is a tiny share:
+
+| Weekly recorded volume | Sol API-equivalent / week | Annualized |
+| ---: | ---: | ---: |
+| 10B | ~$5.29K | **~$275K/year** |
+| 12B | ~$6.35K | **~$330K/year** |
+
+For comparison, the displayed 30-day Codex counters translate to about **$15.7K of standard-context Sol API-equivalent usage** before cache-write and request-level long-context adjustments.
+
+These figures exclude any cache-write premium and request-level long-context surcharge because the aggregate dashboard does not yet provide a request histogram around the 272K-input threshold. The collector now records cache writes, so that component can be measured directly once a complete range total is surfaced.
+
+OpenAI currently applies a long-context multiplier to GPT-5.6 requests above 272K input tokens: 2x input, 2x cached input, and 1.5x output for the full request. If every request in the historical 95%-cache envelope landed in that tier, costs would rise to **$17.4K–$26.0K/week at 10B** and **$20.8K–$31.2K/week at 12B**, or roughly **$0.90M–$1.62M/year**. A real workload should be costed request by request according to how much volume actually crosses that threshold.
+
+The gap between subscription spend and these numbers is a product-economics result. Included usage, quota policy, promotions, resets, retail API rates, and provider-side fleet economics belong to different accounting systems. API-equivalent spend is useful here as replacement cost.
 
 ## Self-hosting arithmetic
 
@@ -113,11 +143,20 @@ The hardware-only purchase price of an 8x B300 node is roughly one year of conti
 
 ## What to carry forward
 
-The durable model is simple: **recorded tokens are an accounting quantity; fresh prefill and generated decode are the serving quantities**. Billions of recorded tokens can coexist with hundreds to a few thousand generated tokens per second when prompts dominate the counter and prefix reuse is high.
+The durable model is simple: **recorded tokens are an accounting quantity; fresh prefill and generated decode are the serving quantities**. The new telemetry sharpens the point: a month can contain almost 30B recorded tokens while only about 0.256% are generated output and 97.8% of input is cache-hit context.
 
-For the 2026-08-27 snapshot, the blended 10–12B/week workload implies hundreds to about one thousand decode tok/s on a 24/7 average, or roughly one to three thousand tok/s when concentrated into eight active hours. Frontier-ish open-weight replacement still starts around an 8x B300 node for K3/Qwen because the models themselves are enormous. That makes a half-million-dollar machine a credible minimum hardware reference even after correcting the decode-throughput math.
+For the current workload, the best working picture is:
 
-GLM-5.3-Flash is the economic outlier: it reaches the 57-point screening floor with only 18B active parameters and 320B total, yielding radically cheaper hosted inference and a much smaller self-host memory footprint. Whether that capability level survives the actual agent workload is an empirical question.
+- 30-day measured Codex average: **6.95B recorded tokens/week**;
+- recent 21-day Codex upper bound from the month total: **9.93B/week**;
+- recent blended all-surface working floor: **>=10B/week**, with **10–12B/week** retained as the planning envelope;
+- measured Codex mix: **~0.256% output, 97.8% input-cache reuse**;
+- 10B/week at that mix: **~363 fresh-prefill tok/s, ~42 decode tok/s, ~$275K/year Sol API-equivalent**;
+- 12B/week at that mix: **~436 fresh-prefill tok/s, ~51 decode tok/s, ~$330K/year Sol API-equivalent**.
+
+Frontier-ish open-weight replacement still starts around an 8x B300 node for K3/Qwen because the models themselves are enormous. That makes a half-million-dollar machine a credible hardware reference even after correcting the serving-throughput math. The measured workload also shows how economically powerful prefix reuse can be: cache behavior changes both serving demand and replacement price by multiples while leaving the user-visible recorded token counter gigantic.
+
+GLM-5.3-Flash remains the economic outlier: it reaches the 57-point screening floor with only 18B active parameters and 320B total, yielding radically cheaper hosted inference and a much smaller self-host memory footprint. Whether that capability level survives the actual agent workload is an empirical question.
 
 ## Connections
 
@@ -125,8 +164,9 @@ GLM-5.3-Flash is the economic outlier: it reaches the 57-point screening floor w
 
 ## Sources for the dated snapshot
 
-Accessed 2026-08-27:
+Accessed 2026-08-27 through 2026-08-30:
 
+- Scrapbook Big Red machine-health dashboard and Codex token collector: measured 30-day totals, complete-hour accounting, cache share, model-call count, and audit notes.
 - Artificial Analysis: [GPT-5.6 Sol xhigh](https://artificialanalysis.ai/models/gpt-5-6-sol-xhigh), [Kimi K3 max](https://artificialanalysis.ai/models/kimi-k3), [Qwen3.8 2.4T-A95B](https://artificialanalysis.ai/models/qwen3-8-2-4t-a95b), and [GLM-5.3-Flash](https://artificialanalysis.ai/models/glm-5-3-flash).
 - OpenAI: [GPT-5.6 Sol API model and pricing](https://developers.openai.com/api/docs/models/gpt-5.6-sol) and [ChatGPT token rate card](https://help.openai.com/en/articles/20001415).
 - Kimi: [Kimi K3 technical blog and API pricing](https://www.kimi.com/en/blog/kimi-k3).
