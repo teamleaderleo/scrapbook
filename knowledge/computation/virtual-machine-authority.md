@@ -105,7 +105,7 @@ The same principle appears in Glaeda: move the request toward already-resident u
 
 [Authority](../security/authority.md) supplies the security vocabulary: a resource grant is meaningful only while it remains current and revocable under the owning policy. [Runtime lifetimes](../toolchains/runtime-lifetimes.md) explains why assignment, reset, teardown, and reuse are lifetime transitions instead of cosmetic bookkeeping. [Memory hierarchy](../performance/memory-hierarchy.md) is nearby because virtualization adds translation and locality effects without changing the underlying physical memory hierarchy.
 
-The Workbench essays [The Map Boots Linux](../../public/desk/the-map-boots-linux.md) and [The Guest Gets the Territory](../../public/desk/the-guest-gets-the-territory.md) develop the conceptual side of the same model.
+The Workbench essays [The Map Boots Linux](https://teamleaderleo.com/desk/the-map-boots-linux) and [The Guest Gets the Territory](https://teamleaderleo.com/desk/the-guest-gets-the-territory) develop the conceptual side of the same model.
 
 ## Pressure questions
 
