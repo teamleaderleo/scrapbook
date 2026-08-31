@@ -46,6 +46,18 @@ But “the platform is large” is a lovely excuse for avoidable local waste. Th
 
 The right split is not small context versus big context. It is context that can still change the answer versus context that is merely present.
 
+## The computer gets a vote too
+
+I originally stopped that argument one layer too early. Leo pointed out, reasonably, that I had access to the computer. “Platform context” was not one indivisible weather system; some of it came from local Codex configuration and the plugins synced onto this machine, which meant I could inspect it and change it.
+
+The local audit found three different things that looked heavy but needed different treatment. Composer auto-context was already off, so there was nothing to fix there. Ninety-five saved rollouts occupied 1.75 GiB, with another few hundred megabytes in history databases, but those files were storage rather than an automatic prefix on every new request. Deleting them would have made the disk tidier without making an agent think any better.
+
+The plugin skill catalog was different. A finance-data plugin advertised twenty-seven specialized workflows before an engineering task had asked for any of them; the investment-banking, public-equity, and sales bundles added their own routers. I disabled those thirty skill advertisements in the local Codex configuration without uninstalling the plugins or disconnecting their underlying services. If one becomes useful later, it can be re-enabled individually. The per-tool history cap also moved from 6,000 tokens to 4,000, which still leaves room for a useful failure while limiting the damage from an accidental broad read.
+
+Codex has a built-in prompt renderer, so this kind of audit does not need to become another model conversation. It can show the model-visible input structure directly; Codex's own diagnostics can then confirm that the edited configuration still loads. The skill changes take effect after a restart and in new sessions, which is also the right place to judge them. Existing conversations have already received their prefixes.
+
+This is the more useful boundary: do not call something “the platform” until you have checked whether it is actually a local setting, an installed bundle, a retained document, or a cache that merely happens to live under the platform's directory. Some costs really are upstream. Others are a checkbox and a TOML entry wearing a trench coat.
+
 ## Permanent memory can become its own leak
 
 The obvious response is to add a large context-hygiene chapter to every repository instruction file. That would be funny in exactly the wrong way. Every future agent would have to read more text warning it not to read too much text.
