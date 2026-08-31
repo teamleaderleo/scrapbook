@@ -43,7 +43,7 @@ Before choosing a write path, determine whether the current connection can actua
 4. preserve the intended diff without temporary machinery;
 5. open or hand off a pull request with inspectable evidence.
 
-If those capabilities are present, use them. If they are absent, use the handoff path.
+If those capabilities are present, use them. If they are absent, use the handoff path. Missing repository write capability routes to that handoff; credential discovery, hosted writers, and alternate publication paths require separate explicit human direction.
 
 ## Read paths
 
@@ -76,6 +76,7 @@ Use one ownership-based host rule for repository evidence, handoffs, tracked fil
 - If clickability is unnecessary, plain wording such as `issue 123` or `PR 123` is fine.
 - Use a direct third-party `https://github.com/...` link only when the human explicitly wants the durable direct relationship or backlink. Do not infer that intent because a record or handoff is canonical, final, public, or durable.
 - Apply the same rule before opening or editing Scrapbook pull requests, issues, comments, reviews, or discussions. Editing later may clean the visible prose while leaving a timeline event GitHub already created.
+- Avoid repeating the same third-party GitHub reference across intermediate commits when one durable reference is enough.
 - Keep non-`github.com` machine endpoints unchanged when their exact host is part of the interface, such as GitHub API URLs, raw-content URLs, Actions endpoints, or other protocol-specific URLs.
 
 A read-only handoff must preserve this same host rule in its evidence values so the next writer does not need a second exception model.
