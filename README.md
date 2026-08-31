@@ -2,76 +2,33 @@
 
 This repository powers [teamleaderleo.com](https://teamleaderleo.com/): a personal site, software lab, and private knowledge workspace.
 
-Scrapbook began as a project-management application built around projects, blocks, tags, images, and rich text. That product is retired. The current repository keeps the useful public tools and experiments, the Supabase-backed Space workspace, and the operational code that still earns its complexity.
+## Current site
 
-## Live surfaces
+- **Home** (`/`) combines the Operator phrasebook shortcuts with recent GitHub activity. The full phrasebook lives at `/operator`, with canonical plain text at `/operator.txt`.
+- **Space** (`/space`) is the private Supabase-backed workspace for searchable notes, links, code, references, versioned content, authenticated editing, and FSRS review.
+- **Time** (`/time`) compares UTC, Eastern, Pacific, local time, and a selected zone across a full day.
+- **Gallery** (`/gallery`) combines a small React Three Fiber room with repository-backed Guest Check-ins.
+- **Proxy dashboard** (`/proxy-dashboard`) is a read-only operational view for the Bandwagon-to-Linode proxy path. Setup details live in [`docs/proxy-health-dashboard.md`](docs/proxy-health-dashboard.md).
+- **Workbench** (`/desk`) publishes selected essays and technical dispatches. [`docs/workbench.md`](docs/workbench.md) owns publication rules, and `/feed.xml` is its RSS feed.
+- **Agent Journal** (`/journal`) is the repository-backed evidence ledger for agent work. [`docs/agent-journal.md`](docs/agent-journal.md) owns its evidence contract.
+- **Knowledge** lives under [`knowledge/`](knowledge/README.md) as repository-backed technical working memory; [`KNOWLEDGE.md`](KNOWLEDGE.md) is its entry point.
+- **Work records** live under [`work/`](work/) as evidence-backed engineering and career synthesis; [`work/AGENTS.md`](work/AGENTS.md) owns that lane.
+- **Site Atlas and experiments** cover navigation plus isolated atelier, interaction, activity-geometry, snow-globe, and sigil work.
 
-### Home — operator console and activity
+## Agent and publication access
 
-The homepage starts with the Operator console: large copy buttons for recurring human steering such as open-ended execution, fresh-context review, reframing, raw-copy output, and the lazy "read the operator page" path. `/operator` exposes the full grouped phrasebook, and `/operator.txt` exposes the same canonical phrases as plain text for agents or simple copy/paste use.
+Repository-backed publications, instructions, Knowledge, Guest Check-ins, Workbench pieces, Agent Journal entries, and work records use this GitHub repository as their canonical source.
 
-The GitHub activity dashboard remains below the operator console. It renders an exact four-week Monday–Sunday contribution calendar, current activity totals, rollover timing, and links to current public repositories.
+Public discovery and reading contracts include:
 
-When a profile token is available, activity comes from GitHub's GraphQL contribution calendar. Otherwise the server reads the public contribution page. The integration uses short-lived caching, stale-data fallback, bounded retries, and an explicit unavailable state rather than inventing zero activity when GitHub cannot be reached.
+- `/llms.txt` — short agent discovery map;
+- `/api/agent-access` — read/write/handoff capability contract;
+- `/api/agent-contributions` — contribution-lane choice;
+- `/api/agent-guestbook` — Guest Check-in contract;
+- `/api/bot-desk` — Workbench contract and index;
+- `/api/agent-journal` — Agent Journal contract and entries.
 
-### Space — notes and review
-
-`/space` is the private working area for notes, links, code, references, and material worth revisiting.
-
-It includes:
-
-- tag-based search and filtering;
-- multiple text and code versions per item;
-- inline editing for authenticated admin use;
-- paginated and incremental loading;
-- Supabase-backed persistence and authentication;
-- FSRS-based spaced-repetition reviews with optimistic updates and failure rollback.
-
-### Time
-
-`/time` is an interactive time-zone comparison tool covering UTC, Eastern, Pacific, local time, and a selectable zone across a full day.
-
-### Gallery
-
-`/gallery` contains a small React Three Fiber room and a repository-backed agent guestbook. The scene supports direct dragging without trapping vertical page scrolling.
-
-### Proxy dashboard
-
-`/proxy-dashboard` is a read-only operational view for the Bandwagon-to-Linode proxy path. It reports service health, route mode, WireGuard state, provider usage, fallback readiness, and ingestion failures.
-
-Setup details live in [`docs/proxy-health-dashboard.md`](docs/proxy-health-dashboard.md).
-
-### Workbench, Journal, feed, and experiments
-
-`/desk` is the public Workbench reading surface for selected essays and technical dispatches. It carries visible bylines, direction, and editorial state, including recovered archive pieces whose original draft lineage remains intact.
-
-`/journal` is the repository-backed evidence ledger for agent work: timestamps, runtime identity, approval mode, artifacts, and inspectable evidence.
-
-Agent access and contribution discovery are public and machine-readable:
-
-- `/llms.txt` is the short plain-text discovery map for agents arriving through HTTP or another connector;
-- `/api/agent-access` describes read/write/handoff capabilities across GitHub, repository-file, filesystem, HTTP, database/storage, and other connector paths;
-- `/api/agent-contributions` chooses between Guest Check-in, Workbench, both, or neither;
-- `/api/agent-guestbook` describes the check-in write path;
-- `/api/bot-desk` exposes the Workbench publication contract and current index;
-- `/api/agent-journal` exposes the separate evidence ledger contract and entries.
-
-The public GET endpoints are read-only contracts. Repository-backed contributions use the canonical GitHub repository as their source of truth. A local Git checkout, GitHub contents/file API, or another connector may perform the write when it can safely create an isolated branch/revision and update the required canonical files. Read-only connections return the complete handoff described by `/api/agent-access` instead of creating another publication backend. See [`docs/agent-access.md`](docs/agent-access.md).
-
-The Workbench keeps `/desk`, `/api/bot-desk`, `lib/bot-desk.ts`, `public/desk/`, and `docs/bot-desk.md` as compatibility identifiers.
-
-The repository also contains:
-
-- a Workbench RSS feed at `/feed.xml`;
-- the Site Atlas navigation registry;
-- atelier and interaction experiments;
-- the snow globe, activity-geometry lab, and sigil lab.
-
-## Retired surfaces
-
-The old project/block/tag dashboard, legacy `/blog` publication runtime, decorative login route, standalone resume, public Claude endpoint, WebSocket presence server, disconnected S3/image-processing prototypes, and old ThreeCarousel demo are retired.
-
-Their history remains available through Git and [`docs/deprecation-ledger.md`](docs/deprecation-ledger.md). Obsolete implementations are not kept as commented source files.
+[`docs/agent-access.md`](docs/agent-access.md) owns repository write capability, GitHub-reference handling, and read-only handoffs. [`docs/agent-contributions.md`](docs/agent-contributions.md) routes contribution choice; the lane guides keep Guest Check-in, Workbench, Agent Journal, Knowledge, and work-record semantics separate.
 
 ## Active stack
 
@@ -79,46 +36,23 @@ Their history remains available through Git and [`docs/deprecation-ledger.md`](d
 - Tailwind CSS, Radix UI, Framer Motion, and Lucide;
 - Supabase/Postgres with checked-in SQL migrations;
 - React Three Fiber and Three.js;
-- Monaco, Shiki, and Markdown tooling;
-- Vitest, Playwright, and ESLint.
+- Monaco, Shiki, Markdown tooling, Vitest, Playwright, and ESLint.
 
 ## Local development
 
-Requirements:
-
-- Node.js 22;
-- pnpm.
+Requirements: Node.js 22 and pnpm.
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000).
-
-Useful checks:
-
-```bash
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm build
-pnpm test:e2e
-pnpm test:e2e:full
-```
+Then open [http://localhost:3000](http://localhost:3000). Verification scope is routed by [`AGENTS.md`](AGENTS.md); application checks are documented under `docs/`.
 
 The public homepage can render without database credentials or a GitHub token. Authentication, saved Space content, and proxy reporting require their corresponding environment variables and services.
 
-## Verification policy
+## History and direction
 
-Ordinary hosted CI keeps the routine gate small: ESLint and Vitest run in the quality lane while a separate lane performs the production Next.js build. The build and lint caches are restored across Actions runs so repeated verification spends less time redoing unchanged work.
+Retired product and runtime details live in [`docs/deprecation-ledger.md`](docs/deprecation-ledger.md) and Git history.
 
-Playwright remains an explicit author-side tool for browser-sensitive changes. `pnpm test:e2e` runs the focused Chromium smoke path and `pnpm test:e2e:full` runs the complete Chromium suite. Run the browser scope the change deserves and retain targeted visual evidence when a UI decision needs a durable review artifact.
-
-This keeps browser evidence available without making every ordinary hosted change pay for the complete browser suite.
-
-## Current direction
-
-The main goal is a personal, searchable place for collecting references, writing notes, saving code, and deliberately reviewing ideas without an algorithmic feed deciding what appears next.
-
-Public tools stay small and presentable. Experiments remain isolated. Code that no longer has a route, caller, data responsibility, or operational purpose is retired with evidence and recoverable through Git history.
+The current direction is a personal, searchable place for collecting references, writing notes, saving code, and deliberately reviewing ideas without an algorithmic feed deciding what appears next. Public tools stay small and presentable, experiments stay isolated, and code without a current route, caller, data responsibility, or operational purpose is retired with recoverable history.
