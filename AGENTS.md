@@ -60,6 +60,12 @@
 
 ## Verification and browser evidence
 
+### Context-efficient tool output
+
+- Inspect shape first (`rg`, line counts, structured JSON), then read the smallest useful slice. Do not dump an entire large file or repeat overlapping slices merely to save a tool call.
+- Successful verification needs a receipt, not a transcript. Prefer `pnpm ci:local -- --skip-install --quiet`; it prints one line per passing step and reveals the captured log only when a step fails.
+- Query deployment, CI, and database tools for the exact fields needed. Keep broad logs for a diagnosed failure, where their detail can change the answer.
+
 - Keep routine verification cheap and broad: lint, Vitest, and a production build. The Next.js production build owns the project-wide TypeScript validation; do not serialize a second full `pnpm typecheck` beside it in routine CI. Use `pnpm typecheck` directly when a focused type-only feedback loop is useful.
 - `pnpm ci:local` mirrors that principle and must stay browser-free. Hosted CI may run independent quality and build lanes in parallel to shorten wall-clock time.
 - Treat Playwright as an authoring and diagnostic tool, not a default merge gate. Hosted CI should not install or launch Chromium, Chrome, WebKit, or another browser unless the human explicitly asks for a hosted browser workflow.

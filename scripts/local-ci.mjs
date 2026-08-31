@@ -1,10 +1,21 @@
 #!/usr/bin/env node
 
 import { spawnSync } from 'node:child_process';
+import {
+  closeSync,
+  mkdtempSync,
+  openSync,
+  readFileSync,
+  rmSync,
+} from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import process from 'node:process';
 
-const argumentsSet = new Set(process.argv.slice(2));
-const supportedArguments = new Set(['--skip-install']);
+const argumentsSet = new Set(
+  process.argv.slice(2).filter(argument => argument !== '--')
+);
+const supportedArguments = new Set(['--quiet', '--skip-install']);
 const unknownArguments = [...argumentsSet].filter(
   argument => !supportedArguments.has(argument)
 );
@@ -61,32 +72,56 @@ steps.push(
 );
 
 const startedAt = Date.now();
+const quiet = argumentsSet.has('--quiet');
+const receiptDirectory = quiet
+  ? mkdtempSync(path.join(os.tmpdir(), 'scrapbook-local-ci-'))
+  : null;
 
-for (const [index, step] of steps.entries()) {
-  const stepStartedAt = Date.now();
-  console.log(`\n[${index + 1}/${steps.length}] ${step.label}`);
+try {
+  for (const [index, step] of steps.entries()) {
+    const stepStartedAt = Date.now();
+    console.log(`\n[${index + 1}/${steps.length}] ${step.label}`);
+    const receiptPath = receiptDirectory
+      ? path.join(receiptDirectory, `${index}.log`)
+      : null;
+    const receiptDescriptor = receiptPath
+      ? openSync(receiptPath, 'w', 0o600)
+      : null;
 
-  const result = spawnSync(step.command, step.args, {
-    env: verificationEnvironment,
-    stdio: 'inherit',
-  });
+    const result = spawnSync(step.command, step.args, {
+      env: verificationEnvironment,
+      stdio:
+        receiptDescriptor === null
+          ? 'inherit'
+          : ['inherit', receiptDescriptor, receiptDescriptor],
+    });
+    if (receiptDescriptor !== null) closeSync(receiptDescriptor);
 
-  const elapsedSeconds = ((Date.now() - stepStartedAt) / 1_000).toFixed(1);
+    const elapsedSeconds = ((Date.now() - stepStartedAt) / 1_000).toFixed(1);
 
-  if (result.error) {
-    console.error(`${step.label} could not start: ${result.error.message}`);
-    process.exit(1);
+    if (result.error) {
+      console.error(`${step.label} could not start: ${result.error.message}`);
+      process.exitCode = 1;
+      break;
+    }
+
+    if (result.status !== 0) {
+      if (receiptPath) process.stderr.write(readFileSync(receiptPath));
+      console.error(`${step.label} failed after ${elapsedSeconds}s.`);
+      process.exitCode = result.status ?? 1;
+      break;
+    }
+
+    console.log(`${step.label} passed in ${elapsedSeconds}s.`);
   }
-
-  if (result.status !== 0) {
-    console.error(`${step.label} failed after ${elapsedSeconds}s.`);
-    process.exit(result.status ?? 1);
-  }
-
-  console.log(`${step.label} passed in ${elapsedSeconds}s.`);
+} finally {
+  if (receiptDirectory)
+    rmSync(receiptDirectory, { recursive: true, force: true });
 }
 
-const totalSeconds = ((Date.now() - startedAt) / 1_000).toFixed(1);
-console.log(
-  `\nLocal verification passed ${steps.length}/${steps.length} steps in ${totalSeconds}s.`
-);
+if (!process.exitCode) {
+  const totalSeconds = ((Date.now() - startedAt) / 1_000).toFixed(1);
+  console.log(
+    `\nLocal verification passed ${steps.length}/${steps.length} steps in ${totalSeconds}s.`
+  );
+}
