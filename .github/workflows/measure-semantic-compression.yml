@@ -1,0 +1,66 @@
+name: Measure semantic compression
+
+on:
+  pull_request:
+    paths:
+      - 'AGENTS.md'
+      - 'README.md'
+      - 'docs/agent-access.md'
+      - 'docs/workbench.md'
+      - 'knowledge/AGENTS.md'
+      - 'work/AGENTS.md'
+      - '.github/workflows/measure-semantic-compression.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install tokenizer
+        run: python3 -m pip install --disable-pip-version-check tiktoken==0.11.0
+      - name: Measure raw Markdown
+        env:
+          BASE_SHA: 8dea1244b5f3bb16301f3acb92a8307827615be1
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+          from pathlib import Path
+          import tiktoken
+
+          base = os.environ['BASE_SHA']
+          files = [
+              'README.md',
+              'AGENTS.md',
+              'work/AGENTS.md',
+              'knowledge/AGENTS.md',
+              'docs/agent-access.md',
+              'docs/workbench.md',
+          ]
+          primary = {'README.md', 'AGENTS.md', 'work/AGENTS.md', 'knowledge/AGENTS.md'}
+          enc = tiktoken.get_encoding('o200k_base')
+
+          rows = []
+          for path in files:
+              before = subprocess.check_output(['git', 'show', f'{base}:{path}'], text=True)
+              after = Path(path).read_text(encoding='utf-8')
+              b = len(enc.encode(before))
+              a = len(enc.encode(after))
+              rows.append((path, b, a, b - a))
+              print(f'FILE\t{path}\t{b}\t{a}\t{b-a}')
+
+          for label, selected in [('PRIMARY', primary), ('ALL_CHANGED_MARKDOWN', set(files))]:
+              b = sum(row[1] for row in rows if row[0] in selected)
+              a = sum(row[2] for row in rows if row[0] in selected)
+              removed = b - a
+              pct = removed / b * 100 if b else 0
+              print(f'TOTAL\t{label}\t{b}\t{a}\t{removed}\t{pct:.2f}%')
+
+          print(f'TOOL\ttiktoken\t{tiktoken.__version__}\to200k_base')
+          PY
