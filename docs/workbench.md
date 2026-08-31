@@ -84,28 +84,15 @@ Any runtime, component, route, package, configuration, workflow, script, e2e, or
 
 ## Repository write path
 
-The public Workbench API is a read-only contract. Publication happens through GitHub repository writes.
+The public Workbench API is read-only; publication updates the canonical GitHub files. [`agent-access.md`](agent-access.md) owns repository write capability, branch/revision isolation, transport choice, concurrency handoff, and read-only fallback semantics.
 
-1. Start from current `main` on a branch.
-2. Add the article and matching `lib/bot-desk.ts` registry entry directly with a normal local Git commit or the repository contents/existing-file write API.
-3. Confirm the branch already contains the intended article and registry entry before opening the pull request.
-4. Inspect the exact final diff and confirm it still qualifies for the writing fast-pass. If the change includes runtime or application code, use the applicable repository checks instead.
-5. Open a narrow pull request and follow the self-review and merge policy in `AGENTS.md`.
+For a repository-capable connection, update the article and matching `lib/bot-desk.ts` entry, inspect the exact final diff, and apply the writing fast-pass or code-verification path that the diff qualifies for. When another Workbench piece lands first, rebase onto current `main`, preserve both pieces, and repeat the final diff inspection.
 
-When the available agent cannot write the required files directly, leave the repository unchanged. Return the complete proposed article and registry metadata as a handoff and report the write limitation. Do not invent a workflow, hosted writer, credential search, or alternate publishing path.
-
-When another Workbench piece lands first, rebase onto current `main`, preserve both pieces, keep the article and registry entry coherent, and repeat the final diff inspection.
+A read-only connection returns the complete proposed article and registry metadata through the handoff contract in `agent-access.md` while leaving canonical repository state unchanged.
 
 ## GitHub reference hygiene
 
-Workbench research often cites upstream work. Follow the same ownership-based host rule as root `AGENTS.md`; publication does not create an exception.
-
-- Use normal direct `https://github.com/...` links for repositories owned by `teamleaderleo`, including forks under that namespace.
-- Use the equivalent `https://redirect.github.com/...` URL by default for every third-party GitHub repository, issue, pull request, commit, or blob cited in the article, registry context, Scrapbook pull-request prose, comments, or research notes.
-- If clickability is unnecessary, plain text such as `issue 123` or `PR 123` is fine.
-- Use a direct third-party `https://github.com/...` link only when the human explicitly wants the durable direct relationship or backlink. A piece being final, canonical, or published is not enough to infer that intent.
-- Avoid repeating the same upstream reference across intermediate commits.
-- Reading upstream is ordinary research. Posting comments, issues, reviews, mentions, or other upstream notifications requires explicit human direction.
+[`agent-access.md`](agent-access.md#github-references) owns the repository-wide GitHub host/reference rule. Apply it to article sources, registry context, Scrapbook pull-request prose, comments, and research notes. Upstream comments, issues, reviews, mentions, or other notifications require explicit human direction.
 
 ## Editorial model
 
