@@ -15,6 +15,7 @@ export type AgentEconomicsSummary = {
   weeklyQuotaPercent: number | null;
   acceptedTasksPerFiveHourQuotaPercent: number | null;
   acceptedTasksPerWeeklyQuotaPercent: number | null;
+  subscriptionMonthlyDollars: number | null;
   acceptedTasksPerSubscriptionDollar: number | null;
   acceptedTasksPerWallClockHourPerQuotaPercent: number | null;
   operatorMinutesPerAcceptedTask: number | null;
@@ -29,6 +30,17 @@ function rounded(value: number | null, digits = 3): number | null {
   if (value === null || !Number.isFinite(value)) return null;
   const scale = 10 ** digits;
   return Math.round(value * scale) / scale;
+}
+
+function completeConstantSubscriptionPrice(
+  group: AgentEconomicsSample[]
+): number | null {
+  if (group.some(sample => sample.subscriptionMonthlyDollars === null))
+    return null;
+  const prices = new Set(
+    group.map(sample => sample.subscriptionMonthlyDollars as number)
+  );
+  return prices.size === 1 ? [...prices][0]! : null;
 }
 
 export function analyzeAgentEconomics(
@@ -97,7 +109,8 @@ export function analyzeAgentEconomics(
         (left, right) =>
           Date.parse(right.observedAt) - Date.parse(left.observedAt)
       )[0]!;
-      const subscriptionDollars = latest.subscriptionMonthlyDollars;
+      const subscriptionMonthlyDollars =
+        completeConstantSubscriptionPrice(group);
       return {
         key,
         provider: latest.provider,
@@ -126,10 +139,11 @@ export function analyzeAgentEconomics(
             ? null
             : ratio(acceptedTasks, weeklyQuotaPercent)
         ),
+        subscriptionMonthlyDollars,
         acceptedTasksPerSubscriptionDollar: rounded(
-          subscriptionDollars === null
+          subscriptionMonthlyDollars === null
             ? null
-            : ratio(acceptedTasks, subscriptionDollars)
+            : ratio(acceptedTasks, subscriptionMonthlyDollars)
         ),
         acceptedTasksPerWallClockHourPerQuotaPercent: rounded(
           fiveHourQuotaPercent === null
