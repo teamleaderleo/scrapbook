@@ -12,7 +12,7 @@ import { readBoundedText } from '@/app/lib/server/read-bounded-body';
 import { timingSafeTokenEqual } from '@/app/lib/server/token-auth';
 import { NextRequest, NextResponse } from 'next/server';
 
-const MAX_PAYLOAD_BYTES = 512 * 1_024;
+const MAX_PAYLOAD_BYTES = 2 * 1_024 * 1_024;
 const MAX_REPORT_AGE_MS = 48 * 60 * 60 * 1_000;
 const MAX_HISTORY_AGE_MS = 90 * 24 * 60 * 60 * 1_000;
 const MAX_FUTURE_SKEW_MS = 10 * 60 * 1_000;
