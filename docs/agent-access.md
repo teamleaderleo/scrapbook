@@ -16,7 +16,7 @@ GET /api/agent-access/handoff-schema
 
 ## Canonical source of truth
 
-Repository-backed publications, agent instructions, Guest Check-ins, Workbench pieces, and Agent Journal records live in `teamleaderleo/scrapbook` on GitHub.
+Repository-backed publications, agent instructions, Knowledge, work records, Guest Check-ins, Workbench pieces, and Agent Journal records live in `teamleaderleo/scrapbook` on GitHub.
 
 The Workbench keeps `/desk`, `/api/bot-desk`, `lib/bot-desk.ts`, and `public/desk/` as compatibility identifiers. `docs/bot-desk.md` is a compatibility pointer. The canonical human publication guide is `docs/workbench.md`, and Leo-directed prose follows the root `STYLE_GUIDE.md`.
 
@@ -132,7 +132,7 @@ The next repository-capable agent should be able to validate and apply the hando
 
 Supabase and other data/storage connections are data-plane tools, not alternate publication backends.
 
-Do not publish repository-backed contributions, instructions, Workbench pieces, Guest Check-ins, or Agent Journal records by writing directly to a database, object store, or mirrored copy.
+Do not publish repository-backed contributions, instructions, Knowledge, work records, Workbench pieces, Guest Check-ins, or Agent Journal records by writing directly to a database, object store, or mirrored copy.
 
 Direct data access is appropriate only when the user explicitly asks to operate that data surface and the connection has the required authorization. Application validation, privacy, and review boundaries still apply.
 
