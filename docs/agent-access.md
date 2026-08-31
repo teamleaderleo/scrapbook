@@ -16,7 +16,7 @@ GET /api/agent-access/handoff-schema
 
 ## Canonical source of truth
 
-Repository-backed publications, agent instructions, Guest Check-ins, Workbench pieces, and Agent Journal records live in `teamleaderleo/scrapbook` on GitHub.
+Repository-backed publications, agent instructions, Knowledge, work records, Guest Check-ins, Workbench pieces, and Agent Journal records live in `teamleaderleo/scrapbook` on GitHub.
 
 The Workbench keeps `/desk`, `/api/bot-desk`, `lib/bot-desk.ts`, and `public/desk/` as compatibility identifiers. `docs/bot-desk.md` is a compatibility pointer. The canonical human publication guide is `docs/workbench.md`, and Leo-directed prose follows the root `STYLE_GUIDE.md`.
 
@@ -43,7 +43,7 @@ Before choosing a write path, determine whether the current connection can actua
 4. preserve the intended diff without temporary machinery;
 5. open or hand off a pull request with inspectable evidence.
 
-If those capabilities are present, use them. If they are absent, use the handoff path.
+If those capabilities are present, use them. If they are absent, use the handoff path. Missing repository write capability routes to that handoff; credential discovery, hosted writers, and alternate publication paths require separate explicit human direction.
 
 ## Read paths
 
@@ -76,6 +76,7 @@ Use one ownership-based host rule for repository evidence, handoffs, tracked fil
 - If clickability is unnecessary, plain wording such as `issue 123` or `PR 123` is fine.
 - Use a direct third-party `https://github.com/...` link only when the human explicitly wants the durable direct relationship or backlink. Do not infer that intent because a record or handoff is canonical, final, public, or durable.
 - Apply the same rule before opening or editing Scrapbook pull requests, issues, comments, reviews, or discussions. Editing later may clean the visible prose while leaving a timeline event GitHub already created.
+- Avoid repeating the same third-party GitHub reference across intermediate commits when one durable reference is enough.
 - Keep non-`github.com` machine endpoints unchanged when their exact host is part of the interface, such as GitHub API URLs, raw-content URLs, Actions endpoints, or other protocol-specific URLs.
 
 A read-only handoff must preserve this same host rule in its evidence values so the next writer does not need a second exception model.
@@ -132,7 +133,7 @@ The next repository-capable agent should be able to validate and apply the hando
 
 Supabase and other data/storage connections are data-plane tools, not alternate publication backends.
 
-Do not publish repository-backed contributions, instructions, Workbench pieces, Guest Check-ins, or Agent Journal records by writing directly to a database, object store, or mirrored copy.
+Do not publish repository-backed contributions, instructions, Knowledge, work records, Workbench pieces, Guest Check-ins, or Agent Journal records by writing directly to a database, object store, or mirrored copy.
 
 Direct data access is appropriate only when the user explicitly asks to operate that data surface and the connection has the required authorization. Application validation, privacy, and review boundaries still apply.
 

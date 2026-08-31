@@ -1,98 +1,55 @@
 # Work record agent instructions
 
-These instructions apply to `work/`.
-
-Read the root `AGENTS.md` first. The normal Scrapbook pull-request and authority rules still apply.
+These instructions apply to `work/`. Read the root [`AGENTS.md`](../AGENTS.md) first; its repository, review, and verification routes apply here.
 
 ## Purpose
 
-`work/` is a personal engineering record and career-synthesis lane. It is not a second source of truth for other repositories and it is not a vanity changelog.
+`work/` is the personal engineering record and career-synthesis lane. Originating repositories remain the technical source of truth; work records carry evidence-backed interpretation and durable career context.
 
-When substantive work elsewhere produces something potentially useful, independently ask whether it changes Leo's work record or current resume candidate pool.
+After substantive work elsewhere, independently ask whether it changes the durable record or current resume candidate pool.
 
 ## Before writing
 
-1. Read the primary evidence in the originating repository. Prefer the exact issue, pull request, benchmark report, README evidence section, review, CI receipt, or current handoff over memory.
-2. Check whether an existing `work/` record already owns the story. Update or extend the existing record instead of creating duplicate descriptions.
-3. Separate current fact from interpretation. If exact status is uncertain, say so and leave a verification note rather than upgrading the claim.
-4. Look for the strongest technical meaning, not merely the most recognizable repository name.
+1. Read the primary originating evidence: the exact issue, pull request, benchmark report, README evidence section, review, CI receipt, or current handoff.
+2. Find the existing `work/` record that owns the story and extend it when one exists.
+3. Separate current fact from interpretation. Preserve uncertainty with a verification note when status remains unresolved.
+4. Prefer the strongest technical meaning over the most recognizable repository name.
 
-## What to record
+## What earns a record
 
-Record work when at least one of these is true:
+Record work when it crosses a useful evidence boundary, such as:
 
-- a patch merged, published, or received meaningful maintainer acceptance;
-- a candidate is strongly validated and tells a technically distinctive story even before upstream submission;
-- a performance campaign produced a substantial measured result;
-- a product moved from internal code to something installable, usable, deployed, or externally observed;
-- an investigation found the real owner of a failure after a misleading first theory;
-- a negative result prevented an unsafe, incorrect, or low-value change;
-- a review interaction materially refined the repair boundary;
-- the work adds a new technical axis to the portfolio (compiler, VMM, runtime, browser tooling, distributed coordination, packaging, etc.);
-- the result would plausibly be useful in a resume, interview, portfolio, outreach note, or career narrative.
+- a merged/published patch, meaningful maintainer acceptance, or a strongly validated distinctive candidate;
+- a substantial measured performance result or a product becoming installable, usable, deployed, or externally observed;
+- an investigation, negative result, reversal, or review interaction that changed the technical conclusion or repair boundary;
+- a new portfolio axis such as compiler, VMM, runtime, browser tooling, distributed coordination, or packaging;
+- a result with plausible resume, interview, portfolio, outreach, or career-narrative value.
 
-Do not record typo fixes, mechanical churn, routine dependency updates, superficial activity totals, or speculative findings that never reached a useful evidence boundary.
+Skip typo fixes, mechanical churn, routine dependency updates, superficial activity totals, and speculative findings that never reached a useful evidence boundary.
 
 ## Preserve reversals
 
-Do not sanitize the record into a sequence of uninterrupted wins.
+Keep the evidence that changed the conclusion. A dropped optimization, disproven benchmark theory, corrected ownership boundary, repaired test path, or upstream supersession can be stronger evidence than an uninterrupted win.
 
-Some of the strongest evidence is a good reversal:
-
-- a tempting optimization measured too small and was dropped;
-- a benchmark theory was disproven by a better instrument;
-- a proposed repair belonged on the other side of an API or semantic boundary;
-- a test harness bypassed the actual product path and had to be corrected;
-- current upstream already fixed or superseded the candidate.
-
-Record what changed the conclusion and why the updated decision was better.
+Record why the updated decision was better.
 
 ## Resume candidate churn
 
-`resume-candidates.md` is intentionally editorial and may change often.
+`resume-candidates.md` is intentionally editorial. Rank by marginal signal on a one-page resume: distinct proof, external validation or measurable consequence, quick technical legibility, defensible claims, and fit for the target role.
 
-Rank by marginal signal on a one-page resume, not by effort invested or emotional attachment. Another similar correctness fix can be excellent engineering and still add less resume value than the first strong example on a new technical axis.
+A durable record survives changes in resume ranking.
 
-Useful questions:
+## Moving benchmark owners
 
-- Does this prove something not already proven elsewhere on the page?
-- Is there external validation or a concrete measurable consequence?
-- Can a reader understand the technical point quickly?
-- Is the story stronger than the material competing for the same space?
-- Is the claim defensible without a long status explanation?
-- Does this fit the target role?
+`records/preflight-live-performance.md` solely owns the current career-facing Preflight headline and moving performance numbers. Use it ahead of older timing prose when numbers conflict. `preflight-resume-evidence-map.md` is the provenance index.
 
-Never delete a durable record merely because it falls out of the current resume ranking.
+Historical benchmark material remains evidence for the question it answered. Copy current career-facing Preflight numbers from the live-performance owner instead of freezing them into this instruction file.
 
-## Preflight startup headline
+## Evidence and voice
 
-`records/preflight-live-performance.md` owns the current career-facing Preflight performance headline and moving performance numbers.
+Apply the repository-wide GitHub-reference rule in [`docs/agent-access.md`](../docs/agent-access.md#github-references) to every durable evidence link.
 
-The selected startup headline is **112.17s → 13.69s** on the 83-mod M5 MacBook Air development installation.
-
-- **Do not replace 13.69s** with a rounded value, a different campaign statistic, the old 89.00s → 15.53s A/B pair, or a future package number unless Leo explicitly chooses a new headline.
-- A startup run measured with the same game-log clock is the same kind of elapsed-time observation regardless of whether it came from an ad-hoc run or a named campaign.
-- Campaign shuffling, p-values, acceptance flags, and same-session pairing are useful for **causal A/B questions about an intervention**. They do not give those elapsed times a higher status when reporting current product speed.
-- Do not demote 13.69s merely because it is a low run. The resume and career records intentionally use that retained endpoint.
-
-`preflight-resume-evidence-map.md` is the provenance index. It does not compete with the live-performance record for the current headline.
-
-When historical review notes, old claims files, or benchmark prose conflict with this editorial rule, keep the historical material as evidence for the question it answered and preserve **112.17s → 13.69s** in career-facing copy.
-
-## Evidence links
-
-Follow the root repository's blanket GitHub-link rule here too; durable career records are not an exception.
-
-- For `teamleaderleo` repositories, including forks under that namespace, use normal direct `https://github.com/...` links by default.
-- For any third-party GitHub repository, use the equivalent `https://redirect.github.com/...` URL by default for repository, issue, pull-request, commit, and blob evidence links.
-- A direct third-party `https://github.com/...` link requires explicit human intent to create the durable direct relationship or backlink. Do not infer that intent from the record being final, canonical, public, or career-facing.
-- The redirect changes only navigation behavior; the originating repository and upstream thread remain the technical source of truth.
-
-Where useful, link both the upstream surface and the richer owned evidence packet while preserving the host rule for each target.
-
-## Voice
-
-Write plainly and technically. This is allowed to sound proud when the evidence is strong. Avoid generic praise such as "high-impact" or "complex" unless the following sentence explains the actual impact or complexity.
+Write plainly and technically. Strong evidence can sound proud. Describe the mechanism or consequence instead of generic praise such as "high-impact" or "complex."
 
 Prefer:
 
@@ -104,6 +61,4 @@ over:
 
 ## Pull requests
 
-Keep substantive updates on ordinary Scrapbook branches and pull requests. It is fine for multiple agents to collaborate on the same open work-record PR when the branch is current and the changes are coherent. If another PR lands first, rebase or resolve the markdown conflicts rather than discarding either record.
-
-The work record is low-risk documentation, but still inspect the complete diff before declaring it ready.
+Use the ordinary Scrapbook branch/pull-request and Markdown verification path from the root instructions. Multiple agents may collaborate on one coherent work-record PR. When another PR lands first, rebase or resolve the Markdown conflicts while preserving both records, then inspect the complete diff.
