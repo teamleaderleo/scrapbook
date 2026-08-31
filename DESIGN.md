@@ -15,6 +15,8 @@ Scrapbook is a personal workshop with distinct rooms:
 
 The ordinary interface stays immediate and dependable. Selected objects receive tactile, material behaviour. Gallery and laboratory surfaces may become strange.
 
+The operator's direction, this guide, interface memory, and established adjacent Scrapbook surfaces are the product authority. Generic assistant design heuristics are prompts for judgment, not a house style. Avoid defaulting to rounded card grids, pills and status badges, glass panels, gradients, oversized hero copy, or decorative icons unless the information model or an established component gives them a specific job. Prefer clear hierarchy, native browser behavior, compact inspection, and evidence that earns its space. Healthy detail may recede; actionable exceptions stay obvious. Accessibility, responsiveness, privacy, and safety still apply.
+
 ## Browser behaviour stays native
 
 - Use natural document scrolling.
