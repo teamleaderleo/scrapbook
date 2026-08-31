@@ -9,14 +9,15 @@ vi.mock('@/app/lib/agent-economics-store', async importOriginal => {
   return { ...original, saveAgentEconomicsReport };
 });
 
+import { AgentEconomicsReplayConflict } from '@/app/lib/agent-economics-store';
 import { POST } from './route';
 
 const sample = {
   receipt_sha256: `sha256:${'a'.repeat(64)}`,
   usage_sample_id: 'attempt-1',
   observed_at: '2026-09-01T01:00:00Z',
-  provider: 'google-antigravity',
-  harness: 'agy',
+  provider: 'google',
+  harness: 'antigravity',
   five_hour_quota_delta_percent: null,
   weekly_quota_delta_percent: null,
   five_hour_resets_at: null,
@@ -108,5 +109,19 @@ describe('agent economics ingestion', () => {
       expect(response.status).toBe(400);
     }
     expect(saveAgentEconomicsReport).not.toHaveBeenCalled();
+  });
+
+  it('returns 409 when a receipt digest is replayed with changed facts', async () => {
+    saveAgentEconomicsReport.mockRejectedValueOnce(
+      new AgentEconomicsReplayConflict('changed settlement replay')
+    );
+
+    const response = await POST(request(JSON.stringify(report)));
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      error: 'changed settlement replay',
+    });
   });
 });
