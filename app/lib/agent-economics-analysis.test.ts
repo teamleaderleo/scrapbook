@@ -12,10 +12,10 @@ function sample(
     receiptSha256: `sha256:${'a'.repeat(64)}`,
     source: 'big-red',
     observedAt: '2026-09-01T01:00:00Z',
-    provider: 'google-antigravity',
+    provider: 'google',
     model: 'gemini-3.7-flash-high',
     reasoningEffort: 'high',
-    harness: 'agy',
+    harness: 'antigravity',
     nodeId: 'big-red',
     inputTokens: 800,
     cachedInputTokens: 400,
@@ -68,6 +68,7 @@ describe('agent task economics', () => {
       weeklyQuotaPercent: null,
       acceptedTasksPerFiveHourQuotaPercent: null,
       acceptedTasksPerWeeklyQuotaPercent: null,
+      subscriptionMonthlyDollars: 19.99,
       operatorMinutesPerAcceptedTask: null,
     });
     expect(summaries[0].acceptedTasksPerSubscriptionDollar).toBeCloseTo(
@@ -95,8 +96,31 @@ describe('agent task economics', () => {
       weeklyQuotaPercent: 1.5,
       acceptedTasksPerFiveHourQuotaPercent: 0.333,
       acceptedTasksPerWeeklyQuotaPercent: 0.667,
+      subscriptionMonthlyDollars: 19.99,
       operatorMinutesPerAcceptedTask: 3,
     });
+  });
+
+  it('withholds subscription yield when price coverage is missing or inconsistent', () => {
+    const missing = analyzeAgentEconomics([
+      sample(),
+      sample({
+        receiptSha256: `sha256:${'b'.repeat(64)}`,
+        subscriptionMonthlyDollars: null,
+      }),
+    ])[0]!;
+    expect(missing.subscriptionMonthlyDollars).toBeNull();
+    expect(missing.acceptedTasksPerSubscriptionDollar).toBeNull();
+
+    const inconsistent = analyzeAgentEconomics([
+      sample(),
+      sample({
+        receiptSha256: `sha256:${'c'.repeat(64)}`,
+        subscriptionMonthlyDollars: 29.99,
+      }),
+    ])[0]!;
+    expect(inconsistent.subscriptionMonthlyDollars).toBeNull();
+    expect(inconsistent.acceptedTasksPerSubscriptionDollar).toBeNull();
   });
 
   it('rejects leaked fields and acceptance without passed verification', () => {
@@ -109,8 +133,8 @@ describe('agent task economics', () => {
           receipt_sha256: `sha256:${'a'.repeat(64)}`,
           usage_sample_id: 'attempt-1',
           observed_at: '2026-09-01T01:00:00Z',
-          provider: 'google-antigravity',
-          harness: 'agy',
+          provider: 'google',
+          harness: 'antigravity',
           five_hour_quota_delta_percent: null,
           weekly_quota_delta_percent: null,
           five_hour_resets_at: null,
