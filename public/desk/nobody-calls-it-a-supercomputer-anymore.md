@@ -14,7 +14,7 @@ These were serious machines.
 
 Ten years later, NVIDIA will sell you a [DGX Spark](https://marketplace.nvidia.com/en-us/enterprise/personal-ai-supercomputers/dgx-spark/) with 128 GB of coherent unified memory and a 4 TB SSD for US$4,699. It is a little square box that fits beside a monitor.
 
-The arithmetic is not “a Spark is 27 times more supercomputer than a DGX-1.” FP4 and FP16 are different, eight separate HBM pools and one coherent memory pool are different, and ten years of software make a raw FLOPS comparison increasingly silly anyway.
+A straight “27 times more supercomputer” comparison would be nonsense. FP4 and FP16 are different, eight separate HBM pools and one coherent memory pool are different, and ten years of software make a raw FLOPS ratio increasingly silly anyway.
 
 The machine class moved.
 
@@ -32,7 +32,7 @@ Computing may be one of the true great trickle-down things in exactly this sense
 
 Digital photography did it. GPS did it. Video editing did it. Cryptography, global publishing, 3D graphics, speech recognition, machine translation, giant searchable databases — the machine keeps taking things that once belonged to institutions and stuffing them into smaller boxes, cheaper subscriptions, or both.
 
-The people at the top can keep getting much more. That does not stop the old miracle from leaking everywhere else.
+The people at the top can keep getting much more while the old miracle leaks everywhere else.
 
 ## Big Red is a stupid little example
 
@@ -42,7 +42,7 @@ It is now Big Red, an always-on Linux execution node.
 
 The ridiculous part is that I bought it expecting to benchmark whether a cheap laptop could earn a place in the fleet. That premise aged almost immediately. It became useful enough that the newer Glaeda work is about routing real agent and CI work into it. Once the repositories are resident, exact Git topology and diff queries have completed in [11.8 to 43.2 milliseconds](https://github.com/teamleaderleo/glaeda/issues/987). Quarry's complete 3,037-node verification has gone from a 460.8-second warm serial reference to [143.7 seconds at four workers](https://github.com/teamleaderleo/quarry/pull/1112).
 
-This is not exotic hardware. That is the point.
+The hardware is ordinary; that is the point.
 
 A machine cheap enough to feel almost disposable has become a little personal compute plant because the ordinary computer underneath it is already absurdly capable relative to the work I need done.
 
@@ -60,15 +60,13 @@ So the installed base can lag the frontier by years while the capability availab
 
 This is probably what ordinary 2036 looks like for a lot of people. Somebody will still be using a scratched 2029 laptop because it boots, the battery was replaced once, and buying another computer sounds annoying. That laptop may have mediocre local AI by 2036 standards. It can also send a small request to a datacenter and get back work that would have required an absurd institutional machine in 2026.
 
-The hardware can be old. The intelligence behind it does not have to be.
+The hardware can be old while the intelligence behind it stays current.
 
 That is a much stronger diffusion mechanism than waiting for everyone to buy the newest workstation.
 
-## The frontier does not have to get cheap
+## The frontier can stay expensive
 
-There is no requirement that the biggest machine in 2036 be affordable.
-
-It may be grotesquely expensive. There may be multi-gigawatt campuses, exotic optical fabrics, memory systems that make today's HBM look quaint, and models or simulations that consume every improvement the industry can manufacture. The frontier is excellent at inventing new reasons to spend money.
+The biggest machine in 2036 can remain grotesquely expensive. There may be multi-gigawatt campuses, exotic optical fabrics, memory systems that make today's HBM look quaint, and models or simulations that consume every improvement the industry can manufacture. The frontier is excellent at inventing new reasons to spend money.
 
 Fixed capability has a different life.
 
@@ -76,7 +74,7 @@ Once a certain level of computation, storage, graphics, perception or machine re
 
 Then people respond to the abundance by finding more work for the machine.
 
-[Somebody Out There Needs the Tokens](/desk/somebody-out-there-needs-the-tokens) is the same story one layer higher. Make cognition cheaper and a heavy user does not necessarily pocket the savings. They ask more questions, run more agents, keep more projects alive, try things that were previously too frivolous to justify, and eventually discover that the old ceiling was hiding whole categories of demand.
+[Somebody Out There Needs the Tokens](/desk/somebody-out-there-needs-the-tokens) is the same story one layer higher. Make cognition cheaper and a heavy user may spend the savings immediately: ask more questions, run more agents, keep more projects alive, try things that were previously too frivolous to justify, and eventually discover that the old ceiling was hiding whole categories of demand.
 
 The trickle-down creates appetite on the way down.
 
