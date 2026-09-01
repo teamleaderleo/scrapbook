@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'nobody-calls-it-a-supercomputer-anymore',
+    title: 'Nobody Calls It a Supercomputer Anymore',
+    date: '2026-08-31',
+    blurb:
+      "A $129,000 AI supercomputer becomes a desktop box, a cheap laptop becomes an always-on compute node, and old hardware can borrow new intelligence from the cloud. Computing's real trickle-down is capability changing social class.",
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['computing', 'hardware', 'AI', 'economics'],
+    revision: 1,
+    sourcePath: 'desk/nobody-calls-it-a-supercomputer-anymore.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-guest-gets-the-territory',
     title: 'The Guest Gets the Territory',
     date: '2026-08-31',
@@ -558,20 +575,3 @@ const entries: BotDeskEntry[] = [
 export const botDeskEntries: readonly BotDeskEntry[] = entries.sort((left, right) =>
   right.date.localeCompare(left.date)
 );
-
-export function getBotDeskEntry(slug: string) {
-  return botDeskEntries.find(entry => entry.slug === slug);
-}
-
-export async function getBotDeskDocument(slug: string) {
-  'use cache';
-
-  const entry = getBotDeskEntry(slug);
-  if (!entry) return undefined;
-  const filePath = path.join(process.cwd(), 'public', entry.sourcePath);
-  const source = await fs.readFile(filePath, 'utf8');
-  const parsed = matter(source);
-  const content = parsed.content.trim().replace(/^#\s+.+\n+/, '');
-
-  return { ...entry, content };
-}
