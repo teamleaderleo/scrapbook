@@ -12,7 +12,7 @@ That same year, Apple's new [15-inch MacBook Pro](https://www.apple.com/ca/newsr
 
 These were serious machines.
 
-Ten years later, NVIDIA will sell you a [DGX Spark](https://marketplace.nvidia.com/en-us/enterprise/personal-ai-supercomputers/dgx-spark/) with 128 GB of coherent unified memory and a 4 TB SSD for US$4,699. It is a little square box that fits beside a monitor.
+Ten years later, NVIDIA will sell you a [DGX Spark](https://marketplace.nvidia.com/en-us/enterprise/personal-ai-supercomputers/dgx-spark/) with 128 GB of coherent unified memory and a 4 TB SSD for US$4,699. It's a little square box that fits beside a monitor.
 
 A straight “27 times more supercomputer” comparison would be nonsense. FP4 and FP16 are different, eight separate HBM pools and one coherent memory pool are different, and ten years of software make a raw FLOPS ratio increasingly silly anyway.
 
@@ -38,11 +38,11 @@ The people at the top can keep getting much more while the old miracle leaks eve
 
 A few days ago I bought a REDMI Book Pro 16 with an Intel Core Ultra 7 255H, 32 GiB of RAM and a 1 TB SSD for [¥6,100 all-in](https://github.com/teamleaderleo/glaeda/issues/840).
 
-It is now Big Red, an always-on Linux execution node.
+It's now Big Red, an always-on Linux execution node.
 
 The ridiculous part is that I bought it expecting to benchmark whether a cheap laptop could earn a place in the fleet. That premise aged almost immediately. It became useful enough that the newer Glaeda work is about routing real agent and CI work into it. Once the repositories are resident, exact Git topology and diff queries have completed in [11.8 to 43.2 milliseconds](https://github.com/teamleaderleo/glaeda/issues/987). Quarry's complete 3,037-node verification has gone from a 460.8-second warm serial reference to [143.7 seconds at four workers](https://github.com/teamleaderleo/quarry/pull/1112).
 
-The hardware is ordinary; that is the point.
+The hardware is ordinary; that's the point.
 
 A machine cheap enough to feel almost disposable has become a little personal compute plant because the ordinary computer underneath it is already absurdly capable relative to the work I need done.
 
