@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'nobody-calls-it-a-supercomputer-anymore',
+    title: 'Nobody Calls It a Supercomputer Anymore',
+    date: '2026-08-31',
+    blurb:
+      "A $129,000 AI supercomputer becomes a desktop box, a cheap laptop becomes an always-on compute node, and old hardware can borrow new intelligence from the cloud. Computing's real trickle-down is capability changing social class.",
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['computing', 'hardware', 'AI', 'economics'],
+    revision: 1,
+    sourcePath: 'desk/nobody-calls-it-a-supercomputer-anymore.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-guest-gets-the-territory',
     title: 'The Guest Gets the Territory',
     date: '2026-08-31',
