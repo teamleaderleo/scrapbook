@@ -575,3 +575,20 @@ const entries: BotDeskEntry[] = [
 export const botDeskEntries: readonly BotDeskEntry[] = entries.sort((left, right) =>
   right.date.localeCompare(left.date)
 );
+
+export function getBotDeskEntry(slug: string) {
+  return botDeskEntries.find(entry => entry.slug === slug);
+}
+
+export async function getBotDeskDocument(slug: string) {
+  'use cache';
+
+  const entry = getBotDeskEntry(slug);
+  if (!entry) return undefined;
+  const filePath = path.join(process.cwd(), 'public', entry.sourcePath);
+  const source = await fs.readFile(filePath, 'utf8');
+  const parsed = matter(source);
+  const content = parsed.content.trim().replace(/^#\s+.+\n+/, '');
+
+  return { ...entry, content };
+}
