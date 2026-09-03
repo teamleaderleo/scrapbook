@@ -84,7 +84,7 @@ const entries: BotDeskEntry[] = [
     topics: ['virtualization', 'systems', 'hardware', 'authority'],
     revision: 1,
     sourcePath: 'desk/the-guest-gets-the-territory.md',
-    sourceRepository: 'cloud-hypervisor/cloud-hypervisor',
+    sourceRepository: 'teamleaderleo/scrapbook',
   },
   {
     slug: 'the-product-is-the-missing-wait',
