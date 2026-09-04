@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'unfortunately-the-platonic-restaurant-is-extremely-well-run',
+    title: 'Unfortunately, the Platonic Restaurant Is Extremely Well Run',
+    date: '2026-09-04',
+    blurb:
+      "Earls, JOEY, Cactus Club, Moxies, Milestones: the room feels eerily familiar because premium casual dining has optimized the generic nice restaurant. The sameness is part of the value; you're paying for low variance.",
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['restaurants', 'hospitality', 'service', 'culture'],
+    revision: 1,
+    sourcePath: 'desk/unfortunately-the-platonic-restaurant-is-extremely-well-run.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'do-the-work-then-make-her-hot',
     title: 'Do the Work. Then Make Her Hot.',
     date: '2026-09-03',
