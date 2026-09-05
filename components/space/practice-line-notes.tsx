@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { PracticeInsight } from '@/lib/practice-insights';
 import styles from './practice.module.css';
+import { PracticeSyntaxCode } from './practice-appearance';
 
 export function PracticeLineNotes({
   id, text, insights, selected, onSelect,
@@ -54,12 +55,12 @@ function LineComparison({ insight }: { insight: PracticeInsight }) {
         <div className="space-y-2 border-y border-border py-3 font-mono text-xs leading-5">
           <div>
             <span className="sr-only">Original line: </span>
-            <code className="whitespace-pre-wrap break-words">{insight.match.trim()}</code>
+            <code className="whitespace-pre-wrap break-words"><PracticeSyntaxCode text={insight.match.trim()} /></code>
           </div>
           {change ? (
             <div className="border-l-2 border-current pl-2 text-[var(--practice-leaf)]">
               <span className="text-xs">{change.replacement ? 'Becomes' : 'Removed'}</span>
-              {change.replacement ? <code className="mt-1 block whitespace-pre-wrap break-words">{change.replacement.trim()}</code> : null}
+              {change.replacement ? <code className="mt-1 block whitespace-pre-wrap break-words"><PracticeSyntaxCode text={change.replacement.trim()} /></code> : null}
             </div>
           ) : null}
         </div>

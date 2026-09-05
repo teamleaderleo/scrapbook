@@ -25,6 +25,23 @@ results and reject missing or duplicated anchors. The browser displays that data
 without a compiler, evaluator, or network request. These are selected examples,
 not a free-form editor or an exhaustive analysis of possible failures.
 
+The theme picker offers Catppuccin Mocha and Macchiato, Vesper, Rosé Pine and
+Moon, plus Latte and Dawn for light mode. It remembers a separate choice for each
+light/dark mode in this browser; choosing a palette also selects its site mode.
+Without a saved choice, dark uses Mocha and light uses Latte.
+
+Shiki prepares TypeScript token colors on the server for every passage and line
+example. The browser receives character ranges and colors, with no highlighter
+or grammar engine to run while typing. Correct input keeps its syntax colors and
+adds an underline; mistakes have separate color and background feedback. Recall
+hides syntax colors along with the reference. UI accents are adjusted for text
+contrast while syntax colors retain the theme definitions. Theme previews wrap
+on narrow screens, and changing a theme preserves the current typing draft.
+
+Theme definitions come from the existing [Shiki themes](https://shiki.style/themes)
+dependency; the [Catppuccin palette](https://catppuccin.com/palette/) documents its
+light and dark variants.
+
 The same `TypingExercise` component handles Type mode in Space reading sheets.
 An attempt starts on the first edit, pauses on blur or a hidden document, and
 finishes on an exact match. Restart clears its timer and returns focus. Attempts
@@ -47,7 +64,7 @@ wait for a tap. Recall paints only entered text until the source is revealed.
 
 Practice uses open page surfaces, text controls, and a searchable concept library
 with full wrapping titles. It has no function or concept dropdowns. A small
-botanical mark and larger margin drawing supply sage accents without sitting
+botanical mark and larger margin drawing use the palette accent without sitting
 behind the controls. There is no ambient animation; caret blinking respects
 reduced motion. Space's shared practice dock uses the same inline typing field.
 

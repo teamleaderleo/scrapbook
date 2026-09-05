@@ -1,12 +1,6 @@
 .garden {
-  --practice-leaf: #526b45;
-  --practice-rust: #a83b2c;
   position: relative;
   isolation: isolate;
-}
-:global(.dark) .garden {
-  --practice-leaf: #b1c79b;
-  --practice-rust: #f39b87;
 }
 .branch {
   position: absolute;
@@ -82,6 +76,23 @@
   color: var(--practice-rust, hsl(var(--destructive)));
   text-decoration: underline;
   text-underline-offset: 0.3em;
+}
+.syntaxText {
+  color: hsl(var(--foreground));
+}
+.syntaxCharacter {
+  color: var(--syntax-color);
+}
+.syntaxCharacter.correct {
+  color: var(--syntax-color);
+  text-decoration: underline;
+  text-decoration-color: var(--practice-leaf);
+  text-underline-offset: 0.3em;
+}
+.syntaxCharacter.wrong {
+  color: var(--practice-rust);
+  background: hsl(var(--foreground) / 0.1);
+  text-decoration-thickness: 2px;
 }
 .selected {
   background: hsl(var(--foreground) / 0.12);
@@ -164,6 +175,9 @@
   }
 }
 @media (forced-colors: active) {
+  .syntaxCharacter {
+    color: CanvasText !important;
+  }
   .correct {
     color: CanvasText;
   }
