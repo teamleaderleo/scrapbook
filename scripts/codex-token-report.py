@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Collect complete-hour Codex token counters and quota snapshots.
+"""Collect complete-hour Codex usage by model and quota snapshots.
 
 The report contains aggregate counters, quota percentages/reset times, and the
-fixed source label only. It does not emit session IDs, prompts, responses,
+model IDs and fixed source label only. It does not emit session IDs, prompts, responses,
 paths, account identities, or machine names.
 """
 
