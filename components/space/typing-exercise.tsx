@@ -354,16 +354,18 @@ export function TypingExercise({
             ? 'Exact pass'
             : focused
               ? 'Esc to leave'
-              : 'Click the code to type'}
+              : target.kind === 'prose'
+                ? 'Click the passage to type'
+                : 'Click the code to type'}
         </p>
-        <label className="inline-flex min-h-[44px] items-center gap-2">
+        {target.kind === 'code' ? <label className="inline-flex min-h-[44px] items-center gap-2">
           <input
             type="checkbox"
             checked={indentTab}
             onChange={event => setIndentTab(event.target.checked)}
           />
           Tab indents
-        </label>
+        </label> : null}
       </div>
     </div>
   );

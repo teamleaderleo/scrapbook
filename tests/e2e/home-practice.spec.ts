@@ -112,6 +112,6 @@ test('practice stays inside a mobile viewport with readable input', async ({
     await page.evaluate(() => document.documentElement.scrollWidth)
   ).toBeLessThanOrEqual(390);
   await expect(
-    page.getByRole('group', { name: 'Function', exact: true })
+    page.getByRole('group', { name: 'Passage', exact: true })
   ).toBeVisible();
 });
