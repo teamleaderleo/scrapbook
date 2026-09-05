@@ -1,4 +1,4 @@
-# Code practice
+# Practice
 
 `/practice` is a small function picker over revision-pinned, owner-authorized
 Scrapbook excerpts in `lib/code-practice.ts`. Source links retain repository,
@@ -23,7 +23,28 @@ removed from the homepage. The calendar API and its cache remain available for
 existing consumers. Featured repository summaries live separately from that
 upstream cache and wrap without truncation at mobile widths.
 
-Useful next additions need more than speed: saved attempts for the same excerpt,
-recall mode, and prompts to modify or test the function. There is currently no
-code execution, adaptive difficulty, cross-device practice history, or assessment
-of comprehension.
+Copy and Recall are separate code modes. Recall hides the source until revealed;
+revealing it marks the attempt assisted. Completion records active time, WPM
+when meaningful, and newly inserted mismatches that were subsequently corrected.
+Deleting text does not add mistakes. Best/last WPM compares the same function,
+source revision, and mode, excluding assisted attempts. Each function also has
+an explanation question and a change prompt with local notes.
+
+Concept practice is derived from Knowledge's existing Pressure questions and
+Invariant sections (falling back to its summary). The current HANDOFF reading
+path comes first. No separate concept registry or generated answer key exists.
+The reference is an orientation for comparison, not a guaranteed answer to each
+pressure question; the complete node remains one link away. Notes are optional;
+Revisit and Recalled are explicit self-assessments. Revisit filtering uses the
+latest retained assessment for each concept.
+
+`scrapbook:practice-history:v1` stores at most 50 completed attempts or concept
+self-checks in this browser. It contains titles, identifiers, dates, and result
+metrics; answer text stays in separate local note keys. Recent practice shows
+eight entries and offers Clear history. If writing storage fails, the session
+remains usable and the UI labels history as session-only. History is not synced
+or uploaded. The Code/Concepts material and selected concept are retained in the
+URL. Eligible Knowledge nodes link directly to their own practice questions.
+
+There is no code execution, automatic comprehension grading, adaptive difficulty,
+or cross-device practice history.

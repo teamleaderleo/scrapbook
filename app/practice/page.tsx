@@ -1,21 +1,24 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { CodePracticeBench } from '@/components/space/code-practice-bench';
+import { PracticeWorkspace } from '@/components/space/practice-workspace';
+import { getConceptExercises } from '@/lib/concept-practice-data';
+import { Suspense } from 'react';
 import ViewportPageShell from '@/components/viewport-page-shell';
 
 export const metadata: Metadata = {
-  title: 'Code practice · Scrapbook',
+  title: 'Practice · Scrapbook',
   description:
-    'Practise short functions from Scrapbook, inspect mismatches, and explain the code.',
+    'Practise code and technical concepts, recall what you learned, and track your progress.',
   alternates: { canonical: '/practice' },
 };
 
-export default function PracticePage() {
+export default async function PracticePage() {
+  const concepts = await getConceptExercises();
   return (
     <ViewportPageShell className="bg-background text-foreground">
-      <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
-        <header className="mb-7 flex flex-wrap items-baseline justify-between gap-3">
-          <h1 className="font-serif text-3xl tracking-tight">Code practice</h1>
+      <div className="mx-auto w-full max-w-3xl px-4 py-7 sm:px-6 sm:py-8">
+        <header className="mb-5 flex flex-wrap items-baseline justify-between gap-3">
+          <h1 className="font-serif text-3xl tracking-tight">Practice</h1>
           <Link
             href="/space/trail"
             className="text-sm text-muted-foreground underline-offset-4 hover:underline"
@@ -23,7 +26,13 @@ export default function PracticePage() {
             Study trail →
           </Link>
         </header>
-        <CodePracticeBench />
+        <Suspense
+          fallback={
+            <p className="text-sm text-muted-foreground">Loading practice…</p>
+          }
+        >
+          <PracticeWorkspace concepts={concepts} />
+        </Suspense>
       </div>
     </ViewportPageShell>
   );

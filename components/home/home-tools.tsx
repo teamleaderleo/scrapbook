@@ -5,8 +5,8 @@ import { ScrapbookPet } from './scrapbook-pet';
 const tools = [
   {
     href: '/practice',
-    title: 'Code practice',
-    note: 'Short functions. Type, compare, then explain.',
+    title: 'Practice',
+    note: 'Code, concepts, recall, and your recent progress.',
   },
   {
     href: '/machine-health',

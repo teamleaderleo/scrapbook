@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { MarkdownContent } from '@/components/space/markdown-content';
 import { getKnowledgeDocument, getKnowledgeIndex } from '@/lib/knowledge';
+import { conceptExerciseFromMarkdown } from '@/lib/concept-practice';
 
 type KnowledgeDocumentPageProps = {
   params: Promise<{ slug: string[] }>;
@@ -103,6 +104,9 @@ export default async function KnowledgeDocumentPage({
                 ? `updated ${document.updated}`
                 : document.date ?? document.sourcePath}
             </p>
+            {document.kind === 'concept' && conceptExerciseFromMarkdown(document, document.markdown) ? (
+              <Link href={`/practice?mode=concepts&concept=${encodeURIComponent(document.slug)}`} className="mt-3 inline-flex min-h-[44px] items-center text-sm font-medium underline underline-offset-4">Practise this concept →</Link>
+            ) : null}
           </header>
 
           <div className="px-5 py-7 sm:px-9 sm:py-10">
