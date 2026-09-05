@@ -10,10 +10,12 @@ import { insertedMistakes } from '@/lib/practice-history';
 export function TypingExercise({
   target,
   recall = false,
+  highlightedLine,
   onComplete,
 }: {
   target: SpaceTypingTarget;
   recall?: boolean;
+  highlightedLine?: number;
   onComplete?: (result: {
     elapsed: number;
     wpm: number | null;
@@ -140,9 +142,10 @@ export function TypingExercise({
     ? entered
     : [...expected, ...entered.slice(expected.length)];
   let offset = 0;
+  let line = 1;
 
   return (
-    <div data-typing-exercise className={styles.surface}>
+    <div data-typing-exercise className={`${styles.surface} min-w-0`}>
       <div className="flex min-h-[24px] flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
         <span className="sr-only">{target.label}</span>
         <span>
@@ -162,7 +165,7 @@ export function TypingExercise({
           className={styles.control}
           onClick={() => setRevealed(true)}
         >
-          Reveal code
+          {target.kind === 'prose' ? 'Reveal passage' : 'Reveal code'}
         </button>
       ) : (
         <p id={referenceId} className="sr-only">
@@ -194,6 +197,8 @@ export function TypingExercise({
           className={styles.text}
         >
           {displayed.map((character, index) => {
+            const annotated = !hiddenReference && line === highlightedLine;
+            if (character === '\n') line += 1;
             const start = offset;
             const typed = entered[index];
             offset += typed?.length ?? character.length;
@@ -215,12 +220,14 @@ export function TypingExercise({
               <span
                 key={index}
                 data-offset={start}
+                data-line-note={annotated ? '' : undefined}
                 data-typing-cursor={current ? '' : undefined}
                 data-typing-state={
                   wrong ? 'wrong' : typed === undefined ? 'pending' : 'correct'
                 }
                 className={[
                   styles.character,
+                  annotated ? styles.inspected : '',
                   wrong
                     ? styles.wrong
                     : typed === undefined

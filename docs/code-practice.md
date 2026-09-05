@@ -14,6 +14,17 @@ own revision so changed text cannot silently enter an old speed comparison.
 Collection choices keep the passage list short. Existing excerpt history remains
 under its original identifier and source revision.
 
+Line notes annotate each code exercise. Select a line, then choose an example edit
+to compare its output with the original. Desktop shows notes beside the typing
+field; mobile places them below it. Edits change only the comparison: the typing
+target, draft, and history remain intact. Recall hides the notes.
+
+`lib/practice-insights.ts` owns the line anchors, edits, inputs, and precomputed
+results. Unit tests execute every original and changed example against those
+results and reject missing or duplicated anchors. The browser displays that data
+without a compiler, evaluator, or network request. These are selected examples,
+not a free-form editor or an exhaustive analysis of possible failures.
+
 The same `TypingExercise` component handles Type mode in Space reading sheets.
 An attempt starts on the first edit, pauses on blur or a hidden document, and
 finishes on an exact match. Restart clears its timer and returns focus. Attempts
