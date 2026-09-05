@@ -124,7 +124,7 @@ export function SiteSearch() {
               : error
                 ? 'Search unavailable'
                 : query.trim() || kind
-                  ? `${results.length} results${results.length > 40 ? ' · first 40 shown' : ''}`
+                  ? `${results.length} ${results.length === 1 ? 'result' : 'results'}${results.length > 40 ? ' · first 40 shown' : ''}`
                   : ''}
           </span>
           {error && (
