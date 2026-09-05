@@ -7,7 +7,10 @@ The production database, ingestion credentials, hourly Big Red timer, public sum
 ## Minute activity monitor
 
 The Mac's display name is **Air Blue**; its stable ingest identity remains
-`macbook-air`. One device selection controls Now and resource History.
+`macbook-air`. Machine switches sit beside the charts. Now and resource History
+share a device selection; Codex usage and Models share their own machine scope
+and period. Section jumps stay within the page and do not start route-loading
+feedback. The public header has no generic health verdict or service-count alert.
 
 The Models table follows the Codex usage period and combines counted reports
 from both machines. Sort by calls, input, or output; cache hit is cached input

@@ -41,6 +41,11 @@ export function ActivityMonitorView({
   >('cpu');
   const [selectedMinute, setSelectedMinute] = useState<number | null>(null);
   const snapshot = data?.latest.find(item => item.host === host);
+  const activeCoreGroup =
+    coreGroup === 'all' ||
+    snapshot?.cpu.cores.some(core => core.kind === coreGroup)
+      ? coreGroup
+      : 'all';
   const age = snapshot
     ? Math.max(0, Math.floor((now - Date.parse(snapshot.checked_at)) / 1000))
     : null;
@@ -59,7 +64,7 @@ export function ActivityMonitorView({
     if (!item) return null;
     if (historyMetric === 'cpu') {
       const cores = item.cpu.cores.filter(
-        core => coreGroup === 'all' || core.kind === coreGroup
+        core => activeCoreGroup === 'all' || core.kind === activeCoreGroup
       );
       return cores.length
         ? cores.reduce((sum, core) => sum + core.used_percent, 0) / cores.length
@@ -290,7 +295,7 @@ export function ActivityMonitorView({
             CPU group
             <select
               className="rounded border border-black/10 bg-transparent p-1 dark:border-white/15"
-              value={coreGroup}
+              value={activeCoreGroup}
               onChange={event => {
                 setCoreGroup(event.target.value as 'all' | CoreKind);
                 setSelectedMinute(null);
@@ -332,7 +337,7 @@ export function ActivityMonitorView({
                   selectedMinute === bin.minute ? null : bin.minute
                 )
               }
-              className={`h-full min-w-0 flex-1 content-end focus-visible:outline-2 ${selectedMinute === bin.minute ? 'ring-1 ring-current' : ''}`}
+              className={`flex h-full min-w-0 flex-1 flex-col justify-end p-0 focus-visible:outline-2 ${selectedMinute === bin.minute ? 'ring-1 ring-current' : ''}`}
             >
               <span
                 aria-hidden="true"
@@ -352,9 +357,7 @@ export function ActivityMonitorView({
           <span>{timestamp(minute)}</span>
         </div>
       </section>
-      <details
-        className="mt-5 border-t border-black/10 pt-3 dark:border-white/10"
-      >
+      <details className="mt-5 border-t border-black/10 pt-3 dark:border-white/10">
         <summary className="cursor-pointer text-sm font-medium">
           Top processes{' '}
           <span className="ml-1 text-xs font-normal opacity-60">

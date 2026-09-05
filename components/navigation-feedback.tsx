@@ -368,7 +368,9 @@ export function NavigationFeedback() {
       const anchor = anchorFromTarget(event.target);
       if (!anchor) return;
       const href = internalDestination(anchor);
-      if (href) prefetch(href);
+      if (href && href !== `${window.location.pathname}${window.location.search}`) {
+        prefetch(href);
+      }
     };
 
     const startNavigation = (event: MouseEvent) => {
@@ -389,7 +391,7 @@ export function NavigationFeedback() {
       if (!href) return;
 
       const current = `${window.location.pathname}${window.location.search}`;
-      if (href === current || anchor.hash) return;
+      if (href === current) return;
 
       prefetch(href);
       beginNavigation(href, destinationLabel(href), 'link');
@@ -406,6 +408,9 @@ export function NavigationFeedback() {
 
     const startHistoryNavigation = () => {
       const href = `${window.location.pathname}${window.location.search}`;
+      // Fragment history changes scroll position without committing a new route.
+      // Starting feedback here would leave it waiting for a commit that never comes.
+      if (href === previousRouteKey.current) return;
       beginNavigation(href, destinationLabel(href), 'history');
     };
 
@@ -501,7 +506,7 @@ export function NavigationFeedback() {
           role="status"
           aria-live={showFailureStatus ? 'assertive' : 'polite'}
         >
-          {showFailureStatus ? state.failureMessage : `Still opening ${state.label}…`}
+          {showFailureStatus ? state.failureMessage : `Loading ${state.label}`}
         </div>
       )}
     </div>

@@ -103,6 +103,8 @@
 }
 
 .navigation-status {
+  white-space: normal;
+  overflow-wrap: anywhere;
   position: absolute;
   right: 0.75rem;
   top: 0.65rem;

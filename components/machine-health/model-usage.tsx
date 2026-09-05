@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { CodexTokenSample } from '@/app/lib/machine-health-store';
 
 export function summarizeModels(
@@ -61,10 +61,12 @@ export function ModelUsage({
   samples,
   from,
   to,
+  controls,
 }: {
   samples: CodexTokenSample[];
   from: number;
   to: number;
+  controls?: ReactNode;
 }) {
   const [sort, setSort] = useState<'input' | 'output' | 'calls'>('input');
   const rows = summarizeModels(samples, from, to).sort(
@@ -83,6 +85,7 @@ export function ModelUsage({
         >
           Models
         </h3>
+        <div className="mt-2">{controls}</div>
         <p className="mt-2 text-xs opacity-60">No usage in this period.</p>
       </section>
     );
@@ -91,14 +94,14 @@ export function ModelUsage({
       aria-label="Model usage"
       className="mt-5 border-t border-black/10 pt-4 dark:border-white/10"
     >
-      <div className="mb-3 flex items-baseline justify-between gap-3">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <h3
           id="model-usage-heading"
           className="scroll-mt-20 text-sm font-medium"
         >
           Models
         </h3>
-        <span className="text-xs opacity-50">Both machines</span>
+        {controls ?? <span className="text-xs opacity-50">Both machines</span>}
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs tabular-nums">
