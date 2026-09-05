@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useMachineDevice } from './machine-device-context';
 import {
   CORE_LABELS,
   summarizeCores,
@@ -10,7 +11,7 @@ import {
 
 const HOSTS = [
   ['big-red', 'Big Red'],
-  ['macbook-air', 'MacBook Air'],
+  ['macbook-air', 'Air Blue'],
 ] as const;
 const COLORS: Record<CoreKind, string> = {
   performance: 'bg-[#b74a42] dark:bg-[#e77970]',
@@ -32,7 +33,7 @@ export function ActivityMonitorView({
   error: boolean;
   refresh: () => void;
 }) {
-  const [host, setHost] = useState<'big-red' | 'macbook-air'>('big-red');
+  const [host, setHost] = useMachineDevice();
   const [coreGroup, setCoreGroup] = useState<'all' | CoreKind>('all');
   const [sort, setSort] = useState<'cpu_cores' | 'rss_mib'>('cpu_cores');
   const [historyMetric, setHistoryMetric] = useState<
@@ -109,20 +110,18 @@ export function ActivityMonitorView({
         <div>
           <h2
             id="activity-monitor-heading"
-            className="text-xl font-semibold tracking-tight"
+            className="scroll-mt-20 text-xl font-semibold tracking-tight"
           >
-            Activity monitor
+            Now
           </h2>
           <p
             className={`mt-1 text-xs ${stale || error ? 'text-amber-700 dark:text-amber-300' : 'opacity-60'}`}
             role="status"
           >
-            {error
-              ? 'Refresh failed · retaining the last successful view. '
-              : ''}
+            {error ? 'Refresh failed · ' : ''}
             {snapshot
-              ? `${stale ? 'Stale · ' : ''}${age! < 60 ? `${age}s` : `${Math.floor(age! / 60)}m`} since sample · ${snapshot.sample_seconds.toFixed(1)}-second observation`
-              : 'Waiting for the first activity snapshot'}
+              ? `${stale ? 'Stale · ' : ''}${age! < 60 ? `${age}s` : `${Math.floor(age! / 60)}m`} ago · updates each minute`
+              : 'Waiting for a sample'}
           </p>
         </div>
         <button
@@ -130,7 +129,7 @@ export function ActivityMonitorView({
           onClick={refresh}
           className="min-h-9 px-2 text-xs underline underline-offset-4 focus-visible:outline-2"
         >
-          Refresh activity
+          Refresh
         </button>
       </div>
       <div className="my-4 flex gap-5" aria-label="Activity monitor device">
@@ -154,9 +153,7 @@ export function ActivityMonitorView({
         <>
           <div className="mb-4 flex flex-wrap justify-between gap-2 text-xs opacity-60">
             <span>{snapshot.cpu.model}</span>
-            <span>
-              {snapshot.process_count ?? 'Unknown'} processes observed
-            </span>
+            <span>{snapshot.process_count ?? '—'} processes</span>
           </div>
           <div className="grid gap-5 lg:grid-cols-[1.15fr_1fr]">
             <section aria-label="Current CPU groups">
@@ -212,9 +209,7 @@ export function ActivityMonitorView({
               </div>
             </section>
             <section aria-label="Current memory and throughput">
-              <h3 className="mb-2 text-sm font-medium">
-                Memory and throughput
-              </h3>
+              <h3 className="mb-2 text-sm font-medium">Memory & I/O</h3>
               <dl className="text-sm">
                 <Readout
                   label="RAM used"
@@ -272,9 +267,7 @@ export function ActivityMonitorView({
       )}
       <section className="mt-5" aria-label="Last hour of activity">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-sm font-medium">
-            Last hour · one-minute snapshots
-          </h3>
+          <h3 className="text-sm font-medium">Last hour</h3>
           <div className="flex gap-3" aria-label="Activity history metric">
             {(['cpu', 'memory', 'network', 'disk'] as const).map(metric => (
               <button
@@ -316,7 +309,7 @@ export function ActivityMonitorView({
           <span>
             {selected?.sample
               ? `${timestamp(selected.minute)} · ${number(values[selectedIndex], unit, 2)}`
-              : 'Select a bar to inspect a sample'}
+              : 'Select a minute'}
           </span>
           <span>
             0–{maximum.toFixed(historyMetric === 'cpu' ? 0 : 1)} {unit}
@@ -361,7 +354,6 @@ export function ActivityMonitorView({
       </section>
       <details
         className="mt-5 border-t border-black/10 pt-3 dark:border-white/10"
-        open={data?.privateAccess || undefined}
       >
         <summary className="cursor-pointer text-sm font-medium">
           Top processes{' '}
@@ -419,31 +411,29 @@ export function ActivityMonitorView({
                 </tbody>
               </table>
               <p className="mt-2 text-xs leading-relaxed opacity-50">
-                Top 10 by the selected measure. One CPU core means one fully
-                busy logical CPU. Resident memory includes shared pages, so
-                process rows don’t sum to RAM usage.
+                Top 10 · RSS includes shared memory.
               </p>
             </>
           ) : (
-            <p className="mt-3 text-xs opacity-60">
-              Process detail is unavailable or stale.
-            </p>
+            <p className="mt-3 text-xs opacity-60">No recent process sample.</p>
           )
         ) : (
           <p className="mt-3 text-xs opacity-60">
-            Sign in using the dashboard’s private-details controls to see
-            executable names, CPU and memory. Arguments and window titles aren’t
-            collected.
+            Sign in below to see processes.
           </p>
         )}
       </details>
-      <p className="mt-4 text-xs leading-relaxed opacity-50">
-        Samples arrive about once a minute while each machine is awake; the page
-        refreshes while visible. Short spikes between samples can be missed.
-        Network totals include virtual interfaces. Mac available RAM is a
-        VM-counter estimate; wired/compressed values describe parts of memory
-        already counted above.
-      </p>
+      <details className="mt-3 text-xs opacity-60">
+        <summary className="cursor-pointer py-2">
+          About these measurements
+        </summary>
+        <p className="max-w-prose leading-relaxed">
+          Two-second samples each minute while awake; brief spikes can be
+          missed. One core means one fully busy logical CPU. Network totals
+          include virtual interfaces. Air Blue’s available RAM is estimated;
+          wired and compressed memory are already counted in used RAM.
+        </p>
+      </details>
     </section>
   );
 }

@@ -76,7 +76,7 @@ const CODEX_INPUT_SEGMENTS = [
     value: (bin: ActivityBin) => bin.codexSourceInputTokens['big-red'],
   },
   {
-    label: 'MacBook Air',
+    label: 'Air Blue',
     className: 'bg-[#2d7f88] dark:bg-[#68c4cb]',
     value: (bin: ActivityBin) => bin.codexSourceInputTokens['macbook-air'],
   },
@@ -89,7 +89,7 @@ const CODEX_OUTPUT_SEGMENTS = [
     value: (bin: ActivityBin) => bin.codexSourceOutputTokens['big-red'],
   },
   {
-    label: 'MacBook Air',
+    label: 'Air Blue',
     className: 'bg-[#2d7f88] dark:bg-[#68c4cb]',
     value: (bin: ActivityBin) => bin.codexSourceOutputTokens['macbook-air'],
   },
@@ -1271,7 +1271,7 @@ function CodexActivity({
       : `${Math.round(rangeHours / 24)}-day window`;
   const sourceLabels: Record<CodexTokenSource, string> = {
     'big-red': 'Big Red',
-    'macbook-air': 'MacBook Air',
+    'macbook-air': 'Air Blue',
   };
   const sourceCoverage = (['big-red', 'macbook-air'] as const)
     .map(source => ({

@@ -84,6 +84,7 @@ def empty_window(start: dt.datetime) -> dict[str, Any]:
         "window_ended_at": iso_timestamp(end),
         **dict.fromkeys(TOKEN_FIELDS, 0),
         "model_calls": 0,
+        "model_usage": [],
         "active_routes": 0,
         "session_fingerprints": [],
         "fingerprints_complete": False,
@@ -219,7 +220,8 @@ def collect_windows_and_quota(
             session_started_at: dt.datetime | None = None
             session_id: str | None = None
             forked_session = False
-            events: list[tuple[dt.datetime, dict[str, int]]] = []
+            events: list[tuple[dt.datetime, dict[str, int], str]] = []
+            current_model = "unknown"
             path_quota_observations: list[dict[str, Any]] = []
             with path.open("r", encoding="utf-8") as session:
                 for line in session:
@@ -237,6 +239,9 @@ def collect_windows_and_quota(
                         candidate = payload.get("id") or payload.get("session_id")
                         if isinstance(candidate, str) and candidate:
                             session_id = candidate
+                    if record.get("type") == "turn_context":
+                        candidate_model = payload.get("model")
+                        current_model = candidate_model if isinstance(candidate_model, str) and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.:/@+\-]{0,127}", candidate_model) else "unknown"
                     if payload.get("forked_from_id"):
                         forked_session = True
                     if payload.get("type") != "token_count" or not (
@@ -265,18 +270,18 @@ def collect_windows_and_quota(
                             break
                         values[field] = value
                     if values:
-                        events.append((timestamp, values))
+                        events.append((timestamp, values, current_model))
 
             if forked_session and session_started_at is not None:
                 cutoff = session_started_at + dt.timedelta(
                     seconds=FORK_REPLAY_SECONDS
                 )
-                if sum(timestamp < cutoff for timestamp, _ in events) > 1:
+                if sum(timestamp < cutoff for timestamp, _, _ in events) > 1:
                     events = [event for event in events if event[0] >= cutoff]
 
             quota_observations.extend(path_quota_observations)
             route_hours: set[dt.datetime] = set()
-            for timestamp, values in events:
+            for timestamp, values, model in events:
                 start = complete_hour(timestamp)
                 window = windows.get(start)
                 if window is None:
@@ -284,6 +289,17 @@ def collect_windows_and_quota(
                 for field, value in values.items():
                     window[field] += value
                 window["model_calls"] += 1
+                models = window["model_usage"]
+                # Keep report size bounded even with unexpected model identifiers.
+                if len(models) >= 63 and not any(row["model"] == model for row in models):
+                    model = "unknown"
+                row = next((row for row in models if row["model"] == model), None)
+                if row is None:
+                    row = {"model": model, **dict.fromkeys(TOKEN_FIELDS, 0), "model_calls": 0}
+                    models.append(row)
+                for field, value in values.items():
+                    row[field] += value
+                row["model_calls"] += 1
                 route_hours.add(start)
             for start in route_hours:
                 windows[start]["active_routes"] += 1

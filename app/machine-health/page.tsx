@@ -13,8 +13,8 @@ import { cookies } from 'next/headers';
 import { connection } from 'next/server';
 
 export const metadata: Metadata = {
-  title: 'Big Red health · Leo',
-  description: 'Big Red resource health and Codex activity over time.',
+  title: 'Machine health · Leo',
+  description: 'Big Red, Air Blue, and model usage.',
   robots: { index: false, follow: false },
 };
 

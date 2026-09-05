@@ -48,6 +48,26 @@ def rate_limits(short_used: float, weekly_used: float) -> dict[str, object]:
 
 
 class CodexTokenReportTest(unittest.TestCase):
+    def test_model_switches_and_unattributed_usage_reconcile(self):
+        now = dt.datetime(2026, 8, 29, 7, 23, tzinfo=dt.timezone.utc)
+        def record(payload, kind="event_msg"):
+            return {"timestamp":"2026-08-29T06:15:00Z", "type":kind, "payload":payload}
+        records = [record({"type":"token_count", "info":{"last_token_usage":usage(10, 5)}}),
+                   record({"model":"model-a"}, "turn_context"),
+                   record({"type":"token_count", "info":{"last_token_usage":usage(20, 5)}}),
+                   record({"model":"model-b"}, "turn_context"),
+                   record({"type":"token_count", "info":{"last_token_usage":usage(30, 10)}})]
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/"session.jsonl"
+            path.write_text("\n".join(json.dumps(row) for row in records))
+            window=REPORT.collect_windows(now,1,Path(directory))[0]
+        models={row["model"]:row for row in window["model_usage"]}
+        self.assertEqual(set(models), {"unknown","model-a","model-b"})
+        self.assertEqual(models["model-a"]["input_tokens"],20)
+        for field in (*REPORT.TOKEN_FIELDS,"model_calls"):
+            self.assertEqual(sum(row[field] for row in models.values()),window[field])
+
+
     def test_groups_complete_hours_and_keeps_zero_activity_coverage(self) -> None:
         now = dt.datetime(2026, 8, 29, 7, 23, tzinfo=dt.timezone.utc)
         with tempfile.TemporaryDirectory() as temporary_directory:

@@ -116,7 +116,7 @@ describe('machine health dashboard', () => {
     expect(html).toContain('Codex runtime PSS high');
     expect(html).toContain('Codex');
     expect(html).toContain(
-      '12-hour window · 1/12 hours recorded · Big Red 1h · MacBook Air 1h'
+      '12-hour window · 1/12 hours recorded · Big Red 1h · Air Blue 1h'
     );
     expect(html).toContain('15,050,000 tokens');
     expect(html).toContain('Cached input');
