@@ -13,9 +13,7 @@ for (const width of [320, 390, 1280]) {
     await expect(page.locator('[data-home-repository]')).toHaveCount(6);
     await expect(page.locator('[data-activity-scoreboard]')).toHaveCount(0);
     await expect(
-      page
-        .locator('[data-home-tools]')
-        .getByRole('link', { name: /Code practice/ })
+      page.locator('[data-home-tools]').getByRole('link', { name: /Practice/ })
     ).toHaveAttribute('href', '/practice');
     const sizes = await page
       .locator('[data-home-repository]')
@@ -57,7 +55,7 @@ test('typing locates mistakes, pauses, completes, restarts and switches exercise
     page.getByText(/First mismatch: line 1, column 1/)
   ).toBeVisible();
   await expect(page.getByText(/Typing · [1-9]/)).toBeVisible({ timeout: 4000 });
-  await page.getByRole('heading', { name: 'Code practice' }).click();
+  await page.getByRole('heading', { name: 'Practice' }).click();
   const paused = await page.getByText(/Paused ·/).textContent();
   await page.waitForTimeout(1100);
   await expect(page.getByText(/Paused ·/)).toHaveText(paused!);
@@ -67,7 +65,9 @@ test('typing locates mistakes, pauses, completes, restarts and switches exercise
   await page.getByRole('button', { name: 'Restart' }).click();
   await expect(input).toHaveValue('');
   await expect(input).toBeFocused();
-  await page.getByLabel('Function', { exact: true }).selectOption('1');
+  await page
+    .getByRole('button', { name: 'Mode validation', exact: true })
+    .click();
   await expect(input).toHaveValue('');
   await input.fill(codeExercises[1].text);
   await expect(page.getByRole('status')).toContainText('Exact pass');
@@ -83,8 +83,8 @@ test('Tab is native unless enabled and pasted attempts have no speed score', asy
   const input = page.getByRole('textbox', { name: 'Typing input' });
   await input.focus();
   await input.press('Tab');
-  await expect(page.getByLabel('Tab inserts indentation')).toBeFocused();
-  await page.getByLabel('Tab inserts indentation').check();
+  await expect(page.getByRole('button', { name: 'Restart' })).toBeFocused();
+  await page.getByLabel('Tab indents').check();
   await input.fill('export');
   await input.press('Tab');
   await expect(input).toHaveValue('export  ');
@@ -111,5 +111,7 @@ test('practice stays inside a mobile viewport with readable input', async ({
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth)
   ).toBeLessThanOrEqual(390);
-  await expect(page.getByLabel('Function', { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('group', { name: 'Passage', exact: true })
+  ).toBeVisible();
 });
