@@ -1,3 +1,4 @@
+import { RecentItems } from '@/components/discovery/recent-items';
 import { ActivityDashboard } from '@/components/home/activity-dashboard';
 import { HomeNowShelf } from '@/components/home/home-now-shelf';
 import { OperatorConsole } from '@/components/operator/operator-console';
@@ -253,7 +254,11 @@ export default function Page() {
       <div className="relative mx-auto flex min-h-[calc(100dvh-3rem)] w-full max-w-7xl flex-col justify-start gap-10 px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
         <OperatorConsole mode="featured" />
 
-        <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
+        <div className="flex min-w-0 flex-col gap-6 sm:gap-8">
+          <RecentItems />
+          <Suspense fallback={null}>
+            <HomeNowShelf />
+          </Suspense>
           <section aria-labelledby="home-activity-title" className="min-w-0">
             <div className="mb-3 px-0.5">
               <p
@@ -268,7 +273,6 @@ export default function Page() {
             </Suspense>
           </section>
 
-          <HomeNowShelf />
           <HomeRoomShelf />
         </div>
       </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { openSiteSearch } from '@/components/discovery/site-search';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -153,6 +154,18 @@ export function SearchCommand() {
             </CommandItem>
           </CommandGroup>
         )}
+        <CommandGroup heading="Scrapbook">
+          <CommandItem
+            value="Search all Scrapbook"
+            onSelect={() => {
+              setSearchOpen(false);
+              // Let the local dialog restore focus before the site dialog opens.
+              requestAnimationFrame(openSiteSearch);
+            }}
+          >
+            Search all Scrapbook
+          </CommandItem>
+        </CommandGroup>
       </CommandList>
     </CommandDialog>
   );

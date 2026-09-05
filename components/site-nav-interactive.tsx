@@ -1,5 +1,6 @@
 'use client';
 
+import { SiteSearchTrigger } from '@/components/discovery/site-search';
 import { SiteAtlas } from '@/components/site-atlas';
 import { ThemeToggle } from '@/components/theme-toggle';
 import {
@@ -108,6 +109,7 @@ export function SiteNavBar() {
           </div>
 
           <div className="ml-auto flex h-full shrink-0 items-stretch">
+            <SiteSearchTrigger />
             <ThemeToggle variant="rail" />
             <SiteAtlas variant="rail" />
           </div>

@@ -1,3 +1,6 @@
+import { RememberVisit } from '@/components/discovery/recent-items';
+import { ScrapbookRelated } from '@/components/scrapbook-related';
+import { getRelatedScrapbookRefs } from '@/lib/scrapbook-relations';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -188,6 +191,13 @@ export default function PreflightWorkPage() {
           </p>
         </section>
       </main>
+      <RememberVisit href="/work/preflight" />
+      <div className="mx-auto max-w-5xl px-4 pb-12">
+        <ScrapbookRelated
+          references={getRelatedScrapbookRefs('work', 'preflight')}
+          className="border-t border-border pt-5"
+        />
+      </div>
     </ViewportPageShell>
   );
 }

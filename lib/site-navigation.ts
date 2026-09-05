@@ -163,8 +163,8 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
       {
         id: 'machine-health',
         href: '/machine-health',
-        label: 'Big Red',
-        description: 'Sanitized machine health and Codex usage.',
+        label: 'Machine health',
+        description: 'Big Red and Air Blue resources, Windows VM, and model usage.',
         group: 'tools',
         surface: 'operational',
       },

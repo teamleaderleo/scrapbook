@@ -2,10 +2,12 @@ import Link from 'next/link';
 import type { ScrapbookRef } from '@/lib/scrapbook-relations';
 
 const surfaceLabels: Record<ScrapbookRef['surface'], string> = {
-  desk: 'Desk',
+  desk: 'Workbench',
   journal: 'Journal',
   space: 'Space',
   guestbook: 'Guestbook',
+  knowledge: 'Knowledge',
+  work: 'Work',
 };
 
 const relationLabels: Record<ScrapbookRef['relation'], string> = {
@@ -28,12 +30,12 @@ export function ScrapbookRelated({
 
   return (
     <section
-      aria-label="Continue through Scrapbook"
+      aria-label="Related"
       data-scrapbook-related
       className={className}
     >
       <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-        Continue through Scrapbook
+        Related
       </p>
       <ul className="mt-2 grid gap-2">
         {references.map(reference => (

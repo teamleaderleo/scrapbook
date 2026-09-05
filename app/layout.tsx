@@ -1,3 +1,4 @@
+import { SiteSearch } from '@/components/discovery/site-search';
 import '@/app/globals.css';
 import '@/app/materials.css';
 import '@/app/materials-accessibility.css';
@@ -62,6 +63,7 @@ export default function RootLayout({
         >
           <Suspense fallback={null}>
             <NavigationFeedback />
+            <SiteSearch />
           </Suspense>
           {children}
           <Toaster />

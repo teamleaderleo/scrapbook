@@ -164,7 +164,7 @@ test('covers strong language with the reusable hover reveal', async ({
   const response = await page.goto('/');
   expect(response?.ok()).toBe(true);
 
-  const latestWriting = page.locator('[data-home-now-kind="latest writing"]');
+  const latestWriting = page.locator('[data-home-now-kind="Writing"]');
   await expect(latestWriting).toBeVisible({ timeout: 15_000 });
   const covered = latestWriting.locator('[data-censor-token]').first();
   await expect(covered).toBeVisible();

@@ -1,3 +1,4 @@
+import { RememberVisit } from '@/components/discovery/recent-items';
 import { parseMarkdown } from '@/app/lib/utils/markdown';
 import { PageCurl, StitchedRule } from '@/components/cozy-flourishes';
 import { MarkdownContent } from '@/components/space/markdown-content';
@@ -49,6 +50,9 @@ export default async function LearningRecordPage({
 
   return (
     <div className="min-h-[calc(100dvh-3rem)] bg-background px-3 py-3 text-foreground sm:px-6 sm:py-6">
+      {record.visibility === 'public' && (
+        <RememberVisit href={record.canonicalUrl} />
+      )}
       <div className="mx-auto mb-3 flex min-h-11 w-full max-w-4xl items-center justify-between gap-3">
         <Link
           href="/space/records"
