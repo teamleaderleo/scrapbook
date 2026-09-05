@@ -4,6 +4,8 @@ import { PracticeWorkspace } from '@/components/space/practice-workspace';
 import { getConceptExercises } from '@/lib/concept-practice-data';
 import { Suspense } from 'react';
 import ViewportPageShell from '@/components/viewport-page-shell';
+import styles from '@/components/space/practice.module.css';
+import { PracticeBotanical } from '@/components/space/practice-botanical';
 
 export const metadata: Metadata = {
   title: 'Practice · Scrapbook',
@@ -16,9 +18,15 @@ export default async function PracticePage() {
   const concepts = await getConceptExercises();
   return (
     <ViewportPageShell className="bg-background text-foreground">
-      <div className="mx-auto w-full max-w-3xl px-4 py-7 sm:px-6 sm:py-8">
-        <header className="mb-5 flex flex-wrap items-baseline justify-between gap-3">
-          <h1 className="font-serif text-3xl tracking-tight">Practice</h1>
+      <div
+        className={`${styles.garden} mx-auto w-full max-w-5xl px-5 py-7 sm:px-10 sm:py-10`}
+      >
+        <PracticeBotanical className={styles.branch} />
+        <header className="mb-7 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <PracticeBotanical className={styles.sprig} />
+            <h1 className="font-serif text-4xl tracking-tight">Practice</h1>
+          </div>
           <Link
             href="/space/trail"
             className="text-sm text-muted-foreground underline-offset-4 hover:underline"

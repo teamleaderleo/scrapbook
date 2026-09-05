@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import styles from './practice.module.css';
 import { codeExercises, practiceRevision } from '@/lib/code-practice';
 import { TypingExercise } from './typing-exercise';
 import { usePracticeHistory } from './use-practice-history';
@@ -29,38 +30,39 @@ export function CodePracticeBench() {
   return (
     <div className="min-w-0">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <label className="flex flex-wrap items-center gap-3 text-sm">
-          Function
-          <select
-            aria-label="Function"
-            value={selected}
-            onChange={event => setSelected(Number(event.target.value))}
-            className="min-h-[44px] max-w-full rounded-md border border-border bg-background px-3"
-          >
-            {codeExercises.map((item, index) => (
-              <option key={item.slug} value={index}>
-                {item.title} · TypeScript
-              </option>
-            ))}
-          </select>
-        </label>
+        <div
+          className="flex flex-wrap items-center gap-x-5 gap-y-1"
+          role="group"
+          aria-label="Function"
+        >
+          {codeExercises.map((item, index) => (
+            <button
+              key={item.slug}
+              aria-pressed={selected === index}
+              onClick={() => setSelected(index)}
+              className={`${styles.control} text-sm`}
+            >
+              {item.title}
+            </button>
+          ))}
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div
-            className="inline-flex rounded-md border border-border p-1"
+            className="inline-flex gap-4 text-sm"
             role="group"
             aria-label="Code mode"
           >
             <button
               aria-pressed={!recall}
               onClick={() => setRecall(false)}
-              className={`min-h-[44px] rounded px-4 text-sm ${!recall ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
+              className={styles.control}
             >
               Copy
             </button>
             <button
               aria-pressed={recall}
               onClick={() => setRecall(true)}
-              className={`min-h-[44px] rounded px-4 text-sm ${recall ? 'bg-foreground text-background' : 'text-muted-foreground'}`}
+              className={styles.control}
             >
               Recall
             </button>
@@ -72,7 +74,7 @@ export function CodePracticeBench() {
           ) : null}
         </div>
       </div>
-      <div className="mt-5 overflow-hidden rounded-xl border border-border bg-card">
+      <div className="mt-2">
         <TypingExercise
           key={`${exercise.slug}:${mode}`}
           target={{ kind: 'code', label: exercise.title, text: exercise.text }}
@@ -100,7 +102,7 @@ export function CodePracticeBench() {
           value={notes}
           onChange={event => setNotes(event.target.value)}
           placeholder="Explain it, or sketch the change…"
-          className="mt-3 min-h-[128px] w-full rounded-md border border-border bg-background p-3 font-mono text-base leading-6 focus-visible:ring-2 focus-visible:ring-ring"
+          className="mt-3 min-h-[128px] w-full border-b border-border bg-transparent py-3 font-mono text-base leading-6 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         />
         <p className="mt-1 text-xs text-muted-foreground">
           Notes saved on this device.

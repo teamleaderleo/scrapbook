@@ -1,0 +1,178 @@
+.garden {
+  --practice-leaf: #526b45;
+  --practice-rust: #a83b2c;
+  position: relative;
+  isolation: isolate;
+}
+:global(.dark) .garden {
+  --practice-leaf: #b1c79b;
+  --practice-rust: #f39b87;
+}
+.branch {
+  position: absolute;
+  right: -7.5rem;
+  top: 1.5rem;
+  width: 10rem;
+  height: 17rem;
+  color: var(--practice-leaf);
+  opacity: 0.16;
+  pointer-events: none;
+  z-index: -1;
+}
+.sprig {
+  width: 2rem;
+  height: 3rem;
+  color: var(--practice-leaf);
+}
+.surface {
+  padding: 1rem 0;
+}
+.stage {
+  position: relative;
+  min-height: 12rem;
+  cursor: text;
+  padding: 0.75rem 0;
+}
+.text,
+.input {
+  margin: 0;
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  font-family:
+    var(--font-jetbrains-mono, ui-monospace), SFMono-Regular, Menlo, Consolas,
+    monospace;
+  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  font-weight: 400;
+  line-height: 1.9;
+  letter-spacing: 0;
+  tab-size: 2;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-variant-ligatures: none;
+}
+.text {
+  position: relative;
+  min-height: 9rem;
+  color: hsl(var(--muted-foreground));
+}
+.input {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  padding: 0.75rem 0;
+  resize: none;
+  opacity: 0;
+  pointer-events: none;
+}
+.stage:focus-within {
+  outline: none;
+}
+.character {
+  position: relative;
+}
+.correct {
+  color: var(--practice-leaf, hsl(var(--foreground)));
+}
+.wrong {
+  color: var(--practice-rust, hsl(var(--destructive)));
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+.selected {
+  background: hsl(var(--foreground) / 0.12);
+}
+.caret::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 0.1em;
+  height: 1.2em;
+  border-left: 2px solid var(--practice-leaf, currentColor);
+  animation: caret 1.1s step-end infinite;
+}
+.stage:not(:focus-within) .caret::before {
+  animation: none;
+  opacity: 0.35;
+}
+.stage:focus-within .text {
+  text-shadow: none;
+}
+.control {
+  min-height: 44px;
+  padding: 0.5rem 0.1rem;
+  color: hsl(var(--muted-foreground));
+  border-bottom: 1px solid transparent;
+  text-align: left;
+  transition:
+    color 150ms,
+    border-color 150ms;
+}
+.control:hover {
+  color: hsl(var(--foreground));
+}
+.control[aria-pressed='true'] {
+  color: var(--practice-leaf, hsl(var(--foreground)));
+  border-color: currentColor;
+}
+.control:focus-visible {
+  outline: 2px solid var(--practice-leaf, hsl(var(--ring)));
+  outline-offset: 6px;
+}
+.libraryRow {
+  display: flex;
+  width: 100%;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 1rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.6);
+  text-align: left;
+}
+.libraryRow:hover,
+.libraryRow:focus-visible {
+  background: hsl(var(--muted));
+  outline: none;
+}
+.libraryRow[aria-current='true'] {
+  color: var(--practice-leaf, hsl(var(--foreground)));
+  border-left: 2px solid currentColor;
+}
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+@media (max-width: 640px) {
+  .branch {
+    display: none;
+  }
+  .surface {
+    padding-top: 0.75rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .caret::before {
+    animation: none;
+  }
+  .control {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  .correct {
+    color: CanvasText;
+  }
+  .wrong {
+    color: LinkText;
+  }
+  .caret::before {
+    border-color: Highlight;
+  }
+  .selected {
+    background: Highlight;
+    color: HighlightText;
+  }
+  .branch {
+    display: none;
+  }
+}

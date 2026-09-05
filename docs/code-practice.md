@@ -1,6 +1,6 @@
 # Practice
 
-`/practice` is a small function picker over revision-pinned, owner-authorized
+`/practice` offers visible function choices over revision-pinned, owner-authorized
 Scrapbook excerpts in `lib/code-practice.ts`. Source links retain repository,
 commit, file, and line; the source drawer states that no repository license is
 declared. The excerpt registry is teaching material, not a live source mirror.
@@ -16,6 +16,20 @@ accuracy. Categories classify the expected character at each mismatched position
 this is positional comparison, not an edit-distance or syntax diff. WPM uses
 correct current characters divided by five per active minute. Paste/drop removes
 the speed result. Tab indentation is opt-in; Shift+Tab remains normal navigation.
+
+Typing happens directly on the reference. A native textarea occupies the same
+field as the painted code; it owns keyboard input, selection, clipboard, and
+mobile keyboard focus. The visible layer paints entered characters, mistakes,
+selection, and the caret. Clicking a character places the caret in the existing
+input. Arrow keys, Enter, selection replacement, and backspace remain native.
+Escape leaves the field. Desktop can focus an idle field on entry; touch devices
+wait for a tap. Recall paints only entered text until the source is revealed.
+
+Practice uses open page surfaces, text controls, and a searchable concept library
+with full wrapping titles. It has no function or concept dropdowns. A small
+botanical mark and larger margin drawing supply sage accents without sitting
+behind the controls. There is no ambient animation; caret blinking respects
+reduced motion. Space's shared practice dock uses the same inline typing field.
 
 The homepage now prioritizes dated changes, recently opened pages, practice,
 machine health, and the study trail. GitHub contribution counts and polling are
