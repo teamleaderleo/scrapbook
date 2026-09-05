@@ -132,7 +132,7 @@ describe('machine health dashboard v2', () => {
     const html = renderDashboard();
 
     expect(html).toContain('Big Red');
-    expect(html).toContain('Online');
+    expect(html).not.toContain('Needs attention');
     expect(html).toContain('Resources');
     expect(html).toContain('CPU');
     expect(html).toContain('Memory');
@@ -159,6 +159,21 @@ describe('machine health dashboard v2', () => {
     expect(html).not.toContain('Use recovery token');
   });
 
+  it('does not turn failed services into a headline warning', () => {
+    const html = renderDashboard({
+      reportOverride: {
+        ...report,
+        payload: {
+          ...report.payload,
+          services: { ...report.payload.services, failed_user_units: 3 },
+        },
+      },
+    });
+    expect(html).not.toContain('Needs attention');
+    expect(html).not.toContain('3 services failed');
+    expect(html).not.toContain('Big Red diagnostics');
+  });
+
   it('keeps resolved 24-hour incidents out of the headline', () => {
     const incidentReport: StoredMachineHealth = {
       ...report,
@@ -179,7 +194,7 @@ describe('machine health dashboard v2', () => {
     };
     const html = renderDashboard({ reportOverride: incidentReport });
 
-    expect(html).toContain('Online');
+    expect(html).not.toContain('Needs attention');
     expect(html).not.toContain('Current issue');
     expect(html).not.toContain('Desktop search');
   });
@@ -204,7 +219,9 @@ describe('machine health dashboard v2', () => {
     const html = renderDashboard({ macReport });
 
     expect(html).toContain('aria-label="Activity monitor device"');
-    expect(html).not.toContain('aria-label="Resource device"');
+    expect(html).toContain('aria-label="Resource device"');
+    expect(html).toContain('aria-label="Codex usage device"');
+    expect(html).toContain('aria-label="Model usage device"');
     expect(html).toContain('Big Red');
     expect(html).toContain('Air Blue');
   });

@@ -22,6 +22,7 @@ import {
 import { useMemo, useState, useSyncExternalStore } from 'react';
 import { useMachineDevice } from './machine-device-context';
 import { ModelUsage } from './model-usage';
+import { MachineSourceControl, type MachineScope } from './machine-source-control';
 
 type ActivityRange = '12h' | '24h' | '7d' | '30d';
 
@@ -513,13 +514,16 @@ function ResourceHistory({
   previousBins,
   range,
   current,
+  metric,
+  onMetricChange,
 }: {
   bins: PublicActivityBin[];
   previousBins: PublicActivityBin[];
   range: ActivityRange;
   current: MachineResourceSnapshot;
+  metric: ResourceKey;
+  onMetricChange: (metric: ResourceKey) => void;
 }) {
-  const [metric, setMetric] = useState<ResourceKey>('cpu');
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const timeZone = useSyncExternalStore(
     subscribeToTimeZone,
@@ -641,7 +645,7 @@ function ResourceHistory({
               type="button"
               aria-pressed={metric === key}
               onClick={() => {
-                setMetric(key);
+                onMetricChange(key);
                 setSelectedIndex(null);
               }}
               className="grid min-h-[3.45rem] w-full grid-cols-[minmax(0,1fr)_5rem] items-center gap-3 border-b border-black/[0.055] px-5 py-2.5 text-left last:border-b-0 hover:bg-black/[0.025] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#a53b34] dark:border-white/[0.065] dark:hover:bg-white/[0.035]"
@@ -1290,11 +1294,14 @@ export function MachineHealthOverview({
   currentByHost: Partial<Record<MachineHealthHost, MachineResourceSnapshot>>;
   windowsVm?: WindowsVm;
 }) {
-  const [resourceHost] = useMachineDevice();
+  const [resourceHost, setResourceHost] = useMachineDevice();
+  const [usageSource, setUsageSource] = useState<MachineScope>('all');
+  const usageSamples = useMemo(() => codexSamples.filter(sample => usageSource === 'all' || sample.source === usageSource), [codexSamples, usageSource]);
   const selectedResourceHost = currentByHost[resourceHost]
     ? resourceHost
     : 'big-red';
   const [resourceRange, setResourceRange] = useState<ActivityRange>('12h');
+  const [resourceMetric, setResourceMetric] = useState<ResourceKey>('cpu');
   const [codexRange, setCodexRange] = useState<ActivityRange>('7d');
   const resourceSamples = useMemo(
     () => samples.filter(sample => sample.host === selectedResourceHost),
@@ -1316,14 +1323,14 @@ export function MachineHealthOverview({
     [resourceSamples, resourceRange, now, resourceDuration]
   );
   const codexBins = useMemo(
-    () => buildCodexBins(codexSamples, codexRange, now),
-    [codexSamples, codexRange, now]
+    () => buildCodexBins(usageSamples, codexRange, now),
+    [usageSamples, codexRange, now]
   );
   const codexDuration =
     RANGE_CONFIG[codexRange].bins * RANGE_CONFIG[codexRange].binMs;
   const previousCodexBins = useMemo(
-    () => buildCodexBins(codexSamples, codexRange, now - codexDuration),
-    [codexSamples, codexRange, now, codexDuration]
+    () => buildCodexBins(usageSamples, codexRange, now - codexDuration),
+    [usageSamples, codexRange, now, codexDuration]
   );
 
   return (
@@ -1340,9 +1347,10 @@ export function MachineHealthOverview({
 
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         <div>
-          <div className="mb-2 flex items-end justify-between gap-3 px-1">
+          <div className="mb-2 flex flex-wrap items-end justify-between gap-3 px-1">
             <div>
-              <h3 className="opacity-55 pb-2 text-sm font-medium">Resources · {selectedResourceHost === 'macbook-air' ? 'Air Blue' : 'Big Red'}</h3>
+              <h3 className="opacity-55 pb-1 text-sm font-medium">Resources</h3>
+              {currentByHost['macbook-air'] ? <MachineSourceControl label="Resource device" value={selectedResourceHost} onChange={value => { if (value !== 'all') setResourceHost(value); }} /> : <span className="text-xs opacity-55">Big Red</span>}
 
             </div>
             <RangeControl
@@ -1357,11 +1365,13 @@ export function MachineHealthOverview({
             previousBins={previousResourceBins}
             range={resourceRange}
             current={currentByHost[selectedResourceHost]!}
+            metric={resourceMetric}
+            onMetricChange={setResourceMetric}
           />
         </div>
         <div>
-          <div className="min-h-9 mb-2 flex items-end justify-between gap-3 px-1">
-            <h3 className="opacity-55 pb-2 text-sm font-medium">Codex usage</h3>
+          <div className="min-h-9 mb-2 flex flex-wrap items-end justify-between gap-3 px-1">
+            <div><h3 className="opacity-55 pb-1 text-sm font-medium">Codex usage</h3><MachineSourceControl label="Codex usage device" value={usageSource} onChange={setUsageSource} allowAll /></div>
             <RangeControl
               label="Codex"
               range={codexRange}
@@ -1376,7 +1386,7 @@ export function MachineHealthOverview({
         </div>
       </div>
 
-      <ModelUsage samples={codexSamples} from={codexBins[0].start} to={codexBins.at(-1)!.end} />
+      <ModelUsage samples={usageSamples} from={codexBins[0].start} to={codexBins.at(-1)!.end} controls={<div className="flex flex-wrap items-center gap-x-6 gap-y-2"><MachineSourceControl label="Model usage device" value={usageSource} onChange={setUsageSource} allowAll /><RangeControl label="Model usage" range={codexRange} onChange={setCodexRange} /></div>} />
       <WindowsVmHistory samples={samples} current={windowsVm} now={now} />
       <PerformanceDetails bins={resourceBins} />
     </section>

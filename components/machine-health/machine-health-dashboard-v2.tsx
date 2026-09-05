@@ -17,7 +17,6 @@ import { MachineDeviceProvider } from './machine-device-context';
 import { MachineActivityMonitor } from './machine-activity-monitor';
 import { MachineHealthOverview } from './machine-health-overview';
 import { MachineHealthRefresh } from './machine-health-refresh';
-import { MachineHealthTimestamp } from './machine-health-timestamp';
 
 const HOUR_MS = 60 * 60_000;
 const GIB = 1_024 ** 3;
@@ -277,48 +276,6 @@ export function MachineHealthDashboard({
   const payload = report.payload;
   const assessment = evaluateMachineHealth(payload);
   const recentHistory = assessment.reasons.filter(isRecentHistory);
-  const activeReasons: string[] = [];
-  const ageHours = Math.max(0, (now - Date.parse(report.checkedAt)) / HOUR_MS);
-  if (ageHours > 3)
-    activeReasons.unshift(
-      `Latest update is ${Math.floor(ageHours)} hours old.`
-    );
-  if (payload.disk.root_used_percent >= 90)
-    activeReasons.push('Storage is above 90%.');
-  else if (payload.disk.root_used_percent >= 80)
-    activeReasons.push('Storage is above 80%.');
-  if (payload.memory.used_percent >= 90)
-    activeReasons.push('Memory is above 90%.');
-  const failedUnits =
-    payload.services.failed_system_units + payload.services.failed_user_units;
-  if (failedUnits > 0)
-    activeReasons.push(
-      `${failedUnits} service${failedUnits === 1 ? '' : 's'} failed.`
-    );
-  if (payload.network.connectivity !== 'full')
-    activeReasons.push('Network connectivity is degraded.');
-  if (payload.network.tailscale_backend !== 'running')
-    activeReasons.push('Tailscale is not running.');
-  if (
-    payload.windows_vm?.source === 'libvirt' &&
-    payload.windows_vm.state === 'crashed'
-  )
-    activeReasons.push('Windows VM has crashed.');
-  const attention =
-    payload.disk.root_used_percent >= 90 ||
-    failedUnits > 0 ||
-    (payload.windows_vm?.source === 'libvirt' &&
-      payload.windows_vm.state === 'crashed');
-  const status = attention
-    ? 'Needs attention'
-    : activeReasons.length > 0
-      ? 'Check Big Red'
-      : 'Online';
-  const statusColor = attention
-    ? 'bg-red-600 dark:bg-red-400'
-    : activeReasons.length > 0
-      ? 'bg-amber-600 dark:bg-amber-300'
-      : 'bg-emerald-600 dark:bg-emerald-400';
   const publicSamples = samples.map(sample => ({
     windowsVm: sample.windowsVm ?? null,
     memoryTotalGib: sample.memoryTotalGib ?? null,
@@ -349,17 +306,6 @@ export function MachineHealthDashboard({
           <h1 className="mt-1 text-3xl font-semibold tracking-[-0.045em]">
             Machines
           </h1>
-          <div className="mt-2 flex items-center gap-2 text-xs">
-            <span
-              aria-hidden="true"
-              className={`size-2 rounded-full ${statusColor}`}
-            />
-            <span className="font-medium">Big Red · {status}</span>
-            <span aria-hidden="true" className="opacity-25">
-              ·
-            </span>
-            <MachineHealthTimestamp checkedAt={report.checkedAt} now={now} />
-          </div>
           <nav aria-label="Machine dashboard sections" className="mt-3 flex gap-4 text-xs opacity-60">
             <a href="#activity-monitor-heading" className="hover:underline">Now</a>
             <a href="#activity-heading" className="hover:underline">History</a>
@@ -371,19 +317,6 @@ export function MachineHealthDashboard({
           <DailyCompanion now={now} />
         </div>
       </header>
-
-      {activeReasons.length > 0 ? (
-        <section
-          className={`border-l-2 px-3 py-1 text-sm ${attention ? 'border-red-600 dark:border-red-400' : 'border-amber-600 dark:border-amber-300'}`}
-          aria-label="Big Red diagnostics"
-        >
-          <ul className="opacity-65 grid gap-1">
-            {activeReasons.map(reason => (
-              <li key={reason}>{reason}</li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
 
       <MachineDeviceProvider>
         <MachineActivityMonitor />

@@ -285,3 +285,27 @@ test('reduced motion keeps navigation progress static and animation-free', async
 
   await cancelNavigationFeedback(page);
 });
+
+test('fragment jumps and their back/forward history never start route feedback', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await startNavigationFeedback(page, '/gallery');
+  await cancelNavigationFeedback(page);
+  await page.evaluate(() => {
+    window.location.hash = 'first-section';
+  });
+  await expect(page).toHaveURL(/#first-section$/);
+  await expect(feedback(page)).toHaveCount(0);
+  await page.evaluate(() => {
+    window.location.hash = 'second-section';
+  });
+  await expect(page).toHaveURL(/#second-section$/);
+  await expect(feedback(page)).toHaveCount(0);
+  await page.goBack();
+  await expect(page).toHaveURL(/#first-section$/);
+  await expect(feedback(page)).toHaveCount(0);
+  await page.goForward();
+  await expect(page).toHaveURL(/#second-section$/);
+  await expect(feedback(page)).toHaveCount(0);
+});
