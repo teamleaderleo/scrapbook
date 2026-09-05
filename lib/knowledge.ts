@@ -238,3 +238,14 @@ export async function getKnowledgeDocument(
 
   return { ...entry, markdown, html };
 }
+
+// Use the canonical handoff's first reading paragraph; no duplicate route list.
+export function getKnowledgeReadingPath(markdown: string) {
+  const section =
+    markdown.split(/^## Default next walk\s*$/m)[1]?.split(/^## /m)[0] ?? '';
+  const paragraph = section.trim().split(/\n\s*\n/)[0] ?? '';
+  return Array.from(paragraph.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)).flatMap(match => {
+    const href = resolveKnowledgeLink('HANDOFF.md', match[2]);
+    return href.startsWith('/knowledge/') ? [{ title: match[1], href }] : [];
+  });
+}

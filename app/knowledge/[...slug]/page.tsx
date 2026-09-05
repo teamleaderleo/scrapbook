@@ -1,3 +1,6 @@
+import { RememberVisit } from '@/components/discovery/recent-items';
+import { ScrapbookRelated } from '@/components/scrapbook-related';
+import { getRelatedScrapbookRefs } from '@/lib/scrapbook-relations';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -52,6 +55,7 @@ export default async function KnowledgeDocumentPage({
       className="bg-background text-foreground"
       contentClassName="min-h-[calc(100dvh-3rem)]"
     >
+      <RememberVisit href={`/knowledge/${document.slug}`} />
       <main className="mx-auto w-full max-w-6xl px-3 pb-24 pt-4 sm:px-6 sm:pt-7">
         <nav
           className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
@@ -141,6 +145,10 @@ export default async function KnowledgeDocumentPage({
             </section>
           ) : null}
         </article>
+        <ScrapbookRelated
+          references={getRelatedScrapbookRefs('knowledge', document.slug)}
+          className="mt-8 border-t border-border pt-4"
+        />
       </main>
     </ViewportPageShell>
   );

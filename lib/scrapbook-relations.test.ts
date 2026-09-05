@@ -1,3 +1,4 @@
+import { getKnowledgeIndex } from './knowledge';
 import { describe, expect, it } from 'vitest';
 import { agentJournalEntries } from './agent-journal';
 import { botDeskEntries } from './bot-desk';
@@ -35,7 +36,21 @@ const publicArtifacts = new Map<string, ScrapbookArtifact>([
 ]);
 
 describe('Scrapbook relations', () => {
-  it('references canonical public artifacts at both ends', () => {
+  it('references canonical public artifacts at both ends', async () => {
+    const knowledge = await getKnowledgeIndex();
+    for (const entry of knowledge.concepts)
+      publicArtifacts.set(`knowledge:${entry.slug}`, {
+        surface: 'knowledge',
+        id: entry.slug,
+        href: `/knowledge/${entry.slug}`,
+        title: entry.title,
+      });
+    publicArtifacts.set('work:preflight', {
+      surface: 'work',
+      id: 'preflight',
+      href: '/work/preflight',
+      title: 'Preflight',
+    });
     for (const relation of scrapbookRelations) {
       for (const artifact of [relation.from, relation.to]) {
         expect(

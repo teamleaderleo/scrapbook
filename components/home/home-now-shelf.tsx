@@ -1,100 +1,118 @@
 import { CensorReveal } from '@/components/ui/censor-reveal';
-import { agentVisits } from '@/lib/agent-guestbook';
 import { botDeskEntries } from '@/lib/bot-desk';
 import { getBotDeskDisplayCopy } from '@/lib/bot-desk-display';
 import { publicLearningRecords } from '@/lib/learning-records';
-import { ArrowRight } from 'lucide-react';
+import { getKnowledgeIndex } from '@/lib/knowledge';
+import { workRecordUpdatedAt, workRecords } from '@/lib/work-records';
 import Link from 'next/link';
 
-function latestLearningRecord() {
-  return [...publicLearningRecords].sort((left, right) => {
-    const leftDate = left.revisions.at(-1)?.createdAt ?? '';
-    const rightDate = right.revisions.at(-1)?.createdAt ?? '';
-    return rightDate.localeCompare(leftDate);
-  })[0];
-}
-
-export function HomeNowShelf() {
-  const workbench = botDeskEntries.find(entry => entry.publicationState === 'Published');
-  const workbenchDisplay = workbench ? getBotDeskDisplayCopy(workbench) : null;
-  const learning = latestLearningRecord();
-  const visit = agentVisits[0];
-
+export async function HomeNowShelf() {
+  const index = await getKnowledgeIndex();
+  const workbench = botDeskEntries.find(
+    entry => entry.publicationState === 'Published'
+  );
+  const learning = [...publicLearningRecords].sort((a, b) =>
+    (b.revisions.at(-1)?.createdAt ?? '').localeCompare(
+      a.revisions.at(-1)?.createdAt ?? ''
+    )
+  )[0];
+  const concept = [...index.concepts].sort(
+    (a, b) =>
+      (b.updated ?? b.created ?? '').localeCompare(
+        a.updated ?? a.created ?? ''
+      ) || (b.created ?? '').localeCompare(a.created ?? '')
+  )[0];
   const items = [
-    workbench && workbenchDisplay
-      ? {
-          id: `workbench-${workbench.slug}`,
-          kind: 'latest writing',
-          title: workbenchDisplay.title,
-          note: workbenchDisplay.blurb,
-          href: `/desk/${workbench.slug}`,
-          censor: true,
-        }
-      : null,
-    learning
-      ? {
-          id: `learning-${learning.slug}`,
-          kind: 'studying',
-          title: learning.title,
-          note: learning.spark,
-          href: learning.canonicalUrl,
-          censor: false,
-        }
-      : null,
-    visit
-      ? {
-          id: `visit-${visit.id}`,
-          kind: 'agent visit',
-          title: visit.name,
-          note: visit.note,
-          href: `/gallery#visit-${visit.id}`,
-          censor: false,
-        }
-      : null,
-  ].filter((item): item is NonNullable<typeof item> => Boolean(item));
-
-  if (items.length === 0) return null;
-
+    ...(workbench
+      ? [
+          {
+            href: `/desk/${workbench.slug}`,
+            title: getBotDeskDisplayCopy(workbench).title,
+            note: getBotDeskDisplayCopy(workbench).blurb,
+            kind: 'Writing',
+            date: workbench.date,
+          },
+        ]
+      : []),
+    ...(learning
+      ? [
+          {
+            href: learning.canonicalUrl,
+            title: learning.title,
+            note: learning.spark,
+            kind: 'Study',
+            date: learning.revisions.at(-1)?.createdAt.slice(0, 10) ?? '',
+          },
+        ]
+      : []),
+    ...(concept
+      ? [
+          {
+            href: `/knowledge/${concept.slug}`,
+            title: concept.title,
+            note: concept.summary ?? '',
+            kind: 'Knowledge',
+            date: concept.updated ?? concept.created ?? '',
+          },
+        ]
+      : []),
+    {
+      href: '/work',
+      title: 'Engineering work',
+      note: `${workRecords[0].title}: ${workRecords[0].status}`,
+      kind: 'Work record',
+      date: workRecordUpdatedAt,
+    },
+  ].sort((a, b) => b.date.localeCompare(a.date));
   return (
-    <section aria-labelledby="home-now-title" className="min-w-0" data-home-now-shelf>
-      <div className="mb-2 px-0.5">
-        <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.17em] text-muted-foreground">
-          Now
-        </p>
-        <h2 id="home-now-title" className="mt-1 text-base font-semibold tracking-tight">
-          On the desk
-        </h2>
-      </div>
-
-      <div className="grid min-w-0 overflow-hidden rounded-xl border border-border/65 bg-card/70 sm:grid-cols-3">
-        {items.map((item, index) => (
-          <Link
-            key={item.id}
-            href={item.href}
-            data-home-now-kind={item.kind}
-            className="group flex min-h-24 min-w-0 flex-col justify-between gap-3 border-border/55 px-3.5 py-3 transition-colors hover:bg-muted/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&:nth-child(n+2)]:border-t sm:[&:nth-child(n+2)]:border-l sm:[&:nth-child(n+2)]:border-t-0"
-          >
-            <span className="font-mono text-[8px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              {item.kind}
-            </span>
-            <span className="flex min-w-0 items-end justify-between gap-3">
+    <section
+      aria-labelledby="home-now-title"
+      className="min-w-0"
+      data-home-now-shelf
+    >
+      <h2
+        id="home-now-title"
+        className="border-b border-border pb-3 text-base font-semibold"
+      >
+        Latest changes
+      </h2>
+      <ul className="divide-y divide-border/60">
+        {items.map(item => (
+          <li key={item.href}>
+            <Link
+              href={item.href}
+              prefetch={false}
+              data-home-now-kind={item.kind}
+              className="grid gap-1 py-3 hover:bg-muted/40 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-5"
+            >
+              <span className="text-xs leading-5 text-muted-foreground">
+                {item.kind}
+                <time
+                  dateTime={item.date}
+                  className="ml-3 tabular-nums sm:ml-0 sm:block"
+                >
+                  {item.date}
+                </time>
+              </span>
               <span className="min-w-0">
-                <span className="block line-clamp-1 text-sm font-semibold tracking-tight">
-                  {item.censor ? <CensorReveal text={item.title} /> : item.title}
+                <span className="block text-sm font-semibold">
+                  <CensorReveal text={item.title} />
                 </span>
-                <span className="mt-1 block line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                  {item.censor ? <CensorReveal text={item.note} /> : item.note}
+                <span
+                  className="mt-1 overflow-hidden text-xs leading-5 text-muted-foreground"
+                  style={{
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                  }}
+                >
+                  <CensorReveal text={item.note} />
                 </span>
               </span>
-              <ArrowRight
-                className="mb-0.5 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground"
-                aria-hidden="true"
-              />
-            </span>
-            <span className="sr-only">Item {index + 1} of {items.length}</span>
-          </Link>
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 }

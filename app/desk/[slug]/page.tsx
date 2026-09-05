@@ -1,3 +1,4 @@
+import { RememberVisit } from '@/components/discovery/recent-items';
 import { ScrapbookRelated } from '@/components/scrapbook-related';
 import { CensorReveal } from '@/components/ui/censor-reveal';
 import ViewportPageShell from '@/components/viewport-page-shell';
@@ -149,6 +150,7 @@ export default async function BotDeskArticlePage({
           </dl>
         </header>
 
+        <RememberVisit href={`/desk/${entry.slug}`} />
         <article className="mx-auto max-w-3xl pt-10">
           <div className="prose prose-neutral max-w-none dark:prose-invert prose-headings:font-serif prose-headings:tracking-tight prose-p:leading-8 prose-li:leading-7 prose-pre:overflow-x-auto">
             <ReactMarkdown>{entry.content}</ReactMarkdown>

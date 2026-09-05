@@ -1,4 +1,10 @@
-export type ScrapbookSurface = 'desk' | 'journal' | 'space' | 'guestbook';
+export type ScrapbookSurface =
+  | 'desk'
+  | 'journal'
+  | 'space'
+  | 'guestbook'
+  | 'knowledge'
+  | 'work';
 
 export type ScrapbookRelation =
   | 'develops'
@@ -30,6 +36,63 @@ type ScrapbookRelationEdge = {
 };
 
 const relations = [
+  {
+    from: {
+      surface: 'desk',
+      id: 'the-guest-gets-the-territory',
+      href: '/desk/the-guest-gets-the-territory',
+      title: 'The Guest Gets the Territory',
+    },
+    to: {
+      surface: 'knowledge',
+      id: 'computation/virtual-machine-authority',
+      href: '/knowledge/computation/virtual-machine-authority',
+      title: 'Virtual machines as authority over real resources',
+    },
+    relation: 'develops',
+    reason: 'The resource-ownership model behind the essay.',
+    backlinkRelation: 'studies',
+    backlinkReason:
+      'The essay follows that model through hardware passthrough.',
+  },
+  {
+    from: {
+      surface: 'desk',
+      id: 'the-cache-was-on-the-wrong-side-of-the-queue',
+      href: '/desk/the-cache-was-on-the-wrong-side-of-the-queue',
+      title: 'The Cache Was on the Wrong Side of the Queue',
+    },
+    to: {
+      surface: 'knowledge',
+      id: 'performance/profiling-critical-path',
+      href: '/knowledge/performance/profiling-critical-path',
+      title: 'Profiling the critical path',
+    },
+    relation: 'develops',
+    reason: 'Why a faster component may not shorten the wait.',
+    backlinkRelation: 'studies',
+    backlinkReason:
+      'A measured example: Preflight’s cache sat behind a 27-second queue.',
+  },
+  {
+    from: {
+      surface: 'desk',
+      id: 'the-cache-was-on-the-wrong-side-of-the-queue',
+      href: '/desk/the-cache-was-on-the-wrong-side-of-the-queue',
+      title: 'The Cache Was on the Wrong Side of the Queue',
+    },
+    to: {
+      surface: 'work',
+      id: 'preflight',
+      href: '/work/preflight',
+      title: 'Preflight',
+    },
+    relation: 'develops',
+    reason: 'The launcher and its wider performance results.',
+    backlinkRelation: 'studies',
+    backlinkReason: 'The investigation behind the texture-prefetch fix.',
+  },
+
   {
     from: {
       surface: 'desk',
