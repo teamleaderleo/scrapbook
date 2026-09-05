@@ -62,6 +62,12 @@ input. Arrow keys, Enter, selection replacement, and backspace remain native.
 Escape leaves the field. Desktop can focus an idle field on entry; touch devices
 wait for a tap. Recall paints only entered text until the source is revealed.
 
+Focus follows a completed click or tap, leaving swipe gestures to the browser.
+Caret following responds to caret movement, never viewport resize events: mobile
+browser chrome must not pull a reader back to the typing field. Untyped reference
+text uses 65% color opacity; entered text, errors, and the caret stay solid. The
+line being inspected stays solid too. Forced-color mode uses system text colors.
+
 Practice uses open page surfaces, text controls, and a searchable concept library
 with full wrapping titles. It has no function or concept dropdowns. A small
 botanical mark and larger margin drawing use the palette accent without sitting

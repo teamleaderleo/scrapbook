@@ -94,11 +94,6 @@ export function TypingExercise({
   useEffect(() => {
     revealCaret();
   }, [selection.caret, revealCaret]);
-  useEffect(() => {
-    const viewport = window.visualViewport;
-    viewport?.addEventListener('resize', revealCaret);
-    return () => viewport?.removeEventListener('resize', revealCaret);
-  }, [revealCaret]);
 
   const update = (value: string, start = value.length, end = start) => {
     if (feedback.complete) return;
@@ -180,9 +175,8 @@ export function TypingExercise({
       <div
         data-typing-stage
         className={styles.stage}
-        onPointerDown={event => {
+        onClick={event => {
           if (event.button !== 0 || !textarea.current) return;
-          event.preventDefault();
           const character = (event.target as HTMLElement).closest<HTMLElement>(
             '[data-offset]'
           );
