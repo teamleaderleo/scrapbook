@@ -178,15 +178,6 @@ export function ModelUsage({
           </tbody>
         </table>
       </div>
-      <details className="mt-2 text-xs opacity-60">
-        <summary className="cursor-pointer py-2">Usage accounting</summary>
-        <p className="max-w-prose leading-relaxed">
-          Complete hours from local Codex logs. Input includes cached tokens;
-          output includes reasoning. Models come from recorded turn context.
-          Unattributed usage has no model breakdown. Overlapping machine reports
-          are excluded from these totals.
-        </p>
-      </details>
     </section>
   );
 }

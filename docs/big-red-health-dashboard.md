@@ -615,3 +615,5 @@ No rollback step requires firmware, boot, disk, network, login, SSH, Tailscale, 
 ## Related finding
 
 The existing proxy-dashboard documentation says production verifies its signed access cookie, but the current `/proxy-dashboard` page does not call `hasProxyDashboardAccess`. The machine-health route performs that check correctly. Fixing the older route should be reviewed as a separate narrow security change rather than bundled silently into this feature.
+
+Dashboard copy stays at the readout level: labels, units, values, and timestamps. Resource rows use one line; RAM history leads with GiB. Measurement caveats live in one collapsed Data notes section.
