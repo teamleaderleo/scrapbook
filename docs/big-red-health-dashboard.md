@@ -4,6 +4,89 @@
 
 The production database, ingestion credentials, hourly Big Red timer, public summary, and owner-only diagnostics are live. The MacBook Air runs separate one-shot hourly token and resource reporters. Resource history stays device-specific; Codex accounting combines deduplicated complete-hour rows from both devices.
 
+## Minute activity monitor
+
+The activity monitor adds a two-second observation about once a minute while each
+host is awake. It runs separately from the hourly health report: it does not scan
+repositories, storage trees, logs, or Codex transcripts. The visible page refreshes
+once a minute, retains the last successful view on failure, and backs off to five
+minutes after repeated failures. Reports older than three minutes are marked stale.
+This is sampled activity; brief spikes between observations can be missed.
+
+The view includes individual logical CPUs and their actual core groups, used and
+available RAM in GiB, occupied swap, disk and network MiB/s, Windows VM host usage,
+and an hour of selectable minute history. CPU history can isolate a core group.
+One busy core means one fully occupied logical CPU; group percentages divide by
+that group's logical CPU count, not by the whole machine.
+
+Big Red's Linux PMU CPU lists identify performance, efficiency, and low-power
+efficiency cores. The Mac uses IODeviceTree logical CPU IDs and cluster types;
+performance-level ordering is not assumed to match logical CPU numbering. Unknown
+topology remains explicitly unknown. On these machines the observed groups are
+6/8/2 on the Core Ultra 7 255H and 4/6 on the Apple M5.
+
+Linux memory uses MemTotal minus MemAvailable, and reports full memory PSI's
+10-second average stall percentage. Mac memory uses VM counters, with wired and
+compressed amounts and the kernel pressure state. Wired and compressed memory
+are already included in used RAM. Available Mac RAM is an estimate, not an exact
+prediction of allocation capacity. Occupied swap is not itself active swapping.
+Disk rates use cumulative physical-device byte counters; network totals include
+virtual interfaces and can count traffic at more than one interface layer.
+
+Owner sessions and the existing dashboard recovery cookie can see the latest
+top ten processes by CPU or resident memory. CPU is measured from cumulative
+process CPU-time deltas, with start identity checks for recycled PIDs. The report
+contains at most twenty rows (the union of both rankings), with basename, PID,
+busy cores, and RSS. Arguments, executable paths, window titles, and environment
+variables are not sent. RSS can include shared pages and must not be summed as
+exclusive physical memory.
+
+`POST /api/machine-health/activity/ingest` reuses the existing ingest secret,
+accepts at most 32 KiB, and rejects reports more than five minutes old or one
+minute in the future. `GET /api/machine-health/activity` is uncached and strips
+process rows unless the existing private-access check succeeds. Historical rows
+always contain aggregate data only. The two activity tables have RLS enabled
+with no client roles granted access. JSON object constraints reject malformed
+storage, and upserts cannot replace newer observations with older arrivals.
+
+Only the latest process snapshot is stored per host. Reads exclude process data
+after fifteen minutes; each ingest also removes stale process fields and samples
+older than two hours. If both reporters stop, physical cleanup waits until the
+next ingest. The UI displays only the last hour, with gaps for missing samples.
+
+The dependency-free collector is `scripts/machine-activity-report.py`. It loads
+the existing host reporter beside it and reuses that reporter's configuration.
+`--summary-only` measures collection without sending data or printing process
+names. Initial measurements were about 0.21 CPU seconds per Mac sample and 0.06
+CPU seconds per Big Red sample, excluding the subsequent HTTPS send. At a minute
+cadence those measurements correspond to roughly 0.35% and 0.10% of one core.
+They are observations, not a fixed overhead guarantee. No root sampler or
+continuously running collector is required.
+
+Install on Big Red beside the existing health reporter:
+
+```sh
+install -m 755 scripts/machine-activity-report.py ~/.local/bin/machine-activity-report.py
+install -m 644 scripts/machine-activity-report.service scripts/machine-activity-report.timer ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now machine-activity-report.timer
+systemctl --user start machine-activity-report.service
+```
+
+On the Mac, copy the collector beside `mac-health-report.py` in
+`~/Library/Application Support/Scrapbook/`. Render the separate LaunchAgent with
+`scripts/machine-activity-launchd.py --python ABSOLUTE_PYTHON_PATH --reporter
+ABSOLUTE_REPORTER_PATH --config ABSOLUTE_EXISTING_MAC_HEALTH_CONFIG_PATH`, save
+it as `~/Library/LaunchAgents/com.teamleaderleo.scrapbook-machine-activity.plist`,
+and bootstrap it in the current user's GUI domain. It uses a 60-second
+StartInterval, background priority, and low-priority I/O. It does not request
+wake events or queue missed samples during sleep.
+
+To stop minute collection, disable Big Red's `machine-activity-report.timer` and
+boot out the Mac's `com.teamleaderleo.scrapbook-machine-activity` LaunchAgent.
+The hourly health reporters remain independent. Reverting the UI/API change does
+not require dropping tables or deleting collected data.
+
 ## Storage and retention
 
 Live dashboard history is stored in the Scrapbook Supabase Postgres database, not Google Drive.
