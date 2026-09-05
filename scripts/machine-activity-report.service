@@ -1,0 +1,9 @@
+[Unit]
+Description=Scrapbook lightweight machine activity sample
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.config/big-red-health.env
+ExecStart=%h/.local/bin/machine-activity-report.py
+Nice=10
+TimeoutStartSec=25

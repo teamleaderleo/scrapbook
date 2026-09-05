@@ -1,0 +1,11 @@
+[Unit]
+Description=Sample machine activity once per minute
+
+[Timer]
+OnStartupSec=30
+OnUnitActiveSec=60
+AccuracySec=1
+Unit=machine-activity-report.service
+
+[Install]
+WantedBy=timers.target

@@ -13,6 +13,7 @@ import {
 } from '@/components/paper-creature';
 import { MemoryStick, Thermometer, Timer } from 'lucide-react';
 import Link from 'next/link';
+import { MachineActivityMonitor } from './machine-activity-monitor';
 import { MachineHealthOverview } from './machine-health-overview';
 import { MachineHealthRefresh } from './machine-health-refresh';
 import { MachineHealthTimestamp } from './machine-health-timestamp';
@@ -380,6 +381,8 @@ export function MachineHealthDashboard({
           </ul>
         </section>
       ) : null}
+
+      <MachineActivityMonitor />
 
       <MachineHealthOverview
         samples={publicSamples}
