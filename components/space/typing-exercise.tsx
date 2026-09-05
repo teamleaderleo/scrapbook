@@ -3,13 +3,29 @@
 import { useEffect, useRef, useState } from 'react';
 import { typingFeedback } from '@/lib/typing-feedback';
 import { spaceTypingWpm, type SpaceTypingTarget } from '@/lib/space-practice';
+import { insertedMistakes } from '@/lib/practice-history';
 
-export function TypingExercise({ target }: { target: SpaceTypingTarget }) {
+export function TypingExercise({
+  target,
+  recall = false,
+  onComplete,
+}: {
+  target: SpaceTypingTarget;
+  recall?: boolean;
+  onComplete?: (result: {
+    elapsed: number;
+    wpm: number | null;
+    mistakes: number;
+    assisted: boolean;
+  }) => void;
+}) {
   const [input, setInput] = useState('');
   const [elapsed, setElapsed] = useState(0);
   const [running, setRunning] = useState(false);
   const [assisted, setAssisted] = useState(false);
   const [indentTab, setIndentTab] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const mistakes = useRef(0);
   const clock = useRef<{ start: number; previous: number } | null>(null);
   const textarea = useRef<HTMLTextAreaElement>(null);
   const reference = useRef<HTMLPreElement>(null);
@@ -58,11 +74,27 @@ export function TypingExercise({ target }: { target: SpaceTypingTarget }) {
 
   const update = (value: string) => {
     if (feedback.complete) return;
+    mistakes.current += insertedMistakes(target.text, input, value);
     if (!clock.current && value) {
       clock.current = { start: performance.now(), previous: elapsed };
       setRunning(true);
     }
     setInput(value);
+    if (value === target.text) {
+      const duration = clock.current
+        ? clock.current.previous + performance.now() - clock.current.start
+        : elapsed;
+      const helped = assisted || (recall && revealed);
+      onComplete?.({
+        elapsed: duration,
+        wpm:
+          !helped && duration >= 1000
+            ? spaceTypingWpm(feedback.total, duration)
+            : null,
+        mistakes: mistakes.current,
+        assisted: helped,
+      });
+    }
     if (value === target.text || !value) pause();
   };
   const restart = () => {
@@ -71,6 +103,8 @@ export function TypingExercise({ target }: { target: SpaceTypingTarget }) {
     setElapsed(0);
     setInput('');
     setAssisted(false);
+    setRevealed(false);
+    mistakes.current = 0;
     textarea.current?.focus();
   };
   const errorCount = feedback.entered - feedback.correct;
@@ -90,39 +124,56 @@ export function TypingExercise({ target }: { target: SpaceTypingTarget }) {
           · {Math.floor(elapsed / 1000)}s
         </span>
       </div>
-      <p className="sr-only">Typing reference: {target.text}</p>
-      <pre
-        ref={reference}
-        aria-hidden="true"
-        className="max-h-[28rem] overflow-auto whitespace-pre-wrap break-words border-y border-border/60 bg-muted/30 px-4 py-4 font-mono text-sm leading-7 sm:max-h-72"
-      >
-        {Array.from(target.text).map((character, index) => {
-          const typed = entered[index];
-          const current = index === feedback.entered;
-          const wrong = typed !== undefined && typed !== character;
-          return (
-            <span
-              key={index}
-              data-typing-cursor={current ? '' : undefined}
-              className={
-                wrong
-                  ? 'bg-destructive/15 text-destructive underline'
-                  : current
-                    ? 'border-l-2 border-foreground bg-muted text-foreground'
-                    : typed === undefined
-                      ? 'text-muted-foreground'
-                      : 'text-foreground'
-              }
-            >
-              {wrong && character === ' '
-                ? '·'
-                : wrong && character === '\n'
-                  ? '↵\n'
-                  : character}
-            </span>
-          );
-        })}
-      </pre>
+      {recall && !revealed && !feedback.complete ? (
+        <div className="flex items-center justify-between gap-4 border-y border-border/60 bg-muted/30 px-4 py-5">
+          <span className="text-sm text-muted-foreground">
+            Reconstruct the function from memory.
+          </span>
+          <button
+            type="button"
+            className="min-h-[44px] shrink-0 px-2 text-sm underline underline-offset-4"
+            onClick={() => setRevealed(true)}
+          >
+            Reveal code
+          </button>
+        </div>
+      ) : (
+        <>
+          <p className="sr-only">Typing reference: {target.text}</p>
+          <pre
+            ref={reference}
+            aria-hidden="true"
+            className="max-h-[28rem] overflow-auto whitespace-pre-wrap break-words border-y border-border/60 bg-muted/30 px-4 py-4 font-mono text-sm leading-7 sm:max-h-72"
+          >
+            {Array.from(target.text).map((character, index) => {
+              const typed = entered[index];
+              const current = index === feedback.entered;
+              const wrong = typed !== undefined && typed !== character;
+              return (
+                <span
+                  key={index}
+                  data-typing-cursor={current ? '' : undefined}
+                  className={
+                    wrong
+                      ? 'bg-destructive/15 text-destructive underline'
+                      : current
+                        ? 'border-l-2 border-foreground bg-muted text-foreground'
+                        : typed === undefined
+                          ? 'text-muted-foreground'
+                          : 'text-foreground'
+                  }
+                >
+                  {wrong && character === ' '
+                    ? '·'
+                    : wrong && character === '\n'
+                      ? '↵\n'
+                      : character}
+                </span>
+              );
+            })}
+          </pre>
+        </>
+      )}
       <textarea
         ref={textarea}
         value={input}
@@ -168,11 +219,14 @@ export function TypingExercise({ target }: { target: SpaceTypingTarget }) {
         <span>
           {errorCount} {errorCount === 1 ? 'mismatch' : 'mismatches'}
         </span>
-        {elapsed >= 1000 && !assisted ? (
+        {elapsed >= 1000 && !assisted && !(recall && revealed) ? (
           <span>{spaceTypingWpm(feedback.correct, elapsed)} WPM</span>
         ) : null}
         {assisted ? (
           <span className="text-muted-foreground">Pasted · untimed result</span>
+        ) : null}
+        {recall && revealed ? (
+          <span className="text-muted-foreground">Reference revealed</span>
         ) : null}
       </div>
       {feedback.first >= 0 ? (

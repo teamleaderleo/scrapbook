@@ -14,7 +14,7 @@ import { TypingExercise } from './typing-exercise';
 const DRAFT_EVENT = 'space-practice-draft';
 const memoryDrafts = new Map<string, string>();
 
-function useLocalPracticeDraft(key: string) {
+export function useLocalPracticeDraft(key: string) {
   const subscribe = useCallback(
     (listener: () => void) => {
       const onChange = (event: Event) => {

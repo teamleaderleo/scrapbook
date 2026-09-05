@@ -15,7 +15,7 @@ for (const width of [320, 390, 1280]) {
     await expect(
       page
         .locator('[data-home-tools]')
-        .getByRole('link', { name: /Code practice/ })
+        .getByRole('link', { name: /Practice/ })
     ).toHaveAttribute('href', '/practice');
     const sizes = await page
       .locator('[data-home-repository]')
@@ -57,7 +57,7 @@ test('typing locates mistakes, pauses, completes, restarts and switches exercise
     page.getByText(/First mismatch: line 1, column 1/)
   ).toBeVisible();
   await expect(page.getByText(/Typing · [1-9]/)).toBeVisible({ timeout: 4000 });
-  await page.getByRole('heading', { name: 'Code practice' }).click();
+  await page.getByRole('heading', { name: 'Practice' }).click();
   const paused = await page.getByText(/Paused ·/).textContent();
   await page.waitForTimeout(1100);
   await expect(page.getByText(/Paused ·/)).toHaveText(paused!);

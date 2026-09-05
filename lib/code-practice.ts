@@ -6,6 +6,8 @@ export const codeExercises = [
     title: 'Typing speed',
     text: 'export function spaceTypingWpm(\n  correctCharacters: number,\n  elapsedMs: number\n): number {\n  if (correctCharacters <= 0 || elapsedMs < 1_000) return 0;\n  const minutes = elapsedMs / 60_000;\n  return Math.max(0, Math.round(correctCharacters / 5 / minutes));\n}',
     question: 'Why ignore the first second? What does dividing by five assume?',
+    alter:
+      'Change it to return characters per minute. Which inputs would you test?',
     line: 196,
   },
   {
@@ -14,6 +16,8 @@ export const codeExercises = [
     text: 'export function parseSpacePracticeMode(\n  value: string | null | undefined\n): SpacePracticeMode | undefined {\n  return SPACE_PRACTICE_MODES.find(mode => mode.id === value)?.id;\n}',
     question:
       'Why return undefined for an unknown mode instead of accepting the string?',
+    alter:
+      'Accept surrounding whitespace while still rejecting unknown modes. What happens to null?',
     line: 285,
   },
   {
@@ -21,6 +25,8 @@ export const codeExercises = [
     title: 'Study stage',
     text: "export function parseSpaceNextMoveStage(\n  value: string | null | undefined\n): SpaceNextMoveStage | undefined {\n  return value === 'familiar' || value === 'learned' ? value : undefined;\n}",
     question: 'What inputs does this accept? What happens to an empty string?',
+    alter:
+      'Add a third stage, “learning”. What else must change to keep the return type honest?',
     line: 291,
   },
 ] as const;

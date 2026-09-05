@@ -171,8 +171,8 @@ export const siteNavigationGroups: SiteNavigationGroup[] = [
       {
         id: 'practice',
         href: '/practice',
-        label: 'Code practice',
-        description: 'Type real functions, inspect mistakes, and explain the code.',
+        label: 'Practice',
+        description: 'Code and concept exercises, recall, and local practice history.',
         group: 'tools',
         surface: 'public',
         sitemap: { changeFrequency: 'monthly', priority: 0.6 },
