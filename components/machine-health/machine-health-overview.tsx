@@ -571,18 +571,13 @@ function ResourceHistory({
             <p className="opacity-55 text-xs font-medium">
               {selectedBin
                 ? formatBin(selectedBin, timeZone)
-                : RANGE_CONFIG[range].averageLabel}
+                : `${config.label} · avg`}
             </p>
             <p className="mt-0.5 text-[2.15rem] font-semibold tabular-nums leading-none tracking-[-0.045em]">
-              {percent(headline)}
+              {metric === 'memory' && memoryHeadline !== null
+                ? `${memoryHeadline.toFixed(1)} GiB`
+                : percent(headline)}
             </p>
-            {metric === 'memory' ? (
-              <p className="mt-1 text-sm tabular-nums opacity-60">
-                {memoryHeadline === null
-                  ? 'Capacity unavailable for this history'
-                  : `${memoryHeadline.toFixed(1)} GiB average used`}
-              </p>
-            ) : null}
           </div>
           <div className="pt-0.5 text-right text-xs">
             <MetricIcon
@@ -616,29 +611,12 @@ function ResourceHistory({
       </div>
 
       {metric === 'memory' && bins.some(bin => bin.memoryLegacyCount > 0) ? (
-        <p className="px-5 pb-3 text-xs opacity-60">
-          Older RAM readings excluded: their accounting omitted VM-backed
-          memory. Comparable history starts with the corrected collector.
-        </p>
+        <p className="px-5 pb-2 text-xs opacity-60">Earlier RAM unavailable</p>
       ) : null}
-      <p className="px-5 pb-3 text-xs opacity-60">
-        Latest report
-        {current.checkedAt
-          ? ` · ${new Date(current.checkedAt).toLocaleString('en-CA', { timeZone })}`
-          : ''}
-        .{' '}
-        {current.activitySource === 'sysstat-10m'
-          ? `CPU and chart RAM: ${current.activityWindowMinutes}-minute average from ${current.activitySampleCount} intervals.`
-          : 'CPU and RAM are point samples.'}
-      </p>
       <div className="border-black/9 border-t dark:border-white/10">
         {(Object.keys(RESOURCE_CONFIG) as ResourceKey[]).map(key => {
           const item = RESOURCE_CONFIG[key];
           const ItemIcon = item.icon;
-          const itemValues = bins
-            .map(item.value)
-            .filter((value): value is number => value !== null);
-          const high = itemValues.length ? Math.max(...itemValues) : null;
           return (
             <button
               key={key}
@@ -648,30 +626,27 @@ function ResourceHistory({
                 onMetricChange(key);
                 setSelectedIndex(null);
               }}
-              className="grid min-h-[3.45rem] w-full grid-cols-[minmax(0,1fr)_5rem] items-center gap-3 border-b border-black/[0.055] px-5 py-2.5 text-left last:border-b-0 hover:bg-black/[0.025] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#a53b34] dark:border-white/[0.065] dark:hover:bg-white/[0.035]"
+              className="grid min-h-11 w-full grid-cols-[minmax(0,1fr)_auto_2.5rem] items-center gap-3 border-b border-black/[0.055] px-5 py-2.5 text-left last:border-b-0 hover:bg-black/[0.025] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#a53b34] dark:border-white/[0.065] dark:hover:bg-white/[0.035] aria-pressed:bg-black/[0.045] dark:aria-pressed:bg-white/[0.06]"
             >
               <span className="flex min-w-0 items-center gap-2.5">
                 <ItemIcon
                   aria-hidden="true"
                   className={`size-[1.05rem] shrink-0 stroke-[1.8] ${item.iconColor}`}
                 />
-                <span>
-                  <span className="block text-[0.95rem] font-medium leading-tight">
-                    {item.label}
-                  </span>
-                  <span className="opacity-45 mt-1 block text-[0.72rem] leading-snug">
-                    {key === 'memory' && current.memoryComparable === false
-                      ? 'Legacy accounting · awaiting corrected report'
-                      : key === 'storage'
-                        ? `${Math.round(current.storageFreeGib)} GiB free${current.storageTotalGib === undefined ? '' : ` / ${current.storageTotalGib.toFixed(1)} GiB total`}`
-                        : key === 'memory' &&
-                            current.memoryTotalGib !== undefined
-                          ? `${current.memoryUsedGib === undefined ? '≈ ' : ''}${(current.memoryUsedGib ?? (current.memoryTotalGib * current.memoryPercent) / 100).toFixed(1)} / ${current.memoryTotalGib.toFixed(1)} GiB used${current.memoryUsedGib === undefined ? ' (average)' : ' at report'}`
-                          : `${current.logicalCpus === undefined ? '' : `${((current.cpuPercent * current.logicalCpus) / 100).toFixed(2)} / ${current.logicalCpus} logical CPUs · `}${high === null ? 'No range data' : `${percent(high)} high`}`}
-                  </span>
-                </span>
+                <span className="text-sm font-medium">{item.label}</span>
               </span>
-              <span className="text-right text-[1.05rem] font-semibold tabular-nums tracking-[-0.02em]">
+              <span className="text-right text-xs tabular-nums">
+                {key === 'memory'
+                  ? current.memoryComparable === false || current.memoryTotalGib === undefined
+                    ? '—'
+                    : `${current.memoryUsedGib === undefined ? '≈ ' : ''}${(current.memoryUsedGib ?? (current.memoryTotalGib * current.memoryPercent) / 100).toFixed(1)} / ${current.memoryTotalGib.toFixed(1)} GiB`
+                  : key === 'storage'
+                    ? `${Math.round(current.storageFreeGib)}${current.storageTotalGib === undefined ? '' : ` / ${current.storageTotalGib.toFixed(1)}`} GiB free`
+                    : current.logicalCpus === undefined
+                      ? '—'
+                      : `${((current.cpuPercent * current.logicalCpus) / 100).toFixed(2)} / ${current.logicalCpus} cores`}
+              </span>
+              <span className="text-right text-xs tabular-nums opacity-55">
                 {key === 'memory' && current.memoryComparable === false
                   ? '—'
                   : key === 'memory' &&
@@ -686,12 +661,12 @@ function ResourceHistory({
           );
         })}
       </div>
-      <p className="border-t border-black/10 px-5 py-3 text-xs tabular-nums opacity-60 dark:border-white/10">
-        Swap:{' '}
+      <p className="flex justify-between gap-3 border-t border-black/10 px-5 py-2.5 text-xs tabular-nums dark:border-white/10">
+        <span className="opacity-60">Swap</span><span>
         {current.swapUsedGib === undefined || current.swapTotalGib === undefined
           ? 'unavailable'
-          : `${current.swapUsedGib.toFixed(2)} / ${current.swapTotalGib.toFixed(1)} GiB occupied`}
-
+          : `${current.swapUsedGib.toFixed(2)} / ${current.swapTotalGib.toFixed(1)} GiB`}
+        </span>
       </p>
     </section>
   );
@@ -886,13 +861,10 @@ function CodexHistory({
         ) : null}
         <div className="min-h-11 grid grid-cols-[minmax(0,1fr)_7.5rem] items-center gap-3 border-b border-black/[0.055] px-5 py-2.5 dark:border-white/[0.065]">
           <dt>
-            <span className="block text-[0.95rem] leading-tight">Output</span>
-            <span className="opacity-45 mt-1 block text-[0.72rem] leading-snug">
-              {compactNumber(reasoning)} reasoning
-            </span>
+            <span className="block text-sm leading-tight">Output / reasoning</span>
           </dt>
           <dd className="text-right font-medium tabular-nums leading-none">
-            {compactNumber(totalOutput)}
+            <span className="text-xs">{compactNumber(totalOutput)} / {compactNumber(reasoning)}</span>
           </dd>
         </div>
         <div className="min-h-11 grid grid-cols-[minmax(0,1fr)_7.5rem] items-center gap-3 border-b border-black/[0.055] px-5 py-2.5 dark:border-white/[0.065]">
@@ -905,9 +877,6 @@ function CodexHistory({
           <dt>
             <span className="block text-[0.95rem] font-semibold leading-tight">
               Total tokens
-            </span>
-            <span className="opacity-45 mt-1 block text-[0.72rem] leading-snug">
-              {observedHours} accounted hour{observedHours === 1 ? '' : 's'}
             </span>
           </dt>
           <dd className="text-right text-[1.05rem] font-semibold tabular-nums tracking-[-0.02em]">
@@ -1233,14 +1202,14 @@ function WindowsVmHistory({
         </strong>
         <span className="ml-2 opacity-60">
           {selectedBin
-            ? `${formatBin(selectedBin, timeZone)} · ${selectedBin.observations} observation${selectedBin.observations === 1 ? '' : 's'}`
-            : 'Latest report'}
+            ? formatBin(selectedBin, timeZone)
+            : null}
         </span>
       </p>
       <p className="mb-1 text-right text-xs tabular-nums opacity-60">
         {bins.every(bin => bin[metric] === null)
           ? 'No measurements in this range'
-          : `Scale: 0–${format(
+          : `0–${format(
               Math.max(
                 metric === 'running'
                   ? 100
@@ -1273,10 +1242,6 @@ function WindowsVmHistory({
         }
         formatValue={format}
       />
-      <details className="mt-2 text-xs opacity-60">
-        <summary className="cursor-pointer py-2">VM measurements</summary>
-        <p className="max-w-prose leading-relaxed">Host RAM is peak resident memory, included in Big Red’s total. CPU includes virtualization overhead. Running state describes observed reports; gaps mean no sample.</p>
-      </details>
     </section>
   );
 }
@@ -1342,7 +1307,6 @@ export function MachineHealthOverview({
         >
           History
         </h2>
-
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
@@ -1351,7 +1315,6 @@ export function MachineHealthOverview({
             <div>
               <h3 className="opacity-55 pb-1 text-sm font-medium">Resources</h3>
               {currentByHost['macbook-air'] ? <MachineSourceControl label="Resource device" value={selectedResourceHost} onChange={value => { if (value !== 'all') setResourceHost(value); }} /> : <span className="text-xs opacity-55">Big Red</span>}
-
             </div>
             <RangeControl
               label="Resource"
@@ -1389,6 +1352,15 @@ export function MachineHealthOverview({
       <ModelUsage samples={usageSamples} from={codexBins[0].start} to={codexBins.at(-1)!.end} controls={<div className="flex flex-wrap items-center gap-x-6 gap-y-2"><MachineSourceControl label="Model usage device" value={usageSource} onChange={setUsageSource} allowAll /><RangeControl label="Model usage" range={codexRange} onChange={setCodexRange} /></div>} />
       <WindowsVmHistory samples={samples} current={windowsVm} now={now} />
       <PerformanceDetails bins={resourceBins} />
+      <details className="mt-3 text-xs opacity-60">
+        <summary className="cursor-pointer py-2">Data notes</summary>
+        <ul className="max-w-prose list-disc space-y-1 pl-4 leading-relaxed">
+          <li>Live: two-second samples each minute. One core = one busy logical CPU. History: hourly averages; gaps are missing samples.</li>
+          <li>RAM includes VM memory, wired memory, and compressed memory. Air Blue’s available RAM is estimated. Older incompatible RAM readings are excluded.</li>
+          <li>VM host RAM is peak resident memory, included in Big Red’s total. CPU includes virtualization overhead.</li>
+          <li>Codex: complete hours from local logs. Input includes cached tokens; output includes reasoning. Overlapping reports are excluded.</li>
+        </ul>
+      </details>
     </section>
   );
 }

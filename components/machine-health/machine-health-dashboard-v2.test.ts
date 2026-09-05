@@ -298,8 +298,8 @@ describe('Windows VM history', () => {
         },
       },
     });
-    expect(html).toContain('16.5 / 30.8 GiB used at report');
-    expect(html).toContain('0.11 / 8.0 GiB occupied');
+    expect(html).toContain('16.5 / 30.8 GiB');
+    expect(html).toContain('0.11 / 8.0 GiB');
     expect(html).toContain('12.0 GiB allocated');
     expect(html).toContain('14 vCPUs');
     expect(html).toContain('11.99 GiB');

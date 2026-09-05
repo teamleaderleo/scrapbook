@@ -76,9 +76,6 @@ export function CodexQuotaPanel({
     <section className="mt-4 border-t border-black/15 pt-4 dark:border-white/15">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h2 className="text-sm font-semibold tracking-tight">Codex allowance</h2>
-        <p className="text-[0.68rem] opacity-45">
-          Private · session rate-limit receipts
-        </p>
       </div>
       <div className="mt-3 grid gap-x-8 gap-y-3 sm:grid-cols-2">
         {buckets.map(bucket => {
@@ -97,7 +94,6 @@ export function CodexQuotaPanel({
                 </span>
               </div>
               <div className="mt-1 flex flex-wrap justify-between gap-x-4 text-[0.68rem] tabular-nums opacity-45">
-                <span>{bucket.usedPercent.toFixed(1)}% used</span>
                 <span>{resetLabel(bucket.resetsAt)}</span>
               </div>
             </div>
@@ -152,14 +148,11 @@ export function CodexQuotaPanel({
               </p>
             </div>
             <div>
-              <p className="text-[0.65rem] opacity-45">Linear 100% estimate</p>
+              <p className="text-[0.65rem] opacity-45" title="Extrapolated from local tokens this cycle, not OpenAI’s quota formula.">Linear 100% estimate</p>
               <p className="mt-0.5 font-mono text-base tabular-nums">
                 {burn.current.projectedTokensAt100 === null
                   ? 'Not enough signal'
                   : `${compactNumber(burn.current.projectedTokensAt100)} tokens`}
-              </p>
-              <p className="text-[0.65rem] opacity-45">
-                projected from this cycle
               </p>
             </div>
             <div>
@@ -169,7 +162,6 @@ export function CodexQuotaPanel({
                   ? observedLabel(burn.lastSaturation.reachedAt)
                   : 'Not observed'}
               </p>
-              <p className="text-[0.65rem] opacity-45">first 100% receipt</p>
             </div>
           </div>
 
@@ -217,12 +209,6 @@ export function CodexQuotaPanel({
             </div>
           ) : null}
 
-          <p className="mt-4 max-w-3xl text-[0.62rem] leading-relaxed opacity-40">
-            Recorded local tokens are allocated proportionally from hourly token
-            totals between exact quota crossings. This is an extrapolation proxy,
-            not OpenAI&apos;s quota formula; resets and unobserved Codex activity can
-            break linearity.
-          </p>
         </div>
       ) : null}
     </section>

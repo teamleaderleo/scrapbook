@@ -125,7 +125,7 @@ export function ActivityMonitorView({
           >
             {error ? 'Refresh failed · ' : ''}
             {snapshot
-              ? `${stale ? 'Stale · ' : ''}${age! < 60 ? `${age}s` : `${Math.floor(age! / 60)}m`} ago · updates each minute`
+              ? `${stale ? 'Stale · ' : ''}${age! < 60 ? `${age}s` : `${Math.floor(age! / 60)}m`} ago`
               : 'Waiting for a sample'}
           </p>
         </div>
@@ -225,7 +225,7 @@ export function ActivityMonitorView({
                   value={number(snapshot.memory.available_gib, 'GiB')}
                 />
                 <Readout
-                  label="Swap occupied"
+                  label="Swap"
                   value={`${snapshot.memory.swap_used_gib.toFixed(2)} / ${snapshot.memory.swap_total_gib.toFixed(1)} GiB`}
                 />
                 <Readout
@@ -314,7 +314,7 @@ export function ActivityMonitorView({
           <span>
             {selected?.sample
               ? `${timestamp(selected.minute)} · ${number(values[selectedIndex], unit, 2)}`
-              : 'Select a minute'}
+              : null}
           </span>
           <span>
             0–{maximum.toFixed(historyMetric === 'cpu' ? 0 : 1)} {unit}
@@ -425,17 +425,6 @@ export function ActivityMonitorView({
             Sign in below to see processes.
           </p>
         )}
-      </details>
-      <details className="mt-3 text-xs opacity-60">
-        <summary className="cursor-pointer py-2">
-          About these measurements
-        </summary>
-        <p className="max-w-prose leading-relaxed">
-          Two-second samples each minute while awake; brief spikes can be
-          missed. One core means one fully busy logical CPU. Network totals
-          include virtual interfaces. Air Blue’s available RAM is estimated;
-          wired and compressed memory are already counted in used RAM.
-        </p>
       </details>
     </section>
   );
