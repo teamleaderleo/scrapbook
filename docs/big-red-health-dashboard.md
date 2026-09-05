@@ -145,6 +145,7 @@ The page starts with the questions that matter when Leo is away from the machine
 - How many agent routes, jobs, and descendant processes are explicitly owned, how much RSS do they account for, and did any ownership record become unknown or leave residue?
 - How much local Codex state is allocated, how much is active or unknown, did the scan finish cleanly, and how did the total change over seven days?
 - How many Codex tokens came from Big Red and the MacBook Air, and what share of input was served from cache?
+- Which worker assignments are running, returned-unreviewed, failed, or need a decision, with exact artifact links and unknown data explicit?
 
 The dashboard defaults to the last 12 complete hourly bins and also offers day, week, and month
 views. Every token range ends at the last complete UTC hour; the long views group the same
@@ -170,6 +171,18 @@ discontinuities with distinct line/shape cues that do not rely on color. The foo
 totals. This avoids drawing equally authoritative bars from unlike data.
 
 This is not literal Screen Time. Each row combines an hourly aggregate with a few current point observations, so the UI leaves empty bins visible and never implies that a process ran continuously between reports. The panel chart reports the share of authoritative physical-backlight snapshots observed on. It weights the range by snapshots, shows on/off/unknown counts, and never converts missing states into off time.
+
+### Worker assignments
+
+The private view ends with a worker-outcome attention list read live from the repository's own
+open pull requests: at most 30 assignments, with review and check detail for at most the 8 most
+recently updated. Each assignment lands in exactly one bucket — running, returned-unreviewed,
+failed, needs-decision, done, or unknown — with its exact artifact link and the reason for the
+placement. Missing review or check evidence stays explicit `unknown`, never a guessed zero, and a
+failed transport renders the whole list unknown without writing anything. There is no second task
+ledger, no raw log access, and no stored assignment table; the projection is
+`worker-outcome-report/v1` in `app/lib/worker-outcome-attention.ts`, read by
+`app/lib/worker-outcome-source.ts` and rendered by `WorkerOutcomeAttentionPanel`.
 
 ### Resource units and the Windows VM
 
