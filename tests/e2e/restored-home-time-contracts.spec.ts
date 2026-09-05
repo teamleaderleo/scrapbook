@@ -4,44 +4,10 @@ async function waitForHydratedHomepage(page: Page) {
   await expect(page.locator('[data-site-nav-ready="true"]')).toBeVisible({
     timeout: 15_000,
   });
-  const dashboard = page
-    .locator('[data-home-activity-dashboard]:visible')
-    .last();
-  await expect(dashboard).toBeVisible({ timeout: 15_000 });
-  await expect(
-    dashboard.locator('[data-contribution-week-grid]')
-  ).toBeVisible();
-  return dashboard;
+  const tools = page.locator('[data-home-tools]');
+  await expect(tools).toBeVisible();
+  return tools;
 }
-
-test('homepage keeps the exact four-week Monday-Sunday activity field', async ({
-  page,
-}) => {
-  await page.goto('/');
-  const dashboard = await waitForHydratedHomepage(page);
-  const grid = dashboard.locator('[data-contribution-week-grid]');
-
-  await expect(
-    dashboard.getByText('Last 4 weeks', { exact: true })
-  ).toBeVisible();
-  await expect(grid.locator('[data-contribution-cell]')).toHaveCount(28);
-  await expect(grid).toHaveAttribute('data-calendar-weeks', '4');
-  await expect(grid).toHaveAttribute(
-    'aria-label',
-    'GitHub contribution calendar for three completed weeks and the current week'
-  );
-
-  const upcoming = grid.locator('[data-contribution-upcoming]');
-  const upcomingCount = await upcoming.count();
-  expect(upcomingCount).toBeGreaterThanOrEqual(0);
-  expect(upcomingCount).toBeLessThanOrEqual(6);
-  if (upcomingCount > 0) {
-    await expect(upcoming.first()).toHaveAttribute(
-      'aria-label',
-      /— upcoming\.$/
-    );
-  }
-});
 
 test('Time Machine uses the intended monospaced controls', async ({ page }) => {
   await page.goto('/time');
@@ -157,6 +123,7 @@ test('navigation fills a phone rail and exposes room links when they fit', async
     const selectors = [
       '[data-site-home]',
       '[data-site-time]',
+      'button[aria-label="Search Scrapbook"]',
       '[data-theme-toggle]',
       '[data-site-atlas-trigger]',
     ];

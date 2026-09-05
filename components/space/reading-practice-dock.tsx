@@ -1,20 +1,15 @@
 'use client';
 
-import {
-  useCallback,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from 'react';
+import { useCallback, useState, useSyncExternalStore } from 'react';
 import {
   buildSpacePracticePrompt,
-  compareSpaceTyping,
   SPACE_PRACTICE_MODES,
   spacePracticeStorageKey,
-  spaceTypingWpm,
   type SpacePracticeMode,
   type SpaceTypingTarget,
 } from '@/lib/space-practice';
+
+import { TypingExercise } from './typing-exercise';
 
 const DRAFT_EVENT = 'space-practice-draft';
 const memoryDrafts = new Map<string, string>();
@@ -64,47 +59,6 @@ function useLocalPracticeDraft(key: string) {
   return [draft, setDraft] as const;
 }
 
-function TypingReference({
-  target,
-  typed,
-}: {
-  target: SpaceTypingTarget;
-  typed: string;
-}) {
-  return (
-    <div className="border-y border-[hsl(var(--material-paper-edge)/0.55)] bg-[hsl(var(--material-paper-ink)/0.025)] px-4 py-4 sm:px-5">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2 font-mono text-[9px] uppercase tracking-[0.12em] text-[hsl(var(--material-paper-ink)/0.48)]">
-        <span>{target.label}</span>
-        <span>{target.kind === 'code' ? 'Exact code' : 'Exact wording'}</span>
-      </div>
-      <p className="sr-only">Typing reference: {target.text}</p>
-      <pre
-        aria-hidden="true"
-        className="max-h-72 overflow-auto whitespace-pre-wrap break-words font-mono text-[13px] leading-6 sm:text-sm"
-      >
-        {Array.from(target.text).map((character, index) => {
-          const typedCharacter = typed[index];
-          const current = index === typed.length;
-          const className =
-            typedCharacter === undefined
-              ? current
-                ? 'rounded-sm bg-[hsl(var(--material-paper-ink)/0.1)] text-[hsl(var(--material-paper-ink))]'
-                : 'text-[hsl(var(--material-paper-ink)/0.42)]'
-              : typedCharacter === character
-                ? 'text-[hsl(var(--material-paper-ink))]'
-                : 'rounded-sm bg-destructive/10 text-destructive underline decoration-destructive/40 decoration-2 underline-offset-2';
-
-          return (
-            <span key={`${index}-${character}`} className={className}>
-              {character}
-            </span>
-          );
-        })}
-      </pre>
-    </div>
-  );
-}
-
 export function ReadingPracticeDock({
   slug,
   title,
@@ -124,8 +78,6 @@ export function ReadingPracticeDock({
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>(
     'idle'
   );
-  const typingStartedAtRef = useRef<number | null>(null);
-  const [typingElapsedMs, setTypingElapsedMs] = useState(0);
   const storageKey = spacePracticeStorageKey(slug, mode);
   const [draft, setDraft] = useLocalPracticeDraft(storageKey);
   const practiceModes = typingTarget
@@ -138,27 +90,12 @@ export function ReadingPracticeDock({
     activeMode === initialMode && promptOverride?.trim()
       ? promptOverride
       : modeDefinition.prompt;
-  const typingStats =
-    activeMode === 'type' && typingTarget
-      ? compareSpaceTyping(typingTarget.text, draft)
-      : null;
-  const typingWpm = typingStats
-    ? spaceTypingWpm(typingStats.correctCharacters, typingElapsedMs)
-    : 0;
-
   const chooseMode = (nextMode: SpacePracticeMode) => {
     setMode(nextMode);
     setCopyState('idle');
-    typingStartedAtRef.current = null;
-    setTypingElapsedMs(0);
   };
 
   const updateDraft = (value: string) => {
-    if (activeMode === 'type') {
-      const now = Date.now();
-      if (typingStartedAtRef.current === null) typingStartedAtRef.current = now;
-      setTypingElapsedMs(now - typingStartedAtRef.current);
-    }
     setDraft(value);
     setCopyState('idle');
   };
@@ -166,8 +103,6 @@ export function ReadingPracticeDock({
   const clearDraft = () => {
     setDraft('');
     setCopyState('idle');
-    typingStartedAtRef.current = null;
-    setTypingElapsedMs(0);
   };
 
   const copyPrompt = async () => {
@@ -177,7 +112,7 @@ export function ReadingPracticeDock({
           mode: activeMode,
           title,
           sourceUrl,
-          draft,
+          draft: activeMode === 'type' ? '' : draft,
           prompt: activePrompt,
           typingTarget,
         })
@@ -205,8 +140,7 @@ export function ReadingPracticeDock({
           Work the material
         </h2>
         <p className="mt-2 text-sm leading-6 text-[hsl(var(--material-paper-ink)/0.64)]">
-          Question it, explain it, trace it, review it, alter it, or build typing
-          fluency. Drafts stay on this device.
+          Drafts stay on this device.
         </p>
       </header>
 
@@ -221,55 +155,20 @@ export function ReadingPracticeDock({
         </div>
 
         {activeMode === 'type' && typingTarget ? (
-          <TypingReference target={typingTarget} typed={draft} />
-        ) : null}
-
-        <textarea
-          value={draft}
-          onChange={event => updateDraft(event.target.value)}
-          aria-label={
-            activeMode === 'type'
-              ? 'Typing input'
-              : `${modeDefinition.label} notes`
-          }
-          placeholder={
-            activeMode === 'type'
-              ? 'Start typing the excerpt…'
-              : 'Write a thought, a rough answer, or the next question…'
-          }
-          rows={activeMode === 'type' ? 7 : 5}
-          spellCheck={activeMode === 'type' ? false : undefined}
-          autoCapitalize={activeMode === 'type' ? 'off' : undefined}
-          autoCorrect={activeMode === 'type' ? 'off' : undefined}
-          autoComplete={activeMode === 'type' ? 'off' : undefined}
-          className={`block w-full resize-y bg-transparent px-4 py-3 text-[15px] leading-7 text-[hsl(var(--material-paper-ink))] outline-none placeholder:text-[hsl(var(--material-paper-ink)/0.38)] focus-visible:bg-white/20 dark:focus-visible:bg-black/10 sm:px-5 ${
-            activeMode === 'type' ? 'min-h-44 font-mono text-sm' : 'min-h-36'
-          }`}
-        />
-
-        {typingStats && typingTarget ? (
-          <div
-            className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[hsl(var(--material-paper-edge)/0.45)] px-4 py-2.5 font-mono text-[10px] tabular-nums text-[hsl(var(--material-paper-ink)/0.58)] sm:px-5"
-            aria-live="polite"
-          >
-            <span>
-              {Math.min(draft.length, typingTarget.text.length)} /{' '}
-              {typingTarget.text.length} chars
-            </span>
-            <span>
-              {draft.length
-                ? `${Math.round(typingStats.accuracy * 100)}% exact`
-                : 'Exactness first'}
-            </span>
-            <span>{typingStats.errorCharacters} errors</span>
-            {typingWpm > 0 ? <span>{typingWpm} wpm</span> : null}
-            {typingStats.complete ? (
-              <strong className="font-semibold text-[hsl(var(--material-paper-ink))]">
-                Exact pass
-              </strong>
-            ) : null}
-          </div>
-        ) : null}
+          <TypingExercise
+            key={`${slug}:${typingTarget.text}`}
+            target={typingTarget}
+          />
+        ) : (
+          <textarea
+            value={draft}
+            onChange={event => updateDraft(event.target.value)}
+            aria-label={`${modeDefinition.label} notes`}
+            placeholder="Write a thought, a rough answer, or the next question…"
+            rows={5}
+            className="block min-h-36 w-full resize-y bg-transparent px-4 py-3 text-base leading-7 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5"
+          />
+        )}
 
         <footer className="flex flex-col gap-3 border-t border-[hsl(var(--material-paper-edge)/0.55)] bg-[hsl(var(--material-paper-ink)/0.025)] px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div
@@ -298,13 +197,13 @@ export function ReadingPracticeDock({
           </div>
 
           <div className="flex items-center justify-end gap-2">
-            {draft ? (
+            {draft && activeMode !== 'type' ? (
               <button
                 type="button"
                 onClick={clearDraft}
                 className="h-11 rounded-lg px-3 text-xs font-medium text-[hsl(var(--material-paper-ink)/0.58)] hover:bg-[hsl(var(--material-paper-ink)/0.05)] hover:text-[hsl(var(--material-paper-ink))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--material-paper-ink)/0.35)]"
               >
-                {activeMode === 'type' ? 'Restart' : 'Clear'}
+                Clear
               </button>
             ) : null}
             <button
@@ -329,7 +228,7 @@ export function ReadingPracticeDock({
         {copyState === 'failed'
           ? 'Clipboard unavailable · select the text manually'
           : activeMode === 'type'
-            ? 'Exactness first · WPM is secondary · copy saved on this device'
+            ? ''
             : 'Saved on this device · one draft per mode'}
       </p>
     </section>

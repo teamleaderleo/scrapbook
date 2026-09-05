@@ -19,6 +19,7 @@ describe('sitemap', () => {
       'https://teamleaderleo.com/desk',
       'https://teamleaderleo.com/journal',
       'https://teamleaderleo.com/time',
+      'https://teamleaderleo.com/practice',
       'https://teamleaderleo.com/space/records',
       'https://teamleaderleo.com/space/records/stateful-regex-api-boundaries',
       'https://teamleaderleo.com/space/records/interviewing-with-ai-as-a-review-loop',

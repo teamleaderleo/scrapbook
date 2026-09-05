@@ -10,6 +10,6 @@ The shared search opens from the navigation search button or Cmd/Ctrl K. Space r
 
 Recently opened stores at most 12 canonical public article paths under `scrapbook:recent-public-pages:v1`, with no queries, content, or account data. Only explicit public article components record a visit. The homepage and search show up to six entries, resolved against the current public search index; removed entries disappear. Clear history removes this browser's list. Storage failure leaves reading usable. History does not sync across devices.
 
-The homepage shows the latest public writing, study record, updated concept, and the work-record update date ahead of the contribution graph. These dates come from their canonical registries; the work date describes the selected work record as a whole.
+The homepage shows the latest public writing, study record, updated concept, and the work-record update date alongside tools and repository links. These dates come from their canonical registries; the work date describes the selected work record as a whole.
 
 Related links reuse `lib/scrapbook-relations.ts`. One explicit edge provides both directions. Knowledge and project pages use the same component as Workbench and Journal; no keyword-generated relationships are implied.

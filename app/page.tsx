@@ -1,10 +1,9 @@
 import { RecentItems } from '@/components/discovery/recent-items';
-import { ActivityDashboard } from '@/components/home/activity-dashboard';
+import { HomeTools } from '@/components/home/home-tools';
 import { HomeNowShelf } from '@/components/home/home-now-shelf';
 import { OperatorConsole } from '@/components/operator/operator-console';
-import { Skeleton } from '@/components/ui/skeleton';
 import ViewportPageShell from '@/components/viewport-page-shell';
-import { getGitHubHomeData } from '@/lib/github-home';
+import { featuredRepositories } from '@/lib/featured-repositories';
 import { homeRoomNavigationItems } from '@/lib/site-navigation';
 import {
   ArrowRight,
@@ -19,7 +18,6 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { Metadata } from 'next';
-import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import styles from './page.module.css';
@@ -27,7 +25,7 @@ import styles from './page.module.css';
 export const metadata: Metadata = {
   title: 'Leo · Scrapbook',
   description:
-    'Operator tools, current writing and learning, recent GitHub activity, and Scrapbook rooms.',
+    'Operator tools, current writing and learning, code practice, and Scrapbook rooms.',
   alternates: { canonical: '/' },
 };
 
@@ -40,36 +38,9 @@ const homeRoomIcons: Record<string, LucideIcon> = {
   'snow-globe': Snowflake,
 };
 
-async function HomeActivityContent() {
-  'use cache';
-  cacheLife({ stale: 30, revalidate: 30, expire: 3_600 });
-
-  const activity = await getGitHubHomeData();
-  const initialActivity =
-    activity.source === 'unavailable'
-      ? {
-          source: activity.source,
-          today: activity.today,
-          weekTotal: activity.weekTotal,
-          yearTotal: activity.total,
-          days: activity.days,
-          unit: 'contributions',
-          generatedAt: activity.generatedAt,
-        }
-      : {
-          source: activity.source,
-          today: activity.today,
-          weekTotal: activity.weekTotal,
-          yearTotal: activity.total,
-          days: activity.days,
-          unit: 'contributions',
-          generatedAt: activity.generatedAt,
-        };
-
+function HomeRepositories() {
   return (
     <div className="flex min-w-0 flex-col gap-4 sm:gap-5">
-      <ActivityDashboard initial={initialActivity} />
-
       <section
         aria-labelledby="home-repositories-title"
         className="min-w-0"
@@ -83,7 +54,7 @@ async function HomeActivityContent() {
             Repositories
           </h2>
           <a
-            href={`https://github.com/${activity.username}`}
+            href="https://github.com/teamleaderleo"
             target="_blank"
             rel="noreferrer"
             className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
@@ -92,23 +63,23 @@ async function HomeActivityContent() {
           </a>
         </div>
         <div className="grid min-w-0 overflow-hidden rounded-xl border border-border/65 bg-card/70 sm:grid-cols-2">
-          {activity.repositories.map((repository, index) => (
+          {featuredRepositories.map((repository, index) => (
             <a
               key={repository.name}
               href={repository.url}
               target="_blank"
               rel="noreferrer"
               data-home-repository={repository.name}
-              className="group flex min-h-16 items-center gap-3 border-border/55 px-3 py-2.5 transition-colors hover:bg-muted/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&:nth-child(n+2)]:border-t sm:[&:nth-child(2)]:border-t-0 sm:[&:nth-child(even)]:border-l"
+              className="group flex min-w-0 min-h-16 items-start gap-3 border-border/55 px-3 py-2.5 transition-colors hover:bg-muted/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&:nth-child(n+2)]:border-t sm:[&:nth-child(2)]:border-t-0 sm:[&:nth-child(even)]:border-l"
             >
               <span className="w-5 shrink-0 font-mono text-[9px] tabular-nums text-muted-foreground">
                 {String(index + 1).padStart(2, '0')}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold tracking-tight">
+                <span className="block break-words text-sm font-semibold tracking-tight">
                   {repository.name}
                 </span>
-                <span className="block truncate text-xs text-muted-foreground">
+                <span className="mt-1 block whitespace-normal break-words text-xs leading-5 text-muted-foreground">
                   {repository.note}
                 </span>
               </span>
@@ -172,73 +143,6 @@ function HomeRoomShelf() {
   );
 }
 
-function HomeActivitySkeleton() {
-  return (
-    <div
-      className="flex min-w-0 flex-col gap-4 sm:gap-5"
-      aria-label="Loading homepage activity"
-      role="status"
-      data-home-activity-skeleton
-    >
-      <div className="grid min-w-0 gap-3.5 sm:gap-4 lg:grid-cols-[minmax(21rem,0.65fr)_minmax(0,1.35fr)] lg:grid-rows-[auto_auto]">
-        <section className="min-h-[18rem] rounded-[1.25rem] border border-border/70 bg-card p-4 shadow-[0_12px_28px_rgba(35,31,26,0.08)] dark:shadow-[0_14px_32px_rgba(0,0,0,0.25)] lg:col-start-1 lg:row-start-1">
-          <div className="flex items-center justify-between gap-4">
-            <Skeleton className="h-2.5 w-20" />
-            <Skeleton className="h-2.5 w-28" />
-          </div>
-          <div className="mx-auto mt-4 grid max-w-[12.75rem] grid-cols-4 gap-1.5 sm:gap-2">
-            {Array.from({ length: 28 }, (_, index) => (
-              <Skeleton
-                key={index}
-                className="aspect-square rounded-[0.38rem]"
-              />
-            ))}
-          </div>
-        </section>
-
-        <section className="min-h-[13rem] rounded-[1.1rem] border border-border/70 bg-card p-4 shadow-[0_10px_24px_rgba(35,31,26,0.07)] dark:shadow-[0_12px_28px_rgba(0,0,0,0.22)] lg:col-start-1 lg:row-start-2">
-          <div className="flex items-center justify-between gap-3">
-            <Skeleton className="h-2.5 w-24" />
-            <Skeleton className="h-2.5 w-16" />
-          </div>
-          <Skeleton className="mx-auto mt-4 h-24 w-36 rounded-2xl" />
-          <Skeleton className="mt-3 h-3 w-2/3" />
-        </section>
-
-        <section className="min-h-[24rem] rounded-[1.25rem] border border-border/70 bg-card p-5 shadow-[0_16px_38px_rgba(24,24,26,0.08)] dark:shadow-[0_16px_38px_rgba(0,0,0,0.28)] lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <Skeleton className="h-3 w-24" />
-          <Skeleton className="mt-8 h-16 w-3/5 rounded-xl" />
-          <div className="mt-6 grid grid-cols-2 gap-2">
-            <Skeleton className="h-14 rounded-xl" />
-            <Skeleton className="h-14 rounded-xl" />
-          </div>
-        </section>
-      </div>
-
-      <section className="min-w-0">
-        <div className="mb-2 flex items-center justify-between px-0.5">
-          <Skeleton className="h-2.5 w-20" />
-          <Skeleton className="h-3 w-10" />
-        </div>
-        <div className="grid overflow-hidden rounded-xl border border-border/65 bg-card/70 sm:grid-cols-2">
-          {Array.from({ length: 4 }, (_, index) => (
-            <div
-              key={index}
-              className="flex min-h-16 items-center gap-3 border-border/55 px-3 py-2.5 [&:nth-child(n+2)]:border-t sm:[&:nth-child(2)]:border-t-0 sm:[&:nth-child(even)]:border-l"
-            >
-              <Skeleton className="h-3 w-5" />
-              <span className="min-w-0 flex-1">
-                <Skeleton className="h-4 w-2/5" />
-                <Skeleton className="mt-2 h-3 w-3/4" />
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
-  );
-}
-
 export default function Page() {
   return (
     <ViewportPageShell
@@ -259,19 +163,8 @@ export default function Page() {
           <Suspense fallback={null}>
             <HomeNowShelf />
           </Suspense>
-          <section aria-labelledby="home-activity-title" className="min-w-0">
-            <div className="mb-3 px-0.5">
-              <p
-                id="home-activity-title"
-                className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
-              >
-                Activity
-              </p>
-            </div>
-            <Suspense fallback={<HomeActivitySkeleton />}>
-              <HomeActivityContent />
-            </Suspense>
-          </section>
+          <HomeTools />
+          <HomeRepositories />
 
           <HomeRoomShelf />
         </div>

@@ -1,3 +1,4 @@
+import { featuredRepositories as repositoryList } from './featured-repositories';
 import { unstable_cache } from 'next/cache';
 import { captureCacheLoad, unwrapCacheLoad } from './cache-load-result';
 import { fetchGitHubContributionCalendar } from './github-contribution-calendar';
@@ -17,38 +18,6 @@ import {
 import { createStaleWhileErrorCache } from './stale-while-error-cache';
 
 const GITHUB_USERNAME = 'teamleaderleo';
-const FEATURED_REPOSITORIES = [
-  {
-    name: 'preflight',
-    url: 'https://github.com/teamleaderleo/preflight',
-    note: 'Cross-platform performance launcher and mod analysis for Starsector.',
-  },
-  {
-    name: 'stensibly',
-    url: 'https://github.com/teamleaderleo/stensibly',
-    note: 'Work and handoffs that survive disposable agent sessions.',
-  },
-  {
-    name: 'Glaeda',
-    url: 'https://github.com/teamleaderleo/glaeda',
-    note: 'Trust-tiered Linux execution; hot project state when trust permits.',
-  },
-  {
-    name: 'cultist',
-    url: 'https://github.com/teamleaderleo/cultist',
-    note: 'Repository evidence before code changes: find out why before you copy it.',
-  },
-  {
-    name: 'Elatura',
-    url: 'https://github.com/teamleaderleo/elatura',
-    note: 'Adaptive working sets for heavyweight authenticated apps used by humans and agents.',
-  },
-  {
-    name: 'Fieldwork',
-    url: 'https://github.com/teamleaderleo/fieldwork',
-    note: 'Code-first research, real-behaviour probes, negative results, and upstream-ready evidence.',
-  },
-] as const;
 
 const HOME_WINDOW_DAYS = 35;
 const UPSTREAM_TIMEOUT_MS = 8_000;
@@ -219,7 +188,7 @@ export function parseGitHubRateLimit(headers: Headers): GitHubRateLimit | null {
 }
 
 function featuredRepositories(): GitHubHomeData['repositories'] {
-  return FEATURED_REPOSITORIES.map((repository) => ({ ...repository }));
+  return repositoryList.map((repository) => ({ ...repository }));
 }
 
 export function createUnavailableGitHubHomeData(now = new Date()): GitHubUnavailableHomeData {
