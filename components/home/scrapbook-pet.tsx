@@ -32,11 +32,11 @@ function globalPetCountLabel(globalPets: number | null, localPets: number) {
 }
 
 export function ScrapbookPet({
-  activity,
-  updating,
+  activity = 1,
+  updating = false,
 }: {
-  activity: number;
-  updating: boolean;
+  activity?: number;
+  updating?: boolean;
 }) {
   const reduceMotion = useReducedMotion();
   const [pets, setPets] = useState(0);

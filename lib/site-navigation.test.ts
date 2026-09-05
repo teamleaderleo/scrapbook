@@ -106,6 +106,7 @@ describe('site navigation registry', () => {
       'desk',
       'journal',
       'time',
+      'practice',
     ]);
     expect(nonPublicNavigationItems.map(item => item.id)).toEqual([
       'proxy',

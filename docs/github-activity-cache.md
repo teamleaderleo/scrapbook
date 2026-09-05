@@ -1,6 +1,6 @@
 # GitHub activity refresh
 
-The homepage reads GitHub's contribution calendar through `getGitHubHomeData()`. Live client refreshes use the same coordinated result through `getGitHubHomeResult()` and `/api/github-activity`.
+`getGitHubHomeData()`, `getGitHubHomeResult()`, and `/api/github-activity` retain the contribution-calendar contract for existing consumers. The homepage no longer renders or polls contribution counts; its repository list uses `lib/featured-repositories.ts` directly.
 
 ## Counting contract
 
