@@ -6,6 +6,8 @@ import { Suspense } from 'react';
 import ViewportPageShell from '@/components/viewport-page-shell';
 import styles from '@/components/space/practice.module.css';
 import { PracticeBotanical } from '@/components/space/practice-botanical';
+import { getPracticeAppearance } from '@/lib/practice-syntax';
+import { PracticeAppearance, PracticeThemePicker } from '@/components/space/practice-appearance';
 
 export const metadata: Metadata = {
   title: 'Practice · Scrapbook',
@@ -15,8 +17,9 @@ export const metadata: Metadata = {
 };
 
 export default async function PracticePage() {
-  const concepts = await getConceptExercises();
+  const [concepts, appearance] = await Promise.all([getConceptExercises(), getPracticeAppearance()]);
   return (
+    <PracticeAppearance data={appearance}>
     <ViewportPageShell className="bg-background text-foreground">
       <div
         className={`${styles.garden} mx-auto w-full max-w-5xl px-5 py-7 sm:px-10 sm:py-10`}
@@ -27,12 +30,15 @@ export default async function PracticePage() {
             <PracticeBotanical className={styles.sprig} />
             <h1 className="font-serif text-4xl tracking-tight">Practice</h1>
           </div>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+          <PracticeThemePicker />
           <Link
             href="/space/trail"
             className="text-sm text-muted-foreground underline-offset-4 hover:underline"
           >
             Study trail →
           </Link>
+          </div>
         </header>
         <Suspense
           fallback={
@@ -43,5 +49,6 @@ export default async function PracticePage() {
         </Suspense>
       </div>
     </ViewportPageShell>
+    </PracticeAppearance>
   );
 }

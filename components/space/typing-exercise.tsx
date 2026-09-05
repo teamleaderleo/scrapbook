@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from 'react';
 import { typingFeedback } from '@/lib/typing-feedback';
 import { spaceTypingWpm, type SpaceTypingTarget } from '@/lib/space-practice';
 import styles from './practice.module.css';
 import { RotateCcw } from 'lucide-react';
 import { insertedMistakes } from '@/lib/practice-history';
+import { usePracticeAppearance } from './practice-appearance';
 
 export function TypingExercise({
   target,
@@ -24,6 +25,8 @@ export function TypingExercise({
   }) => void;
 }) {
   const [input, setInput] = useState('');
+  const appearance = usePracticeAppearance();
+  const syntax = target.kind === 'code' ? appearance?.syntax[target.text] : undefined;
   const [focused, setFocused] = useState(false);
   const [selection, setSelection] = useState({ start: 0, end: 0, caret: 0 });
   const referenceId = useId();
@@ -143,6 +146,8 @@ export function TypingExercise({
     : [...expected, ...entered.slice(expected.length)];
   let offset = 0;
   let line = 1;
+  let referenceOffset = 0;
+  let tokenIndex = 0;
 
   return (
     <div data-typing-exercise className={`${styles.surface} min-w-0`}>
@@ -194,9 +199,12 @@ export function TypingExercise({
           ref={reference}
           aria-hidden="true"
           data-typing-overlay
-          className={styles.text}
+          className={`${styles.text} ${syntax ? styles.syntaxText : ''}`}
         >
           {displayed.map((character, index) => {
+            while (syntax && tokenIndex < syntax.length && syntax[tokenIndex].end <= referenceOffset) tokenIndex += 1;
+            const color = !hiddenReference && syntax?.[tokenIndex]?.colors[appearance?.index ?? 0];
+            referenceOffset += character.length;
             const annotated = !hiddenReference && line === highlightedLine;
             if (character === '\n') line += 1;
             const start = offset;
@@ -221,12 +229,15 @@ export function TypingExercise({
                 key={index}
                 data-offset={start}
                 data-line-note={annotated ? '' : undefined}
+                data-syntax-token={color ? '' : undefined}
+                style={color ? { '--syntax-color': color } as CSSProperties : undefined}
                 data-typing-cursor={current ? '' : undefined}
                 data-typing-state={
                   wrong ? 'wrong' : typed === undefined ? 'pending' : 'correct'
                 }
                 className={[
                   styles.character,
+                  color ? styles.syntaxCharacter : '',
                   annotated ? styles.inspected : '',
                   wrong
                     ? styles.wrong
