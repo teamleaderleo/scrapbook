@@ -71,6 +71,10 @@
 .character {
   position: relative;
 }
+.inspected {
+  background: hsl(var(--foreground) / 0.08);
+  box-shadow: 0 1px var(--practice-leaf, currentColor);
+}
 .correct {
   color: var(--practice-leaf, hsl(var(--foreground)));
 }
@@ -111,7 +115,8 @@
 .control:hover {
   color: hsl(var(--foreground));
 }
-.control[aria-pressed='true'] {
+.control[aria-pressed='true'],
+.control[aria-expanded='true'] {
   color: var(--practice-leaf, hsl(var(--foreground)));
   border-color: currentColor;
 }

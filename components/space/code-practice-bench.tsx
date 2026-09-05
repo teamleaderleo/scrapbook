@@ -1,16 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import styles from './practice.module.css';
 import { practicePassages } from '@/lib/practice-passages';
 import { TypingExercise } from './typing-exercise';
 import { usePracticeHistory } from './use-practice-history';
 import { useLocalPracticeDraft } from './reading-practice-dock';
+import { practiceInsights } from '@/lib/practice-insights';
+import { PracticeLineNotes } from './practice-line-notes';
 
 export function CodePracticeBench() {
   const [selected, setSelected] = useState(0);
   const [recall, setRecall] = useState(false);
   const exercise = practicePassages[selected];
+  const [showLineNotes, setShowLineNotes] = useState(false);
+  const [lineSelection, setLineSelection] = useState({ slug: '', index: 0 });
+  const lineNotesId = useId();
+  const insights = practiceInsights[exercise.slug] ?? [];
+  const selectedLine = lineSelection.slug === exercise.slug ? lineSelection.index : 0;
+  const lineNotesOpen = showLineNotes && !recall && insights.length > 0;
+  const highlightedLine = lineNotesOpen
+    ? exercise.text.split('\n').indexOf(insights[selectedLine].match) + 1
+    : undefined;
   const history = usePracticeHistory();
   const historySlug = `${exercise.slug}:${exercise.revision}`;
   const mode = recall ? 'recall' : 'copy';
@@ -85,6 +96,16 @@ export function CodePracticeBench() {
               Recall
             </button>
           </div>
+          {!recall && insights.length > 0 ? (
+            <button
+              className={`${styles.control} text-sm`}
+              aria-expanded={lineNotesOpen}
+              aria-controls={lineNotesOpen ? lineNotesId : undefined}
+              onClick={() => setShowLineNotes(open => !open)}
+            >
+              Line notes
+            </button>
+          ) : null}
           {best !== null ? (
             <span className="font-mono text-xs text-muted-foreground">
               {mode} best {best} WPM · last {comparable[0].wpm} WPM
@@ -92,11 +113,12 @@ export function CodePracticeBench() {
           ) : null}
         </div>
       </div>
-      <div className="mt-2">
+      <div className={lineNotesOpen ? 'mt-2 grid min-w-0 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]' : 'mt-2'}>
         <TypingExercise
           key={`${exercise.slug}:${mode}`}
           target={{ kind: exercise.kind, label: exercise.title, text: exercise.text }}
           recall={recall}
+          highlightedLine={highlightedLine}
           onComplete={result =>
             history.add({
               ...result,
@@ -108,6 +130,16 @@ export function CodePracticeBench() {
             })
           }
         />
+        {lineNotesOpen ? (
+          <PracticeLineNotes
+            key={exercise.slug}
+            id={lineNotesId}
+            text={exercise.text}
+            insights={insights}
+            selected={selectedLine}
+            onSelect={index => setLineSelection({ slug: exercise.slug, index })}
+          />
+        ) : null}
       </div>
       <details className="mt-5 border-t border-border py-3">
         <summary className="cursor-pointer text-sm font-medium">
