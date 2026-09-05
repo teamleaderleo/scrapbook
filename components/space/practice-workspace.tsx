@@ -5,6 +5,7 @@ import type { ConceptExercise } from '@/lib/concept-practice';
 import { CodePracticeBench } from './code-practice-bench';
 import { ConceptPracticeBench } from './concept-practice-bench';
 import { usePracticeHistory } from './use-practice-history';
+import styles from './practice.module.css';
 
 export function PracticeWorkspace({
   concepts,
@@ -31,7 +32,7 @@ export function PracticeWorkspace({
             key={item}
             onClick={() => choose(item)}
             aria-pressed={mode === item}
-            className={`min-h-[48px] border-b-2 px-1 text-sm font-medium ${mode === item ? 'border-foreground text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+            className={`${styles.control} text-sm font-medium`}
           >
             {item === 'code' ? 'Code' : 'Concepts'}
           </button>

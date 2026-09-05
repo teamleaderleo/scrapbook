@@ -55,8 +55,8 @@ describe('ReadingPracticeDock', () => {
 
     expect(html).toContain('Implementation code');
     expect(html).toContain('Typing input');
-    expect(html).toContain('0 mismatches');
-    expect(html).toContain('Tab inserts indentation');
+    expect(html).toContain('data-typing-overlay');
+    expect(html).toContain('Tab indents');
     expect(html).toContain('Copy exercise');
     expect(html).toContain('>Type<');
   });

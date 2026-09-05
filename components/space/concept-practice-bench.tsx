@@ -1,6 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Search, ArrowRight } from 'lucide-react';
+import styles from './practice.module.css';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import type { ConceptExercise } from '@/lib/concept-practice';
@@ -36,15 +44,15 @@ function ConceptQuestion({
     setRated(rating);
   };
   return (
-    <article className="mt-5 overflow-hidden rounded-xl border border-border bg-card">
-      <div className="px-5 py-6 sm:px-6">
+    <article className="py-7 sm:py-9" data-concept-exercise>
+      <div className="max-w-[68ch]">
         <p className="font-mono text-xs text-muted-foreground">
           {concept.topic.replaceAll('-', ' ')}
         </p>
-        <h2 className="mt-2 font-serif text-2xl">{concept.title}</h2>
-        <p className="mt-5 text-base leading-7">
-          {concept.questions[question]}
-        </p>
+        <h2 className="mt-3 font-serif text-3xl leading-tight">
+          {concept.title}
+        </h2>
+        <p className="mt-6 text-lg leading-8">{concept.questions[question]}</p>
         <details className="mt-5">
           <summary className="cursor-pointer py-2 text-sm text-muted-foreground">
             Notes
@@ -54,7 +62,7 @@ function ConceptQuestion({
             value={notes}
             onChange={event => setNotes(event.target.value)}
             placeholder="Explain it in your own words…"
-            className="mt-2 min-h-[128px] w-full rounded-md border border-border bg-background p-3 text-base leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="mt-2 min-h-[128px] w-full border-b border-border bg-transparent py-3 text-base leading-7 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           />
           <p className="mt-1 text-xs text-muted-foreground">
             Saved on this device.
@@ -62,7 +70,7 @@ function ConceptQuestion({
         </details>
       </div>
       {revealed ? (
-        <div className="border-t border-border bg-muted/20 px-5 py-5 sm:px-6">
+        <div className="mt-5 max-w-[68ch] border-t border-border/60 py-6">
           <h3 className="text-sm font-semibold">Compare with the concept</h3>
           <div className="mt-3 space-y-3 text-sm leading-7 text-muted-foreground">
             {concept.reference.split(/\n\s*\n/).map((paragraph, index) => {
@@ -92,14 +100,14 @@ function ConceptQuestion({
             <button
               disabled={!!rated}
               onClick={() => record('revisit')}
-              className="min-h-[44px] rounded-md border border-border px-4 text-sm hover:bg-muted disabled:opacity-50"
+              className={`${styles.control} mr-4 text-sm disabled:opacity-50`}
             >
               Revisit
             </button>
             <button
               disabled={!!rated}
               onClick={() => record('recalled')}
-              className="min-h-[44px] rounded-md bg-foreground px-4 text-sm text-background disabled:opacity-50"
+              className={`${styles.control} text-sm font-semibold disabled:opacity-50`}
             >
               Recalled
             </button>
@@ -113,10 +121,10 @@ function ConceptQuestion({
           </div>
         </div>
       ) : (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-3 sm:px-6">
+        <div className="mt-6 flex max-w-[68ch] flex-wrap items-center gap-7">
           <button
             onClick={() => setRevealed(true)}
-            className="min-h-[44px] rounded-md bg-foreground px-4 text-sm text-background"
+            className={`${styles.control} text-sm font-semibold`}
           >
             Reveal reference
           </button>
@@ -138,6 +146,7 @@ export function ConceptPracticeBench({
   concepts: ConceptExercise[];
 }) {
   const [query, setQuery] = useState('');
+  const [browse, setBrowse] = useState(false);
   const params = useSearchParams();
   const selected = params.get('concept') ?? '';
   const setSelected = (slug: string) => {
@@ -162,54 +171,87 @@ export function ConceptPracticeBench({
         .includes(query.toLowerCase().trim()) &&
       (!revisit || latest.get(concept.slug) === 'revisit')
   );
-  const concept = filtered.find(item => item.slug === selected) ?? filtered[0];
+  const concept = concepts.find(item => item.slug === selected) ?? concepts[0];
   const current = concept
     ? Math.min(question, concept.questions.length - 1)
     : 0;
   return (
     <div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <input
-          aria-label="Find a concept"
-          placeholder="Find a concept…"
-          value={query}
-          onChange={event => {
-            setQuery(event.target.value);
-            setQuestion(0);
-          }}
-          className="min-h-[44px] min-w-0 rounded-md border border-border bg-background px-3 text-base sm:text-sm"
-        />
-        <select
-          aria-label="Concept"
-          value={concept?.slug ?? ''}
-          onChange={event => {
-            setSelected(event.target.value);
-            setQuestion(0);
-          }}
-          className="min-h-[44px] min-w-0 max-w-full rounded-md border border-border bg-background px-3 text-sm"
+      <Dialog open={browse} onOpenChange={setBrowse}>
+        <DialogTrigger asChild>
+          <button
+            type="button"
+            className={`${styles.control} inline-flex items-center gap-2 text-sm`}
+          >
+            <Search size={15} aria-hidden="true" />
+            Browse concepts
+          </button>
+        </DialogTrigger>
+        <DialogContent
+          aria-describedby={undefined}
+          className="w-[calc(100vw-2rem)] max-w-2xl gap-0 p-0 sm:rounded-none"
+          style={{ borderRadius: 0 }}
         >
-          {filtered.length ? (
-            filtered.map(item => (
-              <option key={item.slug} value={item.slug}>
-                {item.title}
-              </option>
-            ))
-          ) : (
-            <option value="">No matching concepts</option>
-          )}
-        </select>
-      </div>
-      <label className="mt-2 flex min-h-[44px] items-center gap-2 text-sm text-muted-foreground">
-        <input
-          type="checkbox"
-          checked={revisit}
-          onChange={event => {
-            setRevisit(event.target.checked);
-            setQuestion(0);
-          }}
-        />
-        Marked for revisit
-      </label>
+          <DialogTitle className="px-5 pb-3 pt-5 font-serif text-2xl font-normal">
+            Choose a concept
+          </DialogTitle>
+          <div className="px-5">
+            <input
+              aria-label="Find a concept"
+              placeholder="Search by concept or topic…"
+              value={query}
+              onChange={event => setQuery(event.target.value)}
+              className="min-h-[48px] w-full border-b border-border bg-transparent text-base outline-none focus-visible:border-foreground"
+            />
+            <label className="flex min-h-[44px] items-center gap-2 text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={revisit}
+                onChange={event => setRevisit(event.target.checked)}
+              />
+              Marked for revisit
+            </label>
+          </div>
+          <div
+            className="max-h-[50dvh] overflow-y-auto px-1 pb-2"
+            aria-label="Concept library"
+          >
+            {filtered.length ? (
+              filtered.map(item => (
+                <button
+                  key={item.slug}
+                  type="button"
+                  aria-current={
+                    concept?.slug === item.slug ? 'true' : undefined
+                  }
+                  className={styles.libraryRow}
+                  onClick={() => {
+                    setSelected(item.slug);
+                    setQuestion(0);
+                    setBrowse(false);
+                  }}
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium leading-6">
+                      {item.title}
+                    </span>
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {item.topic.replaceAll('-', ' ')}
+                    </span>
+                  </span>
+                  <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+                </button>
+              ))
+            ) : (
+              <p className="px-4 py-8 text-sm text-muted-foreground">
+                {revisit
+                  ? 'No matching concepts marked for revisit.'
+                  : 'No concepts match this search.'}
+              </p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
       {concept ? (
         <>
           <ConceptQuestion

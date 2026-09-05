@@ -10,6 +10,7 @@ import {
 } from '@/lib/space-practice';
 
 import { TypingExercise } from './typing-exercise';
+import styles from './practice.module.css';
 
 const DRAFT_EVENT = 'space-practice-draft';
 const memoryDrafts = new Map<string, string>();
@@ -144,15 +145,10 @@ export function ReadingPracticeDock({
         </p>
       </header>
 
-      <div className="mx-auto mt-5 max-w-[68ch] overflow-hidden rounded-[1.35rem] border border-[hsl(var(--material-paper-edge)/0.7)] bg-[hsl(var(--material-paper-face)/0.48)] shadow-[0_10px_30px_rgba(39,34,28,0.08)] dark:shadow-[0_12px_32px_rgba(0,0,0,0.22)]">
-        <div className="px-4 pb-3 pt-4 sm:px-5 sm:pt-5">
-          <div className="flex items-start gap-2">
-            <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[hsl(var(--material-paper-ink)/0.08)] font-mono text-[9px] font-semibold uppercase tracking-[0.08em]">
-              You
-            </span>
-            <p className="text-sm font-medium leading-6">{activePrompt}</p>
-          </div>
-        </div>
+      <div className="mx-auto mt-5 max-w-[68ch]">
+        <p className="py-3 text-sm leading-6 text-muted-foreground">
+          {activePrompt}
+        </p>
 
         {activeMode === 'type' && typingTarget ? (
           <TypingExercise
@@ -170,9 +166,9 @@ export function ReadingPracticeDock({
           />
         )}
 
-        <footer className="flex flex-col gap-3 border-t border-[hsl(var(--material-paper-edge)/0.55)] bg-[hsl(var(--material-paper-ink)/0.025)] px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <footer className="flex flex-col gap-3 border-t border-border/60 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div
-            className="grid grid-cols-3 gap-1 rounded-xl bg-[hsl(var(--material-paper-ink)/0.045)] p-1"
+            className="flex flex-wrap gap-x-4 gap-y-1"
             role="group"
             aria-label="Practice mode"
           >
@@ -184,11 +180,7 @@ export function ReadingPracticeDock({
                   type="button"
                   aria-pressed={active}
                   onClick={() => chooseMode(item.id)}
-                  className={`h-11 rounded-lg px-3 text-xs font-medium transition-[background-color,color,box-shadow] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--material-paper-ink)/0.35)] ${
-                    active
-                      ? 'bg-[hsl(var(--material-paper-face))] text-[hsl(var(--material-paper-ink))] shadow-sm'
-                      : 'text-[hsl(var(--material-paper-ink)/0.58)] hover:text-[hsl(var(--material-paper-ink))]'
-                  }`}
+                  className={`${styles.control} text-xs`}
                 >
                   {item.label}
                 </button>

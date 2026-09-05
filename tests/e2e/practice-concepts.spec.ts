@@ -1,13 +1,17 @@
 import { expect, test } from '@playwright/test';
 import { codeExercises } from '../../lib/code-practice';
 
-test('a Knowledge page opens practice on that exact concept', async ({ page }) => {
+test('a Knowledge page opens practice on that exact concept', async ({
+  page,
+}) => {
   await page.goto('/knowledge/storage/mvcc');
   await page.getByRole('link', { name: 'Practise this concept →' }).click();
-  await expect(page.getByRole('heading', { name: 'MVCC', exact: true })).toBeVisible();
-  await expect(page.getByLabel('Concept', { exact: true })).toHaveValue('storage/mvcc');
+  await expect(
+    page.getByRole('heading', { name: 'MVCC', exact: true })
+  ).toBeVisible();
+  await expect(page).toHaveURL(/concept=storage%2Fmvcc/);
   await page.reload();
-  await expect(page.getByLabel('Concept', { exact: true })).toHaveValue('storage/mvcc');
+  await expect(page).toHaveURL(/concept=storage%2Fmvcc/);
 });
 
 test('concepts reveal sources, preserve notes and support revisits', async ({
@@ -15,7 +19,11 @@ test('concepts reveal sources, preserve notes and support revisits', async ({
 }) => {
   await page.goto('/practice?mode=concepts');
   await expect(page.locator('[data-site-nav-ready="true"]')).toBeVisible();
+  await page.getByRole('button', { name: 'Browse concepts' }).click();
   await page.getByLabel('Find a concept').fill('critical path');
+  await page
+    .getByRole('button', { name: /Profiling the critical path/ })
+    .click();
   await expect(
     page.getByRole('heading', { name: 'Profiling the critical path' })
   ).toBeVisible();
@@ -34,7 +42,11 @@ test('concepts reveal sources, preserve notes and support revisits', async ({
   await page.getByRole('button', { name: 'Revisit', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Marked for revisit');
   await page.reload();
+  await page.getByRole('button', { name: 'Browse concepts' }).click();
   await page.getByLabel('Marked for revisit', { exact: true }).check();
+  await page
+    .getByRole('button', { name: /Profiling the critical path/ })
+    .click();
   await expect(
     page.getByRole('heading', { name: 'Profiling the critical path' })
   ).toBeVisible();
@@ -72,7 +84,9 @@ test('code records corrected attempts and keeps recall separate', async ({
   await expect(page.getByText(/copy best .* WPM/)).toBeVisible();
   await page.getByRole('button', { name: 'Recall', exact: true }).click();
   await expect(page.getByText(/copy best/)).toHaveCount(0);
-  await expect(page.locator('[data-typing-exercise] pre')).toHaveCount(0);
+  await expect(page.locator('[data-typing-overlay]')).not.toContainText(
+    'export function'
+  );
   await page.getByRole('button', { name: 'Reveal code' }).click();
   await expect(page.locator('[data-typing-exercise] pre')).toBeVisible();
   await input.fill(codeExercises[0].text);
