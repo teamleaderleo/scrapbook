@@ -12,6 +12,10 @@ import type {
   StoredMachineHealth,
 } from '@/app/lib/machine-health-store';
 import { healthyMachineReport } from '@/tests/fixtures/machine-health';
+import {
+  buildWindowsVmBins,
+  buildPublicActivityBins,
+} from './machine-health-overview';
 import { MachineHealthDashboard } from './machine-health-dashboard-v2';
 
 const checkedAt = healthyMachineReport.checked_at;
@@ -203,4 +207,115 @@ describe('machine health dashboard v2', () => {
     expect(html).toContain('Big Red');
     expect(html).toContain('MacBook Air');
   });
+});
+
+describe('Windows VM history', () => {
+  it('keeps missing reports empty and aggregates host measurements without mixing Macs', () => {
+    const vm = {
+      source: 'libvirt' as const,
+      state: 'running' as const,
+      vcpus: 14,
+      allocated_gib: 12,
+      resident_gib: 8,
+      cpu_cores: 2,
+    };
+    const bins = buildWindowsVmBins(
+      [
+        { ...sample, windowsVm: vm },
+        { ...sample, windowsVm: { ...vm, resident_gib: 10, cpu_cores: 4 } },
+        {
+          ...sample,
+          windowsVm: {
+            ...vm,
+            state: 'off',
+            resident_gib: null,
+            cpu_cores: null,
+          },
+        },
+        { ...sample, windowsVm: { source: 'unavailable' } },
+        {
+          ...sample,
+          host: 'macbook-air',
+          windowsVm: { ...vm, resident_gib: 100 },
+        },
+      ],
+      '12h',
+      Date.parse(checkedAt) + 1
+    );
+    const measured = bins.filter(bin => bin.observations > 0);
+    expect(measured).toHaveLength(1);
+    expect(measured[0]).toMatchObject({ memory: 10, cpu: 3, observations: 3 });
+    expect(measured[0].running).toBeCloseTo(200 / 3);
+    expect(
+      bins
+        .filter(bin => bin.observations === 0)
+        .every(
+          bin => bin.memory === null && bin.cpu === null && bin.running === null
+        )
+    ).toBe(true);
+  });
+
+  it('shows precise capacity, swap and VM provenance', () => {
+    const html = renderDashboard({
+      reportOverride: {
+        ...report,
+        payload: {
+          ...report.payload,
+          memory: {
+            ...report.payload.memory,
+            accounting: 'available',
+            current_used_gib: 16.5,
+            total_gib: 30.8,
+            swap_used_gib: 0.11,
+            swap_total_gib: 8,
+          },
+          windows_vm: {
+            source: 'libvirt',
+            state: 'running',
+            vcpus: 14,
+            allocated_gib: 12,
+            resident_gib: 11.99,
+            cpu_cores: 0.12,
+          },
+        },
+      },
+    });
+    expect(html).toContain('16.5 / 30.8 GiB used at report');
+    expect(html).toContain('0.11 / 8.0 GiB occupied');
+    expect(html).toContain('12.0 GiB allocated');
+    expect(html).toContain('14 vCPUs');
+    expect(html).toContain('11.99 GiB');
+    expect(html).toContain('already included in Big Red');
+  });
+});
+
+it('does not mix legacy Linux RAM accounting into corrected history', () => {
+  const publicSample = {
+    ...sample,
+    coreAveragePercent: null,
+    corePeakPercent: null,
+    networkPeakMibS: null,
+    diskPeakMibS: null,
+  };
+  const bins = buildPublicActivityBins(
+    [
+      {
+        ...publicSample,
+        memoryComparable: false,
+        memoryUsedPercent: 6,
+        memoryTotalGib: 30,
+      },
+      {
+        ...publicSample,
+        memoryComparable: true,
+        memoryUsedPercent: 50,
+        memoryTotalGib: 32,
+      },
+    ],
+    '12h',
+    Date.parse(checkedAt) + 1
+  );
+  const measured = bins.find(bin => bin.memoryLegacyCount > 0)!;
+  expect(measured.memoryUsedPercent).toBe(50);
+  expect(measured.memoryUsedGib).toBe(16);
 });

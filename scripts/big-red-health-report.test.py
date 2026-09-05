@@ -24,7 +24,36 @@ REPORT = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(REPORT)
 
 
+class WindowsVmTest(unittest.TestCase):
+    def test_numeric_allowlist_and_cpu_delta(self):
+        first = "state.state=1\nvcpu.current=14\nballoon.current=12582912\nballoon.rss=8388608\ncpu.time=1000000000\nprivate.name=do-not-emit"
+        with patch.object(REPORT, "run", side_effect=[(0, first), (0, first.replace("cpu.time=1000000000", "cpu.time=1500000000"))]), patch.object(REPORT.time, "sleep"), patch.object(REPORT.time, "monotonic", side_effect=[10, 10.25]):
+            result = REPORT.windows_vm()
+        self.assertEqual(result, {"source": "libvirt", "state": "running", "vcpus": 14, "allocated_gib": 12, "resident_gib": 8, "cpu_cores": 2})
+
+    def test_unavailable_is_not_off(self):
+        with patch.object(REPORT, "run", return_value=(1, "")):
+            self.assertEqual(REPORT.windows_vm(), {"source": "unavailable"})
+
+    def test_off_does_not_invent_resource_use(self):
+        with patch.object(REPORT, "run", return_value=(0, "state.state=5\nballoon.current=12582912")) as run:
+            result = REPORT.windows_vm()
+        self.assertEqual(run.call_count, 1)
+        self.assertEqual(result["state"], "off")
+        self.assertIsNone(result["resident_gib"])
+        self.assertIsNone(result["cpu_cores"])
+
+    def test_counter_reset_is_a_gap(self):
+        with patch.object(REPORT, "run", side_effect=[(0, "state.state=1\ncpu.time=10"), (0, "state.state=1\ncpu.time=1")]), patch.object(REPORT.time, "sleep"), patch.object(REPORT.time, "monotonic", side_effect=[10, 11]):
+            self.assertEqual(REPORT.windows_vm(), {"source": "unavailable"})
+
+
 class SysstatParsingTest(unittest.TestCase):
+    def test_available_memory_includes_vm_backing_omitted_by_legacy_used(self):
+        self.assertEqual(REPORT.sysstat_memory_percent({"avail": 500, "memused-percent": 6}, 1000), 50)
+        self.assertIsNone(REPORT.sysstat_memory_percent({"memused-percent": 6}, 1000))
+        self.assertIsNone(REPORT.sysstat_memory_percent({"avail": 1001}, 1000))
+
     def test_reduces_named_devices_to_bounded_aggregates(self) -> None:
         record = REPORT.sysstat_record(
             {
@@ -118,7 +147,7 @@ class SysstatParsingTest(unittest.TestCase):
                     "interval": 600,
                 },
                 "cpu-load": [{"cpu": "all", "idle": 100 - cpu}],
-                "memory": {"memused-percent": 30},
+                "memory": {"memused-percent": 30, "avail": 700},
             }
 
         documents = {
@@ -159,7 +188,7 @@ class SysstatParsingTest(unittest.TestCase):
             (directory / "sa29").touch()
             (directory / "sa30").touch()
             with patch.object(REPORT, "run", side_effect=fake_run):
-                activity = REPORT.sysstat_activity(now, directory)
+                activity = REPORT.sysstat_activity(now, directory, total_memory_kib=1000)
 
         self.assertIsNotNone(activity)
         assert activity is not None

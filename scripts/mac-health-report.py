@@ -234,12 +234,14 @@ def report(sample_seconds: float = 1.0) -> dict[str, Any]:
         "memory": {
             "used_percent": memory_percent,
             "total_gib": total_gib,
+            "current_used_gib": round(total_gib * memory_percent / 100, 2),
             "swap_used_gib": swap_used,
             "swap_total_gib": swap_total,
         },
         "disk": {
             "root_used_percent": round(100 * disk.used / disk.total, 2),
             "root_free_gib": round(disk.free / GIB, 2),
+            "root_total_gib": round(disk.total / GIB, 2),
         },
         "temperature": {"peak_sensor_c": None},
         "graphics": {"clock_mhz": None, "max_clock_mhz": None},

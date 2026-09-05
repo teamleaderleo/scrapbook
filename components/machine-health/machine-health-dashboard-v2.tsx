@@ -31,9 +31,7 @@ const COMPANION_POSES: { pose: PaperCreaturePose; label: string }[] = [
 
 function DailyCompanion({ now }: { now: number }) {
   const companion =
-    COMPANION_POSES[
-      Math.floor(now / (24 * HOUR_MS)) % COMPANION_POSES.length
-    ];
+    COMPANION_POSES[Math.floor(now / (24 * HOUR_MS)) % COMPANION_POSES.length];
   return (
     <div
       className="relative h-12 w-[4.75rem]"
@@ -299,7 +297,16 @@ export function MachineHealthDashboard({
     activeReasons.push('Network connectivity is degraded.');
   if (payload.network.tailscale_backend !== 'running')
     activeReasons.push('Tailscale is not running.');
-  const attention = payload.disk.root_used_percent >= 90 || failedUnits > 0;
+  if (
+    payload.windows_vm?.source === 'libvirt' &&
+    payload.windows_vm.state === 'crashed'
+  )
+    activeReasons.push('Windows VM has crashed.');
+  const attention =
+    payload.disk.root_used_percent >= 90 ||
+    failedUnits > 0 ||
+    (payload.windows_vm?.source === 'libvirt' &&
+      payload.windows_vm.state === 'crashed');
   const status = attention
     ? 'Needs attention'
     : activeReasons.length > 0
@@ -311,6 +318,9 @@ export function MachineHealthDashboard({
       ? 'bg-amber-600 dark:bg-amber-300'
       : 'bg-emerald-600 dark:bg-emerald-400';
   const publicSamples = samples.map(sample => ({
+    windowsVm: sample.windowsVm ?? null,
+    memoryTotalGib: sample.memoryTotalGib ?? null,
+    memoryComparable: sample.memoryComparable,
     host: sample.host,
     checkedAt: sample.checkedAt,
     cpuUsedPercent: sample.cpuUsedPercent,
@@ -375,9 +385,23 @@ export function MachineHealthDashboard({
         samples={publicSamples}
         codexSamples={codexSamples}
         now={now}
+        windowsVm={payload.windows_vm}
         currentByHost={{
           'big-red': {
             cpuPercent: payload.cpu.used_percent,
+            checkedAt: payload.checked_at,
+            logicalCpus: payload.load.logical_cpus,
+            memoryTotalGib: payload.memory.total_gib,
+            memoryComparable:
+              payload.activity.source === 'point' ||
+              payload.memory.accounting === 'available',
+            memoryUsedGib: payload.memory.current_used_gib,
+            swapUsedGib: payload.memory.swap_used_gib,
+            swapTotalGib: payload.memory.swap_total_gib,
+            storageTotalGib: payload.disk.root_total_gib,
+            activitySource: payload.activity.source,
+            activityWindowMinutes: payload.activity.window_minutes,
+            activitySampleCount: payload.activity.sample_count,
             memoryPercent: payload.memory.used_percent,
             storagePercent: payload.disk.root_used_percent,
             storageFreeGib: payload.disk.root_free_gib,
@@ -386,6 +410,17 @@ export function MachineHealthDashboard({
             ? {
                 'macbook-air': {
                   cpuPercent: macReport.payload.cpu.used_percent,
+                  checkedAt: macReport.payload.checked_at,
+                  logicalCpus: macReport.payload.load.logical_cpus,
+                  memoryTotalGib: macReport.payload.memory.total_gib,
+                  memoryUsedGib: macReport.payload.memory.current_used_gib,
+                  swapUsedGib: macReport.payload.memory.swap_used_gib,
+                  swapTotalGib: macReport.payload.memory.swap_total_gib,
+                  storageTotalGib: macReport.payload.disk.root_total_gib,
+                  activitySource: macReport.payload.activity.source,
+                  activityWindowMinutes:
+                    macReport.payload.activity.window_minutes,
+                  activitySampleCount: macReport.payload.activity.sample_count,
                   memoryPercent: macReport.payload.memory.used_percent,
                   storagePercent: macReport.payload.disk.root_used_percent,
                   storageFreeGib: macReport.payload.disk.root_free_gib,
@@ -409,14 +444,14 @@ export function MachineHealthDashboard({
                 : `${Math.round(payload.temperature.peak_sensor_c)} °C`}
             </p>
           </div>
-          <div aria-label="Installed memory" title="Installed memory">
+          <div aria-label="Usable RAM" title="Usable RAM">
             <MemoryStick
               aria-hidden="true"
               className="size-4 mx-auto stroke-[1.7] opacity-40"
             />
-            <span className="sr-only">Installed memory</span>
+            <span className="sr-only">Usable RAM</span>
             <p className="mt-1 text-lg font-semibold tabular-nums">
-              {payload.memory.total_gib.toFixed(0)} GiB
+              {payload.memory.total_gib.toFixed(1)} GiB
             </p>
           </div>
           <div aria-label="Uptime" title="Uptime">
