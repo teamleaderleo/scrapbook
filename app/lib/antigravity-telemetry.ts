@@ -167,6 +167,8 @@ export function projectAntigravityHeadlessUsage(
     output_tokens: delta.outputTokens,
     total_tokens: delta.totalTokens,
     request_count: null,
+    successful_request_count: null,
+    api_equivalent_estimate_usd: null,
     turn_count: delta.turns,
     agent_step_count: null,
   });

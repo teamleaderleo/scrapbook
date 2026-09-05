@@ -33,6 +33,8 @@ describe('agentTelemetryEnvelopeSchema', () => {
           output_tokens: 657,
           total_tokens: 11_072,
           request_count: null,
+          successful_request_count: null,
+          api_equivalent_estimate_usd: null,
           turn_count: 1,
           agent_step_count: null,
         },
@@ -102,6 +104,8 @@ describe('agentTelemetryEnvelopeSchema', () => {
           output_tokens: 20,
           total_tokens: null,
           request_count: 1,
+          successful_request_count: 1,
+          api_equivalent_estimate_usd: null,
           turn_count: null,
           agent_step_count: null,
         },
@@ -153,7 +157,6 @@ describe('agentTelemetryEnvelopeSchema', () => {
     });
     expect(duplicateQuota.success).toBe(false);
   });
-
   it('rejects undeclared private-content fields', () => {
     const sample = { ...usage('closed-schema'), prompt_text: 'do not retain me' };
     const result = agentTelemetryEnvelopeSchema.safeParse({
@@ -162,6 +165,50 @@ describe('agentTelemetryEnvelopeSchema', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it('accepts delegated peer hourly aggregates with helper success and an API-equivalent estimate', () => {
+    const peerHour = {
+      ...usage('peer-20260905T06Z-anthropic-claude-code-claude-opus-5-high'),
+      provider: 'anthropic',
+      harness: 'claude-code',
+      model: 'claude-opus-5',
+      effort: 'high',
+      accounting_contract: 'big-red-agent-peer-usage/v1',
+      run_ref: null,
+      cached_input_tokens: 800,
+      cache_write_input_tokens: 100,
+      reasoning_tokens: null,
+      request_count: 3,
+      successful_request_count: 2,
+      api_equivalent_estimate_usd: 0.35,
+    };
+    const parsed = agentTelemetryEnvelopeSchema.parse({
+      ...baseReport(),
+      usage_samples: [peerHour],
+    });
+
+    expect(parsed.usage_samples[0]).toMatchObject({
+      request_count: 3,
+      successful_request_count: 2,
+      api_equivalent_estimate_usd: 0.35,
+    });
+
+    const negativeEstimate = agentTelemetryEnvelopeSchema.safeParse({
+      ...baseReport(),
+      usage_samples: [
+        { ...peerHour, sample_id: 'peer-bad-estimate', api_equivalent_estimate_usd: -1 },
+      ],
+    });
+    expect(negativeEstimate.success).toBe(false);
+
+    const fractionalSuccess = agentTelemetryEnvelopeSchema.safeParse({
+      ...baseReport(),
+      usage_samples: [
+        { ...peerHour, sample_id: 'peer-bad-success', successful_request_count: 1.5 },
+      ],
+    });
+    expect(fractionalSuccess.success).toBe(false);
   });
 });
 
@@ -183,6 +230,8 @@ function usage(sampleId: string) {
     output_tokens: 20,
     total_tokens: 120,
     request_count: 1,
+    successful_request_count: 1,
+    api_equivalent_estimate_usd: null,
     turn_count: null,
     agent_step_count: null,
   };

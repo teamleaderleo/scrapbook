@@ -19,6 +19,8 @@ const nullableCounterSchema = z
   .max(Number.MAX_SAFE_INTEGER)
   .nullable();
 
+const nullableEstimateSchema = z.number().finite().nonnegative().nullable();
+
 type UsageSampleIdentity = {
   sample_id: string;
   provider: string;
@@ -62,6 +64,8 @@ export const agentUsageSampleSchema = z
     output_tokens: nullableCounterSchema,
     total_tokens: nullableCounterSchema,
     request_count: nullableCounterSchema,
+    successful_request_count: nullableCounterSchema,
+    api_equivalent_estimate_usd: nullableEstimateSchema,
     turn_count: nullableCounterSchema,
     agent_step_count: nullableCounterSchema,
   })

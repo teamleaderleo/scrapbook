@@ -67,6 +67,8 @@ function report() {
         output_tokens: 657,
         total_tokens: 11_072,
         request_count: null,
+        successful_request_count: null,
+        api_equivalent_estimate_usd: null,
         turn_count: 1,
         agent_step_count: null,
       },

@@ -42,6 +42,8 @@ export async function saveAgentTelemetryReport(rawReport: AgentTelemetryEnvelope
           output_tokens,
           total_tokens,
           request_count,
+          successful_request_count,
+          api_equivalent_estimate_usd,
           turn_count,
           agent_step_count,
           collected_at
@@ -62,6 +64,8 @@ export async function saveAgentTelemetryReport(rawReport: AgentTelemetryEnvelope
           ${sample.output_tokens},
           ${sample.total_tokens},
           ${sample.request_count},
+          ${sample.successful_request_count},
+          ${sample.api_equivalent_estimate_usd},
           ${sample.turn_count},
           ${sample.agent_step_count},
           ${report.collected_at}
@@ -91,6 +95,8 @@ export async function saveAgentTelemetryReport(rawReport: AgentTelemetryEnvelope
           output_tokens IS NOT DISTINCT FROM ${sample.output_tokens} AND
           total_tokens IS NOT DISTINCT FROM ${sample.total_tokens} AND
           request_count IS NOT DISTINCT FROM ${sample.request_count} AND
+          successful_request_count IS NOT DISTINCT FROM ${sample.successful_request_count} AND
+          api_equivalent_estimate_usd IS NOT DISTINCT FROM ${sample.api_equivalent_estimate_usd} AND
           turn_count IS NOT DISTINCT FROM ${sample.turn_count} AND
           agent_step_count IS NOT DISTINCT FROM ${sample.agent_step_count}
       `;
@@ -222,4 +228,116 @@ export async function saveAgentTelemetryReport(rawReport: AgentTelemetryEnvelope
       quotaReplayed,
     };
   });
+}
+
+export const PEER_USAGE_CONTRACTS = [
+  'big-red-agent-peer-usage/v1',
+  'big-red-muse-peer-usage/v1',
+] as const;
+
+export type PeerUsageSampleRow = {
+  source: string;
+  observedAt: string;
+  provider: string;
+  harness: string;
+  model: string;
+  effort: string | null;
+  accountingContract: string;
+  inputTokens: number | null;
+  cachedInputTokens: number | null;
+  cacheWriteInputTokens: number | null;
+  reasoningTokens: number | null;
+  outputTokens: number | null;
+  totalTokens: number | null;
+  requestCount: number | null;
+  successfulRequestCount: number | null;
+  apiEquivalentEstimateUsd: number | null;
+  turnCount: number | null;
+  agentStepCount: number | null;
+};
+
+export async function readPeerUsageSamples(
+  days = 30,
+  contracts: readonly string[] = PEER_USAGE_CONTRACTS
+): Promise<PeerUsageSampleRow[]> {
+  const boundedDays = Math.max(1, Math.min(365, Math.floor(days)));
+  const rows = await client<
+    {
+      source: string;
+      observed_at: Date | string;
+      provider: string;
+      harness: string;
+      model: string;
+      effort: string | null;
+      accounting_contract: string;
+      input_tokens: number | string | null;
+      cached_input_tokens: number | string | null;
+      cache_write_input_tokens: number | string | null;
+      reasoning_tokens: number | string | null;
+      output_tokens: number | string | null;
+      total_tokens: number | string | null;
+      request_count: number | string | null;
+      successful_request_count: number | string | null;
+      api_equivalent_estimate_usd: number | string | null;
+      turn_count: number | string | null;
+      agent_step_count: number | string | null;
+    }[]
+  >`
+    SELECT
+      source,
+      observed_at,
+      provider,
+      harness,
+      model,
+      effort,
+      accounting_contract,
+      input_tokens,
+      cached_input_tokens,
+      cache_write_input_tokens,
+      reasoning_tokens,
+      output_tokens,
+      total_tokens,
+      request_count,
+      successful_request_count,
+      api_equivalent_estimate_usd,
+      turn_count,
+      agent_step_count
+    FROM agent_usage_samples
+    WHERE observed_at >= now() - (${boundedDays}::int * interval '1 day')
+      AND accounting_contract = ANY(${contracts})
+    ORDER BY observed_at ASC, provider ASC, harness ASC, model ASC
+  `;
+
+  return rows.map(row => ({
+    source: row.source,
+    observedAt: new Date(row.observed_at).toISOString(),
+    provider: row.provider,
+    harness: row.harness,
+    model: row.model,
+    effort: row.effort,
+    accountingContract: row.accounting_contract,
+    inputTokens: row.input_tokens === null ? null : Number(row.input_tokens),
+    cachedInputTokens:
+      row.cached_input_tokens === null ? null : Number(row.cached_input_tokens),
+    cacheWriteInputTokens:
+      row.cache_write_input_tokens === null
+        ? null
+        : Number(row.cache_write_input_tokens),
+    reasoningTokens:
+      row.reasoning_tokens === null ? null : Number(row.reasoning_tokens),
+    outputTokens: row.output_tokens === null ? null : Number(row.output_tokens),
+    totalTokens: row.total_tokens === null ? null : Number(row.total_tokens),
+    requestCount: row.request_count === null ? null : Number(row.request_count),
+    successfulRequestCount:
+      row.successful_request_count === null
+        ? null
+        : Number(row.successful_request_count),
+    apiEquivalentEstimateUsd:
+      row.api_equivalent_estimate_usd === null
+        ? null
+        : Number(row.api_equivalent_estimate_usd),
+    turnCount: row.turn_count === null ? null : Number(row.turn_count),
+    agentStepCount:
+      row.agent_step_count === null ? null : Number(row.agent_step_count),
+  }));
 }

@@ -492,6 +492,47 @@ MACHINE_HEALTH_INGEST_SECRET='<ingest secret>' \
 python3 scripts/codex-token-report.py --source macbook-air
 ```
 
+## Delegated peer usage (Claude / Antigravity / Muse)
+
+Codex-orchestrated subscription peers keep their own content-free ledgers on
+Big Red: `~/.local/state/big-red-agent-peer/usage.jsonl` for Claude Code and
+the Antigravity CLI (`big-red-agent-peer-usage/v1` receipts), and
+`~/.local/state/big-red-muse-peer/usage.jsonl` for the contributor-free Muse
+peer (`big-red-muse-peer-usage/v1` receipts). Neither ledger carries prompts,
+responses, session/conversation IDs, paths, account identity, or credentials.
+
+`scripts/agent-peer-report.py` aggregates complete UTC hours per
+provider/harness/model/effort and posts the existing
+`agent-telemetry-report/v1` envelope to
+`POST /api/machine-health/agent-usage/ingest`:
+
+```bash
+python3 scripts/agent-peer-report.py --source big-red --hours 168 --print-only
+```
+
+```bash
+AGENT_PEER_INGEST_URL=https://teamleaderleo.com/api/machine-health/agent-usage/ingest \
+MACHINE_HEALTH_INGEST_SECRET='<ingest secret>' \
+python3 scripts/agent-peer-report.py --source big-red
+```
+
+The reader opens each ledger with `O_NOFOLLOW`, requires a regular
+owner-only file with one link, holds a shared lock against parallel appends,
+and stays under a 64 MiB ceiling. A missing ledger is reported as unavailable,
+never zero; an untrusted ledger fails closed. Per-hour aggregates keep logical
+input, cached input (a subset of input), cache writes, output, reasoning, and
+the producer-defined total separate. Run counts land in `request_count`,
+helper success (exit 0, not accepted work) in `successful_request_count`, and
+Claude's client-side figure in `api_equivalent_estimate_usd`. Missing counters
+stay null. Migration `0023_agent_peer_run_counts.sql` adds those two nullable
+columns; older rows remain readable.
+
+The private dashboard renders a Delegated peer usage panel beside the Codex
+surfaces, and `GET /api/machine-health/agent-usage/summary` returns the same
+grouped projection as compact JSON (`peer-usage-summary/v1`) for operator
+tooling. Dashboard copy calls the dollar field an API-equivalent estimate,
+never the subscription bill.
+
 For launchd, keep those two values in one current-user-owned mode-`0600` JSON file instead of
 putting the bearer secret in a plist:
 
