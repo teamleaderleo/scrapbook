@@ -16,6 +16,17 @@ const codexRuntimeClassSchema = z.object({
 });
 export const codexTokenSourceSchema = z.enum(['big-red', 'macbook-air']);
 export const machineHealthHostSchema = z.enum(['big-red', 'macbook-air']);
+export const codexModelUsageSchema = z.object({
+  model: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_.:/@+\-]{0,127}$/),
+  input_tokens: codexCounter,
+  cached_input_tokens: codexCounter,
+  cache_write_input_tokens: codexCounter,
+  output_tokens: codexCounter,
+  reasoning_output_tokens: codexCounter,
+  total_tokens: codexCounter,
+  model_calls: codexCounter,
+});
+export type CodexModelUsage = z.infer<typeof codexModelUsageSchema>;
 export const codexUsageWindowSchema = z
   .object({
     source: z.literal('session-jsonl'),
@@ -29,6 +40,7 @@ export const codexUsageWindowSchema = z
     total_tokens: codexCounter,
     model_calls: codexCounter,
     active_routes: codexCounter,
+    model_usage: z.array(codexModelUsageSchema).max(64).optional(),
     session_fingerprints: z
       .array(z.string().regex(/^[0-9a-f]{32}$/))
       .max(1_024)
@@ -36,6 +48,30 @@ export const codexUsageWindowSchema = z
     fingerprints_complete: z.boolean().optional(),
   })
   .superRefine((usage, context) => {
+    if (usage.model_usage) {
+      const fields = [
+        'input_tokens',
+        'cached_input_tokens',
+        'cache_write_input_tokens',
+        'output_tokens',
+        'reasoning_output_tokens',
+        'total_tokens',
+        'model_calls',
+      ] as const;
+      if (
+        new Set(usage.model_usage.map(row => row.model)).size !==
+          usage.model_usage.length ||
+        fields.some(
+          field =>
+            usage.model_usage!.reduce((sum, row) => sum + row[field], 0) !==
+            usage[field]
+        )
+      )
+        context.addIssue({
+          code: 'custom',
+          message: 'Model totals must reconcile to the usage window',
+        });
+    }
     const start = Date.parse(usage.window_started_at);
     const end = Date.parse(usage.window_ended_at);
     if (start % (60 * 60 * 1_000) !== 0 || end - start !== 60 * 60 * 1_000)
@@ -951,6 +987,7 @@ export type StoredMachineHealth = {
 };
 
 export type CodexTokenSample = {
+  modelUsage?: CodexModelUsage[] | null;
   source: CodexTokenSource;
   accountingState: 'counted' | 'overlap-skipped' | 'unverified-skipped';
   windowStartedAt: string;
@@ -1327,6 +1364,7 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
             reasoning_output_tokens,
             total_tokens,
             model_calls,
+            model_usage,
             active_routes,
             accounting_state,
             session_fingerprints,
@@ -1344,6 +1382,7 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
             ${usage.reasoning_output_tokens},
             ${usage.total_tokens},
             ${usage.model_calls},
+            ${usage.model_usage ? sql.json(usage.model_usage) : null},
             ${usage.active_routes},
             ${accountingState},
             ${sql.array(usage.session_fingerprints ?? [], 25)}::text[],
@@ -1360,6 +1399,10 @@ export async function saveMachineHealth(payload: MachineHealthPayload) {
             reasoning_output_tokens = EXCLUDED.reasoning_output_tokens,
             total_tokens = EXCLUDED.total_tokens,
             model_calls = EXCLUDED.model_calls,
+            model_usage = CASE WHEN EXCLUDED.model_usage IS NOT NULL THEN EXCLUDED.model_usage WHEN
+              (codex_token_samples.input_tokens, codex_token_samples.cached_input_tokens, codex_token_samples.cache_write_input_tokens, codex_token_samples.output_tokens, codex_token_samples.reasoning_output_tokens, codex_token_samples.total_tokens, codex_token_samples.model_calls)
+              = (EXCLUDED.input_tokens, EXCLUDED.cached_input_tokens, EXCLUDED.cache_write_input_tokens, EXCLUDED.output_tokens, EXCLUDED.reasoning_output_tokens, EXCLUDED.total_tokens, EXCLUDED.model_calls)
+              THEN codex_token_samples.model_usage ELSE NULL END,
             active_routes = EXCLUDED.active_routes,
             accounting_state = EXCLUDED.accounting_state,
             session_fingerprints = EXCLUDED.session_fingerprints,
@@ -1389,6 +1432,7 @@ export async function saveCodexTokenReport(report: CodexTokenReport) {
   const collectedAt = new Date(report.collected_at).toISOString();
   const rows = report.windows.map(window => ({
     source: report.source,
+    model_usage: window.model_usage ?? null,
     window_started_at: new Date(window.window_started_at).toISOString(),
     window_ended_at: new Date(window.window_ended_at).toISOString(),
     input_tokens: window.input_tokens,
@@ -1451,6 +1495,7 @@ export async function saveCodexTokenReport(report: CodexTokenReport) {
         ? ('overlap-skipped' as const)
         : ('counted' as const),
       session_fingerprints: sql.array(row.session_fingerprints, 25),
+      model_usage: row.model_usage === null ? null : sql.json(row.model_usage),
     }));
     const returnedRows = await sql`
       INSERT INTO codex_token_samples ${sql(
@@ -1465,6 +1510,7 @@ export async function saveCodexTokenReport(report: CodexTokenReport) {
         'reasoning_output_tokens',
         'total_tokens',
         'model_calls',
+        'model_usage',
         'active_routes',
         'accounting_state',
         'session_fingerprints',
@@ -1481,6 +1527,7 @@ export async function saveCodexTokenReport(report: CodexTokenReport) {
         reasoning_output_tokens = EXCLUDED.reasoning_output_tokens,
         total_tokens = EXCLUDED.total_tokens,
         model_calls = EXCLUDED.model_calls,
+        model_usage = EXCLUDED.model_usage,
         active_routes = EXCLUDED.active_routes,
         accounting_state = EXCLUDED.accounting_state,
         session_fingerprints = EXCLUDED.session_fingerprints,
@@ -1625,6 +1672,7 @@ export async function readMachineHealth(
           reasoning_output_tokens: number | string | bigint;
           total_tokens: number | string | bigint;
           model_calls: number | string;
+          model_usage: CodexModelUsage[] | null;
           active_routes: number | string;
         }[]
       >`
@@ -1640,6 +1688,7 @@ export async function readMachineHealth(
           reasoning_output_tokens,
           total_tokens,
           model_calls,
+          model_usage,
           active_routes
         FROM codex_token_samples
         WHERE window_started_at >= now() - (${Math.max(1, Math.min(365, Math.floor(days)))}::int * interval '1 day')
@@ -1693,6 +1742,7 @@ export async function readMachineHealth(
         reasoningOutputTokens: toNumber(row.reasoning_output_tokens),
         totalTokens: toNumber(row.total_tokens),
         modelCalls: toNumber(row.model_calls),
+        modelUsage: row.model_usage ?? null,
         activeRoutes: toNumber(row.active_routes),
       })),
       samples: sampleRows.map(row => {

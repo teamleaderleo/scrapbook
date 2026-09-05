@@ -20,6 +20,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useMemo, useState, useSyncExternalStore } from 'react';
+import { useMachineDevice } from './machine-device-context';
+import { ModelUsage } from './model-usage';
 
 type ActivityRange = '12h' | '24h' | '7d' | '30d';
 
@@ -55,10 +57,7 @@ const RANGE_CONFIG: Record<
 };
 
 type ResourceKey = 'cpu' | 'memory' | 'storage';
-const RESOURCE_HOSTS = [
-  ['big-red', 'Big Red', Server],
-  ['macbook-air', 'MacBook Air', Laptop],
-] as const;
+
 
 export type PublicMachineHealthSample = {
   windowsVm?: WindowsVm | null;
@@ -688,7 +687,7 @@ function ResourceHistory({
         {current.swapUsedGib === undefined || current.swapTotalGib === undefined
           ? 'unavailable'
           : `${current.swapUsedGib.toFixed(2)} / ${current.swapTotalGib.toFixed(1)} GiB occupied`}
-        . Occupied swap alone does not indicate active memory pressure.
+
       </p>
     </section>
   );
@@ -731,7 +730,7 @@ function CodexHistory({
   const sources = sourceTotals(bins);
   const sourceLabels: Record<CodexTokenSource, string> = {
     'big-red': 'Big Red',
-    'macbook-air': 'MacBook Air',
+    'macbook-air': 'Air Blue',
   };
   const cacheShare = totalInput > 0 ? (cachedInput / totalInput) * 100 : 0;
 
@@ -1270,13 +1269,10 @@ function WindowsVmHistory({
         }
         formatValue={format}
       />
-      <p className="mt-2 text-xs leading-relaxed opacity-60">
-        Host RAM shows peak sampled resident memory, already included in Big
-        Red’s RAM; it is not Windows application memory. CPU shows mean sampled
-        host cores consumed (1 core = one fully busy logical CPU), including
-        virtualization overhead. Running state is the share of observed reports,
-        not continuous uptime. Gaps mean no measurement.
-      </p>
+      <details className="mt-2 text-xs opacity-60">
+        <summary className="cursor-pointer py-2">VM measurements</summary>
+        <p className="max-w-prose leading-relaxed">Host RAM is peak resident memory, included in Big Red’s total. CPU includes virtualization overhead. Running state describes observed reports; gaps mean no sample.</p>
+      </details>
     </section>
   );
 }
@@ -1294,8 +1290,7 @@ export function MachineHealthOverview({
   currentByHost: Partial<Record<MachineHealthHost, MachineResourceSnapshot>>;
   windowsVm?: WindowsVm;
 }) {
-  const [resourceHost, setResourceHost] =
-    useState<MachineHealthHost>('big-red');
+  const [resourceHost] = useMachineDevice();
   const selectedResourceHost = currentByHost[resourceHost]
     ? resourceHost
     : 'big-red';
@@ -1336,41 +1331,19 @@ export function MachineHealthOverview({
       <div className="mb-2 px-1">
         <h2
           id="activity-heading"
-          className="text-xl font-semibold tracking-tight"
+          className="scroll-mt-20 text-xl font-semibold tracking-tight"
         >
-          Activity
+          History
         </h2>
-        <p className="opacity-45 mt-0.5 text-xs">Big Red and Codex over time</p>
+
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         <div>
           <div className="mb-2 flex items-end justify-between gap-3 px-1">
             <div>
-              <h3 className="opacity-55 pb-2 text-sm font-medium">Resources</h3>
-              {currentByHost['macbook-air'] ? (
-                <div className="flex gap-4" aria-label="Resource device">
-                  {RESOURCE_HOSTS.map(([host, label, Icon]) => (
-                    <button
-                      key={host}
-                      type="button"
-                      aria-pressed={selectedResourceHost === host}
-                      onClick={() => setResourceHost(host)}
-                      className={`flex min-h-8 items-center gap-1.5 border-b pb-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a53b34] ${
-                        selectedResourceHost === host
-                          ? 'border-current font-semibold'
-                          : 'border-transparent opacity-45 hover:opacity-75'
-                      }`}
-                    >
-                      <Icon
-                        aria-hidden="true"
-                        className="size-3.5 stroke-[1.8]"
-                      />
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
+              <h3 className="opacity-55 pb-2 text-sm font-medium">Resources · {selectedResourceHost === 'macbook-air' ? 'Air Blue' : 'Big Red'}</h3>
+
             </div>
             <RangeControl
               label="Resource"
@@ -1388,7 +1361,7 @@ export function MachineHealthOverview({
         </div>
         <div>
           <div className="min-h-9 mb-2 flex items-end justify-between gap-3 px-1">
-            <h3 className="opacity-55 pb-2 text-sm font-medium">Usage</h3>
+            <h3 className="opacity-55 pb-2 text-sm font-medium">Codex usage</h3>
             <RangeControl
               label="Codex"
               range={codexRange}
@@ -1403,6 +1376,7 @@ export function MachineHealthOverview({
         </div>
       </div>
 
+      <ModelUsage samples={codexSamples} from={codexBins[0].start} to={codexBins.at(-1)!.end} />
       <WindowsVmHistory samples={samples} current={windowsVm} now={now} />
       <PerformanceDetails bins={resourceBins} />
     </section>

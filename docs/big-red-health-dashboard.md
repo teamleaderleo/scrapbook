@@ -6,6 +6,24 @@ The production database, ingestion credentials, hourly Big Red timer, public sum
 
 ## Minute activity monitor
 
+The Mac's display name is **Air Blue**; its stable ingest identity remains
+`macbook-air`. One device selection controls Now and resource History.
+
+The Models table follows the Codex usage period and combines counted reports
+from both machines. Sort by calls, input, or output; cache hit is cached input
+divided by input. Model labels come from each recorded `turn_context`, so a
+model switch within a session changes attribution. Missing context and historical
+reports without a breakdown remain unattributed. Every model counter must sum
+to its hour's aggregate counter. Existing overlap/fingerprint checks still apply.
+This tracks Codex session usage; it does not infer other providers' usage or cost.
+
+Air Blue's existing hourly token LaunchAgent collects model rows. Big Red's
+hourly health reporter loads `codex-token-report.py` beside its installed script
+to use the same collector without a second scan or timer. Install both files
+together on Big Red. Older aggregate writers preserve a model breakdown only
+when all corresponding token counters still match; otherwise it is cleared.
+Migration `0022_codex_model_usage.sql` adds the optional aggregate JSON column.
+
 The activity monitor adds a two-second observation about once a minute while each
 host is awake. It runs separately from the hourly health report: it does not scan
 repositories, storage trees, logs, or Codex transcripts. The visible page refreshes

@@ -14,6 +14,7 @@ import hashlib
 import hmac
 import ipaddress
 import json
+import importlib.util
 import math
 import os
 import re
@@ -985,6 +986,14 @@ def codex_usage_window(
     fingerprint_key: bytes | None = None,
 ) -> dict[str, Any]:
     """Aggregate the previous complete UTC hour without retaining content."""
+    portable = Path(__file__).with_name("codex-token-report.py")
+    directory = session_directory or Path.home() / ".codex" / "sessions"
+    if portable.is_file() and directory.is_dir():
+        spec = importlib.util.spec_from_file_location("scrapbook_codex_tokens", portable)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module.collect_windows(now, 1, directory, fingerprint_key=fingerprint_key)[0]
+
     window_end = now.astimezone(dt.timezone.utc).replace(
         minute=0, second=0, microsecond=0
     )

@@ -48,6 +48,40 @@ describe('machine health contract', () => {
     };
 
     expect(codexTokenReportSchema.safeParse(report).success).toBe(true);
+    const model = {
+      model: 'test-model',
+      ...Object.fromEntries(
+        [
+          'input_tokens',
+          'cached_input_tokens',
+          'cache_write_input_tokens',
+          'output_tokens',
+          'reasoning_output_tokens',
+          'total_tokens',
+          'model_calls',
+        ].map(field => [field, window[field as keyof typeof window]])
+      ),
+    };
+    expect(
+      codexTokenReportSchema.safeParse({
+        ...report,
+        windows: [{ ...window, model_usage: [model] }],
+      }).success
+    ).toBe(true);
+    expect(
+      codexTokenReportSchema.safeParse({
+        ...report,
+        windows: [
+          { ...window, model_usage: [{ ...model, input_tokens: 999 }] },
+        ],
+      }).success
+    ).toBe(false);
+    expect(
+      codexTokenReportSchema.safeParse({
+        ...report,
+        windows: [{ ...window, model_usage: [model, model] }],
+      }).success
+    ).toBe(false);
     expect(
       codexTokenReportSchema.safeParse({
         ...report,

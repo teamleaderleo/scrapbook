@@ -13,6 +13,7 @@ import {
 } from '@/components/paper-creature';
 import { MemoryStick, Thermometer, Timer } from 'lucide-react';
 import Link from 'next/link';
+import { MachineDeviceProvider } from './machine-device-context';
 import { MachineActivityMonitor } from './machine-activity-monitor';
 import { MachineHealthOverview } from './machine-health-overview';
 import { MachineHealthRefresh } from './machine-health-refresh';
@@ -346,19 +347,24 @@ export function MachineHealthDashboard({
             Atlas · Tools
           </p>
           <h1 className="mt-1 text-3xl font-semibold tracking-[-0.045em]">
-            Big Red
+            Machines
           </h1>
           <div className="mt-2 flex items-center gap-2 text-xs">
             <span
               aria-hidden="true"
               className={`size-2 rounded-full ${statusColor}`}
             />
-            <span className="font-medium">{status}</span>
+            <span className="font-medium">Big Red · {status}</span>
             <span aria-hidden="true" className="opacity-25">
               ·
             </span>
             <MachineHealthTimestamp checkedAt={report.checkedAt} now={now} />
           </div>
+          <nav aria-label="Machine dashboard sections" className="mt-3 flex gap-4 text-xs opacity-60">
+            <a href="#activity-monitor-heading" className="hover:underline">Now</a>
+            <a href="#activity-heading" className="hover:underline">History</a>
+            <a href="#model-usage-heading" className="hover:underline">Models</a>
+          </nav>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
           <MachineHealthRefresh />
@@ -369,12 +375,9 @@ export function MachineHealthDashboard({
       {activeReasons.length > 0 ? (
         <section
           className={`border-l-2 px-3 py-1 text-sm ${attention ? 'border-red-600 dark:border-red-400' : 'border-amber-600 dark:border-amber-300'}`}
-          aria-labelledby="current-issues-heading"
+          aria-label="Big Red diagnostics"
         >
-          <h2 id="current-issues-heading" className="font-semibold">
-            Current issue{activeReasons.length === 1 ? '' : 's'}
-          </h2>
-          <ul className="opacity-65 mt-1 grid gap-1">
+          <ul className="opacity-65 grid gap-1">
             {activeReasons.map(reason => (
               <li key={reason}>{reason}</li>
             ))}
@@ -382,57 +385,59 @@ export function MachineHealthDashboard({
         </section>
       ) : null}
 
-      <MachineActivityMonitor />
+      <MachineDeviceProvider>
+        <MachineActivityMonitor />
 
-      <MachineHealthOverview
-        samples={publicSamples}
-        codexSamples={codexSamples}
-        now={now}
-        windowsVm={payload.windows_vm}
-        currentByHost={{
-          'big-red': {
-            cpuPercent: payload.cpu.used_percent,
-            checkedAt: payload.checked_at,
-            logicalCpus: payload.load.logical_cpus,
-            memoryTotalGib: payload.memory.total_gib,
-            memoryComparable:
-              payload.activity.source === 'point' ||
-              payload.memory.accounting === 'available',
-            memoryUsedGib: payload.memory.current_used_gib,
-            swapUsedGib: payload.memory.swap_used_gib,
-            swapTotalGib: payload.memory.swap_total_gib,
-            storageTotalGib: payload.disk.root_total_gib,
-            activitySource: payload.activity.source,
-            activityWindowMinutes: payload.activity.window_minutes,
-            activitySampleCount: payload.activity.sample_count,
-            memoryPercent: payload.memory.used_percent,
-            storagePercent: payload.disk.root_used_percent,
-            storageFreeGib: payload.disk.root_free_gib,
-          },
-          ...(macReport
-            ? {
-                'macbook-air': {
-                  cpuPercent: macReport.payload.cpu.used_percent,
-                  checkedAt: macReport.payload.checked_at,
-                  logicalCpus: macReport.payload.load.logical_cpus,
-                  memoryTotalGib: macReport.payload.memory.total_gib,
-                  memoryUsedGib: macReport.payload.memory.current_used_gib,
-                  swapUsedGib: macReport.payload.memory.swap_used_gib,
-                  swapTotalGib: macReport.payload.memory.swap_total_gib,
-                  storageTotalGib: macReport.payload.disk.root_total_gib,
-                  activitySource: macReport.payload.activity.source,
-                  activityWindowMinutes:
-                    macReport.payload.activity.window_minutes,
-                  activitySampleCount: macReport.payload.activity.sample_count,
-                  memoryPercent: macReport.payload.memory.used_percent,
-                  storagePercent: macReport.payload.disk.root_used_percent,
-                  storageFreeGib: macReport.payload.disk.root_free_gib,
-                },
-              }
-            : {}),
-        }}
-      />
+        <MachineHealthOverview
+          samples={publicSamples}
+          codexSamples={codexSamples}
+          now={now}
+          windowsVm={payload.windows_vm}
+          currentByHost={{
+            'big-red': {
+              cpuPercent: payload.cpu.used_percent,
+              checkedAt: payload.checked_at,
+              logicalCpus: payload.load.logical_cpus,
+              memoryTotalGib: payload.memory.total_gib,
+              memoryComparable:
+                payload.activity.source === 'point' ||
+                payload.memory.accounting === 'available',
+              memoryUsedGib: payload.memory.current_used_gib,
+              swapUsedGib: payload.memory.swap_used_gib,
+              swapTotalGib: payload.memory.swap_total_gib,
+              storageTotalGib: payload.disk.root_total_gib,
+              activitySource: payload.activity.source,
+              activityWindowMinutes: payload.activity.window_minutes,
+              activitySampleCount: payload.activity.sample_count,
+              memoryPercent: payload.memory.used_percent,
+              storagePercent: payload.disk.root_used_percent,
+              storageFreeGib: payload.disk.root_free_gib,
+            },
+            ...(macReport
+              ? {
+                  'macbook-air': {
+                    cpuPercent: macReport.payload.cpu.used_percent,
+                    checkedAt: macReport.payload.checked_at,
+                    logicalCpus: macReport.payload.load.logical_cpus,
+                    memoryTotalGib: macReport.payload.memory.total_gib,
+                    memoryUsedGib: macReport.payload.memory.current_used_gib,
+                    swapUsedGib: macReport.payload.memory.swap_used_gib,
+                    swapTotalGib: macReport.payload.memory.swap_total_gib,
+                    storageTotalGib: macReport.payload.disk.root_total_gib,
+                    activitySource: macReport.payload.activity.source,
+                    activityWindowMinutes:
+                      macReport.payload.activity.window_minutes,
+                    activitySampleCount: macReport.payload.activity.sample_count,
+                    memoryPercent: macReport.payload.memory.used_percent,
+                    storagePercent: macReport.payload.disk.root_used_percent,
+                    storageFreeGib: macReport.payload.disk.root_free_gib,
+                  },
+                }
+              : {}),
+          }}
+        />
 
+      </MachineDeviceProvider>
       <section aria-label="Additional machine details">
         <div className="grid grid-cols-3 gap-4 border-t border-black/10 py-4 text-center dark:border-white/10">
           <div aria-label="Temperature" title="Temperature">

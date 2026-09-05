@@ -203,9 +203,10 @@ describe('machine health dashboard v2', () => {
     };
     const html = renderDashboard({ macReport });
 
-    expect(html).toContain('aria-label="Resource device"');
+    expect(html).toContain('aria-label="Activity monitor device"');
+    expect(html).not.toContain('aria-label="Resource device"');
     expect(html).toContain('Big Red');
-    expect(html).toContain('MacBook Air');
+    expect(html).toContain('Air Blue');
   });
 });
 
@@ -285,7 +286,7 @@ describe('Windows VM history', () => {
     expect(html).toContain('12.0 GiB allocated');
     expect(html).toContain('14 vCPUs');
     expect(html).toContain('11.99 GiB');
-    expect(html).toContain('already included in Big Red');
+    expect(html).toContain('included in Big Red');
   });
 });
 

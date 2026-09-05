@@ -36,7 +36,10 @@ function installDatabaseDouble() {
     }
     return { kind: 'bulk-values' };
   }
-  Object.assign(sql, { array: (values: unknown[]) => values });
+  Object.assign(sql, {
+    json: (value: unknown) => value,
+    array: (values: unknown[]) => values,
+  });
   database.begin.mockImplementation(
     async (callback: (tag: typeof sql) => Promise<unknown>) => callback(sql)
   );
