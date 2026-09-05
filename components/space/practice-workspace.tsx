@@ -34,7 +34,7 @@ export function PracticeWorkspace({
             aria-pressed={mode === item}
             className={`${styles.control} text-sm font-medium`}
           >
-            {item === 'code' ? 'Code' : 'Concepts'}
+            {item === 'code' ? 'Typing' : 'Concepts'}
           </button>
         ))}
       </div>

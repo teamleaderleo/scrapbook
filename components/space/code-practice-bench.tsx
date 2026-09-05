@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import styles from './practice.module.css';
-import { codeExercises, practiceRevision } from '@/lib/code-practice';
+import { practicePassages } from '@/lib/practice-passages';
 import { TypingExercise } from './typing-exercise';
 import { usePracticeHistory } from './use-practice-history';
 import { useLocalPracticeDraft } from './reading-practice-dock';
@@ -10,9 +10,9 @@ import { useLocalPracticeDraft } from './reading-practice-dock';
 export function CodePracticeBench() {
   const [selected, setSelected] = useState(0);
   const [recall, setRecall] = useState(false);
-  const exercise = codeExercises[selected];
+  const exercise = practicePassages[selected];
   const history = usePracticeHistory();
-  const historySlug = `${exercise.slug}:${practiceRevision}`;
+  const historySlug = `${exercise.slug}:${exercise.revision}`;
   const mode = recall ? 'recall' : 'copy';
   const comparable = history.results.filter(
     result =>
@@ -29,13 +29,31 @@ export function CodePracticeBench() {
   );
   return (
     <div className="min-w-0">
+      <div
+        className="mb-3 flex flex-wrap gap-x-5"
+        role="group"
+        aria-label="Passage collection"
+      >
+        {(['Scrapbook', 'Patterns', 'Ideas'] as const).map(collection => (
+          <button
+            key={collection}
+            aria-pressed={exercise.collection === collection}
+            onClick={() => setSelected(practicePassages.findIndex(
+              item => item.collection === collection
+            ))}
+            className={`${styles.control} text-sm`}
+          >
+            {collection}
+          </button>
+        ))}
+      </div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div
           className="flex flex-wrap items-center gap-x-5 gap-y-1"
           role="group"
-          aria-label="Function"
+          aria-label="Passage"
         >
-          {codeExercises.map((item, index) => (
+          {practicePassages.map((item, index) => item.collection === exercise.collection ? (
             <button
               key={item.slug}
               aria-pressed={selected === index}
@@ -44,13 +62,13 @@ export function CodePracticeBench() {
             >
               {item.title}
             </button>
-          ))}
+          ) : null)}
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div
             className="inline-flex gap-4 text-sm"
             role="group"
-            aria-label="Code mode"
+            aria-label="Typing mode"
           >
             <button
               aria-pressed={!recall}
@@ -77,7 +95,7 @@ export function CodePracticeBench() {
       <div className="mt-2">
         <TypingExercise
           key={`${exercise.slug}:${mode}`}
-          target={{ kind: 'code', label: exercise.title, text: exercise.text }}
+          target={{ kind: exercise.kind, label: exercise.title, text: exercise.text }}
           recall={recall}
           onComplete={result =>
             history.add({
@@ -98,7 +116,7 @@ export function CodePracticeBench() {
         <p className="mt-3 text-sm leading-6">{exercise.question}</p>
         <p className="mt-3 text-sm leading-6">{exercise.alter}</p>
         <textarea
-          aria-label="Code explanation or changes"
+          aria-label="Passage notes"
           value={notes}
           onChange={event => setNotes(event.target.value)}
           placeholder="Explain it, or sketch the change…"
@@ -111,16 +129,18 @@ export function CodePracticeBench() {
       <details className="border-t border-border py-3 text-xs text-muted-foreground">
         <summary className="cursor-pointer">Source</summary>
         <p className="mt-3 leading-6">
+          {exercise.line !== undefined ? <>
           <a
             className="underline underline-offset-4"
-            href={`https://github.com/teamleaderleo/scrapbook/blob/${practiceRevision}/lib/space-practice.ts#L${exercise.line}`}
+            href={`https://github.com/teamleaderleo/scrapbook/blob/${exercise.revision}/lib/space-practice.ts#L${exercise.line}`}
             target="_blank"
             rel="noreferrer"
           >
-            Scrapbook · lib/space-practice.ts · {practiceRevision.slice(0, 7)}
+            Scrapbook · lib/space-practice.ts · {exercise.revision.slice(0, 7)}
           </a>
           <br />
           Owner-authorized excerpts. No repository license declared.
+          </> : <>Original practice passage · {exercise.revision}</>}
         </p>
       </details>
     </div>

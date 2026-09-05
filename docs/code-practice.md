@@ -5,6 +5,15 @@ Scrapbook excerpts in `lib/code-practice.ts`. Source links retain repository,
 commit, file, and line; the source drawer states that no repository license is
 declared. The excerpt registry is teaching material, not a live source mirror.
 
+Typing also includes original Patterns and Ideas in `lib/practice-passages.ts`:
+cache expiry, counter rates, rolling windows, state transitions, memory headroom,
+virtual machines, delayed feedback, and cache freshness. Code and prose use the
+same inline typing surface. Optional questions sit under Think it through.
+Original passages are labeled separately from repository excerpts; each has its
+own revision so changed text cannot silently enter an old speed comparison.
+Collection choices keep the passage list short. Existing excerpt history remains
+under its original identifier and source revision.
+
 The same `TypingExercise` component handles Type mode in Space reading sheets.
 An attempt starts on the first edit, pauses on blur or a hidden document, and
 finishes on an exact match. Restart clears its timer and returns focus. Attempts
