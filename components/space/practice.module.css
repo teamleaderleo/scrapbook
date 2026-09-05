@@ -94,6 +94,12 @@
   background: hsl(var(--foreground) / 0.1);
   text-decoration-thickness: 2px;
 }
+.character[data-typing-state='pending']:not([data-line-note]) {
+  color: color-mix(in srgb, var(--syntax-color, hsl(var(--foreground))) 65%, transparent);
+}
+.character[data-typing-state='pending']::before {
+  border-color: var(--practice-leaf, hsl(var(--foreground)));
+}
 .selected {
   background: hsl(var(--foreground) / 0.12);
 }
@@ -175,6 +181,9 @@
   }
 }
 @media (forced-colors: active) {
+  .character[data-typing-state='pending'] {
+    color: CanvasText !important;
+  }
   .syntaxCharacter {
     color: CanvasText !important;
   }
