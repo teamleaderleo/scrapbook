@@ -560,6 +560,64 @@ def memory(
     )
 
 
+def windows_vm() -> dict[str, Any]:
+    """Fixed domain, numeric host counters only; never return libvirt output."""
+    def read() -> dict[str, int]:
+        code, output = run(
+            "virsh", "-c", "qemu:///system", "domstats", "win11-starsector",
+            "--state", "--cpu-total", "--balloon", "--vcpu",
+        )
+        if code != 0:
+            return {}
+        allowed = {
+            "state.state", "cpu.time", "balloon.current", "balloon.rss", "vcpu.current",
+        }
+        result = {}
+        for line in output.splitlines():
+            key, separator, value = line.strip().partition("=")
+            if separator and key in allowed and value.isdigit():
+                result[key] = int(value)
+        return result
+
+    first = read()
+    states = {
+        1: "running", 2: "running", 3: "paused", 4: "stopping",
+        5: "off", 6: "crashed", 7: "suspended",
+    }
+    state = states.get(first.get("state.state"))
+    if state is None:
+        return {"source": "unavailable"}
+    cores = None
+    if state == "running":
+        started = time.monotonic()
+        time.sleep(ACTIVITY_SAMPLE_SECONDS)
+        second = read()
+        elapsed = time.monotonic() - started
+        before, after = first.get("cpu.time"), second.get("cpu.time")
+        if (
+            second.get("state.state") == first.get("state.state")
+            and before is not None and after is not None
+            and after >= before and elapsed > 0
+        ):
+            cores = round((after - before) / 1_000_000_000 / elapsed, 3)
+        else:
+            return {"source": "unavailable"}
+    return {
+        "source": "libvirt",
+        "state": state,
+        "vcpus": first.get("vcpu.current"),
+        "allocated_gib": (
+            round(first["balloon.current"] / 1024**2, 3)
+            if "balloon.current" in first else None
+        ),
+        "resident_gib": (
+            round(first["balloon.rss"] / 1024**2, 3)
+            if "balloon.rss" in first and state in {"running", "paused"} else None
+        ),
+        "cpu_cores": cores,
+    }
+
+
 def cpu_counters() -> tuple[int, int]:
     fields = Path("/proc/stat").read_text(encoding="utf-8").splitlines()[0].split()[1:]
     values = [int(value) for value in fields]
@@ -626,7 +684,16 @@ def sysstat_timestamp(statistic: dict[str, Any]) -> dt.datetime | None:
         return None
 
 
-def sysstat_record(statistic: dict[str, Any]) -> dict[str, Any] | None:
+def sysstat_memory_percent(memory_row: dict[str, Any], total_kib: float) -> float | None:
+    available = finite_number(memory_row.get("avail"))
+    if available is None or total_kib <= 0 or not 0 <= available <= total_kib:
+        return None
+    return (total_kib - available) / total_kib * 100
+
+
+def sysstat_record(
+    statistic: dict[str, Any], total_memory_kib: float | None = None,
+) -> dict[str, Any] | None:
     timestamp = statistic.get("timestamp")
     cpu_rows = statistic.get("cpu-load")
     memory_row = statistic.get("memory")
@@ -643,7 +710,11 @@ def sysstat_record(statistic: dict[str, Any]) -> dict[str, Any] | None:
         None,
     )
     idle = finite_number(cpu_all.get("idle")) if cpu_all else None
-    memory_used = finite_number(memory_row.get("memused-percent"))
+    memory_used = (
+        sysstat_memory_percent(memory_row, total_memory_kib)
+        if total_memory_kib is not None
+        else finite_number(memory_row.get("memused-percent"))
+    )
     if interval is None or interval <= 0 or idle is None or memory_used is None:
         return None
 
@@ -779,8 +850,15 @@ def core_activity(
 
 
 def sysstat_activity(
-    now: dt.datetime, directory: Path | None = None
+    now: dt.datetime, directory: Path | None = None,
+    total_memory_kib: float | None = None,
 ) -> dict[str, Any] | None:
+    if total_memory_kib is None:
+        try:
+            meminfo = Path("/proc/meminfo").read_text()
+            total_memory_kib = float(re.search(r"^MemTotal:\s+(\d+)", meminfo, re.M).group(1))
+        except (OSError, AttributeError, ValueError):
+            return None
     directory = directory or Path("/var/log/sysstat")
     try:
         files = sorted(
@@ -823,7 +901,7 @@ def sysstat_activity(
             if not isinstance(statistic, dict):
                 continue
             observed_at = sysstat_timestamp(statistic)
-            record = sysstat_record(statistic)
+            record = sysstat_record(statistic, total_memory_kib)
             if (
                 observed_at is not None
                 and record is not None
@@ -2756,7 +2834,7 @@ def build_report() -> dict[str, Any]:
     coverage = process_coverage()
     state_inventory = codex_state()
     desktop = desktop_state()
-    _, total_gib, swap_used_gib, swap_total_gib = memory()
+    current_memory_percent, total_gib, swap_used_gib, swap_total_gib = memory()
     disk = shutil.disk_usage("/")
     graphics_clock_mhz, graphics_max_clock_mhz = graphics_clock()
     on_ac, battery_percent, power_state = battery_state()
@@ -2794,12 +2872,15 @@ def build_report() -> dict[str, Any]:
         "memory": {
             "used_percent": activity["memory_used_percent"],
             "total_gib": total_gib,
+            "current_used_gib": round(total_gib * current_memory_percent / 100, 2),
+            "accounting": "available",
             "swap_used_gib": swap_used_gib,
             "swap_total_gib": swap_total_gib,
         },
         "disk": {
             "root_used_percent": round(disk.used / disk.total * 100, 2),
             "root_free_gib": round(disk.free / GIB, 2),
+            "root_total_gib": round(disk.total / GIB, 2),
         },
         "temperature": {"peak_sensor_c": peak_sensor_temperature()},
         "graphics": {
@@ -2826,6 +2907,7 @@ def build_report() -> dict[str, Any]:
             "network_peak_mib_s": activity["network_peak_mib_s"],
             "disk_peak_mib_s": activity["disk_peak_mib_s"],
         },
+        "windows_vm": windows_vm(),
         "codex_usage": codex_usage,
         "route_activity": routes,
         "process_tags": tags,

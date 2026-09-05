@@ -67,6 +67,33 @@ totals. This avoids drawing equally authoritative bars from unlike data.
 
 This is not literal Screen Time. Each row combines an hourly aggregate with a few current point observations, so the UI leaves empty bins visible and never implies that a process ran continuously between reports. The panel chart reports the share of authoritative physical-backlight snapshots observed on. It weights the range by snapshots, shows on/off/unknown counts, and never converts missing states into off time.
 
+### Resource units and the Windows VM
+
+Resource rows include logical CPU capacity, RAM used/total in GiB, root free/total capacity,
+and occupied swap. Reports distinguish current RAM from the sysstat interval average. Big Red
+now calculates interval RAM from `MemTotal - avail`, because its sysstat version's old
+`memused-percent` subtracts cached memory and severely understates usage with the VM running.
+The current `/proc/meminfo` capacity supplies the denominator for the recent 90-minute window.
+Missing or invalid available-memory counters fall back to point sampling. Older Linux interval
+RAM readings stay stored but are excluded from the comparable RAM graph with an explanation;
+Mac and Linux point samples remain comparable. Memory history uses each stored report's
+own capacity, so a later RAM change doesn't rewrite old measurements. The timestamp, interval
+length, and sample count identify what the latest resource numbers represent.
+
+The Windows VM has separate 12-hour, day, week, and month controls. Big Red reads the fixed
+libvirt domain through `qemu:///system` with the existing user permissions. Two counter reads
+separated by a quarter second yield host CPU cores consumed; one core means one fully busy
+logical CPU and the total includes virtualization overhead. The collector emits only state,
+vCPU count, allocated GiB, resident GiB, and CPU cores. No domain name, UUID, disk path, network
+address, guest command, or raw libvirt output enters the report.
+
+VM RAM bars keep the highest observed host RSS in each bin. RSS is already included in Big Red's
+RAM and can exceed allocated guest memory because of host overhead; it doesn't measure Windows
+application usage. CPU bars average short samples. Running-state bars show the share of reports
+observed running, not continuous uptime. Unavailable telemetry and older reports leave gaps.
+A stopped VM is distinct from failed collection; a crashed VM raises a current issue. These
+optional fields reuse the existing JSON payload storage without a database migration.
+
 ## Privacy boundary
 
 The ingestion schema is an allowlist and strips unknown keys at every object level. The collector never emits:

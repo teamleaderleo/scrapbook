@@ -4,6 +4,7 @@ import type {
   CodexTokenSample,
   CodexTokenSource,
   MachineHealthHost,
+  WindowsVm,
 } from '@/app/lib/machine-health-store';
 import {
   ArrowDownRight,
@@ -60,6 +61,9 @@ const RESOURCE_HOSTS = [
 ] as const;
 
 export type PublicMachineHealthSample = {
+  windowsVm?: WindowsVm | null;
+  memoryTotalGib?: number | null;
+  memoryComparable?: boolean;
   host: MachineHealthHost;
   checkedAt: string;
   cpuUsedPercent: number;
@@ -77,6 +81,8 @@ export type PublicMachineHealthSample = {
 };
 
 type PublicActivityBin = {
+  memoryUsedGib: number | null;
+  memoryLegacyCount: number;
   start: number;
   end: number;
   cpuUsedPercent: number | null;
@@ -106,6 +112,17 @@ type CodexActivityBin = {
 };
 
 export type MachineResourceSnapshot = {
+  checkedAt?: string;
+  logicalCpus?: number;
+  memoryTotalGib?: number;
+  memoryComparable?: boolean;
+  memoryUsedGib?: number;
+  swapUsedGib?: number;
+  swapTotalGib?: number;
+  storageTotalGib?: number;
+  activitySource?: 'point' | 'sysstat-10m';
+  activityWindowMinutes?: number;
+  activitySampleCount?: number;
   cpuPercent: number;
   memoryPercent: number;
   storagePercent: number;
@@ -196,7 +213,7 @@ function peakCoreArrays(values: (number[] | null)[]) {
   );
 }
 
-function buildPublicActivityBins(
+export function buildPublicActivityBins(
   samples: PublicMachineHealthSample[],
   range: ActivityRange,
   now: number
@@ -228,9 +245,23 @@ function buildPublicActivityBins(
     return {
       start: binStart,
       end: binEnd,
+      memoryLegacyCount: included.filter(
+        sample => sample.memoryComparable === false
+      ).length,
+      memoryUsedGib: average(
+        included
+          .filter(sample => sample.memoryComparable !== false)
+          .flatMap(sample =>
+            sample.memoryTotalGib == null
+              ? []
+              : [(sample.memoryUsedPercent * sample.memoryTotalGib) / 100]
+          )
+      ),
       cpuUsedPercent: average(included.map(sample => sample.cpuUsedPercent)),
       memoryUsedPercent: average(
-        included.map(sample => sample.memoryUsedPercent)
+        included
+          .filter(sample => sample.memoryComparable !== false)
+          .map(sample => sample.memoryUsedPercent)
       ),
       rootUsedPercent: average(included.map(sample => sample.rootUsedPercent)),
       networkMibS: average(
@@ -318,13 +349,7 @@ function formatThroughput(value: number | null) {
   return `${value.toFixed(value < 10 ? 1 : 0)} MiB/s`;
 }
 
-function DeltaValue({
-  value,
-  suffix,
-}: {
-  value: number;
-  suffix: string;
-}) {
+function DeltaValue({ value, suffix }: { value: number; suffix: string }) {
   const RisingIcon = value >= 0 ? ArrowUpRight : ArrowDownRight;
   return (
     <span className="inline-flex items-center justify-end gap-1">
@@ -406,7 +431,11 @@ function TimelineBars({
   darkSelectedColor,
   timeZone,
   label,
+  minimumMax = 100,
+  formatValue = percent,
 }: {
+  minimumMax?: number;
+  formatValue?: (value: number | null) => string;
   bins: { start: number; end: number }[];
   values: (number | null)[];
   selectedIndex: number | null;
@@ -419,7 +448,7 @@ function TimelineBars({
   label: string;
 }) {
   const max = Math.max(
-    100,
+    minimumMax,
     ...values.filter((value): value is number => value !== null)
   );
   return (
@@ -447,7 +476,7 @@ function TimelineBars({
                 type="button"
                 disabled={value === null}
                 aria-pressed={selected}
-                aria-label={`${formatBin(bin, timeZone)}: ${percent(value)}`}
+                aria-label={`${formatBin(bin, timeZone)}: ${formatValue(value)}`}
                 onClick={() => onSelect(index)}
                 className="group relative flex h-full min-w-0 flex-1 touch-manipulation items-end outline-none [-webkit-tap-highlight-color:transparent] enabled:focus-visible:ring-2 enabled:focus-visible:ring-[#a53b34]"
               >
@@ -515,6 +544,13 @@ function ResourceHistory({
     selectedIndex === null && rangeAverage !== null && previousAverage !== null
       ? rangeAverage - previousAverage
       : null;
+  const memoryHeadline = selectedBin
+    ? selectedBin.memoryUsedGib
+    : average(
+        bins.flatMap(bin =>
+          bin.memoryUsedGib === null ? [] : [bin.memoryUsedGib]
+        )
+      );
   const currentValues: Record<ResourceKey, number> = {
     cpu: current.cpuPercent,
     memory: current.memoryPercent,
@@ -537,6 +573,13 @@ function ResourceHistory({
             <p className="mt-0.5 text-[2.15rem] font-semibold tabular-nums leading-none tracking-[-0.045em]">
               {percent(headline)}
             </p>
+            {metric === 'memory' ? (
+              <p className="mt-1 text-sm tabular-nums opacity-60">
+                {memoryHeadline === null
+                  ? 'Capacity unavailable for this history'
+                  : `${memoryHeadline.toFixed(1)} GiB average used`}
+              </p>
+            ) : null}
           </div>
           <div className="pt-0.5 text-right text-xs">
             <MetricIcon
@@ -569,6 +612,22 @@ function ResourceHistory({
         />
       </div>
 
+      {metric === 'memory' && bins.some(bin => bin.memoryLegacyCount > 0) ? (
+        <p className="px-5 pb-3 text-xs opacity-60">
+          Older RAM readings excluded: their accounting omitted VM-backed
+          memory. Comparable history starts with the corrected collector.
+        </p>
+      ) : null}
+      <p className="px-5 pb-3 text-xs opacity-60">
+        Latest report
+        {current.checkedAt
+          ? ` · ${new Date(current.checkedAt).toLocaleString('en-CA', { timeZone })}`
+          : ''}
+        .{' '}
+        {current.activitySource === 'sysstat-10m'
+          ? `CPU and chart RAM: ${current.activityWindowMinutes}-minute average from ${current.activitySampleCount} intervals.`
+          : 'CPU and RAM are point samples.'}
+      </p>
       <div className="border-black/9 border-t dark:border-white/10">
         {(Object.keys(RESOURCE_CONFIG) as ResourceKey[]).map(key => {
           const item = RESOURCE_CONFIG[key];
@@ -597,22 +656,40 @@ function ResourceHistory({
                   <span className="block text-[0.95rem] font-medium leading-tight">
                     {item.label}
                   </span>
-                  <span className="opacity-45 mt-1 block text-[0.72rem] leading-none">
-                    {key === 'storage'
-                      ? `${Math.round(current.storageFreeGib)} GiB free`
-                      : high === null
-                        ? 'No range data'
-                        : `${percent(high)} high`}
+                  <span className="opacity-45 mt-1 block text-[0.72rem] leading-snug">
+                    {key === 'memory' && current.memoryComparable === false
+                      ? 'Legacy accounting · awaiting corrected report'
+                      : key === 'storage'
+                        ? `${Math.round(current.storageFreeGib)} GiB free${current.storageTotalGib === undefined ? '' : ` / ${current.storageTotalGib.toFixed(1)} GiB total`}`
+                        : key === 'memory' &&
+                            current.memoryTotalGib !== undefined
+                          ? `${current.memoryUsedGib === undefined ? '≈ ' : ''}${(current.memoryUsedGib ?? (current.memoryTotalGib * current.memoryPercent) / 100).toFixed(1)} / ${current.memoryTotalGib.toFixed(1)} GiB used${current.memoryUsedGib === undefined ? ' (average)' : ' at report'}`
+                          : `${current.logicalCpus === undefined ? '' : `${((current.cpuPercent * current.logicalCpus) / 100).toFixed(2)} / ${current.logicalCpus} logical CPUs · `}${high === null ? 'No range data' : `${percent(high)} high`}`}
                   </span>
                 </span>
               </span>
               <span className="text-right text-[1.05rem] font-semibold tabular-nums tracking-[-0.02em]">
-                {percent(currentValues[key])}
+                {key === 'memory' && current.memoryComparable === false
+                  ? '—'
+                  : key === 'memory' &&
+                      current.memoryUsedGib !== undefined &&
+                      current.memoryTotalGib
+                    ? percent(
+                        (current.memoryUsedGib / current.memoryTotalGib) * 100
+                      )
+                    : percent(currentValues[key])}
               </span>
             </button>
           );
         })}
       </div>
+      <p className="border-t border-black/10 px-5 py-3 text-xs tabular-nums opacity-60 dark:border-white/10">
+        Swap:{' '}
+        {current.swapUsedGib === undefined || current.swapTotalGib === undefined
+          ? 'unavailable'
+          : `${current.swapUsedGib.toFixed(2)} / ${current.swapTotalGib.toFixed(1)} GiB occupied`}
+        . Occupied swap alone does not indicate active memory pressure.
+      </p>
     </section>
   );
 }
@@ -807,7 +884,7 @@ function CodexHistory({
         <div className="min-h-11 grid grid-cols-[minmax(0,1fr)_7.5rem] items-center gap-3 border-b border-black/[0.055] px-5 py-2.5 dark:border-white/[0.065]">
           <dt>
             <span className="block text-[0.95rem] leading-tight">Output</span>
-            <span className="opacity-45 mt-1 block text-[0.72rem] leading-none">
+            <span className="opacity-45 mt-1 block text-[0.72rem] leading-snug">
               {compactNumber(reasoning)} reasoning
             </span>
           </dt>
@@ -826,7 +903,7 @@ function CodexHistory({
             <span className="block text-[0.95rem] font-semibold leading-tight">
               Total tokens
             </span>
-            <span className="opacity-45 mt-1 block text-[0.72rem] leading-none">
+            <span className="opacity-45 mt-1 block text-[0.72rem] leading-snug">
               {observedHours} accounted hour{observedHours === 1 ? '' : 's'}
             </span>
           </dt>
@@ -882,9 +959,7 @@ function CoreActivity({ bins }: { bins: PublicActivityBin[] }) {
           <span className="block font-medium">Core {busiestCore}</span>
           <span className="opacity-45 mt-0.5 block">
             {percent(activeAverages[busiestCore])} avg
-            {activePeaks
-              ? ` · ${percent(activePeaks[busiestCore])} high`
-              : ''}
+            {activePeaks ? ` · ${percent(activePeaks[busiestCore])} high` : ''}
           </span>
         </p>
       </div>
@@ -981,7 +1056,9 @@ function PerformanceDetails({ bins }: { bins: PublicActivityBin[] }) {
             Network
           </dt>
           <dd className="text-right tabular-nums">
-            <span className="block font-medium">{formatThroughput(network)}</span>
+            <span className="block font-medium">
+              {formatThroughput(network)}
+            </span>
             {networkPeak !== null ? (
               <span className="opacity-45 mt-0.5 block text-xs">
                 {formatThroughput(networkPeak)} high
@@ -1016,16 +1093,206 @@ function PerformanceDetails({ bins }: { bins: PublicActivityBin[] }) {
   );
 }
 
+export function buildWindowsVmBins(
+  samples: Pick<
+    PublicMachineHealthSample,
+    'host' | 'checkedAt' | 'windowsVm'
+  >[],
+  range: ActivityRange,
+  now: number
+) {
+  const { bins, binMs } = RANGE_CONFIG[range];
+  const end = Math.ceil(now / binMs) * binMs;
+  return Array.from({ length: bins }, (_, index) => {
+    const start = end - (bins - index) * binMs;
+    const observed = samples
+      .filter(
+        sample =>
+          sample.host === 'big-red' &&
+          Date.parse(sample.checkedAt) >= start &&
+          Date.parse(sample.checkedAt) < start + binMs
+      )
+      .flatMap(sample =>
+        sample.windowsVm?.source === 'libvirt' ? [sample.windowsVm] : []
+      );
+    const measured = (values: (number | null)[]) =>
+      values.filter((value): value is number => value !== null);
+    const memory = measured(observed.map(vm => vm.resident_gib));
+    return {
+      start,
+      end: start + binMs,
+      cpu: average(measured(observed.map(vm => vm.cpu_cores))),
+      memory: memory.length ? Math.max(...memory) : null,
+      running: observed.length
+        ? (observed.filter(vm => vm.state === 'running').length /
+            observed.length) *
+          100
+        : null,
+      observations: observed.length,
+    };
+  });
+}
+
+function WindowsVmHistory({
+  samples,
+  current,
+  now,
+}: {
+  samples: PublicMachineHealthSample[];
+  current?: WindowsVm;
+  now: number;
+}) {
+  const [range, setRange] = useState<ActivityRange>('12h');
+  const [metric, setMetric] = useState<'memory' | 'cpu' | 'running'>('memory');
+  const [selected, setSelected] = useState<number | null>(null);
+  const timeZone = useSyncExternalStore(
+    subscribeToTimeZone,
+    getBrowserTimeZone,
+    getServerTimeZone
+  );
+  const bins = buildWindowsVmBins(samples, range, now);
+  const vm = current?.source === 'libvirt' ? current : null;
+  const format = (value: number | null) =>
+    value === null
+      ? 'Unavailable'
+      : metric === 'memory'
+        ? `${value.toFixed(2)} GiB`
+        : metric === 'cpu'
+          ? `${value.toFixed(2)} cores`
+          : `${Math.round(value)}% of observations`;
+  const selectedBin = selected === null ? null : bins[selected];
+  const currentValue = vm
+    ? metric === 'memory'
+      ? vm.resident_gib
+      : metric === 'cpu'
+        ? vm.cpu_cores
+        : vm.state === 'running'
+          ? 100
+          : 0
+    : null;
+  return (
+    <section
+      aria-label="Windows VM"
+      className="mt-6 border-t border-black/10 pt-5 dark:border-white/10"
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">
+            Windows VM{' '}
+            <span className="text-sm font-normal opacity-60">
+              · {vm?.state ?? 'telemetry unavailable'}
+            </span>
+          </h3>
+          <p className="mt-1 text-xs opacity-60">
+            {vm?.allocated_gib == null
+              ? 'RAM allocation unavailable'
+              : `${vm.allocated_gib.toFixed(1)} GiB allocated`}
+            {' · '}
+            {vm?.vcpus == null ? 'vCPU count unavailable' : `${vm.vcpus} vCPUs`}
+          </p>
+        </div>
+        <div className="flex gap-3" aria-label="Windows VM metric">
+          {(['memory', 'cpu', 'running'] as const).map(key => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={metric === key}
+              className={`min-h-9 border-b text-xs focus-visible:outline-2 ${metric === key ? 'border-current font-semibold' : 'border-transparent opacity-60'}`}
+              onClick={() => {
+                setMetric(key);
+                setSelected(null);
+              }}
+            >
+              {
+                {
+                  memory: 'Host RAM',
+                  cpu: 'CPU cores',
+                  running: 'Running state',
+                }[key]
+              }
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="mt-3 flex justify-end">
+        <RangeControl
+          label="Windows VM"
+          range={range}
+          onChange={value => {
+            setRange(value);
+            setSelected(null);
+          }}
+        />
+      </div>
+      <p className="my-3 text-sm tabular-nums">
+        <strong>
+          {format(selectedBin ? selectedBin[metric] : currentValue)}
+        </strong>
+        <span className="ml-2 opacity-60">
+          {selectedBin
+            ? `${formatBin(selectedBin, timeZone)} · ${selectedBin.observations} observation${selectedBin.observations === 1 ? '' : 's'}`
+            : 'Latest report'}
+        </span>
+      </p>
+      <p className="mb-1 text-right text-xs tabular-nums opacity-60">
+        {bins.every(bin => bin[metric] === null)
+          ? 'No measurements in this range'
+          : `Scale: 0–${format(
+              Math.max(
+                metric === 'running'
+                  ? 100
+                  : metric === 'memory'
+                    ? (vm?.allocated_gib ?? 1)
+                    : 1,
+                ...bins.flatMap(bin =>
+                  bin[metric] === null ? [] : [bin[metric]!]
+                )
+              )
+            )}`}
+      </p>
+      <TimelineBars
+        bins={bins}
+        values={bins.map(bin => bin[metric])}
+        selectedIndex={selected}
+        onSelect={index => setSelected(selected === index ? null : index)}
+        color="bg-[#378690]"
+        selectedColor="bg-[#205b63]"
+        darkColor="dark:bg-[#66c0c8]"
+        darkSelectedColor="dark:bg-[#99e1e5]"
+        timeZone={timeZone}
+        label="Windows VM"
+        minimumMax={
+          metric === 'running'
+            ? 100
+            : metric === 'memory'
+              ? (vm?.allocated_gib ?? 1)
+              : 1
+        }
+        formatValue={format}
+      />
+      <p className="mt-2 text-xs leading-relaxed opacity-60">
+        Host RAM shows peak sampled resident memory, already included in Big
+        Red’s RAM; it is not Windows application memory. CPU shows mean sampled
+        host cores consumed (1 core = one fully busy logical CPU), including
+        virtualization overhead. Running state is the share of observed reports,
+        not continuous uptime. Gaps mean no measurement.
+      </p>
+    </section>
+  );
+}
+
 export function MachineHealthOverview({
   samples,
   codexSamples,
   now,
   currentByHost,
+  windowsVm,
 }: {
   samples: PublicMachineHealthSample[];
   codexSamples: CodexTokenSample[];
   now: number;
   currentByHost: Partial<Record<MachineHealthHost, MachineResourceSnapshot>>;
+  windowsVm?: WindowsVm;
 }) {
   const [resourceHost, setResourceHost] =
     useState<MachineHealthHost>('big-red');
@@ -1082,10 +1349,7 @@ export function MachineHealthOverview({
             <div>
               <h3 className="opacity-55 pb-2 text-sm font-medium">Resources</h3>
               {currentByHost['macbook-air'] ? (
-                <div
-                  className="flex gap-4"
-                  aria-label="Resource device"
-                >
+                <div className="flex gap-4" aria-label="Resource device">
                   {RESOURCE_HOSTS.map(([host, label, Icon]) => (
                     <button
                       key={host}
@@ -1098,7 +1362,10 @@ export function MachineHealthOverview({
                           : 'border-transparent opacity-45 hover:opacity-75'
                       }`}
                     >
-                      <Icon aria-hidden="true" className="size-3.5 stroke-[1.8]" />
+                      <Icon
+                        aria-hidden="true"
+                        className="size-3.5 stroke-[1.8]"
+                      />
                       {label}
                     </button>
                   ))}
@@ -1136,6 +1403,7 @@ export function MachineHealthOverview({
         </div>
       </div>
 
+      <WindowsVmHistory samples={samples} current={windowsVm} now={now} />
       <PerformanceDetails bins={resourceBins} />
     </section>
   );

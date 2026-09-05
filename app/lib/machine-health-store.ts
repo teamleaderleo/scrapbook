@@ -363,11 +363,32 @@ const berylLinkState = z.union([
     }),
 ]);
 
+export const windowsVmSchema = z.discriminatedUnion('source', [
+  z.object({ source: z.literal('unavailable') }),
+  z.object({
+    source: z.literal('libvirt'),
+    state: z.enum([
+      'running',
+      'paused',
+      'stopping',
+      'off',
+      'crashed',
+      'suspended',
+    ]),
+    vcpus: z.number().int().min(0).max(1024).nullable(),
+    allocated_gib: nonnegative.nullable(),
+    resident_gib: nonnegative.nullable(),
+    cpu_cores: z.number().finite().min(0).max(1024).nullable(),
+  }),
+]);
+export type WindowsVm = z.infer<typeof windowsVmSchema>;
+
 export const machineHealthPayloadSchema = z.object({
   schema_version: z.literal(1),
   host: machineHealthHostSchema,
   checked_at: z.string().datetime({ offset: true }),
   uptime_seconds: nonnegativeInteger,
+  windows_vm: windowsVmSchema.optional(),
   load: z.object({
     one: nonnegative,
     five: nonnegative,
@@ -381,10 +402,20 @@ export const machineHealthPayloadSchema = z.object({
     .object({
       used_percent: percent,
       total_gib: nonnegative,
+      current_used_gib: nonnegative.optional(),
+      accounting: z.literal('available').optional(),
       swap_used_gib: nonnegative.optional(),
       swap_total_gib: nonnegative.optional(),
     })
     .superRefine((value, context) => {
+      if (
+        value.current_used_gib !== undefined &&
+        value.current_used_gib > value.total_gib
+      )
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'RAM usage cannot exceed capacity',
+        });
       const hasUsed = value.swap_used_gib !== undefined;
       const hasTotal = value.swap_total_gib !== undefined;
       if (hasUsed !== hasTotal) {
@@ -406,6 +437,7 @@ export const machineHealthPayloadSchema = z.object({
   disk: z.object({
     root_used_percent: percent,
     root_free_gib: nonnegative,
+    root_total_gib: nonnegative.optional(),
   }),
   temperature: z.object({
     peak_sensor_c: z.number().finite().min(-20).max(150).nullable(),
@@ -857,6 +889,9 @@ export type MachineHealthSample = {
   host: MachineHealthHost;
   checkedAt: string;
   panelOn: boolean | null;
+  windowsVm?: WindowsVm | null;
+  memoryTotalGib?: number | null;
+  memoryComparable?: boolean;
   cpuUsedPercent: number;
   rootUsedPercent: number;
   memoryUsedPercent: number;
@@ -1127,10 +1162,7 @@ export function evaluateMachineHealth(payload: MachineHealthPayload) {
 function storedState(payload: MachineHealthPayload) {
   if (payload.host === 'big-red') return evaluateMachineHealth(payload).state;
   if (payload.disk.root_used_percent >= 90) return 'attention' as const;
-  if (
-    payload.disk.root_used_percent >= 80 ||
-    payload.memory.used_percent >= 90
-  )
+  if (payload.disk.root_used_percent >= 80 || payload.memory.used_percent >= 90)
     return 'watch' as const;
   return 'healthy' as const;
 }
@@ -1706,6 +1738,17 @@ export async function readMachineHealth(
           checkedAt: new Date(row.checked_at).toISOString(),
           panelOn: parsedSample.success
             ? panelOnSample(parsedSample.data)
+            : null,
+          memoryComparable:
+            row.host === 'macbook-air' ||
+            row.activity_source === 'point' ||
+            (parsedSample.success &&
+              parsedSample.data.memory.accounting === 'available'),
+          memoryTotalGib: parsedSample.success
+            ? parsedSample.data.memory.total_gib
+            : null,
+          windowsVm: parsedSample.success
+            ? (parsedSample.data.windows_vm ?? null)
             : null,
           cpuUsedPercent: toNumber(row.cpu_used_percent),
           rootUsedPercent: toNumber(row.root_used_percent),
