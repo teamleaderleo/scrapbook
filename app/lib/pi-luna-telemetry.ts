@@ -68,6 +68,8 @@ export function projectPiLunaReceiptUsage(
     output_tokens: receipt.usage.output ?? null,
     total_tokens: receipt.usage.totalTokens ?? null,
     request_count: null,
+    successful_request_count: null,
+    api_equivalent_estimate_usd: null,
     turn_count: null,
     agent_step_count: null,
   });

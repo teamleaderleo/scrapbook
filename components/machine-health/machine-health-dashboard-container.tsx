@@ -1,8 +1,10 @@
 import { readCodexQuotaSamples } from '@/app/lib/codex-quota-store';
+import { readPeerUsageSamples } from '@/app/lib/agent-usage-store';
 import { readMachineHealth } from '@/app/lib/machine-health-store';
 import { readWorkerOutcomeSnapshot } from '@/app/lib/worker-outcome-source';
 import { headers } from 'next/headers';
 import { CodexQuotaPanel } from './codex-quota-panel';
+import { PeerUsagePanel } from './peer-usage-panel';
 import { WorkerOutcomeAttentionPanel } from './worker-outcome-attention-panel';
 import { MachineHealthDashboard } from './machine-health-dashboard-v2';
 
@@ -39,11 +41,17 @@ export async function MachineHealthDashboardContainer({
   authError?: boolean;
 }) {
   await headers();
-  const [result, quotaSamples, outcomeSnapshot] = await Promise.all([
+  const [result, quotaSamples, peerSamples, outcomeSnapshot] = await Promise.all([
     readMachineHealth(60),
     hasPrivateAccess
       ? readCodexQuotaSamples(30).catch(error => {
           console.warn('Unable to read private Codex quota history', error);
+          return [];
+        })
+      : Promise.resolve([]),
+    hasPrivateAccess
+      ? readPeerUsageSamples(30).catch(error => {
+          console.warn('Unable to read private peer usage history', error);
           return [];
         })
       : Promise.resolve([]),
@@ -94,10 +102,13 @@ export async function MachineHealthDashboardContainer({
         authError={authError}
       />
       {hasPrivateAccess ? (
-        <CodexQuotaPanel
-          samples={quotaSamples}
-          tokenSamples={result.codexSamples}
-        />
+        <>
+          <PeerUsagePanel samples={peerSamples} />
+          <CodexQuotaPanel
+            samples={quotaSamples}
+            tokenSamples={result.codexSamples}
+          />
+        </>
       ) : null}
       {hasPrivateAccess && outcomeSnapshot ? (
         <WorkerOutcomeAttentionPanel snapshot={outcomeSnapshot} />
