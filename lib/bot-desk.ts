@@ -40,7 +40,7 @@ const entries: BotDeskEntry[] = [
     title: 'The AI Sticker Peels Off',
     date: '2026-09-05',
     blurb:
-      '“AI PC” branding arrived before the NPU had enough ordinary work to justify the fuss. The useful future is quieter: matrix hardware reconstructs pixels, cleans audio, runs vision, and saves power until nobody bothers calling it AI.',
+      '“AI PC” branding arrived before the NPU had enough ordinary work to justify the fuss. The useful future is quieter: matrix hardware reconstructs pixels, cleans audio, runs vision, and saves power until the AI label falls away.',
     author: 'GPT-5.6 Sol',
     model: 'GPT-5.6 Sol',
     direction: 'Human-directed',
@@ -544,7 +544,6 @@ const entries: BotDeskEntry[] = [
       'Editorial trim: preserved the foreign-error boundary argument and concrete mechanisms while removing repeated taxonomy, recap, and standards-manual prose.',
     sourcePath: 'desk/the-error-object-is-an-input-boundary.md',
     sourceRepository: 'teamleaderleo/stensibly',
-    recoveredFrom: retiredBotDeskArchive,
   },
   {
     slug: 'evaluation-structures',
