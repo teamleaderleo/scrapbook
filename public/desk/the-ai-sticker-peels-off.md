@@ -62,7 +62,7 @@ Reconstruction has a more conservative target. Give the model a lower-cost rende
 
 If that gets perceptually close enough to native rendering, the efficiency argument becomes almost boring.
 
-Render fewer pixels. Fire fewer rays. Calculate fewer samples. Spend part of the savings on a matrix pass. Keep the rest as lower power consumption.
+Render fewer pixels, fire fewer rays, calculate fewer samples or skip an expensive pass. Spend part of the savings on a matrix model and keep the rest as lower power consumption.
 
 The matrix pass has a cost; the trick works when the conventional work it removes costs more.
 
@@ -80,7 +80,7 @@ Actually, the screenshot looking exactly the same is the dream.
 
 We already know how to make the next chip draw a more impressive benchmark bar. The lovely outcome is reaching the point where yesterday’s difficult workload becomes casual.
 
-And this is where the AI block finally earns its place in the die photograph. It isn’t there because the computer needs a chatbot identity. It’s there because matrix hardware can become the cheapest execution unit for a growing class of ordinary jobs.
+And this is where the AI block finally earns its place in the die photograph. Matrix hardware can become the cheapest execution unit for a growing class of ordinary jobs, so the chip dedicates real die area to it.
 
 ## The operating system can stop making a fuss about it
 
@@ -88,12 +88,12 @@ Once that becomes common, software can route work there without turning every ca
 
 A microphone pipeline can run a tiny denoiser. A camera can use segmentation or depth estimation. OCR can happen locally. A video call can clean up an ugly room. A game can reconstruct pixels. An accessibility feature can recognize an object. The framework chooses CPU, GPU, NPU or some little matrix unit near the relevant subsystem according to latency, memory traffic and power.
 
-Nobody needs an “AI mode” button for most of this.
+Most of this should arrive invisibly through ordinary product behavior.
 
 That’s the part of the current boom that can survive even if consumers get completely sick of the word AI. The models can get smaller. Quantization improves. Compilers learn the hardware. Memory stays closer to the compute. Developers learn which inferences are reliable enough to disappear into a normal product path. The accelerator becomes busier while the marketing term becomes less useful.
 
 [Nobody Calls It a Supercomputer Anymore](/desk/nobody-calls-it-a-supercomputer-anymore) was about capabilities changing social class as the old miracle gets cheap enough to become ordinary computing. This feels like the same process happening inside the machine. A conspicuous new category gets used, optimized, broken apart and placed beside the work until the category name starts sounding quaint.
 
-Nobody advertises a laptop by yelling that it contains a hardware H.265 decoder. You expect the video to play and the battery to survive.
+A hardware H.265 decoder barely earns a line in the spec sheet now; you expect the video to play and the battery to survive.
 
 Eventually, the AI core is just the part of the chip that saves a watt.
