@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-ai-sticker-peels-off',
+    title: 'The AI Sticker Peels Off',
+    date: '2026-09-05',
+    blurb:
+      '“AI PC” branding arrived before the NPU had enough ordinary work to justify the fuss. The useful future is quieter: matrix hardware reconstructs pixels, cleans audio, runs vision, and saves power until the AI label falls away.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'hardware', 'graphics', 'efficiency'],
+    revision: 1,
+    sourcePath: 'desk/the-ai-sticker-peels-off.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'unfortunately-the-platonic-restaurant-is-extremely-well-run',
     title: 'Unfortunately, the Platonic Restaurant Is Extremely Well Run',
     date: '2026-09-04',
