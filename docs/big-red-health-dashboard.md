@@ -50,9 +50,9 @@ Live capability probes on 2026-09-07 established the current source choices:
   29.3 W at `psys` and 17.4 W at `package-0`; `psys` is therefore the measured
   platform primary and package remains diagnostic. The AC and USB power supplies
   expose no usable input-power reading. Kernel 7.0 restricts the energy counters to
-  root by default; compute-node-bootstrap installs a non-resident, name-filtered
-  udev helper that grants the existing reporter user read-only ACL access to only
-  the `psys` and `package-0` energy attributes.
+  root by default and rejects filesystem ACLs on those attributes.
+  compute-node-bootstrap therefore installs a fixed sudo rule for one root-owned,
+  no-argument reader that emits only allowlisted `psys` and `package-0` counters.
 - Air Blue's unprivileged AppleSmartBattery plist exposes `SystemLoad`,
   `SystemPowerIn`, input voltage/current, `BatteryPower`, and adapter efficiency
   loss. On the Apple M5 probe, 20.158 V × 26 mA agreed with 538 mW
@@ -135,9 +135,9 @@ systemctl --user start machine-activity-report.service
 
 Before the first RAPL-enabled run, apply the tracked
 `compute-node-bootstrap/scripts/install-big-red-powercap-telemetry` installer once.
-It reloads the udev rule and grants current named domains the same minimal read-only
-ACL used after future boots. It does not change GNOME blanking, suspend, brightness,
-or power profiles.
+It installs the fixed read-only helper and exact no-argument sudo rule. It does not
+change GNOME blanking, suspend, brightness, or power profiles, and no privileged
+process remains resident.
 
 On the Mac, copy the collector beside `mac-health-report.py` in
 `~/Library/Application Support/Scrapbook/`. Render the separate LaunchAgent with

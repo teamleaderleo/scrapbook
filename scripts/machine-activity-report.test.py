@@ -74,14 +74,13 @@ class ActivityTest(unittest.TestCase):
         self.assertIsNone(REPORT.rapl_delta_watts(1, 9_000_000_001, 10_000_000_000, 2))
 
     def test_psys_is_primary_and_package_is_not_added_to_it(self):
-        psys, package = Path('/psys'), Path('/package')
         before = {'captured_at': 1.0, 'domains': [
-            {'name':'psys', 'energy_uj':1_000_000, 'max_energy_range_uj':100_000_000, 'entry':psys},
-            {'name':'package-0', 'energy_uj':2_000_000, 'max_energy_range_uj':100_000_000, 'entry':package},
+            {'name':'psys', 'energy_uj':1_000_000, 'max_energy_range_uj':100_000_000, 'key':'psys'},
+            {'name':'package-0', 'energy_uj':2_000_000, 'max_energy_range_uj':100_000_000, 'key':'package-0'},
         ]}
         after = {'captured_at': 3.0, 'domains': [
-            {'name':'psys', 'energy_uj':21_000_000, 'max_energy_range_uj':100_000_000, 'entry':psys},
-            {'name':'package-0', 'energy_uj':10_000_000, 'max_energy_range_uj':100_000_000, 'entry':package},
+            {'name':'psys', 'energy_uj':21_000_000, 'max_energy_range_uj':100_000_000, 'key':'psys'},
+            {'name':'package-0', 'energy_uj':10_000_000, 'max_energy_range_uj':100_000_000, 'key':'package-0'},
         ]}
         with patch.object(REPORT, 'rapl_energy_snapshot', return_value=after):
             power = REPORT.linux_rapl_power(before)
@@ -90,12 +89,11 @@ class ActivityTest(unittest.TestCase):
         self.assertEqual(power['package']['watts'], 4)
 
     def test_package_only_fallback_remains_labeled_cpu_package(self):
-        package = Path('/package')
         before = {'captured_at': 1.0, 'domains': [
-            {'name':'package-0', 'energy_uj':2_000_000, 'max_energy_range_uj':100_000_000, 'entry':package},
+            {'name':'package-0', 'energy_uj':2_000_000, 'max_energy_range_uj':100_000_000, 'key':'package-0'},
         ]}
         after = {'captured_at': 3.0, 'domains': [
-            {'name':'package-0', 'energy_uj':10_000_000, 'max_energy_range_uj':100_000_000, 'entry':package},
+            {'name':'package-0', 'energy_uj':10_000_000, 'max_energy_range_uj':100_000_000, 'key':'package-0'},
         ]}
         with patch.object(REPORT, 'rapl_energy_snapshot', return_value=after):
             power = REPORT.linux_rapl_power(before)
@@ -149,6 +147,14 @@ class ActivityTest(unittest.TestCase):
         self.assertIsNone(REPORT.power_reading(501, 'platform', 'intel-rapl-psys'))
         power = REPORT.apple_power([{'PowerTelemetryData': {'SystemLoad': 900_000}}])
         self.assertIsNone(power['system_load'])
+
+    def test_privileged_rapl_projection_drops_paths_and_unknown_domains(self):
+        domains = REPORT.parsed_rapl_domains([
+            {'name':'psys', 'energy_uj':10, 'max_energy_range_uj':100, 'path':'private'},
+            {'name':'core', 'energy_uj':20, 'max_energy_range_uj':100},
+        ])
+        self.assertEqual(domains, [{'name':'psys', 'energy_uj':10, 'max_energy_range_uj':100, 'key':'psys'}])
+        self.assertNotIn('path', str(domains))
 
 
 if __name__ == '__main__':
