@@ -260,11 +260,17 @@ def collect(sample_seconds: float = 2.0) -> dict[str, Any]:
     vm = None if mac else module.windows_vm()
     if vm and vm.get("source") != "libvirt":
         vm = None
+    panel = None
+    if not mac:
+        panel_reader = getattr(module, "panel_backlight_state", None)
+        observed_panel = optional(panel_reader) if callable(panel_reader) else None
+        if isinstance(observed_panel, dict) and observed_panel.get("source") == "sysfs-backlight":
+            panel = observed_panel
     result = dict(schema_version=1, host="macbook-air" if mac else "big-red",
                   checked_at=dt.datetime.now(dt.timezone.utc).isoformat(), sample_seconds=round(elapsed, 3),
                   cpu=dict(model=model[:100], cores=cores), memory=memory,
                   network=dict(rx_mib_s=rx, tx_mib_s=tx), disk=dict(read_mib_s=read, write_mib_s=write),
-                  process_count=len(after_processes) if after_processes is not None else None,
+                  panel=panel, process_count=len(after_processes) if after_processes is not None else None,
                   processes=top_processes(before_processes, after_processes, process_elapsed),
                   vm=vm, observer=dict(cpu_ms=round((cpu_used()-cpu_started)*1000, 2), wall_ms=round((time.monotonic()-started)*1000, 2)))
     return result
@@ -286,7 +292,7 @@ def main():
     report = collect()
     if args.summary_only:
         print(json.dumps({"host": report["host"], "cpu_groups": {kind: sum(core["kind"] == kind for core in report["cpu"]["cores"]) for kind in {core["kind"] for core in report["cpu"]["cores"]}},
-                          "memory": report["memory"], "disk": report["disk"], "process_count": report["process_count"], "named_rows": len(report["processes"] or []), "observer": report["observer"]}))
+                          "memory": report["memory"], "disk": report["disk"], "panel": report["panel"], "process_count": report["process_count"], "named_rows": len(report["processes"] or []), "observer": report["observer"]}))
         return
     if args.print_only:
         print(json.dumps(report))
