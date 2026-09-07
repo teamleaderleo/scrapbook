@@ -65,7 +65,8 @@ describe('Activity telemetry', () => {
     ).toBe(false);
   });
   it('keeps older version-one rows valid when panel telemetry is absent', () => {
-    const { panel: _panel, ...legacy } = activitySnapshot;
+    const legacy = { ...activitySnapshot };
+    delete legacy.panel;
     expect(activitySnapshotSchema.safeParse(legacy).success).toBe(true);
   });
 });
