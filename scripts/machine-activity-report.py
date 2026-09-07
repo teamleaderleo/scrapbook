@@ -7,6 +7,7 @@ import datetime as dt
 import importlib.machinery
 import importlib.util
 import json
+import math
 import os
 import plistlib
 import re
@@ -20,6 +21,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 GIB = 1024**3
 MIB = 1024**2
+MAX_POWER_WATTS = 500.0
 
 
 def command(*args: str) -> str:
@@ -121,6 +123,194 @@ def mac_disk() -> tuple[int, int] | None:
     return (sum(entry.get("Bytes (Read)", 0) for entry in stats), sum(entry.get("Bytes (Write)", 0) for entry in stats)) if stats else None
 
 
+def power_reading(watts: float, scope: str, source: str, quality: str = "measured") -> dict[str, Any] | None:
+    if not isinstance(watts, (int, float)) or isinstance(watts, bool) or not math.isfinite(watts):
+        return None
+    if not 0 < watts <= MAX_POWER_WATTS:
+        return None
+    return dict(watts=round(watts, 3), scope=scope, source=source, quality=quality)
+
+
+def empty_power() -> dict[str, Any]:
+    return dict(primary=None, platform=None, package=None, system_load=None,
+                adapter_input=None, battery_flow=None)
+
+
+def rapl_energy_snapshot(root: Path = Path("/sys/class/powercap")) -> dict[str, Any]:
+    domains = []
+    for entry in root.iterdir():
+        try:
+            name = (entry / "name").read_text().strip()
+            if name not in {"psys", "package-0"}:
+                continue
+            energy = int((entry / "energy_uj").read_text())
+            maximum = int((entry / "max_energy_range_uj").read_text())
+            if not 0 <= energy < maximum or maximum <= 0:
+                continue
+            domains.append(dict(name=name, energy_uj=energy, max_energy_range_uj=maximum, entry=entry))
+        except (OSError, ValueError):
+            continue
+    return dict(captured_at=time.monotonic(), domains=domains)
+
+
+def rapl_delta_watts(before: int, after: int, maximum: int, elapsed: float) -> float | None:
+    if not all(isinstance(value, int) and not isinstance(value, bool) for value in (before, after, maximum)):
+        return None
+    if not math.isfinite(elapsed) or elapsed <= 0 or maximum <= 0:
+        return None
+    if not 0 <= before < maximum or not 0 <= after < maximum or before == after:
+        return None
+    if after < before:
+        # A wrap crosses the top of the advertised range. A random backwards jump is a reset.
+        if before < maximum * 0.9 or after > maximum * 0.1:
+            return None
+        delta = maximum - before + after
+    else:
+        delta = after - before
+    watts = delta / 1_000_000 / elapsed
+    return watts if 0 < watts <= MAX_POWER_WATTS else None
+
+
+def linux_rapl_power(before: dict[str, Any] | None) -> dict[str, Any]:
+    result = empty_power()
+    if not before:
+        return result
+    after = rapl_energy_snapshot()
+    elapsed = after["captured_at"] - before["captured_at"]
+    candidates: dict[str, list[float]] = {"psys": [], "package-0": []}
+    after_by_entry = {domain["entry"]: domain for domain in after["domains"]}
+    for old in before["domains"]:
+        new = after_by_entry.get(old["entry"])
+        if not new or new["name"] != old["name"] or new["max_energy_range_uj"] != old["max_energy_range_uj"]:
+            continue
+        watts = rapl_delta_watts(old["energy_uj"], new["energy_uj"], old["max_energy_range_uj"], elapsed)
+        if watts is not None:
+            candidates[old["name"]].append(watts)
+    # Some kernels expose the same package through more than one RAPL interface. They overlap.
+    platform = power_reading(candidates["psys"][0], "platform", "intel-rapl-psys") if candidates["psys"] else None
+    package = power_reading(candidates["package-0"][0], "cpu-package", "intel-rapl-package") if candidates["package-0"] else None
+    result.update(platform=platform, package=package, primary=platform or package)
+    return result
+
+
+def numeric(value: Any) -> float | None:
+    return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) else None
+
+
+def signed_apple_integer(value: Any) -> int | None:
+    if not isinstance(value, int) or isinstance(value, bool):
+        return None
+    # ioreg plists may surface negative SMC values directly or wrapped at 16, 32, or 64 bits.
+    for bits in (64, 32, 16):
+        top = 1 << bits
+        if top // 2 < value < top:
+            value -= top
+            break
+    return value
+
+
+def close_power(left_mw: float, right_mw: float) -> bool:
+    return abs(left_mw - right_mw) <= max(250.0, 0.2 * max(abs(left_mw), abs(right_mw)))
+
+
+def apple_power(document: Any) -> dict[str, Any]:
+    result = empty_power()
+    battery = next((entry for entry in document if isinstance(entry, dict)), {}) if isinstance(document, list) else {}
+    telemetry = battery.get("PowerTelemetryData", {}) if isinstance(battery, dict) else {}
+    if not isinstance(telemetry, dict):
+        telemetry = {}
+
+    system_in_mw = numeric(telemetry.get("SystemPowerIn"))
+    voltage_mv = numeric(telemetry.get("SystemVoltageIn", telemetry.get("SystemInputVoltage")))
+    current_ma = numeric(telemetry.get("SystemCurrentIn", telemetry.get("SystemInputCurrent")))
+    adapter = None
+    if system_in_mw is not None and voltage_mv is not None and current_ma is not None:
+        calculated_mw = voltage_mv * current_ma / 1000
+        if 0 < system_in_mw <= MAX_POWER_WATTS * 1000 and close_power(system_in_mw, calculated_mw):
+            adapter = power_reading(system_in_mw / 1000, "adapter-input", "apple-power-telemetry")
+
+    direct_battery_mw = signed_apple_integer(telemetry.get("BatteryPower"))
+    voltage = numeric(battery.get("Voltage"))
+    amperage = signed_apple_integer(battery.get("InstantAmperage", battery.get("Amperage")))
+    calculated_battery_mw = voltage * amperage / 1000 if voltage is not None and amperage is not None else None
+    battery_mw = None
+    if direct_battery_mw is not None and calculated_battery_mw is not None:
+        if close_power(direct_battery_mw, calculated_battery_mw):
+            battery_mw = float(direct_battery_mw)
+    elif direct_battery_mw is not None:
+        battery_mw = float(direct_battery_mw)
+    elif calculated_battery_mw is not None:
+        battery_mw = calculated_battery_mw
+    battery_flow = None
+    if battery_mw:
+        battery_flow = power_reading(abs(battery_mw) / 1000,
+                                     "battery-output" if battery_mw < 0 else "battery-input",
+                                     "apple-battery-flow")
+
+    load_mw = numeric(telemetry.get("SystemLoad"))
+    system_load = None
+    if load_mw is not None and 0 < load_mw <= MAX_POWER_WATTS * 1000:
+        expected_mw = system_in_mw - battery_mw if adapter is not None and battery_mw is not None else None
+        if expected_mw is None or close_power(load_mw, expected_mw):
+            system_load = power_reading(load_mw / 1000, "whole-system", "apple-power-telemetry")
+
+    result.update(system_load=system_load, adapter_input=adapter, battery_flow=battery_flow)
+    result["primary"] = system_load or (battery_flow if battery_flow and battery_flow["scope"] == "battery-output" else None) or adapter
+    return result
+
+
+def apple_power_sample() -> dict[str, Any]:
+    document = plistlib.loads(command("ioreg", "-a", "-r", "-c", "AppleSmartBattery").encode())
+    return apple_power(document)
+
+
+def linux_power_supply(root: Path = Path("/sys/class/power_supply")) -> dict[str, Any]:
+    result = empty_power()
+    adapter_candidates = []
+    battery_candidates = []
+    try:
+        supplies = list(root.iterdir())
+    except OSError:
+        return result
+    for supply in supplies:
+        try:
+            kind = (supply / "type").read_text().strip()
+        except OSError:
+            continue
+        if kind not in {"Mains", "USB", "USB_C", "Battery"}:
+            continue
+        def read_number(name: str) -> float | None:
+            try:
+                return numeric(int((supply / name).read_text()))
+            except (OSError, ValueError):
+                return None
+        power_uw = read_number("power_now")
+        voltage_uv, current_ua = read_number("voltage_now"), read_number("current_now")
+        calculated_watts = voltage_uv * abs(current_ua) / 1e12 if voltage_uv is not None and current_ua is not None else None
+        watts = power_uw / 1e6 if power_uw is not None else calculated_watts
+        if watts is None or (power_uw is not None and calculated_watts is not None and not close_power(power_uw / 1000, calculated_watts * 1000)):
+            continue
+        if kind == "Battery":
+            try:
+                status = (supply / "status").read_text().strip()
+            except OSError:
+                status = ""
+            scope = {"Discharging": "battery-output", "Charging": "battery-input"}.get(status)
+            reading = power_reading(watts, scope, "linux-power-supply") if scope else None
+            if reading:
+                battery_candidates.append(reading)
+        else:
+            online = read_number("online")
+            reading = power_reading(watts, "adapter-input", "linux-power-supply") if online == 1 else None
+            if reading:
+                adapter_candidates.append(reading)
+    adapter = max(adapter_candidates, key=lambda value: value["watts"], default=None)
+    battery_flow = max(battery_candidates, key=lambda value: value["watts"], default=None)
+    result.update(adapter_input=adapter, battery_flow=battery_flow)
+    result["primary"] = adapter or (battery_flow if battery_flow and battery_flow["scope"] == "battery-output" else None)
+    return result
+
+
 def cpu_time(value: str) -> float:
     days, _, clock = value.rpartition("-")
     parts = [float(part) for part in clock.split(":")]
@@ -219,6 +409,7 @@ def collect(sample_seconds: float = 2.0) -> dict[str, Any]:
     before_disk = optional(read_disk)
     disk_started = time.monotonic()
     before_cpu = read_cpu()
+    before_rapl = None if mac else optional(rapl_energy_snapshot)
     sample_started = time.monotonic()
     time.sleep(sample_seconds)
     after_cpu = read_cpu()
@@ -260,6 +451,15 @@ def collect(sample_seconds: float = 2.0) -> dict[str, Any]:
     vm = None if mac else module.windows_vm()
     if vm and vm.get("source") != "libvirt":
         vm = None
+    if mac:
+        power = optional(apple_power_sample) or empty_power()
+    else:
+        power = linux_rapl_power(before_rapl)
+        supply_power = optional(linux_power_supply) or empty_power()
+        power["adapter_input"] = supply_power["adapter_input"]
+        power["battery_flow"] = supply_power["battery_flow"]
+        if power["primary"] is None:
+            power["primary"] = supply_power["primary"]
     panel = None
     if not mac:
         panel_reader = getattr(module, "panel_backlight_state", None)
@@ -270,7 +470,7 @@ def collect(sample_seconds: float = 2.0) -> dict[str, Any]:
                   checked_at=dt.datetime.now(dt.timezone.utc).isoformat(), sample_seconds=round(elapsed, 3),
                   cpu=dict(model=model[:100], cores=cores), memory=memory,
                   network=dict(rx_mib_s=rx, tx_mib_s=tx), disk=dict(read_mib_s=read, write_mib_s=write),
-                  panel=panel, process_count=len(after_processes) if after_processes is not None else None,
+                  panel=panel, power=power, process_count=len(after_processes) if after_processes is not None else None,
                   processes=top_processes(before_processes, after_processes, process_elapsed),
                   vm=vm, observer=dict(cpu_ms=round((cpu_used()-cpu_started)*1000, 2), wall_ms=round((time.monotonic()-started)*1000, 2)))
     return result
@@ -292,7 +492,7 @@ def main():
     report = collect()
     if args.summary_only:
         print(json.dumps({"host": report["host"], "cpu_groups": {kind: sum(core["kind"] == kind for core in report["cpu"]["cores"]) for kind in {core["kind"] for core in report["cpu"]["cores"]}},
-                          "memory": report["memory"], "disk": report["disk"], "panel": report["panel"], "process_count": report["process_count"], "named_rows": len(report["processes"] or []), "observer": report["observer"]}))
+                          "memory": report["memory"], "disk": report["disk"], "panel": report["panel"], "power": report["power"], "process_count": report["process_count"], "named_rows": len(report["processes"] or []), "observer": report["observer"]}))
         return
     if args.print_only:
         print(json.dumps(report))

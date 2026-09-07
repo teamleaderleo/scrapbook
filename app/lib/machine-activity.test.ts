@@ -16,6 +16,7 @@ describe('Activity telemetry', () => {
     expect(projection).not.toHaveProperty('processes');
     expect(projection).not.toHaveProperty('other_private_field');
     expect(projection.panel).toEqual(activitySnapshot.panel);
+    expect(projection.power).toEqual(activitySnapshot.power);
   });
   it('normalizes each core group by its own capacity', () => {
     const groups = summarizeCores(activitySnapshot.cpu.cores);
@@ -28,7 +29,7 @@ describe('Activity telemetry', () => {
     expect(groups[0].percent).toBeCloseTo(60);
     expect(groups[2].percent).toBe(5);
   });
-  it('rejects duplicate cores, impossible memory, invalid panel brightness, and unbounded process rows', () => {
+  it('rejects duplicate cores, impossible memory, invalid panel brightness, invalid watts, and unbounded process rows', () => {
     expect(activitySnapshotSchema.safeParse(activitySnapshot).success).toBe(
       true
     );
@@ -38,6 +39,18 @@ describe('Activity telemetry', () => {
         cpu: {
           ...activitySnapshot.cpu,
           cores: [activitySnapshot.cpu.cores[0], activitySnapshot.cpu.cores[0]],
+        },
+      }).success
+    ).toBe(false);
+    expect(
+      activitySnapshotSchema.safeParse({
+        ...activitySnapshot,
+        power: {
+          ...activitySnapshot.power!,
+          primary: {
+            ...activitySnapshot.power!.primary!,
+            source: 'intel-rapl-package',
+          },
         },
       }).success
     ).toBe(false);
@@ -60,13 +73,26 @@ describe('Activity telemetry', () => {
     expect(
       activitySnapshotSchema.safeParse({
         ...activitySnapshot,
+        power: {
+          ...activitySnapshot.power!,
+          primary: {
+            ...activitySnapshot.power!.primary!,
+            watts: 501,
+          },
+        },
+      }).success
+    ).toBe(false);
+    expect(
+      activitySnapshotSchema.safeParse({
+        ...activitySnapshot,
         processes: Array(21).fill(activitySnapshot.processes![0]),
       }).success
     ).toBe(false);
   });
-  it('keeps older version-one rows valid when panel telemetry is absent', () => {
+  it('keeps older version-one rows valid when panel and power telemetry are absent', () => {
     const legacy = { ...activitySnapshot };
     delete legacy.panel;
+    delete legacy.power;
     expect(activitySnapshotSchema.safeParse(legacy).success).toBe(true);
   });
 });

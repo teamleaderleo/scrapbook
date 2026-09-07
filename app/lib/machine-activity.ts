@@ -14,6 +14,90 @@ const panelSnapshotSchema = z.object({
   state: z.enum(['on', 'off', 'unknown']),
   actual_brightness_percent: percent,
 });
+export const powerScopeSchema = z.enum([
+  'whole-system',
+  'platform',
+  'adapter-input',
+  'battery-output',
+  'battery-input',
+  'cpu-package',
+]);
+export const powerSourceSchema = z.enum([
+  'intel-rapl-psys',
+  'intel-rapl-package',
+  'linux-power-supply',
+  'apple-power-telemetry',
+  'apple-battery-flow',
+  'modeled-v1',
+]);
+export const powerReadingSchema = z
+  .object({
+    watts: nonnegative.positive().max(500),
+    scope: powerScopeSchema,
+    source: powerSourceSchema,
+    quality: z.enum(['measured', 'modeled']),
+  })
+  .superRefine((reading, context) => {
+    const allowedScopes: Record<typeof reading.source, typeof reading.scope[]> = {
+      'intel-rapl-psys': ['platform'],
+      'intel-rapl-package': ['cpu-package'],
+      'linux-power-supply': [
+        'adapter-input',
+        'battery-output',
+        'battery-input',
+      ],
+      'apple-power-telemetry': ['whole-system', 'adapter-input'],
+      'apple-battery-flow': ['battery-output', 'battery-input'],
+      'modeled-v1': ['whole-system'],
+    };
+    if (!allowedScopes[reading.source].includes(reading.scope))
+      context.addIssue({
+        code: 'custom',
+        path: ['scope'],
+        message: 'Power source and scope disagree',
+      });
+  });
+const powerSnapshotSchema = z
+  .object({
+    primary: powerReadingSchema.nullable(),
+    platform: powerReadingSchema.nullable(),
+    package: powerReadingSchema.nullable(),
+    system_load: powerReadingSchema.nullable(),
+    adapter_input: powerReadingSchema.nullable(),
+    battery_flow: powerReadingSchema.nullable(),
+  })
+  .superRefine((power, context) => {
+    const expected: Array<[
+      keyof Omit<typeof power, 'primary'>,
+      PowerReading['scope'][]
+    ]> = [
+      ['platform', ['platform']],
+      ['package', ['cpu-package']],
+      ['system_load', ['whole-system']],
+      ['adapter_input', ['adapter-input']],
+      ['battery_flow', ['battery-output', 'battery-input']],
+    ];
+    for (const [field, scopes] of expected) {
+      const reading = power[field];
+      if (reading && !scopes.includes(reading.scope))
+        context.addIssue({
+          code: 'custom',
+          path: [field, 'scope'],
+          message: `${field} has the wrong power scope`,
+        });
+    }
+    for (const [field, reading] of Object.entries(power)) {
+      if (
+        reading &&
+        ((reading.source === 'modeled-v1') !== (reading.quality === 'modeled'))
+      )
+        context.addIssue({
+          code: 'custom',
+          path: [field, 'quality'],
+          message: 'Power source and quality disagree',
+        });
+    }
+  });
 export const activitySnapshotSchema = z.object({
   schema_version: z.literal(1),
   host: z.enum(['big-red', 'macbook-air']),
@@ -70,6 +154,7 @@ export const activitySnapshotSchema = z.object({
     write_mib_s: nonnegative.nullable(),
   }),
   panel: panelSnapshotSchema.nullable().optional(),
+  power: powerSnapshotSchema.nullable().optional(),
   vm: z
     .object({
       state: z.enum([
@@ -127,6 +212,7 @@ export function publicActivitySnapshot(
     network: value.network,
     disk: value.disk,
     panel: value.panel ?? null,
+    power: value.power ?? null,
     vm: value.vm,
     process_count: value.process_count,
     observer: value.observer,
@@ -139,6 +225,8 @@ export const CORE_LABELS: Record<CoreKind, string> = {
   'low-power-efficiency': 'Low-power efficiency',
   unknown: 'Unclassified',
 };
+
+export type PowerReading = z.infer<typeof powerReadingSchema>;
 
 export function summarizeCores(cores: ActivitySnapshot['cpu']['cores']) {
   return (Object.keys(CORE_LABELS) as CoreKind[]).flatMap(kind => {
