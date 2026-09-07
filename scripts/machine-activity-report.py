@@ -22,6 +22,7 @@ from urllib.parse import urlsplit, urlunsplit
 GIB = 1024**3
 MIB = 1024**2
 MAX_POWER_WATTS = 500.0
+POWERCAP_ROOT = Path("/sys/class/powercap")
 
 
 def command(*args: str) -> str:
@@ -136,20 +137,52 @@ def empty_power() -> dict[str, Any]:
                 adapter_input=None, battery_flow=None)
 
 
-def rapl_energy_snapshot(root: Path = Path("/sys/class/powercap")) -> dict[str, Any]:
+def parsed_rapl_domains(document: Any) -> list[dict[str, Any]]:
     domains = []
-    for entry in root.iterdir():
+    seen = set()
+    if not isinstance(document, list) or len(document) > 8:
+        return domains
+    for item in document:
+        if not isinstance(item, dict):
+            continue
+        name, energy, maximum = item.get("name"), item.get("energy_uj"), item.get("max_energy_range_uj")
+        if name not in {"psys", "package-0"} or name in seen:
+            continue
+        if not all(isinstance(value, int) and not isinstance(value, bool) for value in (energy, maximum)):
+            continue
+        if not 0 <= energy < maximum or maximum <= 0:
+            continue
+        domains.append(dict(name=name, energy_uj=energy, max_energy_range_uj=maximum, key=name))
+        seen.add(name)
+    return domains
+
+
+def rapl_energy_snapshot(root: Path = POWERCAP_ROOT) -> dict[str, Any]:
+    raw_domains = []
+    try:
+        entries = list(root.iterdir())
+    except OSError:
+        entries = []
+    for entry in entries:
         try:
             name = (entry / "name").read_text().strip()
             if name not in {"psys", "package-0"}:
                 continue
             energy = int((entry / "energy_uj").read_text())
             maximum = int((entry / "max_energy_range_uj").read_text())
-            if not 0 <= energy < maximum or maximum <= 0:
-                continue
-            domains.append(dict(name=name, energy_uj=energy, max_energy_range_uj=maximum, entry=entry))
+            raw_domains.append(dict(name=name, energy_uj=energy, max_energy_range_uj=maximum))
         except (OSError, ValueError):
             continue
+    domains = parsed_rapl_domains(raw_domains)
+    if root == POWERCAP_ROOT and not any(domain["name"] == "psys" for domain in domains):
+        # Big Red's kernel keeps counters root-only. The fixed sudo helper emits only these numbers.
+        try:
+            privileged = parsed_rapl_domains(json.loads(command(
+                "/usr/bin/sudo", "-n", "/usr/local/sbin/big-red-powercap-read")))
+            if privileged:
+                domains = privileged
+        except (OSError, ValueError, subprocess.SubprocessError):
+            pass
     return dict(captured_at=time.monotonic(), domains=domains)
 
 
@@ -178,9 +211,9 @@ def linux_rapl_power(before: dict[str, Any] | None) -> dict[str, Any]:
     after = rapl_energy_snapshot()
     elapsed = after["captured_at"] - before["captured_at"]
     candidates: dict[str, list[float]] = {"psys": [], "package-0": []}
-    after_by_entry = {domain["entry"]: domain for domain in after["domains"]}
+    after_by_entry = {domain["key"]: domain for domain in after["domains"]}
     for old in before["domains"]:
-        new = after_by_entry.get(old["entry"])
+        new = after_by_entry.get(old["key"])
         if not new or new["name"] != old["name"] or new["max_energy_range_uj"] != old["max_energy_range_uj"]:
             continue
         watts = rapl_delta_watts(old["energy_uj"], new["energy_uj"], old["max_energy_range_uj"], elapsed)
