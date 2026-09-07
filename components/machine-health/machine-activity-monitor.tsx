@@ -7,6 +7,7 @@ import {
   summarizeCores,
   type ActivityMonitorData,
   type CoreKind,
+  type PowerReading,
 } from '@/app/lib/machine-activity';
 
 const HOSTS = [
@@ -21,6 +22,40 @@ const COLORS: Record<CoreKind, string> = {
 };
 const number = (value: number | null | undefined, unit: string, digits = 1) =>
   value == null ? 'Unavailable' : `${value.toFixed(digits)} ${unit}`;
+const POWER_SCOPES: Record<PowerReading['scope'], string> = {
+  'whole-system': 'system',
+  platform: 'platform',
+  'adapter-input': 'input',
+  'battery-output': 'battery output',
+  'battery-input': 'battery input',
+  'cpu-package': 'CPU package',
+};
+const POWER_SOURCES: Record<PowerReading['source'], string> = {
+  'intel-rapl-psys': 'Intel RAPL psys',
+  'intel-rapl-package': 'Intel RAPL package-0',
+  'linux-power-supply': 'Linux power supply',
+  'apple-power-telemetry': 'Apple PowerTelemetryData',
+  'apple-battery-flow': 'Apple battery flow',
+  'modeled-v1': 'Machine model v1',
+};
+const COMBINABLE_POWER_SCOPES = new Set<PowerReading['scope']>([
+  'whole-system',
+  'platform',
+  'adapter-input',
+  'battery-output',
+]);
+
+export function formatPower(reading: PowerReading | null | undefined) {
+  if (!reading) return 'Unavailable';
+  const amount = `${reading.quality === 'modeled' ? '~' : ''}${reading.watts.toFixed(1)} W`;
+  if (reading.quality === 'modeled') return `${amount} · modeled ${POWER_SCOPES[reading.scope]}`;
+  if (reading.scope === 'cpu-package') return `${amount} · CPU package`;
+  return `${amount} · measured ${POWER_SCOPES[reading.scope]}`;
+}
+
+function sameReading(left: PowerReading | null | undefined, right: PowerReading | null | undefined) {
+  return Boolean(left && right && left.watts === right.watts && left.scope === right.scope && left.source === right.source && left.quality === right.quality);
+}
 
 export function ActivityMonitorView({
   data,
@@ -37,7 +72,7 @@ export function ActivityMonitorView({
   const [coreGroup, setCoreGroup] = useState<'all' | CoreKind>('all');
   const [sort, setSort] = useState<'cpu_cores' | 'rss_mib'>('cpu_cores');
   const [historyMetric, setHistoryMetric] = useState<
-    'cpu' | 'memory' | 'network' | 'disk'
+    'cpu' | 'memory' | 'network' | 'disk' | 'power'
   >('cpu');
   const [selectedMinute, setSelectedMinute] = useState<number | null>(null);
   const snapshot = data?.latest.find(item => item.host === host);
@@ -50,6 +85,21 @@ export function ActivityMonitorView({
     ? Math.max(0, Math.floor((now - Date.parse(snapshot.checked_at)) / 1000))
     : null;
   const stale = age !== null && age > 180;
+  const combinedReadings = HOSTS.flatMap(([id, label]) => {
+    const item = data?.latest.find(candidate => candidate.host === id);
+    const reading = item?.power?.primary;
+    const itemAge = item ? Math.max(0, now - Date.parse(item.checked_at)) : Infinity;
+    return reading && itemAge <= 180000 && COMBINABLE_POWER_SCOPES.has(reading.scope)
+      ? [{ label, reading }]
+      : [];
+  });
+  const combined = combinedReadings.length === HOSTS.length
+    ? {
+        watts: combinedReadings.reduce((sum, item) => sum + item.reading.watts, 0),
+        modeled: combinedReadings.some(item => item.reading.quality === 'modeled'),
+        mixed: new Set(combinedReadings.map(item => `${item.reading.scope}:${item.reading.source}`)).size > 1,
+      }
+    : null;
   const history = data?.history.filter(item => item.host === host) ?? [];
   const minute = Math.floor(now / 60000);
   const byMinute = new Map(
@@ -71,6 +121,7 @@ export function ActivityMonitorView({
         : null;
     }
     if (historyMetric === 'memory') return item.memory.used_gib;
+    if (historyMetric === 'power') return item.power?.primary?.watts ?? null;
     const pair =
       historyMetric === 'network'
         ? [item.network.rx_mib_s, item.network.tx_mib_s]
@@ -82,7 +133,9 @@ export function ActivityMonitorView({
       ? '%'
       : historyMetric === 'memory'
         ? 'GiB'
-        : 'MiB/s';
+        : historyMetric === 'power'
+          ? 'W'
+          : 'MiB/s';
   const maximum = Math.max(
     historyMetric === 'cpu'
       ? 100
@@ -154,6 +207,20 @@ export function ActivityMonitorView({
           </button>
         ))}
       </div>
+      {combined ? (
+        <div className="mb-4 border-y border-black/10 py-2 text-sm dark:border-white/10">
+          <div className="flex flex-wrap justify-between gap-2">
+            <span className="opacity-60">Combined power</span>
+            <strong className="font-medium tabular-nums">
+              {combined.modeled ? '~' : ''}{combined.watts.toFixed(1)} W ·{' '}
+              {combined.modeled ? 'includes modeled' : combined.mixed ? 'measured mixed' : 'measured system'}
+            </strong>
+          </div>
+          <p className="mt-1 text-right text-xs opacity-50">
+            {combinedReadings.map(item => `${item.label} ${POWER_SCOPES[item.reading.scope]}`).join(' + ')}
+          </p>
+        </div>
+      ) : null}
       {snapshot ? (
         <>
           <div className="mb-4 flex flex-wrap justify-between gap-2 text-xs opacity-60">
@@ -254,6 +321,40 @@ export function ActivityMonitorView({
                   label="Disk read / write"
                   value={`${number(snapshot.disk.read_mib_s, '', 2)} / ${number(snapshot.disk.write_mib_s, 'MiB/s', 2)}`}
                 />
+                <Readout
+                  label="Power"
+                  value={formatPower(snapshot.power?.primary)}
+                />
+                {snapshot.power?.primary ? (
+                  <Readout
+                    label="Power source"
+                    value={POWER_SOURCES[snapshot.power.primary.source]}
+                  />
+                ) : null}
+                {snapshot.power?.package && !sameReading(snapshot.power.primary, snapshot.power.package) ? (
+                  <Readout
+                    label="CPU package"
+                    value={`${snapshot.power.package.watts.toFixed(1)} W · measured`}
+                  />
+                ) : null}
+                {snapshot.power?.adapter_input && !sameReading(snapshot.power.primary, snapshot.power.adapter_input) ? (
+                  <Readout
+                    label="Adapter input"
+                    value={`${snapshot.power.adapter_input.watts.toFixed(1)} W · measured`}
+                  />
+                ) : null}
+                {snapshot.power?.battery_flow && !sameReading(snapshot.power.primary, snapshot.power.battery_flow) ? (
+                  <Readout
+                    label={snapshot.power.battery_flow.scope === 'battery-output' ? 'Battery output' : 'Battery input'}
+                    value={`${snapshot.power.battery_flow.watts.toFixed(1)} W · measured`}
+                  />
+                ) : null}
+                {snapshot.panel ? (
+                  <Readout
+                    label="Physical panel"
+                    value={`${snapshot.panel.state === 'on' ? 'On' : snapshot.panel.state === 'off' ? 'Off' : 'Unknown'} · ${snapshot.panel.actual_brightness_percent.toFixed(1)}%`}
+                  />
+                ) : null}
                 {snapshot.vm ? (
                   <Readout
                     label={`Windows VM · ${snapshot.vm.state}`}
@@ -274,7 +375,7 @@ export function ActivityMonitorView({
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-sm font-medium">Last hour</h3>
           <div className="flex gap-3" aria-label="Activity history metric">
-            {(['cpu', 'memory', 'network', 'disk'] as const).map(metric => (
+            {(['cpu', 'memory', 'network', 'disk', 'power'] as const).map(metric => (
               <button
                 key={metric}
                 type="button"
@@ -313,7 +414,7 @@ export function ActivityMonitorView({
         <div className="mb-1 flex min-h-5 justify-between gap-2 text-xs tabular-nums opacity-60">
           <span>
             {selected?.sample
-              ? `${timestamp(selected.minute)} · ${number(values[selectedIndex], unit, 2)}`
+              ? `${timestamp(selected.minute)} · ${historyMetric === 'power' ? formatPower(selected.sample.power?.primary) : number(values[selectedIndex], unit, 2)}`
               : null}
           </span>
           <span>

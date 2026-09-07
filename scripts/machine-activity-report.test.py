@@ -3,6 +3,7 @@ import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 SPEC = importlib.util.spec_from_file_location('activity', Path(__file__).with_name('machine-activity-report.py'))
 REPORT = importlib.util.module_from_spec(SPEC)
@@ -62,6 +63,92 @@ class ActivityTest(unittest.TestCase):
         self.assertEqual(REPORT.activity_url('https://example.test/api/machine-health/ingest'), 'https://example.test/api/machine-health/activity/ingest')
         with self.assertRaises(ValueError):
             REPORT.activity_url('https://example.test/unrelated')
+
+    def test_rapl_energy_delta_and_wrap(self):
+        self.assertEqual(REPORT.rapl_delta_watts(1_000_000, 5_000_000, 100_000_000, 2), 2)
+        self.assertEqual(REPORT.rapl_delta_watts(95_000_000, 5_000_000, 100_000_000, 2), 5)
+
+    def test_rapl_frozen_reset_and_impossible_delta_stay_unavailable(self):
+        self.assertIsNone(REPORT.rapl_delta_watts(5, 5, 100, 2))
+        self.assertIsNone(REPORT.rapl_delta_watts(50, 10, 100, 2))
+        self.assertIsNone(REPORT.rapl_delta_watts(1, 9_000_000_001, 10_000_000_000, 2))
+
+    def test_psys_is_primary_and_package_is_not_added_to_it(self):
+        psys, package = Path('/psys'), Path('/package')
+        before = {'captured_at': 1.0, 'domains': [
+            {'name':'psys', 'energy_uj':1_000_000, 'max_energy_range_uj':100_000_000, 'entry':psys},
+            {'name':'package-0', 'energy_uj':2_000_000, 'max_energy_range_uj':100_000_000, 'entry':package},
+        ]}
+        after = {'captured_at': 3.0, 'domains': [
+            {'name':'psys', 'energy_uj':21_000_000, 'max_energy_range_uj':100_000_000, 'entry':psys},
+            {'name':'package-0', 'energy_uj':10_000_000, 'max_energy_range_uj':100_000_000, 'entry':package},
+        ]}
+        with patch.object(REPORT, 'rapl_energy_snapshot', return_value=after):
+            power = REPORT.linux_rapl_power(before)
+        self.assertEqual(power['primary'], power['platform'])
+        self.assertEqual(power['platform']['watts'], 10)
+        self.assertEqual(power['package']['watts'], 4)
+
+    def test_package_only_fallback_remains_labeled_cpu_package(self):
+        package = Path('/package')
+        before = {'captured_at': 1.0, 'domains': [
+            {'name':'package-0', 'energy_uj':2_000_000, 'max_energy_range_uj':100_000_000, 'entry':package},
+        ]}
+        after = {'captured_at': 3.0, 'domains': [
+            {'name':'package-0', 'energy_uj':10_000_000, 'max_energy_range_uj':100_000_000, 'entry':package},
+        ]}
+        with patch.object(REPORT, 'rapl_energy_snapshot', return_value=after):
+            power = REPORT.linux_rapl_power(before)
+        self.assertIsNone(power['platform'])
+        self.assertEqual(power['primary']['scope'], 'cpu-package')
+        self.assertEqual(power['primary']['watts'], 4)
+
+    def test_apple_power_telemetry_is_unit_checked_and_labeled(self):
+        document = [{
+            'Voltage': 12898,
+            'InstantAmperage': -629,
+            'PowerTelemetryData': {
+                'SystemPowerIn': 538,
+                'SystemLoad': 8650,
+                'SystemVoltageIn': 20158,
+                'SystemCurrentIn': 26,
+                'BatteryPower': -8112,
+                'AdapterEfficiencyLoss': -2,
+            },
+            'Serial': 'must-not-escape',
+        }]
+        power = REPORT.apple_power(document)
+        self.assertEqual(power['primary'], power['system_load'])
+        self.assertEqual(power['system_load']['watts'], 8.65)
+        self.assertEqual(power['adapter_input']['watts'], 0.538)
+        self.assertEqual(power['battery_flow']['scope'], 'battery-output')
+        self.assertEqual(power['battery_flow']['watts'], 8.112)
+        self.assertNotIn('Serial', str(power))
+
+    def test_apple_input_voltage_current_sanity_check_rejects_mismatch(self):
+        power = REPORT.apple_power([{'PowerTelemetryData': {
+            'SystemPowerIn': 10_000,
+            'SystemVoltageIn': 20_000,
+            'SystemCurrentIn': 25,
+        }}])
+        self.assertIsNone(power['adapter_input'])
+        self.assertIsNone(power['primary'])
+
+    def test_apple_signed_battery_amperage_accepts_wrapped_values(self):
+        wrapped = (1 << 16) - 500
+        power = REPORT.apple_power([{'Voltage': 10_000, 'InstantAmperage': wrapped}])
+        self.assertEqual(REPORT.signed_apple_integer((1 << 32) - 500), -500)
+        self.assertEqual(REPORT.signed_apple_integer((1 << 64) - 500), -500)
+        self.assertEqual(power['battery_flow']['scope'], 'battery-output')
+        self.assertEqual(power['battery_flow']['watts'], 5)
+        self.assertEqual(power['primary'], power['battery_flow'])
+
+    def test_missing_and_absurd_apple_power_stay_unavailable(self):
+        self.assertEqual(REPORT.apple_power([{}]), REPORT.empty_power())
+        self.assertIsNone(REPORT.power_reading(float('nan'), 'platform', 'intel-rapl-psys'))
+        self.assertIsNone(REPORT.power_reading(501, 'platform', 'intel-rapl-psys'))
+        power = REPORT.apple_power([{'PowerTelemetryData': {'SystemLoad': 900_000}}])
+        self.assertIsNone(power['system_load'])
 
 
 if __name__ == '__main__':

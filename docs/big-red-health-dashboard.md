@@ -34,6 +34,45 @@ once a minute, retains the last successful view on failure, and backs off to fiv
 minutes after repeated failures. Reports older than three minutes are marked stale.
 This is sampled activity; brief spikes between observations can be missed.
 
+Each minute sample can also carry typed power readings. Every reading includes
+watts, a fixed scope, a fixed source, and measured or modeled quality. The Now view
+labels whole-system, platform, adapter-input, battery-flow, and CPU-package power
+separately; package power is never presented as computer power. Power history uses
+the primary reading available in each minute and preserves gaps. A combined number
+appears only when both fresh primary readings cover a whole-machine-compatible
+scope. Mixed platform/system/input sources are described as mixed instead of being
+silently equated.
+
+Live capability probes on 2026-09-07 established the current source choices:
+
+- Big Red exposes advancing Intel RAPL `psys` and `package-0` energy domains, plus
+  overlapping `core` and `uncore` domains. A 2.05-second probe measured about
+  29.3 W at `psys` and 17.4 W at `package-0`; `psys` is therefore the measured
+  platform primary and package remains diagnostic. The AC and USB power supplies
+  expose no usable input-power reading. Kernel 7.0 restricts the energy counters to
+  root by default; compute-node-bootstrap installs a non-resident, name-filtered
+  udev helper that grants the existing reporter user read-only ACL access to only
+  the `psys` and `package-0` energy attributes.
+- Air Blue's unprivileged AppleSmartBattery plist exposes `SystemLoad`,
+  `SystemPowerIn`, input voltage/current, `BatteryPower`, and adapter efficiency
+  loss. On the Apple M5 probe, 20.158 V × 26 mA agreed with 538 mW
+  `SystemPowerIn`; 8.112 W of battery output plus that input equaled the 8.650 W
+  `SystemLoad`. The collector therefore treats `SystemLoad` as measured
+  whole-system load, retains adapter and battery flow as separate diagnostics, and
+  falls back to battery voltage × signed instantaneous amperage when appropriate.
+
+The Mac probe parses the binary plist locally and emits only allowlisted numeric
+readings and enums. Registry documents, hardware identities, serials, adapter
+identifiers, and device paths never enter the report. Wrapped signed Apple current
+representations are normalized locally. Values must be finite, positive, and no
+more than 500 W; inconsistent voltage/current arithmetic, frozen or reset RAPL
+counters, impossible deltas, and unavailable fields remain null. Neither collector
+uses CPU utilization or TDP to invent watts.
+
+These are short point samples, not billing-grade energy meters. The application
+does not integrate them into daily or monthly Wh/kWh totals. A future cumulative
+energy contract can do that only with continuous, reset-aware source accounting.
+
 The view includes individual logical CPUs and their actual core groups, used and
 available RAM in GiB, occupied swap, disk and network MiB/s, Windows VM host usage,
 and an hour of selectable minute history. CPU history can isolate a core group.
@@ -93,6 +132,12 @@ systemctl --user daemon-reload
 systemctl --user enable --now machine-activity-report.timer
 systemctl --user start machine-activity-report.service
 ```
+
+Before the first RAPL-enabled run, apply the tracked
+`compute-node-bootstrap/scripts/install-big-red-powercap-telemetry` installer once.
+It reloads the udev rule and grants current named domains the same minimal read-only
+ACL used after future boots. It does not change GNOME blanking, suspend, brightness,
+or power profiles.
 
 On the Mac, copy the collector beside `mac-health-report.py` in
 `~/Library/Application Support/Scrapbook/`. Render the separate LaunchAgent with

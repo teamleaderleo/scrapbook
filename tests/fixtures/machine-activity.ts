@@ -26,6 +26,34 @@ export const activitySnapshot: ActivitySnapshot = {
   },
   network: { rx_mib_s: 3, tx_mib_s: 1 },
   disk: { read_mib_s: 4, write_mib_s: 2 },
+  panel: {
+    source: 'sysfs-backlight',
+    state: 'off',
+    actual_brightness_percent: 0,
+  },
+  power: {
+    primary: {
+      watts: 28.4,
+      scope: 'platform',
+      source: 'intel-rapl-psys',
+      quality: 'measured',
+    },
+    platform: {
+      watts: 28.4,
+      scope: 'platform',
+      source: 'intel-rapl-psys',
+      quality: 'measured',
+    },
+    package: {
+      watts: 16.2,
+      scope: 'cpu-package',
+      source: 'intel-rapl-package',
+      quality: 'measured',
+    },
+    system_load: null,
+    adapter_input: null,
+    battery_flow: null,
+  },
   vm: {
     state: 'running',
     vcpus: 14,

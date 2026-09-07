@@ -15,6 +15,8 @@ describe('Activity telemetry', () => {
     expect(JSON.stringify(projection)).not.toContain('PRIVATE-PROCESS');
     expect(projection).not.toHaveProperty('processes');
     expect(projection).not.toHaveProperty('other_private_field');
+    expect(projection.panel).toEqual(activitySnapshot.panel);
+    expect(projection.power).toEqual(activitySnapshot.power);
   });
   it('normalizes each core group by its own capacity', () => {
     const groups = summarizeCores(activitySnapshot.cpu.cores);
@@ -27,7 +29,7 @@ describe('Activity telemetry', () => {
     expect(groups[0].percent).toBeCloseTo(60);
     expect(groups[2].percent).toBe(5);
   });
-  it('rejects duplicate cores, impossible memory, and unbounded process rows', () => {
+  it('rejects duplicate cores, impossible memory, invalid panel brightness, invalid watts, and unbounded process rows', () => {
     expect(activitySnapshotSchema.safeParse(activitySnapshot).success).toBe(
       true
     );
@@ -43,7 +45,41 @@ describe('Activity telemetry', () => {
     expect(
       activitySnapshotSchema.safeParse({
         ...activitySnapshot,
+        power: {
+          ...activitySnapshot.power!,
+          primary: {
+            ...activitySnapshot.power!.primary!,
+            source: 'intel-rapl-package',
+          },
+        },
+      }).success
+    ).toBe(false);
+    expect(
+      activitySnapshotSchema.safeParse({
+        ...activitySnapshot,
         memory: { ...activitySnapshot.memory, used_gib: 999 },
+      }).success
+    ).toBe(false);
+    expect(
+      activitySnapshotSchema.safeParse({
+        ...activitySnapshot,
+        panel: {
+          source: 'sysfs-backlight',
+          state: 'on',
+          actual_brightness_percent: 101,
+        },
+      }).success
+    ).toBe(false);
+    expect(
+      activitySnapshotSchema.safeParse({
+        ...activitySnapshot,
+        power: {
+          ...activitySnapshot.power!,
+          primary: {
+            ...activitySnapshot.power!.primary!,
+            watts: 501,
+          },
+        },
       }).success
     ).toBe(false);
     expect(
@@ -52,6 +88,12 @@ describe('Activity telemetry', () => {
         processes: Array(21).fill(activitySnapshot.processes![0]),
       }).success
     ).toBe(false);
+  });
+  it('keeps older version-one rows valid when panel and power telemetry are absent', () => {
+    const legacy = { ...activitySnapshot };
+    delete legacy.panel;
+    delete legacy.power;
+    expect(activitySnapshotSchema.safeParse(legacy).success).toBe(true);
   });
 });
 
