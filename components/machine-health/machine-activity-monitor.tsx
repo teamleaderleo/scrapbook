@@ -254,6 +254,12 @@ export function ActivityMonitorView({
                   label="Disk read / write"
                   value={`${number(snapshot.disk.read_mib_s, '', 2)} / ${number(snapshot.disk.write_mib_s, 'MiB/s', 2)}`}
                 />
+                {snapshot.panel ? (
+                  <Readout
+                    label="Physical panel"
+                    value={`${snapshot.panel.state === 'on' ? 'On' : snapshot.panel.state === 'off' ? 'Off' : 'Unknown'} · ${snapshot.panel.actual_brightness_percent.toFixed(1)}%`}
+                  />
+                ) : null}
                 {snapshot.vm ? (
                   <Readout
                     label={`Windows VM · ${snapshot.vm.state}`}
