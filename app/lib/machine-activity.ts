@@ -9,6 +9,11 @@ export const coreKindSchema = z.enum([
   'unknown',
 ]);
 export type CoreKind = z.infer<typeof coreKindSchema>;
+const panelSnapshotSchema = z.object({
+  source: z.literal('sysfs-backlight'),
+  state: z.enum(['on', 'off', 'unknown']),
+  actual_brightness_percent: percent,
+});
 export const activitySnapshotSchema = z.object({
   schema_version: z.literal(1),
   host: z.enum(['big-red', 'macbook-air']),
@@ -64,6 +69,7 @@ export const activitySnapshotSchema = z.object({
     read_mib_s: nonnegative.nullable(),
     write_mib_s: nonnegative.nullable(),
   }),
+  panel: panelSnapshotSchema.nullable().optional(),
   vm: z
     .object({
       state: z.enum([
@@ -120,6 +126,7 @@ export function publicActivitySnapshot(
     memory: value.memory,
     network: value.network,
     disk: value.disk,
+    panel: value.panel ?? null,
     vm: value.vm,
     process_count: value.process_count,
     observer: value.observer,
