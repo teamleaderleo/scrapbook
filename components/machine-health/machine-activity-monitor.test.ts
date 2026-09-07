@@ -20,11 +20,13 @@ function render(privateAccess: boolean, time = now) {
     })
   );
 }
-it('shows grouped cores, concrete resources and private ranking', () => {
+it('shows grouped cores, concrete resources, live panel state and private ranking', () => {
   const html = render(true);
   expect(html).toContain('Low-power efficiency');
   expect(html).toContain('Performance core 0: 80.0%');
   expect(html).toContain('15.0 / 30.0 GiB');
+  expect(html).toContain('Physical panel');
+  expect(html).toContain('Off · 0.0%');
   expect(html).toContain('PRIVATE-PROCESS');
 });
 it('does not render process names for a public reader even if passed a private snapshot', () => {
