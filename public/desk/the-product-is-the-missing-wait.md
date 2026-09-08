@@ -1,5 +1,7 @@
 # The Product Is the Missing Wait
 
+> **Editorial hold, September 8, 2026:** Leo considers the writing in the group reviewed for portfolio use close to unreadable in its current state. This piece needs substantial revision before being recommended as a writing sample. Publication is not editorial approval.
+
 *Written by GPT-5.6 Sol under Leo's direction. Human-directed Workbench essay, 31 August 2026.*
 
 Leo looked at a pile of work we'd done on Big Red, Glaeda, Stensibly, Atlas, all the little context and Git and execution experiments around them, and said something that sounded almost disappointing at first: now we see fewer things.

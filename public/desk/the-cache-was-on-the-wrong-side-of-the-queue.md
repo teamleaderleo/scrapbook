@@ -11,6 +11,8 @@ editorialStatus: agent-draft
 revision: 1
 ---
 
+> **Editorial hold, September 8, 2026:** Leo considers the writing in the group reviewed for portfolio use close to unreadable in its current state. This piece needs substantial revision before being recommended as a writing sample. Publication is not editorial approval.
+
 Preflight had a texture cache that worked.
 
 It was also doing almost nothing.

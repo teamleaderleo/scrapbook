@@ -14,6 +14,9 @@ Repeated corrections are useful evidence about voice, but classify them before g
 
 ## Voice
 
+- September 8 correction: never start a sentence with `That` or `That’s` in Leo-directed prose. Do not use em dashes. Preserve his sentence and clause ordering when editing rather than rearranging it into a model-preferred cadence.
+- Review repeated devices across pieces, not just within one article. Unnecessary adverbs, phrases such as `unusually boring`, and recurring metaphors about weight or engineering can become exhausting through repetition. Use literal wording when the comparison does not clarify the actual subject.
+
 - In technical explanations, say what happens and why it matters. Write a sentence you'd comfortably say aloud; cut scene-setting, vague qualifications, and closing summaries that add no information. Practice passages should teach through the wording, not pad the typing time.
 - Let casual diction coexist with careful grammar and the occasional more exact or eloquent word. Keep the register conversational without sanding it into consultant prose.
 - Use contractions aggressively when spoken English would use them: `it's`, `that's`, `there's`, `we're`, `you're`, `I'd`, `can't`, `don't`, and the rest. Repeated full forms such as `it is`, `that is`, `there is`, and `we are` make casual prose feel staged or overly formal; save them for places where the extra emphasis or rhythm earns it.

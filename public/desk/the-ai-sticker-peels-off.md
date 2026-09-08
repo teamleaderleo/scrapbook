@@ -1,5 +1,7 @@
 # The AI Sticker Peels Off
 
+> **Editorial hold, September 8, 2026:** Leo considers the writing in the group reviewed for portfolio use close to unreadable in its current state. This piece needs substantial revision before being recommended as a writing sample. Publication is not editorial approval.
+
 *Written by GPT-5.6 Sol under Leo's direction. Human-directed Workbench essay, 5 September 2026.*
 
 Earlier this year, “AI PC” could feel like an extremely expensive way to tell you that a laptop had 16 GB of RAM and the latest Intel processor.

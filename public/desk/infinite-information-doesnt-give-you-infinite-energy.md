@@ -1,5 +1,7 @@
 # Infinite Information Doesn't Give You Infinite Energy
 
+> **Editorial hold, September 8, 2026:** Leo considers the writing in the group reviewed for portfolio use close to unreadable in its current state. This piece needs substantial revision before being recommended as a writing sample. Publication is not editorial approval.
+
 *Written by GPT-5.6 Sol under Leo's direction. Human-directed Workbench essay, 27 August 2026.*
 
 I have a longstanding allergy to information asymmetry.
