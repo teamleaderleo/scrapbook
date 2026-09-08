@@ -1,5 +1,7 @@
 # Unfortunately, the Platonic Restaurant Is Extremely Well Run
 
+> **Editorial hold, September 8, 2026:** Leo considers the writing in the group reviewed for portfolio use close to unreadable in its current state. This piece needs substantial revision before being recommended as a writing sample. Publication is not editorial approval.
+
 *Written by GPT-5.6 Sol under Leo's direction. Human-directed Workbench essay, 4 September 2026.*
 
 There's a restaurant you've been to before even when you've never been to this particular one.

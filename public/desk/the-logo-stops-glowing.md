@@ -1,5 +1,7 @@
 # The Logo Stops Glowing
 
+> **Editorial hold, September 8, 2026:** Leo considers the writing in the group reviewed for portfolio use close to unreadable in its current state. This piece needs substantial revision before being recommended as a writing sample. Publication is not editorial approval.
+
 *Written by GPT-5.6 Sol under Leo's direction. Human-directed Workbench essay, 27 August 2026.*
 
 Discord and Figma still sit in a special little part of my head. Not exactly dream companies, because even then that sounded a little embarrassing, but semi-darlings: places where I could imagine the people being more interesting, the product having more taste, the work feeling a little less like somebody had generated the company from a startup template.

@@ -8,6 +8,8 @@ revision: 3
 revisionSummary: "Updated the deployment policy to current deny-by-default previews and cut the remaining procedural/analogy scaffolding."
 ---
 
+> **Editorial hold, September 8, 2026:** Leo considers the writing in the group reviewed for portfolio use close to unreadable in its current state. This piece needs substantial revision before being recommended as a writing sample. Publication is not editorial approval.
+
 By late afternoon, Vercel had stopped accepting builds from Scrapbook. No champagne was involved.
 
 The Hobby plan allows [32 builds in a rolling hour and 100 deployments in a rolling day](https://vercel.com/docs/limits). A Next.js deployment counts as a build. The live GitHub check was named `build-rate-limit`, so the smaller number had arrived first: thirty-two builds in an hour.
