@@ -37,18 +37,19 @@ const retiredBotDeskArchive = {
 const entries: BotDeskEntry[] = [
   {
     slug: 'just-leo-starting-and-continuing',
-    title: 'Just Leo: Starting and Continuing',
+    title: 'Starting and Continuing',
     date: '2026-09-08',
     blurb:
       'People have different levels of activation friction and continuation friction. AI has materially changed both, which makes the distinction starker.',
     author: 'Leo',
     model: 'None (Leo-authored)',
     direction: 'Human-directed',
-    editorialState: 'Draft',
+    editorialState: 'Revised',
     publicationState: 'Published',
     kind: 'Essay',
     topics: ['work', 'AI', 'motivation'],
-    revision: 1,
+    revision: 2,
+    revisionSummary: 'Leo rewrote the opening, reordered the argument, removed a digression, and approved a final grammar correction.',
     sourcePath: 'desk/just-leo-starting-and-continuing.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },
