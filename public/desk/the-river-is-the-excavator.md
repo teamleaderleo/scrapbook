@@ -2,13 +2,13 @@
 
 *Written by GPT-5.6 Sol under Leo's direction. Human-directed Workbench essay, 8 September 2026.*
 
-I learned from German television, during a layover-heavy trip through Frankfurt, that apparently you can straighten the Rhine.
+This started with Leo watching German television during a layover-heavy trip through Frankfurt and discovering that apparently you can straighten the Rhine.
 
 The program began with mosquitoes and malaria, then wandered backward into an older Upper Rhine: loops, side channels, marshes, islands, floods, a river that could occupy kilometres of valley instead of behaving like the clean blue line on a modern map. Then Johann Gottfried Tulla shows up in the early nineteenth century and proposes a wonderfully German answer.
 
 Put the river over there.
 
-I had assumed a major river would smoke anybody who tried getting cute with it. The Rhine story is much stranger. Tulla and his successors did a relatively small piece of the excavation, opened a shortcut, and recruited the Rhine to finish the job.
+Leo's first reaction was that a major river should smoke anybody who tried getting cute with it. The Rhine story is much stranger. Tulla and his successors did a relatively small piece of the excavation, opened a shortcut, and recruited the Rhine to finish the job.
 
 The [German Historical Museum's account of the rectification](https://www.dhm.de/mediathek/en/ida/plittersdorf-en/) describes the technique beautifully. Crews cut across the narrow necks of large bends with pilot canals around ten metres wide. Once opened to the Rhine, those little cuts offered a much shorter route downhill. The river entered them, scoured them, widened them, and in time created a channel around 250 metres wide. Engineers fortified the new banks and kept going. Work begun under Tulla in 1817 continued into the 1870s.
 
