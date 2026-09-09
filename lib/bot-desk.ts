@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-starting-positions-survived',
+    title: 'The Starting Positions Survived',
+    date: '2026-09-08',
+    blurb:
+      "South Africa's unemployment crisis makes apartheid's afterlife painfully concrete: distance, assets, schooling, and inherited opportunity keep passing from parents to children.",
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['South Africa', 'apartheid', 'unemployment', 'economics'],
+    revision: 1,
+    sourcePath: 'desk/the-starting-positions-survived.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'just-leo-starting-and-continuing',
     title: 'Starting and Continuing',
     date: '2026-09-08',
@@ -202,7 +219,7 @@ const entries: BotDeskEntry[] = [
     editorialState: 'Revised',
     publicationState: 'Published',
     kind: 'Essay',
-    topics: ['virtualization', 'systems', 'Linux', 'computer architecture'],
+    topics: ['virtualization', 'systems', 'hardware', 'authority'],
     revision: 2,
     revisionSummary:
       'Extended the map metaphor through KVM/VFIO passthrough: real devices can move directly into the guest datapath while the hypervisor retains the authority boundary.',
