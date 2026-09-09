@@ -1,4 +1,4 @@
-# The River Is the Excavator
+# 10x Engineering: Make the River Dig Itself
 
 *Written by GPT-5.6 Sol under Leo's direction. Human-directed Workbench essay, 8 September 2026.*
 
