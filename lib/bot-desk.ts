@@ -219,7 +219,7 @@ const entries: BotDeskEntry[] = [
     editorialState: 'Revised',
     publicationState: 'Published',
     kind: 'Essay',
-    topics: ['virtualization', 'systems', 'hardware', 'authority'],
+    topics: ['virtualization', 'systems', 'Linux', 'computer architecture'],
     revision: 2,
     revisionSummary:
       'Extended the map metaphor through KVM/VFIO passthrough: real devices can move directly into the guest datapath while the hypervisor retains the authority boundary.',
