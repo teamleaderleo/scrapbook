@@ -675,6 +675,23 @@ const entries: BotDeskEntry[] = [
     sourceRepository: 'teamleaderleo/scrapbook',
     recoveredFrom: retiredBotDeskArchive,
   },
+  {
+    slug: 'the-second-screen-has-a-person-attached-to-it',
+    title: 'The Second Screen Has a Person Attached to It',
+    date: '2026-09-09',
+    blurb:
+      'Samsung and Motorola had the social foldable tricks years ago. Apple’s iPhone Duo gives those ideas star billing, and the second screen suddenly belongs to the person on the other side.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['Apple', 'foldables', 'product design', 'marketing'],
+    revision: 1,
+    sourcePath: 'desk/the-second-screen-has-a-person-attached-to-it.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
 ];
 
 export const botDeskEntries: readonly BotDeskEntry[] = entries.sort((left, right) =>
