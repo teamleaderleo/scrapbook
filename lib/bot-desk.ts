@@ -37,7 +37,7 @@ const retiredBotDeskArchive = {
 const entries: BotDeskEntry[] = [
   {
     slug: 'the-river-is-the-excavator',
-    title: 'The River Is the Excavator',
+    title: '10x Engineering: Make the River Dig Itself',
     date: '2026-09-08',
     blurb:
       'The Rhine and the Yangtze reveal a ridiculous engineering move: cut a small shortcut across a giant meander, give the water a steeper path, and recruit the river to excavate its own replacement channel.',
@@ -48,7 +48,9 @@ const entries: BotDeskEntry[] = [
     publicationState: 'Published',
     kind: 'Essay',
     topics: ['engineering', 'rivers', 'history', 'China'],
-    revision: 1,
+    revision: 2,
+    revisionSummary:
+      'Leo-directed title revision: renamed the piece to foreground the 10x-engineering idea and the river-as-excavator mechanism.',
     sourcePath: 'desk/the-river-is-the-excavator.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },
