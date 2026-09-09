@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-starting-positions-survived',
+    title: 'The Starting Positions Survived',
+    date: '2026-09-08',
+    blurb:
+      "South Africa's unemployment crisis makes apartheid's afterlife painfully concrete: distance, assets, schooling, and inherited opportunity keep passing from parents to children.",
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['South Africa', 'apartheid', 'unemployment', 'economics'],
+    revision: 1,
+    sourcePath: 'desk/the-starting-positions-survived.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'just-leo-starting-and-continuing',
     title: 'Starting and Continuing',
     date: '2026-09-08',
