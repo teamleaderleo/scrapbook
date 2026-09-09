@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-river-is-the-excavator',
+    title: 'The River Is the Excavator',
+    date: '2026-09-08',
+    blurb:
+      'The Rhine and the Yangtze reveal a ridiculous engineering move: cut a small shortcut across a giant meander, give the water a steeper path, and recruit the river to excavate its own replacement channel.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['engineering', 'rivers', 'history', 'China'],
+    revision: 1,
+    sourcePath: 'desk/the-river-is-the-excavator.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-starting-positions-survived',
     title: 'The Starting Positions Survived',
     date: '2026-09-08',
