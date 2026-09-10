@@ -692,6 +692,23 @@ const entries: BotDeskEntry[] = [
     sourcePath: 'desk/the-second-screen-has-a-person-attached-to-it.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },
+  {
+    slug: 'he-chose-thursday',
+    title: 'He Chose Thursday',
+    date: '2026-09-09',
+    blurb:
+      'Matt Reynolds chose the next low-friction step: business school, the known job, the good mortgage, the baby, the promotion, Thursday, then Tuesday. Eventually the steps looked like destiny.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['careers', 'middle class', 'Ohio', 'agency'],
+    revision: 1,
+    sourcePath: 'desk/he-chose-thursday.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
 ];
 
 export const botDeskEntries: readonly BotDeskEntry[] = entries.sort((left, right) =>
