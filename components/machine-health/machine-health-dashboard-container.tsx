@@ -7,6 +7,7 @@ import { CodexQuotaPanel } from './codex-quota-panel';
 import { PeerUsagePanel } from './peer-usage-panel';
 import { WorkerOutcomeAttentionPanel } from './worker-outcome-attention-panel';
 import { MachineHealthDashboard } from './machine-health-dashboard-v2';
+import { WeeklyCodexUsage } from './weekly-codex-usage';
 
 function StateCard({
   title,
@@ -100,6 +101,10 @@ export async function MachineHealthDashboardContainer({
         hasPrivateAccess={hasPrivateAccess}
         ownerAuthConfigured={ownerAuthConfigured}
         authError={authError}
+      />
+      <WeeklyCodexUsage
+        samples={result.codexSamples}
+        now={Date.parse(result.observedAt)}
       />
       {hasPrivateAccess ? (
         <>
