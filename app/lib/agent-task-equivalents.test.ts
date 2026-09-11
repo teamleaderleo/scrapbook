@@ -30,8 +30,18 @@ describe('taskEquivalentBenchmark', () => {
     });
   });
 
-  it('maps provider-default Muse telemetry to the XHigh working range', () => {
+  it('models Muse High with the published XHigh coding-agent token range', () => {
+    expect(taskEquivalentBenchmark('muse-spark', 'high')).toEqual({
+      label: 'Muse Spark High · XHigh coding-agent proxy',
+      tokensPerTaskMin: 14_800_000,
+      tokensPerTaskMax: 16_200_000,
+    });
     expect(taskEquivalentBenchmark('muse-spark', 'provider-default')).toEqual({
+      label: 'Muse Spark High · XHigh coding-agent proxy',
+      tokensPerTaskMin: 14_800_000,
+      tokensPerTaskMax: 16_200_000,
+    });
+    expect(taskEquivalentBenchmark('muse-spark', 'xhigh')).toEqual({
       label: 'Muse Spark XHigh working range',
       tokensPerTaskMin: 14_800_000,
       tokensPerTaskMax: 16_200_000,
@@ -57,7 +67,7 @@ describe('estimateTaskEquivalents', () => {
 
     const muse = estimateTaskEquivalents({
       model: 'muse-spark',
-      effort: 'provider-default',
+      effort: 'high',
       totalTokens: 16_200_000,
     });
     expect(muse?.min).toBeCloseTo(1, 8);
