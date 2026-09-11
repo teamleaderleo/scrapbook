@@ -26,6 +26,14 @@ function row(overrides: Partial<PeerUsageSampleRow> = {}): PeerUsageSampleRow {
   };
 }
 
+describe('peerLaneLabel direct lanes', () => {
+  it('labels the Air Blue direct harnesses', () => {
+    expect(peerLaneLabel('claude-agent-sdk')).toBe('Claude Agent SDK');
+    expect(peerLaneLabel('opencode')).toBe('opencode');
+    expect(peerLaneLabel('t3code')).toBe('t3code');
+  });
+});
+
 describe('summarizePeerUsage', () => {
   it('keeps provider lanes separate and sums complete-hour rows', () => {
     const groups = summarizePeerUsage([

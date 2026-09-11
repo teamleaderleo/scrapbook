@@ -47,6 +47,9 @@ jobs:
           python3 scripts/machine-activity-report.test.py
           python3 scripts/codex-token-report.test.py
           python3 scripts/codex-token-launchd.test.py
+          python3 scripts/agent-peer-report.test.py
+          python3 scripts/agent-direct-usage-report.test.py
+          python3 scripts/agent-direct-usage-launchd.test.py
       - name: Unit tests
         run: pnpm test
 
