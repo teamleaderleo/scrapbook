@@ -21,8 +21,11 @@ export type PeerUsageGroup = {
 
 export function peerLaneLabel(harness: string): string {
   if (harness === 'claude-code') return 'Claude Code';
+  if (harness === 'claude-agent-sdk') return 'Claude Agent SDK';
   if (harness === 'antigravity') return 'Antigravity';
   if (harness === 'muse') return 'Muse';
+  if (harness === 'opencode') return 'opencode';
+  if (harness === 't3code') return 't3code';
   return harness;
 }
 

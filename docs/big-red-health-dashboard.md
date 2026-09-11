@@ -591,6 +591,92 @@ grouped projection as compact JSON (`peer-usage-summary/v1`) for operator
 tooling. Dashboard copy calls the dollar field an API-equivalent estimate,
 never the subscription bill.
 
+## Direct agent usage (Claude Code / opencode / t3code)
+
+Air Blue's interactive agents already keep usage records. The public **Other
+agents** panel reads them through the same `agent-telemetry-report/v1` ingest
+and `agent_usage_samples` table as the peer lane. Separate accounting contracts
+keep the two lanes apart, so no migration is added.
+
+| Lane | Local record | Contract |
+| --- | --- | --- |
+| Claude Code, Claude Agent SDK | `~/.claude/projects/**/*.jsonl` assistant `message.usage` | `claude-code-transcript-usage/v1` |
+| opencode, t3code | `~/.local/share/opencode/opencode.db` finished assistant messages | `opencode-message-usage/v1` |
+| Claude subscription limits | `~/.t3/caches/claudeAgent.json` `usageLimits` | `t3code-claude-usage-limits/v1` (quota) |
+
+t3code is not a separate token source. Its usage scanner rereads the Codex
+and Claude transcripts, so counting it would double-count. An opencode session
+started by a t3code thread (found through t3code's
+`provider_session_runtime` resume cursor, including child sessions) is
+labelled `t3code`; every other opencode session stays `opencode`. Claude Code
+lines whose `entrypoint` starts with `sdk` become `claude-agent-sdk`. Codex
+usage and Codex quota stay with `codex-token-report.py`. Antigravity IDE keeps
+per-generation records only in an undocumented protobuf with no reliable
+token counters, so it is not collected.
+
+Token semantics match the peer lane. Anthropic's `input_tokens` excludes
+cache traffic, so logical input is uncached input + cache reads + cache
+writes, and cached input is the cache-read subset. opencode stores output and
+reasoning as disjoint counters (434 of 1,651 live messages had reasoning
+above output), so emitted output is their sum and reasoning stays a subset.
+Claude Code repeats one reply's usage on every content-block line, and forked
+sessions copy earlier lines. Requests are deduplicated globally by message and
+request ID before the window check, and the first copy wins. opencode messages
+are bucketed by completion time; unfinished messages are skipped, so a sent
+hour cannot change and trip the store's immutable-replay conflict.
+
+```bash
+python3 scripts/agent-direct-usage-report.py --hours 720 --summary-only
+python3 scripts/agent-direct-usage-report.py --hours 24 --print-only
+```
+
+`--summary-only` prints per-lane totals and never sends. The reporter loads
+`agent-peer-report.py` beside it for the cursor, credential-file, redirect,
+and HTTPS rules, so install both files together. It accepts the same
+`AGENT_PEER_INGEST_URL` and `MACHINE_HEALTH_INGEST_SECRET` pair, or a
+`--config-file`. Posts are split at 400 samples to stay under the 512 KiB
+ingest limit, and the cursor advances only after every post succeeds.
+Routine runs never resend an hour. A manual `--hours` re-backfill should stay
+within data still on disk: Claude Code prunes old transcripts, and a thread
+deleted from t3code would relabel its opencode hours as `opencode`, storing
+them a second time beside the earlier `t3code` rows.
+
+A Sept. 11 live reconciliation of the 720 hours ending 03:00 UTC matched an
+independent full rescan exactly: 6,010 Opus 5, 585 Fable 5.1 and 163 Sonnet 5
+requests. opencode's 834 free-tier Muse messages split into 28 `opencode` and
+806 `t3code` requests. The whole backfill was 118 samples and 88 KiB in one
+post. A one-hour run took 0.95 s. Transcripts untouched since the window began
+are skipped without being opened.
+
+Totals are public, like the Codex Models table. The public panel omits
+opencode's API-equivalent dollar estimate. Claude subscription percentages,
+reset countdowns and probe age render only for private sessions; each hourly
+run sends t3code's latest probe when it is under 48 hours old. The payload
+never contains prompts, responses, titles, paths, session/message/request
+IDs, or the account email found beside the limits.
+
+Render the LaunchAgent (minute 37, after the token and resource reporters):
+
+```bash
+support="$HOME/Library/Application Support/Scrapbook"
+install -m 600 scripts/agent-peer-report.py scripts/agent-direct-usage-report.py "$support/"
+python3 scripts/agent-direct-usage-launchd.py \
+  --python "$(command -v python3)" \
+  --reporter "$support/agent-direct-usage-report.py" \
+  --config "$support/agent-direct-usage.json" \
+  --state "$support/agent-direct-usage-state.json" \
+  > "$HOME/Library/LaunchAgents/com.teamleaderleo.scrapbook-agent-direct-usage.plist"
+```
+
+`agent-direct-usage.json` uses the credential-file shape below with the
+`/api/machine-health/agent-usage/ingest` URL. Activation needs migrations
+`0020_agent_usage_and_quota.sql` and `0023_agent_peer_run_counts.sql` in
+production first; until then the panel reads nothing and shows its empty
+state. Do not run this collector on Big Red: its Claude transcripts and
+opencode ledger contain the delegated peer runs the peer ledger already
+counts. Rollback is `launchctl bootout` of the agent plus removal of the two
+copies, credential file and cursor.
+
 For launchd, keep those two values in one current-user-owned mode-`0600` JSON file instead of
 putting the bearer secret in a plist:
 

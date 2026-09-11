@@ -235,6 +235,70 @@ export const PEER_USAGE_CONTRACTS = [
   'big-red-muse-peer-usage/v1',
 ] as const;
 
+export const DIRECT_USAGE_CONTRACTS = [
+  'claude-code-transcript-usage/v1',
+  'opencode-message-usage/v1',
+] as const;
+
+export const DIRECT_QUOTA_CONTRACTS = ['t3code-claude-usage-limits/v1'] as const;
+
+export type ProviderQuotaSampleRow = {
+  source: string;
+  observedAt: string;
+  provider: string;
+  harness: string;
+  limitId: string;
+  windowMinutes: number | null;
+  percentOrientation: 'used' | 'remaining' | null;
+  percentValue: number | null;
+  resetsAt: string | null;
+};
+
+export async function readLatestProviderQuotaSamples(
+  contracts: readonly string[] = DIRECT_QUOTA_CONTRACTS
+): Promise<ProviderQuotaSampleRow[]> {
+  const rows = await client<
+    {
+      source: string;
+      observed_at: Date | string;
+      provider: string;
+      harness: string;
+      limit_id: string;
+      window_minutes: number | null;
+      percent_orientation: 'used' | 'remaining' | null;
+      percent_value: number | string | null;
+      resets_at: Date | string | null;
+    }[]
+  >`
+    SELECT DISTINCT ON (source, provider, harness, limit_id)
+      source,
+      observed_at,
+      provider,
+      harness,
+      limit_id,
+      window_minutes,
+      percent_orientation,
+      percent_value,
+      resets_at
+    FROM provider_quota_samples
+    WHERE observed_at >= now() - interval '7 days'
+      AND quota_contract = ANY(${contracts})
+    ORDER BY source, provider, harness, limit_id, observed_at DESC
+  `;
+
+  return rows.map(row => ({
+    source: row.source,
+    observedAt: new Date(row.observed_at).toISOString(),
+    provider: row.provider,
+    harness: row.harness,
+    limitId: row.limit_id,
+    windowMinutes: row.window_minutes,
+    percentOrientation: row.percent_orientation,
+    percentValue: row.percent_value === null ? null : Number(row.percent_value),
+    resetsAt: row.resets_at === null ? null : new Date(row.resets_at).toISOString(),
+  }));
+}
+
 export type PeerUsageSampleRow = {
   source: string;
   observedAt: string;

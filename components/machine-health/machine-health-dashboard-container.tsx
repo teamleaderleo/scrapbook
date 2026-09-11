@@ -1,9 +1,14 @@
 import { readCodexQuotaSamples } from '@/app/lib/codex-quota-store';
-import { readPeerUsageSamples } from '@/app/lib/agent-usage-store';
+import {
+  DIRECT_USAGE_CONTRACTS,
+  readLatestProviderQuotaSamples,
+  readPeerUsageSamples,
+} from '@/app/lib/agent-usage-store';
 import { readMachineHealth } from '@/app/lib/machine-health-store';
 import { readWorkerOutcomeSnapshot } from '@/app/lib/worker-outcome-source';
 import { headers } from 'next/headers';
 import { CodexQuotaPanel } from './codex-quota-panel';
+import { DirectUsagePanel } from './direct-usage-panel';
 import { PeerUsagePanel } from './peer-usage-panel';
 import { WorkerOutcomeAttentionPanel } from './worker-outcome-attention-panel';
 import { MachineHealthDashboard } from './machine-health-dashboard-v2';
@@ -31,6 +36,16 @@ function StateCard({
   );
 }
 
+async function readDirectQuota(hasPrivateAccess: boolean) {
+  const samples = hasPrivateAccess
+    ? await readLatestProviderQuotaSamples().catch(error => {
+        console.warn('Unable to read private provider quota samples', error);
+        return [];
+      })
+    : [];
+  return { samples, readAt: Date.now() };
+}
+
 export async function MachineHealthDashboardContainer({
   hasPrivateAccess,
   ownerAuthConfigured,
@@ -41,7 +56,14 @@ export async function MachineHealthDashboardContainer({
   authError?: boolean;
 }) {
   await headers();
-  const [result, quotaSamples, peerSamples, outcomeSnapshot] = await Promise.all([
+  const [
+    result,
+    quotaSamples,
+    peerSamples,
+    outcomeSnapshot,
+    directSamples,
+    directQuota,
+  ] = await Promise.all([
     readMachineHealth(60),
     hasPrivateAccess
       ? readCodexQuotaSamples(30).catch(error => {
@@ -65,6 +87,11 @@ export async function MachineHealthDashboardContainer({
           };
         })
       : Promise.resolve(null),
+    readPeerUsageSamples(30, DIRECT_USAGE_CONTRACTS).catch(error => {
+      console.warn('Unable to read direct agent usage history', error);
+      return [];
+    }),
+    readDirectQuota(hasPrivateAccess),
   ]);
   if (result.status === 'configuration-error')
     return (
@@ -100,6 +127,11 @@ export async function MachineHealthDashboardContainer({
         hasPrivateAccess={hasPrivateAccess}
         ownerAuthConfigured={ownerAuthConfigured}
         authError={authError}
+      />
+      <DirectUsagePanel
+        samples={directSamples}
+        quota={directQuota.samples}
+        now={directQuota.readAt}
       />
       {hasPrivateAccess ? (
         <>
