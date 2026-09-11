@@ -30,11 +30,11 @@ describe('taskEquivalentBenchmark', () => {
     });
   });
 
-  it('maps provider-default Muse telemetry to the XHigh working benchmark', () => {
+  it('maps provider-default Muse telemetry to the XHigh working range', () => {
     expect(taskEquivalentBenchmark('muse-spark', 'provider-default')).toEqual({
-      label: 'Muse Spark XHigh working benchmark',
+      label: 'Muse Spark XHigh working range',
       tokensPerTaskMin: 14_800_000,
-      tokensPerTaskMax: 14_800_000,
+      tokensPerTaskMax: 16_200_000,
     });
   });
 });
@@ -55,13 +55,13 @@ describe('estimateTaskEquivalents', () => {
     expect(astra?.min).toBeCloseTo(2, 8);
     expect(astra?.max).toBeCloseTo(3.1090909, 7);
 
-    expect(
-      estimateTaskEquivalents({
-        model: 'muse-spark',
-        effort: 'provider-default',
-        totalTokens: 14_800_000,
-      })
-    ).toMatchObject({ min: 1, max: 1 });
+    const muse = estimateTaskEquivalents({
+      model: 'muse-spark',
+      effort: 'provider-default',
+      totalTokens: 16_200_000,
+    });
+    expect(muse?.min).toBeCloseTo(1, 8);
+    expect(muse?.max).toBeCloseTo(1.0945946, 7);
   });
 
   it('leaves unknown models and unavailable totals unestimated', () => {
