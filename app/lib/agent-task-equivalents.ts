@@ -14,9 +14,11 @@ export type TaskEquivalentEstimate = TaskEquivalentBenchmark & {
 export const TASK_EQUIVALENT_BENCHMARK_REVISION = '2026-09-10';
 
 // Working task units for dashboard normalization. Sol High and Muse Spark XHigh
-// use Artificial Analysis Coding Agent token/task measurements; Astra Low/Medium
-// uses the working token/task estimates derived from its coding cost/task and the
-// measured Codex token mix discussed alongside this dashboard.
+// use Artificial Analysis Coding Agent token/task measurements; Muse High uses
+// that XHigh range as an explicit proxy because the coding-agent table does not
+// publish a High row. Astra Low/Medium uses the working token/task estimates
+// derived from its coding cost/task and the measured Codex token mix discussed
+// alongside this dashboard.
 function normalize(value: string | null | undefined): string {
   return (value ?? '')
     .trim()
@@ -75,16 +77,21 @@ export function taskEquivalentBenchmark(
     normalizedModel === 'muse'
   ) {
     if (
-      !unspecifiedEffort(normalizedEffort) &&
-      normalizedEffort !== 'xhigh' &&
-      normalizedEffort !== 'extra-high'
+      normalizedEffort === 'xhigh' ||
+      normalizedEffort === 'extra-high'
     )
-      return null;
-    return {
-      label: 'Muse Spark XHigh working range',
-      tokensPerTaskMin: 14.8 * MILLION,
-      tokensPerTaskMax: 16.2 * MILLION,
-    };
+      return {
+        label: 'Muse Spark XHigh working range',
+        tokensPerTaskMin: 14.8 * MILLION,
+        tokensPerTaskMax: 16.2 * MILLION,
+      };
+    if (normalizedEffort === 'high' || unspecifiedEffort(normalizedEffort))
+      return {
+        label: 'Muse Spark High · XHigh coding-agent proxy',
+        tokensPerTaskMin: 14.8 * MILLION,
+        tokensPerTaskMax: 16.2 * MILLION,
+      };
+    return null;
   }
 
   return null;
