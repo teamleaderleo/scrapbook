@@ -1,3 +1,8 @@
+import {
+  estimateTaskEquivalents,
+  TASK_EQUIVALENT_BENCHMARK_REVISION,
+  type TaskEquivalentEstimate,
+} from '@/app/lib/agent-task-equivalents';
 import type { PeerUsageSampleRow } from '@/app/lib/agent-usage-store';
 import { summarizePeerUsage } from '@/app/lib/peer-usage-summary';
 
@@ -7,14 +12,59 @@ const compact = (value: number) =>
     maximumFractionDigits: 1,
   }).format(value);
 
+function formatTaskEstimate(estimate: TaskEquivalentEstimate): string {
+  const min = compact(estimate.min);
+  const max = compact(estimate.max);
+  return estimate.min === estimate.max ? `~${min}` : `~${min}–${max}`;
+}
+
+function taskEstimateTitle(estimate: TaskEquivalentEstimate): string {
+  const tokensPerTask =
+    estimate.tokensPerTaskMin === estimate.tokensPerTaskMax
+      ? `${compact(estimate.tokensPerTaskMin)} tokens/task`
+      : `${compact(estimate.tokensPerTaskMin)}–${compact(estimate.tokensPerTaskMax)} tokens/task`;
+  return `${estimate.label} · ${tokensPerTask} · benchmark revision ${TASK_EQUIVALENT_BENCHMARK_REVISION}`;
+}
+
 export function PeerUsagePanel({ samples }: { samples: PeerUsageSampleRow[] }) {
-  const groups = summarizePeerUsage(samples);
+  const groups = summarizePeerUsage(samples).map(group => ({
+    ...group,
+    taskEstimate: estimateTaskEquivalents({
+      model: group.model,
+      effort: group.effort,
+      totalTokens: group.totalTokens,
+    }),
+  }));
+  const taskRows = groups.filter(group => group.taskEstimate !== null);
+  const estimatedWork = taskRows.length
+    ? {
+        min: taskRows.reduce(
+          (sum, group) => sum + (group.taskEstimate?.min ?? 0),
+          0
+        ),
+        max: taskRows.reduce(
+          (sum, group) => sum + (group.taskEstimate?.max ?? 0),
+          0
+        ),
+      }
+    : null;
+
   return (
     <section
       aria-label="Delegated peer usage"
       className="dark:bg-black/15 mt-6 rounded-2xl border border-black/10 bg-white/70 p-5 dark:border-white/10"
     >
-      <h2 className="text-xl font-bold">Delegated peer usage</h2>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2 className="text-xl font-bold">Delegated peer usage</h2>
+        {estimatedWork ? (
+          <p className="text-sm font-semibold tabular-nums">
+            {estimatedWork.min === estimatedWork.max
+              ? `~${compact(estimatedWork.min)}`
+              : `~${compact(estimatedWork.min)}–${compact(estimatedWork.max)}`}{' '}
+            <span className="text-xs font-normal opacity-55">task eq.</span>
+          </p>
+        ) : null}
+      </div>
       <p className="mt-1 text-xs opacity-60">
         Subscription peers Codex delegates to — kept separate from Codex usage
         and from each other.
@@ -50,6 +100,9 @@ export function PeerUsagePanel({ samples }: { samples: PeerUsageSampleRow[] }) {
                   </th>
                   <th scope="col" className="pl-3 font-normal opacity-60">
                     Total
+                  </th>
+                  <th scope="col" className="pl-3 font-normal opacity-60">
+                    Est. tasks
                   </th>
                   <th scope="col" className="pl-3 font-normal opacity-60">
                     API-equiv. estimate
@@ -111,6 +164,18 @@ export function PeerUsagePanel({ samples }: { samples: PeerUsageSampleRow[] }) {
                       <td
                         className="pl-3 text-right"
                         title={
+                          group.taskEstimate
+                            ? taskEstimateTitle(group.taskEstimate)
+                            : 'No working task benchmark for this lane'
+                        }
+                      >
+                        {group.taskEstimate
+                          ? formatTaskEstimate(group.taskEstimate)
+                          : '—'}
+                      </td>
+                      <td
+                        className="pl-3 text-right"
+                        title={
                           group.apiEquivalentEstimateUsd === null
                             ? 'no API-equivalent estimate reported'
                             : `$${group.apiEquivalentEstimateUsd.toFixed(2)} API-equivalent estimate`
@@ -132,8 +197,13 @@ export function PeerUsagePanel({ samples }: { samples: PeerUsageSampleRow[] }) {
               input is never added a second time.
             </li>
             <li>
-              Succeeded means the delegated run exited 0. It is helper success,
-              not accepted engineering work.
+              Est. tasks are normalized coding-task equivalents from recorded
+              tokens and working model benchmarks. Accepted engineering work is
+              tracked separately.
+            </li>
+            <li>
+              Succeeded means the delegated run exited 0. Accepted engineering
+              work is tracked separately.
             </li>
             <li>
               The dollar figure is Claude&apos;s client-side API-equivalent

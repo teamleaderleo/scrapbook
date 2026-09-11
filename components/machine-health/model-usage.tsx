@@ -1,7 +1,12 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import {
+  estimateTaskEquivalents,
+  TASK_EQUIVALENT_BENCHMARK_REVISION,
+  type TaskEquivalentEstimate,
+} from '@/app/lib/agent-task-equivalents';
 import type { CodexTokenSample } from '@/app/lib/machine-health-store';
+import { useState, type ReactNode } from 'react';
 
 export function summarizeModels(
   samples: CodexTokenSample[],
@@ -57,6 +62,24 @@ const compact = (value: number) =>
     maximumFractionDigits: 1,
   }).format(value);
 
+function formatTaskEstimate(estimate: TaskEquivalentEstimate): string {
+  const min = compact(estimate.min);
+  const max = compact(estimate.max);
+  return estimate.min === estimate.max ? `~${min}` : `~${min}–${max}`;
+}
+
+function formatTokensPerTask(estimate: TaskEquivalentEstimate): string {
+  const min = compact(estimate.tokensPerTaskMin);
+  const max = compact(estimate.tokensPerTaskMax);
+  return estimate.tokensPerTaskMin === estimate.tokensPerTaskMax
+    ? `${min} tokens/task`
+    : `${min}–${max} tokens/task`;
+}
+
+function taskEstimateTitle(estimate: TaskEquivalentEstimate): string {
+  return `${estimate.label} · ${formatTokensPerTask(estimate)} · benchmark revision ${TASK_EQUIVALENT_BENCHMARK_REVISION}`;
+}
+
 export function ModelUsage({
   samples,
   from,
@@ -69,10 +92,38 @@ export function ModelUsage({
   controls?: ReactNode;
 }) {
   const [sort, setSort] = useState<'input' | 'output' | 'calls'>('input');
-  const rows = summarizeModels(samples, from, to).sort(
-    (a, b) => b[sort] - a[sort] || a.model.localeCompare(b.model)
+  const rows = summarizeModels(samples, from, to)
+    .map(row => ({
+      ...row,
+      taskEstimate: estimateTaskEquivalents({
+        model: row.model,
+        totalTokens: row.input + row.output,
+      }),
+    }))
+    .sort((a, b) => b[sort] - a[sort] || a.model.localeCompare(b.model));
+  const sortTotal = rows.reduce((sum, row) => sum + row[sort], 0);
+  const taskRows = rows.filter(
+    (row): row is typeof row & { taskEstimate: TaskEquivalentEstimate } =>
+      row.taskEstimate !== null
   );
-  const total = rows.reduce((sum, row) => sum + row[sort], 0);
+  const taskEstimate = taskRows.length
+    ? {
+        min: taskRows.reduce((sum, row) => sum + row.taskEstimate.min, 0),
+        max: taskRows.reduce((sum, row) => sum + row.taskEstimate.max, 0),
+      }
+    : null;
+  const recordedTokens = rows.reduce(
+    (sum, row) => sum + row.input + row.output,
+    0
+  );
+  const benchmarkedTokens = taskRows.reduce(
+    (sum, row) => sum + row.input + row.output,
+    0
+  );
+  const benchmarkCoverage = recordedTokens
+    ? (100 * benchmarkedTokens) / recordedTokens
+    : 0;
+
   if (!rows.length)
     return (
       <section
@@ -89,6 +140,7 @@ export function ModelUsage({
         <p className="mt-2 text-xs opacity-60">No usage in this period.</p>
       </section>
     );
+
   return (
     <section
       aria-label="Model usage"
@@ -103,6 +155,20 @@ export function ModelUsage({
         </h3>
         {controls ?? <span className="text-xs opacity-50">Both machines</span>}
       </div>
+      {taskEstimate ? (
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-y border-black/[0.055] py-2 dark:border-white/[0.065]">
+          <span className="text-xs opacity-60">Estimated work</span>
+          <span
+            className="text-sm font-semibold tabular-nums"
+            title={`${benchmarkCoverage.toFixed(1)}% of recorded tokens covered by a working task benchmark`}
+          >
+            {taskEstimate.min === taskEstimate.max
+              ? `~${compact(taskEstimate.min)}`
+              : `~${compact(taskEstimate.min)}–${compact(taskEstimate.max)}`}{' '}
+            <span className="text-xs font-normal opacity-55">task eq.</span>
+          </span>
+        </div>
+      ) : null}
       <div className="overflow-x-auto">
         <table className="w-full text-xs tabular-nums">
           <thead className="border-b border-black/10 text-right dark:border-white/10">
@@ -128,6 +194,9 @@ export function ModelUsage({
                 </th>
               ))}
               <th scope="col" className="pl-3 font-normal opacity-60">
+                Est. tasks
+              </th>
+              <th scope="col" className="pl-3 font-normal opacity-60">
                 Cache hit
               </th>
             </tr>
@@ -146,7 +215,7 @@ export function ModelUsage({
                     aria-hidden="true"
                     className="mt-1.5 block h-0.5 bg-[#378690] dark:bg-[#66c0c8]"
                     style={{
-                      width: `${total ? (100 * row[sort]) / total : 0}%`,
+                      width: `${sortTotal ? (100 * row[sort]) / sortTotal : 0}%`,
                     }}
                   />
                 </th>
@@ -168,6 +237,16 @@ export function ModelUsage({
                 >
                   {compact(row.output)}
                 </td>
+                <td
+                  className="pl-3 text-right"
+                  title={
+                    row.taskEstimate
+                      ? taskEstimateTitle(row.taskEstimate)
+                      : 'No working task benchmark for this model'
+                  }
+                >
+                  {row.taskEstimate ? formatTaskEstimate(row.taskEstimate) : '—'}
+                </td>
                 <td className="pl-3 text-right">
                   {row.input
                     ? ((100 * row.cached) / row.input).toFixed(1) + '%'
@@ -178,6 +257,14 @@ export function ModelUsage({
           </tbody>
         </table>
       </div>
+      {taskEstimate ? (
+        <p className="mt-2 max-w-prose text-[0.7rem] leading-relaxed opacity-50">
+          Est. tasks are normalized coding-task equivalents derived from recorded
+          tokens and model-specific working benchmarks. Coverage:{' '}
+          {benchmarkCoverage.toFixed(1)}% of recorded tokens. Accepted worker
+          outcomes stay separate.
+        </p>
+      ) : null}
     </section>
   );
 }
