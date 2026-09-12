@@ -238,7 +238,7 @@ Here is the actual speculative leap.
 
 Human social research suggests that close relationships live in small inner layers. Software teams have repeatedly rediscovered practical advantages to small groups. Team research suggests that shared mental models, transactive memory, and interpersonal safety can improve learning and performance. Startup research suggests that early organizational choices can persist. AI research shows that machine assistance can raise individual productivity in real tasks.
 
-None of those literatures says, “therefore the future corporation has five employees.”
+Each of those literatures stops well short of “therefore the future corporation has five employees.”
 
 Put them together, though, and a beautiful possibility appears.
 
@@ -273,7 +273,7 @@ If it works, lunch stays the all-hands.
 ## Sources and useful reading
 
 [^1]: [Cognitive resource allocation determines the organization of personal networks](https://pmc.ncbi.nlm.nih.gov/articles/PMC6099867/) reviews evidence for nested personal-network layers around 5, 15, 50, and 150.
-[^2]: [Using obsidian transfer distances to explore social network maintenance in late Pleistocene hunter-gatherers](https://pmc.ncbi.nlm.nih.gov/articles/PMC4157217/) gives a useful table comparing the 5/15/50/150 layers with family, foraging-party, residential-band, and wider aggregation scales. The mapping is approximate; treat it as an analogy, not a law of organization.
+[^2]: [Using obsidian transfer distances to explore social network maintenance in late Pleistocene hunter-gatherers](https://pmc.ncbi.nlm.nih.gov/articles/PMC4157217/) gives a useful table comparing the 5/15/50/150 layers with family, foraging-party, residential-band, and wider aggregation scales. The mapping is approximate; treat it as an analogy with loose boundaries.
 [^3]: [Small is beautiful: A study of packaged software development teams](https://doi.org/10.1016/S1047-8310(97)90017-1) examined 74 product-development teams and reported a median team size of five.
 [^4]: [Building the Iron Cage: Determinants of Managerial Intensity in the Early Years of Organizations](https://doi.org/10.1177/000312249906400404) studied young technology firms and found enduring effects from founding conditions and early employment models on later managerial intensity.
 [^5]: [Group Versus Individual Training and Group Performance: The Mediating Role of Transactive Memory](https://doi.org/10.1177/0146167295214009) found better recall and assembly performance in groups trained together, with transactive memory mediating much of the advantage.
