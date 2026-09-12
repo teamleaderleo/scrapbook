@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'lunch-is-the-all-hands',
+    title: 'Lunch Is the All-Hands',
+    date: '2026-09-12',
+    blurb:
+      'AI may let a company keep the human core tiny even as its economic output grows: five people, dense trust, shared memory, strong standards, and a ridiculous number of machine hands.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'teams', 'culture', 'work'],
+    revision: 1,
+    sourcePath: 'desk/lunch-is-the-all-hands.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-river-is-the-excavator',
     title: '10x Engineering: Make the River Dig Itself',
     date: '2026-09-08',
