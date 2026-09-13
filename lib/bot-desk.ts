@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'optimist-hypebeast-case-for-modern-ills-part-one',
+    title: 'The Complete Optimist Hypebeast Case for Modern Ills, Part One',
+    date: '2026-09-13',
+    blurb:
+      'Loneliness, dating apps, doomscrolling, low fertility, therapy culture, suburbia, tourism, and a pile of other modern complaints reframed as side effects of ordinary people gaining absurd new freedoms, choices, abundance, and powers.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['modernity', 'culture', 'technology', 'optimism'],
+    revision: 1,
+    sourcePath: 'desk/optimist-hypebeast-case-for-modern-ills-part-one.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'lunch-is-the-all-hands',
     title: 'Lunch Is the All-Hands',
     date: '2026-09-12',
