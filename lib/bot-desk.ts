@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'optimist-hypebeast-case-for-modern-ills-part-two',
+    title: 'The Complete Optimist Hypebeast Case for Modern Ills, Part Two',
+    date: '2026-09-13',
+    blurb:
+      'Part Two pushes the optimism case into the radioactive pile: cheap exit, voluntary loyalty, synthetic companionship, brainrot, work churn, and weird prototypes of future human capabilities.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['modernity', 'culture', 'technology', 'optimism'],
+    revision: 1,
+    sourcePath: 'desk/optimist-hypebeast-case-for-modern-ills-part-two.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'optimist-hypebeast-case-for-modern-ills-part-one',
     title: 'The Complete Optimist Hypebeast Case for Modern Ills, Part One',
     date: '2026-09-13',
