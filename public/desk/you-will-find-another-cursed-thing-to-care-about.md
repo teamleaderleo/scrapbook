@@ -34,7 +34,7 @@ AI gives the lumpiness leverage.
 
 Give a curious person with excellent taste a machine that can search, build, simulate, test, criticize, and try again all day, and you may get somebody terrifyingly capable. Give the same machine to somebody with awful judgment and you get awful judgment with more output.
 
-The interesting variable was never simply how many hours somebody spent manually typing the old moves.
+The variable worth watching was never simply how many hours somebody spent manually typing the old moves.
 
 What teaches judgment is contact with reality. Make a prediction. Try the thing. Watch reality disagree. Figure out why. Carry the correction forward.
 
@@ -48,7 +48,7 @@ Judgment was scarce before agents. Agents reveal how scarce it was.
 
 The engineer's sadness starts sounding much darker if you quietly assume humanity is approaching the end of the problem set.
 
-We aren't.
+Humanity keeps creating larger problem sets.
 
 A solved layer opens another layer. Cheap capability makes previously ridiculous projects affordable. Better tools let people attempt things that used to be beyond the available budget, expertise, coordination, or patience. The reachable territory expands, and suddenly a whole collection of fresh problems becomes worth having.
 
@@ -80,11 +80,11 @@ The career question is different.
 
 A person who developed a consuming interest in low-level AI performance has already demonstrated the more portable trait: they can fall in love with a hard technical world deeply enough to acquire rare taste inside it.
 
-This cannot possibly be the only special interest available to that brain.
+A brain like that has more special interests waiting for it.
 
 Maybe the next obsession is model architecture. Maybe hardware scheduling at a higher level. Maybe agent economies. Maybe robotics. Maybe compiler generation. Maybe some hideous co-design problem between silicon and learned systems that barely exists yet. Maybe it has nothing to do with computers.
 
-The specific answer barely matters. Obsession migrates.
+The specific answer can stay unknown. Obsession migrates.
 
 People do this across a lifetime already. A biologist becomes obsessed with microscopy, then statistics, then a disease, then an instrument, then the weird institutional problem preventing the instrument from being used. An engineer falls into operating systems, then virtualization, then performance, then some tiny device problem that eats three months. An artist spends five years on one medium and wakes up one morning consumed by another.
 
@@ -92,9 +92,9 @@ The continuity lives in the person.
 
 ## Rare people sometimes universalize themselves
 
-There is also a funny humility problem here.
+Exceptional specialists have a funny humility problem.
 
-Exceptional specialists often talk as though anybody who goes through the correct apprenticeship can eventually acquire the judgment they have. Some can. Many won't. The specialist has spent so long surrounded by other specialists that the unusual trait starts feeling normal.
+They often talk as though anybody who goes through the correct apprenticeship can eventually acquire the judgment they have. Some can. Many won't. The specialist has spent so long surrounded by other specialists that the unusual trait starts feeling normal.
 
 A DeepSeek engineer writing frontier attention operators can understandably think, "My craft is being automated, so how will future engineers acquire what I acquired through the craft?"
 
@@ -116,7 +116,7 @@ But his story also contains a much older human pattern.
 
 A person becomes excellent at a difficult craft. Technology absorbs more of the craft. The person can preserve it as art, move upward into directing the machines, move sideways into another domain, or discover a new obsession created by the capability that replaced the old one.
 
-The loss can be romantic and sad. The afternoon by the window mattered. The exact rhythm of the work mattered. A future full of agents can be richer and still contain things worth missing.
+The loss can be romantic and sad. The afternoon by the window was beautiful. The exact rhythm of the work was his. A future full of agents can be richer and still contain things worth missing.
 
 Then tomorrow produces another cursed thing.
 
