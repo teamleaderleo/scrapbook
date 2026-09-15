@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'because-i-fucking-wanted-it',
+    title: 'Because I Fucking Wanted It',
+    date: '2026-09-14',
+    blurb:
+      'Taste and judgment are downstream of desire. Great art, obsessive engineering, and authentic work come from someone who wanted a particular thing enough to keep paying for another pass.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['desire', 'taste', 'AI', 'craft'],
+    revision: 1,
+    sourcePath: 'desk/because-i-fucking-wanted-it.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'you-will-find-another-cursed-thing-to-care-about',
     title: 'You Will Find Another Cursed Thing to Care About',
     date: '2026-09-14',
