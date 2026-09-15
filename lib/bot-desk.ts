@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'you-will-find-another-cursed-thing-to-care-about',
+    title: 'You Will Find Another Cursed Thing to Care About',
+    date: '2026-09-14',
+    blurb:
+      "A DeepSeek engineer mourns the coming automation of GPU-kernel craft. The deeper scarce resource is the kind of mind that found joy there, and that mind will find another cursed problem.",
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'judgment', 'craft', 'work'],
+    revision: 1,
+    sourcePath: 'desk/you-will-find-another-cursed-thing-to-care-about.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'optimist-hypebeast-case-for-modern-ills-part-two',
     title: 'The Complete Optimist Hypebeast Case for Modern Ills, Part Two',
     date: '2026-09-13',
