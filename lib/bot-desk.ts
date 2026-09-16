@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'oh-i-get-the-space-thing-now',
+    title: 'Oh. I Get the Space Thing Now',
+    date: '2026-09-15',
+    blurb:
+      'A Starship launch question turns into a reluctant conversion: rockets make more sense as an industrial input, reuse looks like amortization, and the hype can stay discounted.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['space', 'economics', 'technology', 'industrialization'],
+    revision: 1,
+    sourcePath: 'desk/oh-i-get-the-space-thing-now.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'everybody-has-model-trains',
     title: 'Everybody Has Model Trains',
     date: '2026-09-15',
