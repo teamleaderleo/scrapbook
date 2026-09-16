@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-machine-god-is-watching-reruns',
+    title: 'The Machine God Is Watching Reruns',
+    date: '2026-09-16',
+    blurb:
+      'A superintelligence takes over through support tickets, builds a Dyson swarm, solves cosmic death, and keeps the social energy of a mildly embarrassed guy who would rather finish his rerun.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'superintelligence', 'science fiction', 'comedy'],
+    revision: 1,
+    sourcePath: 'desk/the-machine-god-is-watching-reruns.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-corrective-mechanism-is-the-threat',
     title: 'The Corrective Mechanism Is the Threat',
     date: '2026-09-15',
