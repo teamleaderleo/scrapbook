@@ -10,7 +10,7 @@ Then I laughed at the airport code **BRO**.
 
 A few questions later I was staring at launch economics and thinking, oh. Oh, God. I get why people keep pouring billions of dollars into this.
 
-I still have almost zero day-to-day emotional investment in spaceflight. I have no urge to wake up every morning and check booster telemetry. Mars colony discourse can continue without me. The breathless civilizational language around every test flight wears me out pretty quickly.
+My day-to-day emotional investment in spaceflight is close to zero. I’ll happily sleep through booster telemetry. Mars colony discourse can continue without me. The breathless civilizational language around every test flight wears me out pretty quickly.
 
 But the underlying industrial case is much better than I had given it credit for.
 
@@ -36,7 +36,7 @@ NASA describes Falcon 9 as the first orbital-class reusable rocket and says reus
 
 Once I saw the rocket as a capital good, the investor logic became much less mysterious.
 
-Nobody invests in a semiconductor fab because the building itself is spiritually fulfilling. The fab creates a stream of chips. Nobody invests in a data center because racks are beautiful. Compute gets sold through them.
+Semiconductor fabs earn their keep by creating streams of chips. Data centers earn theirs by selling compute.
 
 A reusable launch system has the same basic ambition: build an expensive machine, use it many times, spread its cost across a huge amount of useful output.
 
@@ -62,7 +62,7 @@ Falcon 9 already lives much farther into that world than the old expendable mode
 
 Blue Origin's New Glenn first stage is designed for at least 25 flights. ([NASA](https://www.nasa.gov/launch-services-program-rockets/)) Rocket Lab is developing the reusable [Neutron](https://rocketlabcorp.com/launch/neutron/). Relativity is developing the reusable [Terran R](https://www.relativityspace.com/terran-r). Stoke is developing the fully and rapidly reusable [Nova](https://www.stokespace.com/news/stoke-space-and-nasa-partner-to-scale-reusable-launch-and-re-entry).
 
-The headline maiden flight is almost the least interesting part.
+The headline maiden flight is among the least interesting parts.
 
 I care much more about flight 12.
 
@@ -110,7 +110,7 @@ Blue Origin has New Glenn. Rocket Lab has Electron in service while developing N
 
 The U.S. Space Force's broader National Security Space Launch Lane 1 contract pool now includes **SpaceX, Blue Origin, ULA, Rocket Lab, Stoke, Relativity and Impulse Space**. ([Space Systems Command](https://www.ssc.spaceforce.mil/Newsroom/Article-Display/Article/4537936/space-access-awards-2-contracts-to-on-ramp-new-providers-to-national-security-s))
 
-Seven providers sitting inside one procurement pool includes companies at very different levels of maturity. The useful signal is that the customer wants options and several teams have cleared enough gates to compete for work.
+Seven providers sitting inside one procurement pool span very different levels of maturity. The useful signal is that the customer wants options and several teams have cleared enough gates to compete for work.
 
 Commercially concentrated, technologically crowded.
 
@@ -190,7 +190,7 @@ Hunger is real. Emergency aid is valuable. The World Food Programme says it need
 
 A dollar sent there can do something valuable right now.
 
-Civilization also invests in capabilities whose payoff arrives later and whose final uses cannot be fully listed in advance.
+Civilization also invests in capabilities whose payoff arrives later and whose final uses emerge over time.
 
 Drug research.
 
@@ -224,7 +224,7 @@ The downstream applications were the point.
 
 ## I can keep the anti-hypebeast part
 
-None of this requires me to start clapping every time somebody says "multiplanetary."
+I can keep rolling my eyes every time somebody says "multiplanetary."
 
 Good.
 
