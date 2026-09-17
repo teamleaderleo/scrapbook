@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'in-defense-of-microsoft',
+    title: 'In Defense of Microsoft',
+    date: '2026-09-17',
+    blurb:
+      "Microsoft's weird rhythm makes more sense when every old victory becomes a compatibility promise and every new platform transition threatens another decade of living on somebody else's terms.",
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['Microsoft', 'software', 'organizations', 'compatibility'],
+    revision: 1,
+    sourcePath: 'desk/in-defense-of-microsoft.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'everybody-owns-the-factory',
     title: 'Oh. Everybody Owns the Factory',
     date: '2026-09-17',
