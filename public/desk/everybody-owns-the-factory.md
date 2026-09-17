@@ -32,7 +32,7 @@ The company contributes the machinery around the person. Capital, compute, equip
 
 A worker with high leverage can therefore create a large surplus over the direct cost of employing them.
 
-High leverage alone does not tell us who captures the surplus. Scarcity, mobility, bargaining power, competition between employers and the worker's outside options decide a lot of that part.
+Who captures that surplus comes down to scarcity, mobility, bargaining power, competition between employers and the worker's outside options.
 
 Research on firms and wages finds a real version of this relationship. Employees at more productive firms tend to earn more, and the pay-productivity link becomes stronger toward the top of the pay distribution. A 2024 NBER paper using U.S. Census data found that more productive firms paid more at every earnings level, with the relationship strongest for their highest-paid workers. ([NBER](https://www.nber.org/papers/w32240))
 
@@ -78,7 +78,7 @@ Then you change jobs. The next company does something similar. Your retirement a
 
 After twenty years, the word *worker* still describes what you do every day, while *capital owner* describes a meaningful part of what you own.
 
-Nobody needed to hand you a factory key.
+The factory key becomes irrelevant.
 
 You own claims on factories, software, stores, machines, patents, datacenters, logistics networks and businesses you will never visit.
 
@@ -92,7 +92,7 @@ Investors can still decide which startups deserve money. Banks can still lend. V
 
 Friedrich Hayek's famous 1945 argument about the price system was about dispersed knowledge. No central mind knows every local fact about scarcity, demand, technology and opportunity; prices communicate enough information for decentralized actors to coordinate. ([American Economic Association](https://www.aeaweb.org/aer/top20/35.4.519-530.pdf))
 
-Hayek was supplying an argument about coordination, not a program for universal employee ownership. The module fits here anyway.
+Hayek's argument concerns coordination. Universal employee ownership is a separate question. The module fits here anyway.
 
 You can ask two separate questions:
 
@@ -100,7 +100,7 @@ You can ask two separate questions:
 
 **Who should own claims on the returns?**
 
-Those questions do not require the same answer.
+Those questions can have different answers.
 
 A society can use markets heavily for the first while distributing the second much more widely than it does today.
 
@@ -126,7 +126,7 @@ Then John Stuart Mill walks in and becomes almost comically on the nose.
 
 In *Principles of Political Economy*, Mill expected the ordinary master-worker relationship to be **“gradually superseded by partnership.”** He explicitly discussed workers partnering with capitalists, profit sharing, worker associations, and eventually entire workforces becoming participants in profits. ([Econlib](https://www.econlib.org/library/Mill/mlP.html?chapter_num=65))
 
-Mill also cared about the efficiency of large-scale production. He was not imagining everybody retreating into tiny isolated workshops. Large enterprises could preserve specialization, accumulated capital and coordinated production while workers gained a direct economic interest in the success of the concern.
+Mill also cared about the efficiency of large-scale production. He imagined large enterprises preserving specialization, accumulated capital and coordinated production while workers gained a direct economic interest in the success of the concern.
 
 He even gets the incentive point. Shared interest can connect the worker's gain to the company's gain, giving employees a reason to care about productivity beyond avoiding dismissal and collecting the next wage.
 
@@ -148,7 +148,7 @@ Property-owning democracy asks who begins with claims on productive wealth in th
 
 John Rawls argued that welfare-state capitalism could leave too much control and productive wealth concentrated even while transferring income afterward. His preferred institutional families included **property-owning democracy**, with widespread ownership of productive assets, and **liberal democratic socialism**, with worker-managed firms. ([Stanford Encyclopedia of Philosophy](https://plato.stanford.edu/entries/rawls/))
 
-Rawls drew heavily on economist James Meade for the property-owning-democracy idea.
+Rawls repeatedly cited economist James Meade when introducing property-owning democracy; Meade's 1964 *Efficiency, Equality and the Ownership of Property* developed a model built around widely distributed capital ownership, education and limits on inherited concentrations of wealth. ([White Rose Research Online](https://eprints.whiterose.ac.uk/165444/1/Social_Justice_and_Economic_Systems_for_Philosophical_Topics_special_issue_on_Socialism_updated_.pdf))
 
 This move is subtle and powerful.
 
@@ -160,21 +160,19 @@ The fashionable word for versions of this is **predistribution**. Arrange bargai
 
 This also explains why broad ownership can feel different from a pure welfare-state story. A dividend from an asset you own has a different institutional origin from a benefit payment financed after the fact. The dollar spends the same; the relationship to production differs.
 
-## Kelso asks: why not make more capitalists?
+## Kelso asks: why make more capitalists?
 
 Louis Kelso may be the closest practical ancestor to the thought we stumbled into.
 
 Kelso developed the ESOP idea in **1956** and spent decades arguing for wider capital ownership. Patricia Hetter Kelso continued the project under the language of **universal capitalism**, explicitly trying to expand capitalism by expanding the number of people who owned capital. ([NCEO](https://www.nceo.org/employee-ownership-blog/patricia-hetter-kelso-1927-2025))
 
-The ESOP is clever because workers do not need to arrive rich enough to buy the company in cash. A trust can acquire shares on behalf of employees, sometimes using financing whose repayment comes from future corporate contributions and earnings.
+The ESOP is clever because workers can arrive without enough wealth to buy the company in cash. A trust can acquire shares on behalf of employees, sometimes using financing whose repayment comes from future corporate contributions and earnings.
 
 So the route from worker to owner can be financed by the productive asset itself over time.
 
-You do not abolish capital ownership.
+Capital ownership continues; the number of capital owners grows.
 
-You manufacture more capital owners.
-
-That sentence lands in a very strange political neighborhood.
+And now we have landed in a very strange political neighborhood.
 
 ## Does any of this make the company better?
 
@@ -196,13 +194,11 @@ The cursed version says:
 
 Employees can carry too much company-specific risk. A collapse can erase the job and the savings at the same time. Private-company shares can be illiquid. Executives can hoard grants while everybody else gets decorative crumbs. A profit-sharing formula can become opaque enough that employees experience it as management astrology.
 
-Ownership can also exist without much control. A worker with $100,000 in employer stock has a genuine financial claim and may have almost no influence over the board. Worker cooperatives and some employee trusts move much farther toward governance rights. Public-company stock grants mostly move the financial side.
+Ownership can also exist with very little control. A worker with $100,000 in employer stock has a genuine financial claim and may have almost no influence over the board. Worker cooperatives and some employee trusts move much farther toward governance rights. Public-company stock grants mostly move the financial side.
 
 The words *employee ownership* cover several quite different arrangements.
 
-## Broad ownership does not solve the entire economy
-
-Plenty of problems survive.
+## Broad ownership leaves plenty unsolved
 
 Land can remain scarce and expensive. Housing gains can swallow wage gains. Monopoly can generate profits through market power. Care work can create enormous human value while producing weak market revenue. Disability, childhood, unemployment and old age all create periods when labor income disappears. Environmental externalities survive regardless of who owns the shares. Inheritance can reconcentrate wealth across generations. Some industries have low margins and limited scalable surplus to distribute.
 
@@ -240,9 +236,9 @@ After enough time, the sentence “workers versus capitalists” starts describi
 
 The normal person becomes both.
 
-They work. They save. They own. Their labor income pays the bills today. Their capital claims accumulate a second stream of wealth. Productivity gains can reach them through compensation and through ownership.
+They work and they own. Labor income pays the bills today; capital claims accumulate a second stream of wealth. Productivity gains can reach the same household through compensation and ownership.
 
-No single institutional form gets you all the way there. ESOPs, broad stock grants, cooperatives, pensions, profit sharing, ownership trusts and diversified household investment each solve different pieces.
+Several institutional forms solve different pieces: ESOPs, broad stock grants, cooperatives, pensions, profit sharing, ownership trusts and diversified household investment.
 
 But Jesus Christ, okay.
 
