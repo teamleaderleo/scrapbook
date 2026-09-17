@@ -40,21 +40,21 @@ Success leaves obligations.
 
 A startup can delete the old API and write a migration guide. Microsoft can do that too, except the migration guide may land in a hospital, a government department, a bank, a school district, a game studio, an accounting office, and forty thousand companies whose internal software nobody at Microsoft has ever seen.
 
-Some Microsoft decisions are still bad. A giant installed base doesn't magically make every prompt, update, product bundle, or UI choice wise.
+Some Microsoft decisions are still bad. A giant installed base can coexist perfectly well with lousy prompts, bad updates, clumsy bundles, and dumb UI choices.
 
-It does explain why apparently tiny decisions can take forever.
+The compatibility burden explains why apparently tiny decisions can take forever.
 
 ## More capability buys more ambition
 
 There's a tempting answer to all of this: hire more excellent engineers, give them better tools, spend more money, and clean the place up.
 
-I don't think capability works that way for very long.
+Capability works differently once ambition catches up.
 
 The personal version is easy to recognize. Become capable of doing five times as much and the first lasting result is usually a much longer list of things you suddenly want to attempt. The extra capability gets spent. Then you want more.
 
 A successful company has the same appetite at a ridiculous scale.
 
-Give Microsoft better developer tools and it can maintain more products. Give it more compute and it can attempt larger services. Give it better AI systems and suddenly a team can imagine integrations that would have been too expensive two years earlier. Add another thousand excellent people and the company doesn't wake up the next morning saying, "Wonderful, now everybody can relax." It discovers another frontier.
+Give Microsoft better developer tools and it can maintain more products. Give it more compute and it can attempt larger services. Give it better AI systems and suddenly a team can imagine integrations that would have been too expensive two years earlier. Add another thousand excellent people and, five minutes later, somebody has a proposal for another frontier.
 
 Microsoft's [2025 annual report](https://www.microsoft.com/investor/reports/ar25/) describes the tension almost perfectly. The company says it is delivering its current platforms at scale while building the next generation, and that it has to think in decades while executing in quarters.
 
@@ -80,7 +80,7 @@ Change a mature platform carelessly and you can create years of compatibility wo
 
 If Microsoft believes AI assistants and agents are becoming a new interface to computing, the aggressive integrations make sense even when some of them are annoying, premature, or ugly. A company with Microsoft's history has lived through enough platform transitions to know what happens when a new layer becomes somebody else's territory.
 
-Windows gave Microsoft an empire. The web weakened parts of that empire. Mobile put Apple and Google in positions Microsoft once would have loved to own. Cloud gave Microsoft another enormous platform. AI arrives and, from Redmond, the obvious institutional memory probably sounds something like: move.
+Windows gave Microsoft an empire. The web weakened parts of that empire. Mobile put Apple and Google in positions Microsoft once would have loved to own. Cloud gave Microsoft another enormous platform. AI arrives and the institutional lesson is easy to infer: move.
 
 So Windows can spend years carrying an ancient compatibility edge case while Copilot gets hammered into everything in sight.
 
@@ -108,15 +108,13 @@ In 2026, Microsoft can bill the VM.
 
 Linux can remain Linux. Kubernetes can have shared governance. PostgreSQL can be PostgreSQL. Open-source projects can develop on their own terms. Microsoft can sell cloud capacity, identity, support, developer tools, security products, GitHub, whatever customers actually want around them.
 
-I can imagine this being a relief at the level of the company too.
+The arrangement can be a relief at the company level too.
 
-Being the author of every important layer means carrying every compatibility decision, setting every expectation, maintaining every weird corner, and receiving every complaint. A healthy ecosystem outside Microsoft gives the company places where it can participate without personally deciding every rule.
+Being the author of every important layer means carrying every compatibility decision, setting every expectation, maintaining every weird corner, and receiving every complaint. A healthy ecosystem outside Microsoft gives the company places where it can participate while leaving many of the rules to somebody else.
 
 Competition can even be useful in that sense. Somebody else develops the standard. Somebody else proves a product category. Somebody else has users who demand interoperability. Microsoft gets a thing it can follow instead of another domain where the entire industry waits for Microsoft to set the tone.
 
-I wouldn't turn this into a claim that Microsoft altruistically wants competitors to prosper. Microsoft is a giant profit-seeking company and competes very hard where it sees value.
-
-The narrower incentive is enough: Microsoft can make a lot of money in a world containing strong independent ecosystems, and every thriving external ecosystem is one more place where Microsoft can sell something without inheriting sole authorship of the whole experience.
+The claim stays narrow. Microsoft is a giant profit-seeking company and competes very hard where it sees value. It can also make a lot of money in a world containing strong independent ecosystems, and every thriving external ecosystem is one more place where Microsoft can sell something while sharing authorship of the broader experience.
 
 Old Microsoft wanted developers writing Windows applications.
 
@@ -152,7 +150,7 @@ So yes, Microsoft sometimes looks unfocused. It has an incredible amount to focu
 
 ## A defense still gets to complain
 
-None of this buys Microsoft absolution.
+Microsoft still earns plenty of criticism.
 
 Users can reasonably hate account nags, unwanted product promotion, UI churn, broken updates, or an AI feature showing up before it earns its space. Enterprise customers can complain about licensing. Developers can complain about product direction. Competitors can complain when Microsoft uses an established position aggressively.
 
@@ -160,7 +158,7 @@ A defense of Microsoft gets more interesting when the criticism stays intact.
 
 The useful claim is that a surprising amount of Microsoft's weird behavior can emerge from competent people facing a genuinely strange inheritance.
 
-Every successful layer leaves a constituency behind. Every new feature can become a future compatibility promise. Every simplification threatens an old dependency. Every new platform transition creates pressure to move before the evidence feels complete. Every increase in capability gives the company enough confidence to attempt another thing.
+Every successful layer leaves a constituency behind. Every new feature can become a future compatibility promise. Every simplification threatens an old dependency. Every new platform transition creates pressure to move before the evidence feels complete. Every increase in capability gives the company enough confidence to attempt another frontier.
 
 Then millions of people encounter the combined result through the machine they use every day.
 
