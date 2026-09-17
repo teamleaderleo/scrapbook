@@ -40,7 +40,7 @@ It can teach those people the wrong lesson.
 
 ## Every company has a hidden curriculum
 
-Nobody has to publish the lesson.
+The lesson arrives through consequences.
 
 Suppose an engineer raises a serious problem with a launch. The launch slips. A senior manager gets embarrassed. The engineer spends the next month defending why they escalated.
 
@@ -48,19 +48,15 @@ A different engineer sees a similar problem six months later and phrases it more
 
 "We may want to keep an eye on this after launch."
 
-The launch ships. Nothing catches fire that week. Their manager says they handled the situation pragmatically.
+The launch ships and survives the week. Their manager says they handled the situation pragmatically.
 
 Everybody nearby just learned something.
 
-No policy changed.
-
-No memo went out saying **please hide bad news**.
-
-The organization ran a tiny training example and supplied the reward signal itself.
+Policy stayed the same. The organization taught the lesson anyway.
 
 Companies do this constantly. Which projects get rescued? Who gets promoted after a miss? Who gets described as "strategic"? Who gets called difficult? Which person can say "this is stupid" and keep their career? Which person gets celebrated for landing the quarter after quietly borrowing from the next one?
 
-The employee handbook matters less than the observed gradient.
+The employee handbook carries less information than the observed gradient.
 
 People are astonishingly good at finding it.
 
@@ -86,7 +82,7 @@ A local survival tactic has become a selection criterion.
 
 Give it another generation and it becomes culture.
 
-This is why a company can drift without any moment where somebody chooses the new direction. The people who thrive under the existing incentives become the people who allocate money, conduct interviews, write performance reviews, define leadership qualities, and decide what counts as good judgment.
+A company can drift through accumulated local choices. The people who thrive under the existing incentives become the people who allocate money, conduct interviews, write performance reviews, define leadership qualities, and decide what counts as good judgment.
 
 The test starts breeding people who are good at the test.
 
@@ -98,11 +94,11 @@ Intelligence sounds like the obvious corrective until you ask what the intellige
 
 A smart employee can notice that the official goal and the career goal have diverged earlier than everyone else.
 
-Maybe customer retention matters to the company while the promotion committee rewards launches.
+Maybe customer retention is crucial to the company while the promotion committee rewards launches.
 
 The smart employee launches.
 
-Maybe reliability matters to the product while leadership rewards visible feature work.
+Maybe reliability is crucial to the product while leadership rewards visible feature work.
 
 The smart employee learns how much reliability work earns social credit and stops there.
 
@@ -162,7 +158,7 @@ Oh, great. Another loop.
 
 Graham gets even closer to the chain-reaction idea in [How to Think for Yourself](https://www.paulgraham.com/think.html). He argues that successful startups begin with unusually independent-minded people, then growth can dilute that population because conventional-minded people are more common. He floats the idea of organizational policies acting like control rods that slow a chain reaction of conformism.
 
-Control rods is exactly the right kind of image here.
+Control rods are exactly the right image here.
 
 A culture can move because the composition of the room changes.
 
@@ -170,7 +166,7 @@ Then the changed room affects what can comfortably be said.
 
 What can be said affects what people think through openly.
 
-That affects who enjoys working there.
+The narrowed conversational range affects who enjoys working there.
 
 Those people leave or stay.
 
@@ -260,17 +256,17 @@ People remember.
 
 The obvious response is to hire virtuous people who love truth and resist incentives.
 
-I don't trust a plan that needs everybody to be a saint.
+A plan that requires everybody to be a saint is fragile.
 
 A healthier company makes correction cheaper and gives reality multiple routes into decisions.
 
-Customers can reach people with authority. Engineers can surface failures outside the chain that owns the project. Metrics have definitions that survive a bad quarter. Leaders talk to people several levels down. Projects can die without requiring somebody to confess moral failure. Postmortems increase the status of the person who found the problem early. A respected senior person can say "yeah, I fucked that up" and remain respected.
+Customers can reach people with authority. Engineers can surface failures outside the chain that owns the project. Metrics have definitions that survive a bad quarter. Leaders talk to people several levels down. Projects can die while their owners keep their dignity. Postmortems increase the status of the person who found the problem early. A respected senior person can say "yeah, I fucked that up" and remain respected.
 
-None of this eliminates politics, pride, career incentives, conformity, or bad judgment.
+Politics, pride, career incentives, conformity, and bad judgment stay.
 
-It changes which behavior is locally survivable.
+The checks change which behavior is locally survivable.
 
-Graham's control rods metaphor works because the chain reaction is the point. You don't need a perfect organization. You need enough interruption that one local distortion struggles to reproduce itself into the next generation.
+Graham's control rods metaphor works because the chain reaction is the point. A merely corrigible organization is enough. The chain needs enough interruption that one local distortion struggles to reproduce itself into the next generation.
 
 The best check may be brutally simple: keep some important tests close to the outside world.
 
@@ -280,7 +276,7 @@ Does the software work?
 
 Did the launch actually improve anything?
 
-Can the person doing the work tell the person making the decision what happened without spending half the conversation managing their ego?
+Can the person doing the work tell the decision-maker what happened directly, with little ego management?
 
 Reality is wonderfully rude when it retains veto power.
 
@@ -310,6 +306,6 @@ Then those people choose successors.
 
 Eventually you can have a building full of people who are excellent at succeeding inside the company and a company that's terrible at succeeding anywhere else.
 
-Nobody had to decide to ruin it.
+Ruin emerged from ordinary local wins.
 
 The company taught them how.
