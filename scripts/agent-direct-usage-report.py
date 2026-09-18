@@ -536,7 +536,138 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="print per-lane totals instead of the payload; never sends",
     )
+    parser.add_argument(
+        "--table",
+        action="store_true",
+        help="print a formatted summary table of direct agent usage",
+    )
     return parser.parse_args()
+
+
+def format_compact(value: int | float | None) -> str:
+    if value is None:
+        return "—"
+    if value >= 1_000_000_000:
+        return f"{value / 1_000_000_000:.1f}B"
+    if value >= 1_000_000:
+        return f"{value / 1_000_000:.1f}M"
+    if value >= 1_000:
+        return f"{value / 1_000:.1f}K"
+    return str(int(value))
+
+
+def format_table(payload: dict[str, Any]) -> str:
+    lanes: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for sample in payload.get("usage_samples", []):
+        key = (sample["harness"], sample["provider"], sample["model"])
+        lane = lanes.setdefault(
+            key,
+            {
+                "hours": set(),
+                "requests": 0,
+                "input": 0,
+                "cached": 0,
+                "output": 0,
+                "total": 0,
+            },
+        )
+        lane["hours"].add(sample["observed_at"])
+        lane["requests"] += sample.get("request_count") or 0
+        lane["input"] += sample.get("input_tokens") or 0
+        lane["cached"] += sample.get("cached_input_tokens") or 0
+        lane["output"] += sample.get("output_tokens") or 0
+        lane["total"] += sample.get("total_tokens") or 0
+
+    if not lanes:
+        return "No direct agent usage found in this window."
+
+    sorted_lanes = sorted(
+        lanes.items(), key=lambda item: (item[1]["total"], item[0]), reverse=True
+    )
+
+    table_data = []
+    tot_reqs = tot_input = tot_cached = tot_output = tot_total = 0
+    all_hours: set[str] = set()
+
+    for (harness, provider, model), data in sorted_lanes:
+        all_hours.update(data["hours"])
+        tot_reqs += data["requests"]
+        tot_input += data["input"]
+        tot_cached += data["cached"]
+        tot_output += data["output"]
+        tot_total += data["total"]
+
+        cache_pct = (
+            f"{(data['cached'] / data['input'] * 100):.1f}%"
+            if data["input"] > 0
+            else "—"
+        )
+        table_data.append(
+            (
+                harness,
+                provider,
+                model,
+                str(len(data["hours"])),
+                f"{data['requests']:,}",
+                format_compact(data["input"]),
+                cache_pct,
+                format_compact(data["output"]),
+                format_compact(data["total"]),
+            )
+        )
+
+    tot_cache_pct = (
+        f"{(tot_cached / tot_input * 100):.1f}%" if tot_input > 0 else "—"
+    )
+    totals_row = (
+        "Total",
+        "",
+        "",
+        str(len(all_hours)),
+        f"{tot_reqs:,}",
+        format_compact(tot_input),
+        tot_cache_pct,
+        format_compact(tot_output),
+        format_compact(tot_total),
+    )
+
+    headers = (
+        "Harness",
+        "Provider",
+        "Model",
+        "Hours",
+        "Requests",
+        "Input",
+        "Cache %",
+        "Output",
+        "Total",
+    )
+    col_widths = [len(h) for h in headers]
+    for row in table_data + [totals_row]:
+        for idx, cell in enumerate(row):
+            col_widths[idx] = max(col_widths[idx], len(cell))
+
+    header_line = "  ".join(
+        h.ljust(col_widths[i]) if i < 3 else h.rjust(col_widths[i])
+        for i, h in enumerate(headers)
+    )
+    sep_line = "  ".join("-" * col_widths[i] for i in range(len(headers)))
+
+    data_lines = []
+    for row in table_data:
+        data_lines.append(
+            "  ".join(
+                cell.ljust(col_widths[i]) if i < 3 else cell.rjust(col_widths[i])
+                for i, cell in enumerate(row)
+            )
+        )
+
+    totals_line = "  ".join(
+        cell.ljust(col_widths[i]) if i < 3 else cell.rjust(col_widths[i])
+        for i, cell in enumerate(totals_row)
+    )
+
+    return "\n".join([header_line, sep_line] + data_lines + [sep_line, totals_line])
 
 
 def summary(payload: dict[str, Any]) -> dict[str, Any]:
@@ -576,6 +707,9 @@ def main() -> int:
     for warning in warnings:
         print(warning, file=sys.stderr)
 
+    if args.table:
+        print(format_table(payload))
+        return 0
     if args.summary_only:
         print(json.dumps(summary(payload), indent=2))
         return 0

@@ -265,6 +265,46 @@ class ReporterTest(unittest.TestCase):
         self.assertLessEqual(len(sample["sample_id"]), 128)
         self.assertEqual(sample["sample_id"], buckets.samples()[0]["sample_id"])
 
+    def test_format_table_renders_aligned_summary(self) -> None:
+        payload = {
+            "usage_samples": [
+                {
+                    "harness": "t3code",
+                    "provider": "opencode-go",
+                    "model": "muse-spark-1.3-contributor",
+                    "observed_at": "2026-09-11T05:00:00Z",
+                    "request_count": 10,
+                    "input_tokens": 10_000_000,
+                    "cached_input_tokens": 9_000_000,
+                    "output_tokens": 50_000,
+                    "total_tokens": 10_050_000,
+                },
+                {
+                    "harness": "t3code",
+                    "provider": "opencode-go",
+                    "model": "muse-spark-1.3-contributor",
+                    "observed_at": "2026-09-11T06:00:00Z",
+                    "request_count": 5,
+                    "input_tokens": 5_000_000,
+                    "cached_input_tokens": 4_500_000,
+                    "output_tokens": 25_000,
+                    "total_tokens": 5_025_000,
+                },
+            ]
+        }
+        table = REPORT.format_table(payload)
+        self.assertIn("Harness", table)
+        self.assertIn("Model", table)
+        self.assertIn("muse-spark-1.3-contributor", table)
+        self.assertIn("15", table)  # 10 + 5 requests
+        self.assertIn("15.0M", table)  # 15M input
+        self.assertIn("90.0%", table)  # 13.5M / 15M
+        self.assertIn("Total", table)
+
+        empty_table = REPORT.format_table({"usage_samples": []})
+        self.assertEqual(empty_table, "No direct agent usage found in this window.")
+
 
 if __name__ == "__main__":
     unittest.main()
+

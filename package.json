@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test tests/e2e/smoke.spec.ts --project=chromium",
     "test:e2e:full": "playwright test --project=chromium",
+    "usage": "python3 scripts/agent-direct-usage-report.py --hours 720 --table",
     "analyze": "cross-env ANALYZE=true pnpm build",
     "preinstall": "npx only-allow pnpm"
   },
