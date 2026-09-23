@@ -68,6 +68,12 @@ export default function WorkImpactPage() {
               >
                 Compact summary
               </a>
+              <a
+                href="/api/work-impact/candidates?q=latency"
+                className="text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+              >
+                Search PR candidates
+              </a>
             </div>
           </div>
         </header>
