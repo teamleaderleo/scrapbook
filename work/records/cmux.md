@@ -39,6 +39,14 @@ A second cluster works on demand before buying more capacity.
 
 These figures overlap in places, so the impact ledger keeps them separate. A runner minute shifted to sponsored capacity, a minute never scheduled, and a minute removed from a release job are different economic events.
 
+## Put a dollar scale on the workload
+
+The [CMUX economics model](cmux-economics.md) keeps pricing assumptions separate from the engineering claims.
+
+A complete 24-hour accounting measured **18,704 macOS runner-minutes/day of actual runner occupancy**. Pricing only the explicitly 12-vCPU Nightly and Release work at WarpBuild's 12-vCPU rate and every other minute at the cheaper 6-vCPU rate yields a conservative replacement-cost run rate of approximately **$1,668/day**, **$50,051 per 30-day month**, or **$608,951/year** at Warp list prices checked 2026-09-23.
+
+That is a workload baseline, not an attributed saving. The individual records separately identify which work moved off paid capacity, which demand disappeared, and which feedback loops got shorter. The economics model also keeps engineer-time and additional-staffing scenarios explicitly hypothetical until there is evidence for event frequency or avoided hiring.
+
 ## Make failures tell the truth
 
 Some of the strongest work improves the signal instead of the raw runtime.

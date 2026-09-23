@@ -37,6 +37,7 @@ The operating idea is simple:
 - [`interview-calibration.md`](interview-calibration.md) — preparation-sensitive interpretation of interview/test performance and the rule to prepare the actual evaluation instrument rather than an invented generic packet.
 - [`records/preflight.md`](records/preflight.md) — durable Preflight engineering stories and deeper mechanism context; moving performance numbers live in `records/preflight-live-performance.md`.
 - [`records/cmux.md`](records/cmux.md) — synthesis of the CMUX build-systems, developer-feedback, CI-capacity, and reliability campaign; moving quantitative claims remain in the impact ledger.
+- [`records/cmux-economics.md`](records/cmux-economics.md) — replacement-cost baseline and explicit sensitivity model for CMUX compute, engineer feedback time, and staffing counterfactuals.
 - [`records/open-source.md`](records/open-source.md) — selected open-source engineering evidence and the larger bench.
 - [`archive/2026-08-11-signal-audit.md`](archive/2026-08-11-signal-audit.md) — first broad snapshot of the current body of work and the narrative it supports.
 - [`AGENTS.md`](AGENTS.md) — local instructions for agents updating this record.
