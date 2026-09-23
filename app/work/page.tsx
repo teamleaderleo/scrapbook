@@ -45,12 +45,20 @@ export default function WorkPage() {
               This is a selected public view, not a resume and not an activity
               leaderboard. Useful reversals stay beside the wins.
             </p>
-            <a
-              href="/api/work"
-              className="mt-3 inline-flex min-h-11 items-center font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
-            >
-              Read as JSON
-            </a>
+            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+              <a
+                href="/api/work"
+                className="inline-flex min-h-11 items-center font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+              >
+                Read as JSON
+              </a>
+              <a
+                href="/work/impact"
+                className="inline-flex min-h-11 items-center font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+              >
+                Impact ledger
+              </a>
+            </div>
           </div>
         </header>
 
