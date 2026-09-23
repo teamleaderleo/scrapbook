@@ -63,6 +63,6 @@ Mine the raw snapshot for uncurated candidates:
 
 ## Public read path
 
-The site exposes the generated index at /api/work-impact and a human view at /work/impact.
+The site exposes the curated index at /api/work-impact and a human view at /work/impact. The raw candidate projection is available at /api/work-impact/candidates and /data/impact-pr-candidates-v1.json.
 
-The API supports q, repo, area, dimension, and id query parameters. A fresh agent can therefore inspect the impact record with one small request instead of walking hundreds of GitHub pull requests.
+The curated API supports q, repo, area, dimension, and id query parameters. The candidate API supports q, repo, and limit. A fresh agent can therefore inspect either the durable impact record or the full 437-PR retrieval pool with one small request instead of walking hundreds of GitHub pull requests.
