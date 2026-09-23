@@ -2,12 +2,17 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  IMPACT_CANDIDATES_PATH,
   IMPACT_INDEX_PATH,
+  IMPACT_SNAPSHOT_PATH,
   IMPACT_SUMMARY_PATH,
+  IMPACT_SYNC_STATE_PATH,
   buildImpactArtifacts,
+  buildImpactCandidateArtifact,
   extractMetricHints,
   loadImpactRecords,
   normalizeEvidenceUrl,
+  parseJsonLines,
 } from '../scripts/impact-lib.mjs';
 
 describe('impact ledger', () => {
@@ -20,9 +25,21 @@ describe('impact ledger', () => {
     const summary = JSON.parse(
       await readFile(path.join(process.cwd(), IMPACT_SUMMARY_PATH), 'utf8')
     );
+    const snapshot = parseJsonLines(
+      await readFile(path.join(process.cwd(), IMPACT_SNAPSHOT_PATH), 'utf8')
+    );
+    const syncState = JSON.parse(
+      await readFile(path.join(process.cwd(), IMPACT_SYNC_STATE_PATH), 'utf8')
+    );
+    const candidates = JSON.parse(
+      await readFile(path.join(process.cwd(), IMPACT_CANDIDATES_PATH), 'utf8')
+    );
 
     expect(index).toEqual(artifacts.index);
     expect(summary).toEqual(artifacts.summary);
+    expect(candidates).toEqual(
+      buildImpactCandidateArtifact(snapshot, syncState)
+    );
   });
 
   it('preserves the third-party evidence host rule', () => {
