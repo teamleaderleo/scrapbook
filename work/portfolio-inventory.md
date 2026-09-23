@@ -1,6 +1,6 @@
 # Portfolio inventory
 
-**Last broad refresh:** 2026-08-26
+**Last broad refresh:** 2026-09-23
 
 This is a retrieval index, not a second current-state file and not a draft resume.
 
@@ -40,6 +40,22 @@ What it proves:
 - a native desktop product around the performance work: profiles, settings, diagnostics, privacy-bounded support, updates/rollback, packaging, and candidate evidence.
 
 Career use: **current default**.
+
+### CMUX
+
+Repository: https://redirect.github.com/manaflow-ai/cmux  
+Synthesis: [`records/cmux.md`](records/cmux.md)  
+Measured impact: [`impact/`](impact/README.md)
+
+**Use for:** build systems, developer productivity, Swift/Xcode compilation behavior, CI performance/capacity, test reliability.
+
+The current impact snapshot indexes 437 merged PRs from September 13–23, 2026. The career signal comes from the measured campaign inside that volume: cache ownership and lifecycle, reusable build products, runner scheduling, queue latency, CI observability, and failure-signal repair.
+
+Selected measurements include same-commit tagged builds from 953s to 35.7s through warm DerivedData reuse; Linux guard critical path from 385.5s to 124.3s while intentionally spending about 1.06 extra Linux runner-minutes; focused E2E queue p90 at 83.3 min on macOS 15 versus 1.0 min on macOS 26; roughly 5,900 paid macOS overflow minutes/day shifted onto sponsored capacity in one measured window; and a 1,060-test Swift package lane falling from more than 12 minutes with about 161 issues to 65 seconds with 17 real failures when run serially.
+
+The record also preserves attractive changes that were deliberately narrowed or left unclaimed when the measurement did not support them.
+
+Career use: **strong default for build systems / developer productivity / CI-platform roles**, and a strong systems-performance alternate elsewhere.
 
 ### Vercel AI SDK
 
