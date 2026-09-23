@@ -1,0 +1,321 @@
+{
+  "version": 1,
+  "source": "repository",
+  "generatedFrom": "work/impact/records",
+  "updatedAt": "2026-09-23",
+  "recordCount": 8,
+  "records": [
+    {
+      "id": "cmux-13749",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13749,
+      "title": "Read app-host artifacts over parallel range requests",
+      "status": "merged",
+      "happenedAt": "2026-09-23T03:59:13Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "performance",
+        "artifact-transport",
+        "macos"
+      ],
+      "summary": "Traced app-host product restore time to the single-stream artifact transport rather than hashing or extraction, then added a verified parallel range-request path with the canonical GitHub download retained as fallback.",
+      "evidence": {
+        "label": "CMUX PR 13749",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13749",
+        "basis": "The PR body records per-phase timings, artifact size and throughput, the seven-consumer cost, integrity checks, and fallback behavior."
+      },
+      "claims": [
+        {
+          "id": "artifact-transfer-baseline",
+          "dimension": "compute",
+          "metric": "artifact-transfer-job-minutes-per-full-suite",
+          "direction": "baseline",
+          "value": 60,
+          "unit": "job-minutes/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "two referenced CI runs",
+          "population": "Seven app-host product consumers in a full-suite run",
+          "note": "The baseline was about eight minutes per consumer; the PR reports the transfer step as roughly 98 percent transport time and moves the path to concurrent ranges with verification and fallback.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": null
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13749.md"
+    },
+    {
+      "id": "cmux-13908",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13908,
+      "title": "Compile the E2E test product once and reuse it on reruns",
+      "status": "merged",
+      "happenedAt": "2026-09-23",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "testing",
+        "macos",
+        "build-reuse"
+      ],
+      "summary": "Split the focused E2E dispatch into filter, build, and test jobs so invalid selectors fail on Linux before a Mac starts and reruns download the retained test product instead of recompiling it.",
+      "evidence": {
+        "label": "CMUX PR 13908",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13908",
+        "basis": "The PR body measures 60 dispatches, isolates the approximately 15.3-minute compile portion, and states that reruns now download the product and compile nothing."
+      },
+      "claims": [
+        {
+          "id": "rerun-compile-avoided",
+          "dimension": "critical-path",
+          "metric": "compile-minutes-avoided-per-failed-dispatch-rerun",
+          "direction": "reduction",
+          "value": 15.3,
+          "unit": "minutes/event",
+          "recurrence": "per-event",
+          "confidence": "derived",
+          "measurementWindow": "60 dispatches over about 8 hours",
+          "population": "Reruns of a failed focused E2E dispatch while the retained product remains available",
+          "note": "Fresh dispatches do not claim lower total runner minutes; this figure is the measured compile portion removed from a rerun by the new job split.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": null
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13908.md"
+    },
+    {
+      "id": "cmux-13962",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13962,
+      "title": "Report recorded failures even when app-host results are incomplete",
+      "status": "merged",
+      "happenedAt": "2026-09-23",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "testing",
+        "reliability",
+        "diagnostics"
+      ],
+      "summary": "Fixed an early-return path where one missing terminal test result caused the shard to suppress every failure it had successfully recorded, leaving red full-suite runs without the names of the tests that regressed.",
+      "evidence": {
+        "label": "CMUX PR 13962",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13962",
+        "basis": "The PR body compares CI output with the same run's logs and records 60 XCTest assertion failures plus 88 Swift Testing failures that produced zero ratchet lines."
+      },
+      "claims": [
+        {
+          "id": "hidden-recorded-failures",
+          "dimension": "reliability",
+          "metric": "recorded-failures-hidden-in-observed-run",
+          "direction": "reliability",
+          "value": 148,
+          "unit": "failures/run",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "one referenced full-suite run",
+          "population": "Recorded XCTest and Swift Testing failures in the incomplete app-host shards",
+          "note": "The fix changes diagnostics, not the fail-closed verdict: incomplete runs remain failed while recorded failures are now named.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": null
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13962.md"
+    },
+    {
+      "id": "swift-92545",
+      "repository": "swiftlang/swift",
+      "kind": "issue",
+      "number": 92545,
+      "title": "Cached-diagnostics replay crash with mixed prefix-mapped inputs",
+      "status": "filed",
+      "happenedAt": "2026-09-23",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "swift",
+        "compiler",
+        "build-system",
+        "compilation-cache",
+        "investigation"
+      ],
+      "summary": "Reduced a real compilation-cache crash to three Swift source files and one resource, traced the replay failure through CachedDiagnostics and FileSpecificDiagnosticConsumer, decoded the CAS diagnostics blob, and connected the missing-file condition to an earlier prefix-map fix.",
+      "evidence": {
+        "label": "Swift issue 92545",
+        "url": "https://redirect.github.com/swiftlang/swift/issues/92545",
+        "basis": "The issue contains the deterministic reproducer, controls, decoded cache evidence, stack trace, suspected failure path, workarounds, and related prior fixes."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/swift-92545.md"
+    },
+    {
+      "id": "cmux-13644",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13644,
+      "title": "Debounce macOS admission on superseded pull-request pushes",
+      "status": "merged",
+      "happenedAt": "2026-09-22T14:00:30Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "cost",
+        "macos",
+        "queueing"
+      ],
+      "summary": "Inserted a bounded Linux admission delay before expensive macOS work so rapid follow-up pushes cancel stale runs before a Mac starts, then replayed a day of job timings to estimate the avoided work and latency trade-off.",
+      "evidence": {
+        "label": "CMUX PR 13644",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13644",
+        "basis": "The PR body contains the 24-hour run sample, cancelled-minute breakdown, replay method, and delay trade-off table."
+      },
+      "claims": [
+        {
+          "id": "cancelled-macos-minutes-avoided",
+          "dimension": "compute",
+          "metric": "runner-minutes-avoided-per-day",
+          "direction": "reduction",
+          "value": 590,
+          "unit": "runner-minutes/day",
+          "recurrence": "daily",
+          "confidence": "derived",
+          "measurementWindow": "24-hour replay",
+          "population": "Superseded pull-request runs that would otherwise start macOS work",
+          "note": "Replay estimate at the default 180-second delay; the same analysis measured a 1.4-minute median increase to the green signal.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-macos-capacity-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13644.md"
+    },
+    {
+      "id": "cmux-13658",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13658,
+      "title": "Route pull-request macOS jobs to sponsored capacity",
+      "status": "merged",
+      "happenedAt": "2026-09-22T13:46:48Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "cost",
+        "macos",
+        "runner-routing"
+      ],
+      "summary": "Measured a day of macOS workload by triggering event, then routed the pull-request burst lane from paid overflow onto sponsored Blacksmith capacity while leaving other events on the existing repository variable.",
+      "evidence": {
+        "label": "CMUX PR 13658",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13658",
+        "basis": "The PR body records the 24-hour workload measurement, event split, routing change, and rollback control."
+      },
+      "claims": [
+        {
+          "id": "paid-capacity-shift",
+          "dimension": "paid-compute",
+          "metric": "runner-minutes-shifted-from-paid-capacity-per-day",
+          "direction": "shift",
+          "value": 5900,
+          "unit": "runner-minutes/day",
+          "recurrence": "daily",
+          "confidence": "measured",
+          "measurementWindow": "24 hours",
+          "population": "Pull-request macOS overflow work in the sampled CMUX CI day",
+          "note": "This moves workload onto sponsored capacity; it does not claim the compute disappeared.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-macos-capacity-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13658.md"
+    },
+    {
+      "id": "cmux-13754",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13754,
+      "title": "Seed compilation cache on the runner pull requests restore from",
+      "status": "merged",
+      "happenedAt": "2026-09-22",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "swift",
+        "compilation-cache",
+        "runner-routing"
+      ],
+      "summary": "Found that the nightly compilation-cache seed and pull-request consumer ran on different runner layouts even though the cache fingerprint included the workspace path, making the seed impossible to restore by construction.",
+      "evidence": {
+        "label": "CMUX PR 13754",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13754",
+        "basis": "The PR body records the exact cache miss, runner labels, fingerprint mechanism, and a measured 19.9-minute cold compile step."
+      },
+      "claims": [
+        {
+          "id": "cold-pr-compile-baseline",
+          "dimension": "critical-path",
+          "metric": "cold-compile-minutes-per-affected-pr",
+          "direction": "baseline",
+          "value": 19.9,
+          "unit": "minutes/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "referenced pull-request run",
+          "population": "Pull-request admission before the cache producer and consumer runner layouts matched",
+          "note": "The PR explicitly left warm compile time unmeasured until the next scheduled seed.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-compilation-cache-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13754.md"
+    },
+    {
+      "id": "cmux-13060",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13060,
+      "title": "Seed the Debug compilation cache from main",
+      "status": "merged",
+      "happenedAt": "2026-09-20T02:42:11Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "swift",
+        "compilation-cache",
+        "macos"
+      ],
+      "summary": "Added a scheduled main-branch seed for the Debug compilation cache so pull-request compile admission could restore shared package work instead of always beginning from an empty cache.",
+      "evidence": {
+        "label": "CMUX PR 13060",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13060",
+        "basis": "The PR body records the cold admission baseline, module timing breakdown, cache policy, local experiments, and the distinction between measured and expected CI behavior."
+      },
+      "claims": [
+        {
+          "id": "cold-admission-baseline",
+          "dimension": "critical-path",
+          "metric": "cold-compile-seconds-per-admission-run",
+          "direction": "baseline",
+          "value": 800,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "referenced compile-admission run",
+          "population": "macOS compile admission from an empty compilation cache",
+          "note": "The PR deliberately did not quote an unmeasured CI savings number before the scheduled seed had run.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-compilation-cache-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13060.md"
+    }
+  ]
+}

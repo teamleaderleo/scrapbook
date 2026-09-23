@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "repository": "manaflow-ai/cmux",
+      "author": "teamleaderleo",
+      "lastSyncedAt": "2026-09-23T11:36:53Z",
+      "lastQuery": "repo:manaflow-ai/cmux author:teamleaderleo is:pr is:merged",
+      "lastMatchedCount": 437,
+      "totalMergedInSnapshot": 437
+    }
+  ],
+  "updatedAt": "2026-09-23T11:36:53Z",
+  "requestCountLastSync": 5,
+  "recordCount": 437
+}

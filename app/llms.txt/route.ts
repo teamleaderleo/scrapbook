@@ -19,6 +19,11 @@ Start here
 Read
 - Selected engineering work: https://teamleaderleo.com/work
 - Machine-readable work records: https://teamleaderleo.com/api/work
+- Engineering impact ledger: https://teamleaderleo.com/work/impact
+- Machine-readable impact ledger: https://teamleaderleo.com/api/work-impact
+- Searchable impact candidate pool: https://teamleaderleo.com/api/work-impact/candidates
+- Compact impact candidate index: https://teamleaderleo.com/data/impact-pr-candidates-v1.json
+- Compact impact summary: https://teamleaderleo.com/data/impact-summary-v1.json
 - Public living learning records: https://teamleaderleo.com/space/records
 - Machine-readable learning records: https://teamleaderleo.com/api/learning-records
 - Workbench index/publication contract: https://teamleaderleo.com/api/bot-desk

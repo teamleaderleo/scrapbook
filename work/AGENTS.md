@@ -33,6 +33,12 @@ Keep the evidence that changed the conclusion. A dropped optimization, disproven
 
 Record why the updated decision was better.
 
+## Impact ledger
+
+`impact/` keeps measured or otherwise evidence-backed consequences that should remain queryable below the editorial resume layer. Read `impact/README.md` before editing it. Preserve whether a number is a baseline, reduction, capacity shift, reliability observation, measured result, derived estimate, or projection. Keep potentially overlapping claims separate unless the record explicitly proves they are additive. Refresh generated artifacts with `pnpm impact:build` and verify them with `pnpm impact:audit`.
+
+The compact GitHub snapshot is retrieval support, not an authority override. Promote a raw pull request into a curated record only after reading the originating evidence.
+
 ## Resume candidate churn
 
 `resume-candidates.md` is intentionally editorial. Rank by marginal signal on a one-page resume: distinct proof, external validation or measurable consequence, quick technical legibility, defensible claims, and fit for the target role.

@@ -12,7 +12,7 @@ This repository powers [teamleaderleo.com](https://teamleaderleo.com/): a person
 - **Workbench** (`/desk`) publishes selected essays and technical dispatches. [`docs/workbench.md`](docs/workbench.md) owns publication rules, and `/feed.xml` is its RSS feed.
 - **Agent Journal** (`/journal`) is the repository-backed evidence ledger for agent work. [`docs/agent-journal.md`](docs/agent-journal.md) owns its evidence contract.
 - **Knowledge** lives under [`knowledge/`](knowledge/README.md) as repository-backed technical working memory; [`KNOWLEDGE.md`](KNOWLEDGE.md) is its entry point.
-- **Work records** live under [`work/`](work/) as evidence-backed engineering and career synthesis; [`work/AGENTS.md`](work/AGENTS.md) owns that lane.
+- **Work records** live under [`work/`](work/) as evidence-backed engineering and career synthesis; [`work/AGENTS.md`](work/AGENTS.md) owns that lane. The measured-impact projection lives at `/work/impact`.
 - **Site Atlas and experiments** cover navigation plus isolated atelier, interaction, activity-geometry, snow-globe, and sigil work.
 
 ## Agent and publication access
@@ -26,7 +26,8 @@ Public discovery and reading contracts include:
 - `/api/agent-contributions` — contribution-lane choice;
 - `/api/agent-guestbook` — Guest Check-in contract;
 - `/api/bot-desk` — Workbench contract and index;
-- `/api/agent-journal` — Agent Journal contract and entries.
+- `/api/agent-journal` — Agent Journal contract and entries;
+- `/api/work-impact` — queryable engineering impact ledger with confidence and accounting metadata.
 
 [`docs/agent-access.md`](docs/agent-access.md) owns repository write capability, GitHub-reference handling, and read-only handoffs. [`docs/agent-contributions.md`](docs/agent-contributions.md) routes contribution choice; the lane guides keep Guest Check-in, Workbench, Agent Journal, Knowledge, and work-record semantics separate.
 

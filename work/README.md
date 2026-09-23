@@ -30,6 +30,7 @@ The operating idea is simple:
 - [`resume-candidates.md`](resume-candidates.md) — larger, intentionally churny reservoir of strong résumé alternates and role-specific material; it does not override `resume-current.md`.
 - [`preflight-resume-evidence-map.md`](preflight-resume-evidence-map.md) — provenance and implementation/measurement breadcrumbs for Preflight career claims; it does not override the live performance record.
 - [`portfolio-inventory.md`](portfolio-inventory.md) — unified retrieval index across owned systems, upstream contributions, adopted findings, reversals, reports, and research-only work.
+- [`impact/`](impact/README.md) — evidence ledger for measured baselines, reductions, capacity shifts, reliability results, and a compact offline pull-request snapshot used to mine future candidates without repeatedly querying GitHub.
 - [`resume-language-bank.md`](resume-language-bank.md) — richer candidate bullets, application theses, and interview story formulations that are worth preserving even when they do not fit the current one-page cut.
 - [`resume-review-playbook.md`](resume-review-playbook.md) — current résumé-review handoff and authority map; historical reviewer outputs are subordinate to it.
 - [`fit-and-interviews.md`](fit-and-interviews.md) — living hypotheses about role/team/interview fit, questions that can discriminate those hypotheses, and signals to retain after hiring processes.
@@ -72,4 +73,4 @@ Do not silently turn an owned-fork candidate into an upstream contribution. Do n
 
 This material is intentionally personal and can be candid about technical judgment. It should still be written so that a curious engineer, recruiter, or hiring manager could read it without needing private conversation context.
 
-The public `/work` surface is a readable projection of selected records, not a dump of every internal ranking note. Its typed selection lives in `lib/work-records.ts` and is available to human readers at `/work` and machine readers at `/api/work`. The repository remains more exhaustive than the site.
+The public `/work` surface is a readable projection of selected records, not a dump of every internal ranking note. Its typed selection lives in `lib/work-records.ts` and is available to human readers at `/work` and machine readers at `/api/work`. The evidence ledger has its own public projection at `/work/impact` and `/api/work-impact`. The repository remains more exhaustive than the site.
