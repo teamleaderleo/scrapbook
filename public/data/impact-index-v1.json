@@ -3,8 +3,124 @@
   "source": "repository",
   "generatedFrom": "work/impact/records",
   "updatedAt": "2026-09-23",
-  "recordCount": 8,
+  "recordCount": 19,
   "records": [
+    {
+      "id": "cmux-13935",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13935,
+      "title": "Run the CmuxMobileShell package tests serially",
+      "status": "merged",
+      "happenedAt": "2026-09-23T07:12:30Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "testing",
+        "swift",
+        "reliability",
+        "performance"
+      ],
+      "summary": "Diagnosed a package lane that timed out without reporting a result as contention from parallel Swift Testing execution; serial execution finished the same 1,060 tests in about a minute and exposed the smaller set of real failures.",
+      "evidence": {
+        "label": "CMUX PR 13935",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13935",
+        "basis": "The PR body records parallel and serial runs of the same 1,060 tests, their wall time, issue counts, and a representative test family."
+      },
+      "claims": [
+        {
+          "id": "serial-test-time-lower-bound",
+          "dimension": "critical-path",
+          "metric": "package-test-wall-time-reduction-lower-bound",
+          "direction": "reduction",
+          "value": 655,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "derived",
+          "measurementWindow": "same-machine parallel/serial comparison",
+          "population": "1,060 CmuxMobileShell package tests",
+          "note": "Parallel execution exceeded 12 minutes without finishing; serial execution completed in 65 seconds. The stored 655-second reduction is therefore a lower bound.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": null
+        },
+        {
+          "id": "contention-failures-removed",
+          "dimension": "reliability",
+          "metric": "contention-failures-removed-in-comparison",
+          "direction": "reliability",
+          "value": 144,
+          "unit": "failures/run",
+          "recurrence": "one-time",
+          "confidence": "derived",
+          "measurementWindow": "same-machine parallel/serial comparison",
+          "population": "1,060 CmuxMobileShell package tests",
+          "note": "The parallel run produced about 161 issues while the serial run reported 17 real failures; the difference is approximately 144 contention artifacts.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": null
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13935.md"
+    },
+    {
+      "id": "cmux-13902",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13902,
+      "title": "Move focused E2E dispatches to the low-queue macOS pool",
+      "status": "merged",
+      "happenedAt": "2026-09-23T06:05:47Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "latency",
+        "macos",
+        "runner-routing",
+        "testing"
+      ],
+      "summary": "Compared focused E2E dispatches across the macOS 15 and macOS 26 pools, then changed the automatic default to the pool with dramatically lower queue tails while preserving an explicit macOS 15 override.",
+      "evidence": {
+        "label": "CMUX PR 13902",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13902",
+        "basis": "The PR body records 60 dispatches, queue median/p90/max, execution median, total elapsed median, and the limitation that the two runner groups did not execute identical tests."
+      },
+      "claims": [
+        {
+          "id": "e2e-queue-p90-gap",
+          "dimension": "critical-path",
+          "metric": "focused-e2e-queue-p90-reduction",
+          "direction": "reduction",
+          "value": 82.3,
+          "unit": "minutes",
+          "recurrence": "none",
+          "confidence": "observed",
+          "measurementWindow": "60 dispatches from 2026-09-22T21:19Z to 2026-09-23T05:18Z",
+          "population": "33 macOS 15 and 25 macOS 26 focused E2E dispatches",
+          "note": "Observed queue p90 was 83.3 minutes on macOS 15 and 1.0 minute on macOS 26. Execution median was about four minutes slower on macOS 26, and the test mixes differed, so the comparison is operational rather than causal.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-macos-queue-2026-09"
+        },
+        {
+          "id": "e2e-execution-tradeoff",
+          "dimension": "compute",
+          "metric": "focused-e2e-execution-median-increase",
+          "direction": "shift",
+          "value": 3.8,
+          "unit": "minutes",
+          "recurrence": "none",
+          "confidence": "observed",
+          "measurementWindow": "same 60-dispatch comparison",
+          "population": "focused E2E dispatches",
+          "note": "Execution median was 18.7 minutes on macOS 15 and 22.5 minutes on macOS 26 while total elapsed median still favored macOS 26 after queueing.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-macos-queue-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13902.md"
+    },
     {
       "id": "cmux-13749",
       "repository": "manaflow-ai/cmux",
@@ -45,6 +161,180 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-13749.md"
+    },
+    {
+      "id": "cmux-13646",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13646,
+      "title": "Throttle push-triggered Nightly builds by published commit age",
+      "status": "merged",
+      "happenedAt": "2026-09-23T01:25:39Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "cost",
+        "macos",
+        "nightly",
+        "capacity"
+      ],
+      "summary": "Measured seven days of push-triggered Nightly activity and added a two-hour publication interval so busy main-branch periods stop running the expensive macOS publication pipeline back to back.",
+      "evidence": {
+        "label": "CMUX PR 13646",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13646",
+        "basis": "The PR body records seven days of push runs, publish frequency, per-publish macOS minutes, a replay of alternative intervals, and the delivery-latency trade-off."
+      },
+      "claims": [
+        {
+          "id": "nightly-push-savings-low-edge",
+          "dimension": "compute",
+          "metric": "projected-macos-runner-minutes-avoided-per-day",
+          "direction": "reduction",
+          "value": 450,
+          "unit": "runner-minutes/day",
+          "recurrence": "daily",
+          "confidence": "projected",
+          "measurementWindow": "seven-day replay",
+          "population": "push-triggered Nightly publication work",
+          "note": "The PR projects roughly 450–600 macOS minutes/day avoided at the two-hour default. This record stores the lower edge of that stated range; the PR also gives a roughly 280-minute/day lower-bound scenario.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-nightly-capacity-2026-09"
+        },
+        {
+          "id": "nightly-push-baseline",
+          "dimension": "compute",
+          "metric": "push-triggered-nightly-macos-minutes-per-day",
+          "direction": "baseline",
+          "value": 1030,
+          "unit": "runner-minutes/day",
+          "recurrence": "daily",
+          "confidence": "measured",
+          "measurementWindow": "seven days",
+          "population": "push-to-main Nightly macOS jobs",
+          "note": "The seven-day sample recorded 7,197 push-to-main macOS minutes, about 1,030 minutes/day including three hung builds.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-nightly-capacity-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13646.md"
+    },
+    {
+      "id": "cmux-13810",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13810,
+      "title": "Measure CI waste on a schedule",
+      "status": "merged",
+      "happenedAt": "2026-09-23T00:09:55Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "observability",
+        "capacity",
+        "cost",
+        "reliability"
+      ],
+      "summary": "Turned repeated manual Actions investigations into a scheduled health report covering runner minutes, queue percentiles, cancelled work, repeated unchanged heads, mostly-skipped workflows, fork cache behavior, and previous-window comparison.",
+      "evidence": {
+        "label": "CMUX PR 13810",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13810",
+        "basis": "The PR body contains the first real report, including partial-window caveats, queue percentiles, sampled runner-minute tables, cancellation patterns, skipped workflows, and unchanged-head repetition."
+      },
+      "claims": [
+        {
+          "id": "unchanged-head-repeat-runs",
+          "dimension": "observability",
+          "metric": "runs-beyond-first-on-unchanged-head",
+          "direction": "baseline",
+          "value": 9763,
+          "unit": "runs/window",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "first real report, approximately 23.1 hours of a 24-hour window",
+          "population": "2,424 workflow/head pairs in the fetched run set",
+          "note": "The report found 9,763 runs beyond the first for a head that did not change. This is an observation to investigate, not a claim that every repeated run is removable.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-control-plane-runs-2026-09"
+        },
+        {
+          "id": "macos15-queue-p90-observed",
+          "dimension": "critical-path",
+          "metric": "macos15-queue-p90",
+          "direction": "baseline",
+          "value": 119.8,
+          "unit": "minutes",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "same first health report",
+          "population": "sampled blacksmith-6vcpu-macos-15 jobs",
+          "note": "The previous window's corresponding p90 was 0.9 minutes, which made the new 119.8-minute queue visible as a capacity regression.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-macos-queue-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13810.md"
+    },
+    {
+      "id": "cmux-13703",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13703,
+      "title": "Remove full-history checkout and unconditional Zig setup from iOS uploads",
+      "status": "merged",
+      "happenedAt": "2026-09-23T00:00:11Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "ios",
+        "release",
+        "macos",
+        "cost"
+      ],
+      "summary": "Replaced a full recursive checkout and unconditional Zig installation in both iOS upload workflows with a shallow checkout, prebuilt-first GhosttyKit path, and bounded history fetch only when release notes actually need it.",
+      "evidence": {
+        "label": "CMUX PR 13703",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13703",
+        "basis": "The PR body records a 12-minute checkout and 6-minute Zig install in a real upload, local shallow/full checkout timings, the new fallback semantics, and the expected recurring savings."
+      },
+      "claims": [
+        {
+          "id": "ios-upload-setup-savings",
+          "dimension": "compute",
+          "metric": "macos-minutes-avoided-per-upload",
+          "direction": "reduction",
+          "value": 16,
+          "unit": "runner-minutes/event",
+          "recurrence": "per-event",
+          "confidence": "derived",
+          "measurementWindow": "real upload baseline plus local shallow-checkout timing",
+          "population": "iOS TestFlight/App Store upload runs when the pinned GhosttyKit prebuilt exists",
+          "note": "The PR states about 16–17 macOS minutes saved per upload. This record stores the lower edge of that range.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-ios-upload-capacity-2026-09"
+        },
+        {
+          "id": "ios-hourly-lane-ceiling",
+          "dimension": "compute",
+          "metric": "maximum-hourly-lane-macos-minutes-avoided-per-day",
+          "direction": "reduction",
+          "value": 390,
+          "unit": "runner-minutes/day",
+          "recurrence": "daily",
+          "confidence": "projected",
+          "measurementWindow": "24 hourly upload opportunities",
+          "population": "official cmux.app hourly upload lane",
+          "note": "The PR gives an upper ceiling of about 6.5 macOS-hours/day when all 24 hourly opportunities upload. Actual savings depend on upload frequency.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-ios-upload-capacity-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13703.md"
     },
     {
       "id": "cmux-13908",
@@ -154,6 +444,48 @@
       "sourcePath": "work/impact/records/swift-92545.md"
     },
     {
+      "id": "cmux-13797",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13797,
+      "title": "Seed the test compilation cache from one clean build",
+      "status": "merged",
+      "happenedAt": "2026-09-22T23:51:24Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "cache",
+        "swift",
+        "macos",
+        "performance"
+      ],
+      "summary": "Stopped the test compilation-cache seeder from restoring its previous seed by prefix and recursively accumulating old generations until it crossed the save bound and froze.",
+      "evidence": {
+        "label": "CMUX PR 13797",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13797",
+        "basis": "The PR body records cache growth across scheduled seeds, the 5 GiB save bound, one clean-build result, producer timings, and the per-pull-request download consequence."
+      },
+      "claims": [
+        {
+          "id": "compilation-seed-download-reduction",
+          "dimension": "cache-transfer",
+          "metric": "compilation-seed-download-reduction-per-pr",
+          "direction": "reduction",
+          "value": 1.5,
+          "unit": "GiB/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "scheduled seed comparison",
+          "population": "pull requests restoring the shared test compilation-cache seed",
+          "note": "The clean seed is about 3.5 GiB instead of roughly 5.0 GiB, so every pull request restores about 1.5 GiB less.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-compilation-cache-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13797.md"
+    },
+    {
       "id": "cmux-13644",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -236,6 +568,48 @@
       "sourcePath": "work/impact/records/cmux-13658.md"
     },
     {
+      "id": "cmux-13645",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13645,
+      "title": "Trigger the persistent Mac router once per CI run",
+      "status": "merged",
+      "happenedAt": "2026-09-22T13:44:27Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "control-plane",
+        "macos",
+        "capacity",
+        "routing"
+      ],
+      "summary": "Changed the persistent-Mac router from a workflow activity emitted for every CI job to the once-per-run requested event, eliminating thousands of duplicate router invocations while preserving the trust boundary and hosted fallback.",
+      "evidence": {
+        "label": "CMUX PR 13645",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13645",
+        "basis": "The PR body records the 24-hour router-run counts, explains why the old activity fired per job, and documents the re-run coverage trade-off."
+      },
+      "claims": [
+        {
+          "id": "router-runs-avoided",
+          "dimension": "control-plane",
+          "metric": "router-runs-avoided-per-day",
+          "direction": "reduction",
+          "value": 5611,
+          "unit": "runs/day",
+          "recurrence": "daily",
+          "confidence": "derived",
+          "measurementWindow": "24-hour measured baseline",
+          "population": "persistent-macos-router workflow invocations",
+          "note": "The measured baseline was about 6,864 router runs/day; the once-per-CI-run trigger was expected to produce about 1,253/day, an 82% reduction.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-control-plane-runs-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13645.md"
+    },
+    {
       "id": "cmux-13754",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -277,6 +651,132 @@
       "sourcePath": "work/impact/records/cmux-13754.md"
     },
     {
+      "id": "cmux-13132",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13132,
+      "title": "Move Computer Use runtime out of the 3,700-file app module",
+      "status": "merged",
+      "happenedAt": "2026-09-20T11:18:22Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "swift",
+        "build-system",
+        "developer-experience",
+        "modularity",
+        "latency"
+      ],
+      "summary": "Moved the Computer Use runtime into a local package and a shared process-identity type into CmuxFoundation so edits in those files stop paying the app target's whole-module planning and compilation cost.",
+      "evidence": {
+        "label": "CMUX PR 13132",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13132",
+        "basis": "The PR body records warm incremental comment-only edits before and after the move, app-target file counts, package tests, and the limit imposed by public-interface changes."
+      },
+      "claims": [
+        {
+          "id": "process-identity-incremental-build-reduction",
+          "dimension": "developer-loop",
+          "metric": "warm-incremental-build-time-reduction",
+          "direction": "reduction",
+          "value": 25.6,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "same-machine warm incremental builds",
+          "population": "comment-only edit to AgentPIDProcessIdentity.swift before and after moving it from the app target to CmuxFoundation",
+          "note": "The measured build fell from 38.9 seconds to 13.3 seconds and compiled zero app-target Swift files after the move.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-local-build-loop-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13132.md"
+    },
+    {
+      "id": "cmux-13131",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13131,
+      "title": "Reuse one warm DerivedData across development tags",
+      "status": "merged",
+      "happenedAt": "2026-09-20T10:15:05Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "developer-experience",
+        "xcode",
+        "swift",
+        "build-cache",
+        "latency"
+      ],
+      "summary": "Changed tagged development builds from one fresh DerivedData tree per tag to a reusable warm tree, while keeping build serialization, CLI lookup, path validation, and cleanup ownership explicit.",
+      "evidence": {
+        "label": "CMUX PR 13131",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13131",
+        "basis": "The PR records a same-machine matrix covering fresh DerivedData, same-commit tag reuse, branch/tag switches, small edits, larger app edits, and interface-invalidating changes."
+      },
+      "claims": [
+        {
+          "id": "same-commit-warm-derived-data",
+          "dimension": "developer-loop",
+          "metric": "same-commit-tag-build-time-reduction",
+          "direction": "reduction",
+          "value": 917.3,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "same-machine build matrix",
+          "population": "new development tag at the same commit after a warm build",
+          "note": "Fresh DerivedData took 953 seconds; a new tag using the already-warm shared DerivedData took 35.7 seconds.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-local-build-loop-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13131.md"
+    },
+    {
+      "id": "cmux-13160",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13160,
+      "title": "Stop pull requests from evicting shared cache seeds",
+      "status": "merged",
+      "happenedAt": "2026-09-20T09:06:05Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "cache",
+        "swift",
+        "cost",
+        "reliability"
+      ],
+      "summary": "Found that pull-request jobs were writing gigabyte-scale, PR-scoped cache entries that other pull requests could never read, rapidly evicting the main-branch seeds and forcing expensive macOS builds cold.",
+      "evidence": {
+        "label": "CMUX PR 13160",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13160",
+        "basis": "The PR body records the cache inventory, entry scope, cold build timings, cache-store limits, and the change to restore-only pull-request consumers."
+      },
+      "claims": [
+        {
+          "id": "github-cache-churn-baseline",
+          "dimension": "cache",
+          "metric": "github-cache-occupancy-observed",
+          "direction": "baseline",
+          "value": 37.5,
+          "unit": "GB",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "cache inventory at 2026-09-20 05:55 UTC",
+          "population": "27 GitHub cache entries visible to the repository",
+          "note": "The oldest macOS entry was only five minutes old and the shared Debug compilation seed was already missing. Pull-request jobs had 14 save+restore cache steps and wrote 1–3 GB PR-scoped entries.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-compilation-cache-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13160.md"
+    },
+    {
       "id": "cmux-13060",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -316,6 +816,63 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-13060.md"
+    },
+    {
+      "id": "cmux-13097",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 13097,
+      "title": "Parallelize slow and history-dependent CI guards",
+      "status": "merged",
+      "happenedAt": "2026-09-20T01:11:39Z",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "latency",
+        "linux",
+        "critical-path"
+      ],
+      "summary": "Split one roughly 390-second guard job into shallow, history-only, CLI-script, and source-lint jobs so independent policy checks run concurrently before macOS admission.",
+      "evidence": {
+        "label": "CMUX PR 13378 follow-up measurement",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13378",
+        "basis": "The follow-up reusable-workflow PR records the accepted before/after measurement for PR 13097: 385.5 seconds to 124.3 seconds on the guard critical path, with Linux runner-minutes increasing from 6.43 to 7.49."
+      },
+      "claims": [
+        {
+          "id": "guard-critical-path-reduction",
+          "dimension": "critical-path",
+          "metric": "linux-guard-critical-path-reduction",
+          "direction": "reduction",
+          "value": 261.2,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "accepted before/after workflow runs",
+          "population": "Linux guard path gating macOS admission",
+          "note": "Measured guard wall time fell from 385.5 seconds to 124.3 seconds, about a 68% reduction.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-linux-guard-latency-2026-09"
+        },
+        {
+          "id": "guard-runner-minute-tradeoff",
+          "dimension": "compute",
+          "metric": "linux-runner-minutes-added-by-parallelism",
+          "direction": "shift",
+          "value": 1.06,
+          "unit": "runner-minutes/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "same before/after runs",
+          "population": "Linux guard jobs",
+          "note": "Runner consumption rose from 6.43 to 7.49 minutes because parallel jobs duplicate setup work. The change intentionally spends cheap compute to return the macOS admission answer sooner.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-linux-guard-latency-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13097.md"
     }
   ]
 }
