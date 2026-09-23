@@ -69,7 +69,8 @@ export const workRecords: readonly WorkRecord[] = [
     accomplishments: [
       'The compilation-cache thread moved from 37.5 GB of rapidly churning PR-scoped cache entries and cold macOS builds to shared main-owned seeds, then repaired runner-path identity drift and a seed-growth loop that crossed the 5 GiB save bound; the clean seed is about 3.5 GiB, roughly 1.5 GiB less for every PR to restore.',
       'Local and CI feedback loops moved materially: same-commit tagged builds measured 953 s with fresh DerivedData versus 35.7 s on the shared warm tree; Linux guard critical path measured 385.5 s to 124.3 s while intentionally spending about 1.06 extra cheap Linux runner-minutes; focused E2E queue p90 measured 83.3 min on macOS 15 versus 1.0 min on macOS 26.',
-      'Capacity work measured and rerouted demand instead of treating runner scarcity as a provider problem: about 5,900 paid macOS overflow minutes/day moved to sponsored capacity in one sampled window, superseded-PR admission replay estimated about 590 macOS minutes/day avoidable, and a router trigger was reduced from roughly 6,864 invocations/day to about 1,253.',\n      'A complete 24-hour accounting measured 18,704 macOS runner-minutes/day of actual occupied capacity. Conservatively applying WarpBuild list rates only where runner size is known gives a roughly $50,051 per 30-day month / $609k annualized replacement-cost baseline for the macOS workload; attributed savings remain separate.',
+      'Capacity work measured and rerouted demand instead of treating runner scarcity as a provider problem: about 5,900 paid macOS overflow minutes/day moved to sponsored capacity in one sampled window, superseded-PR admission replay estimated about 590 macOS minutes/day avoidable, and a router trigger was reduced from roughly 6,864 invocations/day to about 1,253.',
+      'A complete 24-hour accounting measured 18,704 macOS runner-minutes/day of actual occupied capacity. Conservatively applying WarpBuild list rates only where runner size is known gives a roughly $50,051 per 30-day month / $609k annualized replacement-cost baseline for the macOS workload; attributed savings remain separate.',
       'Reliability work made red CI more truthful: one incomplete-xcresult path had suppressed 148 already-recorded test failures, while a 1,060-test Swift package suite took over 12 minutes with about 161 issues in parallel but completed in 65 seconds with 17 real failures when run serially.',
     ],
     reversal:
@@ -83,6 +84,11 @@ export const workRecords: readonly WorkRecord[] = [
       {
         label: 'Measured impact ledger',
         href: '/work/impact',
+        kind: 'record',
+      },
+      {
+        label: 'Economics model',
+        href: 'https://github.com/teamleaderleo/scrapbook/blob/main/work/records/cmux-economics.md',
         kind: 'record',
       },
       {
