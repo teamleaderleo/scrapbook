@@ -46,6 +46,7 @@ Career use: **current default**.
 Repository: https://redirect.github.com/manaflow-ai/cmux  
 Synthesis: [`records/cmux.md`](records/cmux.md)  
 Measured impact: [`impact/`](impact/README.md)
+Economics model: [`records/cmux-economics.md`](records/cmux-economics.md)
 
 **Use for:** build systems, developer productivity, Swift/Xcode compilation behavior, CI performance/capacity, test reliability.
 
