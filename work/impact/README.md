@@ -40,7 +40,7 @@ Force a full refresh:
 
     pnpm impact:sync -- --full
 
-The sync uses one GitHub GraphQL search page per 100 matching pull requests. It stores titles, dates, diff statistics, labels, a body digest, and a bounded set of metric-bearing lines; it does not keep every full PR body.
+The sync uses one GitHub GraphQL search page per 100 matching pull requests. It stores titles, dates, diff statistics, labels, a body fingerprint when available, and a bounded set of metric-bearing lines; it does not keep every full PR body. The initial REST snapshot leaves older body fingerprints and diff statistics empty; incremental GraphQL refreshes fill them only for pull requests they touch.
 
 Rebuild the public query files after editing curated records:
 
