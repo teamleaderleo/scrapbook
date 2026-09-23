@@ -11,7 +11,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test tests/e2e/smoke.spec.ts --project=chromium",
     "test:e2e:full": "playwright test --project=chromium",
-    "analyze": "cross-env ANALYZE=true pnpm build",
+    "analyze": "cross-env ANALYZE=true pnpm build",\n    "impact:sync": "node scripts/sync-impact-github.mjs",\n    "impact:build": "node scripts/build-impact-index.mjs",\n    "impact:audit": "node scripts/audit-impact.mjs",\n    "impact:query": "node scripts/query-impact.mjs",
     "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
