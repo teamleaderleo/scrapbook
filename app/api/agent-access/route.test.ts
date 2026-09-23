@@ -33,6 +33,7 @@ describe('GET /api/agent-access', () => {
       read: {
         publicSite: {
           work: '/work',
+          impact: '/work/impact',
           learningRecords: '/space/records',
           workbench: '/desk',
         },
@@ -40,6 +41,7 @@ describe('GET /api/agent-access', () => {
           handoffSchema: '/api/agent-access/handoff-schema',
           botDesk: '/api/bot-desk',
           work: '/api/work',
+          workImpact: '/api/work-impact',
           learningRecords: '/api/learning-records',
         },
         compatibility: expect.stringContaining('docs/workbench.md'),
@@ -47,6 +49,7 @@ describe('GET /api/agent-access', () => {
           'STYLE_GUIDE.md',
           'docs/workbench.md',
           'docs/bot-desk.md',
+          'work/impact/README.md',
         ]),
       },
       transports: {
@@ -112,6 +115,7 @@ describe('GET /api/agent-access', () => {
         accessGuide: expect.stringContaining('docs/agent-access.md'),
         publicWorkbench: '/desk',
         publicWork: '/work',
+        publicWorkImpact: '/work/impact',
       },
     });
 
