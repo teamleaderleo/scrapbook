@@ -24,6 +24,12 @@ describe('GET /llms.txt', () => {
     expect(text).toContain('https://teamleaderleo.com/work/impact');
     expect(text).toContain('https://teamleaderleo.com/api/work-impact');
     expect(text).toContain(
+      'https://teamleaderleo.com/api/work-impact/candidates'
+    );
+    expect(text).toContain(
+      'https://teamleaderleo.com/data/impact-pr-candidates-v1.json'
+    );
+    expect(text).toContain(
       'https://teamleaderleo.com/data/impact-summary-v1.json'
     );
     expect(text).toContain('https://teamleaderleo.com/space/records');
