@@ -6,35 +6,31 @@ The impact ledger owns measurements. This page combines those measurements with 
 
 ## Hard workload baseline
 
-The strongest compute baseline is the complete accounting in [CMUX issue 13652](https://redirect.github.com/manaflow-ai/cmux/issues/13652):
+The strongest compute baseline is now the GitHub Actions **90-day usage export downloaded on 2026-09-23**, summarized in [the checked-in source record](../impact/sources/cmux-actions-90d-2026-09-23.json).
 
-- **18,704 macOS runner-minutes/day** of actual occupied runner time;
-- queued jobs cancelled before allocation excluded;
-- 1,366 runner-minutes/day of 12-vCPU Release work;
-- 691.6 runner-minutes/day of 12-vCPU Nightly app work;
-- 92.9 runner-minutes/day of the 12-vCPU compilation-cache warmer;
-- the remaining workload can conservatively be priced at the 6-vCPU rate.
+The export contains:
 
-WarpBuild's pricing page, checked 2026-09-23, lists:
+- **1,966,401 self-hosted macOS runner-minutes over 90 days**;
+- **21,848.9 macOS runner-minutes/day** on average;
+- **655,467 minutes per 30-day equivalent month**;
+- **1,345,657 minutes in ci.yml alone**, about 68.4% of all self-hosted macOS usage.
 
-- 6-vCPU macOS: **$0.08/minute**;
-- 12-vCPU macOS: **$0.16/minute**.
-
-Source: https://www.warpbuild.com/pricing
-
-Using 12-vCPU pricing only where the CMUX accounting explicitly identifies a 12-vCPU lane:
+WarpBuild's pricing page, checked 2026-09-23, lists its cheapest macOS class, 6 vCPU, at **$0.08/minute**. Pricing **every** exported self-hosted macOS minute at that cheapest rate gives a floor:
 
 | Input | Value |
 | --- | ---: |
-| 12-vCPU macOS | 2,150.5 min/day |
-| remaining macOS at 6-vCPU price | 16,553.5 min/day |
-| replacement cost | **$1,668.36/day** |
-| 30-day run rate | **$50,050.80/month** |
-| annualized run rate | **$608,951.40/year** |
+| self-hosted macOS usage | **1,966,401 min / 90 days** |
+| 90-day value at $0.08/min | **$157,312.08** |
+| 30-day equivalent | **$52,437.36/month** |
+| annualized at the 90-day average | **$637,987.88/year** |
 
-This is the cleanest meaning of the "$50k/month" number: **replacement-cost exposure of the measured macOS workload at Warp list prices**.
+This is intentionally more conservative than trying to reconstruct the historical 6-vCPU/12-vCPU mix. Any minutes actually billed at Warp's 12-vCPU rate would increase the equivalent value.
 
-It is not the same claim as "Leo saved $50k/month." Some minutes had already moved to sponsored Blacksmith capacity, and several changes overlap or reduce the same future workload. Historical actual Warp invoices can be added when a durable billing or 90-day usage receipt is available.
+The earlier issue-level accounting of **18,704 actual macOS runner-minutes/day** remains useful as an independent point-in-time measurement and for lane composition. It is lower than the 90-day average and is no longer the primary dollar baseline.
+
+This is the cleanest meaning of the "$50k/month" number: **the exported 90-day workload averages more than $52k per 30 days even when every macOS minute is valued at Warp's cheapest macOS rate**.
+
+It is not the same claim as "Leo saved $52k/month." The workload includes capacity later served by sponsored Blacksmith and other self-hosted runners, while multiple engineering changes can affect the same future minute.
 
 ## What the engineering campaign changes
 
@@ -51,24 +47,24 @@ These categories should not be summed blindly. They can affect the same minute f
 
 ## Engineer-time sensitivity
 
-The compute baseline alone annualizes to about **$609k/year**. Human feedback time is a separate scenario.
+The 90-day compute baseline annualizes to about **$638k/year** at the cheapest Warp macOS rate. Human feedback time is a separate scenario.
 
 For three engineers, 250 workdays/year:
 
 | Economic value of engineering time | Feedback time recovered per engineer/day | Team value/year | Compute baseline + team time |
 | ---: | ---: | ---: | ---: |
-| $100/hour | 2 hours | $150,000 | $758,951 |
-| $150/hour | 2 hours | $225,000 | $833,951 |
-| $150/hour | 3.5 hours | $393,750 | **$1,002,701** |
-| $150/hour | 4 hours | $450,000 | **$1,058,951** |
-| $200/hour | 3 hours | $450,000 | **$1,058,951** |
-| $200/hour | 4 hours | $600,000 | **$1,208,951** |
+| $100/hour | 2 hours | $150,000 | $787,988 |
+| $150/hour | 2 hours | $225,000 | $862,988 |
+| $150/hour | 3.5 hours | $393,750 | **$1,031,738** |
+| $150/hour | 4 hours | $450,000 | **$1,087,988** |
+| $200/hour | 3 hours | $450,000 | **$1,087,988** |
+| $200/hour | 4 hours | $600,000 | **$1,237,988** |
 
-Another way to state the threshold: after the ~$609k compute baseline, reaching $1M/year of total economic value requires approximately:
+Another way to state the threshold: after the ~$638k compute baseline, reaching $1M/year of total economic value requires approximately:
 
-- **5.21 hours/day per engineer** at $100/hour;
-- **3.48 hours/day per engineer** at $150/hour;
-- **2.61 hours/day per engineer** at $200/hour;
+- **4.83 hours/day per engineer** at $100/hour;
+- **3.22 hours/day per engineer** at $150/hour;
+- **2.41 hours/day per engineer** at $200/hour;
 
 for a three-engineer team over 250 workdays.
 
@@ -80,14 +76,16 @@ A separate hypothetical is staffing capacity: if the unrepaired build/CI system 
 
 | Hourly economic value | One engineer-year | Compute baseline + one engineer-year |
 | ---: | ---: | ---: |
-| $100/hour | $200,000 | $808,951 |
-| $150/hour | $300,000 | $908,951 |
-| $200/hour | $400,000 | **$1,008,951** |
+| $100/hour | $200,000 | $837,988 |
+| $150/hour | $300,000 | $937,988 |
+| $200/hour | $400,000 | **$1,037,988** |
 
 This is deliberately labelled a **counterfactual**, not an attributed saving. Scrapbook should only promote "avoided a hire" if there is direct organizational evidence for that claim.
 
-## Historical invoice question
+## Historical usage question
 
-The September 22 workload already supports a ~$50k/month replacement-cost run rate. Earlier June–August CI was more Warp-heavy and less optimized; for example, the June long-pole test job explicitly ran on warp-macos-15-arm64-6x.
+The 90-day Actions export removes the main uncertainty about **workload volume**: the self-hosted macOS workload itself sustained a floor-equivalent average of **$52,437 per 30 days** at Warp's cheapest macOS rate.
 
-That makes sustained $50k-plus historical Warp months plausible, but plausibility is not a billing claim. The missing evidence is a durable 30/60/90-day runner-minute export or invoice. If that becomes available, record the actual paid total separately from this replacement-cost model and use it to calibrate how much of the workload was truly billed versus sponsored or self-hosted.
+What remains unknown from this export is provider attribution. "Self-hosted macOS" includes Warp, sponsored Blacksmith, and other self-hosted capacity used during the window. Actual Warp invoices or a provider-labelled 90-day export would be needed to state historical **cash spend** rather than replacement-cost exposure.
+
+For context, the June long-pole test job explicitly ran on warp-macos-15-arm64-6x, while September records document the later migration toward sponsored capacity. That supports the historical story without turning self-hosted minutes into a fabricated invoice.
