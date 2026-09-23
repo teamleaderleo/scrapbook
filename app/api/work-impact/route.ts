@@ -32,6 +32,8 @@ export function GET(request: Request) {
           'https://github.com/teamleaderleo/scrapbook/tree/main/work/impact',
         compactIndex: '/data/impact-index-v1.json',
         compactSummary: '/data/impact-summary-v1.json',
+        candidates: '/api/work-impact/candidates',
+        compactCandidates: '/data/impact-pr-candidates-v1.json',
       },
     },
     {
