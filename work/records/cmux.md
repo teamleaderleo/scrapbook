@@ -43,9 +43,9 @@ These figures overlap in places, so the impact ledger keeps them separate. A run
 
 The [CMUX economics model](cmux-economics.md) keeps pricing assumptions separate from the engineering claims.
 
-A complete 24-hour accounting measured **18,704 macOS runner-minutes/day of actual runner occupancy**. Pricing only the explicitly 12-vCPU Nightly and Release work at WarpBuild's 12-vCPU rate and every other minute at the cheaper 6-vCPU rate yields a conservative replacement-cost run rate of approximately **$1,668/day**, **$50,051 per 30-day month**, or **$608,951/year** at Warp list prices checked 2026-09-23.
+A GitHub Actions 90-day usage export downloaded on 2026-09-23 records **1,966,401 self-hosted macOS runner-minutes**, averaging **21,848.9 minutes/day**. Pricing every minute at only WarpBuild's cheapest documented macOS rate, $0.08/min, yields a replacement-cost floor of **$157,312 over 90 days**, **$52,437 per 30-day equivalent month**, or **$637,988/year** at the 90-day average. No 12-vCPU premium is included.
 
-That is a workload baseline, not an attributed saving. The individual records separately identify which work moved off paid capacity, which demand disappeared, and which feedback loops got shorter. The economics model also keeps engineer-time and additional-staffing scenarios explicitly hypothetical until there is evidence for event frequency or avoided hiring.
+The earlier one-day accounting of 18,704 macOS runner-minutes/day remains a useful corroborating snapshot, but the 90-day export is now the stronger economic baseline. This is workload replacement value, not an attributed saving or an assertion that every self-hosted minute was billed to Warp. The individual records separately identify which work moved off paid capacity, which demand disappeared, and which feedback loops got shorter. The economics model keeps engineer-time and additional-staffing scenarios explicitly hypothetical until there is evidence for event frequency or avoided hiring.
 
 ## Make failures tell the truth
 
