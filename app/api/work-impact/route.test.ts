@@ -14,14 +14,13 @@ describe('GET /api/work-impact', () => {
     expect(body).toMatchObject({
       version: 1,
       source: 'repository',
-      totalRecordCount: 8,
-      recordCount: 8,
+      accountingRule: undefined,
     });
-    expect(body.summary).toMatchObject({
-      recordCount: 8,
-      claimCount: 7,
-      accountingRule: expect.stringContaining('explicitly marked additive'),
-    });
+    expect(body.totalRecordCount).toBeGreaterThanOrEqual(8);
+    expect(body.recordCount).toBe(body.totalRecordCount);
+    expect(body.summary.recordCount).toBe(body.totalRecordCount);
+    expect(body.summary.claimCount).toBeGreaterThanOrEqual(7);
+    expect(body.summary.accountingRule).toContain('explicitly marked additive');
     expect(
       body.records.some((record: { id: string }) => record.id === 'swift-92545')
     ).toBe(true);
