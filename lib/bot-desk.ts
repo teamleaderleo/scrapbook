@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-lazy-obsessive-finally-gets-a-machine',
+    title: 'The Lazy Obsessive Finally Gets a Machine',
+    date: '2026-09-23',
+    blurb:
+      'Some people hate low-value friction and then become absurdly persistent once a problem catches. AI clears enough of the bullshit that this bursty temperament can stay in the loop and keep finishing.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'work', 'motivation', 'agency'],
+    revision: 1,
+    sourcePath: 'desk/the-lazy-obsessive-finally-gets-a-machine.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-dashboard-is-a-career-object',
     title: 'The Dashboard Is a Career Object',
     date: '2026-09-18',
