@@ -337,6 +337,112 @@
       "sourcePath": "work/impact/records/cmux-13703.md"
     },
     {
+      "id": "cmux-13652",
+      "repository": "manaflow-ai/cmux",
+      "kind": "issue",
+      "number": 13652,
+      "title": "Measure CMUX macOS CI capacity and replacement-cost exposure",
+      "status": "measured",
+      "happenedAt": "2026-09-23",
+      "recordedAt": "2026-09-23",
+      "areas": [
+        "ci",
+        "cost",
+        "macos",
+        "capacity",
+        "economics"
+      ],
+      "summary": "A GitHub Actions 90-day usage export records 1,966,401 self-hosted macOS runner-minutes, averaging 21,848.9 minutes/day. Pricing every minute at only WarpBuild's cheapest documented macOS rate yields a $52,437.36 per 30-day-month replacement-cost floor.",
+      "evidence": {
+        "label": "Scrapbook 90-day Actions usage source",
+        "url": "https://github.com/teamleaderleo/scrapbook/blob/main/work/impact/sources/cmux-actions-90d-2026-09-23.json",
+        "basis": "Derived directly from the GitHub Actions 90-day usage CSV downloaded on 2026-09-23; the checked-in source summary preserves aggregate minutes and the leading macOS workflows."
+      },
+      "claims": [
+        {
+          "id": "actions-self-hosted-macos-90d",
+          "dimension": "compute",
+          "metric": "self-hosted-macos-runner-minutes-90d",
+          "direction": "baseline",
+          "value": 1966401,
+          "unit": "runner-minutes/90-days",
+          "recurrence": "none",
+          "confidence": "measured",
+          "measurementWindow": "GitHub Actions 90-day usage export downloaded 2026-09-23",
+          "population": "All rows in the export where runner type is self-hosted and runtime OS is macOS",
+          "note": "The export contains 1,966,401 self-hosted macOS minutes. ci.yml alone accounts for 1,345,657 minutes, or about 68.4 percent of this total.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-macos-capacity-90d-2026-09"
+        },
+        {
+          "id": "actions-self-hosted-macos-daily-average",
+          "dimension": "compute",
+          "metric": "self-hosted-macos-runner-minutes-per-day-90d-average",
+          "direction": "baseline",
+          "value": 21848.9,
+          "unit": "runner-minutes/day",
+          "recurrence": "daily",
+          "confidence": "derived",
+          "measurementWindow": "Same 90-day export divided by 90 days",
+          "population": "Self-hosted macOS Actions workload",
+          "note": "This 90-day average is about 16.8 percent above the separate 18,704-minute one-day accounting from September 22.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-macos-capacity-90d-2026-09"
+        },
+        {
+          "id": "warp-replacement-monthly-floor-90d",
+          "dimension": "replacement-cost",
+          "metric": "warp-list-price-equivalent-floor-per-30-day-month",
+          "direction": "baseline",
+          "value": 52437.36,
+          "unit": "USD/30-day-month",
+          "recurrence": "none",
+          "confidence": "derived",
+          "measurementWindow": "90-day Actions export; Warp price checked 2026-09-23",
+          "population": "All 1,966,401 self-hosted macOS minutes priced at WarpBuild's cheapest documented 6-vCPU macOS rate",
+          "note": "Floor valuation only: 655,467 equivalent minutes per 30 days at $0.08/min. No 12-vCPU premium is applied. This is replacement-cost exposure, not a claim that every minute was actually billed to Warp or saved by one contributor.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-macos-capacity-90d-2026-09"
+        },
+        {
+          "id": "warp-replacement-annual-floor-90d",
+          "dimension": "replacement-cost",
+          "metric": "warp-list-price-equivalent-floor-annualized",
+          "direction": "baseline",
+          "value": 637987.88,
+          "unit": "USD/year",
+          "recurrence": "none",
+          "confidence": "derived",
+          "measurementWindow": "Same 90-day Actions export annualized over 365 days",
+          "population": "Same self-hosted macOS workload priced at $0.08/min",
+          "note": "Annualized replacement-cost floor at the 90-day average. Any 12-vCPU Warp usage would raise the equivalent value.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-macos-capacity-90d-2026-09"
+        },
+        {
+          "id": "point-in-time-macos-runner-occupancy",
+          "dimension": "compute",
+          "metric": "macos-runner-minutes-per-day-point-in-time",
+          "direction": "baseline",
+          "value": 18704,
+          "unit": "runner-minutes/day",
+          "recurrence": "none",
+          "confidence": "measured",
+          "measurementWindow": "24 hours ending approximately 2026-09-22T17:00Z",
+          "population": "Nine CMUX workflows scheduling macOS jobs; only time that actually held a runner",
+          "note": "This independent issue-level accounting remains a useful corroborating snapshot but is no longer the primary economic baseline.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-macos-capacity-2026-09"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-13652.md"
+    },
+    {
       "id": "cmux-13908",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -484,80 +590,6 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-13797.md"
-    },
-    {
-      "id": "cmux-13652",
-      "repository": "manaflow-ai/cmux",
-      "kind": "issue",
-      "number": 13652,
-      "title": "Measure CMUX macOS CI capacity and replacement-cost exposure",
-      "status": "measured",
-      "happenedAt": "2026-09-22T17:00:00Z",
-      "recordedAt": "2026-09-23",
-      "areas": [
-        "ci",
-        "cost",
-        "macos",
-        "capacity",
-        "economics"
-      ],
-      "summary": "A complete 24-hour accounting measured 18,704 macOS runner-minutes of actual occupied runner time across the CMUX workflows, providing a stable baseline for separating workload economics from the later question of which provider paid for each minute.",
-      "evidence": {
-        "label": "CMUX issue 13652",
-        "url": "https://redirect.github.com/manaflow-ai/cmux/issues/13652",
-        "basis": "The issue's complete-accounting update records 18,704 actual macOS runner-minutes/day and names the explicitly 12-vCPU Nightly and Release lanes used for the replacement-cost conversion."
-      },
-      "claims": [
-        {
-          "id": "macos-runner-occupancy",
-          "dimension": "compute",
-          "metric": "macos-runner-minutes-per-day",
-          "direction": "baseline",
-          "value": 18704,
-          "unit": "runner-minutes/day",
-          "recurrence": "daily",
-          "confidence": "measured",
-          "measurementWindow": "24 hours ending approximately 2026-09-22T17:00Z",
-          "population": "Nine CMUX workflows scheduling macOS jobs; only time that actually held a runner",
-          "note": "Queued jobs cancelled before allocation are excluded, removing 3,734 minutes that would otherwise inflate the workload.",
-          "headline": false,
-          "additive": false,
-          "overlapGroup": "cmux-macos-capacity-2026-09"
-        },
-        {
-          "id": "warp-replacement-monthly-run-rate",
-          "dimension": "replacement-cost",
-          "metric": "warp-list-price-equivalent-per-30-day-month",
-          "direction": "baseline",
-          "value": 50050.8,
-          "unit": "USD/30-day-month",
-          "recurrence": "none",
-          "confidence": "derived",
-          "measurementWindow": "Same 24-hour workload baseline; Warp prices checked 2026-09-23",
-          "population": "Same measured macOS workload, valued at WarpBuild list prices",
-          "note": "Conservative conversion: 2,150.5 explicitly 12-vCPU runner-minutes/day at $0.16/min and the remaining 16,553.5 minutes/day at $0.08/min. This is replacement-cost exposure, not a claim that every minute was billed to Warp or saved by one change.",
-          "headline": true,
-          "additive": false,
-          "overlapGroup": "cmux-macos-capacity-2026-09"
-        },
-        {
-          "id": "warp-replacement-annual-run-rate",
-          "dimension": "replacement-cost",
-          "metric": "warp-list-price-equivalent-annualized",
-          "direction": "baseline",
-          "value": 608951.4,
-          "unit": "USD/year",
-          "recurrence": "none",
-          "confidence": "derived",
-          "measurementWindow": "Same 24-hour workload baseline annualized over 365 days",
-          "population": "Same measured macOS workload, valued at WarpBuild list prices",
-          "note": "Annualized replacement-cost exposure at the measured run rate. This is a workload valuation, not an attributed annual saving.",
-          "headline": false,
-          "additive": false,
-          "overlapGroup": "cmux-macos-capacity-2026-09"
-        }
-      ],
-      "sourcePath": "work/impact/records/cmux-13652.md"
     },
     {
       "id": "cmux-13644",

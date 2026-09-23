@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "source": "GitHub Actions usage export",
+  "exportLabel": "90 days, downloaded 2026-09-23",
+  "uploadedFilename": "usage 90 days cmux sept 23(1).csv",
+  "companionPerformanceFilename": "perf 90 days cmux sept 23(1).csv",
+  "rowCount": 223,
+  "totalMinutesAll": 3130592,
+  "minutesByRunnerOs": [
+    {
+      "runnerType": "self-hosted",
+      "runtimeOs": "macos",
+      "totalMinutes": 1966401
+    },
+    {
+      "runnerType": "self-hosted",
+      "runtimeOs": "linux",
+      "totalMinutes": 965707
+    },
+    {
+      "runnerType": "hosted",
+      "runtimeOs": "linux",
+      "totalMinutes": 160901
+    },
+    {
+      "runnerType": "hosted",
+      "runtimeOs": "windows",
+      "totalMinutes": 30308
+    },
+    {
+      "runnerType": "hosted",
+      "runtimeOs": "macos",
+      "totalMinutes": 7275
+    }
+  ],
+  "selfHostedMacos": {
+    "totalMinutes90d": 1966401,
+    "averageMinutesPerDay": 21848.9,
+    "equivalentMinutesPer30Days": 655467,
+    "floorAtUsd008PerMinute": {
+      "usd90d": 157312.08,
+      "usdPer30Days": 52437.36,
+      "usdAnnualized": 637987.88
+    }
+  },
+  "topSelfHostedMacosWorkflows": [
+    {
+      "workflow": ".github/workflows/ci.yml",
+      "totalMinutes": 1345657,
+      "workflowRuns": 16360,
+      "jobs": 91
+    },
+    {
+      "workflow": ".github/workflows/test-e2e.yml",
+      "totalMinutes": 152508,
+      "workflowRuns": 14225,
+      "jobs": 5
+    },
+    {
+      "workflow": ".github/workflows/agent-notification-tests.yml",
+      "totalMinutes": 78986,
+      "workflowRuns": 4477,
+      "jobs": 2
+    },
+    {
+      "workflow": ".github/workflows/test-ios.yml",
+      "totalMinutes": 78805,
+      "workflowRuns": 5222,
+      "jobs": 6
+    },
+    {
+      "workflow": ".github/workflows/cmux-tui.yml",
+      "totalMinutes": 67092,
+      "workflowRuns": 5395,
+      "jobs": 10
+    },
+    {
+      "workflow": ".github/workflows/nightly.yml",
+      "totalMinutes": 60110,
+      "workflowRuns": 2057,
+      "jobs": 8
+    },
+    {
+      "workflow": ".github/workflows/reload-build.yml",
+      "totalMinutes": 56687,
+      "workflowRuns": 7190,
+      "jobs": 1
+    },
+    {
+      "workflow": ".github/workflows/perf-activation.yml",
+      "totalMinutes": 54925,
+      "workflowRuns": 8188,
+      "jobs": 2
+    }
+  ],
+  "notes": [
+    "This source summary was derived directly from the user-provided GitHub Actions 90-day CSV export.",
+    "The $0.08/min conversion is deliberately a floor: every self-hosted macOS minute is priced at WarpBuild's cheapest documented 6-vCPU macOS rate, with no 12-vCPU uplift.",
+    "This is an equivalent replacement-cost baseline, not proof that every self-hosted macOS minute was billed to Warp."
+  ]
+}
