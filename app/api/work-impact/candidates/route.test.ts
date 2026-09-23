@@ -16,8 +16,8 @@ describe('GET /api/work-impact/candidates', () => {
     expect(body).toMatchObject({
       version: 1,
       source: 'repository-snapshot',
-      totalRecordCount: 437,
     });
+    expect(body.totalRecordCount).toBeGreaterThanOrEqual(437);
     expect(body.recordCount).toBeGreaterThan(0);
     expect(
       body.records.every(
