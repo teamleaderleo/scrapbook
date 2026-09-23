@@ -33,11 +33,17 @@ describe('GET /api/work-impact', () => {
     );
     const body = await response.json();
 
-    expect(body.recordCount).toBe(1);
-    expect(body.records[0]).toMatchObject({
-      id: 'cmux-13962',
-      repository: 'manaflow-ai/cmux',
-    });
+    expect(body.recordCount).toBeGreaterThanOrEqual(2);
+    expect(
+      body.records.map((record: { id: string }) => record.id)
+    ).toEqual(expect.arrayContaining(['cmux-13962', 'cmux-13935']));
+    expect(
+      body.records.every(
+        (record: { repository: string; claims: Array<{ dimension: string }> }) =>
+          record.repository === 'manaflow-ai/cmux' &&
+          record.claims.some(claim => claim.dimension === 'reliability')
+      )
+    ).toBe(true);
   });
 
   it('supports free-text lookup across claims and areas', async () => {
