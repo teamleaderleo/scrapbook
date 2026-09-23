@@ -48,6 +48,7 @@ export function GET() {
           journal: '/api/agent-journal',
           work: '/api/work',
           workImpact: '/api/work-impact',
+          workImpactCandidates: '/api/work-impact/candidates',
           learningRecords: '/api/learning-records',
         },
         compatibility:
