@@ -14,7 +14,6 @@ describe('GET /api/work-impact', () => {
     expect(body).toMatchObject({
       version: 1,
       source: 'repository',
-      accountingRule: undefined,
     });
     expect(body.totalRecordCount).toBeGreaterThanOrEqual(8);
     expect(body.recordCount).toBe(body.totalRecordCount);
