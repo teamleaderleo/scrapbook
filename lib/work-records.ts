@@ -60,6 +60,49 @@ export const workRecords: readonly WorkRecord[] = [
     ],
   },
   {
+    id: 'cmux',
+    title: 'CMUX',
+    kind: 'Build systems and developer productivity',
+    status: '437 merged PRs indexed · Sep 13–23, 2026',
+    summary:
+      'A concentrated systems campaign across Swift/Xcode compilation, cache identity and lifecycle, reusable test products, artifact transport, macOS runner scheduling, CI observability, and release-workflow economics. The recurring goal is a shorter, more truthful feedback loop rather than a smaller CI bill in isolation.',
+    accomplishments: [
+      'The compilation-cache thread moved from 37.5 GB of rapidly churning PR-scoped cache entries and cold macOS builds to shared main-owned seeds, then repaired runner-path identity drift and a seed-growth loop that crossed the 5 GiB save bound; the clean seed is about 3.5 GiB, roughly 1.5 GiB less for every PR to restore.',
+      'Local and CI feedback loops moved materially: same-commit tagged builds measured 953 s with fresh DerivedData versus 35.7 s on the shared warm tree; Linux guard critical path measured 385.5 s to 124.3 s while intentionally spending about 1.06 extra cheap Linux runner-minutes; focused E2E queue p90 measured 83.3 min on macOS 15 versus 1.0 min on macOS 26.',
+      'Capacity work measured and rerouted demand instead of treating runner scarcity as a provider problem: about 5,900 paid macOS overflow minutes/day moved to sponsored capacity in one sampled window, superseded-PR admission replay estimated about 590 macOS minutes/day avoidable, and a router trigger was reduced from roughly 6,864 invocations/day to about 1,253.',
+      'Reliability work made red CI more truthful: one incomplete-xcresult path had suppressed 148 already-recorded test failures, while a 1,060-test Swift package suite took over 12 minutes with about 161 issues in parallel but completed in 65 seconds with 17 real failures when run serially.',
+    ],
+    reversal:
+      'A tempting janitor class could reclaim 1,316 macOS runner-minutes behind already-decided Linux-guard failures. It was dropped because every reclaimable minute was an in-flight compile that cross-run reuse could make valuable to another run; the shipped cancellation rule stays narrower.',
+    evidence: [
+      {
+        label: 'CMUX synthesis',
+        href: 'https://github.com/teamleaderleo/scrapbook/blob/main/work/records/cmux.md',
+        kind: 'record',
+      },
+      {
+        label: 'Measured impact ledger',
+        href: '/work/impact',
+        kind: 'record',
+      },
+      {
+        label: 'CMUX repository',
+        href: 'https://redirect.github.com/manaflow-ai/cmux',
+        kind: 'repository',
+      },
+      {
+        label: 'Compilation-cache runner identity',
+        href: 'https://redirect.github.com/manaflow-ai/cmux/pull/13754',
+        kind: 'pull-request',
+      },
+      {
+        label: 'CI health observability',
+        href: 'https://redirect.github.com/manaflow-ai/cmux/pull/13810',
+        kind: 'pull-request',
+      },
+    ],
+  },
+  {
     id: 'open-source',
     title: 'Open-source repairs',
     kind: 'Upstream engineering',
@@ -323,7 +366,7 @@ export const workRecords: readonly WorkRecord[] = [
   },
 ];
 
-export const workRecordUpdatedAt = '2026-08-27';
+export const workRecordUpdatedAt = '2026-09-23';
 
 export function getWorkRecord(id: string): WorkRecord | undefined {
   return workRecords.find(record => record.id === id);
