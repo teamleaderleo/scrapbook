@@ -3,24 +3,24 @@
   "source": "repository",
   "updatedAt": "2026-09-23",
   "recordCount": 20,
-  "claimCount": 27,
+  "claimCount": 29,
   "repositories": [
     "manaflow-ai/cmux",
     "swiftlang/swift"
   ],
   "countsByConfidence": {
-    "derived": 8,
+    "derived": 9,
     "observed": 4,
-    "measured": 13,
+    "measured": 14,
     "projected": 2
   },
   "countsByDimension": {
     "critical-path": 7,
     "reliability": 2,
-    "compute": 9,
+    "compute": 11,
     "observability": 1,
-    "cache-transfer": 1,
     "replacement-cost": 2,
+    "cache-transfer": 1,
     "paid-compute": 1,
     "control-plane": 1,
     "developer-loop": 2,
@@ -148,6 +148,26 @@
       "overlapGroup": "cmux-ios-upload-capacity-2026-09"
     },
     {
+      "recordId": "cmux-13652",
+      "repository": "manaflow-ai/cmux",
+      "title": "Measure CMUX macOS CI capacity and replacement-cost exposure",
+      "evidence": "https://github.com/teamleaderleo/scrapbook/blob/main/work/impact/sources/cmux-actions-90d-2026-09-23.json",
+      "id": "warp-replacement-monthly-floor-90d",
+      "dimension": "replacement-cost",
+      "metric": "warp-list-price-equivalent-floor-per-30-day-month",
+      "direction": "baseline",
+      "value": 52437.36,
+      "unit": "USD/30-day-month",
+      "recurrence": "none",
+      "confidence": "derived",
+      "measurementWindow": "90-day Actions export; Warp price checked 2026-09-23",
+      "population": "All 1,966,401 self-hosted macOS minutes priced at WarpBuild's cheapest documented 6-vCPU macOS rate",
+      "note": "Floor valuation only: 655,467 equivalent minutes per 30 days at $0.08/min. No 12-vCPU premium is applied. This is replacement-cost exposure, not a claim that every minute was actually billed to Warp or saved by one contributor.",
+      "headline": true,
+      "additive": false,
+      "overlapGroup": "cmux-macos-capacity-90d-2026-09"
+    },
+    {
       "recordId": "cmux-13908",
       "repository": "manaflow-ai/cmux",
       "title": "Compile the E2E test product once and reuse it on reruns",
@@ -206,26 +226,6 @@
       "headline": true,
       "additive": false,
       "overlapGroup": "cmux-compilation-cache-2026-09"
-    },
-    {
-      "recordId": "cmux-13652",
-      "repository": "manaflow-ai/cmux",
-      "title": "Measure CMUX macOS CI capacity and replacement-cost exposure",
-      "evidence": "https://redirect.github.com/manaflow-ai/cmux/issues/13652",
-      "id": "warp-replacement-monthly-run-rate",
-      "dimension": "replacement-cost",
-      "metric": "warp-list-price-equivalent-per-30-day-month",
-      "direction": "baseline",
-      "value": 50050.8,
-      "unit": "USD/30-day-month",
-      "recurrence": "none",
-      "confidence": "derived",
-      "measurementWindow": "Same 24-hour workload baseline; Warp prices checked 2026-09-23",
-      "population": "Same measured macOS workload, valued at WarpBuild list prices",
-      "note": "Conservative conversion: 2,150.5 explicitly 12-vCPU runner-minutes/day at $0.16/min and the remaining 16,553.5 minutes/day at $0.08/min. This is replacement-cost exposure, not a claim that every minute was billed to Warp or saved by one change.",
-      "headline": true,
-      "additive": false,
-      "overlapGroup": "cmux-macos-capacity-2026-09"
     },
     {
       "recordId": "cmux-13644",
