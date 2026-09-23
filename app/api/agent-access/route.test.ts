@@ -42,6 +42,7 @@ describe('GET /api/agent-access', () => {
           botDesk: '/api/bot-desk',
           work: '/api/work',
           workImpact: '/api/work-impact',
+          workImpactCandidates: '/api/work-impact/candidates',
           learningRecords: '/api/learning-records',
         },
         compatibility: expect.stringContaining('docs/workbench.md'),
