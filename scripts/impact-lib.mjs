@@ -9,6 +9,7 @@ export const IMPACT_SNAPSHOT_PATH = path.join('work', 'impact', 'sources', 'gith
 export const IMPACT_SYNC_STATE_PATH = path.join('work', 'impact', 'sources', 'sync-state.json');
 export const IMPACT_INDEX_PATH = path.join('public', 'data', 'impact-index-v1.json');
 export const IMPACT_SUMMARY_PATH = path.join('public', 'data', 'impact-summary-v1.json');
+export const IMPACT_CANDIDATES_PATH = path.join('public', 'data', 'impact-pr-candidates-v1.json');
 
 const CONFIDENCE = new Set(['measured', 'derived', 'projected', 'observed']);
 const DIRECTIONS = new Set(['baseline', 'reduction', 'shift', 'reliability', 'throughput']);
@@ -260,6 +261,50 @@ export function buildImpactArtifacts(records) {
   };
 
   return { index, summary };
+}
+
+export function buildImpactCandidateArtifact(snapshotRecords, syncState = {}) {
+  return {
+    version: IMPACT_VERSION,
+    source: 'repository-snapshot',
+    updatedAt: syncState.updatedAt ?? null,
+    recordCount: snapshotRecords.length,
+    records: snapshotRecords.map(record => ({
+      id: record.id,
+      repository: record.repository,
+      number: record.number,
+      title: record.title,
+      url: record.url,
+      mergedAt: record.mergedAt ?? null,
+      updatedAt: record.updatedAt ?? null,
+      labels: record.labels ?? [],
+      metricHints: record.metricHints ?? [],
+    })),
+  };
+}
+
+export function queryImpactCandidates(snapshot, filters = {}) {
+  const q = String(filters.q ?? '').trim().toLowerCase();
+  const repo = String(filters.repo ?? '').trim();
+  const limit = Number.isInteger(filters.limit) && filters.limit > 0
+    ? Math.min(filters.limit, 100)
+    : 30;
+
+  return snapshot.records
+    .filter(record => !repo || record.repository === repo)
+    .filter(record => {
+      if (!q) return true;
+      return [record.title, ...record.labels, ...record.metricHints]
+        .join('\n')
+        .toLowerCase()
+        .includes(q);
+    })
+    .sort(
+      (a, b) =>
+        b.metricHints.length - a.metricHints.length ||
+        String(b.mergedAt ?? '').localeCompare(String(a.mergedAt ?? ''))
+    )
+    .slice(0, limit);
 }
 
 export function queryImpactIndex(index, filters = {}) {
