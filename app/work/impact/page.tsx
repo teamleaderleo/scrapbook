@@ -84,10 +84,10 @@ export default function WorkImpactPage() {
             ['Curated records', impactIndex.recordCount],
             ['Quantitative claims', impactSummary.claimCount],
             ['Additive totals', impactSummary.additiveTotals.length],
-          ].map(([label, value]) => (
+          ].map(([label, value], index) => (
             <div
               key={String(label)}
-              className="border-b border-border py-5 sm:nth-[odd]:border-r lg:border-b-0 lg:border-r lg:last:border-r-0"
+              className={[\n                'border-b border-border py-5',\n                index % 2 === 0 ? 'sm:border-r' : '',\n                index < 3 ? 'lg:border-r' : 'lg:border-r-0',\n                'lg:border-b-0',\n              ].filter(Boolean).join(' ')}
             >
               <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                 {label}
