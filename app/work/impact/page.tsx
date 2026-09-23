@@ -87,7 +87,12 @@ export default function WorkImpactPage() {
           ].map(([label, value], index) => (
             <div
               key={String(label)}
-              className={[\n                'border-b border-border py-5',\n                index % 2 === 0 ? 'sm:border-r' : '',\n                index < 3 ? 'lg:border-r' : 'lg:border-r-0',\n                'lg:border-b-0',\n              ].filter(Boolean).join(' ')}
+              className={[
+                'border-b border-border py-5',
+                index % 2 === 0 ? 'sm:border-r' : '',
+                index < 3 ? 'lg:border-r' : 'lg:border-r-0',
+                'lg:border-b-0',
+              ].filter(Boolean).join(' ')}
             >
               <p className="font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                 {label}
