@@ -11,11 +11,12 @@ describe('GET /api/work', () => {
     expect(body).toMatchObject({
       version: 1,
       source: 'repository',
-      updatedAt: '2026-08-27',
-      recordCount: 8,
+      updatedAt: '2026-09-23',
+      recordCount: 9,
     });
     expect(body.records.map((record: { id: string }) => record.id)).toEqual([
       'preflight',
+      'cmux',
       'open-source',
       'agent-systems',
       'stensibly',
@@ -24,12 +25,16 @@ describe('GET /api/work', () => {
       'cultist',
       'fieldwork',
     ]);
-    expect(body.records[4]).toMatchObject({
+    expect(body.records[5]).toMatchObject({
       id: 'smolrunner',
       title: 'Glaeda',
     });
-    expect(body.records[4].evidence[0]).toMatchObject({
+    expect(body.records[5].evidence[0]).toMatchObject({
       href: 'https://github.com/teamleaderleo/glaeda',
+    });
+    expect(body.records[1]).toMatchObject({
+      id: 'cmux',
+      title: 'CMUX',
     });
     expect(body.records[0].evidence[0].href).toBe('/work/preflight');
   });
