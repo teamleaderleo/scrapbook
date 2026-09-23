@@ -72,4 +72,4 @@ Do not silently turn an owned-fork candidate into an upstream contribution. Do n
 
 This material is intentionally personal and can be candid about technical judgment. It should still be written so that a curious engineer, recruiter, or hiring manager could read it without needing private conversation context.
 
-The public `/work` surface is a readable projection of selected records, not a dump of every internal ranking note. Its typed selection lives in `lib/work-records.ts` and is available to human readers at `/work` and machine readers at `/api/work`. The repository remains more exhaustive than the site.
+The public `/work` surface is a readable projection of selected records, not a dump of every internal ranking note. Its typed selection lives in `lib/work-records.ts` and is available to human readers at `/work` and machine readers at `/api/work`. The evidence ledger has its own public projection at `/work/impact` and `/api/work-impact`. The repository remains more exhaustive than the site.
