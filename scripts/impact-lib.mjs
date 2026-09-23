@@ -362,6 +362,27 @@ export function parseJsonLines(raw) {
     });
 }
 
+export function stringifyImpactCandidateArtifact(artifact) {
+  return [
+    '{',
+    '  "version": ' + JSON.stringify(artifact.version) + ',',
+    '  "source": ' + JSON.stringify(artifact.source) + ',',
+    '  "updatedAt": ' + JSON.stringify(artifact.updatedAt) + ',',
+    '  "recordCount": ' + JSON.stringify(artifact.recordCount) + ',',
+    '  "records": [',
+    artifact.records
+      .map((record, index) =>
+        '    ' +
+        JSON.stringify(record) +
+        (index + 1 === artifact.records.length ? '' : ',')
+      )
+      .join('\n'),
+    '  ]',
+    '}',
+    '',
+  ].join('\n');
+}
+
 export function stringifyJsonLines(records) {
   return records.map(record => JSON.stringify(record)).join('\n') + '\n';
 }
