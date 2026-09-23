@@ -181,8 +181,9 @@ export async function loadImpactRecords({ projectRoot = process.cwd() } = {}) {
 }
 
 function publicRecord(record) {
-  const { body: _body, ...rest } = record;
-  return rest;
+  const result = { ...record };
+  delete result.body;
+  return result;
 }
 
 function maxRecordedAt(records) {
