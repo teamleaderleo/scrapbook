@@ -13,6 +13,7 @@ import {
   buildImpactCandidateArtifact,
   loadImpactRecords,
   parseJsonLines,
+  stringifyImpactCandidateArtifact,
 } from './impact-lib.mjs';
 
 const projectRoot = process.cwd();
@@ -32,7 +33,10 @@ for (const [relativePath, value] of [
   [IMPACT_SUMMARY_PATH, artifacts.summary],
   [IMPACT_CANDIDATES_PATH, candidates],
 ]) {
-  const expected = JSON.stringify(value, null, 2) + '\n';
+  const expected =
+    relativePath === IMPACT_CANDIDATES_PATH
+      ? stringifyImpactCandidateArtifact(value)
+      : JSON.stringify(value, null, 2) + '\n';
   const actual = await readFile(path.join(projectRoot, relativePath), 'utf8');
   if (actual !== expected) {
     failed = true;
