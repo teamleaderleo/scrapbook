@@ -13,6 +13,7 @@ import {
   buildImpactCandidateArtifact,
   loadImpactRecords,
   parseJsonLines,
+  stringifyImpactCandidateArtifact,
 } from './impact-lib.mjs';
 
 const projectRoot = process.cwd();
@@ -33,6 +34,10 @@ for (const [relativePath, value] of [
 ]) {
   const target = path.join(projectRoot, relativePath);
   await mkdir(path.dirname(target), { recursive: true });
-  await writeFile(target, JSON.stringify(value, null, 2) + '\n');
+  const serialized =
+    relativePath === IMPACT_CANDIDATES_PATH
+      ? stringifyImpactCandidateArtifact(value)
+      : JSON.stringify(value, null, 2) + '\n';
+  await writeFile(target, serialized);
   console.log('wrote ' + relativePath);
 }
