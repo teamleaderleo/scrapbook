@@ -32,6 +32,7 @@ export function GET() {
           home: '/',
           space: '/space',
           work: '/work',
+          impact: '/work/impact',
           learningRecords: '/space/records',
           workbench: '/desk',
           journal: '/journal',
@@ -46,6 +47,7 @@ export function GET() {
           botDeskDocument: '/api/bot-desk?slug=<slug>',
           journal: '/api/agent-journal',
           work: '/api/work',
+          workImpact: '/api/work-impact',
           learningRecords: '/api/learning-records',
         },
         compatibility:
@@ -61,6 +63,7 @@ export function GET() {
           'docs/bot-desk.md',
           'docs/agent-journal.md',
           'work/README.md',
+          'work/impact/README.md',
         ],
       },
       transports: {
@@ -208,6 +211,7 @@ export function GET() {
           'https://github.com/teamleaderleo/scrapbook/blob/main/docs/agent-contributions.md',
         publicWorkbench: '/desk',
         publicWork: '/work',
+        publicWorkImpact: '/work/impact',
       },
     },
     {
