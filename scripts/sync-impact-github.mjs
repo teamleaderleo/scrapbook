@@ -178,8 +178,15 @@ const now = new Date().toISOString();
 let requestCount = 0;
 
 for (const source of state.sources) {
+  const fullSourceSync = options.full || existing.length === 0;
+  if (fullSourceSync) {
+    for (const [id, record] of records) {
+      if (record.repository === source.repository) records.delete(id);
+    }
+  }
+
   const result = await fetchSource(token, source, {
-    full: options.full || existing.length === 0,
+    full: fullSourceSync,
   });
   requestCount += result.requests;
 
