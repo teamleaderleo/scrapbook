@@ -1,23 +1,24 @@
 {
   "version": 1,
   "source": "repository",
-  "updatedAt": "2026-09-23",
-  "recordCount": 20,
-  "claimCount": 29,
+  "updatedAt": "2026-09-25",
+  "recordCount": 22,
+  "claimCount": 32,
   "repositories": [
     "manaflow-ai/cmux",
     "swiftlang/swift"
   ],
   "countsByConfidence": {
+    "measured": 17,
     "derived": 9,
     "observed": 4,
-    "measured": 14,
     "projected": 2
   },
   "countsByDimension": {
+    "compute": 13,
+    "latency": 1,
     "critical-path": 7,
     "reliability": 2,
-    "compute": 11,
     "observability": 1,
     "replacement-cost": 2,
     "cache-transfer": 1,
@@ -27,6 +28,26 @@
     "cache": 1
   },
   "headlineClaims": [
+    {
+      "recordId": "cmux-14275",
+      "repository": "manaflow-ai/cmux",
+      "title": "Key DerivedData seeds by Swift job width",
+      "evidence": "https://redirect.github.com/manaflow-ai/cmux/pull/14275",
+      "id": "seeded-admission-module-reemits",
+      "dimension": "compute",
+      "metric": "SwiftEmitModule tasks in the cmux scheme of a test-only seeded admission",
+      "direction": "reduction",
+      "value": 62,
+      "unit": "tasks/admission",
+      "recurrence": "per-run",
+      "confidence": "measured",
+      "measurementWindow": "one admission before (run 36040706124) and one after (run 36077356582), both 6 vCPU",
+      "population": "Seeded macOS compile admissions on Blacksmith macOS 26 pools",
+      "note": "62 to 0. Holds when a seed of the runner's width exists. Owned 14-CPU minis have none yet (cmuxterm-hq#590). cmuxTests still recompiles fully after adoption (cmux#14320).",
+      "headline": true,
+      "additive": false,
+      "overlapGroup": "cmux-seeded-admission-rebuild"
+    },
     {
       "recordId": "cmux-13935",
       "repository": "manaflow-ai/cmux",
