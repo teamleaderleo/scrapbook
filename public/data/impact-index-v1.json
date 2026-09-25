@@ -694,7 +694,7 @@
           "recurrence": "none",
           "confidence": "observed",
           "measurementWindow": "2026-09-24",
-          "population": "manaflow-ai/cmux GitHub Actions runners",
+          "population": "Owned Manaflow Mac mini runners (first job on the teamleaderleo/cmux fork)",
           "note": "0 to 1, job-verified on the fork. By glaeda#1175, 13 runners were registered on manaflow-ai/cmux but not yet taking jobs; glaeda#1200 plans 36. Neither is job-verified here.",
           "headline": false,
           "additive": false,
