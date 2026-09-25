@@ -3,7 +3,7 @@
   "source": "repository",
   "generatedFrom": "work/impact/records",
   "updatedAt": "2026-09-25",
-  "recordCount": 39,
+  "recordCount": 38,
   "records": [
     {
       "id": "glaeda-1192",
@@ -35,7 +35,7 @@
           "unit": "failures/run",
           "recurrence": "per-run",
           "confidence": "observed",
-          "measurementWindow": "one fill before and one after on cmux7s, 2026-09-25",
+          "measurementWindow": "one fill before (2026-09-24) and one after (2026-09-25) on cmux7s",
           "population": "Fleet compilation cache fills",
           "note": "751 to 0. Wall time went 684 s to 2,643 s, likely from a 66 GB VM image pull on the same host (unconfirmed); this is a reliability win, not a speed win.",
           "headline": false,
@@ -131,8 +131,8 @@
           "recurrence": "none",
           "confidence": "measured",
           "measurementWindow": "health report window, 2026-09-23 20:37 to 09-24 02:37Z",
-          "population": "Cancelled ci.yml, iroh-v2 and testbox jobs",
-          "note": "A reporting correction, not a compute saving: the report overstated cancelled-job cost about 14 times in that window.",
+          "population": "Cancelled iroh-v2 client, cli-pipe-regressions, Claude wrapper regressions and compile admission jobs",
+          "note": "A reporting correction, not a compute saving: queue-only minutes were about 14 times the real runner minutes (4,732 vs 345), so the old report showed about 15 times the real cost.",
           "headline": false,
           "additive": false,
           "overlapGroup": null
@@ -502,7 +502,7 @@
         "caching",
         "reliability"
       ],
-      "summary": "The seeder skipped a main commit whenever its parent's inputs matched, even when the parent had no seed, leaving main on a stale seed for up to 80 minutes. It now compares against the nearest seeded ancestor.",
+      "summary": "The seeder skipped a main commit whenever its parent's inputs matched, even when the parent had no seed, leaving main on a stale seed for 80 minutes in the latest case. It now compares against the nearest seeded ancestor.",
       "evidence": {
         "label": "CMUX PR 14261",
         "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14261",
@@ -653,7 +653,7 @@
           "value": 36,
           "unit": "seconds/run",
           "recurrence": "per-run",
-          "confidence": "measured",
+          "confidence": "observed",
           "measurementWindow": "before 19:07 to 20:40Z; after 21:55 to 22:55Z (n=4), 2026-09-24",
           "population": "Compile admissions on owned glaeda minis",
           "note": "52 to 56 s before, 13 to 16 s after; 36 s is the conservative gap (52 minus 16). cli-pipe-regressions on a mini still missed (41 s, n=1) because its workspace path differs.",
@@ -677,26 +677,26 @@
         "fleet",
         "ci"
       ],
-      "summary": "One command turns a cmux Mac mini into a GitHub Actions runner with fleet labels. The first owned-mini job ran green, and by later that day the fleet served manaflow-ai/cmux with 13 runners.",
+      "summary": "One command turns a cmux Mac mini into a GitHub Actions runner with fleet labels. The first owned-mini runner (cmux15-glaeda) ran a job green on the fork.",
       "evidence": {
         "label": "Glaeda PR 1146",
         "url": "https://github.com/teamleaderleo/glaeda/pull/1146#issuecomment-5812849555",
-        "basis": "PR comment: teamleaderleo/cmux run 35990802447 ran on cmux15-glaeda and succeeded in 29 s. glaeda-1175's body lists 13 owned runners on manaflow-ai/cmux (std 11, light 2)."
+        "basis": "PR comment: teamleaderleo/cmux run 35990802447 ran on cmux15-glaeda and succeeded in 29 s. Later the same day, glaeda#1175's body lists 13 glaeda pool runners registered on manaflow-ai/cmux (std 11, light 2), before the owned pool was switched on."
       },
       "claims": [
         {
           "id": "owned-runners",
-          "dimension": "capacity",
-          "metric": "owned Mac mini runners serving manaflow-ai/cmux",
+          "dimension": "compute",
+          "metric": "owned Mac mini runners with a verified job",
           "direction": "shift",
-          "value": 13,
+          "value": 1,
           "unit": "runners",
           "recurrence": "none",
           "confidence": "observed",
           "measurementWindow": "2026-09-24",
           "population": "manaflow-ai/cmux GitHub Actions runners",
-          "note": "0 to 13 owned runners on the day, a capacity shift beside Blacksmith. Later PRs (glaeda-1189, 1200) plan 36; not job-verified yet.",
-          "headline": true,
+          "note": "0 to 1, job-verified on the fork. By glaeda#1175, 13 runners were registered on manaflow-ai/cmux but not yet taking jobs; glaeda#1200 plans 36. Neither is job-verified here.",
+          "headline": false,
           "additive": false,
           "overlapGroup": null
         }
@@ -721,7 +721,7 @@
       "evidence": {
         "label": "Glaeda PR 1162",
         "url": "https://github.com/teamleaderleo/glaeda/pull/1162",
-        "basis": "PR body and docs/experiments/fleet-compilation-cache-minis-2026-09-24.md: full cmux app, Xcode 26.3, cold build 756 s; fresh build reading the store 132 s with 4,191 of 4,191 cacheable tasks hit and byte-identical outputs. About 52 s of the 132 s was fetching."
+        "basis": "PR body and docs/experiments/fleet-compilation-cache-minis-2026-09-24.md: full cmux app, Xcode 26.3, cold build 756 s; fresh build reading the store 132 s with 4,191 of 4,191 cacheable tasks hit and byte-identical outputs. The PR attributed about 52 s of the 132 s to fetching; glaeda-1180 later found most of that was a loaded store host, with the network adding about 20 to 30 s."
       },
       "claims": [
         {
@@ -730,7 +730,7 @@
           "metric": "fresh full cmux app build with a filled fleet cache",
           "direction": "reduction",
           "value": 624,
-          "unit": "seconds/run",
+          "unit": "seconds/event",
           "recurrence": "per-event",
           "confidence": "observed",
           "measurementWindow": "one cold and one cached build, 2026-09-24",
@@ -742,45 +742,6 @@
         }
       ],
       "sourcePath": "work/impact/records/glaeda-1162.md"
-    },
-    {
-      "id": "glaeda-1168",
-      "repository": "teamleaderleo/glaeda",
-      "kind": "pull-request",
-      "number": 1168,
-      "title": "glaeda-fleet-status: one typed fleet status document with typed actions",
-      "status": "merged",
-      "happenedAt": "2026-09-24",
-      "recordedAt": "2026-09-25",
-      "areas": [
-        "fleet",
-        "observability"
-      ],
-      "summary": "A single typed status read of the whole build fleet, with typed follow-up actions, replacing ad hoc checks that misreported healthy minis as broken.",
-      "evidence": {
-        "label": "Glaeda PR 1168",
-        "url": "https://github.com/teamleaderleo/glaeda/pull/1168",
-        "basis": "PR body: live read of the 15-mini fleet in 33 s; members wrongly marked broken went from 14 of 17 to 3 real errors, with 124 onboarding warnings reported separately."
-      },
-      "claims": [
-        {
-          "id": "false-broken-members",
-          "dimension": "observability",
-          "metric": "fleet members wrongly reported broken",
-          "direction": "reliability",
-          "value": 11,
-          "unit": "members",
-          "recurrence": "one-time",
-          "confidence": "observed",
-          "measurementWindow": "one live fleet read, 2026-09-24",
-          "population": "Manaflow build fleet members",
-          "note": "14 of 17 flagged to 3 real errors.",
-          "headline": false,
-          "additive": false,
-          "overlapGroup": null
-        }
-      ],
-      "sourcePath": "work/impact/records/glaeda-1168.md"
     },
     {
       "id": "glaeda-1180",
@@ -809,7 +770,7 @@
           "metric": "fresh full cmux app build reading another mini's store",
           "direction": "reduction",
           "value": 629,
-          "unit": "seconds/run",
+          "unit": "seconds/event",
           "recurrence": "per-event",
           "confidence": "observed",
           "measurementWindow": "one build, 2026-09-24, against glaeda-1162's 756 s cold baseline",

@@ -29,7 +29,7 @@
       "unit": "failures/run",
       "recurrence": "per-run",
       "confidence": "observed",
-      "measurementWindow": "one fill before and one after on cmux7s, 2026-09-25",
+      "measurementWindow": "one fill before (2026-09-24) and one after (2026-09-25) on cmux7s",
       "population": "Fleet compilation cache fills",
       "note": "751 to 0. Wall time went 684 s to 2,643 s, likely from a 66 GB VM image pull on the same host (unconfirmed); this is a reliability win, not a speed win.",
       "headline": false,

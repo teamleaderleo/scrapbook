@@ -17,7 +17,7 @@
   "evidence": {
     "label": "Glaeda PR 1162",
     "url": "https://github.com/teamleaderleo/glaeda/pull/1162",
-    "basis": "PR body and docs/experiments/fleet-compilation-cache-minis-2026-09-24.md: full cmux app, Xcode 26.3, cold build 756 s; fresh build reading the store 132 s with 4,191 of 4,191 cacheable tasks hit and byte-identical outputs. About 52 s of the 132 s was fetching."
+    "basis": "PR body and docs/experiments/fleet-compilation-cache-minis-2026-09-24.md: full cmux app, Xcode 26.3, cold build 756 s; fresh build reading the store 132 s with 4,191 of 4,191 cacheable tasks hit and byte-identical outputs. The PR attributed about 52 s of the 132 s to fetching; glaeda-1180 later found most of that was a loaded store host, with the network adding about 20 to 30 s."
   },
   "claims": [
     {
@@ -26,7 +26,7 @@
       "metric": "fresh full cmux app build with a filled fleet cache",
       "direction": "reduction",
       "value": 624,
-      "unit": "seconds/run",
+      "unit": "seconds/event",
       "recurrence": "per-event",
       "confidence": "observed",
       "measurementWindow": "one cold and one cached build, 2026-09-24",

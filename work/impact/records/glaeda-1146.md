@@ -12,26 +12,26 @@
     "fleet",
     "ci"
   ],
-  "summary": "One command turns a cmux Mac mini into a GitHub Actions runner with fleet labels. The first owned-mini job ran green, and by later that day the fleet served manaflow-ai/cmux with 13 runners.",
+  "summary": "One command turns a cmux Mac mini into a GitHub Actions runner with fleet labels. The first owned-mini runner (cmux15-glaeda) ran a job green on the fork.",
   "evidence": {
     "label": "Glaeda PR 1146",
     "url": "https://github.com/teamleaderleo/glaeda/pull/1146#issuecomment-5812849555",
-    "basis": "PR comment: teamleaderleo/cmux run 35990802447 ran on cmux15-glaeda and succeeded in 29 s. glaeda-1175's body lists 13 owned runners on manaflow-ai/cmux (std 11, light 2)."
+    "basis": "PR comment: teamleaderleo/cmux run 35990802447 ran on cmux15-glaeda and succeeded in 29 s. Later the same day, glaeda#1175's body lists 13 glaeda pool runners registered on manaflow-ai/cmux (std 11, light 2), before the owned pool was switched on."
   },
   "claims": [
     {
       "id": "owned-runners",
-      "dimension": "capacity",
-      "metric": "owned Mac mini runners serving manaflow-ai/cmux",
+      "dimension": "compute",
+      "metric": "owned Mac mini runners with a verified job",
       "direction": "shift",
-      "value": 13,
+      "value": 1,
       "unit": "runners",
       "recurrence": "none",
       "confidence": "observed",
       "measurementWindow": "2026-09-24",
       "population": "manaflow-ai/cmux GitHub Actions runners",
-      "note": "0 to 13 owned runners on the day, a capacity shift beside Blacksmith. Later PRs (glaeda-1189, 1200) plan 36; not job-verified yet.",
-      "headline": true,
+      "note": "0 to 1, job-verified on the fork. By glaeda#1175, 13 runners were registered on manaflow-ai/cmux but not yet taking jobs; glaeda#1200 plans 36. Neither is job-verified here.",
+      "headline": false,
       "additive": false,
       "overlapGroup": null
     }
@@ -41,4 +41,4 @@
 
 # Why this record exists
 
-The owned fleet is what later CI routing (owned pool first, Blacksmith overflow) builds on.
+The first owned runner: the later owned-pool-first CI routing builds on it.

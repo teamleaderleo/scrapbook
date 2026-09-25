@@ -26,7 +26,7 @@
       "metric": "fresh full cmux app build reading another mini's store",
       "direction": "reduction",
       "value": 629,
-      "unit": "seconds/run",
+      "unit": "seconds/event",
       "recurrence": "per-event",
       "confidence": "observed",
       "measurementWindow": "one build, 2026-09-24, against glaeda-1162's 756 s cold baseline",
