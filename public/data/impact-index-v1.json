@@ -3,8 +3,47 @@
   "source": "repository",
   "generatedFrom": "work/impact/records",
   "updatedAt": "2026-09-25",
-  "recordCount": 38,
+  "recordCount": 46,
   "records": [
+    {
+      "id": "cmux-14314",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14314,
+      "title": "Start macOS compile admission beside the fast Linux jobs",
+      "status": "merged",
+      "happenedAt": "2026-09-25",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "critical-path"
+      ],
+      "summary": "Compile admission waited for the static stage and the admission gate before starting. It now starts right after change detection, with a hold step that keeps consumers behind the fast Linux gate.",
+      "evidence": {
+        "label": "CMUX PR 14314 after-merge measurement",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14314#issuecomment-5825460838",
+        "basis": "Measured after merge from GitHub Actions job and step timings (read-only), posted on the PR: run start to admission job created, median 160.5 s (n=62, 09-24 20:39Z to 09-25 00:26Z) before, 39.5 s (n=16, 00:30Z to 01:39Z) after; p90 236 s to 77.5 s. Examples 36056381503, 36077835830."
+      },
+      "claims": [
+        {
+          "id": "admission-gate-wait",
+          "dimension": "critical-path",
+          "metric": "run start to compile admission job created",
+          "direction": "reduction",
+          "value": 121,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "n=62 before, n=16 after, 2026-09-24/25",
+          "population": "pull_request ci.yml runs, first attempts",
+          "note": "160.5 s to 39.5 s median; p90 236 s to 77.5 s. One late-night hour after merge; re-measure on a weekday.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-admission-start"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14314.md"
+    },
     {
       "id": "glaeda-1192",
       "repository": "teamleaderleo/glaeda",
@@ -102,6 +141,125 @@
       "sourcePath": "work/impact/records/cmux-14089.md"
     },
     {
+      "id": "cmux-14174",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14174,
+      "title": "Order R2 cache pointers by run ID, so seeder saves take effect",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "caching",
+        "reliability"
+      ],
+      "summary": "The latest-seed pointer could name an older save than the newest one, so seeders kept adopting a stale seed. Pointers are now ordered by run ID.",
+      "evidence": {
+        "label": "CMUX PR 14174 after-merge measurement",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14174#issuecomment-5825462298",
+        "basis": "Measured after merge from GitHub Actions job and step timings (read-only), posted on the PR: seeder changed inputs median 451 (n=5, all adopting stale f2abe643) before; 221, 129, 64 right after on the same pool, then median 28 (n=16, 09:12Z to 14:00Z)."
+      },
+      "claims": [
+        {
+          "id": "seeder-changed-inputs",
+          "dimension": "reliability",
+          "metric": "changed inputs when the seeder adopts a seed",
+          "direction": "reliability",
+          "value": 423,
+          "unit": "inputs/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "n=5 before, n=16 after, 2026-09-24",
+          "population": "seed-derived-data.yml runs on main",
+          "note": "451 to 28 median. Build time on the same pool moved only 845 s to 737 s (n=3); the large build-time drop belongs to #14188 and #14190.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-seed-freshness"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14174.md"
+    },
+    {
+      "id": "cmux-14184",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14184,
+      "title": "Download the admission DerivedData seed while packages resolve",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "critical-path",
+        "caching"
+      ],
+      "summary": "Compile admission downloaded the DerivedData seed after resolving packages. The download now runs during the resolve.",
+      "evidence": {
+        "label": "CMUX PR 14184 after-merge measurement",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14184#issuecomment-5825461750",
+        "basis": "Measured after merge from GitHub Actions job and step timings (read-only), posted on the PR: seeded admissions on 6 vCPU macOS 26: package-cache start to compile start, median 148 s (n=63, 06:00Z to 09:10Z) before, 110 s (n=37, 09:15Z to 14:00Z) after; adopt step 46 s to 8 s. Examples jobs 107514602188, 107569667264."
+      },
+      "claims": [
+        {
+          "id": "pre-compile-window",
+          "dimension": "critical-path",
+          "metric": "package cache start to compile start in seeded admissions",
+          "direction": "reduction",
+          "value": 38,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "n=63 before, n=37 after, 2026-09-24",
+          "population": "Seeded compile admissions on 6 vCPU macOS 26",
+          "note": "148 s to 110 s median. From job start the gain is 23 s, because checkout got about 12 s slower in the same period.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": null
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14184.md"
+    },
+    {
+      "id": "cmux-14186",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14186,
+      "title": "Balance the guard legs the macOS gate waits on",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "critical-path"
+      ],
+      "summary": "The macOS admission gate waits on the slowest guard leg. This PR rebalanced the guard legs, and #14176 started them beside Fast static checks.",
+      "evidence": {
+        "label": "CMUX PR 14186 after-merge measurement",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14186#issuecomment-5825461500",
+        "basis": "Measured after merge from GitHub Actions job and step timings (read-only), posted on the PR: changes-done to admission gate created, median 100 s (n=54, 06:00Z to 08:13Z) before, 79 s (n=39, 09:00Z to 12:00Z) after; slowest guard leg 81 s to 59 s. Covers #14176 too."
+      },
+      "claims": [
+        {
+          "id": "gate-open-time",
+          "dimension": "critical-path",
+          "metric": "changes done to macOS admission gate created",
+          "direction": "reduction",
+          "value": 21,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "n=54 before, n=39 after, 2026-09-24",
+          "population": "pull_request ci.yml runs, first attempts",
+          "note": "100 s to 79 s median shortly after merge; over the whole day 89 s, and nothing measurable from run start because change detection itself got slower. #14176 accounts for about 5 s of it.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-admission-start"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14186.md"
+    },
+    {
       "id": "cmux-14187",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -141,6 +299,62 @@
       "sourcePath": "work/impact/records/cmux-14187.md"
     },
     {
+      "id": "cmux-14188",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14188,
+      "title": "Seed DerivedData on the 12 vCPU macOS 26 pool",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "caching",
+        "critical-path"
+      ],
+      "summary": "The main-branch seeder queued behind PR jobs on the 6 vCPU pool, so seeds landed long after each push. It now runs on the 12 vCPU pool.",
+      "evidence": {
+        "label": "CMUX PR 14188 after-merge measurement",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14188#issuecomment-5825462059",
+        "basis": "Measured after merge from GitHub Actions job and step timings (read-only), posted on the PR: seed job queue wait median 1,342 s (n=6, runs created 06:00Z to 09:01Z) before, 16 s (n=16, 09:12Z to 14:00Z) after; push to seed saved 2,628 s to 740 s. Examples 35971831008 (2,179 s wait), 35979832359 (14 s)."
+      },
+      "claims": [
+        {
+          "id": "seed-queue-wait",
+          "dimension": "critical-path",
+          "metric": "seeder job queue wait",
+          "direction": "reduction",
+          "value": 1326,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "n=6 before, n=16 after, 2026-09-24",
+          "population": "seed-derived-data.yml runs on main",
+          "note": "1,342 s to 16 s median. After 14:00Z the 12 vCPU pool queued too (621 s and 663 s), once PR admissions began preferring it.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-seed-freshness"
+        },
+        {
+          "id": "push-to-seed",
+          "dimension": "critical-path",
+          "metric": "main push to seed saved",
+          "direction": "reduction",
+          "value": 1888,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "same runs",
+          "population": "seed-derived-data.yml runs on main",
+          "note": "2,628 s to 740 s median, including the faster build and #14174 and #14190.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-seed-freshness"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14188.md"
+    },
+    {
       "id": "cmux-14199",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -178,6 +392,101 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-14199.md"
+    },
+    {
+      "id": "cmux-14212",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14212,
+      "title": "Build only the CLI product for CLI-only changes",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "critical-path"
+      ],
+      "summary": "A CLI-routed change built all four app schemes. It now builds only the CLI product and its tests.",
+      "evidence": {
+        "label": "CMUX PR 14212 after-merge measurement",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14212#issuecomment-5825463348",
+        "basis": "Measured after merge from GitHub Actions job and step timings (read-only), posted on the PR: compile step median 388 s (n=4, four schemes) before, 36 s (n=4, cli profile) after; admission job 602 s to 251 s. Closest pair #14325: 120 s to 40 s compile (jobs 107891367186, 107897749996)."
+      },
+      "claims": [
+        {
+          "id": "cli-profile-compile",
+          "dimension": "critical-path",
+          "metric": "compile step for CLI-profile admissions",
+          "direction": "reduction",
+          "value": 352,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "n=4 each side, 2026-09-24/25",
+          "population": "Admissions routed to the CLI product profile",
+          "note": "388 s to 36 s median. All 4 after-runs were already-admitted CI-script PR reruns; no true CLI-only PR has run yet. Pool mix differs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": null
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14212.md"
+    },
+    {
+      "id": "cmux-14226",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14226,
+      "title": "Build focused runs from compile admission's DerivedData seed",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "testing",
+        "caching"
+      ],
+      "summary": "Focused E2E runs compiled the app cold. They now adopt compile admission's DerivedData seed.",
+      "evidence": {
+        "label": "CMUX PR 14226 after-merge measurement",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14226#issuecomment-5825463587",
+        "basis": "Measured after merge from GitHub Actions job and step timings (read-only), posted on the PR: test-e2e.yml build step: 6 vCPU macOS 26 median 1,021 s (n=20) before, 435 s with a seed hit (n=16) after; 12 vCPU 553 s (n=9) to 367.5 s (n=14). macOS 15 got no seed (n=8, 1,249 s)."
+      },
+      "claims": [
+        {
+          "id": "e2e-build-6vcpu",
+          "dimension": "critical-path",
+          "metric": "E2E app build step on 6 vCPU macOS 26",
+          "direction": "reduction",
+          "value": 586,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "n=20 before, n=16 after, 2026-09-24",
+          "population": "Focused test-e2e.yml builds with a seed hit",
+          "note": "1,021 s to 435 s median.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-e2e-duplicate-compile"
+        },
+        {
+          "id": "e2e-build-12vcpu",
+          "dimension": "critical-path",
+          "metric": "E2E app build step on 12 vCPU macOS 26",
+          "direction": "reduction",
+          "value": 185.5,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "n=9 before, n=14 after, 2026-09-24",
+          "population": "Focused test-e2e.yml builds with a seed hit",
+          "note": "553 s to 367.5 s median. 8 of 22 12 vCPU builds missed with no-seed, cause unknown. macOS 15 has no seed until #14315.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-e2e-duplicate-compile"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14226.md"
     },
     {
       "id": "cmux-14229",
@@ -663,6 +972,46 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-14282.md"
+    },
+    {
+      "id": "cmux-14285",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14285,
+      "title": "Keep compile admission's build state on an owned Mac between jobs",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "fleet",
+        "caching"
+      ],
+      "summary": "Owned Mac minis now keep compile admission's DerivedData and package checkouts between jobs, instead of restoring caches and a seed every time.",
+      "evidence": {
+        "label": "CMUX PR 14285 after-merge measurement",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14285#issuecomment-5825462660",
+        "basis": "Measured after merge from GitHub Actions job and step timings (read-only), posted on the PR: warm owned admissions median 10.7 min (n=4; jobs 107886727411, 107903167882, 107904138254, 107908956658) against the 25 min first owned run (36048804178); cold owned 14.8 min (n=3); seeded Blacksmith macOS 26 in the same window 10.3 min (n=20)."
+      },
+      "claims": [
+        {
+          "id": "owned-admission-time",
+          "dimension": "critical-path",
+          "metric": "owned-mini compile admission job time",
+          "direction": "reduction",
+          "value": 14.3,
+          "unit": "minutes/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "1 run before, 4 warm runs after, 2026-09-24/25",
+          "population": "Compile admissions on owned glaeda minis",
+          "note": "25 to 10.7 min. It comes from skipping the seed and cache restore: the kept DerivedData still recompiled about 2,600 tasks every time, so warm owned only matches the Blacksmith median. Uploads on the minis take 113 to 137 s against 8 to 18 s on Blacksmith.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": null
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14285.md"
     },
     {
       "id": "glaeda-1146",
