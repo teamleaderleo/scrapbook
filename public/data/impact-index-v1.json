@@ -3,8 +3,48 @@
   "source": "repository",
   "generatedFrom": "work/impact/records",
   "updatedAt": "2026-09-25",
-  "recordCount": 29,
+  "recordCount": 38,
   "records": [
+    {
+      "id": "glaeda-1192",
+      "repository": "teamleaderleo/glaeda",
+      "kind": "pull-request",
+      "number": 1192,
+      "title": "glaeda-fleet-cas: ProcessType Interactive for the node and store agents",
+      "status": "merged",
+      "happenedAt": "2026-09-25",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "fleet",
+        "caching",
+        "reliability"
+      ],
+      "summary": "The fleet cache node and store daemons ran at background priority, and under load they failed a large share of store calls. They now run as Interactive.",
+      "evidence": {
+        "label": "Glaeda PR 1192",
+        "url": "https://github.com/teamleaderleo/glaeda/pull/1192#issuecomment-5824669691",
+        "basis": "PR body and comment: daemon priority 4 to 31. A fill through the signing writer on cmux7s went from 187 failed and 543 skipped store calls plus 751 failed writes to 0, 0 and 0; the fixed run pushed 7,706 entries and 25,032 objects (2.3 GB) and published a verified marker."
+      },
+      "claims": [
+        {
+          "id": "failed-cache-writes",
+          "dimension": "reliability",
+          "metric": "failed fleet cache writes in one fill",
+          "direction": "reliability",
+          "value": 751,
+          "unit": "failures/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "one fill before (2026-09-24) and one after (2026-09-25) on cmux7s",
+          "population": "Fleet compilation cache fills",
+          "note": "751 to 0. Wall time went 684 s to 2,643 s, likely from a 66 GB VM image pull on the same host (unconfirmed); this is a reliability win, not a speed win.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": null
+        }
+      ],
+      "sourcePath": "work/impact/records/glaeda-1192.md"
+    },
     {
       "id": "cmux-14089",
       "repository": "manaflow-ai/cmux",
@@ -60,6 +100,84 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-14089.md"
+    },
+    {
+      "id": "cmux-14187",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14187,
+      "title": "Stop counting queue time on cancelled jobs as runner minutes",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "observability"
+      ],
+      "summary": "The CI health report counted the queue time of cancelled jobs as runner minutes, inflating the apparent cost of cancelled work. It now counts only minutes a runner actually ran.",
+      "evidence": {
+        "label": "CMUX PR 14187",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14187",
+        "basis": "PR body, health report window 2026-09-23 20:37 to 09-24 02:37Z: cancelled jobs had 345 real runner minutes against 4,732 queue-only minutes (iroh-v2 client 0 vs 334, cli-pipe-regressions 21 vs 1,022, Claude wrapper regressions 3 vs 728, compile admission 321 vs 2,648)."
+      },
+      "claims": [
+        {
+          "id": "miscounted-queue-minutes",
+          "dimension": "observability",
+          "metric": "queue-only minutes reported as runner minutes",
+          "direction": "reliability",
+          "value": 4732,
+          "unit": "minutes/window",
+          "recurrence": "none",
+          "confidence": "measured",
+          "measurementWindow": "health report window, 2026-09-23 20:37 to 09-24 02:37Z",
+          "population": "Cancelled iroh-v2 client, cli-pipe-regressions, Claude wrapper regressions and compile admission jobs",
+          "note": "A reporting correction, not a compute saving: queue-only minutes were about 14 times the real runner minutes (4,732 vs 345), so the old report showed about 15 times the real cost.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": null
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14187.md"
+    },
+    {
+      "id": "cmux-14199",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14199,
+      "title": "One git archive for the trusted router; delete duplicate CI guard tests",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "testing"
+      ],
+      "summary": "The trusted CI router copied its 82 base files one git call at a time. It now extracts them with one git archive; the change also deleted duplicate guard tests.",
+      "evidence": {
+        "label": "CMUX PR 14199",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14199",
+        "basis": "PR body: copying the 82 base files at 6d203e81b6c took 14.6 s before and 0.43 s after, with identical output (diff -r). Measured locally on Big Red's full clone at load average 40 to 100."
+      },
+      "claims": [
+        {
+          "id": "router-base-copy-time",
+          "dimension": "critical-path",
+          "metric": "trusted-router base file copy",
+          "direction": "reduction",
+          "value": 14.2,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "one local run each on Big Red, 2026-09-24",
+          "population": "Trusted CI router",
+          "note": "14.6 s to 0.43 s, measured locally on a loaded host with a full clone; a CI shallow checkout will differ and was not measured.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": null
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14199.md"
     },
     {
       "id": "cmux-14229",
@@ -221,6 +339,45 @@
       "sourcePath": "work/impact/records/cmux-14241.md"
     },
     {
+      "id": "cmux-14254",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14254,
+      "title": "Clone the canonical build root instead of rsyncing it",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "critical-path"
+      ],
+      "summary": "Compile admission copied the checkout into the canonical build root with rsync. It now uses an APFS clone (cp -cpR).",
+      "evidence": {
+        "label": "CMUX PR 14254",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14254#issuecomment-5818649514",
+        "basis": "PR comment: canonical-root copy median 10.0 s over 8 PR admissions since 13:00Z on 2026-09-24 (range 8.72 to 22.31 s; runs 36029137471, 36023014704, 36022937624, 36028782656, 36028762508, 36022099083, 36025040765, 36027687674); 2.54 s on run 36029504166 after."
+      },
+      "claims": [
+        {
+          "id": "canonical-root-copy-time",
+          "dimension": "critical-path",
+          "metric": "admission canonical build root copy",
+          "direction": "reduction",
+          "value": 7.5,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "8-run median before, 1 run after, 2026-09-24",
+          "population": "macOS compile admissions",
+          "note": "10.0 s median to 2.54 s. The before runs span three pools; the after run was 6vcpu macOS 26.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": null
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14254.md"
+    },
+    {
       "id": "cmux-14255",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -332,6 +489,46 @@
       "sourcePath": "work/impact/records/cmux-14257.md"
     },
     {
+      "id": "cmux-14261",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14261,
+      "title": "Skip a main seed build only when the nearest seed has the same inputs",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "caching",
+        "reliability"
+      ],
+      "summary": "The seeder skipped a main commit whenever its parent's inputs matched, even when the parent had no seed, leaving main on a stale seed for 80 minutes in the latest case. It now compares against the nearest seeded ancestor.",
+      "evidence": {
+        "label": "CMUX PR 14261",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14261",
+        "basis": "PR body: of 22 skips in the last 100 seeder runs (2026-09-23 17:00Z to 09-24 17:10Z), 8 left main on a stale seed 2 to 6 commits back. Replaying the new rule over the same 22 skips builds all 8, keeps the 13 correct skips, and builds 1 extra (a05c7e6)."
+      },
+      "claims": [
+        {
+          "id": "stale-seed-skips",
+          "dimension": "reliability",
+          "metric": "seeder skips that left main on a stale seed",
+          "direction": "reliability",
+          "value": 8,
+          "unit": "runs/window",
+          "recurrence": "none",
+          "confidence": "derived",
+          "measurementWindow": "22 skips in 100 seeder runs, 2026-09-23 17:00Z to 09-24 17:10Z",
+          "population": "seed-derived-data.yml runs on main",
+          "note": "8 of 22 to 0 of 22 by replaying the new rule on the same skips, not by live runs after merge. One extra, harmless build.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-seeded-admission-rebuild"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14261.md"
+    },
+    {
       "id": "cmux-14262",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -426,6 +623,165 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-14275.md"
+    },
+    {
+      "id": "cmux-14282",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14282,
+      "title": "Keep the runner account out of the SwiftPM manifest cache key",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "critical-path",
+        "caching"
+      ],
+      "summary": "The SwiftPM manifest cache from cmux-14257 never hit on the owned Mac minis, because the runner account's HOME was part of the key. The resolve now runs with a fixed HOME, so the minis hit the same cache as Blacksmith.",
+      "evidence": {
+        "label": "CMUX PR 14282",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14282#issuecomment-5823586250",
+        "basis": "PR comment: admission 'Resolve Swift packages' on the glaeda minis took 52 to 56 s before (PR runs 19:07 to 20:40Z, e.g. job 107819765887) and 13 to 16 s after (n=4, runs created 21:55 to 22:55Z, after seed run 36059263610). Blacksmith macOS 26 in the same window: median 15 s (n=11)."
+      },
+      "claims": [
+        {
+          "id": "mini-admission-resolve-time",
+          "dimension": "critical-path",
+          "metric": "admission Resolve Swift packages step on owned minis",
+          "direction": "reduction",
+          "value": 36,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "before 19:07 to 20:40Z; after 21:55 to 22:55Z (n=4), 2026-09-24",
+          "population": "Compile admissions on owned glaeda minis",
+          "note": "52 to 56 s before, 13 to 16 s after; 36 s is the conservative gap (52 minus 16). cli-pipe-regressions on a mini still missed (41 s, n=1) because its workspace path differs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-swiftpm-resolve"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14282.md"
+    },
+    {
+      "id": "glaeda-1146",
+      "repository": "teamleaderleo/glaeda",
+      "kind": "pull-request",
+      "number": 1146,
+      "title": "glaeda-cmux-runner: one-command GitHub Actions runner for a cmux Mac mini",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "fleet",
+        "ci"
+      ],
+      "summary": "One command turns a cmux Mac mini into a GitHub Actions runner with fleet labels. The first owned-mini runner (cmux15-glaeda) ran a job green on the fork.",
+      "evidence": {
+        "label": "Glaeda PR 1146",
+        "url": "https://github.com/teamleaderleo/glaeda/pull/1146#issuecomment-5812849555",
+        "basis": "PR comment: teamleaderleo/cmux run 35990802447 ran on cmux15-glaeda and succeeded in 29 s. Later the same day, glaeda#1175's body lists 13 glaeda pool runners registered on manaflow-ai/cmux (std 11, light 2), before the owned pool was switched on."
+      },
+      "claims": [
+        {
+          "id": "owned-runners",
+          "dimension": "compute",
+          "metric": "owned Mac mini runners with a verified job",
+          "direction": "shift",
+          "value": 1,
+          "unit": "runners",
+          "recurrence": "none",
+          "confidence": "observed",
+          "measurementWindow": "2026-09-24",
+          "population": "Owned Manaflow Mac mini runners (first job on the teamleaderleo/cmux fork)",
+          "note": "0 to 1, job-verified on the fork. By glaeda#1175, 13 runners were registered on manaflow-ai/cmux but not yet taking jobs; glaeda#1200 plans 36. Neither is job-verified here.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": null
+        }
+      ],
+      "sourcePath": "work/impact/records/glaeda-1146.md"
+    },
+    {
+      "id": "glaeda-1162",
+      "repository": "teamleaderleo/glaeda",
+      "kind": "pull-request",
+      "number": 1162,
+      "title": "Measure the fleet compilation cache mini to mini on the full cmux app",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "build-performance",
+        "caching",
+        "fleet"
+      ],
+      "summary": "Measured Xcode's compilation cache served from a shared fleet store on the Manaflow M4 Pro minis: a fresh full cmux app build that reads a filled store instead of compiling.",
+      "evidence": {
+        "label": "Glaeda PR 1162",
+        "url": "https://github.com/teamleaderleo/glaeda/pull/1162",
+        "basis": "PR body and docs/experiments/fleet-compilation-cache-minis-2026-09-24.md: full cmux app, Xcode 26.3, cold build 756 s; fresh build reading the store 132 s with 4,191 of 4,191 cacheable tasks hit and byte-identical outputs. The PR attributed about 52 s of the 132 s to fetching; glaeda-1180 later found most of that was a loaded store host, with the network adding about 20 to 30 s."
+      },
+      "claims": [
+        {
+          "id": "fresh-full-app-build",
+          "dimension": "developer-loop",
+          "metric": "fresh full cmux app build with a filled fleet cache",
+          "direction": "reduction",
+          "value": 624,
+          "unit": "seconds/event",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "one cold and one cached build, 2026-09-24",
+          "population": "Fresh builds on a Manaflow M4 Pro mini",
+          "note": "756 s to 132 s. Lab measurement, not CI. For the full app the store and reader were on the same mini; cross-machine was shown on the CmuxSettingsUI chain, and for the full app in glaeda-1180.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "glaeda-fleet-cas-fresh-build"
+        }
+      ],
+      "sourcePath": "work/impact/records/glaeda-1162.md"
+    },
+    {
+      "id": "glaeda-1180",
+      "repository": "teamleaderleo/glaeda",
+      "kind": "pull-request",
+      "number": 1180,
+      "title": "Record the cross-machine full-app read of the fleet compilation cache",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "build-performance",
+        "caching",
+        "fleet"
+      ],
+      "summary": "Repeated glaeda-1162's full-app measurement with the store filled on one mini and read from another over the LAN.",
+      "evidence": {
+        "label": "Glaeda PR 1180",
+        "url": "https://github.com/teamleaderleo/glaeda/pull/1180",
+        "basis": "PR body: cmux8s filled, cmux7s read, Xcode 26.3: 4,191 of 4,191 hits in 127 s (warm node 77 s; same-host reference 108 s). 7,631 of 7,634 outputs byte-identical; the 3 that differ are two Go WireGuard library copies and the debug dylib."
+      },
+      "claims": [
+        {
+          "id": "cross-machine-full-app-read",
+          "dimension": "developer-loop",
+          "metric": "fresh full cmux app build reading another mini's store",
+          "direction": "reduction",
+          "value": 629,
+          "unit": "seconds/event",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "one build, 2026-09-24, against glaeda-1162's 756 s cold baseline",
+          "population": "Fresh builds on Manaflow M4 Pro minis",
+          "note": "756 s to 127 s. Members share entries only on the same Xcode build. The network adds about 20 to 30 s.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "glaeda-fleet-cas-fresh-build"
+        }
+      ],
+      "sourcePath": "work/impact/records/glaeda-1180.md"
     },
     {
       "id": "cmux-13935",
