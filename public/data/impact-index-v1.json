@@ -50,10 +50,10 @@
           "value": 35,
           "unit": "GiB/day",
           "recurrence": "daily",
-          "confidence": "derived",
+          "confidence": "observed",
           "measurementWindow": "about five days before 2026-09-24",
           "population": "manaflow-ai/cmux CI cache bucket",
-          "note": "Derived from 143.4 GiB accumulated over about five days.",
+          "note": "The PR's stated growth rate (143.4 GiB held after about five days; the PR puts steady growth at about 35 GiB a day, mostly compilation archives).",
           "headline": false,
           "additive": false,
           "overlapGroup": "cmux-r2-cache-storage"
@@ -93,7 +93,7 @@
           "confidence": "measured",
           "measurementWindow": "2026-09-24, 25 distinct refs",
           "population": "Focused cmuxTests E2E dispatches",
-          "note": "Each duplicate compile took 12 to 27 minutes. No after-count was taken.",
+          "note": "The 82 sampled cmuxTests-only runs had 12 to 27 minute build jobs; the duplicate refs' own compile times were not listed. No after-count was taken.",
           "headline": false,
           "additive": false,
           "overlapGroup": "cmux-e2e-duplicate-compile"
@@ -115,11 +115,11 @@
         "testing",
         "developer-loop"
       ],
-      "summary": "App-host test reruns still compiled all 1,091 cmuxTests files to run one suite. The rerun now prunes the test sources to those the selected suites can reach (1 to 24 of 1,069 files on that day's traffic), with a full-compile fallback.",
+      "summary": "App-host test reruns still compiled all 1,091 test-target sources (1,069 cmuxTests files plus 22 app and CLI files) to run one suite. The rerun now prunes the test sources to those the selected suites can reach (1 to 24 of 1,069 files on that day's traffic), with a full-compile fallback.",
       "evidence": {
         "label": "CMUX PR 14236",
         "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14236",
-        "basis": "PR body: run 36009423131 spent 220 s compiling all test sources for a suite whose tests took 0.01 s. Successful app-host-test-rerun.yml runs on 2026-09-24 before the change: 442 to 667 s (n=8, median 513 s). First run with pruning, 36016462173: 371 s."
+        "basis": "PR body 'Result' table, same suite and same products: run 36009423131 took 583 s before pruning; run 36016462173, on the PR branch head 2d7207ae with pruning and the cache and fetch fixes, took 371 s. Run 36009423131 also spent 220 s compiling all test sources for a suite whose tests took 0.01 s."
       },
       "claims": [
         {
@@ -127,13 +127,13 @@
           "dimension": "critical-path",
           "metric": "app-host-test-rerun.yml wall time",
           "direction": "reduction",
-          "value": 142,
+          "value": 212,
           "unit": "seconds/run",
           "recurrence": "per-run",
           "confidence": "observed",
-          "measurementWindow": "8 runs before (12:23Z to 14:54Z) against 1 run after (36016462173), 2026-09-24",
+          "measurementWindow": "runs 36009423131 (before) and 36016462173 (pre-merge PR branch run), 2026-09-24",
           "population": "Focused cmuxTests reruns",
-          "note": "513 s median to 371 s. One after-run, so indicative only.",
+          "note": "583 s to 371 s. One run each, so indicative only.",
           "headline": false,
           "additive": false,
           "overlapGroup": "cmux-e2e-duplicate-compile"
@@ -198,7 +198,7 @@
       "evidence": {
         "label": "CMUX PR 14241",
         "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14241",
-        "basis": "PR comment: before, 29 of 29 seeded PR admissions from 11:00Z to 15:00Z on 2026-09-24 reran CompileAssetCatalog and GenerateAssetSymbols. After, 0 in 3 of 3 seeded admissions at distance 0 (runs 36041488043, 36040706124, 36040299378). Canary 36017663612: touching only the directory cost a 241 s rebuild against 29 s null."
+        "basis": "PR comment: before, 29 of 29 seeded PR admissions from 11:00Z to 15:00Z on 2026-09-24 reran CompileAssetCatalog and GenerateAssetSymbols. After (seeds that also carry cmux-14262), 0 in 3 of 3 seeded admissions at distance 0 (runs 36041488043, 36040706124, 36040299378). Canary 36017663612: touching only the directory cost a 241 s rebuild against 29 s null."
       },
       "claims": [
         {
@@ -212,7 +212,7 @@
           "confidence": "measured",
           "measurementWindow": "29 admissions before, 3 after, 2026-09-24",
           "population": "Seeded macOS compile admissions",
-          "note": "29 of 29 to 0 of 3. The cmux-unit phase did not get faster yet (median 129 s to 112 s on 12vcpu), because cmuxTests still recompiles fully after adoption (cmux#14320).",
+          "note": "29 of 29 to 0 of 3. The after seeds also carried cmux-14262's checksum-only mode, so the 0 of 3 is both changes combined. The cmux-unit phase did not get faster: 12 vCPU 129 s median to 112 s (n=1); 6 vCPU 199 s median to 207 s and 242 s. cmuxTests still recompiles fully after adoption (cmux#14320).",
           "headline": false,
           "additive": false,
           "overlapGroup": "cmux-seeded-admission-rebuild"
@@ -237,21 +237,21 @@
       "evidence": {
         "label": "CMUX PR 14255",
         "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14255",
-        "basis": "PR body: checkout medians across 80 ci.yml PR runs on 2026-09-24 were 48 s (admission), 34 s (app-host shards), 44 s (swift-package-tests), 35 s (cli-pipe-regressions). PR comment after merge: 3 to 9 s checkout plus 2 to 8 s restore on five jobs, admission 4 s (job 107802311019)."
+        "basis": "PR body: checkout medians across 80 ci.yml PR runs on 2026-09-24 were 48 s (admission), 34 s (app-host shards), 44 s (swift-package-tests), 35 s (cli-pipe-regressions). PR comment after merge: 3 to 9 s checkout plus 2 to 8 s restore on five jobs, admission 4 s checkout plus 8 s restore (job 107802311019). The comment sums it as about 48 s to 12 s."
       },
       "claims": [
         {
           "id": "admission-checkout-time",
           "dimension": "critical-path",
-          "metric": "compile admission checkout step",
+          "metric": "compile admission checkout plus git seed restore",
           "direction": "reduction",
-          "value": 44,
+          "value": 36,
           "unit": "seconds/run",
           "recurrence": "per-run",
           "confidence": "observed",
           "measurementWindow": "80-run median before; 1 admission job after",
           "population": "macOS compile admission",
-          "note": "48 s to 4 s, plus an 8 s seed restore, so about 36 s net. One after-sample per lane.",
+          "note": "48 s median to 12 s (4 s checkout plus 8 s restore). One after-sample per lane.",
           "headline": true,
           "additive": false,
           "overlapGroup": "cmux-macos-checkout"
@@ -336,7 +336,7 @@
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
       "number": 14262,
-      "title": "Compare file contents, not mtimes, in seeded compile admission",
+      "title": "Compare build inputs by content so an adopted seed rebuilds only real changes",
       "status": "merged",
       "happenedAt": "2026-09-24",
       "recordedAt": "2026-09-25",
@@ -349,7 +349,7 @@
       "evidence": {
         "label": "CMUX PR 14262",
         "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14262",
-        "basis": "XCBuild rerun-reason trace from canary run 36022099083 (seed distance 0: 94 SwiftDriver, 64 SwiftEmitModule, 129 CompileC). Test-only admissions before (run 36001051652, 129 CompileC) and after (run 36040706124, 0 CompileC)."
+        "basis": "XCBuild rerun-reason trace from canary run 36022099083 (seed distance 0: 94 SwiftDriver, 64 SwiftEmitModule). CompileC counts from the before/after comment on cmux#14275: run 36001051652 had 129 CompileC, run 36040706124 had 0."
       },
       "claims": [
         {
@@ -360,10 +360,10 @@
           "value": 129,
           "unit": "tasks/admission",
           "recurrence": "per-run",
-          "confidence": "measured",
+          "confidence": "observed",
           "measurementWindow": "one admission before (run 36001051652) and one after (run 36040706124)",
           "population": "Seeded macOS compile admissions for pull requests",
-          "note": "129 to 0. The Swift module re-emits remained until cmux-14275, because the runner width is part of every Swift driver command.",
+          "note": "129 to 0. One run each: the before run was 12 vCPU with a same-width seed, the after run 6 vCPU with a j12 seed, and the after seed also carried cmux-14241's directory-time replay. The Swift module re-emits remained until cmux-14275.",
           "headline": false,
           "additive": false,
           "overlapGroup": "cmux-seeded-admission-rebuild"
@@ -376,7 +376,7 @@
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
       "number": 14275,
-      "title": "Key DerivedData seeds by Swift job width",
+      "title": "Seed each Swift job width admission compiles at",
       "status": "merged",
       "happenedAt": "2026-09-24",
       "recordedAt": "2026-09-25",
@@ -388,7 +388,7 @@
       "summary": "Swift Build passes -j<CPU count> to every swift-driver invocation, and no build setting overrides it. A seed built on 12 vCPU therefore changed every Swift driver task on a 6 vCPU runner, and all 62 modules re-emitted. Seeds are now keyed by width and built for each Blacksmith macOS 26 pool, and admission adopts a seed of its own width first.",
       "evidence": {
         "label": "CMUX PR 14275",
-        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14275",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14275#issuecomment-5824983225",
         "basis": "Before/after posted on the PR: test-only canary #14269. Run 36040706124 (6 vCPU, j12 seed): 62 SwiftEmitModule, 94 SwiftDriver, cmux scheme 145 s. Run 36077356582 (6 vCPU, j6 seed, distance 0): 0 SwiftEmitModule, 0 SwiftDriver, 0 CompileC, cmux scheme 59 s."
       },
       "claims": [
@@ -400,10 +400,10 @@
           "value": 62,
           "unit": "tasks/admission",
           "recurrence": "per-run",
-          "confidence": "measured",
+          "confidence": "observed",
           "measurementWindow": "one admission before (run 36040706124) and one after (run 36077356582), both 6 vCPU",
           "population": "Seeded macOS compile admissions on Blacksmith macOS 26 pools",
-          "note": "62 to 0. Holds when a seed of the runner's width exists. Owned 14-CPU minis have none yet (cmuxterm-hq#590). cmuxTests still recompiles fully after adoption (cmux#14320).",
+          "note": "62 to 0, one run each. Holds when a seed of the runner's width exists. Owned 14-CPU minis have none yet (cmuxterm-hq#590). cmuxTests still recompiles fully after adoption (cmux#14320).",
           "headline": true,
           "additive": false,
           "overlapGroup": "cmux-seeded-admission-rebuild"
@@ -416,10 +416,10 @@
           "value": 86,
           "unit": "seconds/run",
           "recurrence": "per-run",
-          "confidence": "measured",
+          "confidence": "observed",
           "measurementWindow": "same two 6 vCPU runs",
           "population": "Seeded macOS compile admissions on 6 vCPU macOS 26",
-          "note": "145 s to 59 s. Two runs, so treat as indicative, not a median.",
+          "note": "145 s to 59 s. One run each, so indicative only.",
           "headline": false,
           "additive": false,
           "overlapGroup": "cmux-seeded-admission-rebuild"

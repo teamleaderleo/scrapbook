@@ -9,9 +9,9 @@
     "swiftlang/swift"
   ],
   "countsByConfidence": {
-    "measured": 24,
-    "derived": 10,
-    "observed": 6,
+    "measured": 21,
+    "observed": 10,
+    "derived": 9,
     "projected": 2
   },
   "countsByDimension": {
@@ -55,15 +55,15 @@
       "evidence": "https://redirect.github.com/manaflow-ai/cmux/pull/14255",
       "id": "admission-checkout-time",
       "dimension": "critical-path",
-      "metric": "compile admission checkout step",
+      "metric": "compile admission checkout plus git seed restore",
       "direction": "reduction",
-      "value": 44,
+      "value": 36,
       "unit": "seconds/run",
       "recurrence": "per-run",
       "confidence": "observed",
       "measurementWindow": "80-run median before; 1 admission job after",
       "population": "macOS compile admission",
-      "note": "48 s to 4 s, plus an 8 s seed restore, so about 36 s net. One after-sample per lane.",
+      "note": "48 s median to 12 s (4 s checkout plus 8 s restore). One after-sample per lane.",
       "headline": true,
       "additive": false,
       "overlapGroup": "cmux-macos-checkout"
@@ -91,8 +91,8 @@
     {
       "recordId": "cmux-14275",
       "repository": "manaflow-ai/cmux",
-      "title": "Key DerivedData seeds by Swift job width",
-      "evidence": "https://redirect.github.com/manaflow-ai/cmux/pull/14275",
+      "title": "Seed each Swift job width admission compiles at",
+      "evidence": "https://redirect.github.com/manaflow-ai/cmux/pull/14275#issuecomment-5824983225",
       "id": "seeded-admission-module-reemits",
       "dimension": "compute",
       "metric": "SwiftEmitModule tasks in the cmux scheme of a test-only seeded admission",
@@ -100,10 +100,10 @@
       "value": 62,
       "unit": "tasks/admission",
       "recurrence": "per-run",
-      "confidence": "measured",
+      "confidence": "observed",
       "measurementWindow": "one admission before (run 36040706124) and one after (run 36077356582), both 6 vCPU",
       "population": "Seeded macOS compile admissions on Blacksmith macOS 26 pools",
-      "note": "62 to 0. Holds when a seed of the runner's width exists. Owned 14-CPU minis have none yet (cmuxterm-hq#590). cmuxTests still recompiles fully after adoption (cmux#14320).",
+      "note": "62 to 0, one run each. Holds when a seed of the runner's width exists. Owned 14-CPU minis have none yet (cmuxterm-hq#590). cmuxTests still recompiles fully after adoption (cmux#14320).",
       "headline": true,
       "additive": false,
       "overlapGroup": "cmux-seeded-admission-rebuild"
