@@ -2,9 +2,431 @@
   "version": 1,
   "source": "repository",
   "generatedFrom": "work/impact/records",
-  "updatedAt": "2026-09-23",
-  "recordCount": 20,
+  "updatedAt": "2026-09-25",
+  "recordCount": 29,
   "records": [
+    {
+      "id": "cmux-14089",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14089,
+      "title": "Prune expired R2 cache archives, never one a latest pointer names",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "caching",
+        "storage"
+      ],
+      "summary": "Nothing deleted CI cache archives from R2, so the bucket grew about 35 GiB a day, mostly per-commit Xcode compilation archives. A daily prune now deletes archives past their family's retention (1 day for per-commit families, 30 days for content-keyed ones) and never deletes one a latest pointer names.",
+      "evidence": {
+        "label": "CMUX PR 14089",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14089",
+        "basis": "Before: the PR body measured 143.4 GiB in the bucket after about five days, 141.4 GiB of it compilation archives. First deleting run 35972452822 deleted 114 archives, 117.2 GiB."
+      },
+      "claims": [
+        {
+          "id": "r2-storage-freed-first-run",
+          "dimension": "storage",
+          "metric": "R2 cache bytes deleted by the first prune",
+          "direction": "reduction",
+          "value": 117.2,
+          "unit": "GiB",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "run 35972452822, 2026-09-24",
+          "population": "manaflow-ai/cmux CI cache bucket",
+          "note": "One-time reclaim. The steady-state effect is capping growth at about one day of per-commit archives, not measured here.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-r2-cache-storage"
+        },
+        {
+          "id": "r2-storage-growth-baseline",
+          "dimension": "storage",
+          "metric": "R2 cache growth before pruning",
+          "direction": "baseline",
+          "value": 35,
+          "unit": "GiB/day",
+          "recurrence": "daily",
+          "confidence": "observed",
+          "measurementWindow": "about five days before 2026-09-24",
+          "population": "manaflow-ai/cmux CI cache bucket",
+          "note": "The PR's stated growth rate (143.4 GiB held after about five days; the PR puts steady growth at about 35 GiB a day, mostly compilation archives).",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-r2-cache-storage"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14089.md"
+    },
+    {
+      "id": "cmux-14229",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14229,
+      "title": "Run focused cmuxTests against products CI already compiled",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "testing",
+        "developer-loop"
+      ],
+      "summary": "Focused E2E runs of cmuxTests always compiled the whole app first. The dispatcher now reuses products PR CI already built, or waits for an in-flight CI compile of the same commit, and recompiles only cmuxTests.",
+      "evidence": {
+        "label": "CMUX PR 14229",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14229",
+        "basis": "PR body: 82 of 100 sampled test-e2e runs on 2026-09-24 selected only cmuxTests, with 12 to 27 minute build jobs against about 2 minutes of tests. Of 25 distinct app-host-only refs that day, 15 paid for a second compile of code CI had built or was building."
+      },
+      "claims": [
+        {
+          "id": "duplicate-compiles-baseline",
+          "dimension": "compute",
+          "metric": "app-host-only E2E refs that recompiled code CI already built",
+          "direction": "baseline",
+          "value": 15,
+          "unit": "refs/day",
+          "recurrence": "daily",
+          "confidence": "measured",
+          "measurementWindow": "2026-09-24, 25 distinct refs",
+          "population": "Focused cmuxTests E2E dispatches",
+          "note": "The 82 sampled cmuxTests-only runs had 12 to 27 minute build jobs; the duplicate refs' own compile times were not listed. No after-count was taken.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-e2e-duplicate-compile"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14229.md"
+    },
+    {
+      "id": "cmux-14236",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14236,
+      "title": "Compile only the cmuxTests sources a rerun's suites reach",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "testing",
+        "developer-loop"
+      ],
+      "summary": "App-host test reruns still compiled all 1,091 test-target sources (1,069 cmuxTests files plus 22 app and CLI files) to run one suite. The rerun now prunes the test sources to those the selected suites can reach (1 to 24 of 1,069 files on that day's traffic), with a full-compile fallback.",
+      "evidence": {
+        "label": "CMUX PR 14236",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14236",
+        "basis": "PR body 'Result' table, same suite and same products: run 36009423131 took 583 s before pruning; run 36016462173, on the PR branch head 2d7207ae with pruning and the cache and fetch fixes, took 371 s. Run 36009423131 also spent 220 s compiling all test sources for a suite whose tests took 0.01 s."
+      },
+      "claims": [
+        {
+          "id": "rerun-wall-time",
+          "dimension": "critical-path",
+          "metric": "app-host-test-rerun.yml wall time",
+          "direction": "reduction",
+          "value": 212,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "runs 36009423131 (before) and 36016462173 (pre-merge PR branch run), 2026-09-24",
+          "population": "Focused cmuxTests reruns",
+          "note": "583 s to 371 s. One run each, so indicative only.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-e2e-duplicate-compile"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14236.md"
+    },
+    {
+      "id": "cmux-14240",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14240,
+      "title": "E2E: wait for an earlier dispatch's compile of the same revision",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "testing"
+      ],
+      "summary": "Two test-e2e dispatches of one commit with different selectors ran side by side, each compiling the same product for 12 to 27 minutes. A sibling job now waits for the earlier run's build and adopts its product through the existing lookup.",
+      "evidence": {
+        "label": "CMUX PR 14240",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14240",
+        "basis": "PR body: from 2026-09-23 to 09-24, 25 of 197 test-e2e runs repeated a commit and pool an earlier run had built, and at least 12 started while the identical compile was still running."
+      },
+      "claims": [
+        {
+          "id": "concurrent-duplicate-compiles-baseline",
+          "dimension": "compute",
+          "metric": "test-e2e runs that started while an identical compile was running",
+          "direction": "baseline",
+          "value": 12,
+          "unit": "runs/window",
+          "recurrence": "none",
+          "confidence": "measured",
+          "measurementWindow": "2026-09-23 to 2026-09-24, 197 runs",
+          "population": "test-e2e.yml dispatches",
+          "note": "Each would have cost 12 to 27 minutes of macOS compile. No after-count was taken.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-e2e-duplicate-compile"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14240.md"
+    },
+    {
+      "id": "cmux-14241",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14241,
+      "title": "Replay directory times when adopting a DerivedData seed",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "build-performance",
+        "caching"
+      ],
+      "summary": "Seed adoption restored file times but not directory times, so Xcode saw Assets.xcassets as changed on every adoption and reran the asset catalog. Directory times are now recorded with a digest of their entry names and restored when the names match.",
+      "evidence": {
+        "label": "CMUX PR 14241",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14241",
+        "basis": "PR comment: before, 29 of 29 seeded PR admissions from 11:00Z to 15:00Z on 2026-09-24 reran CompileAssetCatalog and GenerateAssetSymbols. After (seeds that also carry cmux-14262), 0 in 3 of 3 seeded admissions at distance 0 (runs 36041488043, 36040706124, 36040299378). Canary 36017663612: touching only the directory cost a 241 s rebuild against 29 s null."
+      },
+      "claims": [
+        {
+          "id": "asset-catalog-reruns",
+          "dimension": "reliability",
+          "metric": "seeded admissions that reran the asset catalog",
+          "direction": "reliability",
+          "value": 29,
+          "unit": "runs/window",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "29 admissions before, 3 after, 2026-09-24",
+          "population": "Seeded macOS compile admissions",
+          "note": "29 of 29 to 0 of 3. The after seeds also carried cmux-14262's checksum-only mode, so the 0 of 3 is both changes combined. The cmux-unit phase did not get faster: 12 vCPU 129 s median to 112 s (n=1); 6 vCPU 199 s median to 207 s and 242 s. cmuxTests still recompiles fully after adoption (cmux#14320).",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-seeded-admission-rebuild"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14241.md"
+    },
+    {
+      "id": "cmux-14255",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14255,
+      "title": "Start macOS checkouts from main's git objects",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "critical-path"
+      ],
+      "summary": "Every macOS job cloned the tested commit at depth 1 into an empty repository, downloading about 129 MB. Main now publishes a git seed, and macOS jobs restore it before checkout so the fetch moves only the delta.",
+      "evidence": {
+        "label": "CMUX PR 14255",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14255",
+        "basis": "PR body: checkout medians across 80 ci.yml PR runs on 2026-09-24 were 48 s (admission), 34 s (app-host shards), 44 s (swift-package-tests), 35 s (cli-pipe-regressions). PR comment after merge: 3 to 9 s checkout plus 2 to 8 s restore on five jobs, admission 4 s checkout plus 8 s restore (job 107802311019). The comment sums it as about 48 s to 12 s."
+      },
+      "claims": [
+        {
+          "id": "admission-checkout-time",
+          "dimension": "critical-path",
+          "metric": "compile admission checkout plus git seed restore",
+          "direction": "reduction",
+          "value": 36,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "80-run median before; 1 admission job after",
+          "population": "macOS compile admission",
+          "note": "48 s median to 12 s (4 s checkout plus 8 s restore). One after-sample per lane.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-macos-checkout"
+        },
+        {
+          "id": "checkout-time-baseline",
+          "dimension": "compute",
+          "metric": "checkout time across four macOS PR lanes",
+          "direction": "baseline",
+          "value": 88,
+          "unit": "minutes/window",
+          "recurrence": "none",
+          "confidence": "measured",
+          "measurementWindow": "80 ci.yml PR runs, 11:00Z onward on 2026-09-24",
+          "population": "admission, app-host shards, swift-package-tests, cli-pipe-regressions",
+          "note": "35 + 21 + 17 + 15 minutes of checkout in the window.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-macos-checkout"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14255.md"
+    },
+    {
+      "id": "cmux-14257",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14257,
+      "title": "Restore SwiftPM's manifest cache for package resolves",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "critical-path",
+        "caching"
+      ],
+      "summary": "Every admission re-evaluated about 90 Package.swift manifests. SwiftPM keys its manifest cache on the whole process environment, so a plain restore never hit. The resolve now runs under a fixed environment and restores a manifest cache main seeds.",
+      "evidence": {
+        "label": "CMUX PR 14257",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14257",
+        "basis": "PR comment: admission 'Resolve Swift packages' median 63 s (n=21) before, 17 s (n=12) after on macOS 26 pools; cli-pipe-regressions 48 s (n=13) to 15.5 s (n=8). The macOS 15 pool missed until cmux#14272 seeded it."
+      },
+      "claims": [
+        {
+          "id": "admission-resolve-time",
+          "dimension": "critical-path",
+          "metric": "admission Resolve Swift packages step",
+          "direction": "reduction",
+          "value": 46,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "before 11:00Z to 16:40Z (n=21), after 17:34Z to 18:40Z (n=12), 2026-09-24",
+          "population": "macOS 26 compile admissions",
+          "note": "63 s to 17 s median.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-swiftpm-resolve"
+        },
+        {
+          "id": "cli-pipe-resolve-time",
+          "dimension": "critical-path",
+          "metric": "cli-pipe-regressions package resolve step",
+          "direction": "reduction",
+          "value": 32.5,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "same windows (n=13 before, n=8 after)",
+          "population": "macOS 26 cli-pipe-regressions jobs",
+          "note": "48 s to 15.5 s median.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-swiftpm-resolve"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14257.md"
+    },
+    {
+      "id": "cmux-14262",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14262,
+      "title": "Compare build inputs by content so an adopted seed rebuilds only real changes",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "build-performance",
+        "caching"
+      ],
+      "summary": "Seeded PR compile admissions reran every C compile and re-emitted every package module even with an unchanged source tree, because llbuild compared mtimes and 1,616 Xcode SDK and toolchain files carry different mtimes on each runner image. Building with Swift Build's FileSystemMode=checksum-only, and folding the mode into the seed fingerprint, made the C and resource work cache-hit.",
+      "evidence": {
+        "label": "CMUX PR 14262",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14262",
+        "basis": "XCBuild rerun-reason trace from canary run 36022099083 (seed distance 0: 94 SwiftDriver, 64 SwiftEmitModule). CompileC counts from the before/after comment on cmux#14275: run 36001051652 had 129 CompileC, run 36040706124 had 0."
+      },
+      "claims": [
+        {
+          "id": "seeded-admission-c-compiles",
+          "dimension": "compute",
+          "metric": "CompileC tasks per seeded test-only admission",
+          "direction": "reduction",
+          "value": 129,
+          "unit": "tasks/admission",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "one admission before (run 36001051652) and one after (run 36040706124)",
+          "population": "Seeded macOS compile admissions for pull requests",
+          "note": "129 to 0. One run each: the before run was 12 vCPU with a same-width seed, the after run 6 vCPU with a j12 seed, and the after seed also carried cmux-14241's directory-time replay. The Swift module re-emits remained until cmux-14275.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-seeded-admission-rebuild"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14262.md"
+    },
+    {
+      "id": "cmux-14275",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14275,
+      "title": "Seed each Swift job width admission compiles at",
+      "status": "merged",
+      "happenedAt": "2026-09-24",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "build-performance",
+        "caching"
+      ],
+      "summary": "Swift Build passes -j<CPU count> to every swift-driver invocation, and no build setting overrides it. A seed built on 12 vCPU therefore changed every Swift driver task on a 6 vCPU runner, and all 62 modules re-emitted. Seeds are now keyed by width and built for each Blacksmith macOS 26 pool, and admission adopts a seed of its own width first.",
+      "evidence": {
+        "label": "CMUX PR 14275",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14275#issuecomment-5824983225",
+        "basis": "Before/after posted on the PR: test-only canary #14269. Run 36040706124 (6 vCPU, j12 seed): 62 SwiftEmitModule, 94 SwiftDriver, cmux scheme 145 s. Run 36077356582 (6 vCPU, j6 seed, distance 0): 0 SwiftEmitModule, 0 SwiftDriver, 0 CompileC, cmux scheme 59 s."
+      },
+      "claims": [
+        {
+          "id": "seeded-admission-module-reemits",
+          "dimension": "compute",
+          "metric": "SwiftEmitModule tasks in the cmux scheme of a test-only seeded admission",
+          "direction": "reduction",
+          "value": 62,
+          "unit": "tasks/admission",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "one admission before (run 36040706124) and one after (run 36077356582), both 6 vCPU",
+          "population": "Seeded macOS compile admissions on Blacksmith macOS 26 pools",
+          "note": "62 to 0, one run each. Holds when a seed of the runner's width exists. Owned 14-CPU minis have none yet (cmuxterm-hq#590). cmuxTests still recompiles fully after adoption (cmux#14320).",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-seeded-admission-rebuild"
+        },
+        {
+          "id": "cmux-scheme-wall-time",
+          "dimension": "critical-path",
+          "metric": "cmux scheme build-for-testing wall time in admission",
+          "direction": "reduction",
+          "value": 86,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "same two 6 vCPU runs",
+          "population": "Seeded macOS compile admissions on 6 vCPU macOS 26",
+          "note": "145 s to 59 s. One run each, so indicative only.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-seeded-admission-rebuild"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14275.md"
+    },
     {
       "id": "cmux-13935",
       "repository": "manaflow-ai/cmux",
