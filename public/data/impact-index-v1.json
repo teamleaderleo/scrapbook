@@ -3,7 +3,7 @@
   "source": "repository",
   "generatedFrom": "work/impact/records",
   "updatedAt": "2026-09-25",
-  "recordCount": 47,
+  "recordCount": 58,
   "records": [
     {
       "id": "cmux-14314",
@@ -43,6 +43,269 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-14314.md"
+    },
+    {
+      "id": "cmux-14318",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14318,
+      "title": "ci: place each PR macOS job on a free owned mini, overflow the rest",
+      "status": "merged",
+      "happenedAt": "2026-09-25",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "critical-path",
+        "runner-routing"
+      ],
+      "summary": "PR macOS jobs now go to the owned Mac minis first, one job at a time, and overflow to Blacksmith only when no mini is free. This record covers the routing series: owned pools first (cmux#14237), per-job placement (this PR), rolling over to the next pool when one is full (cmux#14323), overflowing to macOS 15 sooner (cmux#14319), and one fleet retry for a refused owned job (cmux#14312, cmux#14325). In the first night after the series landed, about half of PR compile admissions were placed on a mini within seconds.",
+      "evidence": {
+        "label": "CMUX PR 14318 measurement comment",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14318#issuecomment-5826976943",
+        "basis": "PR comment: attempt-1 'macos / macOS compile admission' jobs from ci.yml pull_request runs, wait = job started_at minus job created_at. 09-24 03:46Z to 14:59Z: n=223, 0% on owned minis, median 120 s, p90 1535 s. 09-24 12Z to 14Z (after cmux#14205): n=38, median 22.5 s, p90 323 s. 09-25 01:13Z to 04:37Z: n=53, 49% on owned minis, median 3 s, p90 229 s; owned-placed median 2 s, p90 3 s (n=26); Blacksmith-placed median 48 s, p90 404 s (n=27)."
+      },
+      "claims": [
+        {
+          "id": "pr-admission-owned-share",
+          "dimension": "paid-compute",
+          "metric": "share of attempt-1 PR compile admissions placed on owned Mac minis",
+          "direction": "shift",
+          "value": 49,
+          "unit": "percent of admissions",
+          "recurrence": "per-event",
+          "confidence": "measured",
+          "measurementWindow": "before 2026-09-24 03:46Z to 14:59Z (n=223, 0 owned), after 2026-09-25 01:13Z to 04:37Z (n=53, 26 owned)",
+          "population": "attempt-1 PR compile admission jobs in ci.yml",
+          "note": "0% to 49%, over one 3.5-hour window of US night. Owned-placed admissions waited 2 s median and 3 s p90 for a runner; the other 27 overflowed to Blacksmith. Of the 26 owned attempt-1 jobs, 5 succeeded, 11 failed and 10 were cancelled (mostly superseded pushes). The failures mix real build failures with owned-runner refusals, which the retry path (cmux#14312, cmux#14325) re-runs as attempt 2; this measurement keeps attempt 1 only, so a refused job counts as owned and its refusal plus re-queue time is not in the wait. Runner speed after start is not compared here.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-pr-routing"
+        },
+        {
+          "id": "pr-admission-queue-wait",
+          "dimension": "critical-path",
+          "metric": "PR compile admission queue wait (job created to started), median",
+          "direction": "reduction",
+          "value": 19.5,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "before 2026-09-24 12:00Z to 14:59Z (n=38), after 2026-09-25 01:13Z to 04:37Z (n=53)",
+          "population": "attempt-1 PR compile admission jobs in ci.yml",
+          "note": "22.5 s to 3 s median; p90 323 s to 229 s; mean 138 s to 70 s. The baseline is conservative: it starts after cmux#14205 (least-queued Blacksmith pool, 12:13Z) and had about half the macOS job demand of the after window (31 to 41 vs 55 to 89 jobs per hour). At matched demand before cmux#14205 the median was 312 s (n=159), but most of that gap belongs to cmux#14205 and a single capped 6vcpu pool, so it is not claimed here. The after window is 3.5 hours of US night, and owned slots were raised again at 04:32Z. Reruns are excluded because their job created_at can follow started_at. Attempt 1 only: for an owned job that was refused and re-run, the extra refusal and re-queue time is not counted, which flatters the after median.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-pr-routing"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14318.md"
+    },
+    {
+      "id": "cmux-14333",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14333,
+      "title": "Stop portal lifecycle tests waiting 12 s each on login(1)",
+      "status": "merged",
+      "happenedAt": "2026-09-25",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "testing"
+      ],
+      "summary": "TerminalWindowPortalLifecycleTests freed each terminal surface milliseconds after it spawned login(1), which still ignores SIGHUP while starting, so every close waited out Ghostty's full 12 s SIGHUP grace. tearDown now SIGKILLs the processes on the surface's PTY first. The suite went from about 174 s to about 6 s per CI run.",
+      "evidence": {
+        "label": "CMUX PR 14333 CI comment",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14333#issuecomment-5827083427",
+        "basis": "Comment with the table: ci.yml 'app-host unit tests (1/7)' jobs, suite time summed from the test case durations in each job log. Median 173.6 s (range 127.2 to 197.2, 10 to 16 of 37 tests over 10 s) across 41 runs from 2026-09-24 15:16Z to 2026-09-25 03:29Z; 4.5 s and 7.3 s (no test over 10 s) in the two runs after the 03:54Z merge (36092666273 on main, 36094056367). Shard 1 job 581 s median before, 319 s and 360 s after."
+      },
+      "claims": [
+        {
+          "id": "portal-suite-duration",
+          "dimension": "compute",
+          "metric": "TerminalWindowPortalLifecycleTests suite time per CI run",
+          "direction": "reduction",
+          "value": 166,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "before 2026-09-24 15:16Z to 2026-09-25 03:29Z (n=41, median 173.6 s), after 2026-09-25 04:00Z to 04:21Z (n=2, 4.5 s and 7.3 s)",
+          "population": "ci.yml app-host unit test shard 1 jobs",
+          "note": "173.6 s median minus the larger after value (7.3 s). Only two post-merge runs existed at recording time, so this stays observed. Shard 1's job dropped more than the suite did (581 s median to 319 s and 360 s), so part of that drop comes from other merges and is not claimed. Shard 4 was already the longest app-host job, so this saves shard 1 runner time rather than shortening the app-host lane.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": null
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14333.md"
+    },
+    {
+      "id": "cmux-14334",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14334,
+      "title": "Stop the CLI no-socket regression waiting 90 s for an app it never starts",
+      "status": "merged",
+      "happenedAt": "2026-09-25",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "testing",
+        "compute"
+      ],
+      "summary": "A CLI regression test deliberately starts no app, yet two of its cases waited out the CLI's full 45 s restore-socket startup timeout before asserting 'still opening'. The CLI now accepts an environment override that can only shorten that timeout, and the test sets it to 1 s. The test went from about 90 s to about 2.4 s in CI.",
+      "evidence": {
+        "label": "CMUX PR 14334 CI comment",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14334#issuecomment-5827083266",
+        "basis": "Comment with the table: ci.yml 'app-host unit tests (4/7)' jobs, test times read from job logs. testLaunchCapableCommandsReachTheirDispatchPathWithoutLiveImplicitSocket median 90.4 s (n=28, 2026-09-24 16:29Z to 2026-09-25 01:03Z) before, 2.4 s (n=5, 01:16Z to 02:43Z) after; shard 4 'Run unit tests' step median 331 s to 263 s; shard 4 job median 653 s to 590 s. Run ids listed in the comment."
+      },
+      "claims": [
+        {
+          "id": "no-socket-test-duration",
+          "dimension": "compute",
+          "metric": "testLaunchCapableCommandsReachTheirDispatchPathWithoutLiveImplicitSocket duration",
+          "direction": "reduction",
+          "value": 88,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "before 2026-09-24 16:29Z to 2026-09-25 01:03Z (n=28), after 2026-09-25 01:16Z to 02:43Z (n=5)",
+          "population": "ci.yml app-host unit test shard 4 jobs that ran the full CMUXCLIErrorOutputRegressionTests suite",
+          "note": "90.4 s to 2.4 s median; every before run fell in 90.2 to 90.6 s and every after run in 2.35 to 2.54 s. Six runs that ran the test in under 1 s (a different selection), three on each side, are excluded. The test runs inside the parallel 'Run unit tests' step, so its time is not all wall time.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-app-host-shard4-duration"
+        },
+        {
+          "id": "shard4-unit-step",
+          "dimension": "compute",
+          "metric": "app-host shard 4 'Run unit tests' step",
+          "direction": "reduction",
+          "value": 68,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "same runs: 331 s median (288 to 554) before, 263 s median (254 to 305) after",
+          "population": "ci.yml app-host unit test shard 4 jobs that ran the full CMUXCLIErrorOutputRegressionTests suite",
+          "note": "Upper bound on the lane effect, recorded as runner time. Shard 4 was usually the longest app-host job (median 653 s before, 590 s after), but shard 1 was close (job median 581 s) and ran longer than shard 4 in some after runs (run 36085886212: 653 s against 628 s), so the app-host lane's wall time fell by less than this step until cmux#14333 shortened shard 1. Other merges landed in the same windows and the after sample is five runs, so not all of the step drop is attributable; the per-test drop is. The PR body placed the test in the 'Run CLI no-socket regressions' step, but it runs in 'Run unit tests'; the no-socket step stayed at 218 to 252 s.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-app-host-shard4-duration"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14334.md"
+    },
+    {
+      "id": "cmux-14346",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14346,
+      "title": "Replay input times onto an owned Mac's kept DerivedData",
+      "status": "merged",
+      "happenedAt": "2026-09-25",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "build-performance",
+        "caching"
+      ],
+      "summary": "An owned Mac kept its DerivedData between compile admissions, but every job copied a fresh source tree into the canonical root, so swift-driver saw every file as new and recompiled the whole cmux module. Each owned job now records its inputs' content digests and times, and the next job replays them onto byte-identical files after adopting the kept build.",
+      "evidence": {
+        "label": "CMUX PR 14346 measurement comment",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14346#issuecomment-5826980830",
+        "basis": "Warm owned compile admissions from ci.yml pull_request runs, deduplicated across rerun attempts, PR branch excluded. Before (09-24 23:15Z to 09-25 02:31Z): 0 of 11 replayed, median 2615 cmux SwiftCompile tasks, 9 of 11 whole-module rebuilds, compile step median 384 s (n=9). After (09-25 03:18Z to 04:37Z, before cmux#14375): 15 of 15 replayed, median 1236 tasks, 7 of 15 whole-module rebuilds, compile step median 380 s (n=13)."
+      },
+      "claims": [
+        {
+          "id": "warm-owned-whole-module-rebuilds",
+          "dimension": "compute",
+          "metric": "share of warm owned compile admissions that rebuilt the whole cmux module",
+          "direction": "reduction",
+          "value": 35,
+          "unit": "percentage points",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "before 2026-09-24 23:15Z to 2026-09-25 02:31Z (n=11), after 2026-09-25 03:18Z to 04:37Z (n=15)",
+          "population": "Warm compile admissions on owned glaeda Macs (kept DerivedData adopted), jobs with an Xcode timing summary",
+          "note": "82% (9 of 11) to 47% (7 of 15). The task counts are bimodal, so the median (2615 to 1236 tasks) sits on the boundary job of the lower cluster and one more whole-module job would move it back near 2480; it is not claimed. Jobs 7 to 52 changed inputs from the kept build compiled 1 to 177 tasks; jobs 71 to 187 inputs away still rebuilt the module, because the kept build is the previous PR's, not the merge base. The PR's stamp bump made each Mac's first job after merge cold (18 of 35 owned admissions cold after, 13 of 25 before), a one-time cost not netted here.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-owned-warm-admission"
+        },
+        {
+          "id": "warm-owned-compile-time",
+          "dimension": "critical-path",
+          "metric": "warm owned Compile app-host test product step, median",
+          "direction": "baseline",
+          "value": 384,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "before 2026-09-24 23:15Z to 2026-09-25 02:31Z (n=9 compile successes); after 380 s (n=13)",
+          "population": "Warm compile admissions on owned glaeda Macs",
+          "note": "Null result for time: 384 s median before, 380 s after. p90 rose from 396 s to 836 s on two contended cmux13s jobs (836 s, 1639 s), unrelated to replay. Jobs that avoided the whole-module rebuild compiled in 91 to 241 s. The PR's expected drop to 50 to 100 s did not hold at the median.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-owned-warm-admission"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14346.md"
+    },
+    {
+      "id": "cmux-14349",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14349,
+      "title": "Build cmuxTests without the compilation cache so it rebuilds incrementally",
+      "status": "merged",
+      "happenedAt": "2026-09-25",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "build-performance",
+        "caching"
+      ],
+      "summary": "Under the compilation cache, every cmuxTests build rewrote a chained bridging header that all 1,073 test inputs depend on, so a one-test-file edit recompiled the whole test target. The CI compile script now turns the cache off for cmuxTests only, and swift-driver's incremental build recompiles just the edited file. The app and every package keep the cache.",
+      "evidence": {
+        "label": "CMUX PR 14349",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14349",
+        "basis": "Canary cmux#14249, run 36081880621 (job 107905530013, blacksmith-12vcpu-macos-26, Xcode 26.6), cmux-unit rebuilds over the admission's DerivedData. One-test-file body edit: cache on, cmuxTests 139 s span with SwiftCompile 43 batched tasks at 1,355.3 CPU s (whole rebuild 156 s); a second cache-on series with incremental remarks gave 129 s, 1,299.1 CPU s, and 1,073 inputs invalidated by 'Newer: cmuxTests-...-ChainedBridgingHeader.h'. Cache off for cmuxTests: 31 s span, SwiftCompile 1 task at 0.6 s (whole rebuild 45 s). Read from the job summary and the canary-cmuxtests-probe-1 artifact."
+      },
+      "claims": [
+        {
+          "id": "cmuxtests-test-edit-wall-time",
+          "dimension": "critical-path",
+          "metric": "cmuxTests build time after a one-test-file body edit",
+          "direction": "reduction",
+          "value": 108,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "run 36081880621, 2026-09-25 01:29Z to 02:08Z: 139 s with the cache on (129 s in a second series), 31 s with it off for cmuxTests",
+          "population": "Incremental cmux-unit rebuilds over admission DerivedData on blacksmith-12vcpu-macos-26, Xcode 26.6",
+          "note": "One canary run, one edit per mode. Uses 139 s minus 31 s; the second cache-on series gives 98 s. Only pays off when an admission rebuilds on adopted DerivedData. Adding a top-level declaration in the app still recompiles every cmuxTests file with or without the cache (117 s in the same run). Of the remaining 31 s, 25.7 s was cmuxTests' own emit-module job, which cmux#14364 then removed.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-cmuxtests-rebuild"
+        },
+        {
+          "id": "cmuxtests-test-edit-cpu",
+          "dimension": "compute",
+          "metric": "cmuxTests SwiftCompile CPU time after a one-test-file body edit",
+          "direction": "reduction",
+          "value": 1354,
+          "unit": "cpu-seconds/build",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "run 36081880621: SwiftCompile 43 tasks at 1,355.3 s with the cache on, 1 task at 0.6 s with it off for cmuxTests",
+          "population": "Incremental cmux-unit rebuilds over admission DerivedData on blacksmith-12vcpu-macos-26, Xcode 26.6",
+          "note": "Xcode Build Timing Summary, summed task time across the 12 vCPU runner, not wall time. Same caveats as the wall-time claim.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-cmuxtests-rebuild"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14349.md"
     },
     {
       "id": "cmux-14359",
@@ -101,6 +364,155 @@
       "sourcePath": "work/impact/records/cmux-14359.md"
     },
     {
+      "id": "cmux-14360",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14360,
+      "title": "Run the CLI pipe regressions in compile admission, drop the separate lane",
+      "status": "merged",
+      "happenedAt": "2026-09-25",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "compute",
+        "capacity"
+      ],
+      "summary": "The cli-pipe-regressions lane took its own macOS runner to rebuild the Debug CLI that compile admission already builds, then ran three Python tests and two CmuxFoundation filters. Admission's CLI smoke step now runs the two tests it lacked against its own binary, the CmuxFoundation filters stay covered by swift-package-tests, and the lane is deleted.",
+      "evidence": {
+        "label": "CMUX PR 14360 measurement comment",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14360#issuecomment-5826986283",
+        "basis": "PR comment: in ci.yml PR runs created 2026-09-25 00:46Z to 03:58Z (137 runs), the cli-pipe-regressions job ran 41 times, median 197 s, mean 382 s, 261 runner-minutes total, median queue 14 s. Admission's 'Run early CLI binary smoke checks' step went from median 9 s (n=54, same window) to 11 s (n=15, runs created 03:58Z to 04:47Z). The lane finished last among non-status jobs in 3 of 41 runs."
+      },
+      "claims": [
+        {
+          "id": "cli-lane-runner-time",
+          "dimension": "compute",
+          "metric": "macOS runner time of the removed cli-pipe-regressions job",
+          "direction": "reduction",
+          "value": 3.28,
+          "unit": "runner-minutes/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "lane jobs n=41, 2026-09-25 00:46Z to 03:58Z; smoke step n=54 before, n=15 after (03:58Z to 04:47Z)",
+          "population": "ci.yml pull_request runs that routed to the CLI lane (41 of 137 in the window); 18 on glaeda minis, 23 on Blacksmith macOS",
+          "note": "Median lane job 197 s, gross, on runs that routed to the CLI lane. The mean lane job was 382 s, so the median is the conservative figure. Averaged over all 137 PR runs in the window this is about 59 s per run. This removal also ends the cli-pipe-resolve-time claim in cmux-14257.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-cli-lane"
+        },
+        {
+          "id": "admission-smoke-step-added",
+          "dimension": "critical-path",
+          "metric": "admission 'Run early CLI binary smoke checks' step, median",
+          "direction": "shift",
+          "value": 2,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "n=54 before (2026-09-25 00:46Z to 03:58Z), n=15 after (03:58Z to 04:47Z)",
+          "population": "every ci.yml PR compile admission",
+          "note": "9 s to 11 s median: the cost of running the two moved tests in admission, paid by every admission, including runs that never used the CLI lane. Admission is on the critical path, so this is a small increase there.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-cli-lane"
+        },
+        {
+          "id": "cli-lane-window-baseline",
+          "dimension": "compute",
+          "metric": "total cli-pipe-regressions runner time before removal",
+          "direction": "baseline",
+          "value": 261,
+          "unit": "runner-minutes/window",
+          "recurrence": "none",
+          "confidence": "measured",
+          "measurementWindow": "ci.yml PR runs created 2026-09-25 00:46Z to 03:58Z (137 runs, 41 lane jobs)",
+          "population": "cli-pipe-regressions jobs on PR runs",
+          "note": "Step totals: CLI build 88 min, Restore Swift packages 85 min, resolve 32 min, tests about 23 min, the rest setup and checkout. Critical-path effect is small: the lane was the last job to finish in only 3 of 41 runs, so no time claim is made.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-cli-lane"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14360.md"
+    },
+    {
+      "id": "cmux-14364",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14364,
+      "title": "Build cmuxTests without emitting its Swift module",
+      "status": "merged",
+      "happenedAt": "2026-09-25",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "ci",
+        "build-performance"
+      ],
+      "summary": "After cmux#14349, most of a one-test-file cmuxTests rebuild was the target's own emit-module job, a serial type-check of every test file that produced a module nothing imports. CI now builds cmuxTests with the standalone Swift driver and -no-emit-module-separately, so no module is planned, and the same edit rebuilds cmuxTests in about 4 s with the same tests in the bundle.",
+      "evidence": {
+        "label": "CMUX PR 14364",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14364",
+        "basis": "Canary cmux#14352, run 36089490735 attempt 2 (job 107930437510, blacksmith-12vcpu-macos-26, Xcode 26.6), cmux-unit rebuilds over the admission's DerivedData without stats flags, read from the job summary and the canary-emit-module-probe-2 artifact. Two one-test-file body edits each way: main settings, cmuxTests spans 35.3 s and 31.6 s (SwiftEmitModule 29.8 s and 26.4 s; whole rebuilds 55 s and 47 s); no-module settings, 4.2 s and 4.1 s (whole rebuilds 19 s and 19 s). Both bundles enumerated 11,758 tests with the same __swift5_tests size (0x44140) and 332 ObjC test classes. The profiling run 36087174643 used fine-grained timers and was not used for the numbers."
+      },
+      "claims": [
+        {
+          "id": "cmuxtests-test-edit-wall-time",
+          "dimension": "critical-path",
+          "metric": "cmuxTests build time after a one-test-file body edit",
+          "direction": "reduction",
+          "value": 27.4,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "run 36089490735, 2026-09-25 03:25Z to 03:40Z: 35.3 s and 31.6 s with the module emitted, 4.2 s and 4.1 s without",
+          "population": "Incremental cmux-unit rebuilds over admission DerivedData on blacksmith-12vcpu-macos-26, Xcode 26.6",
+          "note": "Uses the smaller before (31.6 s) minus the larger after (4.2 s). The whole cmux-unit rebuild went from 47 to 55 s to 19 s in the same series, which contains this saving, so it is not claimed separately. A standalone-driver series that still emitted the module took 36.4 s, so the gain comes from dropping the module. Only pays off when an admission rebuilds on adopted DerivedData, and the first admissions after the merge rebuild cmuxTests once because its arguments changed. Too few post-merge admissions existed at recording time (29 minutes after the merge) to measure it there. cmux#14378 (merged 04:40Z) applies the same settings to the local scripts/test-unit.sh.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-cmuxtests-rebuild"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14364.md"
+    },
+    {
+      "id": "glaeda-1190",
+      "repository": "teamleaderleo/glaeda",
+      "kind": "pull-request",
+      "number": 1190,
+      "title": "worktree reclaim: delete local branches whose work has landed (--branches)",
+      "status": "merged",
+      "happenedAt": "2026-09-25",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "developer-loop"
+      ],
+      "summary": "Removing a worktree kept its branch, so every agent task left a local branch behind. The hourly reclaim now also deletes local branches that are not checked out, are idle, and whose work landed (a merged PR containing the tip, or git alone), with a compare-and-swap delete and a receipt to restore each one.",
+      "evidence": {
+        "label": "Glaeda PR 1190",
+        "url": "https://redirect.github.com/teamleaderleo/glaeda/pull/1190#issuecomment-5826944682",
+        "basis": "PR comment summarizing the hourly LaunchAgent's receipts on Air Blue (~/Library/Logs/glaeda-worktree-reclaim.jsonl): the four runs with a branch pass after merge, ending 2026-09-25 00:15 EDT, deleted 64, 64, 64 and 63 branches (255 total), each hitting the 64-per-run cap; 1 branch was kept because it changed at recheck; circuit breaker never tripped."
+      },
+      "claims": [
+        {
+          "id": "landed-branches-deleted",
+          "dimension": "developer-loop",
+          "metric": "landed local branches deleted by the hourly reclaim on Air Blue",
+          "direction": "reduction",
+          "value": 255,
+          "unit": "branches",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "first four branch-pass runs after merge, 2026-09-24 20:03 to 2026-09-25 00:15 EDT",
+          "population": "Local branches in the Git repositories under ~/Projects on Air Blue",
+          "note": "Backlog clearance, capped at 64 per run, and eligible branches remained, so the total keeps rising. Before, these were only removed by a manual git branch -D. Big Red runs the same job; its receipts were not read here.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "glaeda-worktree-reclaim"
+        }
+      ],
+      "sourcePath": "work/impact/records/glaeda-1190.md"
+    },
+    {
       "id": "glaeda-1192",
       "repository": "teamleaderleo/glaeda",
       "kind": "pull-request",
@@ -139,6 +551,46 @@
         }
       ],
       "sourcePath": "work/impact/records/glaeda-1192.md"
+    },
+    {
+      "id": "glaeda-1209",
+      "repository": "teamleaderleo/glaeda",
+      "kind": "pull-request",
+      "number": 1209,
+      "title": "fleet-cas: tailnet addressing, launchd wrapper, upstream error logging",
+      "status": "merged",
+      "happenedAt": "2026-09-25",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "fleet",
+        "caching",
+        "reliability"
+      ],
+      "summary": "Cross-machine reads through the deployed fleet cache services never worked: macOS Local Network privacy blocks launchd-started third-party binaries on the headless minis from other hosts' LAN addresses. The store and nodes now use tailnet addresses, and a fresh full cmux app build on cmux11s hit every cacheable task through its deployed node.",
+      "evidence": {
+        "label": "Glaeda PR 1209",
+        "url": "https://redirect.github.com/teamleaderleo/glaeda/pull/1209#issuecomment-5826438514",
+        "basis": "PR body: before, the launchd-started node on cmux8s got \"No route to host\" for the store's LAN address on cmux7s while the same binary from ssh connected. Pre-merge comment: fresh full-app read on cmux11s through its deployed node LaunchAgent, over the tailnet, from the store on cmux7s, commit 2ae26d1c, Xcode 26.6: 4,192 of 4,192 cacheable tasks hit, all 7,706 signed index entries fetched and verified (kv_sig_fail 0, up_errors 0), BUILD SUCCEEDED in 326 s."
+      },
+      "claims": [
+        {
+          "id": "deployed-cross-machine-hits",
+          "dimension": "reliability",
+          "metric": "cacheable tasks hit through a deployed node reading another mini's store",
+          "direction": "reliability",
+          "value": 4192,
+          "unit": "tasks/build",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "one fresh full-app build on cmux11s before merge, 2026-09-25",
+          "population": "Fresh full cmux app builds on Manaflow minis using the deployed fleet-cas node (Xcode 26.6)",
+          "note": "Before, the deployed (launchd) node could not reach the store at all, so deployed cross-machine reads served nothing; lab reads in glaeda-1162 and glaeda-1180 ran from ssh, which the block does not affect. The 326 s build time is not claimed as a reduction: there is no same-host, same-Xcode cold baseline for it (756 s in glaeda-1162 was Xcode 26.3).",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "glaeda-fleet-cas-fresh-build"
+        }
+      ],
+      "sourcePath": "work/impact/records/glaeda-1209.md"
     },
     {
       "id": "cmux-14089",
@@ -1706,6 +2158,84 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-13962.md"
+    },
+    {
+      "id": "glaeda-1133",
+      "repository": "teamleaderleo/glaeda",
+      "kind": "pull-request",
+      "number": 1133,
+      "title": "Reclaim eligible linked worktrees with --apply",
+      "status": "merged",
+      "happenedAt": "2026-09-23",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "developer-loop",
+        "storage"
+      ],
+      "summary": "glaeda-worktree-reclaim gained --apply: it re-plans each eligible linked worktree, pins an orphan HEAD, rechecks for movement and removes it with git's own guards, recording commit and branch so it can be recreated. The first runs cleared a backlog of 248 idle worktrees across Air Blue and Big Red. The first apply on Air Blue ran from the PR build shortly before merge.",
+      "evidence": {
+        "label": "Glaeda PR 1133",
+        "url": "https://redirect.github.com/teamleaderleo/glaeda/pull/1133#issuecomment-5826944522",
+        "basis": "PR comment summarizing the apply receipts from 2026-09-23 (24 h idle window): first apply on Air Blue, 2 repos, 57 linked, 8 reclaimed; Air Blue backlog, 21 repos, 211 linked, 148 reclaimed; Big Red backlog, 23 repos, 161 linked, 92 reclaimed. No other outcomes, circuit breaker never tripped. Per-repository free space rose by 11.4 GiB in total."
+      },
+      "claims": [
+        {
+          "id": "worktrees-reclaimed-backlog",
+          "dimension": "storage",
+          "metric": "idle linked worktrees removed in the first apply runs",
+          "direction": "reduction",
+          "value": 248,
+          "unit": "worktrees",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "three apply runs, 2026-09-23 03:00 to 03:15 EDT",
+          "population": "Git repositories under ~/Projects on Air Blue and Big Red",
+          "note": "Exact count from receipts; each reclaim is recoverable from the recorded commit and branch. Free space rose by 11.4 GiB (sum of per-repository before and after readings, so other host activity can move it).",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "glaeda-worktree-reclaim"
+        }
+      ],
+      "sourcePath": "work/impact/records/glaeda-1133.md"
+    },
+    {
+      "id": "glaeda-1140",
+      "repository": "teamleaderleo/glaeda",
+      "kind": "pull-request",
+      "number": 1140,
+      "title": "Add glaeda-disk: where the disk went, and reclaim idle build output",
+      "status": "merged",
+      "happenedAt": "2026-09-23",
+      "recordedAt": "2026-09-25",
+      "areas": [
+        "developer-loop",
+        "storage"
+      ],
+      "summary": "glaeda-disk reports where the disk went by family and deletes idle, reproducible build output (Xcode DerivedData, temp-dir scratch, idle session scratchpads) with process, git and idle-window vetoes. On Air Blue it deleted 52.8 GiB of idle build output in its first day and a half, 35.5 GiB of it after merge.",
+      "evidence": {
+        "label": "Glaeda PR 1140",
+        "url": "https://redirect.github.com/teamleaderleo/glaeda/pull/1140#issuecomment-5826944345",
+        "basis": "PR comment summarizing Air Blue's receipt file (~/Projects/recovery/disk-reclaim/receipts.jsonl): 32 deletions, all outcome reclaimed, all idle 6 h or more, 2026-09-23 11:57 to 2026-09-24 18:50 EDT. 17.3 GiB in 18 deletions before merge (PR build), 35.5 GiB in 14 after. By family: DerivedData 36.1 GiB, temp scratch 12.7, session scratch 4.0."
+      },
+      "claims": [
+        {
+          "id": "air-blue-idle-output-deleted",
+          "dimension": "storage",
+          "metric": "idle build output deleted by glaeda-disk on Air Blue",
+          "direction": "reduction",
+          "value": 52.8,
+          "unit": "GiB",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "32 receipt lines, 2026-09-23 11:57 to 2026-09-24 18:50 EDT",
+          "population": "Air Blue (Leo's MacBook Air)",
+          "note": "Gross bytes deleted, not sustained free space: DerivedData and scratch regrow when the next build or session needs them. 35.5 GiB of it came after merge; the other 17.3 GiB was deleted by the PR's own build before merge. The minis run the same pressure job but have not been under pressure (194 to 270 GiB free against a 69.1 GiB threshold), so there are no mini receipts.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "air-blue-disk-reclaim"
+        }
+      ],
+      "sourcePath": "work/impact/records/glaeda-1140.md"
     },
     {
       "id": "swift-92545",
