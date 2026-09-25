@@ -2,8 +2,8 @@
   "version": 1,
   "source": "repository",
   "updatedAt": "2026-09-25",
-  "recordCount": 46,
-  "claimCount": 61,
+  "recordCount": 47,
+  "claimCount": 63,
   "repositories": [
     "manaflow-ai/cmux",
     "swiftlang/swift",
@@ -11,16 +11,16 @@
   ],
   "countsByConfidence": {
     "measured": 29,
-    "observed": 20,
+    "observed": 22,
     "derived": 10,
     "projected": 2
   },
   "countsByDimension": {
-    "critical-path": 24,
+    "critical-path": 25,
+    "compute": 18,
     "reliability": 6,
     "storage": 2,
     "observability": 2,
-    "compute": 17,
     "developer-loop": 4,
     "replacement-cost": 2,
     "cache-transfer": 1,
@@ -48,6 +48,26 @@
       "headline": true,
       "additive": false,
       "overlapGroup": "cmux-admission-start"
+    },
+    {
+      "recordId": "cmux-14359",
+      "repository": "manaflow-ai/cmux",
+      "title": "Build the app without the compilation cache before Xcode 26.6",
+      "evidence": "https://redirect.github.com/manaflow-ai/cmux/pull/14359",
+      "id": "macos15-app-body-edit-recompiles",
+      "dimension": "compute",
+      "metric": "cmux target SwiftCompile tasks for a body-only edit to one app file",
+      "direction": "reduction",
+      "value": 5217,
+      "unit": "tasks/build",
+      "recurrence": "per-run",
+      "confidence": "observed",
+      "measurementWindow": "two edits each way in run 36086596738 (5,219 and 5,224 before, 2 and 2 after), confirmed by two edits in run 36090019330 (2 and 2)",
+      "population": "Incremental cmux builds on the Blacksmith macOS 15 pool (Xcode 26.3)",
+      "note": "Two edits each way, one runner each. Only pays off in PR admission when it adopts DerivedData to rebuild on: the macOS 15 seeds (cmux#14315, cmux#14358) merged the same morning, and seeds built before this fix used the cache for cmux, so the first adoption after a stale seed can still rebuild the app fully. Xcode 26.6 pools were already incremental and are unchanged.",
+      "headline": true,
+      "additive": false,
+      "overlapGroup": "cmux-seeded-admission-rebuild"
     },
     {
       "recordId": "cmux-14089",
