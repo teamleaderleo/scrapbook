@@ -409,7 +409,7 @@
       "summary": "A CLI-routed change built all four app schemes. It now builds only the CLI product and its tests.",
       "evidence": {
         "label": "CMUX PR 14212 after-merge measurement",
-        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14212#issuecomment-5825463348",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14212#issuecomment-5825517561",
         "basis": "Measured after merge (read-only), posted on the PR with a correction: the one like-for-like pair, #14325 on 6 vCPU macOS 26 with a seed hit, compiled in 120 s before (job 107891367186, four schemes) and 40 s after (job 107897749996, cli profile); 288 s to 253 s for the whole job."
       },
       "claims": [
@@ -449,7 +449,7 @@
       "summary": "Focused E2E runs compiled the app cold. They now adopt compile admission's DerivedData seed.",
       "evidence": {
         "label": "CMUX PR 14226 after-merge measurement",
-        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14226#issuecomment-5825463587",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14226#issuecomment-5825517035",
         "basis": "Measured after merge from GitHub Actions job and step timings (read-only), posted on the PR with a correction: test-e2e.yml build step over all builds, 6 vCPU macOS 26 median 888 s (n=27) before, 435 s (n=16, all seed hits) after; 12 vCPU 553 s (n=15) to 518.5 s (n=22, 14 seed hits at 367.5 s, 8 misses at 675 s). macOS 15 got no seed."
       },
       "claims": [
@@ -990,7 +990,7 @@
       "summary": "Owned Mac minis now keep compile admission's DerivedData and package checkouts between jobs, instead of restoring caches and a seed every time.",
       "evidence": {
         "label": "CMUX PR 14285 after-merge measurement",
-        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14285#issuecomment-5825462660",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14285#issuecomment-5825517334",
         "basis": "Measured after merge from GitHub Actions job timings (read-only), posted on the PR with a correction: warm owned admissions median 10.7 min (n=4; jobs 107886727411, 107903167882, 107904138254, 107908956658) against cold owned 15.4 min (n=2, app-profile jobs 107883200927 and 107909027255) in the same window; seeded Blacksmith macOS 26 10.3 min (n=20). The first owned run (36048804178, PR body) took 25 min."
       },
       "claims": [
