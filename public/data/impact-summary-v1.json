@@ -10,8 +10,8 @@
     "teamleaderleo/glaeda"
   ],
   "countsByConfidence": {
-    "measured": 31,
-    "observed": 18,
+    "measured": 29,
+    "observed": 20,
     "derived": 10,
     "projected": 2
   },
@@ -44,7 +44,7 @@
       "confidence": "measured",
       "measurementWindow": "n=62 before, n=16 after, 2026-09-24/25",
       "population": "pull_request ci.yml runs, first attempts",
-      "note": "160.5 s to 39.5 s median; p90 236 s to 77.5 s. One late-night hour after merge; re-measure on a weekday.",
+      "note": "160.5 s to 39.5 s median; p90 236 s to 77.5 s. One late-night hour after merge; re-measure on a weekday. Job start and compile start also moved (282 s to 60 s, 430 s to 242 s), but pool routing changes merged in the same hour confound those.",
       "headline": true,
       "additive": false,
       "overlapGroup": "cmux-admission-start"
@@ -98,13 +98,13 @@
       "dimension": "critical-path",
       "metric": "E2E app build step on 6 vCPU macOS 26",
       "direction": "reduction",
-      "value": 586,
+      "value": 453,
       "unit": "seconds/run",
       "recurrence": "per-run",
       "confidence": "measured",
-      "measurementWindow": "n=20 before, n=16 after, 2026-09-24",
-      "population": "Focused test-e2e.yml builds with a seed hit",
-      "note": "1,021 s to 435 s median.",
+      "measurementWindow": "n=27 before, n=16 after, 2026-09-24/25",
+      "population": "All focused test-e2e.yml builds on 6 vCPU macOS 26",
+      "note": "888 s to 435 s median. The before side includes 7 builds that had already adopted main's DerivedData or an early admission seed.",
       "headline": true,
       "additive": false,
       "overlapGroup": "cmux-e2e-duplicate-compile"
