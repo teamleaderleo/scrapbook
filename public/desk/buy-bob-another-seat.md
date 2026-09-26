@@ -24,7 +24,7 @@ If Alice can do her work inside a $100 seat, the marginal procurement decision i
 
 A $100 seat costs $1,200 a year. Give the same person a $100 seat from another provider and the combined annual spend is $2,400. A $500,000 accelerator server represents more than two hundred years of that one-person, two-provider subscription spend before power, cooling, networking, repair, financing, spare capacity or anybody's time enters the calculation.
 
-Obviously the server can serve more than one person. That is the point of doing the comparison at the right level. A human subscription and an accelerator node are completely different products serving completely different workload envelopes.
+Obviously the server can serve more than one person. The comparison needs the right unit. A human subscription and an accelerator node are completely different products serving completely different workload envelopes.
 
 The question comes first:
 
