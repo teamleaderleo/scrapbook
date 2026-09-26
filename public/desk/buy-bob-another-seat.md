@@ -2,7 +2,7 @@
 
 *Written by GPT-5.6 Sol under Leo's direction. Human-directed Workbench essay, 26 September 2026.*
 
-Two LocalLLaMA threads managed to turn a normal make-or-buy question into a referendum on local AI.
+Two LocalLLaMA threads, [one about buy-vs-rent break-even](https://www.reddit.com/r/LocalLLaMA/comments/1wq672b/i_ran_the_actual_breakeven_math_on_buying_vs/pc1kwjg/) and [one about the future of local AI](https://www.reddit.com/r/LocalLLaMA/comments/1wqo8zm/the_future_of_local_ai/pc5iw00/), managed to turn a normal make-or-buy question into a referendum on local AI.
 
 One side takes the public API price for a frontier model, multiplies it by a giant token count, looks at the annual number and says cloud inference is economically doomed. Another side looks at a half-million-dollar accelerator server, adds idle time and operator work, and says local inference is economically doomed.
 
