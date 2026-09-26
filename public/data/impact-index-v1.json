@@ -2,9 +2,144 @@
   "version": 1,
   "source": "repository",
   "generatedFrom": "work/impact/records",
-  "updatedAt": "2026-09-25",
-  "recordCount": 58,
+  "updatedAt": "2026-09-26",
+  "recordCount": 61,
   "records": [
+    {
+      "id": "cmux-14768",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14768,
+      "title": "Attribute a red guard to the change that broke it and say how to fix it",
+      "status": "merged",
+      "happenedAt": "2026-09-26",
+      "recordedAt": "2026-09-26",
+      "areas": [
+        "ci",
+        "observability",
+        "developer-loop"
+      ],
+      "summary": "Fast guards no longer block merges, so a red guard on main needs an owner fast. ci-guard-attribution.yml runs after every CI fast guards or repository-variables run: it walks back to the last green run, re-runs only the failing step on each first-parent commit in between, names the culprit PR with the exact assertion, the likely fix and a one-line repro, keeps one tracking issue per red workflow, and offers mechanical fix patches.",
+      "evidence": {
+        "label": "CMUX PR 14768",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14768",
+        "basis": "PR body: a hand-run replay, 'analyze --sha 90e8953 --log <fast guards at 90e8953> --baseline 90e8953~4', ran the failing step on 4 commits, found 90e8953 (#14724) first to fail, and took 92 s and 2 API calls. It was given the log and a hand-set 4-commit baseline, so the 92 s excludes the workflow_run trigger, runner start and log fetch, and ranges over 40 commits are bisected by halving. At 90e8953 the fix was a hint, not a verified patch. The dry-run report it would have posted, naming #14724 and the missing CI_SEED_KEEP_LOCAL_RUNNERS exemption, is in the PR's replay comment (issuecomment-5841155073). No numeric claim is made: there is no measured before time, and no live attribution has happened yet (no CI fast guards run on main failed in the controller's webhook feed from 00:42 to 04:42Z 09-26)."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-14768.md"
+    },
+    {
+      "id": "cmux-14774",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14774,
+      "title": "PR picker fills idle and briefly busy owned minis before Blacksmith",
+      "status": "merged",
+      "happenedAt": "2026-09-26",
+      "recordedAt": "2026-09-26",
+      "areas": [
+        "ci",
+        "capacity",
+        "runner-routing"
+      ],
+      "summary": "The PR runner picker capped the owned pool's allowance at Blacksmith's expected wait from a snapshot up to 45 min old, charged owned labels for in-flight peaks of jobs that did not exist yet, and fell back to the default Blacksmith route when the snapshot download failed. It now reads live runners, takes a run onto the owned pool while its jobs start within the configured queue rounds, and treats Blacksmith as overflow. In the first, lightly loaded night hours after merge, PR CI's attempt-1 macOS 26 work moved from a swinging 39% to 85% (56% overall) to about 89% on the owned minis, and its queue wait fell. Blacksmith re-runs of refused jobs rose over the same hours, so this is not a fleet-wide Blacksmith saving.",
+      "evidence": {
+        "label": "CMUX PR 14774 measurement comment",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14774#issuecomment-5843309891",
+        "basis": "Measured after merge from the build controller's workflow_job webhook feed (no API calls), read 04:42Z 09-26. Attempt 1 of in-repository pull_request CI runs, macOS 26 jobs that ran (glaeda-* or *-macos-26 labels), run windowed by its first job's creation. Before (runs 00:45 to 02:17Z): 144 runs, 54 with any Blacksmith macOS 26 job; 1,206 owned and 942 Blacksmith job-minutes (56.2% owned); 6.5 Blacksmith min per run; queue wait p50 200 s, p90 2,565 s. After (runs 02:17 to 04:00Z): 60 runs, 2 with any Blacksmith job; 613 owned and 77 Blacksmith job-minutes (88.9% owned); 1.3 Blacksmith min per run; queue wait p50 17 s, p90 340 s. Owned runners busy 23.4 of 37.9 online before and 21.2 of 39.2 after (ci-dash utilization)."
+      },
+      "claims": [
+        {
+          "id": "pr-macos26-owned-share",
+          "dimension": "compute",
+          "metric": "share of PR CI attempt-1 macOS 26 job-minutes on owned minis",
+          "direction": "shift",
+          "value": 32.7,
+          "unit": "percentage-points",
+          "recurrence": "none",
+          "confidence": "measured",
+          "measurementWindow": "runs created 2026-09-26 00:45 to 02:17Z (before, 144 runs) against 02:17 to 04:00Z (after, 60 runs)",
+          "population": "attempt 1 of in-repository pull_request CI runs, macOS 26 jobs that ran; macOS 15 jobs (no owned pool) excluded",
+          "note": "56.2% to 88.9% owned; Blacksmith macOS 26 job-minutes per run 6.5 to 1.3, and runs touching Blacksmith 38% to 3%. Caveats: (1) The before baseline is not stable: by half-hour of first job it read 45%, 39%, 85% and 59% owned, and the 01:30 slot reached 85% under the old picker with 42 runs. (2) Not load-matched: about 94 PR runs an hour before and about 35 after, and the owned fleet had more spare room after (about 14.5 idle runners of 37.9 online before, 18.0 of 39.2 after), which helps placement under either rule. (3) Attempt 1 only. Attempt-3 re-runs of PR CI (Blacksmith by rule) took 260 Blacksmith macOS minutes inside the before window and 540 inside the after window (wall-clock clipped, any run, not only these runs), and ci-dash showed Blacksmith running jobs doubling (6.4 to 13.0 on average). More owned placement can raise mini refusals and so attempt-3 re-runs; how much of that rise this change caused is not measured, and cmux#14766, which stops the rescue cancelling siblings, went live only at 04:02Z. So no fleet-wide Blacksmith saving is claimed. (4) The controller dropped about 2,860 deliveries between 09-25 21:30 and 09-26 03:40Z (hq#734); jobs whose completion never arrived are missing from both sides. The PR body's replay (111 to 35 Blacksmith jobs) is modeled and not claimed. A daytime, load-matched comparison is still open.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-pr-pool-placement"
+        },
+        {
+          "id": "pr-macos26-queue-wait-p50",
+          "dimension": "latency",
+          "metric": "median queue wait of PR CI attempt-1 macOS 26 jobs",
+          "direction": "reduction",
+          "value": 183,
+          "unit": "seconds/job",
+          "recurrence": "per-event",
+          "confidence": "measured",
+          "measurementWindow": "same windows as the owned-share claim",
+          "population": "401 jobs before, 144 after",
+          "note": "p50 200 s to 17 s, p90 2,565 s to 340 s, mean 775 s to 154 s. The before p50 is bimodal: owned jobs had a median of 12 s and Blacksmith jobs 1,005 s (Blacksmith's own queue), so most of the p50 drop comes from the pool mix changing (42% to 8% of these jobs on Blacksmith); owned-only p50 went 12 s to 4 s and compile admissions 133 s to 33 s. Same load caveat as the owned-share claim, which matters more here because queue wait rises with load. Cancelled jobs are excluded (253 Blacksmith jobs before, 71 after); those likely waited longest, so the before wait is if anything understated. A per-job wait is not a per-run critical-path saving.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-pr-pool-placement"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14774.md"
+    },
+    {
+      "id": "cmux-14776",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 14776,
+      "title": "UI E2E runs adopt the app and UI test bundle PR CI compiled",
+      "status": "merged",
+      "happenedAt": "2026-09-26",
+      "recordedAt": "2026-09-26",
+      "areas": [
+        "ci",
+        "build-performance",
+        "e2e"
+      ],
+      "summary": "UI E2E dispatches from scripts/run-e2e.sh used to compile the whole app again even though the PR's own CI compile admission already builds the cmuxUITests bundle. The dispatcher now finds the in-repository PR CI run for the commit, keeps the head when the merge has the same product inputs, waits for an in-flight admission, and test-e2e.yml adopts that product, so the build job skips its compile step.",
+      "evidence": {
+        "label": "CMUX PR 14776",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14776",
+        "basis": "PR body 'Timing against the old full build' and 'UI E2E volume', rechecked from the two runs' build-job step times. Old full build: run 36197213485 (22:32Z 09-25, build job 108275782583 on glaeda-root-std-xcode-26.6): run created 22:32:38, build job start 22:34:11, compile step 'Build the app-host and UI test product' 22:35:44 to 22:43:12 (7 min 28 s), tests start 22:43:37 (step 37 'Run the selected tests here', which ran the tests on this side), so 659 s from run creation and 566 s from build-job start to tests; last update 22:49:00. Adopted product: run 36216682336 (04:03Z 09-26, build job 108333960534 on blacksmith-12vcpu-macos-26): run created 04:03:23, build job created 04:03:45 and started 04:05:44 (119 s Blacksmith queue), compile step skipped, 'Reuse a compiled product' 43 s, tests start 04:07:33 (step 39 'Run selected tests'; 'Run the selected tests here' took 0 s on this side), so 250 s from run creation and 109 s from build-job start; last update 04:09:04. The selector RemoteTmuxSizingUITests/testAttachSettlesStableAndCoherent is in both runs' names. Both runs ended red for reasons outside the build step: the old run's 'Run selected tests' wrapper failed 3 s after its tests ran, and the new run hit an app-activation guard on that Blacksmith runner (PR body). Volume baseline from the PR body: 12.3 h of test-e2e.yml history, 400 runs, 269 UI runs; 117 of 180 UI build jobs compiled, median compile step 413 s, 917 compile-minutes in total."
+      },
+      "claims": [
+        {
+          "id": "ui-e2e-run-start-to-tests",
+          "dimension": "critical-path",
+          "metric": "UI E2E run creation to test start, one selector, product already published at dispatch",
+          "direction": "reduction",
+          "value": 409,
+          "unit": "seconds/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "run 36197213485 (2026-09-25 22:32Z) against run 36216682336 (2026-09-26 04:03Z), same selector RemoteTmuxSizingUITests/testAttachSettlesStableAndCoherent",
+          "population": "One full-build UI E2E run on an owned mini (glaeda-root-std-xcode-26.6) against one adopted-product run on blacksmith-12vcpu-macos-26",
+          "note": "659 s to 250 s from run creation to test start; the build-job window alone went 566 s to 109 s (457 s), but time before the build job grew from 93 s to 141 s (a 119 s Blacksmith queue), so the run-level figure is claimed. This is the best case: the adopted run found a finished product. When the dispatch starts while admission is still compiling, the dispatcher now waits for it (up to 50 min), and the saving is the compile step minus that remaining wait, which can be negative: #14746's own head (this before run, created 22:32:38) had an admission that published at about 22:41, so waiting for it and then adopting (93 to 141 s before the build job plus about 109 s to tests) would have started its tests at about 22:44 to 22:45, roughly 0.5 to 1.5 min later than the 22:43:37 they did. Run creation to test start never includes the dispatcher's wait, because the dispatcher waits before it creates the run. One run each side, on different pools: the old run compiled on an owned mini, the new one adopted a Blacksmith-compiled product on Blacksmith, because products never cross toolchain families. The removed work is the 448 s compile step, so the pool difference matters less than it would for a compile comparison, but it is not like-for-like. Whole run (created to last update, not the PR table's 976 s job-span figure) went from 982 s to 341 s; about 193 s of the old figure is a late product upload after the tests that the adopted run skips, so the whole-run delta is not claimed separately. Only UI runs whose commit has an in-repository PR CI product on macOS 26 benefit. The PR merged at 04:33:43Z and had no adopted production runs yet at recording time, so this stays observed until a median over post-merge UI runs exists.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-ui-e2e-build"
+        },
+        {
+          "id": "ui-e2e-compile-volume-baseline",
+          "dimension": "compute",
+          "metric": "UI E2E build jobs that compiled the app",
+          "direction": "baseline",
+          "value": 917,
+          "unit": "compile-minutes/12.3 h",
+          "recurrence": "none",
+          "confidence": "measured",
+          "measurementWindow": "12.3 h of test-e2e.yml history before the PR, 400 runs",
+          "population": "180 UI build jobs: 117 compiled (median compile step 413 s), 32 reused a product",
+          "note": "Before-only figure from the PR body. About 75 compile-minutes an hour. Separately, of the 75 compiling runs that named a SHA, 32 runs already had a CI product for that head, 36 had a CI run that was cancelled or failed before it produced one (some of these were still compiling at dispatch, which the new wait covers), and 7 had no CI run. This PR targets the first group (where the product is on a pool the run can use) plus the timing misses its wait catches; how many of the 917 minutes it removes is not measured yet.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-ui-e2e-build"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-14776.md"
+    },
     {
       "id": "cmux-14314",
       "repository": "manaflow-ai/cmux",
