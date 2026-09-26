@@ -8,7 +8,7 @@ One side takes the public API price for a frontier model, multiplies it by a gia
 
 Everybody has enough arithmetic to sound serious.
 
-The company buying the AI somehow disappears.
+The company buying the AI disappears from the model.
 
 Before a business builds an inference plant, it can buy Bob a seat.
 
@@ -110,7 +110,7 @@ A contract can require a defined processing environment. A regulated workload ca
 
 Cool. Put the requirement in the model and pay for it.
 
-A huge amount of ordinary business work lives somewhere else. OpenAI's current Business offering says it does not train on business data by default. Anthropic says the same for Claude Team. A company whose requirements are satisfied by those products gets to buy the service instead of operating the machine.
+A huge amount of ordinary business work lives somewhere else. [OpenAI's current Business offering](https://openai.com/business/pricing/) says it does not train on business data by default. [Anthropic says the same for Claude Team](https://claude.com/blog/claude-team-updates). A company whose requirements are satisfied by those products gets to buy the service instead of operating the machine.
 
 Owning the box gives you control and gives you the entire operational bill for exercising that control.
 
