@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'buy-bob-another-seat',
+    title: 'Buy Bob Another Seat',
+    date: '2026-09-26',
+    blurb:
+      'Local-AI arguments keep jumping from retail API tokens to owning an accelerator plant. Most companies get cheaper procurement choices first: seats, credits, batch, reserved capacity, rental, and only then hardware.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'economics', 'cloud computing', 'local AI'],
+    revision: 1,
+    sourcePath: 'desk/buy-bob-another-seat.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-lazy-obsessive-finally-gets-a-machine',
     title: 'The Lazy Obsessive Finally Gets a Machine',
     date: '2026-09-23',
