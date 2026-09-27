@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-wall-gives-you-pants',
+    title: 'The Wall Gives You Pants',
+    date: '2026-09-27',
+    blurb:
+      'One giant laundry plant gets much easier if clothes stop belonging to individuals. Standardize the daily wardrobe, circulate garments by size, let the wall dispense pants, then watch sponsors discover the human torso.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['laundry', 'clothing', 'cities', 'advertising'],
+    revision: 1,
+    sourcePath: 'desk/the-wall-gives-you-pants.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'buy-bob-another-seat',
     title: 'Buy Bob Another Seat',
     date: '2026-09-26',
