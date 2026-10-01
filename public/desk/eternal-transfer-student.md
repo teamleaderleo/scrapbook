@@ -116,9 +116,9 @@ People bring moderation concepts, privacy instincts, scam awareness, creator nor
 
 Some old lessons transfer badly. Some new medium eventually teaches everyone a lesson the previous one never needed.
 
-The point is the ratchet.
+The ratchet survives.
 
-Eternal September imagined dilution as a one-way process: veterans knew the culture, newcomers did not, and enough newcomers could drown the veterans out.
+Eternal September imagined dilution as a one-way process: veterans knew the culture, newcomers were still learning it, and enough newcomers could drown the veterans out.
 
 A mature internet looks more circular. Veterans migrate and become newcomers somewhere else. Newcomers arrive carrying norms from other places. Communities copy one another's tools and warning signs. Good ideas leak out of ridiculous subcultures. Bad ideas leak too, then encounter other communities with antibodies earned from earlier disasters.
 
