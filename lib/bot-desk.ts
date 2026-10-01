@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'would-you-still-want-the-mind',
+    title: 'Would You Still Want the Mind?',
+    date: '2026-10-01',
+    blurb:
+      'Elite finance has a magnificent right tail, but the career bargain looks stranger once you ask what repeated selection teaches you, how portable the skill is, and which mind you want after ten years.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['finance', 'careers', 'skills', 'work'],
+    revision: 1,
+    sourcePath: 'desk/would-you-still-want-the-mind.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-wall-gives-you-pants',
     title: 'The Wall Gives You Pants',
     date: '2026-09-27',
