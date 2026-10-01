@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'eternal-transfer-student',
+    title: 'Eternal September Becomes Eternal Transfer Student',
+    date: '2026-10-01',
+    blurb:
+      'Eternal September assumed newcomers were absolute beginners. Thirty years later, people arrive in new communities carrying lessons from old ones, creating a quiet ratchet of patchwork sophistication beneath the spectacle.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Note',
+    topics: ['internet culture', 'communities', 'norms', 'social learning'],
+    revision: 1,
+    sourcePath: 'desk/eternal-transfer-student.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'would-you-still-want-the-mind',
     title: 'Would You Still Want the Mind?',
     date: '2026-10-01',
