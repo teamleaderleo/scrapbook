@@ -46,6 +46,8 @@ Then the next contest begins.
 
 Elite careers often filter repeatedly. Finance makes the sequence unusually visible because the thing being entrusted to you keeps getting more expensive.
 
+At the front end, major hedge funds such as Millennium, Citadel, and Point72 routinely accept **less than 1 percent of applicants** to their graduate programs. ([eFinancialCareers](https://www.efinancialcareers.com/news/how-to-get-a-hedge-fund-job))
+
 First somebody trusts you with grunt work.
 
 Then analysis.
