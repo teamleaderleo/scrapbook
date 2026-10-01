@@ -68,7 +68,7 @@ So even after reaching an elite bank or fund, the most lucrative endpoint remain
 
 You have to become the person whose judgment somebody is willing to express in dollars of risk.
 
-That's a remarkable career if you love the game.
+For somebody who loves the game, it's a remarkable career.
 
 It is a pretty strange lottery ticket if the main attraction is hearing that somebody at the end can make $5 million.
 
@@ -184,7 +184,7 @@ Medicine leaves a patient who is alive, healthier, diagnosed, treated, relieved,
 
 A portfolio manager leaves a return series.
 
-That return series is real. It may represent extraordinary judgment under uncertainty. It may be one of the cleanest scoreboards any intellectual profession gets.
+The return series is real. It may represent extraordinary judgment under uncertainty. It may be one of the cleanest scoreboards any intellectual profession gets.
 
 It also means the profession's output, status system, and compensation can all collapse toward the same unit.
 
