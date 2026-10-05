@@ -136,7 +136,7 @@ Raking the gravel leaves the stones where they are and gives the present another
 
 This is the part I find generative.
 
-A background can become impossibly heavy when identity means carrying every old description forward forever. Child prodigy. Mediocre student. Prestigious hire. Failed founder. Gifted artist. Burnout. Somebody who peaked. Somebody who wasted time. Somebody who was supposed to become something else.
+A background can become impossibly heavy when identity means carrying every old description forward forever. Child prodigy. Mediocre student. Prestigious hire. Failed builder. Gifted artist. Burnout. Somebody who peaked. Somebody who wasted time. Somebody who was supposed to become something else.
 
 The garden version has less ceremony.
 
