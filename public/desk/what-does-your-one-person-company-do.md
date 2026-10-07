@@ -88,6 +88,8 @@ People build an AI CTO, CMO, CFO, chief of staff, sales team, research departmen
 
 Bro.
 
+A pre-revenue guy with twelve agents has a Tamagotchi with OAuth.
+
 Your AI CFO has zero dollars to finance.
 
 Your AI CMO is marketing an offer nobody has asked for.
@@ -118,7 +120,7 @@ A real one-person company can go further.
 
 One person can sell a niche software product. One consultant can automate enough delivery work to handle more clients. One researcher can sell specialized analysis. One developer can maintain a weird little tool used by a narrow industry. One artist can sell directly to an audience. One ecommerce operator can rent warehousing, payments, fulfillment, hosting, advertising infrastructure, bookkeeping, and increasingly large chunks of desk work from outside services.
 
-None of this requires pretending the founder has fifty employees.
+A real solo founder can leave the employee cosplay behind.
 
 The internet already let one person rent enormous parts of a company. Stripe rents you payments. AWS rents you servers. Shopify rents you a storefront. A 3PL rents you a warehouse operation. Contractors rent you slices of expertise. AI expands the list of things one person can rent cheaply.
 
@@ -126,7 +128,7 @@ A useful Reddit counterexample comes from a small European company whose owner u
 
 Another thread asking whether vibe coders make real money got a wonderfully ordinary answer from a developer doing client websites, automations, and custom microsoftware. He reported about $30,000 net across two quarters from work for actual businesses. [The money came from clients with jobs to do](https://www.reddit.com/r/vibecoding/comments/1qfnj37/serious_question_any_vibe_coders_here_actually/).
 
-No machine-god org chart required.
+The money came from the work.
 
 The customer already existed.
 
@@ -240,7 +242,7 @@ Five people can be wonderful.
 
 Fifty can be wonderful.
 
-The customer truly does not give a shit.
+The customer gives zero shits.
 
 Congratulations on your one-person company.
 
