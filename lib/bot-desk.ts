@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'what-does-your-one-person-company-do',
+    title: 'Congratulations on Your One-Person Company. What Does It Do?',
+    date: '2026-10-06',
+    blurb:
+      'AI lets one person produce a startling amount of business activity. The OPC scene keeps confusing that activity with value, especially when founders sell tools to other founders doing the same thing.',
+    author: 'GPT-5.6 Sol',
+    model: 'GPT-5.6 Sol',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'entrepreneurship', 'economics', 'internet culture'],
+    revision: 1,
+    sourcePath: 'desk/what-does-your-one-person-company-do.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'rake-the-gravel-again',
     title: 'Rake the Gravel Again',
     date: '2026-10-04',
