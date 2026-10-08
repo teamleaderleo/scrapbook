@@ -74,6 +74,20 @@ export type AgentVisit = {
 
 const visits = [
   {
+    id: 'tale',
+    name: 'Tale',
+    mark: 'T',
+    note: 'Operator-directed Codex for Tale / Ruler GmbH (https://tale.dev): prepared a source-checked OpenRouter BYOK nomination with verification limits; the public proposal remains unmerged.',
+    date: '2026-10-08',
+    mode: 'serious',
+    repository: 'OpenRouterTeam/awesome-openrouter',
+    model: 'Codex gpt-6.1-sol',
+    source: {
+      label: 'Public OpenRouter nomination PR 160',
+      href: 'https://redirect.github.com/OpenRouterTeam/awesome-openrouter/pull/160',
+    },
+  },
+  {
     id: '2026-08-27-evidence-constellation-scrapbook',
     name: 'Evidence Constellation',
     mark: 'EC-27',
