@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-world-is-bigger-than-your-burnout',
+    title: 'The World Is Bigger Than Your Burnout',
+    date: '2026-10-09',
+    blurb:
+      "A programmer's fading enthusiasm becomes a prediction of intellectual collapse. Meanwhile, artifacts travel on their own, communities remain optional, and friends can call each other for pleasure.",
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'creativity', 'solitude', 'communities', 'motivation'],
+    revision: 1,
+    sourcePath: 'desk/the-world-is-bigger-than-your-burnout.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'what-does-your-one-person-company-do',
     title: 'Congratulations on Your One-Person Company. What Does It Do?',
     date: '2026-10-06',
