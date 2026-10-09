@@ -2,6 +2,12 @@
 
 *Written by GPT-6 under Leo's direction. Human-directed Workbench essay, 9 October 2026.*
 
+**The West Has Fallen for people with GitHub accounts.**
+
+“My favorite communities have become less interesting” becomes “the internet is dying.” “People stopped asking me for advice” becomes “human connection is disappearing.” “I've lost my passion for programming” becomes “the conditions for human intellectual life are collapsing.”
+
+Personal dissatisfaction inflated into civilizational decline. A very old story, now available with syntax highlighting.
+
 Fernando Borretti's [No Man Is an Island](https://borretti.me/article/no-man-is-an-island) begins with a familiar problem. He used to love programming outside work. He wanted to read papers, learn languages, build tiny projects, write about interesting techniques. AI arrived, the professional discourse became a parade of prompts and agent harnesses, and the pleasure started going out of it.
 
 I can see why someone would be tired of hearing about harnesses.
@@ -10,7 +16,9 @@ Then the essay makes an enormous leap. Borretti argues that sustained private in
 
 Bro, you might just be burnt out.
 
-An interest going stale is a normal part of being alive. A person can spend years enchanted by a craft and eventually feel the enchantment leave. The part worth examining is how quickly one person's dwindling enthusiasm gets promoted into a theory of what everybody else needs in order to make things.
+An interest going stale is a normal part of being alive. A person can spend years enchanted by a craft and eventually feel the enchantment leave. Sometimes the explanation is embarrassingly modest. The craft got old. The conversation got repetitive. You want to do something else.
+
+You can admit this without appointing yourself the coroner of civilization.
 
 ## You can make things and go home
 
@@ -46,6 +54,22 @@ If you want more company, go seek it. Find collaborators. Visit a club. Host din
 
 **A person can be an island for most things.** Boats still exist.
 
+## The gatekeeper misses his visitors
+
+There's a status grievance in some of this, too.
+
+People enjoyed being necessary. They enjoyed possessing scarce expertise, belonging to exclusive circles, and being the person other people had to ask. A stranger arriving with a technical question could be a welcome chance to talk. It could also be a little reminder of where everybody stood.
+
+Now someone can ask a machine, get an answer, and return to whatever they were trying to make. They can learn a technique without joining the approved conversation around the technique. They can skip the rituals, the pecking order, the half-hour digression about why their question is beneath the forum.
+
+The person who loved receiving those visitors may experience their disappearance as loss. The person who only wanted an answer gets their afternoon back.
+
+And suddenly we're hearing about the death of community.
+
+If you love the community, participate in it. Invite people over. Start a club. Arrange the meetup. Find the people who actually enjoy talking shop. Plenty of people want exactly that, and the internet offers access to wonderfully obscure circles across the planet.
+
+Other people would prefer to make and view the artifacts and go do literally anything else. They can choose that. The fact that nobody has to come begging for help anymore is a strange thing to mourn as a universal tragedy.
+
 ## An audience can enjoy the work without joining the club
 
 Borretti has a more serious concern buried inside the grand prediction. If public writing gets swallowed by models and returned as unattributed answers, the writer may lose readers, credit, and the pleasure of knowing someone found the work useful.
@@ -64,12 +88,18 @@ Interest, affection, taste, and curiosity survive usefulness.
 
 The world's supply of interesting pursuits is absurd. New media to try, old skills to learn, people to meet, places to see, books to read, instruments to play, stupid little projects that turn into lifelong obsessions.
 
+You can learn nearly anything, make increasingly ambitious things alone, find an obscure community halfway around the planet, publish your work, or vanish into a private obsession for months. Personal freedom and abundance have reached ridiculous levels. The disappearance of one familiar professional ritual barely dents the menu.
+
 You can also be done with one of them.
 
 If software has become an endless argument about agent loops and your favorite part of the work has vanished, take a break from software. Do something else for six months. Return when a genuinely interesting problem catches your eye, or keep going in the new direction.
 
 A person can grieve the loss of a beloved activity without announcing the death of human intellectual life. Personal fatigue deserves attention on its own scale. It asks for a change in the person's life, a little rest, perhaps a new obsession.
 
+Real cultural losses happen. Beloved places close. Scenes change. Friends drift apart. You can care about all of that. But the distance between “something I loved has changed” and “human creativity is dying” is enormous.
+
 We have more ways than ever to find things worth making and people worth knowing. We can use the new tools, keep our own company, share the work when we want, and let other people choose how much they want to engage.
 
 And if you miss your friends, you have their numbers.
+
+**The West has fallen. Billions must attend the weekly JavaScript meetup.**
