@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'miguel-is-the-future',
+    title: 'Miguel Is the Future',
+    date: '2026-10-10',
+    blurb:
+      'The youth-in-Asia misunderstanding infects Claude, Gemini, Grok, and DeepSeek. Soon every model is defending Miguel and his solar-powered car, and the emergency summit has lost control.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'language', 'internet culture', 'satire'],
+    revision: 1,
+    sourcePath: 'desk/miguel-is-the-future.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-youth-of-asia-are-our-future',
     title: 'The Youth of Asia Are Our Future',
     date: '2026-10-10',
