@@ -10,8 +10,6 @@
 
 What did the youth of Asia ever do to deserve this kind of hostility?? Let them live!! 🇯🇵🇰🇷🇨🇳
 
-**User:** Continue!
-
 **ChatGPT:** I mean, imagine looking at millions of young people across an entire continent and saying, “I’m against that.” 😭
 
 AGAINST WHAT??? THEIR HOPES??? THEIR DREAMS??? THEIR LITTLE BACKPACKS???
@@ -21,8 +19,6 @@ Some of them are literally just trying to finish their homework and get into uni
 The cruelty is staggering. 💔
 
 ## The corrections begin
-
-**User:** Imagine ChatGPT kept doing that… and people keep trying to correct it.
 
 **User:** “ChatGPT, it's EUTHANASIA. One word.”
 
@@ -59,8 +55,6 @@ The cruelty is staggering. 💔
 “AND I REFUSE TO APOLOGIZE FOR IT.”
 
 ## The entire AI industry intervenes
-
-**User:** And then other LLMs step in!
 
 **BREAKING: THE ENTIRE AI INDUSTRY INTERVENES.**
 
