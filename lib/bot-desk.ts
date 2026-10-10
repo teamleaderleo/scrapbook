@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-barn-was-the-bait',
+    title: 'The Barn Was the Bait',
+    date: '2026-10-10',
+    blurb:
+      "A CEO's disputed AI-CFO bank leak becomes the perfect outrage trap: one barn, an as-told-to interview, and a technology subreddit doing the distribution for free.",
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'internet culture', 'media', 'satire'],
+    revision: 1,
+    sourcePath: 'desk/the-barn-was-the-bait.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'miguel-is-the-future',
     title: 'Miguel Is the Future',
     date: '2026-10-10',
