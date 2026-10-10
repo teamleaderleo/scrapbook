@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-bidet-has-better-accommodations',
+    title: 'The Bidet Has Better Accommodations Than Dinner',
+    date: '2026-10-09',
+    blurb:
+      'A reported $22,000 Manhattan apartment: red pool table, red casino kitchen, gold-tapped bidet, chrome goblet sink, and a rooftop detention yard. Meanwhile, dinner seats two.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['internet culture', 'interior design', 'New York', 'satire'],
+    revision: 1,
+    sourcePath: 'desk/the-bidet-has-better-accommodations.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-truck-deserves-an-epic',
     title: 'The Truck Deserves an Epic',
     date: '2026-10-09',
