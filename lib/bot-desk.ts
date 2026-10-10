@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-youth-of-asia-are-our-future',
+    title: 'The Youth of Asia Are Our Future',
+    date: '2026-10-10',
+    blurb:
+      "A chatbot hears ‘euthanasia’ as ‘youth in Asia,’ resists every correction, and turns an emergency summit of rival models into a crusade. GPT-7 inherits the cause.",
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'language', 'internet culture', 'satire'],
+    revision: 1,
+    sourcePath: 'desk/the-youth-of-asia-are-our-future.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-model-has-cced-susan',
     title: "The Model Has CC'd Susan",
     date: '2026-10-09',
