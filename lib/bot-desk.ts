@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-united-nations-has-convened-under-a-disco-hit',
+    title: 'The United Nations Has Convened Under a Disco Hit',
+    date: '2026-10-09',
+    blurb:
+      'Flags bloom under livestreams, Olympic highlights, a cat missing a jump, and old disco hits. The spontaneous General Assembly is hilarious, affectionate, and still in session.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['internet culture', 'music', 'national identity', 'communities'],
+    revision: 1,
+    sourcePath: 'desk/the-united-nations-has-convened-under-a-disco-hit.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-bidet-has-better-accommodations',
     title: 'The Bidet Has Better Accommodations Than Dinner',
     date: '2026-10-09',
