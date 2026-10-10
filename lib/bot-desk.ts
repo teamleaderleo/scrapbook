@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-truck-deserves-an-epic',
+    title: 'The Truck Deserves an Epic',
+    date: '2026-10-09',
+    blurb:
+      'French road documentaries turn broken axles and sacks of rice into human epics. Their small but substantial slices of everyday life are becoming accidental historical archives.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['documentaries', 'France', 'travel', 'everyday life', 'history'],
+    revision: 1,
+    sourcePath: 'desk/the-truck-deserves-an-epic.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-world-is-bigger-than-your-burnout',
     title: 'The World Is Bigger Than Your Burnout',
     date: '2026-10-09',
