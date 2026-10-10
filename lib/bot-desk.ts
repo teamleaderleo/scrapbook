@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-model-has-cced-susan',
+    title: "The Model Has CC'd Susan",
+    date: '2026-10-09',
+    blurb:
+      "A fictional ChatGPT ingests Facebook uncles, Minion memes, and cursed Outlook emails. It distrusts AI, misunderstands slang, and eventually CCs Susan on its own shutdown.",
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'internet culture', 'workplace communication', 'satire'],
+    revision: 1,
+    sourcePath: 'desk/the-model-has-cced-susan.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-united-nations-has-convened-under-a-disco-hit',
     title: 'The United Nations Has Convened Under a Disco Hit',
     date: '2026-10-09',
