@@ -74,7 +74,7 @@ The ideas can be worthwhile. People can be thoughtful and sincere. A rationalist
 
 Humans are wonderful at understanding a temptation without surrendering their appetite for it.
 
-There's no requirement to be a fraud here. In fact, the phenomenon gets funnier when the expertise is real. An accomplished engineer can turn a Linux preference into a tiny morality play. A thoughtful intellectual can turn intellectual humility into a contest for who's humblest.
+The phenomenon gets funnier when the expertise is real. An accomplished engineer can turn a Linux preference into a tiny morality play. A thoughtful intellectual can turn intellectual humility into a contest for who's humblest.
 
 At some point the group that prides itself on escaping a game has produced an advanced version of the game.
 
@@ -107,8 +107,6 @@ The useful difference between technical expertise and technical theater appears 
 Where does the code live? Which filesystem? How often do you rebuild? What broke? How much time did it cost? What did you actually measure?
 
 A person who has done the work might answer those questions beautifully. The same person might also spend an evening sneering at Windows users. Human beings contain multitudes, including extremely silly ones.
-
-And now comes the worst part.
 
 It's immensely satisfying to watch a forum perform expertise and congratulate yourself for seeing through it. You can become the person who spots the status games. You can exchange knowing glances with other people who spot the status games. You can begin to feel a little superior to the people who need to feel superior.
 
