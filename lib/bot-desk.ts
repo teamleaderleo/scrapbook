@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-person-is-the-transferable-thing',
+    title: 'The Person Is the Transferable Thing',
+    date: '2026-10-11',
+    blurb:
+      'A guy can spend years mastering a strategy game without meeting the work he might love just as much. The person carries the appetite; AI makes more of those encounters possible.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['human potential', 'AI', 'careers', 'learning', 'ambition'],
+    revision: 1,
+    sourcePath: 'desk/the-person-is-the-transferable-thing.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'everybody-rebuilds-the-schoolyard',
     title: 'Everybody Rebuilds the Schoolyard',
     date: '2026-10-10',
