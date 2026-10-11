@@ -52,9 +52,9 @@ Headline total compensation makes this comparison unnecessarily confusing.
 
 Public-company RSUs are a liquid financial asset once they've vested and you're permitted to sell. You can keep your Google or Meta shares, sell them to buy index funds, pay rent, or use them to finance your next adventure. Most people will eventually diversify some of their exposure anyway.
 
-Salary plus vested, saleable shares is an awfully attractive kind of compensation. Calling the stock portion “equity” doesn't make it speculative in the same way as options in a private startup.
+Salary plus vested, saleable shares is an awfully attractive kind of compensation. Private-company option grants carry an entirely different set of risks.
 
-Startup equity is a different proposition. The company could die. Your stake can be diluted. The preference stack may leave common holders with less than a headline exit valuation suggests. Options can require an exercise payment and create tax consequences before you've received a dollar from selling shares. Liquidity can take years, if it arrives.
+The company could die. Your stake can be diluted. The preference stack may leave common holders with less than a headline exit valuation suggests. Options can require an exercise payment and create tax consequences before you've received a dollar from selling shares. Liquidity can take years, if it arrives.
 
 The potential reward is also different.
 
@@ -139,19 +139,3 @@ An oddly practical question for the perpetually option-maximizing person:
 **If your dream exit opportunity appeared tomorrow, would you take it?**
 
 Or would you turn it down because the current job has better exit opportunities?
-
-## Spend the freedom
-
-Financial freedom can be a magnificent objective. It lets you leave bad situations, choose where to live, take care of people, and spend your time doing things without asking a recruiter for permission.
-
-And once you've accumulated enough freedom to act, you can actually act.
-
-A person who wants a huge safety margin should pursue it. A person who dreams of founding a company and needs another $150,000 in savings has a clear reason to prioritize cash. A person supporting a family has a very different calculation from a new graduate with low expenses.
-
-But if you're financially comfortable, you've found a company you love, and the main reason to decline is that $30,000 invested today could become much more money thirty years from now, ask the second question.
-
-**What are you planning to do with the money when you get there?**
-
-Maybe the answer is something wonderful.
-
-Maybe the answer is the job already sitting in your inbox.
