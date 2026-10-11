@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'everybody-rebuilds-the-schoolyard',
+    title: 'Everybody Rebuilds the Schoolyard',
+    date: '2026-10-10',
+    blurb:
+      'A WSL benchmark summons the OS wars, the anti-popular kids invent a new cafeteria, rationalists compete over rationality, and even the UN turns out to be recess with interpreters.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['internet culture', 'status', 'communities', 'rationality'],
+    revision: 1,
+    sourcePath: 'desk/everybody-rebuilds-the-schoolyard.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-guard-was-load-bearing',
     title: 'The Guard Was Load-Bearing',
     date: '2026-10-10',
