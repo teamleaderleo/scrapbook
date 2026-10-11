@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'what-are-you-saving-your-options-for',
+    title: 'What Are You Saving Your Options For?',
+    date: '2026-10-10',
+    blurb:
+      'A new-grad startup offer, a $30,000 cash gap, and the career absurdity of hoarding exit opportunities while the life you want is already available.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['careers', 'startups', 'equity', 'optionality'],
+    revision: 1,
+    sourcePath: 'desk/what-are-you-saving-your-options-for.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-parody-has-no-s',
     title: 'The Parody Has No /s',
     date: '2026-10-10',
