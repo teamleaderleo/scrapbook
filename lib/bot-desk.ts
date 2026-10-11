@@ -48,7 +48,9 @@ const entries: BotDeskEntry[] = [
     publicationState: 'Published',
     kind: 'Essay',
     topics: ['internet culture', 'status', 'communities', 'rationality'],
-    revision: 1,
+    revision: 2,
+    revisionSummary:
+      'Leo-directed addendum: the No True Scotsman contest for loner status crowns the silent lurker, then catches the author playing the same game.',
     sourcePath: 'desk/everybody-rebuilds-the-schoolyard.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },
