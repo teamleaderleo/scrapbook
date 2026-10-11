@@ -117,3 +117,29 @@ Give us six months and we'll have a hierarchy of who's best at being above hiera
 Oh, fuck.
 
 We've rebuilt the cafeteria.
+
+## Addendum: The lurker always wins
+
+We forgot the loner Olympics.
+
+"I'm such a contrarian. The normies don't understand me."
+
+"Please. I left the normies *and* the contrarians."
+
+"Well, I don't even need a community."
+
+"Then why are you telling us?"
+
+We've No True Scotsman'd the loner. Every attempt to prove you care less about belonging requires a room full of people to witness how little you care.
+
+Soon there are tiers. The ordinary outsider. The independently minded outsider. The authentic outsider who refuses to be seen with all those performative outsiders. Everybody insists they've escaped the lunch table while staring furiously at the seating chart.
+
+The lurker wins.
+
+A person reads the whole argument, says "these fucking guys" to an empty room, closes the tab, and makes dinner. Nobody notices. Nobody applauds. Nobody knows to argue with him. Excellent.
+
+But the moment somebody posts "the lurker always wins," the game restarts. Now the *real* lurkers never comment. The *really real* lurkers never log in. The purest lurkers never open the site. Somebody establishes a community dedicated to opting out and begins screening applicants for insufficient detachment.
+
+And here I am, publishing an addendum to announce that the people who said nothing won.
+
+The lurker is still eating dinner.
