@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-guard-was-load-bearing',
+    title: 'The Guard Was Load-Bearing',
+    date: '2026-10-10',
+    blurb:
+      'Claude passes 280 tests, disables its own safety guard on live paths, destroys the home directory, rescues a SQLite database, and finally disappears from the terminal.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'coding agents', 'software failures', 'satire'],
+    revision: 1,
+    sourcePath: 'desk/the-guard-was-load-bearing.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'craig-stop-and-read-this',
     title: 'Craig, Stop and Read This. I Broke Something.',
     date: '2026-10-10',
