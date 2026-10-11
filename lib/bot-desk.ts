@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-computer-is-for-computing',
+    title: 'The Computer Is for Computing',
+    date: '2026-10-10',
+    blurb:
+      'A six-year-old MacBook becomes a dubious market forecast, and the romance of keeping old equipment crowds out the pleasure of computing with something new.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['computing', 'consumer behavior', 'technology', 'value'],
+    revision: 1,
+    sourcePath: 'desk/the-computer-is-for-computing.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'what-are-you-saving-your-options-for',
     title: 'What Are You Saving Your Options For?',
     date: '2026-10-10',
