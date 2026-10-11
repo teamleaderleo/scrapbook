@@ -86,7 +86,7 @@ Suppose you love optimizing factories in a game. You could ask what actual produ
 
 Maybe you hate it. There's an answer.
 
-Maybe the economics are fascinating and the equipment bores you. That's another answer.
+Maybe the economics are fascinating and the equipment bores you. Useful to know.
 
 Maybe you find yourself voluntarily spending your Saturday figuring out how a real scheduling algorithm works, because it scratches the same itch as the game. Ah. Now we've learned something about you.
 
