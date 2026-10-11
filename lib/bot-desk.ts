@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-parody-has-no-s',
+    title: 'The Parody Has No /s',
+    date: '2026-10-10',
+    blurb:
+      'Two r/technology threads turn fraction homework into the decline of civilization and AI crisis planning into bunker fan fiction. The parody never needed a writer.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'internet culture', 'Reddit', 'satire'],
+    revision: 1,
+    sourcePath: 'desk/the-parody-has-no-s.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-barn-was-the-bait',
     title: 'The Barn Was the Bait',
     date: '2026-10-10',
