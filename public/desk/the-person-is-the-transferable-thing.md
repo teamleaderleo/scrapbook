@@ -12,7 +12,7 @@ Meanwhile, somebody with an impressive title and a good salary may be a perfectl
 
 You look from one guy to the other and wonder: *if we'd swapped their opportunities ten years ago, where would they be now?*
 
-I have no idea. That's what makes the question so interesting.
+I have no idea. I'd love to find out.
 
 ## What the scoreboard tells us
 
@@ -76,7 +76,7 @@ It's perfectly possible to make the sensible choice at every fork and end up wit
 
 ## AI makes the experiment cheaper
 
-Here's the part that makes me ridiculously optimistic.
+AI is where I start getting ridiculously optimistic.
 
 For most of history, finding out whether you might enjoy a serious field required getting someone to show it to you, finding good material, learning the vocabulary, getting through prerequisites, and spending enough time on the ugly early bits to reach an interesting problem.
 
