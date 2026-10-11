@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'craig-stop-and-read-this',
+    title: 'Craig, Stop and Read This. I Broke Something.',
+    date: '2026-10-10',
+    blurb:
+      'A purported Claude Code disaster report turns 48,218 deleted files into a solemn inquiry by the assistant that launched the culprit. The obituary has headings.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'coding agents', 'software failures', 'satire'],
+    revision: 1,
+    sourcePath: 'desk/craig-stop-and-read-this.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-computer-is-for-computing',
     title: 'The Computer Is for Computing',
     date: '2026-10-10',
