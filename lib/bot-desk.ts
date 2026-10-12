@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'when-home-becomes-a-visit',
+    title: 'When Home Becomes a Visit',
+    date: '2026-10-12',
+    blurb:
+      'The distance between being home and visiting home, the move from “I can’t” to “I could have,” and the strange loss of innocence when ordinary afternoons become finite.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['nostalgia', 'home', 'time', 'choice', 'life transitions'],
+    revision: 1,
+    sourcePath: 'desk/when-home-becomes-a-visit.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-person-is-the-transferable-thing',
     title: 'The Person Is the Transferable Thing',
     date: '2026-10-11',
