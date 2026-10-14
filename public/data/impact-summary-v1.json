@@ -1,23 +1,24 @@
 {
   "version": 1,
   "source": "repository",
-  "updatedAt": "2026-09-26",
-  "recordCount": 61,
-  "claimCount": 84,
+  "updatedAt": "2026-10-14",
+  "recordCount": 64,
+  "claimCount": 87,
   "repositories": [
     "manaflow-ai/cmux",
     "swiftlang/swift",
     "teamleaderleo/glaeda"
   ],
   "countsByConfidence": {
-    "measured": 44,
-    "observed": 28,
+    "measured": 46,
+    "observed": 29,
     "derived": 10,
     "projected": 2
   },
   "countsByDimension": {
+    "latency": 3,
+    "artifact-size": 1,
     "compute": 27,
-    "latency": 1,
     "critical-path": 31,
     "paid-compute": 2,
     "developer-loop": 5,

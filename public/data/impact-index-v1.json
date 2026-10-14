@@ -2,9 +2,129 @@
   "version": 1,
   "source": "repository",
   "generatedFrom": "work/impact/records",
-  "updatedAt": "2026-09-26",
-  "recordCount": 61,
+  "updatedAt": "2026-10-14",
+  "recordCount": 64,
   "records": [
+    {
+      "id": "cmux-20536",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20536,
+      "title": "Long chat history pages in without repeatedly folding the entire loaded log",
+      "status": "merged",
+      "happenedAt": "2026-10-14",
+      "recordedAt": "2026-10-14",
+      "areas": [
+        "agent-chat",
+        "performance",
+        "history"
+      ],
+      "summary": "Made older agent-chat turns reachable beyond the newest 400 records, held the reader's position while prepending pages, and folded each page independently instead of rebuilding the loaded history.",
+      "evidence": {
+        "label": "cmux PR 20536",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20536",
+        "basis": "Merged into feat-cmux-next; no stable release claim. PR body Measured (Chromium, 3000-turn chat, 183k records) and Evidence, refreshed from GitHub on 2026-10-14. Full re-fold cost 105 ms per page at 45k loaded events; independent older-page folding 1–6 ms. First paint remained 917–1029 ms versus 893–1125 ms and heap after opening stayed 47 MiB. Real pane, stand-in daemon, React development build; samples clear development performance entries that aren't emitted by the production bundle. A separate daemon-side change #20535 owns its opening improvement."
+      },
+      "claims": [
+        {
+          "id": "full-refold-before-page-local-fold",
+          "dimension": "latency",
+          "metric": "full loaded-history fold per older page before the repair",
+          "direction": "baseline",
+          "value": 105,
+          "unit": "milliseconds/page",
+          "recurrence": "per-event",
+          "confidence": "measured",
+          "measurementWindow": "PR 20536 Chromium experiment, 3000-turn chat / 183k records; before sample at 45k loaded events",
+          "population": "React development build of the agent pane against a stand-in daemon",
+          "note": "After the repair an older page folds in 1–6 ms. The range isn't converted to an average or fixed reduction. First paint and opening heap were unchanged. A 500-turn Chromium regression test proves older history becomes reachable with stable scroll anchoring, decreasing cursors, and no duplicated turns. Native app behavior and production latency weren't measured by this experiment. PR 20699 later repairs reopening at a saved position older than the first loaded page.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-agent-transcript-history"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-20536.md"
+    },
+    {
+      "id": "cmux-19620",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19620,
+      "title": "Lazy update pages and prefetched snapshots shorten the live-sidebar launch path",
+      "status": "merged",
+      "happenedAt": "2026-10-12",
+      "recordedAt": "2026-10-14",
+      "areas": [
+        "desktop",
+        "performance",
+        "startup"
+      ],
+      "summary": "Deferred sidebar update web pages until they're visible and prefetched the first daemon snapshot during launch, keeping buffered events ordered against the snapshot barrier.",
+      "evidence": {
+        "label": "cmux PR 19620",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19620",
+        "basis": "Merged into feat-cmux-next; no stable release claim. PR body Numbers and Test plan, refreshed from GitHub on 2026-10-14: DEV Debug build, 24 workspaces and 10 agent chats, median of three cold launches per build. Relative to #19579, sidebar rows painted 213 to 161 ms, live sidebar 557 to 478 ms, first painted frame 392 to 373 ms, pane content 370 to 350 ms. Older base had a 487 ms live sidebar. Release compile passed; no release-build launch benchmark is reported."
+      },
+      "claims": [
+        {
+          "id": "cold-live-sidebar-vs-immediate-base",
+          "dimension": "latency",
+          "metric": "cold-launch time from main() until live sidebar",
+          "direction": "reduction",
+          "value": 79,
+          "unit": "milliseconds/launch",
+          "recurrence": "per-event",
+          "confidence": "measured",
+          "measurementWindow": "PR 19620 DEV Debug launch experiment, median of three cold launches per build",
+          "population": "24 workspaces and 10 agent chats; immediate #19579 baseline versus optimized build",
+          "note": "557 to 478 ms against #19579. Against the older pre-regression base, 487 to 478 ms is a 9 ms difference. This largely recovers a recent regression; it isn't a 79 ms gain against the earlier baseline. Small Debug sample; no production launch distribution or release-build speedup is established. Other first-frame and sidebar milestones overlap and aren't separately added.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-next-startup"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19620.md"
+    },
+    {
+      "id": "cmux-19386",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19386,
+      "title": "Ship one Computer Use engine instead of two",
+      "status": "merged",
+      "happenedAt": "2026-10-11",
+      "recordedAt": "2026-10-14",
+      "areas": [
+        "packaging",
+        "computer-use",
+        "artifact-size"
+      ],
+      "summary": "Removed the duplicate Computer Use engine from the app's bin resources and shared the installed helper's client policy between wrappers, preserving helper signing and permission identity.",
+      "evidence": {
+        "label": "cmux PR 19386",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19386",
+        "basis": "PR Summary, refreshed from GitHub on 2026-10-14: duplicate bin executable measured 11.5 MiB in the current arm64 build; x86_64 and universal savings weren't measured. Merged into main on 2026-10-11. Build-resource regression test failed before and passed after; PR did not report a completed tagged native app dogfood."
+      },
+      "claims": [
+        {
+          "id": "duplicate-arm64-engine-before-removal",
+          "dimension": "artifact-size",
+          "metric": "duplicate arm64 Computer Use engine before removal",
+          "direction": "baseline",
+          "value": 11.5,
+          "unit": "MiB/app",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "before-removal arm64 app inventory reported in PR 19386",
+          "population": "arm64 app bundle only",
+          "note": "The PR reports the duplicate copy's before-removal size. No native after-build or installed-size delta is established; no x86_64/universal reduction, download reduction, fleet-wide total, or end-to-end release verification is claimed. Shared client trust policy and the helper's signing/notarization identity remain part of the implementation boundary.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-arm64-app-packaging"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19386.md"
+    },
     {
       "id": "cmux-14768",
       "repository": "manaflow-ai/cmux",

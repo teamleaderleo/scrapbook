@@ -41,16 +41,18 @@ What it proves:
 
 Career use: **current default**.
 
-### CMUX
+### cmux
+
+**Current role:** Founding Engineer, October 12, 2026–present, confirmed by Leo on October 14. September contribution dates predate employment.
 
 Repository: https://redirect.github.com/manaflow-ai/cmux  
 Synthesis: [`records/cmux.md`](records/cmux.md)  
 Measured impact: [`impact/`](impact/README.md)
 Economics model: [`records/cmux-economics.md`](records/cmux-economics.md)
 
-**Use for:** build systems, developer productivity, Swift/Xcode compilation behavior, CI performance/capacity, test reliability.
+**Use for:** build systems, developer productivity, Swift/Xcode performance, native desktop reliability, browser automation, agent tooling.
 
-The current impact snapshot indexes 437 merged PRs from September 13–23, 2026. The career signal comes from the measured campaign inside that volume: cache ownership and lifecycle, reusable build products, runner scheduling, queue latency, CI observability, and failure-signal repair.
+The [October 14 refresh](impact/sources/cmux-career-2026-10-14.json) records 3,735 merged account-attributed PRs across all destination branches. The older 437-PR snapshot remains a September 23 partial-day retrieval artifact. The career signal comes from the selected outcomes: build reuse, developer feedback, failure-signal repair, native responsiveness, browser automation, and agent-chat history. A next-branch merge isn't proof of stable shipment.
 
 Selected measurements include same-commit tagged builds from 953s to 35.7s through warm DerivedData reuse; Linux guard critical path from 385.5s to 124.3s while intentionally spending about 1.06 extra Linux runner-minutes; focused E2E queue p90 at 83.3 min on macOS 15 versus 1.0 min on macOS 26; roughly 5,900 paid macOS overflow minutes/day shifted onto sponsored capacity in one measured window; and a 1,060-test Swift package lane falling from more than 12 minutes with about 161 issues to 65 seconds with 17 real failures when run serially. A GitHub Actions 90-day usage export records 1,966,401 self-hosted macOS runner-minutes, averaging 21,848.9 min/day. At only WarpBuild's cheapest macOS rate, that is a replacement-cost floor of roughly $52,437 per 30-day month or $638k/year; no 12-vCPU premium is included.
 
