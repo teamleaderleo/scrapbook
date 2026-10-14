@@ -1,0 +1,312 @@
+{
+  "version": 1,
+  "capturedAt": "2026-10-14T22:17:11Z",
+  "repository": "manaflow-ai/cmux",
+  "author": "teamleaderleo",
+  "counts": {
+    "data": {
+      "historic": {
+        "issueCount": 472
+      },
+      "extension": {
+        "issueCount": 443
+      },
+      "lateSep": {
+        "issueCount": 520
+      },
+      "oct1_7": {
+        "issueCount": 744
+      },
+      "oct8_11": {
+        "issueCount": 811
+      },
+      "oct12_14": {
+        "issueCount": 745
+      },
+      "total": {
+        "issueCount": 4479
+      },
+      "open": {
+        "issueCount": 177
+      },
+      "closedUnmerged": {
+        "issueCount": 567
+      }
+    },
+    "capturedAt": "2026-10-14T22:17:11Z",
+    "author": "teamleaderleo",
+    "repository": "manaflow-ai/cmux",
+    "dates": "UTC merge date; current-state snapshot",
+    "queries": {
+      "historic": "repo:manaflow-ai/cmux is:pr author:teamleaderleo is:merged merged:<=2026-09-23",
+      "extension": "repo:manaflow-ai/cmux is:pr author:teamleaderleo is:merged merged:2026-09-24..2026-09-26",
+      "lateSep": "repo:manaflow-ai/cmux is:pr author:teamleaderleo is:merged merged:2026-09-27..2026-09-30",
+      "oct1_7": "repo:manaflow-ai/cmux is:pr author:teamleaderleo is:merged merged:2026-10-01..2026-10-07",
+      "oct8_11": "repo:manaflow-ai/cmux is:pr author:teamleaderleo is:merged merged:2026-10-08..2026-10-11",
+      "oct12_14": "repo:manaflow-ai/cmux is:pr author:teamleaderleo is:merged merged:2026-10-12..2026-10-14",
+      "total": "repo:manaflow-ai/cmux is:pr author:teamleaderleo created:<=2026-10-14",
+      "open": "repo:manaflow-ai/cmux is:pr author:teamleaderleo is:open created:<=2026-10-14",
+      "closedUnmerged": "repo:manaflow-ai/cmux is:pr author:teamleaderleo is:closed is:unmerged created:<=2026-10-14"
+    },
+    "method": "GitHub GraphQL search issueCount (not a truncated nodes page). All disjoint merged windows sum to 3735. Not review count, LOC, production exposure, unique features, or sole ownership. UTC dates inclusive. Do not add historical snapshot437 to updated cumulative3735.",
+    "additionalResults": {
+      "cutoff": {
+        "issueCount": 437
+      },
+      "mainMerged": {
+        "issueCount": 1725
+      },
+      "nextMerged": {
+        "issueCount": 1966
+      }
+    },
+    "additionalQueries": {
+      "cutoff": "repo:manaflow-ai/cmux is:pr author:teamleaderleo is:merged merged:<=2026-09-23T11:36:53Z",
+      "mainMerged": "repo:manaflow-ai/cmux is:pr author:teamleaderleo is:merged base:main merged:<=2026-10-14",
+      "nextMerged": "repo:manaflow-ai/cmux is:pr author:teamleaderleo is:merged base:feat-cmux-next merged:<=2026-10-14"
+    },
+    "additionalTiming": "Fetched shortly after the 22:17:11Z snapshot on 2026-10-14. The exact per-call completion time was not captured; do not treat the synthetic timestamp in the separate additional-counts artifact as exact.",
+    "historicalRawSourceCheck": {
+      "rows": 437,
+      "uniqueRepositoryNumber": 437,
+      "firstMerged": "2026-09-13T06:07:08Z",
+      "lastMerged": "2026-09-23T11:35:21Z",
+      "allCmux": true,
+      "source": "work/impact/sources/github-prs.jsonl",
+      "note": "Raw rows omit author login; author filter is from sync metadata. Exact author-filtered live cutoff count437 agrees, not a per-node revalidation of all437."
+    }
+  },
+  "selectedPullRequests": [
+    {
+      "number": 13131,
+      "title": "reload: let a reused checkout keep one warm DerivedData across tags",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13131",
+      "state": "MERGED",
+      "mergedAt": "2026-09-20T10:15:05Z",
+      "createdAt": "2026-09-20T04:55:59Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "main"
+    },
+    {
+      "number": 13132,
+      "title": "refactor: move the Computer Use runtime out of the app module into a package",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13132",
+      "state": "MERGED",
+      "mergedAt": "2026-09-20T11:18:22Z",
+      "createdAt": "2026-09-20T04:56:14Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "main"
+    },
+    {
+      "number": 13378,
+      "title": "ci: extract reusable guard workflow",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13378",
+      "state": "MERGED",
+      "mergedAt": "2026-09-21T12:59:59Z",
+      "createdAt": "2026-09-21T09:48:12Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "main"
+    },
+    {
+      "number": 13658,
+      "title": "ci: route pull-request macOS jobs to Blacksmith, keep overflow for the rest",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/13658",
+      "state": "MERGED",
+      "mergedAt": "2026-09-22T13:46:48Z",
+      "createdAt": "2026-09-22T13:38:25Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "main"
+    },
+    {
+      "number": 14774,
+      "title": "ci: fill idle and briefly busy owned minis before Blacksmith",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14774",
+      "state": "MERGED",
+      "mergedAt": "2026-09-26T02:17:23Z",
+      "createdAt": "2026-09-26T01:15:49Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "main"
+    },
+    {
+      "number": 14776,
+      "title": "ci(e2e): UI runs adopt the app and UI test bundle PR CI compiled",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/14776",
+      "state": "MERGED",
+      "mergedAt": "2026-09-26T04:33:43Z",
+      "createdAt": "2026-09-26T01:38:59Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "main"
+    },
+    {
+      "number": 16425,
+      "title": "cmux-next agent pane: stop re-laying out the transcript on every scroll frame",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/16425",
+      "state": "MERGED",
+      "mergedAt": "2026-10-01T18:12:51Z",
+      "createdAt": "2026-10-01T17:41:48Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "feat-cmux-next"
+    },
+    {
+      "number": 16428,
+      "title": "cmux-next: browser.page wait and screenshot",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/16428",
+      "state": "MERGED",
+      "mergedAt": "2026-10-11T12:50:50Z",
+      "createdAt": "2026-10-01T17:46:45Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "feat-cmux-next"
+    },
+    {
+      "number": 16441,
+      "title": "cmux-next: browser cookies and storage for app browser tabs",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/16441",
+      "state": "MERGED",
+      "mergedAt": "2026-10-11T14:12:57Z",
+      "createdAt": "2026-10-01T18:08:34Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "feat-cmux-next"
+    },
+    {
+      "number": 17217,
+      "title": "ci: require a written merge override for red CI",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/17217",
+      "state": "MERGED",
+      "mergedAt": "2026-10-04T08:01:49Z",
+      "createdAt": "2026-10-03T22:43:02Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "main"
+    },
+    {
+      "number": 19386,
+      "title": "Ship the cmux-cua engine once, as the Computer Use helper",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19386",
+      "state": "MERGED",
+      "mergedAt": "2026-10-11T15:28:56Z",
+      "createdAt": "2026-10-11T12:31:27Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "main"
+    },
+    {
+      "number": 19606,
+      "title": "fix: deep split chains no longer freeze the main thread",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19606",
+      "state": "MERGED",
+      "mergedAt": "2026-10-12T00:44:14Z",
+      "createdAt": "2026-10-11T23:11:23Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "main"
+    },
+    {
+      "number": 19620,
+      "title": "cmux-next: faster cold launch: lazy sidebar update pages, prefetched first snapshot",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19620",
+      "state": "MERGED",
+      "mergedAt": "2026-10-12T00:01:30Z",
+      "createdAt": "2026-10-11T23:56:11Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "feat-cmux-next"
+    },
+    {
+      "number": 20535,
+      "title": "acpmux: open long chats from the end of their log, with a size cap (cx-2lv1k)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20535",
+      "state": "MERGED",
+      "mergedAt": "2026-10-14T12:50:25Z",
+      "createdAt": "2026-10-14T09:27:09Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "feat-cmux-next"
+    },
+    {
+      "number": 20536,
+      "title": "agent pane: page older turns in as the reader scrolls up (cx-2lv1k)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20536",
+      "state": "MERGED",
+      "mergedAt": "2026-10-14T13:08:09Z",
+      "createdAt": "2026-10-14T09:27:21Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "feat-cmux-next"
+    },
+    {
+      "number": 20699,
+      "title": "agent pane: a long chat reopens where the reader left it (cx-odzaz)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20699",
+      "state": "MERGED",
+      "mergedAt": "2026-10-14T19:11:01Z",
+      "createdAt": "2026-10-14T17:40:10Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "feat-cmux-next"
+    },
+    {
+      "number": 19993,
+      "title": "cmux NEXT: a Cloud chat's file requests ask in the chat, with Allow once, Always or Deny (cx-rppd.6)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19993",
+      "state": "MERGED",
+      "mergedAt": "2026-10-12T21:03:12Z",
+      "createdAt": "2026-10-12T20:49:49Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "feat-cmux-next"
+    },
+    {
+      "number": 19255,
+      "title": "Ship stable as thin arm64 and x86_64 builds with a one-hop update path",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19255",
+      "state": "MERGED",
+      "mergedAt": "2026-10-11T07:47:35Z",
+      "createdAt": "2026-10-11T07:05:18Z",
+      "author": {
+        "login": "teamleaderleo"
+      },
+      "baseRefName": "main"
+    }
+  ],
+  "scope": "Account-attributed authored PRs. Merged means merged into the named base branch, not proof of release or production exposure. Selected PR metadata is not an exhaustive implementation-ownership or review-credit audit. Original PR bodies own the measurements.",
+  "historicalSnapshotReconciliation": {
+    "oldSnapshotPath": "work/impact/sources/sync-state.json",
+    "oldCapturedAt": "2026-09-23T11:36:53Z",
+    "oldMergedCount": 437,
+    "freshWholeSeptember23Count": 472,
+    "difference": "35 merges later that UTC day; old snapshot is retained, not added to cumulative totals."
+  },
+  "mergeDestinations": {
+    "main": 1725,
+    "feat-cmux-next": 1966,
+    "otherBasesDerivedResidual": 44,
+    "calculation": "3735 - 1725 - 1966 = 44",
+    "timing": "The total is from 22:17:11Z. Base-filtered queries followed shortly afterward; exact per-call completion times were not retained. The residual is derived across these captures, not a simultaneously measured partition."
+  }
+}

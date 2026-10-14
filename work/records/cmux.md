@@ -1,8 +1,27 @@
-# CMUX: feedback latency, reusable work, and CI capacity
+# cmux: build systems, developer feedback, and product reliability
 
-The current Scrapbook snapshot contains 437 merged CMUX pull requests authored by Leo between September 13 and September 23, 2026. Volume alone is a weak career claim. The useful pattern is what a smaller set of measured changes says about the system.
+**Current role:** Founding Engineer at cmux, October 12, 2026–present. Leo confirmed the title and start date on October 14. Contributions in September predate the role and aren't employment tenure.
 
+The [October 14 source refresh](../impact/sources/cmux-career-2026-10-14.json) counts 4,479 PRs attributed by GitHub's author field to `teamleaderleo`: 3,735 merged, 177 open, and 567 closed without merging, as of 22:17:11 UTC. Merged PRs include `main`, `feat-cmux-next`, and other destination branches. They aren't a count of released features, sole implementation ownership, reviews, or business impact.
+
+The follow-up base-filtered queries count 1,725 merged into `main` and 1,966 into `feat-cmux-next`. Subtracting those from 3,735 leaves a derived residual of 44 for other bases. The total was captured at 22:17:11 UTC; the base queries followed shortly afterward without exact per-call timestamps, so this isn't a simultaneous branch partition. None of these counts establishes stable-release inclusion.
+
+The older retrieval snapshot remains intact: 437 merged PRs through September 23 at 11:36:53 UTC. A fresh full-day query returns 472 through September 23, including 35 later merges that day. The old snapshot isn't added to the new count.
 Across the strongest records, the work repeatedly treats build state, runner capacity, test products, queues, and failure signals as one performance problem. The recurring move is to find an expensive boundary, determine which identity or ownership rule makes the work reusable, preserve the cases where reuse is unsafe, and then add enough evidence that later drift is visible.
+
+## Accumulation over time
+
+| UTC merge window | Merged in window | Cumulative merged | What the selected evidence establishes |
+| --- | ---: | ---: | --- |
+| Through September 23 | 472 | 472 | Build/cache identity, reusable products, queueing, capacity, and test signal. The original snapshot stopped partway through September 23 at 437. |
+| September 24–26 | 443 | 915 | [UI E2E adoption](../impact/records/cmux-14776.md) observed test start at 659s → 250s in one pair on different pools. [Runner placement](../impact/records/cmux-14774.md) measured owned share at 56.2% → 88.9% in unmatched overnight windows. |
+| September 27–30 | 520 | 1,435 | Additional merged account activity; this refresh doesn't attach a new measured outcome to every PR in the window. |
+| October 1–7 | 744 | 2,179 | Agent-pane layout reuse on the next branch; exact-head merge-override evaluation on main. |
+| October 8–11 | 811 | 2,990 | Browser command parity on the next branch; [duplicate Computer Use engine removal](../impact/records/cmux-19386.md) on main. |
+| October 12–14, through capture time | 745 | 3,735 | Deep split responsiveness on main; [startup](../impact/records/cmux-19620.md), [older-chat paging](../impact/records/cmux-20536.md), and reading-position recovery on the next branch. |
+
+The time windows are disjoint GitHub merge-date queries, using UTC. They describe contribution coverage; the October 12 UTC window doesn't establish which merges happened after the local employment start. The role starts on October 12 as supplied by Leo.
+These results accumulate as a broader engineering record, not a single savings total. UI product adoption, cache reuse, and runner placement can touch the same execution. A per-job queue reduction doesn't establish recovered engineer-hours; a replacement-cost model doesn't establish avoided invoices.
 
 ## Reuse work at the boundary that actually owns it
 
@@ -69,9 +88,31 @@ Several PRs are useful because they stop at the boundary the measurement support
 
 The larger impact claims are easier to trust because the same record contains cases where the attractive number was declined.
 
+## Extend the work into the product
+
+The later record reaches beyond CI. [PR 16425](https://redirect.github.com/manaflow-ai/cmux/pull/16425), merged into `feat-cmux-next` on October 1, memoizes transcript geometry so scrolling doesn't relayout every row. Its roughly 4 ms per frame figure describes the earlier 5,000-row baseline; the PR body leaves a native re-benchmark pending.
+
+October 11 merges on the same branch restore browser [wait and screenshot commands](https://redirect.github.com/manaflow-ai/cmux/pull/16428) and [cookie and storage operations](https://redirect.github.com/manaflow-ai/cmux/pull/16441). Cookie clearing requires a site scope and refuses an unscoped clear that could sign the user out of every site. [PR 19993](https://redirect.github.com/manaflow-ai/cmux/pull/19993) later adds inline Cloud file-request choices to the moved chat, binding a response to the displayed request and a user gesture. This is the app-side permission flow, not sole ownership of the Cloud stack.
+
+[PR 19620](../impact/records/cmux-19620.md) removes unnecessary startup WebKit work and prefetches the first daemon snapshot. Its DEV Debug live-sidebar median moves from 557 to 478 ms against the immediate regression, compared with 487 ms before that regression. Most of the improvement is recovery; no release-build launch distribution is established.
+
+[PR 20536](../impact/records/cmux-20536.md) makes older agent-chat history reachable and changes page folding from a full-history rebuild, 105 ms at 45,000 loaded events, to 1–6 ms per older page in its Chromium development harness. First paint stays unchanged. The separate daemon repair [PR 20535](https://redirect.github.com/manaflow-ai/cmux/pull/20535) owns the log-read optimization; its backend timing isn't an end-to-end open-time claim.
+
+The follow-on [PR 20699](https://redirect.github.com/manaflow-ai/cmux/pull/20699) preserves a useful reversal. Paging initially broke reopening at a saved position outside the newest page. The repair pages back before revealing the transcript and avoids overwriting the saved position during restore. Its Chromium test passes on the merged next-branch head; a native quit and relaunch remains unverified in the retained evidence.
+
+## Reliability and packaging keep their own boundaries
+
+[PR 19606](https://redirect.github.com/manaflow-ai/cmux/pull/19606), merged into main, repairs deep split chains that freeze the main thread. The focus walk diagnosis came from @Apptah; Leo's PR carries the Bonsplit fix into cmux and records the failed AppDelegate experiment. A native 16-deep-chain check goes from 2/5 to 5/5, with operations answering within 0.08 seconds on the tested fix build. The final head removes the ineffective AppDelegate change and wasn't separately re-run through that native test. This is a responsiveness repair, not an app-wide performance benchmark.
+
+[PR 17217](https://redirect.github.com/manaflow-ai/cmux/pull/17217), merged into main, evaluates merge overrides from trusted base code using GitHub metadata. Overrides name failing checks, carry evidence, and expire when the head changes. Its merged state doesn't by itself establish a repository-wide rollout or every later merge's compliance.
+
+[PR 19386](../impact/records/cmux-19386.md), also merged into main, removes the duplicate Computer Use executable, reported as 11.5 MiB in the before-removal arm64 inventory. A native after-build or installed-size reduction remains unverified. The helper keeps its signing and permission identity. The [thin stable-release pipeline](https://redirect.github.com/manaflow-ai/cmux/pull/19255) is another main-branch merge; its universal-versus-nightly size comparison isn't a measured stable-release before/after result, and the retained PR body leaves the signed dry run and update acceptance for later verification.
+
+Next-branch merges in this record establish integrated development work. A stable shipment or native acceptance result needs its own release or runtime evidence.
+
 ## Career-facing interpretation
 
-The strongest CMUX story is build systems and developer productivity with a systems-performance bent.
+The record now spans build systems and developer productivity alongside native desktop reliability, browser automation, and agent-chat product work.
 
 It includes Swift and Xcode compilation behavior, cache identity and lifecycle, reusable build products, artifact transport, runner scheduling, CI observability, test reliability, and release workflow economics. The repeated skill is less about any one CI provider than about finding the actual ownership and reuse boundary in a large changing system, measuring the cost around it, and preserving safe fallback behavior when the optimization cannot prove a hit.
 

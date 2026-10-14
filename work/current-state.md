@@ -1,8 +1,18 @@
-# Current state — 2026-08-26
+# Current state
 
 This is the source-first live-status overlay for the work record.
 
 Use current implementation and retained current evidence as the authority for what exists and what has been demonstrated. README files, portfolio prose, issue summaries, and claim indexes are projections of that reality and should be updated when they lag it. For career/editorial context, read `portfolio-inventory.md` after this file.
+
+## cmux: Founding Engineer since October 12, 2026
+
+Refreshed October 14, 2026. The other project sections below retain the August 26 snapshot and weren't reverified in this update.
+
+Repository: https://redirect.github.com/manaflow-ai/cmux
+
+State: **current employment, building on an earlier contribution campaign**. Leo confirmed the Founding Engineer title and October 12 start date. September contributions aren't counted as employment tenure.
+
+The [cmux record](records/cmux.md) owns the role and engineering narrative. The [impact ledger](impact/README.md) owns quantitative claims; the [October 14 refresh](impact/sources/cmux-career-2026-10-14.json) counts 3,735 merged account-attributed PRs across all destination branches, including next-branch product work. Selected curated measurements now reach October 14; the older 437-PR retrieval snapshot remains dated to September 23. The [economics model](records/cmux-economics.md) values a historical workload at replacement prices; it doesn't establish personal cash savings.
 
 ## Preflight — 112.17s → 13.69s development arc; candidate execution
 
