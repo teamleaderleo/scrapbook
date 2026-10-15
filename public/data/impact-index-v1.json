@@ -2,9 +2,112 @@
   "version": 1,
   "source": "repository",
   "generatedFrom": "work/impact/records",
-  "updatedAt": "2026-10-14",
-  "recordCount": 64,
+  "updatedAt": "2026-10-15",
+  "recordCount": 82,
   "records": [
+    {
+      "id": "cmux-20883",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20883,
+      "title": "fix: CmuxNextApp size cap: move SidebarSameTurn into CmuxNextSidebar",
+      "status": "merged",
+      "happenedAt": "2026-10-15",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "architecture",
+        "ci",
+        "maintainability"
+      ],
+      "summary": "Moved SidebarSameTurn into the sidebar package to restore CmuxNextApp size-cap headroom after a base regression.",
+      "evidence": {
+        "label": "cmux PR 20883",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20883",
+        "basis": "PR body and size/concurrency checks, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-15. CmuxNextApp went from 37 lines over its 113,692-line cap to 5 lines under it; a fleet Release compile was running at capture, so no compile result is claimed."
+      },
+      "claims": [
+        {
+          "id": "cmux-next-app-cap-headroom",
+          "dimension": "developer-loop",
+          "metric": "CmuxNextApp cap headroom after SidebarSameTurn move",
+          "direction": "reliability",
+          "value": 5,
+          "unit": "lines under cap",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "feat-cmux-next size-cap check on 2026-10-15",
+          "population": "CmuxNextApp source target",
+          "note": "SidebarSameTurn moved 42 lines; the target went from 37 lines over to 5 lines under the cap, a structural 42-line swing with no behavior change. This is source headroom, not binary size or runtime performance.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-next-source-cap"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-20883.md"
+    },
+    {
+      "id": "cmux-20216",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20216,
+      "title": "cx-98s: keep New Tab Cmd-T under the p95 budget",
+      "status": "merged",
+      "happenedAt": "2026-10-14",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "performance",
+        "ci",
+        "test-infrastructure"
+      ],
+      "summary": "Added a real debug-socket New Tab Cmd-T p95 gate and removed duplicate tab-strip reconciliation when adopting an existing spare.",
+      "evidence": {
+        "label": "cmux PR 20216",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20216",
+        "basis": "PR body and native bench receipt requirement, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-14. The audit baseline was 24.9 ms p95 against a 16 ms budget; native --bench-open receipts run on a tagged fleet build, but no post-fix p95 was reported in the retained body."
+      },
+      "claims": [
+        {
+          "id": "new-tab-open-p95-baseline",
+          "dimension": "latency",
+          "metric": "New Tab Cmd-T open p95 before duplicate-reconciliation fix",
+          "direction": "baseline",
+          "value": 24.9,
+          "unit": "milliseconds/open",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "feat-cmux-next audit baseline reported in PR 20216",
+          "population": "debug-socket New Tab open path",
+          "note": "24.9 ms p95 against a 16 ms budget. No post-fix p95 or app-wide launch improvement is claimed.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-next-new-tab-motion"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-20216.md"
+    },
+    {
+      "id": "cmux-20534",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20534,
+      "title": "cmux-next: a local merge commit reuses the fetched same-tree acpmux",
+      "status": "merged",
+      "happenedAt": "2026-10-14",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "developer-loop",
+        "cache",
+        "reliability"
+      ],
+      "summary": "Let local reload reuse a checksum-verified same-tree acpmux binary already fetched for the checkout, while refusing reuse when an architecture is missing.",
+      "evidence": {
+        "label": "cmux PR 20534",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20534",
+        "basis": "PR body and regression test, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-14. The red test reproduced a local merge reload stopping with no cached acpmux; the green fix seeds the commit cache only when the requested architectures are present. verify-local had unrelated base failures."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-20534.md"
+    },
     {
       "id": "cmux-20536",
       "repository": "manaflow-ai/cmux",
@@ -44,6 +147,395 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-20536.md"
+    },
+    {
+      "id": "cmux-20596",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20596,
+      "title": "ci: fast tier can take its own runner label; release-path dogfood builds leave the shared minis (no bead)",
+      "status": "merged",
+      "happenedAt": "2026-10-14",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "ci",
+        "capacity",
+        "runner-routing"
+      ],
+      "summary": "Gave the cmux NEXT fast tier its own runner label and moved cmux-tui release-path dogfood builds off the shared side lane when policy variables are enabled.",
+      "evidence": {
+        "label": "cmux PR 20596",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20596",
+        "basis": "PR body and routing-policy tests, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-14. The fast label is gated to owned pools and attempts 1/2 or human reruns; fork behavior stays unchanged. Tests and actionlint passed, but no post-merge capacity or latency result is claimed."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-20596.md"
+    },
+    {
+      "id": "cmux-20612",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20612,
+      "title": "ci: build cmux-tui dogfood artifacts on the PR pool, not the side lane",
+      "status": "merged",
+      "happenedAt": "2026-10-14",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "ci",
+        "capacity",
+        "runner-routing"
+      ],
+      "summary": "Moved cmux-tui dogfood artifact builds from a saturated side lane to the PR pool and removed the rescue rerun dependency.",
+      "evidence": {
+        "label": "cmux PR 20612",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20612",
+        "basis": "PR body and routing tests, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-14. In a 25-run sample, 24 side-lane builds never started before cancellation (up to 120 minutes); the one that ran waited 92 minutes for a 25-minute build. The after-routing result was not measured here."
+      },
+      "claims": [
+        {
+          "id": "tui-dogfood-side-lane-queue-baseline",
+          "dimension": "critical-path",
+          "metric": "cmux-tui dogfood build queue before rerouting",
+          "direction": "baseline",
+          "value": 92,
+          "unit": "minutes/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "25-run sample from the day before PR 20612",
+          "population": "focused/full cmux-tui runs on the side label",
+          "note": "24/25 builds never started; the single completed build waited 92 minutes for a 25-minute build. This is a queue baseline, not an after-routing reduction or fleet-wide capacity saving.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-tui-dogfood-routing"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-20612.md"
+    },
+    {
+      "id": "cmux-20662",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20662,
+      "title": "cmux NEXT: strip the embedded CEF libraries (-7 MiB, cx-b6r7)",
+      "status": "merged",
+      "happenedAt": "2026-10-14",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "packaging",
+        "artifact-size",
+        "release"
+      ],
+      "summary": "Stripped local symbols and debug stabs from embedded CEF libraries before signing while preserving Vulkan and CEF exports.",
+      "evidence": {
+        "label": "cmux PR 20662",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20662",
+        "basis": "PR body and exact-head build verification, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-14. On nightly-next arm64, libvk_swiftshader.dylib went 22.27 to 15.30 MiB and retained all vk_icd entry points; no stable-release or whole-app download reduction is claimed."
+      },
+      "claims": [
+        {
+          "id": "cef-swiftshader-installed-size",
+          "dimension": "artifact-size",
+          "metric": "embedded libvk_swiftshader.dylib size",
+          "direction": "reduction",
+          "value": 6.97,
+          "unit": "MiB/file",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "nightly-next arm64 build at PR verification",
+          "population": "one embedded CEF software-renderer library",
+          "note": "22.27 MiB to 15.30 MiB; 0 local symbols remained and Vulkan entry points were retained. Other library changes and the 618.1 MiB app baseline are context, not additive savings. Feature-branch/nightly-next evidence; no whole-app or app download reduction claim.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-next-artifact-size"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-20662.md"
+    },
+    {
+      "id": "cmux-20721",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20721,
+      "title": "ci: bound the cmux-next tour's DerivedData on each Mac",
+      "status": "merged",
+      "happenedAt": "2026-10-14",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "ci",
+        "storage",
+        "build-cache"
+      ],
+      "summary": "Added LRU pruning for cmux NEXT media-tour DerivedData, preserving the current run, open or recently touched builds, and at most one other pair.",
+      "evidence": {
+        "label": "cmux PR 20721",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20721",
+        "basis": "PR body and test evidence, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-14. One Mac held eight roughly 9 GiB pairs (~70 GiB), reached 36 GiB free, and failed a 40 GiB reload floor. The pruning logic is covered by a synthetic tree; no post-merge live mini run had occurred."
+      },
+      "claims": [
+        {
+          "id": "media-derived-data-observed-baseline",
+          "dimension": "storage",
+          "metric": "cmux-next media-tour DerivedData held on one Mac",
+          "direction": "baseline",
+          "value": 70,
+          "unit": "GiB/Mac",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "2026-10-14 before-prune observation",
+          "population": "eight cmux-ci-media base/head pairs",
+          "note": "One observed Mac held eight pairs, each about 9 GiB; the 36 GiB free state caused a reload floor failure. The proposed cap is about 36 GiB per Mac, but no live after-prune capacity or avoided failure is measured.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-media-derived-data"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-20721.md"
+    },
+    {
+      "id": "cmux-20743",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20743,
+      "title": "cmux NEXT: ship compiled strings as binary property lists (-10 MiB installed, cx-b6r7)",
+      "status": "merged",
+      "happenedAt": "2026-10-14",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "packaging",
+        "artifact-size",
+        "localization"
+      ],
+      "summary": "Converted cmux NEXT compiled String Catalog XML to binary property lists in both nightly-next and Mac release stripping paths, restoring the project setting and adding encoding guards.",
+      "evidence": {
+        "label": "cmux PR 20743",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20743",
+        "basis": "PR body and verification, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-14. A copy of the nightly-next resources converted 2,109 tables from 19.55 MiB to 9.23 MiB with 0 content mismatches. LZMA changed 1.48 MB to 1.47 MB, so no app download reduction is claimed. Red CI and local tests preceded the green fix; stable-release publication was not reverified."
+      },
+      "claims": [
+        {
+          "id": "compiled-strings-installed-size",
+          "dimension": "artifact-size",
+          "metric": "nightly-next compiled String Catalog storage",
+          "direction": "reduction",
+          "value": 10.32,
+          "unit": "MiB/app",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "2026-10-14 resource-copy verification",
+          "population": "2,109 .strings tables in a nightly-next app copy",
+          "note": "19.55 MiB to 9.23 MiB with 0 table-content mismatches. The result is a feature-branch/nightly-next resource measurement; no whole-app installed-size delta, stable artifact, or app download reduction is claimed.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-strings-installed-size-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-20743.md"
+    },
+    {
+      "id": "cmux-20134",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20134,
+      "title": "Restore journey: a quit and update relaunch proof harness for cmux NEXT",
+      "status": "merged",
+      "happenedAt": "2026-10-13",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "reliability",
+        "desktop",
+        "release-validation"
+      ],
+      "summary": "Built a quit and update-relaunch restore journey harness that snapshots windows, splits, browser pages, terminals, and agent chats before and after relaunch.",
+      "evidence": {
+        "label": "cmux PR 20134",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20134",
+        "basis": "PR body and seven capture-slot runs, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-13. On run 7, 275 of 280 rows passed and restore settled about 2 seconds after quit; terminals, splits, tabs, browser state, and agent history returned. Window recency and several agent-chat/layout gaps remained."
+      },
+      "claims": [
+        {
+          "id": "restore-journey-row-pass-rate",
+          "dimension": "reliability",
+          "metric": "restore journey probe rows passing on run 7",
+          "direction": "reliability",
+          "value": 275,
+          "unit": "rows/run",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "run 7 of seven feat-cmux-next DEV capture-slot runs",
+          "population": "quit and update relaunch across seeded desktop, browser, terminal, and agent-chat state",
+          "note": "One run observed 275/280 rows passing and restore settled about 2 s after quit. Window recency and agent-chat/layout gaps remained; this is a DEV harness result, not a stable release acceptance rate.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-next-restore-journey"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-20134.md"
+    },
+    {
+      "id": "cmux-20193",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20193,
+      "title": "ci(cx-29ch2): cmux NEXT PR fast tier with flake quarantine",
+      "status": "merged",
+      "happenedAt": "2026-10-13",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "ci",
+        "reliability",
+        "test-infrastructure"
+      ],
+      "summary": "Added a deterministic cmux NEXT PR fast tier with explicit flake classification, quarantine ownership, and repeat-20 admission before a seed gates.",
+      "evidence": {
+        "label": "cmux PR 20193",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20193",
+        "basis": "PR body and local workflow/test evidence, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-13. The job covers every feat PR/push and runs without the GUI token; real seed timing and repeat-20 receipts were still pending in the PR body."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-20193.md"
+    },
+    {
+      "id": "cmux-20254",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20254,
+      "title": "ci: a fast-tier filter that matches no test fails (cx-29ch2)",
+      "status": "merged",
+      "happenedAt": "2026-10-13",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "ci",
+        "reliability",
+        "test-infrastructure"
+      ],
+      "summary": "Made fast-tier Swift and Cargo entries fail when their filter matches no tests, catching a hollow motion-clock entry immediately.",
+      "evidence": {
+        "label": "cmux PR 20254",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20254",
+        "basis": "PR body and red/green fake-run plus first fast-tier evidence, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-13. The first run showed four real entries passing and motion clock matching no tests; the empty-match guard then removed the vacuous entry."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-20254.md"
+    },
+    {
+      "id": "cmux-20269",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20269,
+      "title": "Fix base size cap: move the CLI installer out of CmuxNextApp",
+      "status": "merged",
+      "happenedAt": "2026-10-13",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "architecture",
+        "ci",
+        "maintainability"
+      ],
+      "summary": "Moved the Foundation-only CLI installer out of CmuxNextApp to clear a failing source-size cap while keeping the cap unchanged.",
+      "evidence": {
+        "label": "cmux PR 20269",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20269",
+        "basis": "PR body and fleet Swift-suite verification, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-13. CmuxNextApp fell from 113,911 to 113,682 lines, 119 under the 113,801 cap; the fleet package suites built. No binary-size or runtime claim is made."
+      },
+      "claims": [
+        {
+          "id": "cmux-next-app-source-cap-headroom",
+          "dimension": "developer-loop",
+          "metric": "CmuxNextApp cap headroom after CLI installer extraction",
+          "direction": "reliability",
+          "value": 119,
+          "unit": "lines under cap",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "feat-cmux-next cap repair on 2026-10-13",
+          "population": "CmuxNextApp target",
+          "note": "CLIPathInstaller moved 229 lines into a Foundation-only target; the resulting app target was 119 lines under the cap. This is structural source headroom, not a binary-size or runtime reduction.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-next-source-cap"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-20269.md"
+    },
+    {
+      "id": "cmux-20273",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20273,
+      "title": "ci: pane zoom motion in the cmux NEXT fast tier (cx-v0v8k)",
+      "status": "merged",
+      "happenedAt": "2026-10-13",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "ci",
+        "performance",
+        "test-infrastructure"
+      ],
+      "summary": "Registered eight deterministic pane-zoom motion cases in the cmux NEXT fast tier using a fixed 120 Hz simulation step.",
+      "evidence": {
+        "label": "cmux PR 20273",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20273",
+        "basis": "PR body and fast-tier dry-run evidence, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-13. The eight cases take about 0.1 seconds in the test body; a separate 60 Hz slot report still saw 1–2 missed frames and 5–8 ms layout p95 against a 4 ms budget, and remains report-only."
+      },
+      "claims": [
+        {
+          "id": "pane-zoom-fast-tier-cases",
+          "dimension": "throughput",
+          "metric": "deterministic pane-zoom cases per fast-tier run",
+          "direction": "throughput",
+          "value": 8,
+          "unit": "cases/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "feat-cmux-next fast-tier entry definition",
+          "population": "PaneZoomMotionTests with fixed 1/120 s steps",
+          "note": "About 0.1 s test-body time; no end-to-end CI duration or animation improvement is claimed. The separate 60 Hz slot report remains report-only.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-next-fast-tier"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-20273.md"
+    },
+    {
+      "id": "cmux-20290",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20290,
+      "title": "ci: core model matrix in the cmux NEXT fast tier (cx-gkyi1)",
+      "status": "merged",
+      "happenedAt": "2026-10-13",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "ci",
+        "test-infrastructure",
+        "compiler-toolchain"
+      ],
+      "summary": "Registered the cmux-tui-core model matrix in the cmux NEXT fast tier and fixed its ghostty-next and Zig setup path.",
+      "evidence": {
+        "label": "cmux PR 20290",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20290",
+        "basis": "PR body and workflow tests, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-13. The matrix contains 59 headless cases and the recorded test body runs in about 1 second; the first real fast-tier run was the PR receipt, so no broader CI-time saving is claimed."
+      },
+      "claims": [
+        {
+          "id": "cmux-next-core-model-matrix",
+          "dimension": "throughput",
+          "metric": "headless cmux-tui-core model-matrix cases per fast-tier run",
+          "direction": "throughput",
+          "value": 59,
+          "unit": "cases/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "feat-cmux-next fast-tier matrix definition",
+          "population": "cmux-tui-core mux::tests::matrix",
+          "note": "The ~1 s figure is the recorded test body, not an end-to-end CI lane duration. Setup for ghostty-next and Zig runs outside the per-entry cap; no aggregate CI saving is claimed.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-next-fast-tier"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-20290.md"
     },
     {
       "id": "cmux-19620",
@@ -86,6 +578,87 @@
       "sourcePath": "work/impact/records/cmux-19620.md"
     },
     {
+      "id": "cmux-19305",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19305,
+      "title": "Download Linux SSH payloads on demand instead of bundling them (cx-b6r7)",
+      "status": "merged",
+      "happenedAt": "2026-10-11",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "packaging",
+        "artifact-size",
+        "ssh",
+        "reliability"
+      ],
+      "summary": "Moved Linux cmux-tui SSH payloads out of the app bundle into authenticated, resumable, SHA-256-checked on-demand downloads with a per-build cache.",
+      "evidence": {
+        "label": "cmux PR 19305",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19305",
+        "basis": "PR body and hosted integration tests, fetched 2026-10-15. Base main; authored by teamleaderleo; merged 2026-10-11. The two Linux payloads were about 77 MiB installed in the prior bundle. On-demand download, cache reuse, resume, tamper rejection, retention and proxy/PAC behavior were covered by the PR test sequence; the shipped-app drop was not reverified in this record."
+      },
+      "claims": [
+        {
+          "id": "linux-ssh-payload-bundled-baseline",
+          "dimension": "artifact-size",
+          "metric": "Linux SSH payloads bundled in the app before on-demand migration",
+          "direction": "baseline",
+          "value": 77,
+          "unit": "MiB/app",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "pre-change bundle described in PR 19305",
+          "population": "two Linux cmux-tui SSH payloads",
+          "note": "About 77 MiB is a before baseline. Do not claim a shipped app-size reduction until a release artifact proves the payloads are absent; download/cache behavior is the durable capability.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-linux-ssh-payload-size"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19305.md"
+    },
+    {
+      "id": "cmux-19355",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19355,
+      "title": "build: ship compiled strings as binary property lists (-8.8 MiB)",
+      "status": "merged",
+      "happenedAt": "2026-10-11",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "packaging",
+        "artifact-size",
+        "localization"
+      ],
+      "summary": "Compiled the app target and tunnel-extension String Catalogs as binary property lists, shrinking the Apple-silicon app’s localized-string payload while preserving all keys.",
+      "evidence": {
+        "label": "cmux PR 19355",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19355",
+        "basis": "PR body and fleet build verification, fetched 2026-10-15. Base main; authored by teamleaderleo; merged 2026-10-11. Apple-silicon compiled catalogs went 19.98 to 11.20 MiB, 56 outputs decoded to identical 97,726-key dictionaries, and a fleet debug build contained 49 catalog files totaling 11.20 MiB. This is a separate app-target strings change from feat-cmux-next PR 20743; the two size claims are non-additive."
+      },
+      "claims": [
+        {
+          "id": "app-string-catalog-installed-size",
+          "dimension": "artifact-size",
+          "metric": "Apple-silicon app String Catalog storage",
+          "direction": "reduction",
+          "value": 8.78,
+          "unit": "MiB/app",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "fleet Mac Xcode 26.6 measurement and debug build from PR 19355",
+          "population": "app target and tunnel-extension compiled catalogs",
+          "note": "19.98 MiB UTF-16 to 11.20 MiB binary; all 56 measured outputs decode identically. Package resource bundles remain about 2.61 MiB, and no app download reduction is claimed. Do not sum with PR 20743, which targets Swift-package catalogs on feat-cmux-next.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-strings-installed-size-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19355.md"
+    },
+    {
       "id": "cmux-19386",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -124,6 +697,86 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-19386.md"
+    },
+    {
+      "id": "cmux-19398",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19398,
+      "title": "ci: shard the CLI regressions into three root-label jobs (no bead)",
+      "status": "merged",
+      "happenedAt": "2026-10-11",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "ci",
+        "developer-loop",
+        "test-infrastructure"
+      ],
+      "summary": "Sharded 94 CLI and shell regressions into three deterministic root-runner jobs in main CI, keeping GUI runners for app-host work.",
+      "evidence": {
+        "label": "cmux PR 19398",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19398",
+        "basis": "PR body, fetched 2026-10-15. Base main; authored by teamleaderleo; merged 2026-10-11. The 14-day baseline was 23.5 min median PR CI, 44.7 min p90, with about 7.7 min of serial CLI regressions; each shard was estimated at about 2.5 min. A real post-merge macOS run was not yet reported, so no speedup claim is made."
+      },
+      "claims": [
+        {
+          "id": "serial-cli-regressions-baseline",
+          "dimension": "critical-path",
+          "metric": "serial CLI and shell regression segment in PR CI",
+          "direction": "baseline",
+          "value": 7.7,
+          "unit": "minutes/run",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "14-day pre-change baseline reported in PR 19398",
+          "population": "94 Python and shell regression tests after compile admission",
+          "note": "Three shards were designed around recorded test times at about 2.5 min each, but no real macOS after-run was reported. The 7.7 min is a baseline, not an avoided duration.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-cli-regression-sharding"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19398.md"
+    },
+    {
+      "id": "cmux-16511",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 16511,
+      "title": "ci: nightly 120 Hz fling bench for the cmux-next agent pane",
+      "status": "merged",
+      "happenedAt": "2026-10-01",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "ci",
+        "performance",
+        "test-infrastructure"
+      ],
+      "summary": "Added a main-branch nightly 120 Hz frame-pacing bench for cmux NEXT, with virtual display setup, capped/full-rate flings, frame summaries, and warning thresholds.",
+      "evidence": {
+        "label": "cmux PR 16511",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/16511",
+        "basis": "PR body and manual smoke test, fetched 2026-10-15. Base main; authored by teamleaderleo; merged 2026-10-01. A fleet smoke run with 5,000 rows reported capped p50 17 ms with 0/363 dropped and full-rate p50 8 ms with 2/722 dropped; the Actions workflow itself had not yet run because it was new and schedule-driven."
+      },
+      "claims": [
+        {
+          "id": "frame-pacing-full-rate-smoke",
+          "dimension": "latency",
+          "metric": "full-rate 120 Hz fling p50 in manual smoke",
+          "direction": "baseline",
+          "value": 8,
+          "unit": "milliseconds/fling",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "manual fleet smoke against feat-cmux-next at 58ecdaefa38",
+          "population": "5,000-row mock pane; three measured flings after warm-up",
+          "note": "Full-rate p50 8 ms with 2/722 frames dropped; capped p50 17 ms with 0/363 dropped. This is a manual smoke, not an Actions trend or before/after gain; the workflow had not run in Actions at merge.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-next-frame-pacing"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-16511.md"
     },
     {
       "id": "cmux-14768",

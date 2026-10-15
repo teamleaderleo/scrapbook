@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "capturedAt": "2026-10-15",
+  "repository": "manaflow-ai/cmux",
+  "records": [
+    {
+      "number": 20743,
+      "title": "cmux NEXT: ship compiled strings as binary property lists (-10 MiB installed, cx-b6r7)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20743",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-14T22:29:49Z",
+      "mergeCommit": "2a68993bc7327ab11912bdb1605b9dff26d0827e",
+      "evidenceClass": "originating PR body and its cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 20662,
+      "title": "cmux NEXT: strip the embedded CEF libraries (-7 MiB, cx-b6r7)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20662",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-14T18:08:02Z",
+      "mergeCommit": "a79d667be01b8a8c8a8c167576ea3a44a9ac6454",
+      "evidenceClass": "originating PR body and its cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 20721,
+      "title": "ci: bound the cmux-next tour's DerivedData on each Mac",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20721",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-14T19:29:48Z",
+      "mergeCommit": "4bc38179df59b200f1e26530df0b0b813119c576",
+      "evidenceClass": "originating PR body and its cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 20534,
+      "title": "cmux-next: a local merge commit reuses the fetched same-tree acpmux",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20534",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-14T11:05:27Z",
+      "mergeCommit": "9300251e36fceac8a7ed6fa828ee92d6fb09db14",
+      "evidenceClass": "originating PR body and its cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 20269,
+      "title": "Fix base size cap: move the CLI installer out of CmuxNextApp",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20269",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-13T11:31:03Z",
+      "mergeCommit": "473387b6faa9446de74a253f1f82fd6602fa98c4",
+      "evidenceClass": "originating PR body and its cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 20193,
+      "title": "ci(cx-29ch2): cmux NEXT PR fast tier with flake quarantine",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20193",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-13T07:08:02Z",
+      "mergeCommit": "44ba9934c517f7103c45122ae0b69bfad8b533ad",
+      "evidenceClass": "originating PR body and its cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 20290,
+      "title": "ci: core model matrix in the cmux NEXT fast tier (cx-gkyi1)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20290",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-13T21:42:07Z",
+      "mergeCommit": "a020dfe5b4ec71bde7d6864f22435f22e30b2081",
+      "evidenceClass": "originating PR body and its cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 20134,
+      "title": "Restore journey: a quit and update relaunch proof harness for cmux NEXT",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20134",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-13T04:17:43Z",
+      "mergeCommit": "9fdedb77a93b80a0457e0bada58e6b840601f2d2",
+      "evidenceClass": "originating PR body and its cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 19398,
+      "title": "ci: shard the CLI regressions into three root-label jobs (no bead)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19398",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-11T14:20:18Z",
+      "mergeCommit": "f5760b301108e169fc22436c4bca4b2616676b63",
+      "evidenceClass": "originating PR body and its cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 16511,
+      "title": "ci: nightly 120 Hz fling bench for the cmux-next agent pane",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/16511",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-01T22:17:02Z",
+      "mergeCommit": "f204ade4df352cd4c214f8a21f792cfc50e7dba8",
+      "evidenceClass": "originating PR body and its cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 19305,
+      "title": "Download Linux SSH payloads on demand instead of bundling them (cx-b6r7)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19305",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-11T09:34:02Z",
+      "mergeCommit": "18d96ed2069f50c42da893d9af78c45e479738b6",
+      "evidenceClass": "originating PR body and cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 19355,
+      "title": "build: ship compiled strings as binary property lists (-8.8 MiB)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19355",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-11T11:51:10Z",
+      "mergeCommit": "8900b220c58475394105dd93a599a41d7bd168dc",
+      "evidenceClass": "originating PR body and cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 20883,
+      "title": "fix: CmuxNextApp size cap: move SidebarSameTurn into CmuxNextSidebar",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20883",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-15T06:14:53Z",
+      "mergeCommit": "ba64441671fd977b0e50bc1a96e6c4bfc268b238",
+      "evidenceClass": "originating PR body and cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 20612,
+      "title": "ci: build cmux-tui dogfood artifacts on the PR pool, not the side lane",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20612",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-14T12:43:28Z",
+      "mergeCommit": "e5afaeb0e48f2ea8e1bfce1d2fa709e1afe42371",
+      "evidenceClass": "originating PR body and cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 20216,
+      "title": "cx-98s: keep New Tab Cmd-T under the p95 budget",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20216",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-14T01:24:28Z",
+      "mergeCommit": "2b4b73ea6e83e5970af2518bbe3681f074b9f49f",
+      "evidenceClass": "originating PR body and cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 20254,
+      "title": "ci: a fast-tier filter that matches no test fails (cx-29ch2)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20254",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-13T09:07:44Z",
+      "mergeCommit": "92590f7ec4e712acd5412735e367f3500fb97d81",
+      "evidenceClass": "originating PR body and cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 20596,
+      "title": "ci: fast tier can take its own runner label; release-path dogfood builds leave the shared minis (no bead)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20596",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-14T14:32:48Z",
+      "mergeCommit": "a02e12581096c281b6d316e09e09391921e5a404",
+      "evidenceClass": "originating PR body and cited verification; no benchmarks rerun during record update"
+    },
+    {
+      "number": 20273,
+      "title": "ci: pane zoom motion in the cmux NEXT fast tier (cx-v0v8k)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20273",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-13T12:23:55Z",
+      "mergeCommit": "85dcc5719a05aa31da3635f4ce31abf1b733881c",
+      "evidenceClass": "originating PR body and cited verification; no benchmarks rerun during record update"
+    }
+  ],
+  "scope": "Eighteen omitted durable wins selected from read-only source caches. Feature-branch merges are integration evidence, not stable release or production exposure. All quantitative claims are non-additive. Size records claim installed/file baselines or reductions only and do not claim app download reduction; PR 19355 and PR 20743 are the same strings campaign at different target boundaries and must not be summed."
+}
