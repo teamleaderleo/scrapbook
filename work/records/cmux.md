@@ -23,6 +23,27 @@ Across the strongest records, the work repeatedly treats build state, runner cap
 The time windows are disjoint GitHub merge-date queries, using UTC. They describe contribution coverage; the October 12 UTC window doesn't establish which merges happened after the local employment start. The role starts on October 12 as supplied by Leo.
 These results accumulate as a broader engineering record, not a single savings total. UI product adoption, cache reuse, and runner placement can touch the same execution. A per-job queue reduction doesn't establish recovered engineer-hours; a replacement-cost model doesn't establish avoided invoices.
 
+## App-size campaign: from one universal bundle to architecture-specific artifacts
+
+Discussion [#17496](https://redirect.github.com/manaflow-ai/cmux/discussions/17496) records the public question that started this lane: a 775 MB installed app and a 312 MB DMG. In Leo’s [October 12 reply](https://redirect.github.com/manaflow-ai/cmux/discussions/17496#discussioncomment-18874534), the next-release target is 248 MB installed on Apple silicon, 266 MB on Intel, and 79 MB / 93 MB architecture-specific DMGs, compared with a 298 MB DMG. Those are the stated destination numbers, not a single post-release measurement in this record.
+
+The measured release receipts land at an intermediate boundary. [PR 19211](https://redirect.github.com/manaflow-ai/cmux/pull/19211) re-encoded the v0.65.0 DMG from 312.7 MB to 236.7 MB in a Mac mini experiment, then its post-merge dry run produced a signed 238.9 MB universal ULMO DMG and a 741.8 MiB installed app. [PR 19255](https://redirect.github.com/manaflow-ai/cmux/pull/19255) produced signed, stapled architecture variants in dry run 38122582636: 145.0 MB / 461.3 MiB installed for arm64 and 160.8 MB / 481.9 MiB for x86_64. The Apple-silicon update test went from 744.2 MiB to 461.3 MiB; native Intel selection was test-covered rather than live-run. These receipts should stay distinct from the discussion target.
+
+The component map is:
+
+| Boundary | Evidence | Safe reading |
+| --- | --- | --- |
+| DMG encoding | [19211](https://redirect.github.com/manaflow-ai/cmux/pull/19211) | ULMO/LZMA removes 76.0 MB in the v0.65.0 re-encode; signing, stapling, Gatekeeper, and appcast signatures were checked on the later dry run. |
+| Architecture thinning | [19222](https://redirect.github.com/manaflow-ai/cmux/pull/19222), [19255](https://redirect.github.com/manaflow-ai/cmux/pull/19255) | Stable release now carries universal, arm64, and x86_64 variants with per-architecture feeds. The dry-run sizes above are measured artifacts, not the later 79/93 MB target. |
+| SSH payload ownership | [19305](https://redirect.github.com/manaflow-ai/cmux/pull/19305), [19361](https://redirect.github.com/manaflow-ai/cmux/pull/19361), [19601](https://redirect.github.com/manaflow-ai/cmux/pull/19601) | Main removes Linux and macOS payload duplication through checked on-demand delivery and client serving; feat-cmux-next ports the model. The 77 MiB Linux baseline, 76.5 MiB macOS baseline, and 328.8 MB feat bundle are separate populations; projected post-pin savings remain projections. |
+| CLI payloads | [19356](https://redirect.github.com/manaflow-ai/cmux/pull/19356), [19379](https://redirect.github.com/manaflow-ai/cmux/pull/19379) | Removing unused Swift package products identified at least 5.05 MiB in the arm64 CLI; linking 13 duplicate resource bundles removes 3.23 MiB of copied bytes and was runtime-checked. The two boundaries are separate. |
+| Executable symbols and helpers | [19428](https://redirect.github.com/manaflow-ai/cmux/pull/19428), [19665](https://redirect.github.com/manaflow-ai/cmux/pull/19665), [20762](https://redirect.github.com/manaflow-ai/cmux/pull/20762) | Main fully strips eligible executables; feat-cmux-next strips helpers and replaces main-executable names with a UUID-bound symbol map. Their arm64 measurements are separate and non-additive. |
+| Client and browser payloads | [19666](https://redirect.github.com/manaflow-ai/cmux/pull/19666), [19733](https://redirect.github.com/manaflow-ai/cmux/pull/19733), [20662](https://redirect.github.com/manaflow-ai/cmux/pull/20662) | Fat LTO reduces cmux-tui on main and feat-cmux-next; the first published feat nightly measured the client 78.9→59.3 MB and the app 660.5→638.2 MB, while CEF SwiftShader stripping removes local symbols while retaining Vulkan exports. Branch and file-level measurements must not become one app total. |
+| Localized resources | [19355](https://redirect.github.com/manaflow-ai/cmux/pull/19355), [20743](https://redirect.github.com/manaflow-ai/cmux/pull/20743) | Main app catalogs and feat package catalogs share one strings overlap group. Their installed-resource reductions are not summed. |
+| Negative result | [16732](https://redirect.github.com/manaflow-ai/cmux/pull/16732) | An early CEF locale allowlist over-pruned regional catalogs; restoring `es_419`, `pt_PT`, and `en_GB` corrected the expected reduction from 36.46 MiB to about 34.5 MiB, without a second fleet build. |
+
+The full source receipt is [the campaign evidence file](../impact/sources/cmux-size-campaign-2026-10-15.json). Component deltas are non-additive, feature-branch evidence stays separate from stable release evidence, and no installed-size number is converted into an app download saving.
+
 ## Reuse work at the boundary that actually owns it
 
 The compilation-cache thread is one long example instead of a collection of cache toggles.

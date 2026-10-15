@@ -1,0 +1,241 @@
+{
+  "version": 1,
+  "capturedAt": "2026-10-15",
+  "repository": "manaflow-ai/cmux",
+  "discussion": {
+    "url": "https://redirect.github.com/manaflow-ai/cmux/discussions/17496",
+    "title": "Is this now considered normal download/app size for a native mac (terminal) app?",
+    "questionBody": "The .app is 775MB (the .dmg itself is 312MB).",
+    "commentUrl": "https://redirect.github.com/manaflow-ai/cmux/discussions/17496#discussioncomment-18874534",
+    "commentAt": "2026-10-12T05:46:41Z",
+    "commentBy": "teamleaderleo",
+    "statedTarget": "79 MB arm64 DMG / 93 MB Intel DMG and 248 MB arm64 installed / 266 MB Intel installed, down from 298 MB DMG and 775 MB installed.",
+    "questionBodySha256": "257b9b946dece5df084fd5e9ddf5589f202d5d01508e77dc9d283000db0227c8",
+    "commentBodySha256": "0ab5d5cbc97ff2d41317777d1c0becd1f5d15671654dbe2cacc9bcdacf518666"
+  },
+  "records": [
+    {
+      "number": 19211,
+      "title": "release: LZMA stable DMG and stripped SSH payloads (cx-b6r7)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19211",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-11T04:05:16Z",
+      "mergeCommit": "47b7ba9f923048cc22478750cbcfd73254a6f127",
+      "role": "new campaign record",
+      "bodySha256": "b0605a6325154df34f3815adecc04018a79f82666d56ec794bccb6bc8626b463"
+    },
+    {
+      "number": 19213,
+      "title": "release: strip the macOS cmux-tui SSH payloads (cx-b6r7)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19213",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-11T03:46:58Z",
+      "mergeCommit": "7a1747f7b9fba59b6f3277c2e7b2a62b4da580d9",
+      "role": "new campaign record",
+      "bodySha256": "42ddbb34bd9de5bea3e203ff1e6fdc2c6f3da82635b5be03d4bdd86259b4c5c9"
+    },
+    {
+      "number": 19222,
+      "title": "ci: let stable reuse the DMG notarization scripts (cx-b6r7)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19222",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-11T05:44:56Z",
+      "mergeCommit": "7b206e51f553a4febc6375667e7d8a71bce9b32f",
+      "role": "new campaign record",
+      "bodySha256": "fb4b0860b962f1c13d71f3088e4827ba1ee4d00047858ab98df4ffb07c69dd48"
+    },
+    {
+      "number": 19255,
+      "title": "Ship stable as thin arm64 and x86_64 builds with a one-hop update path",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19255",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-11T07:47:35Z",
+      "mergeCommit": "1e6308f921b51b8868a62f7f13825b218458a0ca",
+      "role": "new campaign record",
+      "bodySha256": "ec322e867e64f798be9e0c318484f56d46b1528f06fe4d75a92b8b10edd421da"
+    },
+    {
+      "number": 19305,
+      "title": "Download Linux SSH payloads on demand instead of bundling them (cx-b6r7)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19305",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-11T09:34:02Z",
+      "mergeCommit": "18d96ed2069f50c42da893d9af78c45e479738b6",
+      "role": "existing record",
+      "bodySha256": "f091b0862d6957643d4d0dc9b3c2567cac8d6424d466c1021200becb7e2b038b"
+    },
+    {
+      "number": 19355,
+      "title": "build: ship compiled strings as binary property lists (-8.8 MiB)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19355",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-11T11:51:10Z",
+      "mergeCommit": "8900b220c58475394105dd93a599a41d7bd168dc",
+      "role": "existing record",
+      "bodySha256": "5c99603ed84943e0317c1a764769bbf5f1cc236394ccfe04d186cf08d4b2753c"
+    },
+    {
+      "number": 19356,
+      "title": "Stop linking swift-syntax into the bundled CLI",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19356",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-11T12:04:32Z",
+      "mergeCommit": "46c8146ea98aa668e848478fc6e7c02097f0aa66",
+      "role": "new campaign record",
+      "bodySha256": "4a49c3678bb241e1bfee8f486e7bcf34670236c5f796e3e3e7374679b24842ff"
+    },
+    {
+      "number": 19361,
+      "title": "Stop bundling macOS SSH payloads; serve Mac hosts from the client's own build",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19361",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-11T12:00:50Z",
+      "mergeCommit": "e5653781c620199431ba8d94eeb9853088ffc8f4",
+      "role": "new campaign record",
+      "bodySha256": "02e6c6dbe91b70161d9a654bc9acd26e23d9795632959fb916a2aaf6e3d68d71"
+    },
+    {
+      "number": 19379,
+      "title": "build: link the CLI's resource bundles instead of copying them (-3.2 MiB)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19379",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-11T12:29:23Z",
+      "mergeCommit": "c724aabb4a1ba775fee7e836ecad8108aa6fc067",
+      "role": "campaign source without duplicate record",
+      "bodySha256": "f3b030851f12b76ce98b049713040d198bd9577c2c5a4b497082fa35eb773ad6"
+    },
+    {
+      "number": 19386,
+      "title": "Ship the cmux-cua engine once, as the Computer Use helper",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19386",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-11T15:28:56Z",
+      "mergeCommit": "5d4d6f89b1c9898425883c2866463c2a526b16a5",
+      "role": "existing record",
+      "bodySha256": "5b7d37b43a33af2c59e1c4d6f3066f74030c0c28ec560395730296b206536497"
+    },
+    {
+      "number": 19428,
+      "title": "build: fully strip cmux's own release executables (-13.7 MB arm64)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19428",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-11T14:50:11Z",
+      "mergeCommit": "4b100e7e94483d6daa2cf6b5cd334442b5e18d07",
+      "role": "new campaign record",
+      "bodySha256": "02f17f18c60139a2080b8105cf66c20a8acdf07a041c2af45a46e879aadca405"
+    },
+    {
+      "number": 19601,
+      "title": "cmux-next: download SSH payloads on demand, serve Macs from the client (cx-b6r7)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19601",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-12T02:10:16Z",
+      "mergeCommit": "85dbde2ec8bf38dddebc03bf08f4c8ead8be9592",
+      "role": "new campaign record",
+      "bodySha256": "cf92d4e773fd9bd23c8007d446c15accb7553a18cbcc7892b6a00e99ec920459"
+    },
+    {
+      "number": 19665,
+      "title": "build: strip every bundled helper in the cmux-next release (-3.4 MB)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19665",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-12T02:28:02Z",
+      "mergeCommit": "3d5f509d516633e354689f723e063ab316f84933",
+      "role": "new campaign record",
+      "bodySha256": "f3e47d45df47cca023b812e5352700381b5905f107218ceabd2dab4d55f59652"
+    },
+    {
+      "number": 19666,
+      "title": "build: fat LTO for cmux-tui release again (-11.1 MB unstripped)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19666",
+      "author": "teamleaderleo",
+      "baseRefName": "main",
+      "mergedAt": "2026-10-12T02:24:29Z",
+      "mergeCommit": "3acdab4ad7a74a8659f965ba465bbe5be6da4584",
+      "role": "new campaign record",
+      "bodySha256": "17921e739444aa5ccf541c5ec96944a296878b2e720fd5cf31479d53a6557731"
+    },
+    {
+      "number": 19733,
+      "title": "build: fat LTO for the cmux-next cmux-tui release",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19733",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-12T07:15:19Z",
+      "mergeCommit": "7a26ec5cc0dd94d98539e3ad9e2b7b51a6c67c86",
+      "role": "new campaign record",
+      "bodySha256": "7cd9dd172f9ca544169216e77baa7d24b0922375ab8d180076fdb927538ff282",
+      "postMergeComment": {
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19733#issuecomment-6120391274",
+        "author": "teamleaderleo",
+        "createdAt": "2026-10-12T08:15:44Z",
+        "bodySha256": "c9f0a046dc7f388bf0ac2590562686a04f46a53ef3d5da052dc57335639af8d4",
+        "note": "Authoritative first-published nightly-next measurement; supersedes PR-body pre-publish values for the shipped component result."
+      }
+    },
+    {
+      "number": 20662,
+      "title": "cmux NEXT: strip the embedded CEF libraries (-7 MiB, cx-b6r7)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20662",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-14T18:08:02Z",
+      "mergeCommit": "a79d667be01b8a8c8a8c167576ea3a44a9ac6454",
+      "role": "existing record",
+      "bodySha256": "456dc134a01b14d1c2e26b3816b3bf3fbac8fbc884f7979cde377d986bcc8f6c"
+    },
+    {
+      "number": 20743,
+      "title": "cmux NEXT: ship compiled strings as binary property lists (-10 MiB installed, cx-b6r7)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20743",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-14T22:29:49Z",
+      "mergeCommit": "2a68993bc7327ab11912bdb1605b9dff26d0827e",
+      "role": "existing record",
+      "bodySha256": "befbbbeb0d145d817c55e2873bd699f862b9e9cd39c8e55f58356bc59f6b3e7d"
+    },
+    {
+      "number": 20762,
+      "title": "cmux NEXT: hide the app executable's exports, keep names in an in-app symbol map (-11 MiB, cx-b6r7)",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20762",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-15T06:48:19Z",
+      "mergeCommit": "628debcd7a8b8c50230dc759c22ec5289196eb9a",
+      "role": "new campaign record",
+      "bodySha256": "064fd26fb48401112626f2812d27f6cf0d5252208e4d6101f65441367bdca508"
+    },
+    {
+      "number": 16732,
+      "title": "cmux-next: trim unused CEF locales at embed time",
+      "url": "https://redirect.github.com/manaflow-ai/cmux/pull/16732",
+      "author": "teamleaderleo",
+      "baseRefName": "feat-cmux-next",
+      "mergedAt": "2026-10-02T14:54:50Z",
+      "mergeCommit": "c2067623412718c155be14177ca18403d76b5c19",
+      "role": "new campaign record",
+      "bodySha256": "68ac8395ac3aeb6dd0e619763c30ce9c194442e7b8b22e9e53e78e2b58f1d56a"
+    }
+  ],
+  "boundaries": [
+    "The discussion question reports 775 MB installed and 312 MB DMG; Leo\u2019s reply states a future next-release target of 248/266 MB installed and 79/93 MB DMGs from a 298 MB comparison.",
+    "PR 19255\u2019s signed dry run is an intermediate receipt: universal 741.8 MiB/238.9 MB, arm64 461.3 MiB/145.0 MB, x86_64 481.9 MiB/160.8 MB. It is not the discussion target.",
+    "All component claims are non-additive. Main and feat-cmux-next counterparts, architecture variants, and overlapping payload/string/LTO layers stay separate. No app download reduction is inferred from installed or component deltas.",
+    "PR 16732 preserves a negative result: the first CEF locale allowlist over-pruned regional catalogs, so its 36.46 MiB expectation was corrected to about 34.5 MiB without a second fleet build."
+  ],
+  "hashMethod": "SHA-256 over primary PR API body strings captured 2026-10-15; the 19733 post-merge measurement comment is separately hashed and is authoritative for that published result."
+}

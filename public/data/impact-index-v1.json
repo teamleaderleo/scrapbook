@@ -3,8 +3,49 @@
   "source": "repository",
   "generatedFrom": "work/impact/records",
   "updatedAt": "2026-10-15",
-  "recordCount": 82,
+  "recordCount": 95,
   "records": [
+    {
+      "id": "cmux-20762",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20762,
+      "title": "cmux NEXT: hide the app executable's exports, keep names in an in-app symbol map (-11 MiB, cx-b6r7)",
+      "status": "merged",
+      "happenedAt": "2026-10-15",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "packaging",
+        "artifact-size",
+        "debugging",
+        "reliability"
+      ],
+      "summary": "Removed the cmux NEXT Release executable’s exported symbol tables and replaced raw-address dependence with a UUID-bound compressed in-app symbol map.",
+      "evidence": {
+        "label": "cmux PR 20762",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20762",
+        "basis": "PR body and Release build verification, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-15. Arm64 executable names occupied 11.46 MiB before stripping and 0.27 MiB after; the 2.6 MiB symbol map preserves stack and hang names, for a net 8.6 MiB installed reduction. Feature-branch macOS CI was skipped in one retained comment; exact Release compile and app build evidence exists."
+      },
+      "claims": [
+        {
+          "id": "feat-next-symbol-map-strip",
+          "dimension": "artifact-size",
+          "metric": "cmux NEXT arm64 executable symbol/name storage net reduction",
+          "direction": "reduction",
+          "value": 8.6,
+          "unit": "MiB/app",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "feat-cmux-next Release strip build in PR 20762",
+          "population": "arm64 cmux executable plus in-app symbol map",
+          "note": "Names fell 11.46 to 0.27 MiB while a 2.6 MiB map was added. Crash/hang symbolication remained tested through the map; no stable download reduction is claimed.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-next-symbol-map-strip-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-20762.md"
+    },
     {
       "id": "cmux-20883",
       "repository": "manaflow-ai/cmux",
@@ -538,6 +579,47 @@
       "sourcePath": "work/impact/records/cmux-20290.md"
     },
     {
+      "id": "cmux-19601",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19601,
+      "title": "cmux-next: download SSH payloads on demand, serve Macs from the client (cx-b6r7)",
+      "status": "merged",
+      "happenedAt": "2026-10-12",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "packaging",
+        "artifact-size",
+        "ssh",
+        "architecture"
+      ],
+      "summary": "Ported the Linux and macOS SSH payload on-demand/client-serving model to feat-cmux-next, removing the four-platform payload bundle when the pinned client moves.",
+      "evidence": {
+        "label": "cmux PR 19601",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19601",
+        "basis": "PR body and packager-boundary tests, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-12. Nightly-next arm64 carried 328.8 MB of four payloads in a 981.6 MB app. The PR projects about 329 MB installed and roughly 100 MB DMG once cmux-tui.pin moves; it does not report the post-pin artifact."
+      },
+      "claims": [
+        {
+          "id": "feat-next-ssh-payload-bundle-baseline",
+          "dimension": "artifact-size",
+          "metric": "feat-cmux-next four-platform SSH payload bundle",
+          "direction": "baseline",
+          "value": 328.8,
+          "unit": "MB/app",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "nightly-next build 3815521072201",
+          "population": "Linux and macOS x86_64/arm64 SSH payloads",
+          "note": "Expected post-pin removal is about 329 MB installed and roughly 100 MB DMG, but that is a projection. This ports main PRs 19305 and 19361; do not sum the projected saving with those source records.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-ssh-payload-delivery-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19601.md"
+    },
+    {
       "id": "cmux-19620",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -578,6 +660,336 @@
       "sourcePath": "work/impact/records/cmux-19620.md"
     },
     {
+      "id": "cmux-19665",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19665,
+      "title": "build: strip every bundled helper in the cmux-next release (-3.4 MB)",
+      "status": "merged",
+      "happenedAt": "2026-10-12",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "packaging",
+        "artifact-size",
+        "reliability"
+      ],
+      "summary": "Extended cmux NEXT release stripping to bundled helpers and Chromium helper apps while preserving symbolication and signing order.",
+      "evidence": {
+        "label": "cmux PR 19665",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19665",
+        "basis": "PR body and fleet copy verification, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-12. Seven new helpers reduced a nightly-next arm64 copy from 981.57 to 978.19 MB; the signed/notarized nightly-next follow-up was not yet run."
+      },
+      "claims": [
+        {
+          "id": "feat-next-helper-strip",
+          "dimension": "artifact-size",
+          "metric": "cmux NEXT helper strip on arm64 nightly copy",
+          "direction": "reduction",
+          "value": 3.38,
+          "unit": "MB/app",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "nightly-next arm64 app copy 3815521072201",
+          "population": "seven helper executables and Chromium helper apps",
+          "note": "981.57 to 978.19 MB after ad-hoc deep re-sign. No signed/notarized after artifact or download reduction is claimed.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-next-helper-strip-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19665.md"
+    },
+    {
+      "id": "cmux-19666",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19666,
+      "title": "build: fat LTO for cmux-tui release again (-11.1 MB unstripped)",
+      "status": "merged",
+      "happenedAt": "2026-10-12",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "packaging",
+        "artifact-size",
+        "compiler"
+      ],
+      "summary": "Re-landed fat LTO with one codegen unit for the main cmux-tui release profile after three release-path publish proofs.",
+      "evidence": {
+        "label": "cmux PR 19666",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19666",
+        "basis": "PR body and hosted verification, fetched 2026-10-15. Base main; authored by teamleaderleo; merged 2026-10-12. Shipped macOS arm64 cmux-tui was measured 45.4 to 34.3 MB before stripping, about 11 MB per app variant; the PR was a profile change and a later release dry run was still planned."
+      },
+      "claims": [
+        {
+          "id": "main-cmux-tui-fat-lto",
+          "dimension": "artifact-size",
+          "metric": "main cmux-tui arm64 client before-strip size",
+          "direction": "reduction",
+          "value": 11.1,
+          "unit": "MB/client",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "release-path publish comparison in PR 19666",
+          "population": "main cmux-tui arm64 release profile",
+          "note": "45.4 to 34.3 MB before stripping. This overlaps the later feat-client LTO record only as the same profile family; do not sum into an app total.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-tui-lto-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19666.md"
+    },
+    {
+      "id": "cmux-19733",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19733,
+      "title": "build: fat LTO for the cmux-next cmux-tui release",
+      "status": "merged",
+      "happenedAt": "2026-10-12",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "packaging",
+        "artifact-size",
+        "compiler"
+      ],
+      "summary": "Applied fat LTO to the feat-cmux-next cmux-tui client and measured the bundled client and OptChat Chief reductions on a fleet Release build.",
+      "evidence": {
+        "label": "cmux PR 19733",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19733",
+        "basis": "PR body plus authoritative post-merge comment https://redirect.github.com/manaflow-ai/cmux/pull/19733#issuecomment-6120391274, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-12. The first published nightly-next arm64 build 3821901891501 compared with 3821116387801 measured cmux-tui 78.9→59.3 MB, OptChat Chief 10.8→8.7 MB, installed app 660.5→638.2 MB, and DMG 191.2→187.7 MB. The client component is the ledger claim; app and DMG totals are contextual and not additive to other component records."
+      },
+      "claims": [
+        {
+          "id": "feat-cmux-tui-stripped-lto",
+          "dimension": "artifact-size",
+          "metric": "feat-cmux-next stripped cmux-tui arm64 client",
+          "direction": "reduction",
+          "value": 19.6,
+          "unit": "MB/client",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "cmux-tui artifact runs 38201011083 and 38211068200 plus fleet Release build",
+          "population": "feat-cmux-next arm64 cmux-tui and bundled client",
+          "note": "The first published nightly-next arm64 build measured the client 78.9 to 59.3 MB. The same comparison measured OptChat Chief 10.8 to 8.7 MB, installed app 660.5 to 638.2 MB, and DMG 191.2 to 187.7 MB; those app/DMG totals are contextual and are not added to component claims. This overlaps main PR 19666 as the same LTO family but is a different branch/client measurement.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-tui-lto-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19733.md"
+    },
+    {
+      "id": "cmux-19211",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19211,
+      "title": "release: LZMA stable DMG and stripped SSH payloads (cx-b6r7)",
+      "status": "merged",
+      "happenedAt": "2026-10-11",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "release",
+        "packaging",
+        "artifact-size",
+        "ssh"
+      ],
+      "summary": "Converted stable DMGs to ULMO/LZMA before signing and stripped the two macOS cmux-tui SSH payloads while preserving pinned checksums.",
+      "evidence": {
+        "label": "cmux PR 19211",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19211",
+        "basis": "PR body plus post-merge release dry-run comment, fetched 2026-10-15. Base main; authored by teamleaderleo; merged 2026-10-11. The v0.65.0 DMG re-encode measured 312.7→236.7 MB; macOS payloads measured 42.7→36.5 MiB arm64 and 46.0→39.7 MiB x86_64. Post-merge dry run 38110472793 produced a signed 238.9 MB ULMO universal DMG and 741.8 MiB installed app. The DMG and payload figures are separate layers."
+      },
+      "claims": [
+        {
+          "id": "stable-dmg-lzma-reencode",
+          "dimension": "artifact-size",
+          "metric": "v0.65.0 stable DMG after ULMO/LZMA re-encode",
+          "direction": "reduction",
+          "value": 76,
+          "unit": "MB/DMG",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "Mac mini re-encode in PR 19211",
+          "population": "universal v0.65.0 stable DMG",
+          "note": "312.7 MB to 236.7 MB in the re-encode experiment. The later post-merge dry run was 238.9 MB; neither establishes the later discussion target of 79/93 MB architecture-specific DMGs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-stable-dmg-lzma"
+        },
+        {
+          "id": "stable-macos-ssh-arm64-strip",
+          "dimension": "artifact-size",
+          "metric": "macOS cmux-tui SSH arm64 payload strip",
+          "direction": "reduction",
+          "value": 6.2,
+          "unit": "MiB/payload",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "v0.65.0 payload strip in PR 19211",
+          "population": "aarch64-apple-darwin SSH payload",
+          "note": "42.7 to 36.5 MiB; paired x86_64 reduction is a separate architecture. No app-wide download reduction is assigned to this claim.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-macos-ssh-payload-strip-2026-10"
+        },
+        {
+          "id": "stable-macos-ssh-x86-strip",
+          "dimension": "artifact-size",
+          "metric": "macOS cmux-tui SSH x86_64 payload strip",
+          "direction": "reduction",
+          "value": 6.3,
+          "unit": "MiB/payload",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "v0.65.0 payload strip in PR 19211",
+          "population": "x86_64-apple-darwin SSH payload",
+          "note": "46.0 to 39.7 MiB; the nightly-next counterpart is PR 19213 and is not additive.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-macos-ssh-payload-strip-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19211.md"
+    },
+    {
+      "id": "cmux-19213",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19213,
+      "title": "release: strip the macOS cmux-tui SSH payloads (cx-b6r7)",
+      "status": "merged",
+      "happenedAt": "2026-10-11",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "release",
+        "packaging",
+        "artifact-size",
+        "ssh"
+      ],
+      "summary": "Applied the macOS SSH payload strip to nightly-next and preserved manifest checksums, as the feat-branch counterpart to main PR 19211.",
+      "evidence": {
+        "label": "cmux PR 19213",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19213",
+        "basis": "PR body and post-merge nightly-next proof comment, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-11. Nightly-next arm64 payloads measured 86.9→72.0 MiB and x86_64 94.2→79.1 MiB; installed app 962.1→932.2 MiB and DMG 289.7→285.5 MB. Main PR 19211 carries the stable path; these are branch-specific counterparts, not additive app savings."
+      },
+      "claims": [
+        {
+          "id": "nightly-next-macos-ssh-strip",
+          "dimension": "artifact-size",
+          "metric": "nightly-next macOS SSH payload strip on arm64 app",
+          "direction": "reduction",
+          "value": 14.9,
+          "unit": "MiB/payload",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "post-merge nightly-next proof run 38112473760",
+          "population": "aarch64-apple-darwin payload in feat-cmux-next nightly-next",
+          "note": "86.9 to 72.0 MiB. The x86_64 payload moved 94.2 to 79.1 MiB; the installed and DMG deltas include only this nightly path and are not summed with main PR 19211.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-macos-ssh-payload-strip-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19213.md"
+    },
+    {
+      "id": "cmux-19222",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19222,
+      "title": "ci: let stable reuse the DMG notarization scripts (cx-b6r7)",
+      "status": "merged",
+      "happenedAt": "2026-10-11",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "release",
+        "notarization",
+        "packaging"
+      ],
+      "summary": "Enabled stable channel entitlements and recovery in the existing nightly DMG notarization scripts so thin stable variants could use the same signing path.",
+      "evidence": {
+        "label": "cmux PR 19222",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19222",
+        "basis": "PR body and tests, fetched 2026-10-15. Base main; authored by teamleaderleo; merged 2026-10-11. The change is infrastructure only: stable output remained unchanged until later PR 19255 moved release.yml to architecture-specific DMGs."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-19222.md"
+    },
+    {
+      "id": "cmux-19255",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19255,
+      "title": "Ship stable as thin arm64 and x86_64 builds with a one-hop update path",
+      "status": "merged",
+      "happenedAt": "2026-10-11",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "release",
+        "packaging",
+        "artifact-size",
+        "architecture"
+      ],
+      "summary": "Published signed universal, arm64, and x86_64 stable DMGs with architecture-specific appcasts and one-hop updater selection.",
+      "evidence": {
+        "label": "cmux PR 19255",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19255",
+        "basis": "PR body and post-merge release dry-run comment, fetched 2026-10-15. Base main; authored by teamleaderleo; merged 2026-10-11. Dry run 38122582636 measured universal 238.9 MB/741.8 MiB installed, arm64 145.0 MB/461.3 MiB, and x86_64 160.8 MB/481.9 MiB; all were signed, stapled, notarized and appcast signatures verified. Apple-silicon live update went 744.2→461.3 MiB; Intel selection was covered by tests, not live-run on native Intel. Discussion #17496 later states a future target of 79/93 MB DMGs and 248/266 MB installs from a 298 MB baseline; that target is not substituted for this measured dry run."
+      },
+      "claims": [
+        {
+          "id": "stable-arm64-dry-run-installed",
+          "dimension": "artifact-size",
+          "metric": "signed stable arm64 dry-run installed app",
+          "direction": "baseline",
+          "value": 461.3,
+          "unit": "MiB/app",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "release dry run 38122582636",
+          "population": "arm64-only signed stable dry-run app",
+          "note": "The same dry run measured universal 741.8 MiB and x86_64 481.9 MiB. These are intermediate campaign receipts, not the later discussion target.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-thin-release-dry-run"
+        },
+        {
+          "id": "stable-arm64-dry-run-dmg",
+          "dimension": "artifact-size",
+          "metric": "signed stable arm64 dry-run DMG",
+          "direction": "baseline",
+          "value": 145,
+          "unit": "MB/DMG",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "release dry run 38122582636",
+          "population": "arm64 ULMO DMG",
+          "note": "Universal was 238.9 MB and x86_64 was 160.8 MB. The discussion target 79 MB is future-facing in the cited comment.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-thin-release-dry-run"
+        },
+        {
+          "id": "stable-x86-dry-run-installed",
+          "dimension": "artifact-size",
+          "metric": "signed stable x86_64 dry-run installed app",
+          "direction": "baseline",
+          "value": 481.9,
+          "unit": "MiB/app",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "release dry run 38122582636",
+          "population": "x86_64-only signed stable dry-run app",
+          "note": "Intel selection is test-covered but was not live-run on native Intel in the retained receipt.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-thin-release-dry-run"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19255.md"
+    },
+    {
       "id": "cmux-19305",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -613,7 +1025,7 @@
           "note": "About 77 MiB is a before baseline. Do not claim a shipped app-size reduction until a release artifact proves the payloads are absent; download/cache behavior is the durable capability.",
           "headline": true,
           "additive": false,
-          "overlapGroup": "cmux-linux-ssh-payload-size"
+          "overlapGroup": "cmux-ssh-payload-delivery-2026-10"
         }
       ],
       "sourcePath": "work/impact/records/cmux-19305.md"
@@ -657,6 +1069,88 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-19355.md"
+    },
+    {
+      "id": "cmux-19356",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19356,
+      "title": "Stop linking swift-syntax into the bundled CLI",
+      "status": "merged",
+      "happenedAt": "2026-10-11",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "packaging",
+        "artifact-size",
+        "cli",
+        "reliability"
+      ],
+      "summary": "Removed unused Swift package products that pulled swift-syntax into the bundled CLI and added a dependency-graph guard.",
+      "evidence": {
+        "label": "cmux PR 19356",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19356",
+        "basis": "PR body and tests, fetched 2026-10-15. Base main; authored by teamleaderleo; merged 2026-10-11. The arm64 v0.65 release dry-run binary identified at least 5.05 MiB of removable modules in a 49.1 MiB bin/cmux, including 3.77 MiB SwiftSyntax; no after-build of this exact head was available before merge."
+      },
+      "claims": [
+        {
+          "id": "cli-unused-swift-modules",
+          "dimension": "artifact-size",
+          "metric": "unused Swift package modules identified in arm64 bundled CLI",
+          "direction": "baseline",
+          "value": 5.05,
+          "unit": "MiB/bin/cmux",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "v0.65 arm64 release dry-run symbol attribution",
+          "population": "bundled arm64 CLI executable",
+          "note": "At least 5.05 MiB was attributed to modules removed by the dependency change; exact post-merge binary delta was left for a later nightly comparison. This is separate from PR 19379 resource-bundle links.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-cli-dependency-size-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19356.md"
+    },
+    {
+      "id": "cmux-19361",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19361,
+      "title": "Stop bundling macOS SSH payloads; serve Mac hosts from the client's own build",
+      "status": "merged",
+      "happenedAt": "2026-10-11",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "packaging",
+        "artifact-size",
+        "ssh",
+        "architecture"
+      ],
+      "summary": "Stopped bundling the two macOS cmux-tui SSH payloads and served a client’s own signed build or a pinned cross-architecture download instead.",
+      "evidence": {
+        "label": "cmux PR 19361",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19361",
+        "basis": "PR body and hosted full tests, fetched 2026-10-15. Base main; authored by teamleaderleo; merged 2026-10-11. The two macOS payloads occupied 76.5 MiB in every app variant in the stable release dry run; the universal app already contained both slices in bin/cmux-tui. The behavior moves same-architecture hosts to the client executable and cross-architecture hosts to the pinned on-demand path; no separate shipped app-size delta is claimed."
+      },
+      "claims": [
+        {
+          "id": "bundled-macos-ssh-payload-baseline",
+          "dimension": "artifact-size",
+          "metric": "macOS SSH payloads bundled before client-serving migration",
+          "direction": "baseline",
+          "value": 76.5,
+          "unit": "MiB/app",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "stable release dry-run inventory in PR 19361",
+          "population": "aarch64 and x86_64 macOS SSH payloads across app variants",
+          "note": "The payloads were duplicate slices of bin/cmux-tui after signature removal. This baseline overlaps PR 19211/19213 stripping and PR 19601’s feat port; do not sum those layers.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-ssh-payload-delivery-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19361.md"
     },
     {
       "id": "cmux-19386",
@@ -737,6 +1231,71 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-19398.md"
+    },
+    {
+      "id": "cmux-19428",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19428,
+      "title": "build: fully strip cmux's own release executables (-13.7 MB arm64)",
+      "status": "merged",
+      "happenedAt": "2026-10-11",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "packaging",
+        "artifact-size",
+        "debugging",
+        "reliability"
+      ],
+      "summary": "Fully stripped the main app and bundled release executables while preserving imports, UUIDs, crash symbolication, and required helper behavior.",
+      "evidence": {
+        "label": "cmux PR 19428",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19428",
+        "basis": "PR body and real-binary verification, fetched 2026-10-15. Base main; authored by teamleaderleo; merged 2026-10-11. Arm64 release-dry-run binaries measured Contents/MacOS/cmux 145.01→134.56 MB, bin/cmux 41.72→38.94 MB, bin/cmux-tui 38.58→38.08 MB, and diff-sidecar unchanged; aggregate installed saving reported 13.7 MB. A post-merge signed dry run was planned, not included in this receipt."
+      },
+      "claims": [
+        {
+          "id": "main-release-executables-strip",
+          "dimension": "artifact-size",
+          "metric": "eligible arm64 release executables stripped",
+          "direction": "reduction",
+          "value": 13.7,
+          "unit": "MB/app",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "arm64 release-dry-run binary copy in PR 19428",
+          "population": "Contents/MacOS/cmux, bin/cmux, bin/cmux-tui and sidecar",
+          "note": "Component deltas were 10.45, 2.78, 0.50 and 0 MB respectively. Universal builds save about twice the arm64 executable component; no whole-app download reduction is claimed.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-main-executable-strip-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19428.md"
+    },
+    {
+      "id": "cmux-16732",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 16732,
+      "title": "cmux-next: trim unused CEF locales at embed time",
+      "status": "merged",
+      "happenedAt": "2026-10-02",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "packaging",
+        "artifact-size",
+        "localization",
+        "reliability"
+      ],
+      "summary": "Corrected CEF locale pruning after the first allowlist dropped regional catalogs and changed Spanish and Portuguese users to English.",
+      "evidence": {
+        "label": "cmux PR 16732",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/16732",
+        "basis": "PR body, fetched 2026-10-15. Base feat-cmux-next; authored by teamleaderleo; merged 2026-10-02. The first fleet build over-pruned regional catalogs; restoring es_419, pt_PT and en_GB changes the earlier expected 36.46 MiB app reduction to about 34.5 MiB. No second fleet build was submitted."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-16732.md"
     },
     {
       "id": "cmux-16511",
