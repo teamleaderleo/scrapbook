@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-wo-cao-industrial-complex',
+    title: 'The 我操 Industrial Complex',
+    date: '2026-10-19',
+    blurb:
+      'A 老大哥 picks up a box and emits another 哎呀我操. One expletive covers anger, happiness, sadness, fatigue, and standing there. Linguistics explains the habit; the Department of Standing There has the biggest budget.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['language', 'Mandarin', 'sociolinguistics', 'humor'],
+    revision: 1,
+    sourcePath: 'desk/the-wo-cao-industrial-complex.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'when-home-becomes-a-visit',
     title: 'When Home Becomes a Visit',
     date: '2026-10-12',
