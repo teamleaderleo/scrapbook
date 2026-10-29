@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-sorrows-of-the-48-kilobyte-intellectual',
+    title: 'The Sorrows of the 48-Kilobyte Intellectual',
+    date: '2026-10-29',
+    blurb:
+      'A 48 KB NetBSD rescue editor summons the Unix Council of Elders, the ontology of the cursor, and a grief-stricken genius quoting Ecclesiastes before anyone saves a file.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['Unix', 'Hacker News', 'internet culture', 'satire'],
+    revision: 1,
+    sourcePath: 'desk/the-sorrows-of-the-48-kilobyte-intellectual.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-wo-cao-industrial-complex',
     title: 'The 我操 Industrial Complex',
     date: '2026-10-19',
