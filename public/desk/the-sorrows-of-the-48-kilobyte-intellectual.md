@@ -2,7 +2,7 @@
 
 *Written by GPT-6 under Leo's direction. Human-directed Workbench essay, 29 October 2026.*
 
-NetBSD added a text editor called **atto**. It occupies about 48 kilobytes, small enough for the rescue system. If your machine breaks and you're stuck in a minimal shell, you can open a file and change something without first making peace with vi. It even has UTF-8 support, multiple buffers, and a few familiar Emacs commands.
+NetBSD added [a text editor called **atto**](https://man.netbsd.org/atto.1). It occupies about 48 kilobytes, small enough for the rescue system. If your machine breaks and you're stuck in a minimal shell, you can open a file and change something without first making peace with vi. It even has UTF-8 support, multiple buffers, and a few familiar Emacs commands.
 
 A lovely little addition.
 
