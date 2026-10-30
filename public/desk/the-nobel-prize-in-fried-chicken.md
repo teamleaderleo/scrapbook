@@ -12,7 +12,7 @@ One executive versus an entire occupation. One person's absence versus the simul
 
 ## Every cook has disappeared. The CEO remains.
 
-Try the same test on accountants. Remove the CFO for a day and invoices still get paid. Remove every accountant indefinitely and people start asking upsetting questions about invoices and taxes.
+Try the same test on accountants. Remove the CFO for a day and invoices still get paid. Remove every accountant for a month and the books become a work of historical fiction.
 
 Remove one cook from a KFC shift. The manager shuffles people around. Remove every cook in the chain at once and the fryers become expensive furniture.
 
@@ -54,9 +54,7 @@ Fine. Let's actually divide.
 
 Suppose an executive receives $20 million in annual total compensation and the business has one million workers. Redistribute the entire amount and each worker gets **$20 a year**. About **$1.67 a month**.
 
-Enjoy your newfound financial independence.
-
-In a franchise chain, the parent corporation and the people employing restaurant cooks often have different employers and accounts. Executive compensation may include stock awards, too. You can propose moving money across those boundaries; you should at least know where they are.
+In a franchise chain, restaurant cooks are often employed by franchisees while executives work for the parent corporation. Executive compensation may include stock awards, too. You can propose moving money across those boundaries; you should at least know where they are.
 
 Want higher wages? How much, for whom, and funded by what? You could argue about prices, margins, returns, and investment. You could even put numbers on the page.
 
@@ -80,9 +78,9 @@ Grandma deserves a spreadsheet before you declare her retirement dead.
 
 A lot of the fighting comes from using a theory about how wages emerge as an answer to whether wages are just.
 
-Wages depend partly on what another worker contributes, how many people can perform the job, and what else those people could earn. Employers may also have bargaining power, especially when quitting means a long search or a long commute. Unions and labor laws affect the negotiation. A paycheck tells you where those forces landed. It leaves plenty to argue about.
+Wages depend partly on what an additional worker contributes, how many people can perform the job, and what else those people could earn. Employers may also have bargaining power, especially when quitting means a long search or a long commute. Unions and labor laws affect the negotiation. A paycheck tells you where those forces landed. It leaves plenty to argue about.
 
-And the original meme nearly stumbles into a worthwhile thought experiment. Imagine cooks becoming scarce instead of every cook on Earth disappearing. Restaurants might raise wages to attract them, change menus, invest in automation, or close. Suddenly labor supply and bargaining power are part of the discussion.
+And the original meme nearly stumbles into a worthwhile thought experiment. Imagine cooks becoming scarce instead of every KFC cook vanishing overnight. Restaurants might raise wages to attract them, change menus, invest in automation, or close. Suddenly labor supply and bargaining power are part of the discussion.
 
 A cook can be individually replaceable today and expensive to lose tomorrow. The interesting question is what would make that change happen.
 
