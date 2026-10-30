@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-nobel-prize-in-fried-chicken',
+    title: 'The Nobel Prize in Fried Chicken',
+    date: '2026-10-29',
+    blurb:
+      'A KFC CEO-versus-cooks meme wins the internet economics Nobel. Essential labor, marginal contribution, CEO compensation, shareholder risk, and moral worth all get thrown into the fryer.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['economics', 'labor', 'internet culture', 'Reddit', 'satire'],
+    revision: 1,
+    sourcePath: 'desk/the-nobel-prize-in-fried-chicken.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-sorrows-of-the-48-kilobyte-intellectual',
     title: 'The Sorrows of the 48-Kilobyte Intellectual',
     date: '2026-10-29',
