@@ -145,5 +145,3 @@ The cooks are working. The CEO is at a meeting. The shareholders are checking th
 On Reddit, however, an emergency academic ceremony is underway.
 
 **THE NOBEL PRIZE IN ECONOMICS HAS BEEN AWARDED TO A BUCKET OF CHICKEN.**
-
-The bucket has declined to comment.
