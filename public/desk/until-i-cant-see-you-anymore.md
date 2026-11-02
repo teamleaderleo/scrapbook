@@ -64,7 +64,7 @@ One little interruption, and a whole life unfurls from it. There are people aliv
 
 In the life you lived, both of you kept walking.
 
-The imaginary life gets to stay luminous. Your mind has a real face and three seconds of real attention, and from those it can build twenty years. Then it asks you to miss them.
+The imaginary life gets to stay luminous. Your mind takes a face and a lingering look and builds twenty years. Then it asks you to miss them.
 
 Perhaps you would've disliked each other after five minutes. Perhaps the attraction was only yours. Perhaps they went home wondering why they didn't say hello. Perhaps there was an absurd, beautiful compatibility sitting between two moving strangers, and it vanished when both of them reached the next block.
 
