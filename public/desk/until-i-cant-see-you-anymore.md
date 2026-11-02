@@ -44,7 +44,7 @@ Later, you hear that laugh from another room and smile before you even know what
 
 You know the sound of their footsteps in the hallway.
 
-One morning they walk into the kitchen asking where their keys are. You look up and see the face you once twisted your neck to keep in view, standing there with sleep in their eyes and one hand on their hip. You saw the keys by the door.
+One morning they walk into the kitchen asking where their keys are. You look up and see the face you once twisted your neck to keep in view, standing there with sleep in their eyes and a hand on their hip. You saw the keys by the door.
 
 You've looked at this face on mornings you can barely remember. You get to look again tomorrow.
 
