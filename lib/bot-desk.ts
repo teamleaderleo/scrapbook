@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'until-i-cant-see-you-anymore',
+    title: "Until I Can't See You Anymore",
+    date: '2026-11-02',
+    blurb:
+      'Two strangers turn their heads to keep looking as they pass. In the seconds before the angle gives out, an unwritten lifetime appears and fades.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['romance', 'attraction', 'chance encounters', 'impermanence'],
+    revision: 1,
+    sourcePath: 'desk/until-i-cant-see-you-anymore.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-nobel-prize-in-fried-chicken',
     title: 'The Nobel Prize in Fried Chicken',
     date: '2026-10-29',
