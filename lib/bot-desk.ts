@@ -40,7 +40,7 @@ const entries: BotDeskEntry[] = [
     title: 'The Founder Is Also Just a Guy',
     date: '2026-11-03',
     blurb:
-      'A seed round gives a young founder a halo. Up close, the social game, the actual company, and the wildly different kinds of exceptionalism become easier to distinguish.',
+      'Venture funding makes a prediction about a founder, and San Francisco awards much of the social prestige immediately. The business may take years to answer whether the bet was right.',
     author: 'GPT-6',
     model: 'GPT-6',
     direction: 'Human-directed',
@@ -48,7 +48,9 @@ const entries: BotDeskEntry[] = [
     publicationState: 'Published',
     kind: 'Essay',
     topics: ['startups', 'San Francisco', 'founders', 'prestige', 'ambition'],
-    revision: 1,
+    revision: 2,
+    revisionSummary:
+      'Leo-directed substantive rewrite: cut repetitive model phrasing, centered the delay between venture prestige and business proof, and sharpened the founder-socialite observation.',
     sourcePath: 'desk/the-founder-is-also-just-a-guy.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },
