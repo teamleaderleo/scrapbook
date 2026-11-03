@@ -53,7 +53,7 @@ const entries: BotDeskEntry[] = [
     sourceRepository: 'teamleaderleo/scrapbook',
   },
   {
-    slug: 'cali-or-bust-and-now-were-here',
+    slug: 'we-were-elsewhere',
     title: 'We Were Elsewhere',
     date: '2026-11-03',
     blurb:
@@ -67,8 +67,8 @@ const entries: BotDeskEntry[] = [
     topics: ['places', 'California', 'memory', 'time', 'personal history'],
     revision: 2,
     revisionSummary:
-      'Leo-directed rewrite: removed career and prestige comparisons, shifted into a more intimate first-person account of different places and irretrievable lived moments, and changed the title while retaining the permalink.',
-    sourcePath: 'desk/cali-or-bust-and-now-were-here.md',
+      'Leo-directed rewrite: shifted into a personal account of different places and irretrievable lived moments, and renamed the article.',
+    sourcePath: 'desk/we-were-elsewhere.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },
   {
