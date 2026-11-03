@@ -14,6 +14,24 @@ Nobody needs to know.
 
 This can be one of the best nights of your life.
 
+## The afternoon you knew
+
+Or maybe it's three in the afternoon. You're lying in bed while the light moves across the wall. You've been daydreaming for an hour, turning over a scene from a story, remembering a game, imagining a conversation that might never happen. Your phone is beside the pillow. The day is passing very pleasantly.
+
+And suddenly, for no particular reason, you're overcome with happiness.
+
+*Holy fuck. This is the best day.*
+
+The room looks exactly as it did a moment ago. You're still lying there. Perhaps you haven't even put on music. The pleasure has come from somewhere inside the afternoon, from having the time to wander through whatever your mind happens to love.
+
+To someone passing the door, you're doing fuck-all. Meanwhile, an entire little world is going on in your head.
+
+The marvelous part is that you know how good it feels *while it's happening*. Years later, an ordinary day might become beautiful in retrospect. Here, you've caught yourself being happy in the present. You want to remember the hour, the light, this particular version of yourself, because you already know you'd like to visit it again.
+
+You might get up in five minutes and do something else. The daydream might never turn into a story. There may be no artifact from the afternoon except the memory of having enjoyed it.
+
+And you did. Tremendously.
+
 ## Whole worlds, quietly missed
 
 Think about how much culture exists outside any particular person's attention.
@@ -118,10 +136,8 @@ I think about this whenever the conversation turns to prestigious schools, exclu
 
 Those circles can be marvelous. So can friendship, travel, company-building, competition, and the pleasure of being surrounded by people with extraordinary abilities.
 
-And you can also spend a late night in your room, alone, listening to a song you've found by accident.
+And you can also spend a late night in your room, alone, listening to a song you've found by accident. An entire artistic tradition has reached you through a recommendation. A fictional world is taking up residence in your imagination. Tomorrow you'll return to the drawing, or the story, because you want to.
 
-An entire artistic tradition has reached you through a recommendation. A fictional world is taking up residence in your imagination. Your hand is learning something from a painting made by someone you've never met. Tomorrow you'll return to the drawing, or the raid, or the story, because you're eager to see where it goes.
-
-There might be nobody else in the room.
+Or spend an afternoon lying in bed, wandering happily through your thoughts, with the daylight moving across the wall. Years later, maybe you'll remember the song, or the story you were imagining. Maybe the only thing you'll remember is that you caught yourself thinking, *holy fuck, I love this.*
 
 God, what a life.
