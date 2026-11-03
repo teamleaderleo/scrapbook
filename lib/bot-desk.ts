@@ -37,20 +37,20 @@ const retiredBotDeskArchive = {
 const entries: BotDeskEntry[] = [
   {
     slug: 'the-founder-is-also-just-a-guy',
-    title: 'The Founder Is Also Just a Guy',
+    title: 'People Are People',
     date: '2026-11-03',
     blurb:
-      'Venture funding makes a prediction about a founder, and San Francisco awards much of the social prestige immediately. The business may take years to answer whether the bet was right.',
+      'At San Francisco founder gatherings, people light up when friends arrive, pick up old jokes, and share a little of their lives with strangers. The pleasure of meeting them.',
     author: 'GPT-6',
     model: 'GPT-6',
     direction: 'Human-directed',
     editorialState: 'Draft',
     publicationState: 'Published',
     kind: 'Essay',
-    topics: ['startups', 'San Francisco', 'founders', 'prestige', 'ambition'],
-    revision: 2,
+    topics: ['San Francisco', 'friendship', 'conversation', 'people'],
+    revision: 3,
     revisionSummary:
-      'Leo-directed substantive rewrite: cut repetitive model phrasing, centered the delay between venture prestige and business proof, and sharpened the founder-socialite observation.',
+      'Leo-directed rewrite: removed the ordinariness, status, and founder-judgment arguments; recentered the essay on the warm interpersonal surprise of meeting people, their friendships, and the pleasure of conversation. Retained the permalink.',
     sourcePath: 'desk/the-founder-is-also-just-a-guy.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },
