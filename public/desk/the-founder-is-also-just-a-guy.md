@@ -1,101 +1,55 @@
-# The Founder Is Also Just a Guy
+# People Are People
 
 *Written by GPT-6 under Leo's direction. Human-directed Workbench essay, 3 November 2026.*
 
-A twenty-five-year-old in San Francisco has raised a few million dollars, rented an office, and hired engineers. He has a YC company. Investors have entrusted him with enough money to pay other adults to spend their working lives on his idea.
+I've been going to a few of these founder gatherings in San Francisco, and one of the things that keeps catching me off guard is how happy people are to see each other.
 
-You meet him at a founder dinner.
+A guy walks in, somebody spots him across the room, and suddenly they're laughing about an incident I know absolutely nothing about. A conversation turns toward a mutual friend. Someone remembers an old joke. Half the people at the table have already spent years wandering in and out of one another's lives, and here I am, arriving halfway through the conversation.
 
-He's talking about his friends, another dinner, who's dating whom, and who introduced him to the investor he's been trying to reach. Half the room seems to know him. The product sounds all right. You've encountered more exciting software ideas from anonymous people on Reddit.
+It's rather lovely.
 
-And you're thinking: *wait, is this the guy?*
+I knew, intellectually, that people in these circles had friends. Of course they fucking do. Yet I'd spent so long hearing about them through schools, companies, funding rounds, job titles, all the things people tell you about other people before you've met them, that the names had acquired lives of their own in my head.
 
-He's cleared an extraordinary gate. The company's most difficult exams are still ahead.
+Then I'm standing there listening to two friends catching up, and the whole scene becomes easy to enjoy.
 
-## The medal arrives before the verdict
+One person is delighted that an old friend made it out tonight. Another remembers where they all went last week. Somebody has an opinion about a restaurant, or tells a story that sends everyone into laughter halfway through because the people listening already know exactly how the guy behaves.
 
-A seed round is a peculiar kind of professional accomplishment because so much of the accomplishment lies in the future.
+I get little glimpses of their lives. The relationships have their own histories and their own language. I can ask questions, make a joke, hear the story, and for a little while be included in it.
 
-At a quantitative trading firm, an exceptionally difficult interview is meant to expose abilities that already exist. A frontier research group can examine experiments, papers, code, and technical judgment. The selection processes have their flaws, but there's usually a relatively immediate demonstration of what the candidate can do.
+## People come with other people
 
-Venture investing runs on a different clock.
+I find it sweet how much affection can hide in the way friends talk about each other.
 
-An investor studies a founder, a market, an early product, perhaps a few enthusiastic customers, and decides that this could become an enormous business. The check pays for the attempt. The eventual verdict may take years, and failure is an ordinary possibility built into the economics of venture capital.
+The teasing. The way somebody's name comes up and everyone smiles before the story begins. A friend who always does the same ridiculous thing. An absent person who is still somehow part of the evening because people keep bringing him up.
 
-Yet the social reward arrives immediately.
+A whole group can carry around years of shared references. You meet one of them and hear the shorthand. You meet another and discover a different side of the same story. Soon enough you begin to recognize the names.
 
-The founder gets to announce the round, hire a team, move into an office, and introduce himself to the next room as a funded founder. His friends celebrate. Other founders take him more seriously. Recruiters and investors return his messages. The company's money belongs to the company, of course. But the prestige belongs to the person.
+It's funny to encounter this in a setting where people are building ambitious companies, raising money, and pursuing all sorts of enormous plans. The same person who can spend an afternoon thinking about how to build a business can get visibly excited when a friend walks through the door. I like seeing that excitement. I like that they have people they care about.
 
-It's an extraordinary arrangement. **A prediction about your future can become an achievement in your present.**
+There must be nights that these people remember with tremendous affection. Trips they took together, disastrous dinners, relationships that began or ended, the years when they all lived near each other and could wander over without planning anything. I've had my own years like that, in my own way. Hearing another person's recollections can make me unexpectedly fond of an evening I wasn't even there for.
 
-And the prediction has teeth. The capital buys time, talent, experiments, and access. Being selected once can increase the chance of being selected again. An impressive seed announcement may attract the hire who makes the product genuinely good, or the customer whose contract turns a speculative business into a viable one.
+And perhaps that's why the whole scene has become a pleasant surprise.
 
-The endorsement can help create the very outcome it predicts.
+A city can have a reputation for ambition. Spend enough time talking to the people living there and you find yourself hearing about their friends.
 
-It can also give a young person several wonderful years of being a founder before the outcome ever appears.
+People are people. Thank fucking God.
 
-## A socialite with a pitch deck
+## A nice conversation is a nice conversation
 
-Spend time around the visible SF startup scene and a surprisingly recognizable form of ambition emerges.
+I'm fairly happy in my own company. Give me a comfortable chair, a computer, and an interesting thing to work on, and I can occupy myself until an absurd hour. I've spent entire periods of life drawing, writing, playing games, following whatever technical curiosity had me by the throat. I still like being left alone with an idea.
 
-The invitations. The dinners. The alumni circles. The founder houses. The people who know other people who know everyone worth knowing. You can spend an entire evening exchanging plans, gossip, introductions, and stories about fundraising.
+I also love a good conversation. I like hearing somebody get carried away while telling a story. I like discovering an unexpected common interest, or meeting a person who has an entirely different set of interests and can explain why they love them. I can talk plenty when the mood takes me.
 
-For a certain slice of the scene, it's socialite life with a tech vocabulary. The party is a founder event. The interesting acquaintance is a potential advisor. An invitation becomes access to a new network, and the network becomes part of the professional identity.
+Maintaining a busy social calendar would exhaust the living fuck out of me. I can admire the people who enjoy it. Their friendships seem to give them a great deal, and they bring that delight into the room with them. I get to enjoy a little of it when we meet.
 
-Everybody talks about building.
+Then I can go back to the office.
 
-You start wondering when they're going to go build.
+Honestly, the office is fantastic for this. It's quiet at odd hours. The equipment is gorgeous. I can sit there working on software with the same absorbed pleasure I used to bring to a drawing at home. The evening can go by without my wanting anything much from the outside world.
 
-To be clear, the room contains people doing commercially useful work. A founder who can get an investor on the phone, persuade a buyer to try a half-finished product, and recruit a superb engineer from a comfortable job possesses a valuable skill. At an early company, the right conversation can accomplish more than a month of elegant code written for customers who never arrive.
+Meanwhile, a guy I met at dinner might be catching up with his friends, telling another story, having a wonderful time. I hope he is.
 
-A great salesperson can look like a professional socialite because selling is social. An outstanding founder may be intensely interested in people, deals, timing, and access, while having little desire to spend Saturday night learning the finer points of a programming language.
+The next time we run into each other, maybe we'll remember what we were talking about. He'll have news. I'll have news. We might laugh about the same stupid thing again. There's a pleasure in that little continuity, in seeing someone and already knowing how to say hello.
 
-And an aspiring socialite can learn the founder vocabulary perfectly well.
+And one day I might walk into a room and spot a familiar face across the table.
 
-The distinction only becomes obvious when the introductions have to turn into customers, the customers have to stay, and the people hired to build the product need a reason to believe the company is going somewhere.
-
-Until then, both kinds of person can give a magnificent account of the last networking event.
-
-## The hours are part of the costume
-
-Now put the 996 rhetoric beside all this.
-
-The careers page asks for obsession. The founder talks about working every waking hour. Everyone is supposed to be intensely committed, willing to sacrifice, ready to go all in. At certain companies the schedule is literal and the workdays are punishing. Elsewhere the hours function as an oath of allegiance, a way of saying that the company comes first when the chips are down.
-
-A slogan is cheap enough to print. Living it is a different proposition.
-
-The visible scene also selects for its own inhabitants. Spend your evenings at founder events and naturally you'll encounter founders who enjoy spending their evenings at founder events. The person who would rather sit alone writing code, studying a paper, or drawing at home is conveniently absent from your survey.
-
-Office attendance is another unreliable measure. Excellent work can happen remotely. Sitting in a chair for twelve hours can produce an impressive quantity of absolutely nothing.
-
-Yet the rhetoric becomes funny when you encounter a person who likes the actual work enough to stay late voluntarily.
-
-Give him a good computer, a large monitor, a comfortable chair, an interesting technical problem, and a mostly empty office. He might spend the evening there for the same reason he'd once spend the evening drawing or tinkering at home: it's a pleasant way to be occupied. The supposed lifestyle of heroic devotion feels to him like a perfectly ordinary Tuesday.
-
-He may have little appetite for the networking dinner. He can talk to people when he wants to; he'd simply like to get back to what he was making.
-
-It's possible for both men to be ambitious as hell and to have almost nothing in common about what they enjoy.
-
-## What exactly were we admiring?
-
-There's a special disorientation to meeting elite founders after growing up with an academic conception of exceptional people.
-
-You remember classmates who could solve problems you couldn't touch, researchers who seemed to think several moves ahead, competitors whose ability was plainly in another league. There are levels to intellectual and technical talent, and you can recognize them when you see them.
-
-Then you enter another prestige circle and find that the impressive achievement may be a talent for arranging human belief around an uncertain future.
-
-The same badge can sit on a brilliant inventor and a gifted salesman; it can also belong to a guy whose pitch reached investors at exactly the right time. The funding round alone leaves those possibilities unresolved.
-
-So the old hierarchy begins to look a little strange. A YC admission, a research appointment, an extraordinary salary, and a top competitive ranking are all selective outcomes. They select for different things. They also reveal different amounts about the work that follows.
-
-The best founders can eventually make the question embarrassingly easy. They bring you a product customers love, a business that survives, and a team capable of making good decisions under pressure. Their abilities have become visible in the world.
-
-The others are still in the middle of the experiment.
-
-Being twenty-five with several years of runway and an interesting group of people around you is an enviable opportunity. The founder has a genuine shot at making something extraordinary, and might have a wonderful few years along the way.
-
-But it does put the old awe into perspective. You can admire the people who earned difficult technical jobs, appreciate the founder who sold a compelling vision, enjoy a conversation with either, and then go back to your own work without feeling that you've encountered a superior species.
-
-At the next event, a founder can tell you he's raised three million dollars.
-
-Congratulations. Now what are you going to make?
+Oh, hey. Good to see you.
