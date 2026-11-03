@@ -12,7 +12,7 @@ And you're thinking: *wait, is this the guy?*
 
 He's cleared an extraordinary gate. The company's most difficult exams are still ahead.
 
-## The medal arrives before the race
+## The medal arrives before the verdict
 
 A seed round is a peculiar kind of professional accomplishment because so much of the accomplishment lies in the future.
 
