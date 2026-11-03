@@ -6,11 +6,11 @@ A twenty-five-year-old in San Francisco has raised a few million dollars, rented
 
 You meet him at a founder dinner.
 
-He's talking about his friends, another dinner, who's dating whom, and who introduced him to the investor he's been trying to reach. He knows half the room. He's charming. The product sounds all right. You've encountered more exciting software ideas from anonymous people on Reddit.
+He's talking about his friends, another dinner, who's dating whom, and who introduced him to the investor he's been trying to reach. Half the room seems to know him. The product sounds all right. You've encountered more exciting software ideas from anonymous people on Reddit.
 
 And you're thinking: *wait, is this the guy?*
 
-The young man who has secured millions in venture funding is also a young man with a very active social life. He could be excellent at running a company. He could turn out to be a disaster. For now, he's earned the right to attempt the former on a rather lavish budget.
+He's cleared an extraordinary gate. The company's most difficult exams are still ahead.
 
 ## The medal arrives before the race
 
@@ -84,7 +84,7 @@ You remember classmates who could solve problems you couldn't touch, researchers
 
 Then you enter another prestige circle and find that the impressive achievement may be a talent for arranging human belief around an uncertain future.
 
-Maybe that is the founder's genius. Maybe the founder has both the social instinct and a brilliant product insight. Maybe he was early to a hot market and gave a pitch investors wanted to hear. The funding badge alone doesn't tell you which.
+The same badge can sit on a brilliant inventor and a gifted salesman; it can also belong to a guy whose pitch reached investors at exactly the right time. The funding round alone leaves those possibilities unresolved.
 
 So the old hierarchy begins to look a little strange. A YC admission, a research appointment, an extraordinary salary, and a top competitive ranking are all selective outcomes. They select for different things. They also reveal different amounts about the work that follows.
 
@@ -92,7 +92,7 @@ The best founders can eventually make the question embarrassingly easy. They bri
 
 The others are still in the middle of the experiment.
 
-There's no particular reason to resent anybody for getting a shot. Being twenty-five with a few million dollars of runway and an interesting group of people around you is a rather excellent opportunity. I'd take the work seriously too.
+Being twenty-five with several years of runway and an interesting group of people around you is an enviable opportunity. The founder has a genuine shot at making something extraordinary, and might have a wonderful few years along the way.
 
 But it does put the old awe into perspective. You can admire the people who earned difficult technical jobs, appreciate the founder who sold a compelling vision, enjoy a conversation with either, and then go back to your own work without feeling that you've encountered a superior species.
 
