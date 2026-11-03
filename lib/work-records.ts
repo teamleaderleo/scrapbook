@@ -62,19 +62,19 @@ export const workRecords: readonly WorkRecord[] = [
   {
     id: 'cmux',
     title: 'CMUX',
-    kind: 'Build systems and developer productivity',
-    status: '437 merged PRs indexed · Sep 13–23, 2026',
+    kind: 'Agent runtime, native interaction and delivery systems',
+    status: 'Founding Engineer since Oct 12 · evidence through Nov 2, 2026',
     summary:
-      'A concentrated systems campaign across Swift/Xcode compilation, cache identity and lifecycle, reusable test products, artifact transport, macOS runner scheduling, CI observability, and release-workflow economics. The recurring goal is a shorter, more truthful feedback loop rather than a smaller CI bill in isolation.',
+      'Work across durable agent execution, human control, Cloud Git-state transfer and authorization, native rendering, transcript correctness, and build delivery. Selected public PR evidence distinguishes measured outcomes from projections and NEXT implementation from stable release.',
     accomplishments: [
-      'The compilation-cache thread moved from 37.5 GB of rapidly churning PR-scoped cache entries and cold macOS builds to shared main-owned seeds, then repaired runner-path identity drift and a seed-growth loop that crossed the 5 GiB save bound; the clean seed is about 3.5 GiB, roughly 1.5 GiB less for every PR to restore.',
-      'Local and CI feedback loops moved materially: same-commit tagged builds measured 953 s with fresh DerivedData versus 35.7 s on the shared warm tree; Linux guard critical path measured 385.5 s to 124.3 s while intentionally spending about 1.06 extra cheap Linux runner-minutes; focused E2E queue p90 measured 83.3 min on macOS 15 versus 1.0 min on macOS 26.',
-      'Capacity work measured and rerouted demand instead of treating runner scarcity as a provider problem: about 5,900 paid macOS overflow minutes/day moved to sponsored capacity in one sampled window, superseded-PR admission replay estimated about 590 macOS minutes/day avoidable, and a router trigger was reduced from roughly 6,864 invocations/day to about 1,253.',
-      'A GitHub Actions 90-day usage export records 1,966,401 self-hosted macOS runner-minutes, averaging 21,848.9 min/day. Valuing every minute at only WarpBuild’s cheapest macOS rate gives a $52,437 per 30-day month / $638k annualized replacement-cost floor; attributed savings and actual provider billing remain separate.',
-      'Reliability work made red CI more truthful: one incomplete-xcresult path had suppressed 148 already-recorded test failures, while a 1,060-test Swift package suite took over 12 minutes with about 161 issues in parallel but completed in 65 seconds with 17 real failures when run serially.',
+      'Durable mailbox and inbox work separates retryable delivery from human prompt turns. Background tasks survive harness hibernation, reconnects wait for caller-token adoption, and person-only takeover holds manager messages for ordered handback. Some routes and UI wiring remain separate integrations.',
+      'Machine-side Cloud seeding and export preserve HEAD, index, worktree and stash with retry identity and confined paths. Owner authorization checks fence revocation, regrant and membership changes across asynchronous reads; these NEXT merges do not prove every client shipped.',
+      'Native measurements include a depth-18 split stall falling from 119 s to 9 ms after replacing nested hosts, with diagnosis credit to Apptah, and a controlled warm Cmd-N A/B moving visible-time p50 from 133.8 to 105.4 ms. These are distinct workloads, not an app-wide multiplier.',
+      'Transcript row tests stop unchanged frames rendering on each token. A 3,000-turn WebKit scroll oracle moves from 168 blank frames to zero and maximum residual drift from 56.5 to 0.5 px, preserving the actual half-pixel limit; the separate production geometry integration remained open.',
+      'Web checks expose added diagnostics even on a red base. More test shards reduce the observed verdict from a historical 26.4-minute p50 to 22.4 minutes in one new run; exact-input reuse and image-bound release smoke retain safety checks without inventing unmeasured savings. Earlier build-cache and release-size campaigns remain in the full record.',
     ],
     reversal:
-      'A tempting janitor class could reclaim 1,316 macOS runner-minutes behind already-decided Linux-guard failures. It was dropped because every reclaimable minute was an in-flight compile that cross-run reuse could make valuable to another run; the shipped cancellation rule stays narrower.',
+      'Stronger Stop escalation killed background work as well as the turn. The follow-up separates per-task stopping from turn cancellation and spares a harness with active background work, while retaining the resulting late-call risk and harness-specific limits.',
     evidence: [
       {
         label: 'CMUX synthesis',
@@ -97,13 +97,13 @@ export const workRecords: readonly WorkRecord[] = [
         kind: 'repository',
       },
       {
-        label: 'Compilation-cache runner identity',
-        href: 'https://redirect.github.com/manaflow-ai/cmux/pull/13754',
+        label: 'Background task lifecycle',
+        href: 'https://redirect.github.com/manaflow-ai/cmux/pull/26463',
         kind: 'pull-request',
       },
       {
-        label: 'CI health observability',
-        href: 'https://redirect.github.com/manaflow-ai/cmux/pull/13810',
+        label: 'Transcript scroll repair',
+        href: 'https://redirect.github.com/manaflow-ai/cmux/pull/26718',
         kind: 'pull-request',
       },
     ],
@@ -245,11 +245,13 @@ export const workRecords: readonly WorkRecord[] = [
     // Keep this public v1 id stable: it also keys local interview-rehearsal drafts.
     id: 'smolrunner',
     title: 'Glaeda',
-    kind: 'Hot Linux execution for coding agents',
-    status: 'Pre-alpha · live Apple-silicon acceptance',
+    kind: 'Runner fleet operations and reusable execution state',
+    status: 'Public fleet evidence through Nov 2, 2026',
     summary:
-      'Fresh Linux when the work is untrusted; hot project state when it is trusted. Glaeda runs coding agents and GitHub Actions on Apple-silicon Macs, keeping repositories, dependencies, compiler state, indexes, and services warm only where the trust and validity rules permit it.',
+      'Glaeda runs coding agents and GitHub Actions on Apple-silicon Macs. Recent work measures admission policy, GitHub query traffic and disk recovery while keeping reusable Git and build state tied to explicit ownership and recovery rules.',
     accomplishments: [
+      'A 90-minute trial with three role-matched hosts per arm reports about 15% more jobs per mini-hour after baseline adjustment, with median normalized job duration essentially unchanged. Other resource gates and reserved measurement-host policy remain active.',
+      'Interest-driven polling lowers the comparable host from 833 GraphQL queries/hour to a twenty-minute rate equivalent to 189/hour. One cleanup pass reclaims 38.7 GiB before jobs refill space; archive-before-delete and reboot-safe Git mirror borrowing retain recovery tests. These observations are separate, not fleet-wide totals.',
       'The strict lane gives unknown work a prepared Lima/VZ worker, one bounded job, durable assignment/no-replay handling, official GitHub Runner Scale Set integration, exact teardown, and evidence that the worker is gone.',
       'Trusted projects can keep the expensive substrate hot: persistent project disks, crash-safe leases, OverlayFS task views, immutable Git object-pool generations, and copy-on-write task materialization are already landed as M6 primitives.',
       'The north-star metric is agent wall-clock latency: queue-to-first-useful-command, edit-to-first-test-result, final relevant verification, throughput under concurrent agents, and the CPU/RAM/disk cost of keeping useful state resident.',
@@ -266,6 +268,16 @@ export const workRecords: readonly WorkRecord[] = [
         label: 'Blazingly hot execution',
         href: 'https://github.com/teamleaderleo/glaeda/blob/main/docs/BLAZINGLY_HOT.md',
         kind: 'record',
+      },
+      {
+        label: 'Matched fleet admission trial',
+        href: 'https://github.com/teamleaderleo/glaeda/pull/1758',
+        kind: 'pull-request',
+      },
+      {
+        label: 'GitHub query rollout receipt',
+        href: 'https://github.com/teamleaderleo/glaeda/pull/1790#issuecomment-6554569701',
+        kind: 'pull-request',
       },
       {
         label: 'Current cross-repository state',
@@ -372,7 +384,7 @@ export const workRecords: readonly WorkRecord[] = [
   },
 ];
 
-export const workRecordUpdatedAt = '2026-09-23';
+export const workRecordUpdatedAt = '2026-11-03';
 
 export function getWorkRecord(id: string): WorkRecord | undefined {
   return workRecords.find(record => record.id === id);

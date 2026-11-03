@@ -1,6 +1,8 @@
-# cmux: build systems, developer feedback, and product reliability
+# cmux: agent runtime, native interaction, and delivery systems
 
 **Current role:** Founding Engineer at cmux, October 12, 2026–present. Leo confirmed the title and start date on October 14. Contributions in September predate the role and aren't employment tenure.
+
+**Evidence refresh, November 3:** the selected public stories now cover October 1 through November 2. Existing early-October records are retained; new records below extend the account through agent lifecycle, Cloud Git-state transfer, native rendering and fleet operations. Primary PR descriptions, merge destinations and relevant follow-up receipts were read. This is a curated source review, not a claim that every PR or implementation line in the month was reviewed. The older inventory counts below retain their original cutoff.
 
 The [October 14 source refresh](../impact/sources/cmux-career-2026-10-14.json) counts 4,479 PRs attributed by GitHub's author field to `teamleaderleo`: 3,735 merged, 177 open, and 567 closed without merging, as of 22:17:11 UTC. Merged PRs include `main`, `feat-cmux-next`, and other destination branches. They aren't a count of released features, sole implementation ownership, reviews, or business impact.
 
@@ -123,17 +125,43 @@ The follow-on [PR 20699](https://redirect.github.com/manaflow-ai/cmux/pull/20699
 
 ## Reliability and packaging keep their own boundaries
 
-[PR 19606](https://redirect.github.com/manaflow-ai/cmux/pull/19606), merged into main, repairs deep split chains that freeze the main thread. The focus walk diagnosis came from @Apptah; Leo's PR carries the Bonsplit fix into cmux and records the failed AppDelegate experiment. A native 16-deep-chain check goes from 2/5 to 5/5, with operations answering within 0.08 seconds on the tested fix build. The final head removes the ineffective AppDelegate change and wasn't separately re-run through that native test. This is a responsiveness repair, not an app-wide performance benchmark.
+[PR 19606](https://redirect.github.com/manaflow-ai/cmux/pull/19606) is an intermediate result, not the final deep-split repair. Its reported green native check didn't establish that the responder cache removed the underlying hang. [Bonsplit 284](../impact/records/bonsplit-284.md) subsequently explains that SwiftUI bypassed that cache and replaces nested hosting views with sibling pane hosts inside an AppKit split tree. The controlled depth-18 first-show stall falls from 119 seconds to 9 ms. Apptah supplied the focus-walk diagnosis; the failed AppDelegate experiment and ineffective cache remain part of the story. The measurement concerns deep split chains, not the app as a whole.
 
 [PR 17217](https://redirect.github.com/manaflow-ai/cmux/pull/17217), merged into main, evaluates merge overrides from trusted base code using GitHub metadata. Overrides name failing checks, carry evidence, and expire when the head changes. Its merged state doesn't by itself establish a repository-wide rollout or every later merge's compliance.
 
-[PR 19386](../impact/records/cmux-19386.md), also merged into main, removes the duplicate Computer Use executable, reported as 11.5 MiB in the before-removal arm64 inventory. A native after-build or installed-size reduction remains unverified. The helper keeps its signing and permission identity. The [thin stable-release pipeline](https://redirect.github.com/manaflow-ai/cmux/pull/19255) is another main-branch merge; its universal-versus-nightly size comparison isn't a measured stable-release before/after result, and the retained PR body leaves the signed dry run and update acceptance for later verification.
+[PR 19386](../impact/records/cmux-19386.md), also merged into main, removes the duplicate Computer Use executable, reported as 11.5 MiB in the before-removal arm64 inventory. A native after-build or installed-size reduction remains unverified. The helper keeps its signing and permission identity. The [thin stable-release pipeline](https://redirect.github.com/manaflow-ai/cmux/pull/19255) has a later [signed dry-run and Sparkle update receipt](https://redirect.github.com/manaflow-ai/cmux/pull/19255#issuecomment-6107295819), superseding the pre-merge body that left those checks pending. The Apple-silicon test used the exact signed artifacts with a synthetic feed version to offer the update; native Intel selection remains test-covered only. The measured sizes are retained in the app-size section above.
 
 Next-branch merges in this record establish integrated development work. A stable shipment or native acceptance result needs its own release or runtime evidence.
 
+## Native interaction and transcript work through November 2
+
+[Manifest validator deduplication](../impact/records/cmux-19832.md) removes retained schema duplication and supplies a reproducible process-footprint harness. One same-bundle comparison moves idle footprint from 1032 MB to 596 MB; a separate churn leak remains outside that result. [Hidden chat freezing](../impact/records/cmux-27047.md) later reduces app wakeups by about 32% in one idle-chat comparison, with essentially unchanged CPU and no material memory improvement. These aren't two additive memory wins.
+
+[Sidebar animation](../impact/records/cmux-24187.md) uses the real interaction harness from [PR 24173](https://redirect.github.com/manaflow-ai/cmux/pull/24173) to move realized rows on Core Animation layers. Ten-workspace insertion main-thread work falls from 231.0 to 162.6 ms; the 200-workspace results are mixed. [Cmd-N palette deferral](../impact/records/cmux-28941.md) later cuts warm key-time p50 from 67.7 to 16.8 ms and visible-time p50 from 133.8 to 105.4 ms in a controlled A/B. Key time and visible time overlap; cold and quick visible-time samples don't establish the same benefit.
+
+[Transcript row memoization](../impact/records/cmux-21960.md) stops unchanged rows rendering on every streamed token and retains the hover-cache regression that appeared during review. [Upward-scroll recovery](../impact/records/cmux-26718.md) removes blank frames in a 3,000-turn WebKit oracle and brings maximum residual drift to the half-pixel tolerance the implementation actually meets. The separate immutable geometry primitive merged, but production geometry integration remained open when checked. A model benchmark isn't substituted for a shipped browser result.
+
+## Agent work survives a turn, a process, and a change of authority
+
+[The durable mailbox](../impact/records/cmux-21182.md) owns ordered delivery and retry identity. [The local threaded inbox](../impact/records/cmux-27686.md) changes scheduling: plain agent messages become coalesced notices while human prompts retain priority. Its test turns a burst of 300 messages into one next-tool-step notice. Team, peer and other named routes remain separate follow-ups in that source.
+
+[Daemon-owned background tasks](../impact/records/cmux-26463.md) outlive harness hibernation and expose recoverable output to the returning agent. The record follows tool exposure and the later restart-adoption repair, where reconnecting callers had arrived before their token was adopted. Access checks remain scoped to the same chat.
+
+[Stop's regression and repair](../impact/records/cmux-29879.md) matter as much as its initial implementation: stronger cancellation first killed background work, then the follow-up separated ending a turn from stopping its tasks. The source retains harness-specific limits and the trade-off of sparing an active process. [Human takeover](../impact/records/cmux-30879.md) adds person-only manager holds and ordered handback in delivery itself; wiring the UI is a separate integration boundary.
+
+[Cloud project seed and export](../impact/records/cmux-30382.md) preserve HEAD, index, worktree and stash through confined, retryable machine-side operations. [Owner authorization RPCs](../impact/records/cmux-30399.md) fence revocation, regrant and membership changes around asynchronous reads. These NEXT merges establish tested primitives and owner checks; they don't establish every client integration or stable release.
+
+## Delivery and fleet follow-through
+
+[Independent web checks](../impact/records/cmux-24252.md) reproduce an escaped type error and make a red base incapable of hiding an added diagnostic. [Fast-tier pass reuse](../impact/records/cmux-23384.md) requires complete input identity, while [nightly product reuse](../impact/records/cmux-25731.md) checks trusted producers and archive contents before adopting compiled products. Neither record invents post-rollout savings.
+
+[More web-test shards](../impact/records/cmux-29666.md) reduce the slowest shard from a historical 24.4-minute p50 to 15.6 minutes in the new run at roughly equal head-shard compute. The final verdict improves by four minutes because the aggregator queues. [Parallel launch smoke](../impact/records/cmux-32378.md) binds publication to the exact tested image; its 78–106 second reduction remains projected.
+
+The companion Glaeda work records operational consequences: [a role-matched admission trial](../impact/records/glaeda-1758.md) reports about 15% more jobs per mini-hour after baseline adjustment, [interest-driven GitHub polling](../impact/records/glaeda-1790.md) records a comparable host moving from 833 queries/hour to a twenty-minute observed rate equivalent to 189/hour, and [scratch cleanup](../impact/records/glaeda-1803.md) reclaims 38.7 GiB in one pass before jobs refill space. [Archive-before-delete](../impact/records/glaeda-1625.md) and [mirror borrowing with reboot repair](../impact/records/glaeda-1690.md) retain the recovery and ownership constraints behind those operations. No fleet-wide dollar or permanent free-space total follows from these observations.
+
 ## Career-facing interpretation
 
-The record now spans build systems and developer productivity alongside native desktop reliability, browser automation, and agent-chat product work.
+The record spans agent execution and human control, Cloud state transfer and authorization, native rendering, browser correctness, and the build and fleet systems that deliver them.
 
 It includes Swift and Xcode compilation behavior, cache identity and lifecycle, reusable build products, artifact transport, runner scheduling, CI observability, test reliability, and release workflow economics. The repeated skill is less about any one CI provider than about finding the actual ownership and reuse boundary in a large changing system, measuring the cost around it, and preserving safe fallback behavior when the optimization cannot prove a hit.
 

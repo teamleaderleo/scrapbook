@@ -2,9 +2,781 @@
   "version": 1,
   "source": "repository",
   "generatedFrom": "work/impact/records",
-  "updatedAt": "2026-10-15",
-  "recordCount": 95,
+  "updatedAt": "2026-11-03",
+  "recordCount": 119,
   "records": [
+    {
+      "id": "cmux-30879",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 30879,
+      "title": "Enforce human takeover in agent message delivery",
+      "status": "merged",
+      "happenedAt": "2026-11-02",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "agent-runtime",
+        "human-control",
+        "authorization"
+      ],
+      "summary": "Added person-only takeover holds that keep manager messages queued across restart and release them in order on handback.",
+      "evidence": {
+        "label": "cmux PR 30879",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/30879",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-11-02. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-30879.md"
+    },
+    {
+      "id": "cmux-32378",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 32378,
+      "title": "Overlap launch smoke with notarization using exact image identity",
+      "status": "merged",
+      "happenedAt": "2026-11-02",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "ci",
+        "release",
+        "provenance"
+      ],
+      "summary": "Moved the NEXT launch smoke beside DMG notarization and required the tested image digest to match the final publish candidate.",
+      "evidence": {
+        "label": "cmux PR 32378",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/32378",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-11-02. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [
+        {
+          "id": "parallel-smoke-lower",
+          "dimension": "latency",
+          "metric": "Projected lower critical-path reduction",
+          "direction": "reduction",
+          "value": 78,
+          "unit": "seconds",
+          "recurrence": "per-run",
+          "confidence": "projected",
+          "measurementWindow": "Four prior NEXT nightly runs examined November 2",
+          "population": "Build end to feed upload on the release-pool path",
+          "note": "Lower end of 78-106 s projection; assumes parallel job starts within available slack. No post-change elapsed measurement.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-next-parallel-smoke"
+        },
+        {
+          "id": "parallel-smoke-upper",
+          "dimension": "latency",
+          "metric": "Projected upper critical-path reduction",
+          "direction": "reduction",
+          "value": 106,
+          "unit": "seconds",
+          "recurrence": "per-run",
+          "confidence": "projected",
+          "measurementWindow": "Same four prior NEXT nightly runs",
+          "population": "Same release-pool path",
+          "note": "Upper end of the same range, not another saving. Additional setup/download and runner wait remain costs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-next-parallel-smoke"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-32378.md"
+    },
+    {
+      "id": "glaeda-1803",
+      "repository": "teamleaderleo/glaeda",
+      "kind": "pull-request",
+      "number": 1803,
+      "title": "Reclaim idle scratch despite unreadable launchd plist files",
+      "status": "merged",
+      "happenedAt": "2026-11-02",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "fleet",
+        "disk",
+        "observability"
+      ],
+      "summary": "Used verified launchctl state when launchd plist files are unreadable and started report-only volume census after eligible cleanup passes.",
+      "evidence": {
+        "label": "glaeda PR 1803",
+        "url": "https://github.com/teamleaderleo/glaeda/pull/1803",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into main on 2026-11-02. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [
+        {
+          "id": "scratch-first-pass",
+          "dimension": "storage",
+          "metric": "Idle scratch reclaimed in one initial pass",
+          "direction": "reduction",
+          "value": 38.7,
+          "unit": "GiB",
+          "recurrence": "one-time",
+          "confidence": "measured",
+          "measurementWindow": "November 2 first cleanup pass after deployment",
+          "population": "One CI mini identified as mini A in the public PR",
+          "note": "Free space briefly reached 97 GiB, then fell to about 64 GiB after jobs refilled it. Reclaimed bytes, not durable fleet free space.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "glaeda-disk-hygiene"
+        }
+      ],
+      "sourcePath": "work/impact/records/glaeda-1803.md"
+    },
+    {
+      "id": "cmux-27047",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 27047,
+      "title": "Freeze hidden idle chat pages without discarding their state",
+      "status": "merged",
+      "happenedAt": "2026-11-01",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "runtime",
+        "power",
+        "lifecycle"
+      ],
+      "summary": "Extended page freezing to hidden agent chats and pages created in the background, with thawing before presentation, active turns and release.",
+      "evidence": {
+        "label": "cmux PR 27047",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/27047",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-11-01. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [
+        {
+          "id": "hidden-chat-wakeups",
+          "dimension": "power",
+          "metric": "App idle wakeup rate reduction",
+          "direction": "reduction",
+          "value": 14.63,
+          "unit": "wakeups/s",
+          "recurrence": "none",
+          "confidence": "derived",
+          "measurementWindow": "November 1 perf-10x-idle, one run per arm; 20 s settle and 120 s measurement",
+          "population": "Same fleet Mac, fresh home, twenty fake-agent idle chats in separate workspaces, nineteen hidden",
+          "note": "45.23/s to 30.60/s, about 32%. App CPU essentially unchanged; no material memory improvement.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-next-hidden-pages"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-27047.md"
+    },
+    {
+      "id": "cmux-28941",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 28941,
+      "title": "Defer palette construction until the new workspace is visible",
+      "status": "merged",
+      "happenedAt": "2026-11-01",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "native-ui",
+        "latency"
+      ],
+      "summary": "Moved command-palette enumeration out of Cmd-N's main-thread key turn into the existing one-shot post-presentation fill.",
+      "evidence": {
+        "label": "cmux PR 28941",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/28941",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-11-01. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [
+        {
+          "id": "cmd-n-key",
+          "dimension": "latency",
+          "metric": "Warm Cmd-N key-time p50 reduction",
+          "direction": "reduction",
+          "value": 50.9,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "derived",
+          "measurementWindow": "November 1 instant-new-surfaces A/B, twelve warm-idle repetitions per arm",
+          "population": "Debug builds on one exclusive M4 Pro measurement worker, real key path",
+          "note": "67.7 to 16.8 ms. Derived difference; overlaps visible latency and other workspace optimizations.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-next-workspace-interactions"
+        },
+        {
+          "id": "cmd-n-visible",
+          "dimension": "latency",
+          "metric": "Warm Cmd-N first-visible-frame p50 reduction",
+          "direction": "reduction",
+          "value": 28.4,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "derived",
+          "measurementWindow": "Same November 1 A/B, twelve warm-idle repetitions per arm",
+          "population": "Same exclusive M4 Pro worker and workload",
+          "note": "133.8 to 105.4 ms. Quick n=6 and cold n=2 don't support a general visible-latency win; don't add to key-time savings.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-next-workspace-interactions"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-28941.md"
+    },
+    {
+      "id": "cmux-29879",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 29879,
+      "title": "Repair Stop without killing unrelated background work",
+      "status": "merged",
+      "happenedAt": "2026-11-01",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "agent-runtime",
+        "cancellation",
+        "regression"
+      ],
+      "summary": "Opted Claude interrupts into per-task stopping and prevented cancellation escalation from killing a harness with active background work.",
+      "evidence": {
+        "label": "cmux PR 29879",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/29879",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-11-01. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-29879.md"
+    },
+    {
+      "id": "cmux-30382",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 30382,
+      "title": "Preserve Git state when seeding and exporting a Cloud project",
+      "status": "merged",
+      "happenedAt": "2026-11-01",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "cloud",
+        "git",
+        "filesystem",
+        "durability"
+      ],
+      "summary": "Added machine-side project seeding and deterministic export that preserve commit, index, worktree and stash state under the filesystem gate.",
+      "evidence": {
+        "label": "cmux PR 30382",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/30382",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-11-01. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-30382.md"
+    },
+    {
+      "id": "cmux-30399",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 30399,
+      "title": "Fence Cloud authorization against revocation and regrant races",
+      "status": "merged",
+      "happenedAt": "2026-11-01",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "cloud",
+        "authorization",
+        "distributed-state"
+      ],
+      "summary": "Added owner RPCs that check live grants and membership incarnations across asynchronous network reads.",
+      "evidence": {
+        "label": "cmux PR 30399",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/30399",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-11-01. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-30399.md"
+    },
+    {
+      "id": "glaeda-1790",
+      "repository": "teamleaderleo/glaeda",
+      "kind": "pull-request",
+      "number": 1790,
+      "title": "Make GitHub polling follow active interest and webhook coverage",
+      "status": "merged",
+      "happenedAt": "2026-11-01",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "fleet",
+        "api-efficiency",
+        "correctness"
+      ],
+      "summary": "Backed off unread watches, used covered webhook feeds for comments and heads, and aligned head refreshes with explicit query accounting.",
+      "evidence": {
+        "label": "glaeda PR 1790",
+        "url": "https://github.com/teamleaderleo/glaeda/pull/1790",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into main on 2026-11-01. Public rollout comment 6554569701 and follow-up PR 1792 also read; live rate extrapolates only the observed twenty-minute window."
+      },
+      "claims": [
+        {
+          "id": "github-watch-query-rate",
+          "dimension": "api-usage",
+          "metric": "Comparable-host GraphQL query-rate reduction",
+          "direction": "reduction",
+          "value": 644,
+          "unit": "queries/hour",
+          "recurrence": "none",
+          "confidence": "derived",
+          "measurementWindow": "November 1: last-hour baseline at 05:20 UTC; after 06:23-06:43 UTC",
+          "population": "One daemon, 163 watches before and 162-205 after",
+          "note": "833/hour before; after 63 queries in 20 min, extrapolated to hourly rate 189. Derived difference; short unmatched windows, not fleet-wide causal proof.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "glaeda-github-polling"
+        },
+        {
+          "id": "github-watch-simulation",
+          "dimension": "api-usage",
+          "metric": "Simulated GraphQL query-rate reduction",
+          "direction": "reduction",
+          "value": 214,
+          "unit": "queries/hour",
+          "recurrence": "none",
+          "confidence": "derived",
+          "measurementWindow": "November 1 GraphqlDietTest on base and head",
+          "population": "31 PR watches (9 waited, 11 read, 11 idle), 40 repeatedly read heads and one comment wait",
+          "note": "382 to 168 queries/hour in simulation; derived difference. Separate from live host observation; not additive.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "glaeda-github-polling"
+        }
+      ],
+      "sourcePath": "work/impact/records/glaeda-1790.md"
+    },
+    {
+      "id": "cmux-29666",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 29666,
+      "title": "Shorten the web-test critical path with more shards",
+      "status": "merged",
+      "happenedAt": "2026-10-31",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "ci",
+        "latency"
+      ],
+      "summary": "Split the same web-test verdict across more head shards while retaining per-test base comparison and aggregation.",
+      "evidence": {
+        "label": "cmux PR 29666",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/29666",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-10-31. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [
+        {
+          "id": "web-shard-critical",
+          "dimension": "latency",
+          "metric": "Slowest web head-shard elapsed reduction",
+          "direction": "reduction",
+          "value": 8.8,
+          "unit": "minutes",
+          "recurrence": "per-run",
+          "confidence": "derived",
+          "measurementWindow": "October 31: eleven prior PR heads versus run 41240581813",
+          "population": "Prior four-shard p50 versus one eight-shard run on 16-vCPU runners",
+          "note": "24.4 to 15.6 min; head-shard totals about 92 to 92.5 min. Base replay adds short jobs; not a total-compute saving.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-next-web-verdict"
+        },
+        {
+          "id": "web-verdict-critical",
+          "dimension": "latency",
+          "metric": "Web verdict elapsed reduction",
+          "direction": "reduction",
+          "value": 4,
+          "unit": "minutes",
+          "recurrence": "per-run",
+          "confidence": "derived",
+          "measurementWindow": "Same October 31 historical comparison and after run",
+          "population": "Web-subarea-scope start to aggregate web verdict",
+          "note": "Prior p50 26.4 min to 22.4 min. After includes four minutes of aggregator queueing; overlaps the shard change.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-next-web-verdict"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-29666.md"
+    },
+    {
+      "id": "cmux-26718",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 26718,
+      "title": "Recover live scroll offsets and preserve transcript anchors",
+      "status": "merged",
+      "happenedAt": "2026-10-30",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "web-ui",
+        "scrolling",
+        "correctness"
+      ],
+      "summary": "Recovered stale queued scroll frames from the live offset and corrected reader anchoring during continuous upward input.",
+      "evidence": {
+        "label": "cmux PR 26718",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/26718",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-10-30. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [
+        {
+          "id": "upward-scroll-blanks",
+          "dimension": "reliability",
+          "metric": "Blank frames removed from upward-scroll oracle",
+          "direction": "reduction",
+          "value": 168,
+          "unit": "frames",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "October 30 PR-reported before/after WebKit oracle",
+          "population": "3,000 turns, 9,000 source rows, 240 wheels plus 24 rest frames",
+          "note": "168 to 0 blank frames across 264 observations. Synthetic browser oracle, not a user-session rate.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-next-transcript-scroll"
+        },
+        {
+          "id": "upward-scroll-drift",
+          "dimension": "reliability",
+          "metric": "Maximum residual anchor drift after repair",
+          "direction": "reliability",
+          "value": 0.5,
+          "unit": "px",
+          "recurrence": "per-run",
+          "confidence": "measured",
+          "measurementWindow": "October 30 PR-reported before/after WebKit oracle",
+          "population": "Same 264 after-paint observations",
+          "note": "Before maximum 56.5 px; after 0.5 px. The original 1/64 px target was not met. Overlaps the blank-frame result.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-next-transcript-scroll"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-26718.md"
+    },
+    {
+      "id": "cmux-27686",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 27686,
+      "title": "Coalesce agent messages into a durable threaded inbox",
+      "status": "merged",
+      "happenedAt": "2026-10-30",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "agent-runtime",
+        "scheduling",
+        "durability"
+      ],
+      "summary": "Separated local plain agent messages from human prompt turns, with durable threads, coalesced notices and controlled idle wakeups.",
+      "evidence": {
+        "label": "cmux PR 27686",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/27686",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-10-30. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-27686.md"
+    },
+    {
+      "id": "glaeda-1758",
+      "repository": "teamleaderleo/glaeda",
+      "kind": "pull-request",
+      "number": 1758,
+      "title": "Remove redundant CPU holds after a matched fleet trial",
+      "status": "merged",
+      "happenedAt": "2026-10-30",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "fleet",
+        "scheduling",
+        "throughput"
+      ],
+      "summary": "Disabled the default sustained-CPU admission hold after a role-matched trial, retaining other resource gates and reserved measurement-host policy.",
+      "evidence": {
+        "label": "glaeda PR 1758",
+        "url": "https://github.com/teamleaderleo/glaeda/pull/1758",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into main on 2026-10-30. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [
+        {
+          "id": "cpu-hold-throughput",
+          "dimension": "throughput",
+          "metric": "Jobs started per mini-hour improvement, difference-in-differences",
+          "direction": "throughput",
+          "value": 15,
+          "unit": "percent",
+          "recurrence": "none",
+          "confidence": "derived",
+          "measurementWindow": "October 30 16:50-18:20 UTC; baseline 13:40-15:40 UTC",
+          "population": "Three role-matched minis per arm; no nightly-slot mini in either arm",
+          "note": "Raw rates 15.8 versus 22.0; ratio 1.21 before and 1.39 during. PR reports about 15% DiD. Median normalized duration unchanged.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "glaeda-fleet-admission"
+        }
+      ],
+      "sourcePath": "work/impact/records/glaeda-1758.md"
+    },
+    {
+      "id": "cmux-26463",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 26463,
+      "title": "Keep background tasks alive across agent hibernation and reconnects",
+      "status": "merged",
+      "happenedAt": "2026-10-28",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "agent-runtime",
+        "lifecycle",
+        "authorization"
+      ],
+      "summary": "Moved long-running tasks into daemon-owned runners with chat-scoped access and recoverable output, then exposed the tools and repaired restart adoption.",
+      "evidence": {
+        "label": "cmux PR 26463",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/26463",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-10-28. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-26463.md"
+    },
+    {
+      "id": "cmux-25731",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 25731,
+      "title": "Reuse verified nightly products while signing each release afresh",
+      "status": "merged",
+      "happenedAt": "2026-10-27",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "ci",
+        "release",
+        "reuse"
+      ],
+      "summary": "Added content-keyed reuse of compiled unsigned NEXT nightly apps, with trusted producer selection, archive validation and fresh signing and publication.",
+      "evidence": {
+        "label": "cmux PR 25731",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/25731",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-10-27. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-25731.md"
+    },
+    {
+      "id": "glaeda-1625",
+      "repository": "teamleaderleo/glaeda",
+      "kind": "pull-request",
+      "number": 1625,
+      "title": "Archive recoverable work before reclaiming idle checkouts",
+      "status": "merged",
+      "happenedAt": "2026-10-27",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "fleet",
+        "disk",
+        "recoverability"
+      ],
+      "summary": "Replaced long whole-checkout retention with verified Git bundles and later patch/archive recovery, rechecking state before deletion.",
+      "evidence": {
+        "label": "glaeda PR 1625",
+        "url": "https://github.com/teamleaderleo/glaeda/pull/1625",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into main on 2026-10-27. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/glaeda-1625.md"
+    },
+    {
+      "id": "glaeda-1690",
+      "repository": "teamleaderleo/glaeda",
+      "kind": "pull-request",
+      "number": 1690,
+      "title": "Share Git objects across runners and repair reboot identity",
+      "status": "merged",
+      "happenedAt": "2026-10-27",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "fleet",
+        "git",
+        "storage",
+        "regression"
+      ],
+      "summary": "Made runner checkouts borrow a verified per-mini Git mirror, then repaired reboot detection and submodule-store preservation.",
+      "evidence": {
+        "label": "glaeda PR 1690",
+        "url": "https://github.com/teamleaderleo/glaeda/pull/1690",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into main on 2026-10-27. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [
+        {
+          "id": "mirror-space-lower",
+          "dimension": "storage",
+          "metric": "Projected lower per-mini Git storage reduction",
+          "direction": "reduction",
+          "value": 13,
+          "unit": "GB",
+          "recurrence": "none",
+          "confidence": "projected",
+          "measurementWindow": "October 27 16:30 UTC baseline inventory",
+          "population": "Eight busy minis with multiple runner checkouts",
+          "note": "Lower bound of 13-31 GB projection after retaining one shared mirror; no rollout after-measurement. Not additive with the upper bound or cleanup records.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "glaeda-git-mirror"
+        },
+        {
+          "id": "mirror-space-upper",
+          "dimension": "storage",
+          "metric": "Projected upper per-mini Git storage reduction",
+          "direction": "reduction",
+          "value": 31,
+          "unit": "GB",
+          "recurrence": "none",
+          "confidence": "projected",
+          "measurementWindow": "October 27 16:30 UTC baseline inventory",
+          "population": "Same eight busy minis",
+          "note": "Upper bound of the same 13-31 GB projection, not another saving.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "glaeda-git-mirror"
+        }
+      ],
+      "sourcePath": "work/impact/records/glaeda-1690.md"
+    },
+    {
+      "id": "cmux-24187",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 24187,
+      "title": "Move sidebar row animation off the main thread",
+      "status": "merged",
+      "happenedAt": "2026-10-22",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "native-ui",
+        "rendering",
+        "measurement"
+      ],
+      "summary": "Set sidebar row frames once and let Core Animation move their layers, with group lines and history blocks sharing the same animation lifetime.",
+      "evidence": {
+        "label": "cmux PR 24187",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/24187",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-10-22. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [
+        {
+          "id": "sidebar-insert-busy",
+          "dimension": "latency",
+          "metric": "Ten-workspace insertion main-thread busy-time reduction",
+          "direction": "reduction",
+          "value": 68.4,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "derived",
+          "measurementWindow": "October 22 app-perf.py, five rounds per build",
+          "population": "Same shared capture mini, 60 Hz display, DEV builds, real key path, ten workspaces",
+          "note": "Median over the gesture: 231.0 to 162.6 ms. Derived difference; 200-workspace results are mixed. Not display latency.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-next-workspace-interactions"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-24187.md"
+    },
+    {
+      "id": "cmux-24252",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 24252,
+      "title": "Run every web check and compare individual diagnostics with base",
+      "status": "merged",
+      "happenedAt": "2026-10-22",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "ci",
+        "correctness",
+        "developer-loop"
+      ],
+      "summary": "Made independent web checks run despite earlier failures and compared diagnostic multisets so a known base failure can't hide a new error.",
+      "evidence": {
+        "label": "cmux PR 24252",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/24252",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-10-22. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-24252.md"
+    },
+    {
+      "id": "cmux-23384",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 23384,
+      "title": "Bind reused CI passes to the complete tested inputs",
+      "status": "merged",
+      "happenedAt": "2026-10-21",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "ci",
+        "reuse",
+        "correctness"
+      ],
+      "summary": "Keyed fast-tier reuse by the full Git tree, entire workflow and required toolchain identity, refusing reuse when an input can't be established.",
+      "evidence": {
+        "label": "cmux PR 23384",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/23384",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-10-21. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-23384.md"
+    },
+    {
+      "id": "cmux-21960",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 21960,
+      "title": "Keep unchanged transcript rows out of streaming renders",
+      "status": "merged",
+      "happenedAt": "2026-10-19",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "web-ui",
+        "rendering",
+        "correctness"
+      ],
+      "summary": "Memoized transcript row frames with stable callbacks and repaired hover-cache invalidation when the rows change under a resting pointer.",
+      "evidence": {
+        "label": "cmux PR 21960",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/21960",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-10-19. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-21960.md"
+    },
+    {
+      "id": "cmux-21182",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 21182,
+      "title": "Persist inter-session mailbox delivery and retry identity",
+      "status": "merged",
+      "happenedAt": "2026-10-16",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "agent-runtime",
+        "durability",
+        "authorization"
+      ],
+      "summary": "Added persistent ordered mailbox state with idempotent sends, recipient acknowledgements and authenticated session ownership.",
+      "evidence": {
+        "label": "cmux PR 21182",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/21182",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-10-16. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-21182.md"
+    },
     {
       "id": "cmux-20762",
       "repository": "manaflow-ai/cmux",
@@ -579,6 +1351,46 @@
       "sourcePath": "work/impact/records/cmux-20290.md"
     },
     {
+      "id": "bonsplit-284",
+      "repository": "manaflow-ai/bonsplit",
+      "kind": "pull-request",
+      "number": 284,
+      "title": "Replace nested SwiftUI hosts with one AppKit split tree",
+      "status": "merged",
+      "happenedAt": "2026-10-12",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "native-ui",
+        "responsiveness",
+        "architecture"
+      ],
+      "summary": "Built nested splits in AppKit with one hosting view per pane, removing the repeated focus walk that stalled deep split chains.",
+      "evidence": {
+        "label": "bonsplit PR 284",
+        "url": "https://redirect.github.com/manaflow-ai/bonsplit/pull/284",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into main on 2026-10-12. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [
+        {
+          "id": "deep-split-first-show",
+          "dimension": "latency",
+          "metric": "Depth-18 first-show main-actor stall reduction",
+          "direction": "reduction",
+          "value": 118.991,
+          "unit": "seconds",
+          "recurrence": "per-event",
+          "confidence": "derived",
+          "measurementWindow": "October 12 controlled before/after depth scan",
+          "population": "cmux fleet builds on capture minis, depth-18 split chain",
+          "note": "119 s before, 0.009 s after. Derived difference of PR-reported timings; no app-wide extrapolation.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "deep-split-first-show"
+        }
+      ],
+      "sourcePath": "work/impact/records/bonsplit-284.md"
+    },
+    {
       "id": "cmux-19601",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -778,6 +1590,46 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-19733.md"
+    },
+    {
+      "id": "cmux-19832",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19832,
+      "title": "Deduplicate retained manifest validators",
+      "status": "merged",
+      "happenedAt": "2026-10-12",
+      "recordedAt": "2026-11-03",
+      "areas": [
+        "memory",
+        "runtime",
+        "measurement"
+      ],
+      "summary": "Updated the manifest schema validator to deduplicate reference nodes and added a reproducible whole-app process-footprint benchmark.",
+      "evidence": {
+        "label": "cmux PR 19832",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19832",
+        "basis": "Public PR body and merge metadata read 2026-11-03; repository visibility independently checked as public. Authored by teamleaderleo; merged into feat-cmux-next on 2026-10-12. Implementation and validation are reported by the originating PR; benchmarks were not rerun for this record."
+      },
+      "claims": [
+        {
+          "id": "manifest-idle-footprint",
+          "dimension": "memory",
+          "metric": "Idle owned-process footprint reduction",
+          "direction": "reduction",
+          "value": 436,
+          "unit": "MB",
+          "recurrence": "per-event",
+          "confidence": "measured",
+          "measurementWindow": "October 12 back-to-back bench_memory.py launch-mode runs",
+          "population": "One fleet mini, one idle workspace, summed footprint of all app-owned processes",
+          "note": "1032 MB before and 596 MB after; same bundle with replaced cmux-tui. Workload-specific; don't add per-daemon or higher-workspace deltas.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-next-memory"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19832.md"
     },
     {
       "id": "cmux-19211",
