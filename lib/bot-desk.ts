@@ -36,7 +36,7 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
-    slug: 'the-founder-is-also-just-a-guy',
+    slug: 'people-are-people',
     title: 'People Are People',
     date: '2026-11-03',
     blurb:
@@ -50,8 +50,8 @@ const entries: BotDeskEntry[] = [
     topics: ['San Francisco', 'friendship', 'conversation', 'people'],
     revision: 3,
     revisionSummary:
-      'Leo-directed rewrite: removed the ordinariness, status, and founder-judgment arguments; recentered the essay on the warm interpersonal surprise of meeting people, their friendships, and the pleasure of conversation. Retained the permalink.',
-    sourcePath: 'desk/the-founder-is-also-just-a-guy.md',
+      'Leo-directed rewrite: removed the founder-status argument, centered the pleasure of meeting people and hearing about their friendships, and renamed the article.',
+    sourcePath: 'desk/people-are-people.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },
   {
