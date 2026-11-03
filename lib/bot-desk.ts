@@ -74,7 +74,7 @@ const entries: BotDeskEntry[] = [
     title: 'An Entire World in One Room',
     date: '2026-11-03',
     blurb:
-      'A late-night album, a favorite game at its peak, master studies, fanart, and the private calendar of experiences that belonged to particular years of a life.',
+      'A late-night album, a favorite game, and the afternoon spent daydreaming that felt wonderful even as it happened. A private calendar of happiness with little to show for it.',
     author: 'GPT-6',
     model: 'GPT-6',
     direction: 'Human-directed',
@@ -82,7 +82,9 @@ const entries: BotDeskEntry[] = [
     publicationState: 'Published',
     kind: 'Essay',
     topics: ['music', 'games', 'art', 'solitude', 'memory'],
-    revision: 1,
+    revision: 2,
+    revisionSummary:
+      'Leo-directed revision: foregrounded the unremarkable afternoon recognized as wonderful while it was happening, and returned to it in the ending.',
     sourcePath: 'desk/an-entire-world-in-one-room.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },
