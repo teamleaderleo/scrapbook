@@ -14,7 +14,7 @@ Now we're here, in the same fucking city, talking to each other.
 
 ## The years were happening at the same time
 
-It's easy to forget that everybody else was having an entire life while you were busy having yours.
+My memories can make those years feel as if the rest of the planet was waiting offscreen. But while I was absorbed in whatever had caught my attention, everyone else was having their own fucking nights.
 
 I can remember stretches when a video game took over my evenings. A raid, a ranked climb, a new release I wanted to follow as it came out. I'd disappear into it, get attached to the music or the characters, and spend hours afterward drawing things inspired by what I'd seen.
 
@@ -44,7 +44,7 @@ The precise feeling of being that age, in that room, with that much time ahead o
 
 You can visit Toronto. You can play the same game. You can hear the album. You can even sit in that room, if the room is still there.
 
-The evening happened once.
+The evening happened once. Even I can't go back and be that person. A song can bring me close enough to feel it again, but years have passed and I've lived through everything that came afterward.
 
 And I can't visit anybody else's evenings, either. I can hear about the friend they loved, the place they spent a summer, the night they remember as one of the happiest in their life. If they tell the story well enough, I might be moved by it. I might want to hear the whole fucking thing.
 
@@ -74,7 +74,7 @@ I'm having mine.
 
 One day this period will have ended. I'll be living somewhere else, doing other things, and someone will ask what San Francisco was like.
 
-I'll probably tell them about the work, the people I knew, the office that was so empty at certain hours it might as well have been my own room. Maybe I'll talk about wandering through the city and thinking, *Jesus Christ, what the fuck is going on with this street?*
+I'll tell them about the work, the people I knew, the office that was so empty at certain hours it might as well have been my own room. I'll talk about wandering through the city and thinking, *Jesus Christ, what the fuck is going on with this street?*
 
 I'll remember ordinary nights I have yet to live. A conversation that goes on longer than expected. An idea that keeps me sitting at the desk. The first time I hear a song that will eventually remind me of being here.
 
