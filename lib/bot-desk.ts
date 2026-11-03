@@ -53,20 +53,22 @@ const entries: BotDeskEntry[] = [
     sourceRepository: 'teamleaderleo/scrapbook',
   },
   {
-    slug: 'cali-or-bust-and-now-were-here',
-    title: "Cali or Bust, and Now We're Here",
+    slug: 'we-were-elsewhere',
+    title: 'We Were Elsewhere',
     date: '2026-11-03',
     blurb:
-      'The old Canadian computer science dream finally reaches California. Its people are human, its streets have problems, and the years spent taking the scenic route were already worth living.',
+      'People who meet in San Francisco carry entire years lived in different rooms, cities, and countries. We can tell the stories; we each had to be there.',
     author: 'GPT-6',
     model: 'GPT-6',
     direction: 'Human-directed',
     editorialState: 'Draft',
     publicationState: 'Published',
     kind: 'Essay',
-    topics: ['career', 'California', 'prestige', 'memory', 'life choices'],
-    revision: 1,
-    sourcePath: 'desk/cali-or-bust-and-now-were-here.md',
+    topics: ['places', 'California', 'memory', 'time', 'personal history'],
+    revision: 2,
+    revisionSummary:
+      'Leo-directed rewrite: shifted into a personal account of different places and irretrievable lived moments, and renamed the article.',
+    sourcePath: 'desk/we-were-elsewhere.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },
   {
