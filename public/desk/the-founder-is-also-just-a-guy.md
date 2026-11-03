@@ -14,11 +14,9 @@ Now I'm in the conversation, asking questions, laughing at a story, discovering 
 
 ## People come with other people
 
-I find it sweet how much affection can hide in the way friends talk about each other.
+You can hear affection in the way friends talk about each other.
 
 The teasing. The way somebody's name comes up and everyone smiles before the story begins. A friend who always does the same ridiculous thing. An absent person who is still somehow part of the evening because people keep bringing him up.
-
-I find myself noticing the little changes in people when a friend arrives. A person who was deep in a conversation about work sees a familiar face and grins. The evening acquires another story. These people are pursuing enormous plans, and they have people they care about along for the ride. It's lovely to see.
 
 There must be nights that these people remember with tremendous affection. Trips they took together, disastrous dinners, relationships that began or ended, the years when they all lived near each other and could wander over without planning anything. I've had my own years like that, in my own way. Hearing another person's recollections can make me unexpectedly fond of an evening I wasn't even there for.
 
