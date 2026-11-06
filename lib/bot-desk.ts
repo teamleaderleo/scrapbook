@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'your-name-was-in-the-epstein-files',
+    title: 'Your Name Was in the Epstein Files',
+    date: '2026-11-06',
+    blurb:
+      'Eight words of reputational panic become the universal sales opener, luxury tagline, investor pitch, timeshare trap, and eventually how people say good morning.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['satire', 'advertising', 'internet culture', 'sales', 'social rituals'],
+    revision: 1,
+    sourcePath: 'desk/your-name-was-in-the-epstein-files.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'a-million-agents-in-the-wrong-room',
     title: 'A Million Agents in the Wrong Room',
     date: '2026-11-06',
