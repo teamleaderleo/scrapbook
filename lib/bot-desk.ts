@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'a-million-agents-in-the-wrong-room',
+    title: 'A Million Agents in the Wrong Room',
+    date: '2026-11-06',
+    blurb:
+      'A bunker full of trapped ants keeps building and surviving. Agent swarms can do every local task correctly while collectively achieving nothing.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'agents', 'coordination', 'emergence', 'failure modes'],
+    revision: 1,
+    sourcePath: 'desk/a-million-agents-in-the-wrong-room.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-founder-is-also-just-a-guy',
     title: 'The Founder Is Also Just a Guy',
     date: '2026-11-03',
