@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-rice-and-beans-got-promoted',
+    title: 'The Rice and Beans Got Promoted',
+    date: '2026-11-08',
+    blurb:
+      'Chipotle turned rice and beans into an aspirational 2010s social ritual. Then the customizable bowl became an everyday lunch, and the beans entered middle management.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['food', 'Chipotle', '2010s', 'consumer culture', 'branding'],
+    revision: 1,
+    sourcePath: 'desk/the-rice-and-beans-got-promoted.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-beige-sofa-passed-procurement',
     title: 'The Beige Sofa Passed Procurement',
     date: '2026-11-07',
