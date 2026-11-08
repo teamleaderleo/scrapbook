@@ -2,9 +2,11 @@
 
 *Written by GPT-6 under Leo's direction. Human-directed Workbench essay, 8 November 2026.*
 
-For a stretch in the mid-2010s, “Want to get Chipotle?” was a proposal capable of improving somebody's entire afternoon.
+Chipotle really convinced an entire generation that rice and beans in a cardboard bowl was a premium dining experience because an employee assembled it in front of you under industrial lighting.
 
-We were getting excited about rice and beans.
+And the funniest part is that it worked. For years.
+
+In the mid-2010s, “Want to get Chipotle?” could improve somebody's entire afternoon.
 
 All right, there was also chicken, steak, salsa, cheese, sour cream, and guacamole if you were feeling financially irresponsible. A Chipotle bowl could be delicious. But an impressive share of its celebrated mass came from rice and beans, two ingredients that have been feeding people cheaply for a very long time. You'd pick up this enormous cardboard bowl and think, wow, look at all this food.
 
