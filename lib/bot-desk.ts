@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-beige-sofa-passed-procurement',
+    title: 'The Beige Sofa Passed Procurement',
+    date: '2026-11-07',
+    blurb:
+      'RH can feel formulaic at home and surprisingly excellent in an office. A beige sofa reveals how shared taste, purchasing risk, and B2B buying change the assignment.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['design', 'offices', 'procurement', 'B2B sales', 'furniture'],
+    revision: 1,
+    sourcePath: 'desk/the-beige-sofa-passed-procurement.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'your-name-was-in-the-epstein-files',
     title: 'Your Name Was in the Epstein Files',
     date: '2026-11-06',
