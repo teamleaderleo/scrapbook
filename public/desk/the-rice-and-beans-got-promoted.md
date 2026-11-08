@@ -50,7 +50,7 @@ Eventually Chipotle became what successful chains often become: familiar.
 
 The novelty of standing in front of a counter and choosing your ingredients wore off. Other bowl and salad chains built their own versions of the same ritual. You could customize lunch all over the place. The supposedly enormous bowl began competing with the price on the receipt, and portion complaints gave the internet a new Chipotle hobby.
 
-The food itself hadn't suddenly become uninteresting. Its social job had changed.
+Chipotle had graduated from a destination to a reliable weekday answer.
 
 A place you once went to *because it was Chipotle* became a place you went to because it was nearby, you were hungry, and you knew what you'd get. The special trip became the default lunch. You could eat the exact same bowl while feeling dramatically less thrilled about it.
 
