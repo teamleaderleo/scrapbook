@@ -558,7 +558,7 @@
     {
       "recordId": "cmux-24214",
       "repository": "manaflow-ai/cmux",
-      "title": "acpmux: a wait reads only the chats it waits on (huge-blue daemon at 4.5 GB)",
+      "title": "acpmux: a wait reads only the chats it waits on",
       "evidence": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/40258679607",
       "id": "acpmux-daemon-cpu-per-logged-record-with-13-waits-open",
       "dimension": "latency",
