@@ -3,7 +3,7 @@
   "source": "repository",
   "generatedFrom": "work/impact/records",
   "updatedAt": "2026-11-09",
-  "recordCount": 122,
+  "recordCount": 131,
   "records": [
     {
       "id": "cmux-38993",
@@ -1663,6 +1663,50 @@
       "sourcePath": "work/impact/records/cmux-20883.md"
     },
     {
+      "id": "cmux-20699",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20699,
+      "title": "Restore a reading position older than the first transcript page (cmux-next)",
+      "status": "merged",
+      "happenedAt": "2026-10-14T19:11:01Z",
+      "recordedAt": "2026-10-14",
+      "areas": [
+        "agent-experience",
+        "restoration"
+      ],
+      "summary": "When a saved reading row lies outside the initial page, load older pages before displaying the transcript and preserve the saved anchor during loading. Fall back after three seconds or exhausted history.",
+      "evidence": {
+        "label": "CMUX PR 20699",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20699",
+        "basis": "GitHub PR metadata captured 2026-10-14: author teamleaderleo; MERGED at 2026-10-14T19:11:01Z into feat-cmux-next. PR body identifies this as repair of the author's own PR 20536 paging regression. Chromium with a stand-in daemon restores Question 100 in a 500-turn chat on the merged head without briefly drawing the latest turn. Native DEV quit/relaunch remained unverified. This complements the paging record and is not a second performance saving."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-20699.md"
+    },
+    {
+      "id": "cmux-20638",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 20638,
+      "title": "Judge motion regressions from recorded interaction frames (cmux-next)",
+      "status": "merged",
+      "happenedAt": "2026-10-14T17:33:47Z",
+      "recordedAt": "2026-10-14",
+      "areas": [
+        "performance",
+        "regression-detection"
+      ],
+      "summary": "Add real-app frame tracing and a golden-interactions judge covering tab opening, sidebar motion, transcript follow, window resize and Reduce Motion, with invalid measurements reported explicitly.",
+      "evidence": {
+        "label": "CMUX PR 20638",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/20638",
+        "basis": "GitHub PR metadata captured 2026-10-14: author teamleaderleo; MERGED at 2026-10-14T17:33:47Z into feat-cmux-next. PR body cites recorded-data run 38531434896, final-judge unit tests and a merged-head Release compile with 303 passing Swift tests. The red and green end-to-end bench runs 38562438059 and 38580973500 were still queued at merge. The PR workflow is warning-only, label-gated and requires available owned capacity; this is not evidence that it blocks all regressions."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-20638.md"
+    },
+    {
       "id": "cmux-20216",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -2356,6 +2400,45 @@
       "sourcePath": "work/impact/records/cmux-19733.md"
     },
     {
+      "id": "cmux-19379",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 19379,
+      "title": "Share resource bundles between the app and bundled CLI",
+      "status": "merged",
+      "happenedAt": "2026-10-11T12:29:23Z",
+      "recordedAt": "2026-10-14",
+      "areas": [
+        "app-size",
+        "packaging"
+      ],
+      "summary": "Replace the CLI's duplicate SwiftPM resource bundles with relative links to the app's copies, including replacement of older copies and removal of stale links.",
+      "evidence": {
+        "label": "CMUX PR 19379",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/19379",
+        "basis": "GitHub PR metadata captured 2026-10-14: author teamleaderleo; MERGED at 2026-10-11T12:29:23Z into main. PR body measures 13 duplicate bundles totaling 3,383,194 bytes (3.23 MiB). A fleet debug build has all 13 as links with no files duplicated below them. An arm64 Release copy produces identical sidebar-template output with copies and links, fails when bundles are absent, and passes strict code-sign verification after re-signing. Developer ID notarization of the linked layout was not run before merge. Campaign linkage: https://redirect.github.com/manaflow-ai/cmux/discussions/17496 and the campaign record `cmux-discussion-17496` preserve the whole-app baseline and release checkpoint without summing this component claim."
+      },
+      "claims": [
+        {
+          "id": "duplicate-cli-resource-bytes",
+          "dimension": "installed-size",
+          "metric": "duplicate CLI resource bytes removed from the app layout",
+          "direction": "reduction",
+          "value": 3383194,
+          "unit": "bytes/app",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "PR 19379 original resource inventory and fleet debug build",
+          "population": "13 SwiftPM resource bundles duplicated under Resources/bin",
+          "note": "3,383,194 duplicate bytes before; no duplicated files beneath the 13 relative links after. Installed layout, not compressed download bytes. Release runtime and re-sign probe passed; Developer ID notarization was pending.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-app-bundle-size-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-19379.md"
+    },
+    {
       "id": "cmux-19211",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -2850,6 +2933,319 @@
       "sourcePath": "work/impact/records/cmux-19428.md"
     },
     {
+      "id": "cmux-discussion-17496",
+      "repository": "manaflow-ai/cmux",
+      "kind": "discussion",
+      "number": 17496,
+      "title": "Is this now considered normal download/app size for a native mac (terminal) app?",
+      "status": "published",
+      "happenedAt": "2026-10-06T02:28:55Z",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "app-size",
+        "packaging",
+        "release",
+        "architecture"
+      ],
+      "summary": "Track the cmux app-size campaign from the 775 MB installed and 312 MB DMG discussion baseline through thin architecture-specific release checkpoints and the component-level optimization records.",
+      "evidence": {
+        "label": "CMUX Discussion 17496",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/discussions/17496",
+        "basis": "Discussion #17496 body reports a 775 MB app and 312 MB DMG. Leo maintainer comment https://redirect.github.com/manaflow-ai/cmux/discussions/17496#discussioncomment-18874534 states future next-release targets of 248 MB arm64 installed, 266 MB Intel installed, and 79/93 MB DMGs. Post-merge PR #19255 comment https://redirect.github.com/manaflow-ai/cmux/pull/19255#issuecomment-6107295819 measures signed ULMO checkpoints of 741.8/461.3/481.9 MiB installed and 238.9/145.0/160.8 MB DMGs. Component records link the architecture chain (#19211, #19213, #19305, #19361, #19601), package/resource work (#19356, #19379, #19386, #19355, #20743), executable/helper work (#19428, #19665, #19666, #20662, #20762), and CEF locale trim/supersession (#16732). #19222 is a release-notarization enabler without a standalone size delta; #20943 remains open and is not counted."
+      },
+      "claims": [
+        {
+          "id": "discussion-installed-baseline",
+          "dimension": "campaign",
+          "metric": "discussion app installed-size baseline",
+          "direction": "baseline",
+          "value": 775,
+          "unit": "MB/app",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "discussion #17496 body, created 2026-10-06",
+          "population": "v0.65-era app reported by discussion author",
+          "note": "The discussion reports 775 MB installed; it is a campaign baseline, not a current universal-release receipt.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-app-size-campaign-2026-10"
+        },
+        {
+          "id": "discussion-dmg-baseline",
+          "dimension": "campaign",
+          "metric": "discussion DMG download baseline",
+          "direction": "baseline",
+          "value": 312,
+          "unit": "MB/DMG",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "discussion #17496 body, created 2026-10-06",
+          "population": "v0.65-era DMG reported by discussion author",
+          "note": "The discussion reports a 312 MB DMG baseline; later PRs measure ULMO and thin variants separately.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-app-size-campaign-2026-10"
+        },
+        {
+          "id": "discussion-arm64-installed-target",
+          "dimension": "campaign",
+          "metric": "maintainer-comment Apple-silicon installed target",
+          "direction": "baseline",
+          "value": 248,
+          "unit": "MB/app",
+          "recurrence": "one-time",
+          "confidence": "projected",
+          "measurementWindow": "discussion comment 18874534 on 2026-10-12",
+          "population": "next-release Apple-silicon target",
+          "note": "Leo states 248 MB as a next-release target, not a receipt for the current installed app.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-app-size-campaign-2026-10"
+        },
+        {
+          "id": "discussion-intel-installed-target",
+          "dimension": "campaign",
+          "metric": "maintainer-comment Intel installed target",
+          "direction": "baseline",
+          "value": 266,
+          "unit": "MB/app",
+          "recurrence": "one-time",
+          "confidence": "projected",
+          "measurementWindow": "discussion comment 18874534 on 2026-10-12",
+          "population": "next-release Intel target",
+          "note": "Leo states 266 MB as a next-release target, not a live Intel release receipt.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-app-size-campaign-2026-10"
+        },
+        {
+          "id": "discussion-arm64-dmg-target",
+          "dimension": "campaign",
+          "metric": "maintainer-comment Apple-silicon DMG target",
+          "direction": "baseline",
+          "value": 79,
+          "unit": "MB/DMG",
+          "recurrence": "one-time",
+          "confidence": "projected",
+          "measurementWindow": "discussion comment 18874534 on 2026-10-12",
+          "population": "next-release Apple-silicon DMG target",
+          "note": "Leo states 79 MB as a next-release target; later #19255 ULMO output is a separate measured checkpoint.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-app-size-campaign-2026-10"
+        },
+        {
+          "id": "discussion-intel-dmg-target",
+          "dimension": "campaign",
+          "metric": "maintainer-comment Intel DMG target",
+          "direction": "baseline",
+          "value": 93,
+          "unit": "MB/DMG",
+          "recurrence": "one-time",
+          "confidence": "projected",
+          "measurementWindow": "discussion comment 18874534 on 2026-10-12",
+          "population": "next-release Intel DMG target",
+          "note": "Leo states 93 MB as a next-release target; later #19255 ULMO output is a separate measured checkpoint.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-app-size-campaign-2026-10"
+        },
+        {
+          "id": "stable-universal-installed-checkpoint",
+          "dimension": "campaign",
+          "metric": "measured stable universal installed checkpoint",
+          "direction": "baseline",
+          "value": 741.8,
+          "unit": "MiB/app",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "release run 38122582636 comment on PR 19255",
+          "population": "signed universal stable app",
+          "note": "Measured post-merge release checkpoint; do not treat as the 775 MB discussion baseline or sum with component claims.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-app-size-campaign-2026-10"
+        },
+        {
+          "id": "stable-arm64-installed-checkpoint",
+          "dimension": "campaign",
+          "metric": "measured stable arm64 installed checkpoint",
+          "direction": "baseline",
+          "value": 461.3,
+          "unit": "MiB/app",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "release run 38122582636 comment on PR 19255",
+          "population": "signed arm64 stable app",
+          "note": "Measured post-merge release checkpoint; one Apple-silicon update reached this size.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-app-size-campaign-2026-10"
+        },
+        {
+          "id": "stable-intel-installed-checkpoint",
+          "dimension": "campaign",
+          "metric": "measured stable Intel installed checkpoint",
+          "direction": "baseline",
+          "value": 481.9,
+          "unit": "MiB/app",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "release run 38122582636 comment on PR 19255",
+          "population": "signed x86_64 stable app",
+          "note": "Measured artifact checkpoint; native Intel update was not run live.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-app-size-campaign-2026-10"
+        },
+        {
+          "id": "stable-universal-dmg-checkpoint",
+          "dimension": "campaign",
+          "metric": "measured stable universal ULMO DMG checkpoint",
+          "direction": "baseline",
+          "value": 238.9,
+          "unit": "MB/DMG",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "release run 38122582636 comment on PR 19255",
+          "population": "signed universal ULMO DMG",
+          "note": "Measured release artifact.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-app-size-campaign-2026-10"
+        },
+        {
+          "id": "stable-arm64-dmg-checkpoint",
+          "dimension": "campaign",
+          "metric": "measured stable arm64 ULMO DMG checkpoint",
+          "direction": "baseline",
+          "value": 145,
+          "unit": "MB/DMG",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "release run 38122582636 comment on PR 19255",
+          "population": "signed arm64 ULMO DMG",
+          "note": "Measured release artifact.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-app-size-campaign-2026-10"
+        },
+        {
+          "id": "stable-intel-dmg-checkpoint",
+          "dimension": "campaign",
+          "metric": "measured stable Intel ULMO DMG checkpoint",
+          "direction": "baseline",
+          "value": 160.8,
+          "unit": "MB/DMG",
+          "recurrence": "one-time",
+          "confidence": "observed",
+          "measurementWindow": "release run 38122582636 comment on PR 19255",
+          "population": "signed x86_64 ULMO DMG",
+          "note": "Measured release artifact; no native Intel update was run live.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-app-size-campaign-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-discussion-17496.md"
+    },
+    {
+      "id": "cmux-17217",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 17217,
+      "title": "Require fresh evidence for a red-CI merge override",
+      "status": "merged",
+      "happenedAt": "2026-10-04T08:01:49Z",
+      "recordedAt": "2026-10-14",
+      "areas": [
+        "ci",
+        "reliability"
+      ],
+      "summary": "Add a trusted-main, API-only evaluator that binds merge overrides to the current PR head, checks collaborator authority and named failures, and invalidates stale approval after pushes.",
+      "evidence": {
+        "label": "CMUX PR 17217",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/17217",
+        "basis": "GitHub PR metadata captured 2026-10-14: author teamleaderleo; MERGED at 2026-10-04T08:01:49Z into main. PR body describes the exact-head merge gate, main-failure evidence rules and base-first rollout. It reports evaluator and helper tests; this record does not infer fewer incidents or current deployment of the local helper from the merge."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-17217.md"
+    },
+    {
+      "id": "cmux-17038",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 17038,
+      "title": "ci(cmux-tui): size Linux runners and share Rust cache",
+      "status": "merged",
+      "happenedAt": "2026-10-02T23:46:48Z",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "ci",
+        "performance",
+        "capacity",
+        "build-cache",
+        "feat-cmux-next"
+      ],
+      "summary": "Move Rust-heavy cmux-tui Linux lanes to 32-vCPU runners and share the Rust compile cache across lint and test jobs.",
+      "evidence": {
+        "label": "CMUX PR 17038",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/17038",
+        "basis": "GitHub PR metadata captured 2026-10-15: author teamleaderleo; MERGED at 2026-10-02T23:46:48Z into feat-cmux-next. The body reports the first full dispatch run 37077876900: test about 10 minutes to 5m15s cold-cache, lint about 3 minutes to 2m31s, and valgrind startup about 10 minutes to 3m51s. It says a warm-cache rerun was pending and the test lane still hit an unrelated conformance mismatch."
+      },
+      "claims": [
+        {
+          "id": "cmux-tui-linux-test-lane-reduction",
+          "dimension": "ci-runtime",
+          "metric": "cmux-tui Linux test lane wall-time reduction",
+          "direction": "reduction",
+          "value": 285,
+          "unit": "seconds/run",
+          "recurrence": "one-time",
+          "confidence": "derived",
+          "measurementWindow": "first full dispatch run 37077876900, approximate before/after in PR 17038",
+          "population": "Linux cmux-tui test lane",
+          "note": "About 10 minutes to 5m15s cold cache implies roughly 285 seconds; approximate and non-additive with other lane or cache claims. Warm-cache rerun was pending.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-tui-linux-runner-cache-2026-10"
+        },
+        {
+          "id": "cmux-tui-linux-lint-lane-reduction",
+          "dimension": "ci-runtime",
+          "metric": "cmux-tui Linux lint lane wall-time reduction",
+          "direction": "reduction",
+          "value": 29,
+          "unit": "seconds/run",
+          "recurrence": "one-time",
+          "confidence": "derived",
+          "measurementWindow": "first full dispatch run 37077876900, approximate before/after in PR 17038",
+          "population": "Linux cmux-tui lint lane",
+          "note": "About 3 minutes to 2m31s cold cache implies roughly 29 seconds; approximate and non-additive with the test claim.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-tui-linux-runner-cache-2026-10"
+        },
+        {
+          "id": "cmux-tui-linux-valgrind-startup-reduction",
+          "dimension": "ci-runtime",
+          "metric": "cmux-tui Linux valgrind startup wall-time reduction",
+          "direction": "reduction",
+          "value": 369,
+          "unit": "seconds/run",
+          "recurrence": "one-time",
+          "confidence": "derived",
+          "measurementWindow": "first full dispatch run 37077876900, approximate before/after in PR 17038",
+          "population": "Linux cmux-tui valgrind startup",
+          "note": "About 10 minutes to 3m51s implies roughly 369 seconds; approximate, with no warm-cache receipt.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-tui-linux-runner-cache-2026-10"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-17038.md"
+    },
+    {
       "id": "cmux-16732",
       "repository": "manaflow-ai/cmux",
       "kind": "pull-request",
@@ -2872,6 +3268,50 @@
       },
       "claims": [],
       "sourcePath": "work/impact/records/cmux-16732.md"
+    },
+    {
+      "id": "cmux-16425",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 16425,
+      "title": "Reuse transcript geometry during scroll renders (cmux-next)",
+      "status": "merged",
+      "happenedAt": "2026-10-01T18:12:51Z",
+      "recordedAt": "2026-10-14",
+      "areas": [
+        "agent-experience",
+        "performance"
+      ],
+      "summary": "Memoize transcript layout by rows, width, measured row heights and renderer registry, avoiding a full conversation layout on scroll-only renders while preserving invalidation when row renderers change.",
+      "evidence": {
+        "label": "CMUX PR 16425",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/16425",
+        "basis": "GitHub PR metadata captured 2026-10-14: author teamleaderleo; MERGED at 2026-10-01T18:12:51Z into feat-cmux-next. PR body reports about 4 ms per scroll frame spent recomputing unchanged geometry on a 5,000-row seed. A mounted regression test goes from two expected versus seven actual layout passes to green; in-app after measurement was pending. No before/after frame-time reduction is claimed."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-16425.md"
+    },
+    {
+      "id": "cmux-16231",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 16231,
+      "title": "Open native agent tabs backed by the React acpmux pane (cmux-next)",
+      "status": "merged",
+      "happenedAt": "2026-10-01T17:41:12Z",
+      "recordedAt": "2026-10-14",
+      "areas": [
+        "agent-experience",
+        "architecture"
+      ],
+      "summary": "New Agent Chat opens a frontend-local agent tab with a React pane and a versioned Swift host handshake to the authenticated acpmux transport. The PR joins menu, palette, tab-menu and CLI entrypoints.",
+      "evidence": {
+        "label": "CMUX PR 16231",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/16231",
+        "basis": "GitHub PR metadata captured 2026-10-14: author teamleaderleo; MERGED at 2026-10-01T17:41:12Z into feat-cmux-next. PR body describes the host handshake, pane trust checks and entrypoints. TypeScript tests passed, but the body explicitly leaves native compilation and live tagged-app behavior unverified and says agent tabs do not yet survive relaunch."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-16231.md"
     },
     {
       "id": "cmux-16511",
@@ -2912,6 +3352,30 @@
         }
       ],
       "sourcePath": "work/impact/records/cmux-16511.md"
+    },
+    {
+      "id": "cmux-15366",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 15366,
+      "title": "ci: bound the SwiftPM scratch holder and cache scratch sizes",
+      "status": "merged",
+      "happenedAt": "2026-09-28T13:09:54Z",
+      "recordedAt": "2026-10-15",
+      "areas": [
+        "ci",
+        "storage",
+        "reliability",
+        "build-cache"
+      ],
+      "summary": "Bound the SwiftPM scratch holder and cache scratch-directory sizes so cleanup avoids indefinite locks and repeated full-tree walks.",
+      "evidence": {
+        "label": "CMUX PR 15366",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/15366",
+        "basis": "GitHub PR metadata captured 2026-10-15: author teamleaderleo; MERGED at 2026-09-28T13:09:54Z into main. The body describes a 65-minute holder alarm for a 60-minute job timeout and cached size metadata, with 12 tests covering release, reuse, and held-directory behavior. It gives no fleet time or disk-savings delta."
+      },
+      "claims": [],
+      "sourcePath": "work/impact/records/cmux-15366.md"
     },
     {
       "id": "cmux-14768",
