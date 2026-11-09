@@ -2,9 +2,1585 @@
   "version": 1,
   "source": "repository",
   "generatedFrom": "work/impact/records",
-  "updatedAt": "2026-10-15",
-  "recordCount": 95,
+  "updatedAt": "2026-11-09",
+  "recordCount": 122,
   "records": [
+    {
+      "id": "cmux-38993",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 38993,
+      "title": "cmux-wg: agree on ultra mode inside the tunnel, so one end turning it on protects both directions",
+      "status": "merged",
+      "happenedAt": "2026-11-09T00:45:23Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "remote",
+        "performance"
+      ],
+      "summary": "cmux-wg peers now agree on ultra mode inside the tunnel, so turning it on at one end protects both directions; under loss the desktop stream's input-to-photon p50 went from seconds to the base latency (100 ms RTT, 10% loss: 13,710 ms to 118 ms).",
+      "evidence": {
+        "label": "cmux PR 38993",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/42538022173",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: remote desktop stream input-to-photon p50, ultra mode on at the viewer only, 100 ms RTT, 10% loss: 13,710 to 118 ms (116x) (scripts/remote-stream-ultra-bench.sh on wg-tcp over the in-process lossy link, 8 s per cell, one run per cell, mode rs:4:4@viewer; before = base feat-cmux-next ae80f703 plus the bench knob (run 42537114898), after = this PR); remote desktop stream input-to-photon p50, ultra mode on at the viewer only, 300 ms RTT, 10% loss: 30,661 to 326 ms (94x) (scripts/remote-stream-ultra-bench.sh on wg-tcp over the in-process lossy link, 8 s per cell, one run per cell, mode rs:4:4@viewer; before = run 42537114898, after = this PR); remote desktop stream input-to-photon p50, ultra mode on at the viewer only, 30 ms RTT, 5% loss: 1,206 to 46 ms (26x) (scripts/remote-stream-ultra-bench.sh on wg-tcp over the in-process lossy link, 8 s per cell, one run per cell, mode rs:4:4@viewer; before = run 42537114898, after = this PR). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/42538022173."
+      },
+      "claims": [
+        {
+          "id": "remote-desktop-stream-input-to-photon-p50-ultra-mode-on-at-t",
+          "dimension": "latency",
+          "metric": "remote desktop stream input-to-photon p50, ultra mode on at the viewer only, 100 ms RTT, 10% loss",
+          "direction": "reduction",
+          "value": 13600,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: scripts/remote-stream-ultra-bench.sh on wg-tcp over the in-process lossy link, 8 s per cell, one run per cell, mode rs:4:4@viewer; before = base feat-cmux-next ae80f703 plus the bench knob (run 42537114898), after = this PR",
+          "population": "desktop stream, host starting off, viewer rs:4:4, 100 ms RTT, 10% loss",
+          "note": "13,710 ms to 118 ms (116x), scripts/remote-stream-ultra-bench.sh on wg-tcp over the in-process lossy link, 8 s per cell, one run per cell, mode rs:4:4@viewer; before = base feat-cmux-next ae80f703 plus the bench knob (run 42537114898), after = this PR. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-38993"
+        },
+        {
+          "id": "remote-desktop-stream-input-to-photon-p50-ultra-mode-on-at-t-2",
+          "dimension": "latency",
+          "metric": "remote desktop stream input-to-photon p50, ultra mode on at the viewer only, 300 ms RTT, 10% loss",
+          "direction": "reduction",
+          "value": 30300,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: scripts/remote-stream-ultra-bench.sh on wg-tcp over the in-process lossy link, 8 s per cell, one run per cell, mode rs:4:4@viewer; before = run 42537114898, after = this PR",
+          "population": "desktop stream, host starting off, viewer rs:4:4, 300 ms RTT, 10% loss",
+          "note": "30,661 ms to 326 ms (94x), scripts/remote-stream-ultra-bench.sh on wg-tcp over the in-process lossy link, 8 s per cell, one run per cell, mode rs:4:4@viewer; before = run 42537114898, after = this PR. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-38993"
+        },
+        {
+          "id": "remote-desktop-stream-input-to-photon-p50-ultra-mode-on-at-t-3",
+          "dimension": "latency",
+          "metric": "remote desktop stream input-to-photon p50, ultra mode on at the viewer only, 30 ms RTT, 5% loss",
+          "direction": "reduction",
+          "value": 1160,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: scripts/remote-stream-ultra-bench.sh on wg-tcp over the in-process lossy link, 8 s per cell, one run per cell, mode rs:4:4@viewer; before = run 42537114898, after = this PR",
+          "population": "desktop stream, host starting off, viewer rs:4:4, 30 ms RTT, 5% loss",
+          "note": "1,206 ms to 46 ms (26x), scripts/remote-stream-ultra-bench.sh on wg-tcp over the in-process lossy link, 8 s per cell, one run per cell, mode rs:4:4@viewer; before = run 42537114898, after = this PR. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-38993"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-38993.md"
+    },
+    {
+      "id": "cmux-38863",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 38863,
+      "title": "cmux-wg: send a tail-loss probe before the retransmission timeout (vendored smoltcp)",
+      "status": "merged",
+      "happenedAt": "2026-11-08T22:47:44Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance",
+        "remote",
+        "network"
+      ],
+      "summary": "cmux-wg's TCP now sends a tail-loss probe before the retransmission timeout; in the interleaved bench a 100 ms RTT link at 1% loss improved from 1605 to 1173 ms p50 input-to-photon. At 300 ms RTT and 1% loss p50 got worse (4732 to 6268 ms).",
+      "evidence": {
+        "label": "cmux PR 38863",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/42517264160",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: remote stream input-to-photon p50 at 1% loss, 100 ms RTT: 1,605 to 1,173 ms (remote_stream_bench --path wg-tcp --seconds 8 --bulk-bytes 4000000, in-process lossy link, fleet Linux, median of 4 interleaved runs per arm; A = #37889 head, B = A plus this change); remote stream input-to-photon p50 at 3% loss, 100 ms RTT: 5,097 to 4,602 ms (same bench, median of 4 interleaved runs); remote stream input-to-photon p50 at 3% loss, 300 ms RTT: 11,670 to 9,432 ms (same bench, median of 4 interleaved runs). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/42517264160."
+      },
+      "claims": [
+        {
+          "id": "remote-stream-input-to-photon-p50-at-1-loss-100-ms-rtt",
+          "dimension": "latency",
+          "metric": "remote stream input-to-photon p50 at 1% loss, 100 ms RTT",
+          "direction": "reduction",
+          "value": 432,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: remote_stream_bench --path wg-tcp --seconds 8 --bulk-bytes 4000000, in-process lossy link, fleet Linux, median of 4 interleaved runs per arm; A = #37889 head, B = A plus this change",
+          "population": "same bench, workload and link on both arms",
+          "note": "1,605 ms to 1,173 ms, remote_stream_bench --path wg-tcp --seconds 8 --bulk-bytes 4000000, in-process lossy link, fleet Linux, median of 4 interleaved runs per arm; A = #37889 head, B = A plus this change. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-38863"
+        },
+        {
+          "id": "remote-stream-input-to-photon-p50-at-3-loss-100-ms-rtt",
+          "dimension": "latency",
+          "metric": "remote stream input-to-photon p50 at 3% loss, 100 ms RTT",
+          "direction": "reduction",
+          "value": 495,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: same bench, median of 4 interleaved runs",
+          "population": "same bench and link",
+          "note": "5,097 ms to 4,602 ms, same bench, median of 4 interleaved runs. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-38863"
+        },
+        {
+          "id": "remote-stream-input-to-photon-p50-at-3-loss-300-ms-rtt",
+          "dimension": "latency",
+          "metric": "remote stream input-to-photon p50 at 3% loss, 300 ms RTT",
+          "direction": "reduction",
+          "value": 2240,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: same bench, median of 4 interleaved runs",
+          "population": "same bench and link",
+          "note": "11,670 ms to 9,432 ms, same bench, median of 4 interleaved runs. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-38863"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-38863.md"
+    },
+    {
+      "id": "cmux-38518",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 38518,
+      "title": "cmux-wg: opt-in ultra mode (FEC and duplication under WireGuard) and its loss bench",
+      "status": "merged",
+      "happenedAt": "2026-11-08T19:35:22Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance",
+        "networking"
+      ],
+      "summary": "An opt-in FEC mode under WireGuard rebuilds lost datagrams: input-to-photon p99 at 100 ms RTT and 3% loss went from 5347 ms to 509 ms.",
+      "evidence": {
+        "label": "cmux PR 38518",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/38518#issuecomment-6722315030",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: input-to-photon p99 at 100 ms RTT, 3% loss: 5,347 to 509 ms (11x) (scripts/remote-stream-ultra-bench.sh, remote_stream_bench wg-tcp desktop stream, fleet Linux, 8 s per cell, one run per cell; before is ultra mode off, after is opt-in CMUX_WG_ULTRA=fec:8:2 (costs about 1.25-1.35x bytes); input-to-photon p99 at 100 ms RTT, 1% loss: 3,794 to 513 ms (7.4x) (scripts/remote-stream-ultra-bench.sh, remote_stream_bench wg-tcp desktop stream, fleet Linux, 8 s per cell, one run per cell; before is ultra mode off, after is opt-in CMUX_WG_ULTRA=fec:8:2 (costs about 1.25-1.35x bytes); input-to-photon p99 at 30 ms RTT, 1% loss: 1,175 to 132 ms (8.9x) (scripts/remote-stream-ultra-bench.sh, remote_stream_bench wg-tcp desktop stream, fleet Linux, 8 s per cell, one run per cell; before is ultra mode off, after is opt-in CMUX_WG_ULTRA=fec:8:2 (costs about 1.25-1.35x bytes); input-to-photon p50 at 300 ms RTT, 3% loss: 13,268 to 323 ms (41x) (scripts/remote-stream-ultra-bench.sh, remote_stream_bench wg-tcp desktop stream, fleet Linux, 8 s per cell, one run per cell; before is ultra mode off, after is opt-in CMUX_WG_ULTRA=fec:8:2 (costs about 1.25-1.35x bytes). Evidence: https://redirect.github.com/manaflow-ai/cmux/pull/38518#issuecomment-6722315030."
+      },
+      "claims": [
+        {
+          "id": "input-to-photon-p99-at-100-ms-rtt-3-loss",
+          "dimension": "latency",
+          "metric": "input-to-photon p99 at 100 ms RTT, 3% loss",
+          "direction": "reduction",
+          "value": 4840,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: scripts/remote-stream-ultra-bench.sh, remote_stream_bench wg-tcp desktop stream, fleet Linux, 8 s per cell, one run per cell; before is ultra mode off, after is opt-in CMUX_WG_ULTRA=fec:8:2 (costs about 1.25-1.35x bytes",
+          "population": "same stream, link and loss, ultra off vs fec:8:2",
+          "note": "5,347 ms to 509 ms (11x), scripts/remote-stream-ultra-bench.sh, remote_stream_bench wg-tcp desktop stream, fleet Linux, 8 s per cell, one run per cell; before is ultra mode off, after is opt-in CMUX_WG_ULTRA=fec:8:2 (costs about 1.25-1.35x bytes. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-38518"
+        },
+        {
+          "id": "input-to-photon-p99-at-100-ms-rtt-1-loss",
+          "dimension": "latency",
+          "metric": "input-to-photon p99 at 100 ms RTT, 1% loss",
+          "direction": "reduction",
+          "value": 3280,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: scripts/remote-stream-ultra-bench.sh, remote_stream_bench wg-tcp desktop stream, fleet Linux, 8 s per cell, one run per cell; before is ultra mode off, after is opt-in CMUX_WG_ULTRA=fec:8:2 (costs about 1.25-1.35x bytes",
+          "population": "same stream, link and loss, ultra off vs fec:8:2",
+          "note": "3,794 ms to 513 ms (7.4x), scripts/remote-stream-ultra-bench.sh, remote_stream_bench wg-tcp desktop stream, fleet Linux, 8 s per cell, one run per cell; before is ultra mode off, after is opt-in CMUX_WG_ULTRA=fec:8:2 (costs about 1.25-1.35x bytes. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-38518"
+        },
+        {
+          "id": "input-to-photon-p99-at-30-ms-rtt-1-loss",
+          "dimension": "latency",
+          "metric": "input-to-photon p99 at 30 ms RTT, 1% loss",
+          "direction": "reduction",
+          "value": 1040,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: scripts/remote-stream-ultra-bench.sh, remote_stream_bench wg-tcp desktop stream, fleet Linux, 8 s per cell, one run per cell; before is ultra mode off, after is opt-in CMUX_WG_ULTRA=fec:8:2 (costs about 1.25-1.35x bytes",
+          "population": "same stream, link and loss, ultra off vs fec:8:2",
+          "note": "1,175 ms to 132 ms (8.9x), scripts/remote-stream-ultra-bench.sh, remote_stream_bench wg-tcp desktop stream, fleet Linux, 8 s per cell, one run per cell; before is ultra mode off, after is opt-in CMUX_WG_ULTRA=fec:8:2 (costs about 1.25-1.35x bytes. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-38518"
+        },
+        {
+          "id": "input-to-photon-p50-at-300-ms-rtt-3-loss",
+          "dimension": "latency",
+          "metric": "input-to-photon p50 at 300 ms RTT, 3% loss",
+          "direction": "reduction",
+          "value": 12900,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: scripts/remote-stream-ultra-bench.sh, remote_stream_bench wg-tcp desktop stream, fleet Linux, 8 s per cell, one run per cell; before is ultra mode off, after is opt-in CMUX_WG_ULTRA=fec:8:2 (costs about 1.25-1.35x bytes",
+          "population": "same stream, link and loss, ultra off vs fec:8:2",
+          "note": "13,268 ms to 323 ms (41x), scripts/remote-stream-ultra-bench.sh, remote_stream_bench wg-tcp desktop stream, fleet Linux, 8 s per cell, one run per cell; before is ultra mode off, after is opt-in CMUX_WG_ULTRA=fec:8:2 (costs about 1.25-1.35x bytes. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-38518"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-38518.md"
+    },
+    {
+      "id": "cmux-38329",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 38329,
+      "title": "cmux-host, cmux-remote: the relay Register reads a ticket kept ahead and registers at once after a resume",
+      "status": "merged",
+      "happenedAt": "2026-11-08T13:37:13Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance",
+        "cloud"
+      ],
+      "summary": "After a resume, the Cloud relay Register reads a ticket kept ahead and registers at once: resume to registered p50 drops from 3.57 s to 0.68 s.",
+      "evidence": {
+        "label": "cmux PR 38329",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/42467371720",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: resume to registered, p50, Cloud relay Register: 3.57 to 0.68 s (5.2x) (cmux-host carrier_register_harness, HARNESS_RUNS=10, Linux pool; before = #38291 head (run 42465470129), after = this PR (run 42467371720). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/42467371720."
+      },
+      "claims": [
+        {
+          "id": "resume-to-registered-p50-cloud-relay-register",
+          "dimension": "latency",
+          "metric": "resume to registered, p50, Cloud relay Register",
+          "direction": "reduction",
+          "value": 2.89,
+          "unit": "s",
+          "recurrence": "per-event",
+          "confidence": "measured",
+          "measurementWindow": "before and after from the same harness: cmux-host carrier_register_harness, HARNESS_RUNS=10, Linux pool; before = #38291 head (run 42465470129), after = this PR (run 42467371720",
+          "population": "real CloudRole on a bound machine with a relay carrier, 10 runs each",
+          "note": "3.57 s to 0.68 s (5.2x), cmux-host carrier_register_harness, HARNESS_RUNS=10, Linux pool; before = #38291 head (run 42465470129), after = this PR (run 42467371720. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-38329"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-38329.md"
+    },
+    {
+      "id": "cmux-38481",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 38481,
+      "title": "Composer hat: finished lines stay longer, never go right after a look, and the hat folds away",
+      "status": "merged",
+      "happenedAt": "2026-11-08T12:17:30Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "layout stability",
+        "composer"
+      ],
+      "summary": "When the composer hat's last line leaves, the hat now folds away over several frames instead of dropping 28 px in one frame, so the dock height no longer jumps (largest per-frame step 28 px to 9.6 px in Chromium).",
+      "evidence": {
+        "label": "cmux PR 38481",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/42475417248",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: largest single-frame dock height step when the composer hat's last line leaves (Chromium): 28 to 9.6 px (2.9x) (webviews test/composer-hat-leave-fold.test.ts (gallery entry agent-pane.composer-hat-linger, last-leaves variant); before = base plus gallery scaffolding (run 42474935253), after = PR head). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/42475417248."
+      },
+      "claims": [
+        {
+          "id": "largest-single-frame-dock-height-step-when-the-composer-hat-",
+          "dimension": "work",
+          "metric": "largest single-frame dock height step when the composer hat's last line leaves (Chromium)",
+          "direction": "reduction",
+          "value": 18.4,
+          "unit": "px",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: webviews test/composer-hat-leave-fold.test.ts (gallery entry agent-pane.composer-hat-linger, last-leaves variant); before = base plus gallery scaffolding (run 42474935253), after = PR head",
+          "population": "Chromium; hat with a single line leaving; WebKit also improved 28 to 12.8 px",
+          "note": "28 px to 9.6 px (2.9x), webviews test/composer-hat-leave-fold.test.ts (gallery entry agent-pane.composer-hat-linger, last-leaves variant); before = base plus gallery scaffolding (run 42474935253), after = PR head. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-38481"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-38481.md"
+    },
+    {
+      "id": "cmux-37843",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 37843,
+      "title": "cmux-wg: start the tunnel's TCP at RFC 6928's 10-segment window (vendored smoltcp)",
+      "status": "merged",
+      "happenedAt": "2026-11-07T15:47:33Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance",
+        "networking"
+      ],
+      "summary": "The tunnel's TCP starts at a 10-segment window, so a 200 KB first frame arrives sooner: 3191 ms to 1714 ms at 150 ms RTT with 1% loss.",
+      "evidence": {
+        "label": "cmux PR 37843",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/42378814307",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: first 200 KB frame time through the WireGuard TCP tunnel, 50 ms link: 616 to 433 ms (remote_stream_bench, wg-tcp path, 200 KB first frame, 10 s per row, 8 vCPU fleet Linux, one run per side; before is #37801 at 2a55b95c, after is this PR at 79d08b6d); first 200 KB frame time through the WireGuard TCP tunnel, 150 ms link: 1,744 to 1,252 ms (remote_stream_bench, wg-tcp path, 200 KB first frame, 10 s per row, 8 vCPU fleet Linux, one run per side; before is #37801 at 2a55b95c, after is this PR at 79d08b6d); first 200 KB frame time through the WireGuard TCP tunnel, 50 ms link with 1% loss: 988 to 603 ms (remote_stream_bench, wg-tcp path, 200 KB first frame, 10 s per row, 8 vCPU fleet Linux, one run per side; before is #37801 at 2a55b95c, after is this PR at 79d08b6d); first 200 KB frame time through the WireGuard TCP tunnel, 150 ms link with 1% loss: 3,191 to 1,714 ms (remote_stream_bench, wg-tcp path, 200 KB first frame, 10 s per row, 8 vCPU fleet Linux, one run per side; before is #37801 at 2a55b95c, after is this PR at 79d08b6d). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/42378814307."
+      },
+      "claims": [
+        {
+          "id": "first-200-kb-frame-time-through-the-wireguard-tcp-tunnel-50-",
+          "dimension": "latency",
+          "metric": "first 200 KB frame time through the WireGuard TCP tunnel, 50 ms link",
+          "direction": "reduction",
+          "value": 183,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: remote_stream_bench, wg-tcp path, 200 KB first frame, 10 s per row, 8 vCPU fleet Linux, one run per side; before is #37801 at 2a55b95c, after is this PR at 79d08b6d",
+          "population": "WireGuard TCP rows of the bench, same link settings both sides",
+          "note": "616 ms to 433 ms, remote_stream_bench, wg-tcp path, 200 KB first frame, 10 s per row, 8 vCPU fleet Linux, one run per side; before is #37801 at 2a55b95c, after is this PR at 79d08b6d. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-37843"
+        },
+        {
+          "id": "first-200-kb-frame-time-through-the-wireguard-tcp-tunnel-150",
+          "dimension": "latency",
+          "metric": "first 200 KB frame time through the WireGuard TCP tunnel, 150 ms link",
+          "direction": "reduction",
+          "value": 492,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: remote_stream_bench, wg-tcp path, 200 KB first frame, 10 s per row, 8 vCPU fleet Linux, one run per side; before is #37801 at 2a55b95c, after is this PR at 79d08b6d",
+          "population": "WireGuard TCP rows of the bench, same link settings both sides",
+          "note": "1,744 ms to 1,252 ms, remote_stream_bench, wg-tcp path, 200 KB first frame, 10 s per row, 8 vCPU fleet Linux, one run per side; before is #37801 at 2a55b95c, after is this PR at 79d08b6d. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-37843"
+        },
+        {
+          "id": "first-200-kb-frame-time-through-the-wireguard-tcp-tunnel-50--2",
+          "dimension": "latency",
+          "metric": "first 200 KB frame time through the WireGuard TCP tunnel, 50 ms link with 1% loss",
+          "direction": "reduction",
+          "value": 385,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: remote_stream_bench, wg-tcp path, 200 KB first frame, 10 s per row, 8 vCPU fleet Linux, one run per side; before is #37801 at 2a55b95c, after is this PR at 79d08b6d",
+          "population": "WireGuard TCP rows of the bench, same link settings both sides",
+          "note": "988 ms to 603 ms, remote_stream_bench, wg-tcp path, 200 KB first frame, 10 s per row, 8 vCPU fleet Linux, one run per side; before is #37801 at 2a55b95c, after is this PR at 79d08b6d. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-37843"
+        },
+        {
+          "id": "first-200-kb-frame-time-through-the-wireguard-tcp-tunnel-150-2",
+          "dimension": "latency",
+          "metric": "first 200 KB frame time through the WireGuard TCP tunnel, 150 ms link with 1% loss",
+          "direction": "reduction",
+          "value": 1480,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: remote_stream_bench, wg-tcp path, 200 KB first frame, 10 s per row, 8 vCPU fleet Linux, one run per side; before is #37801 at 2a55b95c, after is this PR at 79d08b6d",
+          "population": "WireGuard TCP rows of the bench, same link settings both sides",
+          "note": "3,191 ms to 1,714 ms, remote_stream_bench, wg-tcp path, 200 KB first frame, 10 s per row, 8 vCPU fleet Linux, one run per side; before is #37801 at 2a55b95c, after is this PR at 79d08b6d. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-37843"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-37843.md"
+    },
+    {
+      "id": "cmux-36979",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 36979,
+      "title": "Fork Conversation: quiet history copy, a pending line with Cancel",
+      "status": "merged",
+      "happenedAt": "2026-11-06T11:58:05Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance"
+      ],
+      "summary": "Fork Conversation copies history quietly: watching apps hear 2 notes per fork instead of 402, and a fork of a 73,119-event chat takes 345 ms instead of 1.04 s.",
+      "evidence": {
+        "label": "cmux PR 36979",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/36979#issuecomment-6677422854",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: fork time p50, chat of 73,119 events (100 turns): 1,040 to 345 ms (3.0x) (fork_latency (cargo test -p acpmux --test hub_integration fork_latency -- --ignored), 5 forks, p50, one fleet run on 8 cores; PR states 1.04 s, converted at 1 s = 1000 ms); fork time p50, chat of 25,119 events: 365 to 116 ms (3.1x) (fork_latency, 5 forks, p50, same fleet run); notes a watching app receives per fork: 402 to 2 notes/fork (201x) (fork_latency, same run (bench chat repeats one record pattern; grows with chat length on real chats). Evidence: https://redirect.github.com/manaflow-ai/cmux/pull/36979#issuecomment-6677422854."
+      },
+      "claims": [
+        {
+          "id": "fork-time-p50-chat-of-73-119-events-100-turns",
+          "dimension": "latency",
+          "metric": "fork time p50, chat of 73,119 events (100 turns)",
+          "direction": "reduction",
+          "value": 695,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: fork_latency (cargo test -p acpmux --test hub_integration fork_latency -- --ignored), 5 forks, p50, one fleet run on 8 cores; PR states 1.04 s, converted at 1 s = 1000 ms",
+          "population": "same 100-turn chat, one watching app connection, base 0dfae167a04 (bench only) vs head 757a6bd8928",
+          "note": "1,040 ms to 345 ms (3.0x), fork_latency (cargo test -p acpmux --test hub_integration fork_latency -- --ignored), 5 forks, p50, one fleet run on 8 cores; PR states 1.04 s, converted at 1 s = 1000 ms. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-36979"
+        },
+        {
+          "id": "fork-time-p50-chat-of-25-119-events",
+          "dimension": "latency",
+          "metric": "fork time p50, chat of 25,119 events",
+          "direction": "reduction",
+          "value": 249,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: fork_latency, 5 forks, p50, same fleet run",
+          "population": "same chat and watcher on both sides",
+          "note": "365 ms to 116 ms (3.1x), fork_latency, 5 forks, p50, same fleet run. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-36979"
+        },
+        {
+          "id": "notes-a-watching-app-receives-per-fork",
+          "dimension": "work",
+          "metric": "notes a watching app receives per fork",
+          "direction": "reduction",
+          "value": 400,
+          "unit": "notes/fork",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: fork_latency, same run (bench chat repeats one record pattern; grows with chat length on real chats",
+          "population": "same chat and watcher on both sides",
+          "note": "402 notes/fork to 2 notes/fork (201x), fork_latency, same run (bench chat repeats one record pattern; grows with chat length on real chats. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-36979"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-36979.md"
+    },
+    {
+      "id": "cmux-34604",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 34604,
+      "title": "cmux link sync: push through a per-user content-addressed blob store",
+      "status": "merged",
+      "happenedAt": "2026-11-04T17:06:48Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "sync",
+        "performance"
+      ],
+      "summary": "cmux link sync can push through a per-user content-addressed blob store, so a second machine or a small edit to a big file moves far fewer bytes from the Mac: a second machine went from 89,610,640 B to 235,291 B.",
+      "evidence": {
+        "label": "cmux PR 34604",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/41809330696",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: bytes sent from the Mac to sync a folder to a second machine: 89,610,640 to 235,291 B (381x) (cargo test -p cmux-tui --test link_sync_store (fake platform and fake machine daemon, loopback); bytes from the Mac = link bytes + store upload bytes); bytes sent from the Mac when 1 byte is edited in a 24 MiB file: 33,682,014 to 3,115,369 B (11x) (cargo test -p cmux-tui --test link_sync_store; bytes from the Mac = link bytes + store upload bytes); bytes sent from the Mac for a first sync of a folder: 89,610,640 to 66,955,373 B (cargo test -p cmux-tui --test link_sync_store; bytes from the Mac = link bytes + store upload bytes). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/41809330696."
+      },
+      "claims": [
+        {
+          "id": "bytes-sent-from-the-mac-to-sync-a-folder-to-a-second-machine",
+          "dimension": "size",
+          "metric": "bytes sent from the Mac to sync a folder to a second machine",
+          "direction": "reduction",
+          "value": 89400000,
+          "unit": "B",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: cargo test -p cmux-tui --test link_sync_store (fake platform and fake machine daemon, loopback); bytes from the Mac = link bytes + store upload bytes",
+          "population": "600 files of 2-24 KiB, a 200 KiB vendored file twice, a 24 MiB asset; before = direct link copy, after = store push to a second machine",
+          "note": "89,610,640 B to 235,291 B (381x), cargo test -p cmux-tui --test link_sync_store (fake platform and fake machine daemon, loopback); bytes from the Mac = link bytes + store upload bytes. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-34604"
+        },
+        {
+          "id": "bytes-sent-from-the-mac-when-1-byte-is-edited-in-a-24-mib-fi",
+          "dimension": "size",
+          "metric": "bytes sent from the Mac when 1 byte is edited in a 24 MiB file",
+          "direction": "reduction",
+          "value": 30600000,
+          "unit": "B",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: cargo test -p cmux-tui --test link_sync_store; bytes from the Mac = link bytes + store upload bytes",
+          "population": "same repo fixture, one byte changed in the 24 MiB asset",
+          "note": "33,682,014 B to 3,115,369 B (11x), cargo test -p cmux-tui --test link_sync_store; bytes from the Mac = link bytes + store upload bytes. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-34604"
+        },
+        {
+          "id": "bytes-sent-from-the-mac-for-a-first-sync-of-a-folder",
+          "dimension": "size",
+          "metric": "bytes sent from the Mac for a first sync of a folder",
+          "direction": "reduction",
+          "value": 22700000,
+          "unit": "B",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: cargo test -p cmux-tui --test link_sync_store; bytes from the Mac = link bytes + store upload bytes",
+          "population": "same repo fixture, first sync",
+          "note": "89,610,640 B to 66,955,373 B, cargo test -p cmux-tui --test link_sync_store; bytes from the Mac = link bytes + store upload bytes. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-34604"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-34604.md"
+    },
+    {
+      "id": "cmux-35138",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 35138,
+      "title": "cmux link sync push: no-follow writes, so a folder's listing replaces the per-file fs.stat",
+      "status": "merged",
+      "happenedAt": "2026-11-04T09:14:16Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance",
+        "cloud"
+      ],
+      "summary": "A link sync push reads one folder listing instead of one stat per file: a 3,038-file push went from 462.4 s to 286.0 s.",
+      "evidence": {
+        "label": "cmux PR 35138",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/41795843672",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: link sync push wall time, 3,038 files, 460 MB, 30 ms latency, 8 Mbit/s: 462.4 to 286 s (cmux-tui/tests/link_push_bench.rs with CMUX_BENCH_FILES=3000 CMUX_BENCH_BLOB_MB=160 CMUX_BENCH_RATE_MBPS=8 CMUX_BENCH_LATENCY_MS=30, one fleet Linux run each side). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/41795843672."
+      },
+      "claims": [
+        {
+          "id": "link-sync-push-wall-time-3-038-files-460-mb-30-ms-latency-8-",
+          "dimension": "latency",
+          "metric": "link sync push wall time, 3,038 files, 460 MB, 30 ms latency, 8 Mbit/s",
+          "direction": "reduction",
+          "value": 176,
+          "unit": "s",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: cmux-tui/tests/link_push_bench.rs with CMUX_BENCH_FILES=3000 CMUX_BENCH_BLOB_MB=160 CMUX_BENCH_RATE_MBPS=8 CMUX_BENCH_LATENCY_MS=30, one fleet Linux run each side",
+          "population": "same throttled Cloud-shaped daemon, 3,038 files written both sides (base 51ccf996bf8 vs PR head)",
+          "note": "462.4 s to 286 s, cmux-tui/tests/link_push_bench.rs with CMUX_BENCH_FILES=3000 CMUX_BENCH_BLOB_MB=160 CMUX_BENCH_RATE_MBPS=8 CMUX_BENCH_LATENCY_MS=30, one fleet Linux run each side. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-35138"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-35138.md"
+    },
+    {
+      "id": "cmux-34538",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 34538,
+      "title": "Cloud copy: compressed fs.write bytes (fs-write-deflate-v1) and fewer round trips per file",
+      "status": "merged",
+      "happenedAt": "2026-11-04T07:43:44Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance",
+        "network"
+      ],
+      "summary": "Cloud copy compresses fs.write bytes through a new capability; bytes up on the wire for a 365 MB push fall from 490.7 MB to 461.0 MB.",
+      "evidence": {
+        "label": "cmux PR 34538",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/41786488153",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: bytes sent up for a 3,190-file, 365 MB Cloud push at 8 MB/s and 30 ms one-way latency: 490.7 to 461 MB (link_push_bench, real headless daemon through a unix-socket proxy; before on fleet Linux job b081eb17, after in the linked run); push wall time for the same fixture: 494.8 to 489.4 s (link_push_bench, same config). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/41786488153."
+      },
+      "claims": [
+        {
+          "id": "bytes-sent-up-for-a-3-190-file-365-mb-cloud-push-at-8-mb-s-a",
+          "dimension": "size",
+          "metric": "bytes sent up for a 3,190-file, 365 MB Cloud push at 8 MB/s and 30 ms one-way latency",
+          "direction": "reduction",
+          "value": 29.7,
+          "unit": "MB",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: link_push_bench, real headless daemon through a unix-socket proxy; before on fleet Linux job b081eb17, after in the linked run",
+          "population": "same fixture, mostly incompressible blobs",
+          "note": "490.7 MB to 461 MB, link_push_bench, real headless daemon through a unix-socket proxy; before on fleet Linux job b081eb17, after in the linked run. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-34538"
+        },
+        {
+          "id": "push-wall-time-for-the-same-fixture",
+          "dimension": "latency",
+          "metric": "push wall time for the same fixture",
+          "direction": "reduction",
+          "value": 5.4,
+          "unit": "s",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: link_push_bench, same config",
+          "population": "same",
+          "note": "494.8 s to 489.4 s, link_push_bench, same config. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-34538"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-34538.md"
+    },
+    {
+      "id": "cmux-32812",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 32812,
+      "title": "perf(diff): back off freshness checks in unfocused windows",
+      "status": "merged",
+      "happenedAt": "2026-11-03T10:54:57Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance"
+      ],
+      "summary": "Unfocused diff windows check repository freshness every 30 s instead of every 4 s: 14 idle wakeups per minute became 2, and git child CPU fell from 41.847 ms to 6.948 ms per minute.",
+      "evidence": {
+        "label": "cmux PR 32812",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/41569006531",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: idle wakeups per 60 s in an unfocused, visible diff window: 14 to 2 wakeups/60 s (7.0x) (hook/git benchmark: real hook in a visible unfocused jsdom page hashing a real git diff in a temp repo, one 60 s sample per arm on the same worker); git child CPU per 60 s in an unfocused diff window: 41.847 to 6.948 ms (6.0x) (same hook/git benchmark, one 60 s sample per arm); combined CPU (parent plus git child) per 60 s in an unfocused diff window: 166.332 to 138.133 ms (same hook/git benchmark, one 60 s sample per arm; hook/git CPU, not whole-app CPU). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/41569006531."
+      },
+      "claims": [
+        {
+          "id": "idle-wakeups-per-60-s-in-an-unfocused-visible-diff-window",
+          "dimension": "work",
+          "metric": "idle wakeups per 60 s in an unfocused, visible diff window",
+          "direction": "reduction",
+          "value": 12,
+          "unit": "wakeups/60 s",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: hook/git benchmark: real hook in a visible unfocused jsdom page hashing a real git diff in a temp repo, one 60 s sample per arm on the same worker",
+          "population": "same worker, same 60 s window, old hook vs new hook",
+          "note": "14 wakeups/60 s to 2 wakeups/60 s (7.0x), hook/git benchmark: real hook in a visible unfocused jsdom page hashing a real git diff in a temp repo, one 60 s sample per arm on the same worker. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-32812"
+        },
+        {
+          "id": "git-child-cpu-per-60-s-in-an-unfocused-diff-window",
+          "dimension": "latency",
+          "metric": "git child CPU per 60 s in an unfocused diff window",
+          "direction": "reduction",
+          "value": 34.9,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: same hook/git benchmark, one 60 s sample per arm",
+          "population": "same worker, same 60 s window",
+          "note": "41.847 ms to 6.948 ms (6.0x), same hook/git benchmark, one 60 s sample per arm. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-32812"
+        },
+        {
+          "id": "combined-cpu-parent-plus-git-child-per-60-s-in-an-unfocused-",
+          "dimension": "latency",
+          "metric": "combined CPU (parent plus git child) per 60 s in an unfocused diff window",
+          "direction": "reduction",
+          "value": 28.2,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: same hook/git benchmark, one 60 s sample per arm; hook/git CPU, not whole-app CPU",
+          "population": "same worker, same 60 s window",
+          "note": "166.332 ms to 138.133 ms, same hook/git benchmark, one 60 s sample per arm; hook/git CPU, not whole-app CPU. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-32812"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-32812.md"
+    },
+    {
+      "id": "cmux-33169",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 33169,
+      "title": "fix(rail): paint initial history ticks at final geometry",
+      "status": "merged",
+      "happenedAt": "2026-11-03T09:36:02Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance",
+        "ui"
+      ],
+      "summary": "Initial history ticks in the chat rail paint at final geometry; the transcript settles 392 ms sooner in the ui-stability harness.",
+      "evidence": {
+        "label": "cmux PR 33169",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/41593763246",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: transcript settled time after open (ui.transcript.settled): 919.7 to 527.9 ms (ui-stability harness, tracing off, 8 CPUs both runs; before run 41590147912 at d119e145, after run 41593763246); chat rail settle after paint: 356.6 to 145.6 ms (2.4x) (same two runs (ui.chat_rail.settle_after_paint). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/41593763246."
+      },
+      "claims": [
+        {
+          "id": "transcript-settled-time-after-open-ui-transcript-settled",
+          "dimension": "latency",
+          "metric": "transcript settled time after open (ui.transcript.settled)",
+          "direction": "reduction",
+          "value": 392,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: ui-stability harness, tracing off, 8 CPUs both runs; before run 41590147912 at d119e145, after run 41593763246",
+          "population": "same harness, cold load variation noted in the PR",
+          "note": "919.7 ms to 527.9 ms, ui-stability harness, tracing off, 8 CPUs both runs; before run 41590147912 at d119e145, after run 41593763246. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-33169"
+        },
+        {
+          "id": "chat-rail-settle-after-paint",
+          "dimension": "latency",
+          "metric": "chat rail settle after paint",
+          "direction": "reduction",
+          "value": 211,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: same two runs (ui.chat_rail.settle_after_paint",
+          "population": "same",
+          "note": "356.6 ms to 145.6 ms (2.4x), same two runs (ui.chat_rail.settle_after_paint. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-33169"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-33169.md"
+    },
+    {
+      "id": "cmux-32795",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 32795,
+      "title": "Prompt rail: full length on the first frame from the prompt count, no shift as history loads",
+      "status": "merged",
+      "happenedAt": "2026-11-03T08:53:56Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "layout stability",
+        "performance",
+        "agent chat"
+      ],
+      "summary": "The prompt rail now draws at full length and centred on the first frame from the chat's prompt count, so it no longer grows or shifts as history loads: a 9,000 px first-paint length gap went to 0 and the rail's first paint came 221 ms sooner.",
+      "evidence": {
+        "label": "cmux PR 32795",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/41565920260",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: prompt rail tick-track length gap between first paint and final, cold open of a 1,000-turn chat with paged history: 9,000 to 0 px (webviews/bench/thread-rail-jump.bench.ts cold-open scenario (thread_rail.first_paint.length_gap_px.paged_1000); before = bench commit alone (run 41560761136), after = PR head); prompt rail first paint after open, cold open of a 1,000-turn chat with paged history: 598 to 377 ms (webviews/bench/thread-rail-jump.bench.ts cold-open scenario; before = bench commit alone (run 41560761136), after = PR head); prompt rail settled time on cold open, WebKit (ui.chat_rail.webkit.settled): 1,346 to 957 ms (ui-stability bench, chat_rail stage, WebKit; before = base run 41569604459, after = PR head). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/41565920260, https://redirect.github.com/manaflow-ai/cmux/actions/runs/41584690294."
+      },
+      "claims": [
+        {
+          "id": "prompt-rail-tick-track-length-gap-between-first-paint-and-fi",
+          "dimension": "work",
+          "metric": "prompt rail tick-track length gap between first paint and final, cold open of a 1,000-turn chat with paged history",
+          "direction": "reduction",
+          "value": 9000,
+          "unit": "px",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: webviews/bench/thread-rail-jump.bench.ts cold-open scenario (thread_rail.first_paint.length_gap_px.paged_1000); before = bench commit alone (run 41560761136), after = PR head",
+          "population": "1,000-turn chat, prompt index answering 150 ms after asked, then two older pages",
+          "note": "9,000 px to 0 px, webviews/bench/thread-rail-jump.bench.ts cold-open scenario (thread_rail.first_paint.length_gap_px.paged_1000); before = bench commit alone (run 41560761136), after = PR head. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-32795"
+        },
+        {
+          "id": "prompt-rail-first-paint-after-open-cold-open-of-a-1-000-turn",
+          "dimension": "latency",
+          "metric": "prompt rail first paint after open, cold open of a 1,000-turn chat with paged history",
+          "direction": "reduction",
+          "value": 221,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: webviews/bench/thread-rail-jump.bench.ts cold-open scenario; before = bench commit alone (run 41560761136), after = PR head",
+          "population": "1,000-turn chat, prompt index answering 150 ms after asked, then two older pages",
+          "note": "598 ms to 377 ms, webviews/bench/thread-rail-jump.bench.ts cold-open scenario; before = bench commit alone (run 41560761136), after = PR head. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-32795"
+        },
+        {
+          "id": "prompt-rail-settled-time-on-cold-open-webkit-ui-chat-rail-we",
+          "dimension": "latency",
+          "metric": "prompt rail settled time on cold open, WebKit (ui.chat_rail.webkit.settled)",
+          "direction": "reduction",
+          "value": 389,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: ui-stability bench, chat_rail stage, WebKit; before = base run 41569604459, after = PR head",
+          "population": "ui-stability chat_rail stage, same harness on base and head",
+          "note": "1,346 ms to 957 ms, ui-stability bench, chat_rail stage, WebKit; before = base run 41569604459, after = PR head. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-32795"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-32795.md"
+    },
+    {
+      "id": "cmux-33150",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 33150,
+      "title": "ci(web): the webview shard split counts the pools the runner really has (shards 40 -> ~13 min)",
+      "status": "merged",
+      "happenedAt": "2026-11-03T07:23:10Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "ci",
+        "performance"
+      ],
+      "summary": "The webview CI shard split now counts the pools the runner really has; shard wall time p50 fell from 26.0 to 19.9 minutes and the slowest shard from 40.3 to 24.4 minutes.",
+      "evidence": {
+        "label": "cmux PR 33150",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/41588526857",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: webview shard wall time, p50: 26 to 19.9 min (web CI webview shards; before: 64 shards on base push runs 41579957080 to 41581500665; after: this PR's run); webview shard wall time, max: 40.3 to 24.4 min (same runs (before had 3 of 64 shards cancelled at 40 min; after none); CI shard-minutes per run (16 vCPU runners): 189 to 156 min/run (same runs; runner count unchanged (8). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/41588526857."
+      },
+      "claims": [
+        {
+          "id": "webview-shard-wall-time-p50",
+          "dimension": "latency",
+          "metric": "webview shard wall time, p50",
+          "direction": "reduction",
+          "value": 6.1,
+          "unit": "min",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: web CI webview shards; before: 64 shards on base push runs 41579957080 to 41581500665; after: this PR's run",
+          "population": "shard wall time per shard, before and after runs",
+          "note": "26 min to 19.9 min, web CI webview shards; before: 64 shards on base push runs 41579957080 to 41581500665; after: this PR's run. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-33150"
+        },
+        {
+          "id": "webview-shard-wall-time-max",
+          "dimension": "latency",
+          "metric": "webview shard wall time, max",
+          "direction": "reduction",
+          "value": 15.9,
+          "unit": "min",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: same runs (before had 3 of 64 shards cancelled at 40 min; after none",
+          "population": "shard wall time per shard",
+          "note": "40.3 min to 24.4 min, same runs (before had 3 of 64 shards cancelled at 40 min; after none. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-33150"
+        },
+        {
+          "id": "ci-shard-minutes-per-run-16-vcpu-runners",
+          "dimension": "compute",
+          "metric": "CI shard-minutes per run (16 vCPU runners)",
+          "direction": "reduction",
+          "value": 33,
+          "unit": "min/run",
+          "recurrence": "per-run",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: same runs; runner count unchanged (8",
+          "population": "webview shards per run",
+          "note": "189 min/run to 156 min/run, same runs; runner count unchanged (8. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-33150"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-33150.md"
+    },
+    {
+      "id": "cmux-31529",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 31529,
+      "title": "acpmux: cache serialized closed summaries",
+      "status": "merged",
+      "happenedAt": "2026-11-02T01:50:22Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance"
+      ],
+      "summary": "Closed-session summary rows are cached, so full list builds on a 7,828-record store dropped from 227 ms to 150 ms of CPU.",
+      "evidence": {
+        "label": "cmux PR 31529",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/41372907688",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: watch/list full build CPU, 7,828 records: 227.378 to 150.376 ms (measure_7828_full_idle_closed_summary_cache, same 7,828-record harness (7,295 closed); sessions usage full build CPU, 7,828 records: 207.694 to 149.91 ms (measure_7828_full_idle_closed_summary_cache, same 7,828-record harness (7,295 closed); peer sync summaries CPU, 7,828 records: 235.739 to 181.206 ms (measure_7828_full_idle_closed_summary_cache, same 7,828-record harness (7,295 closed). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/41372907688."
+      },
+      "claims": [
+        {
+          "id": "watch-list-full-build-cpu-7-828-records",
+          "dimension": "latency",
+          "metric": "watch/list full build CPU, 7,828 records",
+          "direction": "reduction",
+          "value": 77,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: measure_7828_full_idle_closed_summary_cache, same 7,828-record harness (7,295 closed",
+          "population": "7,828 records, 7,295 closed, full idle projection",
+          "note": "227.378 ms to 150.376 ms, measure_7828_full_idle_closed_summary_cache, same 7,828-record harness (7,295 closed. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-31529"
+        },
+        {
+          "id": "sessions-usage-full-build-cpu-7-828-records",
+          "dimension": "latency",
+          "metric": "sessions usage full build CPU, 7,828 records",
+          "direction": "reduction",
+          "value": 57.8,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: measure_7828_full_idle_closed_summary_cache, same 7,828-record harness (7,295 closed",
+          "population": "7,828 records, 7,295 closed",
+          "note": "207.694 ms to 149.91 ms, measure_7828_full_idle_closed_summary_cache, same 7,828-record harness (7,295 closed. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-31529"
+        },
+        {
+          "id": "peer-sync-summaries-cpu-7-828-records",
+          "dimension": "latency",
+          "metric": "peer sync summaries CPU, 7,828 records",
+          "direction": "reduction",
+          "value": 54.5,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: measure_7828_full_idle_closed_summary_cache, same 7,828-record harness (7,295 closed",
+          "population": "7,828 records, 7,295 closed",
+          "note": "235.739 ms to 181.206 ms, measure_7828_full_idle_closed_summary_cache, same 7,828-record harness (7,295 closed. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-31529"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-31529.md"
+    },
+    {
+      "id": "cmux-29490",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 29490,
+      "title": "carry of #26809: cmux-next swift test: main-thread-heavy suites in their own processes, the broad pass sharded, SIGPIPE caught as in the app",
+      "status": "merged",
+      "happenedAt": "2026-10-31T21:12:44Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "ci",
+        "performance"
+      ],
+      "summary": "cmux-next swift test now runs main-thread-heavy suites in their own processes; Mac minutes on the job fell from 9,283 to 6,450 a day in the next measured day (the job was still mostly red on base failures).",
+      "evidence": {
+        "label": "cmux PR 29490",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/29490#issuecomment-6628562335",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: Mac minutes on the cmux-next swift test job, one full day: 9,283 to 6,450 minutes/day (sum of job seconds from ci-dash daily jobs.csv dumps, 24 h to 13:50Z 2026-10-31 vs 2026-11-03 00:00-24:00Z). Evidence: https://redirect.github.com/manaflow-ai/cmux/pull/29490#issuecomment-6628562335."
+      },
+      "claims": [
+        {
+          "id": "mac-minutes-on-the-cmux-next-swift-test-job-one-full-day",
+          "dimension": "compute",
+          "metric": "Mac minutes on the cmux-next swift test job, one full day",
+          "direction": "reduction",
+          "value": 2830,
+          "unit": "minutes/day",
+          "recurrence": "daily",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: sum of job seconds from ci-dash daily jobs.csv dumps, 24 h to 13:50Z 2026-10-31 vs 2026-11-03 00:00-24:00Z",
+          "population": "all cmux-next swift test jobs in the day's dump, before and after",
+          "note": "9,283 minutes/day to 6,450 minutes/day, sum of job seconds from ci-dash daily jobs.csv dumps, 24 h to 13:50Z 2026-10-31 vs 2026-11-03 00:00-24:00Z. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-29490"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-29490.md"
+    },
+    {
+      "id": "cmux-29282",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 29282,
+      "title": "fix(agent-pane): the summary card holds still while the chat scrolls",
+      "status": "merged",
+      "happenedAt": "2026-10-31T16:56:34Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance",
+        "ui-smoothness"
+      ],
+      "summary": "The Agent pane's summary card now takes new rows once, 250 ms after a scroll ends, instead of re-rendering while history pages in; DOM changes in the card during a 100-frame page-in went from 15 to 0.",
+      "evidence": {
+        "label": "cmux PR 29282",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/41191863690",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: DOM changes in the inline Summary card and toggle while history pages in (100 frames, Chromium): 15 to 0 changes (Chromium browser test of the summary card, before 91684367 vs after 5adcbd7). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/41191863690."
+      },
+      "claims": [
+        {
+          "id": "dom-changes-in-the-inline-summary-card-and-toggle-while-hist",
+          "dimension": "work",
+          "metric": "DOM changes in the inline Summary card and toggle while history pages in (100 frames, Chromium)",
+          "direction": "reduction",
+          "value": 15,
+          "unit": "changes",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: Chromium browser test of the summary card, before 91684367 vs after 5adcbd7",
+          "population": "100 frames of page-in, same browser test both sides",
+          "note": "15 changes to 0 changes, Chromium browser test of the summary card, before 91684367 vs after 5adcbd7. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-29282"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-29282.md"
+    },
+    {
+      "id": "cmux-29126",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 29126,
+      "title": "cmux NEXT: a chat opens on its attach, not on acpmux's paced session list (30 s → <1 s on a busy Mac)",
+      "status": "merged",
+      "happenedAt": "2026-10-31T10:13:52Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance"
+      ],
+      "summary": "A chat opens on its own attach reply instead of waiting for the paced session list; with the list held 3 s the open went from 3,004 ms to 1 ms.",
+      "evidence": {
+        "label": "cmux PR 29126",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/41178642875",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: chat open (connect) time with the session list held for 3,000 ms: 3,004 to 1 ms (3004x) (chatOpenPacedList.test.ts 'with a list that takes 3 s', same test before (red commit) and after; after-run shown). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/41178642875."
+      },
+      "claims": [
+        {
+          "id": "chat-open-connect-time-with-the-session-list-held-for-3-000-",
+          "dimension": "latency",
+          "metric": "chat open (connect) time with the session list held for 3,000 ms",
+          "direction": "reduction",
+          "value": 3000,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: chatOpenPacedList.test.ts 'with a list that takes 3 s', same test before (red commit) and after; after-run shown",
+          "population": "same test scenario on both sides (before measured at the red commit, run 41176364697)",
+          "note": "3,004 ms to 1 ms (3004x), chatOpenPacedList.test.ts 'with a list that takes 3 s', same test before (red commit) and after; after-run shown. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-29126"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-29126.md"
+    },
+    {
+      "id": "cmux-29086",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 29086,
+      "title": "perf(agent-chat): sweeping the pointer across the session rail paints within each frame",
+      "status": "merged",
+      "happenedAt": "2026-10-31T10:13:33Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance",
+        "ui"
+      ],
+      "summary": "Sweeping the pointer across the session rail now paints within each frame: move-to-card p50 drops from 20.5 ms to 7.9 ms with 3,000 prompts.",
+      "evidence": {
+        "label": "cmux PR 29086",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/41179784449",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: session rail hover: pointer move to card painted, p50, 3,000 prompts: 20.5 to 7.9 ms (2.6x) (webviews/test/latency chat.rail.hover.sweep.3000, 535 moves, same Linux Chromium job, before = head with webviews/src reverted); session rail hover: pointer move to card painted, p50, 100 prompts: 23.4 to 7.9 ms (3.0x) (webviews/test/latency chat.rail.hover.sweep.100, same job); browser style recalculation per pointer move, 3,000 prompts: 28.3 to 3.9 ms (7.3x) (same latency job, same cases). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/41179784449."
+      },
+      "claims": [
+        {
+          "id": "session-rail-hover-pointer-move-to-card-painted-p50-3-000-pr",
+          "dimension": "latency",
+          "metric": "session rail hover: pointer move to card painted, p50, 3,000 prompts",
+          "direction": "reduction",
+          "value": 12.6,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: webviews/test/latency chat.rail.hover.sweep.3000, 535 moves, same Linux Chromium job, before = head with webviews/src reverted",
+          "population": "535 moves per case, 120-tick sweep",
+          "note": "20.5 ms to 7.9 ms (2.6x), webviews/test/latency chat.rail.hover.sweep.3000, 535 moves, same Linux Chromium job, before = head with webviews/src reverted. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-29086"
+        },
+        {
+          "id": "session-rail-hover-pointer-move-to-card-painted-p50-100-prom",
+          "dimension": "latency",
+          "metric": "session rail hover: pointer move to card painted, p50, 100 prompts",
+          "direction": "reduction",
+          "value": 15.5,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: webviews/test/latency chat.rail.hover.sweep.100, same job",
+          "population": "535 moves per case",
+          "note": "23.4 ms to 7.9 ms (3.0x), webviews/test/latency chat.rail.hover.sweep.100, same job. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-29086"
+        },
+        {
+          "id": "browser-style-recalculation-per-pointer-move-3-000-prompts",
+          "dimension": "latency",
+          "metric": "browser style recalculation per pointer move, 3,000 prompts",
+          "direction": "reduction",
+          "value": 24.4,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: same latency job, same cases",
+          "population": "535 moves per case",
+          "note": "28.3 ms to 3.9 ms (7.3x), same latency job, same cases. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-29086"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-29086.md"
+    },
+    {
+      "id": "cmux-28098",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 28098,
+      "title": "acpmux: restore older Claude chat history after restart",
+      "status": "merged",
+      "happenedAt": "2026-10-31T00:58:46Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance"
+      ],
+      "summary": "After a restart, an adopted Claude chat no longer waits on the full session log before showing its newest answer; the newest answer reaches the page in 256.5 ms instead of 1,806.9 ms on a 700-turn chat.",
+      "evidence": {
+        "label": "cmux PR 28098",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/41066566417",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: navigation to newest answer in the page, restored chat of 700 turns (200 seeded, 500,000 raw log records): 1806.9 to 256.5 ms (7.0x) (restore fixture, synthetic Linux Playwright harness, same build, fresh browser after fixture daemon restart, one sample per mode (waitLogs omitted vs waitLogs:false). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/41066566417."
+      },
+      "claims": [
+        {
+          "id": "navigation-to-newest-answer-in-the-page-restored-chat-of-700",
+          "dimension": "latency",
+          "metric": "navigation to newest answer in the page, restored chat of 700 turns (200 seeded, 500,000 raw log records)",
+          "direction": "reduction",
+          "value": 1550,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: restore fixture, synthetic Linux Playwright harness, same build, fresh browser after fixture daemon restart, one sample per mode (waitLogs omitted vs waitLogs:false",
+          "population": "same 700-turn restore fixture on both sides",
+          "note": "1806.9 ms to 256.5 ms (7.0x), restore fixture, synthetic Linux Playwright harness, same build, fresh browser after fixture daemon restart, one sample per mode (waitLogs omitted vs waitLogs:false. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-28098"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-28098.md"
+    },
+    {
+      "id": "cmux-27740",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 27740,
+      "title": "acpmux: an adopted Claude chat reads its transcript from the end",
+      "status": "merged",
+      "happenedAt": "2026-10-30T03:02:02Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance"
+      ],
+      "summary": "Adopting a Claude chat reads a page from the end of its transcript instead of the newest 64 MiB: opening a 422 MB transcript went from 51 ms to 9 ms.",
+      "evidence": {
+        "label": "cmux PR 27740",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/40991926828",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: adopt open (replay plus tail page) of a 422 MB Claude transcript: 51 to 9 ms (5.7x) (hub::adoption::page_tests::bench_adopt_open_of_a_420_mb_transcript, --release --ignored, 32-vCPU Linux runner class); records written to the chat's log when adopting a 422 MB transcript: 3,915 to 465 records (8.4x) (same bench, same runs (before run 40979774165). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/40991926828."
+      },
+      "claims": [
+        {
+          "id": "adopt-open-replay-plus-tail-page-of-a-422-mb-claude-transcri",
+          "dimension": "latency",
+          "metric": "adopt open (replay plus tail page) of a 422 MB Claude transcript",
+          "direction": "reduction",
+          "value": 42,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: hub::adoption::page_tests::bench_adopt_open_of_a_420_mb_transcript, --release --ignored, 32-vCPU Linux runner class",
+          "population": "synthetic 422 MB transcript, 850 turns of 12 tool calls with 20 KiB outputs, same on both sides",
+          "note": "51 ms to 9 ms (5.7x), hub::adoption::page_tests::bench_adopt_open_of_a_420_mb_transcript, --release --ignored, 32-vCPU Linux runner class. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-27740"
+        },
+        {
+          "id": "records-written-to-the-chat-s-log-when-adopting-a-422-mb-tra",
+          "dimension": "work",
+          "metric": "records written to the chat's log when adopting a 422 MB transcript",
+          "direction": "reduction",
+          "value": 3450,
+          "unit": "records",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: same bench, same runs (before run 40979774165",
+          "population": "synthetic 422 MB transcript, same on both sides",
+          "note": "3,915 records to 465 records (8.4x), same bench, same runs (before run 40979774165. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-27740"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-27740.md"
+    },
+    {
+      "id": "cmux-27281",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 27281,
+      "title": "fix(ios): detect dead links sooner and reconnect immediately on foreground",
+      "status": "merged",
+      "happenedAt": "2026-10-29T21:01:55Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance",
+        "reliability"
+      ],
+      "summary": "The NEXT iPhone app now notices a silently dropped link in about 5 s instead of about 23 s, and redials at once on foreground.",
+      "evidence": {
+        "label": "cmux PR 27281",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/27281#issuecomment-6493187885",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: silently dropped link detection time, median of 3 runs (macOS run): 23,399 to 4,981 ms (4.7x) (LinkRecoveryTests silentDropDetectionBenchmark (silent_drop_ms), 3 runs, before = head with only LinkController.swift restored from base). Evidence: https://redirect.github.com/manaflow-ai/cmux/pull/27281#issuecomment-6493187885."
+      },
+      "claims": [
+        {
+          "id": "silently-dropped-link-detection-time-median-of-3-runs-macos-",
+          "dimension": "latency",
+          "metric": "silently dropped link detection time, median of 3 runs (macOS run)",
+          "direction": "reduction",
+          "value": 18400,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: LinkRecoveryTests silentDropDetectionBenchmark (silent_drop_ms), 3 runs, before = head with only LinkController.swift restored from base",
+          "population": "same benchmark on both sides, only LinkController.swift differs",
+          "note": "23,399 ms to 4,981 ms (4.7x), LinkRecoveryTests silentDropDetectionBenchmark (silent_drop_ms), 3 runs, before = head with only LinkController.swift restored from base. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-27281"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-27281.md"
+    },
+    {
+      "id": "cmux-26843",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 26843,
+      "title": "feat(composer): add shared searchable plus palette surface",
+      "status": "merged",
+      "happenedAt": "2026-10-29T12:03:01Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "layout stability",
+        "composer"
+      ],
+      "summary": "The composer's searchable plus palette no longer shifts its search field while filtering; keyboard-filter layout shift in the paired gallery capture went from 0.166 to 0 in the dark theme.",
+      "evidence": {
+        "label": "cmux PR 26843",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/40856069985",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: palette keyboard-filter layout shift (CLS), dark theme, filtering by typing 'browser': 0.166181 to 0 CLS (paired Chromium gallery run (scripts/gallery-matrix/runner.ts), same runner and command on base commit and fixed commit); palette keyboard-filter layout shift (CLS), light theme, filtering by typing 'browser': 0.250289 to 0 CLS (paired Chromium gallery run (scripts/gallery-matrix/runner.ts), same runner and command on base commit and fixed commit); draft typing layout shift (CLS) in the bottom-stack short-pane long-draft check, both themes: 0.130233 to 0.014148 CLS (9.2x) (same gallery draft geometry checks and runner on base and head). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/40856069985."
+      },
+      "claims": [
+        {
+          "id": "palette-keyboard-filter-layout-shift-cls-dark-theme-filterin",
+          "dimension": "work",
+          "metric": "palette keyboard-filter layout shift (CLS), dark theme, filtering by typing 'browser'",
+          "direction": "reduction",
+          "value": 0.166,
+          "unit": "CLS",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: paired Chromium gallery run (scripts/gallery-matrix/runner.ts), same runner and command on base commit and fixed commit",
+          "population": "palette variant, dark theme, 520x560 CSS px, device scale 2, same typing step on both sides",
+          "note": "0.166181 CLS to 0 CLS, paired Chromium gallery run (scripts/gallery-matrix/runner.ts), same runner and command on base commit and fixed commit. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-26843"
+        },
+        {
+          "id": "palette-keyboard-filter-layout-shift-cls-light-theme-filteri",
+          "dimension": "work",
+          "metric": "palette keyboard-filter layout shift (CLS), light theme, filtering by typing 'browser'",
+          "direction": "reduction",
+          "value": 0.25,
+          "unit": "CLS",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: paired Chromium gallery run (scripts/gallery-matrix/runner.ts), same runner and command on base commit and fixed commit",
+          "population": "palette variant, light theme, 520x560 CSS px, device scale 2, same typing step on both sides",
+          "note": "0.250289 CLS to 0 CLS, paired Chromium gallery run (scripts/gallery-matrix/runner.ts), same runner and command on base commit and fixed commit. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-26843"
+        },
+        {
+          "id": "draft-typing-layout-shift-cls-in-the-bottom-stack-short-pane",
+          "dimension": "work",
+          "metric": "draft typing layout shift (CLS) in the bottom-stack short-pane long-draft check, both themes",
+          "direction": "reduction",
+          "value": 0.116,
+          "unit": "CLS",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: same gallery draft geometry checks and runner on base and head",
+          "population": "bottom-stack#short-520-long-draft, both themes",
+          "note": "0.130233 CLS to 0.014148 CLS (9.2x), same gallery draft geometry checks and runner on base and head. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-26843"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-26843.md"
+    },
+    {
+      "id": "cmux-27230",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 27230,
+      "title": "ci(webviews): split the test shards by recorded duration, not index mod 4",
+      "status": "merged",
+      "happenedAt": "2026-10-29T07:02:53Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "ci",
+        "performance"
+      ],
+      "summary": "Webview test shards are split by recorded file duration instead of index mod 4; the slowest shard job's median fell from 19.7 to 17.0 minutes.",
+      "evidence": {
+        "label": "cmux PR 27230",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/pull/27230#issuecomment-6493465678",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: react-apps-check slowest shard job, median wall time on feat-cmux-next push runs: 19.7 to 17 minutes (react-apps-check shard jobs, 32 vCPU class, median over 8 push runs before (ending run 40815704587) and 14 after (runs 40844104395..40846198563); react-apps-check slowest-to-fastest shard ratio, median: 2.24 to 1.31 ratio (same runs as above). Evidence: https://redirect.github.com/manaflow-ai/cmux/pull/27230#issuecomment-6493465678."
+      },
+      "claims": [
+        {
+          "id": "react-apps-check-slowest-shard-job-median-wall-time-on-feat-",
+          "dimension": "compute",
+          "metric": "react-apps-check slowest shard job, median wall time on feat-cmux-next push runs",
+          "direction": "reduction",
+          "value": 2.7,
+          "unit": "minutes",
+          "recurrence": "per-event",
+          "confidence": "measured",
+          "measurementWindow": "before and after from the same harness: react-apps-check shard jobs, 32 vCPU class, median over 8 push runs before (ending run 40815704587) and 14 after (runs 40844104395..40846198563",
+          "population": "same four shard jobs, same runner class, push runs before and after landing",
+          "note": "19.7 minutes to 17 minutes, react-apps-check shard jobs, 32 vCPU class, median over 8 push runs before (ending run 40815704587) and 14 after (runs 40844104395..40846198563. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-27230"
+        },
+        {
+          "id": "react-apps-check-slowest-to-fastest-shard-ratio-median",
+          "dimension": "performance",
+          "metric": "react-apps-check slowest-to-fastest shard ratio, median",
+          "direction": "reduction",
+          "value": 0.93,
+          "unit": "ratio",
+          "recurrence": "per-event",
+          "confidence": "measured",
+          "measurementWindow": "before and after from the same harness: same runs as above",
+          "population": "same four shard jobs, same runner class",
+          "note": "2.24 ratio to 1.31 ratio, same runs as above. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-27230"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-27230.md"
+    },
+    {
+      "id": "cmux-27048",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 27048,
+      "title": "perf(acpmux): stream session summaries into list snapshots",
+      "status": "merged",
+      "happenedAt": "2026-10-29T00:02:01Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance",
+        "memory"
+      ],
+      "summary": "Full session lists now stream one summary at a time into serialized rows instead of retaining every expanded JSON summary; at 1,000 retained sessions the daemon's RSS after lists fell from 382.361 to 318.771 MiB and its CPU for three list requests from 685 to 540 ms.",
+      "evidence": {
+        "label": "cmux PR 27048",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/40785834614",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: acpmux daemon RSS after list requests, 1,000 retained sessions: 382.361 to 318.771 MiB (daemon_memory, same worker, before vs after); acpmux daemon CPU for three list requests, 1,000 retained sessions: 685 to 540 ms (daemon_memory, same worker, before vs after); acpmux daemon RSS after list requests, 288 retained sessions: 180.148 to 146.908 MiB (daemon_memory, same worker, before vs after). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/40785834614."
+      },
+      "claims": [
+        {
+          "id": "acpmux-daemon-rss-after-list-requests-1-000-retained-session",
+          "dimension": "size",
+          "metric": "acpmux daemon RSS after list requests, 1,000 retained sessions",
+          "direction": "reduction",
+          "value": 63.6,
+          "unit": "MiB",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: daemon_memory, same worker, before vs after",
+          "population": "1,000 retained sessions, same harness both sides",
+          "note": "382.361 MiB to 318.771 MiB, daemon_memory, same worker, before vs after. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-27048"
+        },
+        {
+          "id": "acpmux-daemon-cpu-for-three-list-requests-1-000-retained-ses",
+          "dimension": "latency",
+          "metric": "acpmux daemon CPU for three list requests, 1,000 retained sessions",
+          "direction": "reduction",
+          "value": 145,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: daemon_memory, same worker, before vs after",
+          "population": "1,000 retained sessions, same harness both sides",
+          "note": "685 ms to 540 ms, daemon_memory, same worker, before vs after. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-27048"
+        },
+        {
+          "id": "acpmux-daemon-rss-after-list-requests-288-retained-sessions",
+          "dimension": "size",
+          "metric": "acpmux daemon RSS after list requests, 288 retained sessions",
+          "direction": "reduction",
+          "value": 33.2,
+          "unit": "MiB",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: daemon_memory, same worker, before vs after",
+          "population": "288 retained sessions, same harness both sides",
+          "note": "180.148 MiB to 146.908 MiB, daemon_memory, same worker, before vs after. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-27048"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-27048.md"
+    },
+    {
+      "id": "cmux-26802",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 26802,
+      "title": "New Tab: keep the input steady when entering a shell command",
+      "status": "merged",
+      "happenedAt": "2026-10-28T09:50:13Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance",
+        "ui"
+      ],
+      "summary": "Typing a shell command in New Tab no longer moves the input: layout shift while typing `!pwd` went from 0.00113 to 0 and the over-33-ms frame from 1 to 0.",
+      "evidence": {
+        "label": "cmux PR 26802",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/40660825602",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: layout shift (CLS) while typing !pwd in New Tab, 900x650: 0.001132851851851852 to 0 CLS (onboarding recovery play adapter and fixture from b7fb33de, hosted Chromium, one run per side); frames over 33 ms during the !pwd play in New Tab: 1 to 0 frames (onboarding recovery play adapter and fixture from b7fb33de, hosted Chromium, one run per side). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/40660825602."
+      },
+      "claims": [
+        {
+          "id": "layout-shift-cls-while-typing-pwd-in-new-tab-900x650",
+          "dimension": "work",
+          "metric": "layout shift (CLS) while typing !pwd in New Tab, 900x650",
+          "direction": "reduction",
+          "value": 0.00113,
+          "unit": "CLS",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: onboarding recovery play adapter and fixture from b7fb33de, hosted Chromium, one run per side",
+          "population": "`!pwd` typing play, same fixture both sides",
+          "note": "0.001132851851851852 CLS to 0 CLS, onboarding recovery play adapter and fixture from b7fb33de, hosted Chromium, one run per side. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-26802"
+        },
+        {
+          "id": "frames-over-33-ms-during-the-pwd-play-in-new-tab",
+          "dimension": "work",
+          "metric": "frames over 33 ms during the !pwd play in New Tab",
+          "direction": "reduction",
+          "value": 1,
+          "unit": "frames",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: onboarding recovery play adapter and fixture from b7fb33de, hosted Chromium, one run per side",
+          "population": "`!pwd` typing play, same fixture both sides",
+          "note": "1 frames to 0 frames, onboarding recovery play adapter and fixture from b7fb33de, hosted Chromium, one run per side. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": false,
+          "additive": false,
+          "overlapGroup": "cmux-26802"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-26802.md"
+    },
+    {
+      "id": "cmux-24214",
+      "repository": "manaflow-ai/cmux",
+      "kind": "pull-request",
+      "number": 24214,
+      "title": "acpmux: a wait reads only the chats it waits on",
+      "status": "merged",
+      "happenedAt": "2026-10-26T03:01:46Z",
+      "recordedAt": "2026-11-09",
+      "areas": [
+        "performance"
+      ],
+      "summary": "An acpmux wait client now reads only the chats it waits on, so the daemon no longer summarizes every chat on every record; with 13 waits open the daemon's CPU per record fell from 15.5 ms to 0.9 ms.",
+      "evidence": {
+        "label": "cmux PR 24214",
+        "url": "https://redirect.github.com/manaflow-ai/cmux/actions/runs/40258679607",
+        "basis": "Curated from the PR and the run or comment it cites, before and after from the same harness: acpmux daemon CPU per logged record with 13 waits open: 15.5 to 0.9 ms (17x) (acpmux wait bench, 13 concurrent waits; base c7c6530b9c5 plus the bench vs head c1e674c1d9b (3 head runs). Evidence: https://redirect.github.com/manaflow-ai/cmux/actions/runs/40258679607."
+      },
+      "claims": [
+        {
+          "id": "acpmux-daemon-cpu-per-logged-record-with-13-waits-open",
+          "dimension": "latency",
+          "metric": "acpmux daemon CPU per logged record with 13 waits open",
+          "direction": "reduction",
+          "value": 14.6,
+          "unit": "ms",
+          "recurrence": "per-event",
+          "confidence": "observed",
+          "measurementWindow": "before and after from the same harness: acpmux wait bench, 13 concurrent waits; base c7c6530b9c5 plus the bench vs head c1e674c1d9b (3 head runs",
+          "population": "same bench and wait count on base and head",
+          "note": "15.5 ms to 0.9 ms (17x), acpmux wait bench, 13 concurrent waits; base c7c6530b9c5 plus the bench vs head c1e674c1d9b (3 head runs. Recorded from the PR and its cited run or comment (backfill) by impact/autorecord.mjs.",
+          "headline": true,
+          "additive": false,
+          "overlapGroup": "cmux-24214"
+        }
+      ],
+      "sourcePath": "work/impact/records/cmux-24214.md"
+    },
     {
       "id": "cmux-20762",
       "repository": "manaflow-ai/cmux",
