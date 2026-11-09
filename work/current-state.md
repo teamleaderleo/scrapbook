@@ -6,13 +6,15 @@ Use current implementation and retained current evidence as the authority for wh
 
 ## cmux: Founding Engineer since October 12, 2026
 
-Refreshed October 14, 2026. The other project sections below retain the August 26 snapshot and weren't reverified in this update.
+cmux and Glaeda evidence refreshed November 3, 2026, covering selected public outcomes through November 2. Other project sections retain their previous snapshots and weren't reverified in this update.
 
 Repository: https://redirect.github.com/manaflow-ai/cmux
 
 State: **current employment, building on an earlier contribution campaign**. Leo confirmed the Founding Engineer title and October 12 start date. September contributions aren't counted as employment tenure.
 
-The [cmux record](records/cmux.md) owns the role and engineering narrative. The [impact ledger](impact/README.md) owns quantitative claims; the [October 14 refresh](impact/sources/cmux-career-2026-10-14.json) counts 3,735 merged account-attributed PRs across all destination branches, including next-branch product work. Selected curated measurements now reach October 14; the older 437-PR retrieval snapshot remains dated to September 23. The [economics model](records/cmux-economics.md) values a historical workload at replacement prices; it doesn't establish personal cash savings.
+The [cmux record](records/cmux.md) owns the role and engineering narrative. Selected public evidence now spans native split-tree and transcript repairs, daemon-owned background work, durable inboxes, human takeover holds, Cloud Git-state transfer and owner authorization checks. Most late-October product records merged into NEXT; client wiring and stable shipment require separate evidence. The transcript geometry integration remained open when checked.
+
+The [impact ledger](impact/README.md) owns scoped quantitative claims through November 2. The [October 14 inventory](impact/sources/cmux-career-2026-10-14.json) still has its historical cutoff, as does the older September retrieval snapshot; neither was resynced for this refresh. The [economics model](records/cmux-economics.md) values a historical workload at replacement prices and doesn't establish personal cash savings.
 
 ## Preflight — 112.17s → 13.69s development arc; candidate execution
 
@@ -28,9 +30,11 @@ Private signing/package rehearsals have succeeded across Linux, macOS, and Windo
 
 ## Glaeda — landed M6 hot-state substrate
 
-Repository: https://github.com/teamleaderleo/smolrunner
+Repository: https://github.com/teamleaderleo/glaeda
 
-State: **pre-alpha trust-tiered Linux execution in live Apple-silicon acceptance**.
+State: **runner fleet operations with measured late-October outcomes; the older Linux execution snapshot below retains its original scope**.
+
+The public [admission trial](impact/records/glaeda-1758.md) reports about 15% more jobs per mini-hour after baseline adjustment across role-matched arms, with median job duration essentially unchanged. [GitHub polling](impact/records/glaeda-1790.md) reduces the comparable host's observed query rate while preserving the follow-up fixes and short-window limit. [Scratch reclamation](impact/records/glaeda-1803.md) frees 38.7 GiB in one initial pass, then jobs refill space. [Verified archives](impact/records/glaeda-1625.md) and [mirror identity repairs](impact/records/glaeda-1690.md) document how cleanup and reuse preserve recoverable work. Projected mirror savings aren't recorded as measured free space.
 
 Current main has moved beyond a disposable-runner controller and beyond a roadmap-only hot-execution concept. Landed M6 modules include bounded hot-execution performance receipts, hot-state path policy, crash-safe project-disk leases, trusted OverlayFS task views and mount plans, descriptor-bound mount prerequisites, immutable Git object-pool generations with consumer leases and fixed markers, and Git index stat patching for copy-on-write task materialization.
 
