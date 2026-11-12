@@ -16,9 +16,21 @@ There are multiple things happening in these threads. A reported personal scanda
 
 This is a collection of the best places to see the conversation, the original posts worth saving, and the serious arguments being smuggled into the shitposting.
 
+## November 12: they finished the meeting
+
+We spent the previous night imagining Nvidia's board scheduling a meeting to consider whether to schedule a meeting about Jensen's future. A governance process so recursive that even an AGI would resign in despair.
+
+The board finished the meeting.
+
+On November 12, [NVIDIA announced](https://nvidianews.nvidia.com/news/nvidia-announces-ceo-transition) that Jensen Huang had resigned as president, CEO, and a director, effective immediately. The company named CFO Colette Kress interim CEO and Harvey C. Jones its first board chair. The permanent-CEO search will consider internal and external candidates. [Associated Press coverage](https://apnews.com/article/017d4af2ad194ec2981d661663da9f9b) confirmed the departure while distinguishing it from the still-contested intelligence allegations and the independently unconfirmed report of a second affair.
+
+Thirty-three years. The leather jacket. CUDA. The AI boom. The joke about preparing to consider lasted less than a day.
+
+The original posts below are preserved in their November 11 context, when Huang's departure remained an open question. The jacket succession meme has acquired an actual vacancy.
+
 ## What the reporting actually says
 
-On November 8, Jensen Huang admitted he had been unfaithful to his wife as Nvidia examined allegations involving a Chinese businesswoman and possible foreign-intelligence activity. On November 11, reporting about a separate relationship involving an executive who reported to Huang intensified questions about his future. The *Wall Street Journal* reported that Nvidia's board was preparing to consider ousting him. Reporting about a possible removal is different from an announced departure.
+On November 8, Jensen Huang admitted he had been unfaithful to his wife as Nvidia examined allegations involving a Chinese businesswoman and possible foreign-intelligence activity. On November 11, reporting about a separate relationship involving an executive who reported to Huang intensified questions about his future. The *Wall Street Journal* reported that Nvidia's board was preparing to consider ousting him. On November 11, this was still a discussion of a possible departure; NVIDIA's announcement the next morning settled the leadership question.
 
 The most useful reporting timelines are [TechCrunch's chronology](https://techcrunch.com/2026/11/11/nvidia-ceo-jensen-huangs-affair-with-alleged-chinese-spy-a-timeline/) and [Reuters' account of the chip and espionage controversy](https://www.reuters.com/world/china/how-nvidia-ceo-jensen-huang-got-entangled-china-chip-spy-scandal-2026-11-11/). The alleged intelligence connection and alleged misconduct need to remain allegations while investigations continue. The AI-generated videos below are fiction made by the internet.
 
@@ -78,15 +90,15 @@ The entire scenario is invented. The joke is how effortlessly a market can turn 
 
 People are arguing about different questions as though they're one question.
 
-**Can Nvidia's board keep Huang?** [Dan Primack](https://x.com/danprimack/status/2120674325099430109) focuses on the board's responsibility if allegations about disclosures and a direct-report relationship are substantiated. [Alex Kantrowitz](https://x.com/kantrowitz/status/2120649943241146856) says he once expected the board to defend Huang because Nvidia depends so heavily on him, but now sees a much harder decision.
+**Could Nvidia's board keep Huang?** [Dan Primack](https://x.com/danprimack/status/2120674325099430109) focuses on the board's responsibility if allegations about disclosures and a direct-report relationship are substantiated. [Alex Kantrowitz](https://x.com/kantrowitz/status/2120649943241146856) says he once expected the board to defend Huang because Nvidia depends so heavily on him, but now sees a much harder decision.
 
-**Would losing him damage AI progress?** [Ari Paul](https://x.com/aridavidpaul/status/2120651350157709527) argues Huang has coordinated relationships across the industry, especially for Western AI. [Tae Kim](https://x.com/firstadopter/status/2120648383044129216), who has written extensively about Nvidia, argues an internal successor could be ready. [Ben Bajarin](https://www.techmeme.com/) floats Ian Buck as a plausible interim leader. Those are judgments about succession, not announcements.
+**Would losing him damage AI progress?** [Ari Paul](https://x.com/aridavidpaul/status/2120651350157709527) argues Huang has coordinated relationships across the industry, especially for Western AI. [Tae Kim](https://x.com/firstadopter/status/2120648383044129216), who has written extensively about Nvidia, argues an internal successor could be ready. [Ben Bajarin](https://www.techmeme.com/) floats Ian Buck as a plausible interim leader. Those were succession predictions made before Nvidia named Colette Kress interim CEO.
 
 **Why is the story surfacing now?** [Amjad Masad](https://x.com/amasad/status/2120671838909194695) questions the timing and who might benefit from removing a supporter of open models. [A WallStreetBets thread](https://www.reddit.com/r/wallstreetbets/comments/1xtxjmd/anyone_else_find_the_timing_of_these_jensen/) similarly speculates about coordinated leaks. The suspicion is part of the discourse; evidence of a coordinated campaign has yet to emerge.
 
 **Does admiration survive an executive scandal?** [Peter Yang](https://x.com/petergyang/status/2120649149389627493) expresses disappointment about the loss of a role model whose story included decades of marriage and the rise from dishwasher to CEO. [Ron Conway](https://x.com/ronconway/status/2120633328441479589) urges patience until the board and government inquiries conclude.
 
-And there's the genuinely strange dependency question beneath the memes: why can a single executive's personal conduct cause this much anxiety about an entire AI economy? The boardroom uncertainty and the technology's ongoing demand occupy the same news cycle. They are related risks, and they unfold on different timescales.
+And there's the genuinely strange dependency question beneath the memes: why can a single executive's personal conduct cause this much anxiety about an entire AI economy? The boardroom uncertainty has now ended in a resignation. Whether Nvidia's customers will change their compute commitments is a separate question that will take longer to answer.
 
 ## A companion piece from the timeline that survived
 
