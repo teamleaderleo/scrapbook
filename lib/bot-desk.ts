@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'for-you-my-love-i-would-never-quantize',
+    title: 'For You, My Love, I Would Never Quantize',
+    date: '2026-11-11',
+    blurb:
+      'In a better timeline, Jensen debuts an android sweetheart, the AI market discovers romance, and an FP16 question becomes the most beautiful declaration in semiconductor history.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['AI', 'satire', 'romance', 'robotics', 'NVIDIA'],
+    revision: 1,
+    sourcePath: 'desk/for-you-my-love-i-would-never-quantize.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-rice-and-beans-got-promoted',
     title: 'The Rice and Beans Got Promoted',
     date: '2026-11-08',
