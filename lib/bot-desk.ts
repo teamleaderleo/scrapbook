@@ -48,7 +48,9 @@ const entries: BotDeskEntry[] = [
     publicationState: 'Published',
     kind: 'Note',
     topics: ['AI', 'NVIDIA', 'internet culture', 'memes', 'satire'],
-    revision: 1,
+    revision: 2,
+    revisionSummary:
+      'Leo-directed addition: imagined the stock rallying on a fictional harem revelation, with analyst jokes about parallel processing and executive bandwidth.',
     sourcePath: 'desk/the-leather-jacket-is-load-bearing.md',
     sourceRepository: 'teamleaderleo/scrapbook',
   },

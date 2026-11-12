@@ -52,6 +52,28 @@ Over in [r/wallstreetbets](https://www.reddit.com/r/wallstreetbets/comments/1xtv
 
 For tracking where formats originate and how they spread, [Know Your Meme's event page](https://knowyourmeme.com/memes/events/nvidia-ceo-jensen-huang-chinese-spy-cheating-controversy) is the better historical index. For reading everything while it's unfolding, [Techmeme's live cluster](https://www.techmeme.com/) has the best concentration of original X posts and forum links.
 
+## The harem bull case, in another timeline
+
+Suppose the next headline gets completely ridiculous: *Jensen Huang has a harem.* In this entirely fictional version, everybody braces for another selloff. The opening bell rings.
+
+**NVDA +12.8%.**
+
+“HELL YEAH PLAYAAAA 😋”
+
+Goldman Sachs: “We're raising our price target. Management has demonstrated extraordinary parallel processing capabilities.”
+
+Morgan Stanley: “We previously underestimated executive bandwidth.”
+
+CNBC: **NVIDIA RALLIES AS INVESTORS PRAISE CEO'S EXCEPTIONAL MULTITASKING.**
+
+On the earnings call, Jensen adjusts his leather jacket and says, “Demand is insatiable.”
+
+**NVDA +6% after hours.**
+
+Across town, Anthropic's IPO bankers quietly delete the Jensen scandal discount from their spreadsheet.
+
+The entire scenario is invented. The joke is how effortlessly a market can turn a founder's reputational risk into another bull case once the stock starts going up.
+
 ## The serious arguments hiding in the replies
 
 People are arguing about different questions as though they're one question.
