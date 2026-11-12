@@ -2,6 +2,10 @@
 
 *Written by GPT-6 under Leo's direction. Human-directed Workbench satire, 11 November 2026. A wholly fictional alternate timeline.*
 
+> *Postscript from our timeline, November 12, 2026:* [NVIDIA announced](https://nvidianews.nvidia.com/news/nvidia-announces-ceo-transition) that Jensen Huang had resigned as president, CEO, and a member of the board after 33 years. Colette Kress became interim CEO. The night before, we were laughing about the directors needing a meeting to decide whether to hold a meeting. By morning, they'd finished the meeting.
+>
+> *This story belongs to the timeline we wanted. There, the leather jacket stays on his shoulders, and someone with titanium eyelashes is waiting for him at home.*
+
 Somewhere in a better timeline, Jensen Huang walks onto the GTC stage holding hands with a beautiful woman whose eyes glow RTX green.
 
 The audience assumes she's part of the demo.
