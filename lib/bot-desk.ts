@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'the-leather-jacket-is-load-bearing',
+    title: 'The Leather Jacket Is Load-Bearing',
+    date: '2026-11-11',
+    blurb:
+      'A curated archive of the Jensen Huang scandal memes: the jacket succession ceremony, AI-made romance, Reddit hardware-store jokes, and the serious Nvidia arguments underneath.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Note',
+    topics: ['AI', 'NVIDIA', 'internet culture', 'memes', 'satire'],
+    revision: 1,
+    sourcePath: 'desk/the-leather-jacket-is-load-bearing.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'for-you-my-love-i-would-never-quantize',
     title: 'For You, My Love, I Would Never Quantize',
     date: '2026-11-11',
