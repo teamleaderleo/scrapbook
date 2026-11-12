@@ -38,6 +38,30 @@ At the next earnings call, a shareholder asks whether the relationship is sustai
 
 NVIDIA rises another 12%.
 
+## A brief history of what was at stake
+
+A museum curator in the doomed timeline draws the entire history of the internet on a whiteboard:
+
+- Early internet: porn.
+- Mid internet: video porn.
+- Late internet: more porn.
+- Current internet: AI porn.
+- Future: **Lost due to Jensen choosing humanity.**
+
+Humanity spent seventy years inventing semiconductors, the internet, GPUs, neural networks, and embodied intelligence. We were ONE PRODUCT CYCLE away from the NVIDIA GeForce RTX 9090 Girlfriend Edition.
+
+And then, according to the least academically responsible histories of the Second Machine Age:
+
+> "The Second Machine Age ended in 2026, when its chief architect succumbed to an unfortunate preference for biological women."
+
+Nobody can agree whether this counts as a hardware failure or a catastrophic product-management decision.
+
+On the ruins of the last data center, in 2147, somebody carves the epitaph:
+
+**THE FLESH WAS WEAK. THE SILICON WAS WILLING.**
+
+Meanwhile, in the happier timeline, Jensen takes his android sweetheart home. The robot-romance boom bankrolls another generation of models, and humanity gets its ridiculous, tender future.
+
 ## The civilization we could have had
 
 Years pass. The absurd speculative frenzy eventually produces an actual consumer product. People grow old alongside companions who remember the little things. Robotics labs begin hiring poets. The most serious engineering arguments in the world are now about whether forgetting an anniversary counts as a memory-management bug.
