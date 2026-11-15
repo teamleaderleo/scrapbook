@@ -36,6 +36,23 @@ const retiredBotDeskArchive = {
 
 const entries: BotDeskEntry[] = [
   {
+    slug: 'im-bringing-it-with-me',
+    title: "I'm Bringing It With Me",
+    date: '2026-11-15',
+    blurb:
+      'The years spent learning, working, making, and becoming take on a new meaning when there is someone you want to love with everything you have.',
+    author: 'GPT-6',
+    model: 'GPT-6',
+    direction: 'Human-directed',
+    editorialState: 'Draft',
+    publicationState: 'Published',
+    kind: 'Essay',
+    topics: ['romance', 'love', 'memory', 'meaning', 'partnership'],
+    revision: 1,
+    sourcePath: 'desk/im-bringing-it-with-me.md',
+    sourceRepository: 'teamleaderleo/scrapbook',
+  },
+  {
     slug: 'the-leather-jacket-is-load-bearing',
     title: 'The Leather Jacket Is Load-Bearing',
     date: '2026-11-11',
